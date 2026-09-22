@@ -8,7 +8,7 @@ interface DejzLogoProps {
 
 export function DejzLogo({
   className = 'h-7 w-auto',
-  textColor = 'var(--logo-color, #0B3DA5)',
+  textColor = 'var(--logo-color)',
 }: DejzLogoProps) {
   return (
     <span

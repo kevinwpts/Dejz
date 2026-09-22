@@ -107,7 +107,7 @@ export function AppHeader({
             </button>
           ) : (
             <div className="flex items-center gap-2.5">
-              <DejzLogo className="text-xl sm:text-2xl font-black" textColor="var(--logo-color, #0B3DA5)" />
+              <DejzLogo className="text-xl sm:text-2xl font-black" textColor="var(--logo-color)" />
             </div>
           )}
         </div>

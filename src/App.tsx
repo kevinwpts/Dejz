@@ -1013,7 +1013,7 @@ export default function App() {
     }
 
     // Update theme-color meta tag and root background for iOS Safari status bar and browser toolbar
-    const themeColor = shouldUseDarkMode ? "#101214" : "#EAF0FF";
+    const themeColor = shouldUseDarkMode ? "#101214" : "#F8F9FA";
     
     // Explicitly set body & documentElement background colors so iOS root canvas matches
     document.documentElement.style.backgroundColor = themeColor;
@@ -2968,12 +2968,6 @@ export default function App() {
         style={{ height: 'max(env(safe-area-inset-top, 0px), 1px)', backgroundColor: 'var(--bg-color)' }}
         aria-hidden="true"
       />
-
-      {/* Top Subtle Blue Ambient Gradient */}
-      <div className="absolute top-0 inset-x-0 h-80 sm:h-96 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[130%] h-80 bg-gradient-to-b from-blue-700/12 via-blue-900/8 to-transparent dark:from-blue-600/15 dark:via-blue-800/10 dark:to-transparent blur-3xl opacity-90" />
-        <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-blue-800/10 via-blue-950/5 to-transparent dark:from-blue-700/14 dark:via-blue-900/8 dark:to-transparent" />
-      </div>
 
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 

@@ -83,57 +83,53 @@ textarea {
   text-rendering: optimizeLegibility;
   font-feature-settings: "cv11", "ss01", "ss02", "ss03", "tnum";
 
-  /* Dejz Brand Color Palette:
-     - Dejz Blue / Logo: #0B3DA5
-     - Bright Blue / Buttons & CTA: #356BFF
-     - Light Blue / Backgrounds: #EAF0FF
-  */
-  --logo-color: #0B3DA5;
+  /* Dejz Clean Minimalist Brand Theme */
+  --logo-color: var(--text-primary);
 
-  /* Premium Light Theme (Dejz Color System) */
-  --bg-color: #EAF0FF;
-  --bg-secondary: #DFE8FD;
-  --bg-gradient: #EAF0FF;
+  /* Premium Light Theme (Dejz Design System) */
+  --bg-color: #F8F9FA;
+  --bg-secondary: #F1F3F5;
+  --bg-gradient: #F8F9FA;
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: rgba(53, 107, 255, 0.06);
-  --surface-tint: rgba(53, 107, 255, 0.04);
+  --surface-muted: rgba(0, 0, 0, 0.04);
+  --surface-tint: rgba(0, 0, 0, 0.02);
 
-  --text-primary: #0A1931;
-  --text-secondary: #4B5E80;
-  --text-tertiary: #6C7F9E;
-  --text-inactive: #9BAEC8;
+  --text-primary: #121417;
+  --text-secondary: #636A75;
+  --text-tertiary: #8C94A0;
+  --text-inactive: #B8BFC9;
 
-  --border-color: rgba(11, 61, 165, 0.09);
-  --border-strong: rgba(11, 61, 165, 0.16);
+  --border-color: rgba(0, 0, 0, 0.07);
+  --border-strong: rgba(0, 0, 0, 0.12);
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: rgba(53, 107, 255, 0.08);
+  --chip-bg: rgba(0, 0, 0, 0.05);
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #F4F7FF;
+  --card-nested-bg: #F4F5F7;
   --remaining-today-gradient: var(--surface-color);
 
-  /* Custom Elevation Levels - Light Mode (Soft Brand-Tinted Shadows) */
-  --shadow-level-1: 0 4px 16px rgba(11, 61, 165, 0.045);
-  --shadow-level-2: 0 6px 24px rgba(11, 61, 165, 0.07);
-  --shadow-level-3: 0 10px 30px rgba(11, 61, 165, 0.10);
+  /* Custom Elevation Levels - Light Mode */
+  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.08);
 
-  /* Bright Blue Accent Color for Buttons & CTA (#356BFF) */
-  --accent-color: #356BFF;
-  --accent-hover: #2655E5;
-  --accent-gradient: linear-gradient(145deg, #356BFF 0%, #1E4ED8 100%);
+  /* Clean Minimalist Accent Color for Buttons & CTA */
+  --accent-color: #18181B;
+  --accent-hover: #27272A;
+  --accent-gradient: linear-gradient(145deg, #27272A 0%, #18181B 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(53, 107, 255, 0.10);
-  --accent-glow: rgba(53, 107, 255, 0.28);
+  --accent-soft: rgba(0, 0, 0, 0.06);
+  --accent-glow: rgba(0, 0, 0, 0.14);
 
   --modal-bg: rgba(255, 255, 255, 0.96);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: rgba(53, 107, 255, 0.04);
+  --bg-hover: rgba(0, 0, 0, 0.03);
 
   --card-shadow: var(--shadow-level-2);
   --card-inner-stroke: none;
@@ -142,10 +138,10 @@ textarea {
   --danger-color: #e83e67;
   --warning-color: #f59e0b;
 
-  --nav-active-color: #356BFF;
+  --nav-active-color: #18181B;
   --nav-inactive-color: #71717A;
-  --nav-plus-bg: #356BFF;
-  --nav-plus-shadow: 0 4px 16px rgba(53, 107, 255, 0.40);
+  --nav-plus-bg: #18181B;
+  --nav-plus-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -154,12 +150,12 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #356BFF;
+  --date-active-bg: #18181B;
   --date-active-color: #FFFFFF;
-  --date-active-shadow: 0 4px 14px rgba(53, 107, 255, 0.35);
+  --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.20);
   --date-inactive-bg: rgba(255, 255, 255, 0.90);
-  --date-inactive-border: rgba(11, 61, 165, 0.08);
-  --date-inactive-color: #4B5E80;
+  --date-inactive-border: rgba(0, 0, 0, 0.06);
+  --date-inactive-color: #636A75;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;
@@ -199,15 +195,15 @@ textarea {
   --shadow-level-2: 0 4px 10px rgba(0, 0, 0, 0.15), 0 10px 25px -3px rgba(0, 0, 0, 0.3);
   --shadow-level-3: 0 16px 40px -6px rgba(0, 0, 0, 0.5), 0 6px 16px -2px rgba(0, 0, 0, 0.3);
 
-  --logo-color: #356BFF;
+  --logo-color: #FFFFFF;
 
-  /* Bright Blue Accent Color in Dark Mode */
-  --accent-color: #356BFF;
-  --accent-hover: #4F80FF;
-  --accent-gradient: linear-gradient(135deg, #356BFF 0%, #1E4ED8 100%);
-  --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(53, 107, 255, 0.16);
-  --accent-glow: rgba(53, 107, 255, 0.32);
+  /* Clean Minimalist Accent Color in Dark Mode */
+  --accent-color: #FFFFFF;
+  --accent-hover: #F4F4F5;
+  --accent-gradient: linear-gradient(135deg, #FFFFFF 0%, #E4E4E7 100%);
+  --text-on-accent: #101214;
+  --accent-soft: rgba(255, 255, 255, 0.12);
+  --accent-glow: rgba(255, 255, 255, 0.25);
 
   --modal-bg: #181B1F;
   --bg-primary: var(--bg-color);
@@ -221,10 +217,10 @@ textarea {
   --danger-color: #f43f5e;
   --warning-color: #f59e0b;
 
-  --nav-active-color: #356BFF;
+  --nav-active-color: #FFFFFF;
   --nav-inactive-color: #717780;
-  --nav-plus-bg: var(--accent-gradient);
-  --nav-plus-shadow: 0 4px 14px rgba(53, 107, 255, 0.40);
+  --nav-plus-bg: #FFFFFF;
+  --nav-plus-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -233,9 +229,9 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: var(--accent-gradient);
-  --date-active-color: var(--text-on-accent);
-  --date-active-shadow: 0 4px 14px rgba(53, 107, 255, 0.35);
+  --date-active-bg: #FFFFFF;
+  --date-active-color: #101214;
+  --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   --date-inactive-bg: var(--surface-color);
   --date-inactive-border: rgba(255, 255, 255, 0.03);
   --date-inactive-color: var(--text-secondary);

@@ -438,7 +438,7 @@ export function ProfileView({
         </div>
 
         <div className="flex flex-col items-center justify-center pt-8 pb-4 opacity-75">
-          <DejzLogo className="text-3xl font-black" textColor="var(--logo-color, #0B3DA5)" />
+          <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
         </div>
       </div>
     </motion.div>

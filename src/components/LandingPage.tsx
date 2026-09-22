@@ -122,7 +122,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
         <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[var(--bg-color)]/95 border-b border-[var(--border-color)] pt-[env(safe-area-inset-top)] transition-all">
            <div className="max-w-7xl mx-auto px-5 sm:px-8 h-18 sm:h-20 flex items-center justify-between">
               <div className="flex items-center gap-3 sm:gap-4 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                <DejzLogo className="text-2xl sm:text-3xl font-black" textColor="var(--logo-color, #0B3DA5)" />
+                <DejzLogo className="text-2xl sm:text-3xl font-black" textColor="var(--logo-color)" />
 
                 {/* Language Selector */}
                 <div className="relative">
@@ -305,7 +305,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
 
                       {/* Simulated App Header */}
                       <div className="flex items-center justify-between pt-1 px-1">
-                        <DejzLogo className="text-lg font-black" textColor="var(--logo-color, #0B3DA5)" />
+                        <DejzLogo className="text-lg font-black" textColor="var(--logo-color)" />
                         <div className="flex items-center gap-1.5">
                           <div className="w-7 h-7 rounded-[10px] bg-[var(--surface-color)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] shadow-2xs">
                             <Search size={13} />
@@ -720,7 +720,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                 {/* Brand & Mission column */}
                 <div className="md:col-span-5 space-y-4">
                   <div className="flex items-center gap-3">
-                    <DejzLogo className="text-2xl sm:text-3xl font-black" textColor="var(--logo-color, #0B3DA5)" />
+                    <DejzLogo className="text-2xl sm:text-3xl font-black" textColor="var(--logo-color)" />
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--accent-color)]/10 text-[var(--accent-color)]">
                       <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)] animate-pulse" />
                       App v2.4

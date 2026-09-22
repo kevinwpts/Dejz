@@ -27,7 +27,7 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
           className="flex flex-col items-center space-y-6"
         >
           <div className="p-4 px-6 rounded-[28px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs flex items-center justify-center">
-            <DejzLogo className="text-3xl sm:text-4xl font-black" textColor="var(--logo-color, #0B3DA5)" />
+            <DejzLogo className="text-3xl sm:text-4xl font-black" textColor="var(--logo-color)" />
           </div>
           
           <div className="space-y-3 max-w-sm">

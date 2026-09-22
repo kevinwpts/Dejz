@@ -209,7 +209,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 )}
                 
                 <div className="flex flex-col items-center pt-1 mb-3 select-none">
-                  <DejzLogo className="text-3xl font-black" textColor="var(--logo-color, #0B3DA5)" />
+                  <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
                 </div>
 
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1">
