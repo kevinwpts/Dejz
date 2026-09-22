@@ -113,9 +113,9 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
         </button>
         <button 
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-[12px] text-sm font-semibold hover:bg-accent/20 transition-colors"
+          className="flex items-center gap-1.5 bg-accent/10 text-accent h-7 px-2.5 rounded-full text-[11px] font-semibold hover:bg-accent/20 transition-colors"
         >
-          <Plus size={16} />
+          <Plus size={13} strokeWidth={2.5} />
           Lägg till konto
         </button>
       </div>

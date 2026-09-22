@@ -282,7 +282,7 @@ export function TodayView({
           </div>
           <button
             onClick={() => onNavigate("overview", "transactions")}
-            className="h-8 px-3.5 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)] text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all cursor-pointer flex items-center"
+            className="h-7 px-2.5 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)] text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all cursor-pointer flex items-center justify-center"
           >
             {t("seeAll")}
           </button>

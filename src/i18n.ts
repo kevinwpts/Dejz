@@ -230,7 +230,7 @@ export const translations: Record<Language, any> = {
     total: 'Totalt',
     yesterday: 'Igår',
     tomorrow: 'Imorgon',
-    noDataAvailable: 'Ingen data att visa för perioden',
+    noDataAvailable: 'Ingen data att visa',
     user: 'Användare',
     cloudLoadError: 'Kunde inte ladda data från molnet',
     savingsGoalSaveError: 'Kunde inte spara sparmål',

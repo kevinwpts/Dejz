@@ -136,7 +136,7 @@ export function BudgetView({
               <h3 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight leading-none">{t('incomes')}</h3>
             </div>
           </div>
-          <button onClick={onAddIncome} className="h-8 px-3.5 rounded-full bg-[var(--surface-muted)] text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] transition-all cursor-pointer">
+          <button onClick={onAddIncome} className="h-7 px-2.5 rounded-full bg-[var(--surface-muted)] text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] transition-all cursor-pointer inline-flex items-center justify-center">
             + {t('newIncome')}
           </button>
         </div>
@@ -181,7 +181,7 @@ export function BudgetView({
               <h3 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight leading-none">{t('fixedExpenses')}</h3>
             </div>
           </div>
-          <button onClick={onAddFixedExpense} className="h-8 px-3.5 rounded-full bg-[var(--surface-muted)] text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] transition-all cursor-pointer">
+          <button onClick={onAddFixedExpense} className="h-7 px-2.5 rounded-full bg-[var(--surface-muted)] text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] transition-all cursor-pointer inline-flex items-center justify-center">
             + {t('newFixedExpense')}
           </button>
         </div>
@@ -244,7 +244,7 @@ export function BudgetView({
               <h3 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight leading-none">{t('monthlySavings')}</h3>
             </div>
           </div>
-          <button onClick={onAddMonthlySaving} className="h-8 px-3.5 rounded-full bg-[var(--surface-muted)] text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] transition-all cursor-pointer">
+          <button onClick={onAddMonthlySaving} className="h-7 px-2.5 rounded-full bg-[var(--surface-muted)] text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] transition-all cursor-pointer inline-flex items-center justify-center">
             + {t('newMonthlySaving')}
           </button>
         </div>
@@ -294,7 +294,7 @@ export function BudgetView({
                   </p>
                 </div>
               </div>
-              <div className="h-8 px-3.5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] text-[12px] font-semibold shrink-0 ml-3 flex items-center group-hover:opacity-90 transition-opacity">
+              <div className="h-7 px-2.5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] text-[11px] font-semibold shrink-0 ml-3 flex items-center justify-center group-hover:opacity-90 transition-opacity">
                 Lägg till
               </div>
             </button>

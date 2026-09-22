@@ -118,13 +118,13 @@ textarea {
   --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.06);
   --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.08);
 
-  /* Clean Minimalist Accent Color for Buttons & CTA */
-  --accent-color: #18181B;
-  --accent-hover: #27272A;
-  --accent-gradient: linear-gradient(145deg, #27272A 0%, #18181B 100%);
+  /* Vibrant Interaction & Accent Color: #356BFF */
+  --accent-color: #356BFF;
+  --accent-hover: #2655DB;
+  --accent-gradient: linear-gradient(145deg, #356BFF 0%, #2050D8 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(0, 0, 0, 0.06);
-  --accent-glow: rgba(0, 0, 0, 0.14);
+  --accent-soft: rgba(53, 107, 255, 0.12);
+  --accent-glow: rgba(53, 107, 255, 0.25);
 
   --modal-bg: rgba(255, 255, 255, 0.96);
   --bg-primary: var(--bg-color);
@@ -138,10 +138,10 @@ textarea {
   --danger-color: #e83e67;
   --warning-color: #f59e0b;
 
-  --nav-active-color: #18181B;
+  --nav-active-color: #356BFF;
   --nav-inactive-color: #71717A;
-  --nav-plus-bg: #18181B;
-  --nav-plus-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  --nav-plus-bg: #356BFF;
+  --nav-plus-shadow: 0 4px 14px rgba(53, 107, 255, 0.35);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -197,13 +197,13 @@ textarea {
 
   --logo-color: #FFFFFF;
 
-  /* Clean Minimalist Accent Color in Dark Mode */
-  --accent-color: #FFFFFF;
-  --accent-hover: #F4F4F5;
-  --accent-gradient: linear-gradient(135deg, #FFFFFF 0%, #E4E4E7 100%);
-  --text-on-accent: #101214;
-  --accent-soft: rgba(255, 255, 255, 0.12);
-  --accent-glow: rgba(255, 255, 255, 0.25);
+  /* Vibrant Interaction & Accent Color in Dark Mode: #356BFF */
+  --accent-color: #356BFF;
+  --accent-hover: #4D7DFF;
+  --accent-gradient: linear-gradient(135deg, #356BFF 0%, #2050D8 100%);
+  --text-on-accent: #FFFFFF;
+  --accent-soft: rgba(53, 107, 255, 0.18);
+  --accent-glow: rgba(53, 107, 255, 0.35);
 
   --modal-bg: #181B1F;
   --bg-primary: var(--bg-color);
@@ -217,10 +217,10 @@ textarea {
   --danger-color: #f43f5e;
   --warning-color: #f59e0b;
 
-  --nav-active-color: #FFFFFF;
+  --nav-active-color: #356BFF;
   --nav-inactive-color: #717780;
-  --nav-plus-bg: #FFFFFF;
-  --nav-plus-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
+  --nav-plus-bg: #356BFF;
+  --nav-plus-shadow: 0 4px 14px rgba(53, 107, 255, 0.4);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -380,6 +380,14 @@ textarea {
   ::selection {
     background: var(--accent-soft);
     color: var(--accent-color);
+  }
+
+  a, .link {
+    color: var(--accent-color);
+    transition: color 0.15s ease-in-out;
+  }
+  a:hover, .link:hover {
+    color: var(--accent-hover);
   }
 }
 

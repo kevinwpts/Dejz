@@ -335,7 +335,7 @@ export function GreetingModule({
           <div className="w-full h-2.5 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
             <div 
               className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'bg-danger' : 'bg-[var(--text-primary)]'
+                ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'bg-danger' : 'bg-[#356BFF]'
               }`}
               style={{ width: `${Math.max(0, Math.min(100, ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) * 100))}%` }}
             />
