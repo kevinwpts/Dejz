@@ -110,7 +110,7 @@ function NavItem({
       aria-label={label}
       className={`flex-1 max-w-[52px] h-[44px] sm:h-[48px] flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer select-none rounded-full ${
         isActive
-          ? 'text-[#356BFF] font-semibold'
+          ? 'text-[#5B82FF] font-semibold'
           : 'text-white/40 hover:text-white/80'
       }`}
     >

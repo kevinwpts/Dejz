@@ -9,7 +9,7 @@ interface DejzLogoProps {
 
 export function DejzLogo({
   className = "h-7 w-auto",
-  textColor = "var(--logo-color, #1A2456)",
+  textColor = "var(--logo-color, #0B3DA5)",
   style,
 }: DejzLogoProps) {
   // Check if height is already specified in className (e.g. h-7, h-8, h-full, h-[30px])
