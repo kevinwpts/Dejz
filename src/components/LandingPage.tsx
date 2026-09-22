@@ -18,7 +18,11 @@ import {
   Bell,
   Sparkles,
   Calendar,
-  Clock
+  Clock,
+  ArrowUp,
+  Shield,
+  FileText,
+  Smartphone
 } from 'lucide-react';
 import { TranslationKey, Language, languageInfo } from '../i18n';
 import { PolicyModal } from './PolicyModal';
@@ -704,43 +708,142 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="max-w-7xl mx-auto px-5 sm:px-8 py-16">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12 text-center md:text-left">
-            <div className="space-y-2">
-              <DejzLogo className="text-2xl sm:text-3xl font-black mx-auto md:mx-0" textColor="var(--logo-color, #0B3DA5)" />
-              <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium">
-                {getL10n('Få koll på dina pengar – en dag i taget.', 'Control your money – one day at a time.', 'Få kontroll over pengene dine – én dag om gangen.', 'Få styr på dine penge – en dag ad gangen.', 'Hallitse rahojasi – päivä kerrallaan.')}
-              </p>
-            </div>
+        {/* Footer styled to match the app's clean card and navigation aesthetic */}
+        <footer className="w-full bg-[var(--bg-color)] border-t border-[var(--border-color)] pt-12 pb-16 sm:pb-20">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 space-y-8">
+            {/* Main App-styled Footer Container */}
+            <div className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[24px] p-6 sm:p-10 shadow-xs relative overflow-hidden">
+              {/* Subtle top ambient indicator */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--accent-color)]/30 to-transparent" />
 
-            <div className="flex items-center gap-6 text-xs font-bold text-[var(--text-secondary)]">
-              <button 
-                onClick={() => setActivePolicy('terms')} 
-                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-              >
-                {getL10n('Användarvillkor', 'Terms of Service', 'Brukervilkår', 'Brugervilkår', 'Käyttöehdot')}
-              </button>
-              <button 
-                onClick={() => setActivePolicy('cookies')} 
-                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-              >
-                {getL10n('Integritet & Cookies', 'Privacy & Cookies', 'Personvern & informasjonskapsler', 'Privatliv & Cookies', 'Tietosuoja & Evästeet')}
-              </button>
-              <a 
-                href="https://instagram.com/dejz.se" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                <Instagram size={14} className="text-[#E1306C]" />
-                <span>@dejz.se</span>
-              </a>
-            </div>
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                {/* Brand & Mission column */}
+                <div className="md:col-span-5 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <DejzLogo className="text-2xl sm:text-3xl font-black" textColor="var(--logo-color, #0B3DA5)" />
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--accent-color)]/10 text-[var(--accent-color)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)] animate-pulse" />
+                      App v2.4
+                    </span>
+                  </div>
+                  <p className="text-sm text-[var(--text-secondary)] font-medium leading-relaxed max-w-sm">
+                    {getL10n(
+                      'En modern ekonomiplanerare byggd för enkelhet. Se exakt vad du kan spendera idag och få full kontroll fram till nästa lön.',
+                      'A modern budget companion crafted for clarity. Know exactly what you can spend today and stay in control until payday.',
+                      'En moderne økonomiplanlegger bygget for enkelhet. Se nøyaktig hva du kan bruke i dag og få full kontroll frem til neste lønn.',
+                      'En moderne budgetplanlægger bygget for enkelhed. Se præcis hvad du kan bruge i dag og få fuld kontrol indtil næste løn.',
+                      'Moderni taloussuunnittelija, joka on tehty selkeäksi. Tiedä tarkalleen, mitä voit käyttää tänään palkkapäivään asti.'
+                    )}
+                  </p>
 
-          <div className="pt-8 border-t border-[var(--border-color)] text-center text-xs font-medium text-[var(--text-secondary)] opacity-60">
-            © {new Date().getFullYear()} Dejz Sweden. All rights reserved.
+                  <div className="pt-1 flex flex-wrap items-center gap-2">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-[var(--surface-muted)] text-[11px] font-semibold text-[var(--text-secondary)] border border-[var(--border-color)]">
+                      <Shield size={13} className="text-[var(--accent-color)]" />
+                      <span>{getL10n('Krypterad data', 'Encrypted data', 'Kryptert data', 'Krypteret data', 'Salattu data')}</span>
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-[var(--surface-muted)] text-[11px] font-semibold text-[var(--text-secondary)] border border-[var(--border-color)]">
+                      <Smartphone size={13} className="text-[var(--accent-color)]" />
+                      <span>PWA / Mobil & Web</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Navigation - In-app style pills */}
+                <div className="md:col-span-4 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-75">
+                    {getL10n('Utforska', 'Explore', 'Utforsk', 'Udforsk', 'Tutki')}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
+                    <button 
+                      onClick={() => { const el = document.getElementById('features'); el?.scrollIntoView({ behavior: 'smooth' }); }}
+                      className="flex items-center gap-2 p-2.5 rounded-[14px] bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] text-[var(--text-primary)] transition-all text-left cursor-pointer border border-[var(--border-color)]/60"
+                    >
+                      <Sparkles size={14} className="text-[var(--accent-color)] shrink-0" />
+                      <span>{getL10n('Funktioner', 'Features', 'Funksjoner', 'Funktioner', 'Ominaisuudet')}</span>
+                    </button>
+
+                    <button 
+                      onClick={() => { const el = document.getElementById('daily-budget'); el?.scrollIntoView({ behavior: 'smooth' }); }}
+                      className="flex items-center gap-2 p-2.5 rounded-[14px] bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] text-[var(--text-primary)] transition-all text-left cursor-pointer border border-[var(--border-color)]/60"
+                    >
+                      <Calendar size={14} className="text-[var(--accent-color)] shrink-0" />
+                      <span>{getL10n('Dagsbudget', 'Daily Budget', 'Dagsbudsjett', 'Dagsbudget', 'Päiväbudjetti')}</span>
+                    </button>
+
+                    <button 
+                      onClick={() => { const el = document.getElementById('faq'); el?.scrollIntoView({ behavior: 'smooth' }); }}
+                      className="flex items-center gap-2 p-2.5 rounded-[14px] bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] text-[var(--text-primary)] transition-all text-left cursor-pointer border border-[var(--border-color)]/60"
+                    >
+                      <FileText size={14} className="text-[var(--accent-color)] shrink-0" />
+                      <span>{getL10n('Frågor & Svar', 'FAQ', 'Spørsmål & Svar', 'Spørgsmål & Svar', 'UKK')}</span>
+                    </button>
+
+                    <button 
+                      onClick={onGetStarted}
+                      className="flex items-center gap-2 p-2.5 rounded-[14px] bg-[var(--accent-color)]/10 hover:bg-[var(--accent-color)]/15 text-[var(--accent-color)] transition-all text-left cursor-pointer border border-[var(--accent-color)]/20"
+                    >
+                      <Plus size={14} className="shrink-0" />
+                      <span>{getL10n('Skapa konto', 'Create account', 'Opprett konto', 'Opret konto', 'Luo tili')}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Legal & Socials */}
+                <div className="md:col-span-3 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-75">
+                    {getL10n('Villkor & Socialt', 'Legal & Social', 'Vilkår & Sosiale medier', 'Vilkår & Sociale medier', 'Ehdot & Yhteisö')}
+                  </h4>
+                  <div className="flex flex-col gap-2 text-xs font-medium">
+                    <button 
+                      onClick={() => setActivePolicy('terms')} 
+                      className="flex items-center justify-between p-2 rounded-[12px] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer text-left"
+                    >
+                      <span>{getL10n('Användarvillkor', 'Terms of Service', 'Brukervilkår', 'Brugervilkår', 'Käyttöehdot')}</span>
+                      <ChevronRight size={14} className="opacity-50" />
+                    </button>
+                    
+                    <button 
+                      onClick={() => setActivePolicy('cookies')} 
+                      className="flex items-center justify-between p-2 rounded-[12px] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer text-left"
+                    >
+                      <span>{getL10n('Integritet & Cookies', 'Privacy & Cookies', 'Personvern & informasjonskapsler', 'Privatliv & Cookies', 'Tietosuoja & Evästeet')}</span>
+                      <ChevronRight size={14} className="opacity-50" />
+                    </button>
+
+                    <a 
+                      href="https://instagram.com/dejz.se" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-2 rounded-[12px] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all text-left"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Instagram size={14} className="text-[#E1306C]" />
+                        <span>@dejz.se</span>
+                      </span>
+                      <span className="text-[11px] font-bold text-[var(--accent-color)]">Följ</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom bar inside card */}
+              <div className="mt-8 pt-6 border-t border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-[var(--text-secondary)]">
+                <div className="flex items-center gap-2">
+                  <span>© {new Date().getFullYear()} Dejz.</span>
+                  <span className="opacity-50">•</span>
+                  <span>{getL10n('Byggd med precision för din vardagsekonomi', 'Built with precision for everyday finance', 'Bygget med presisjon for din hverdagsøkonomi', 'Bygget med præcision til din hverdagsøkonomi', 'Rakennettu tarkkuudella arkitalouteesi')}</span>
+                </div>
+
+                <button 
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-muted)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer active:scale-95 shadow-2xs"
+                  title="Till toppen"
+                >
+                  <ArrowUp size={13} />
+                  <span>{getL10n('Till toppen', 'Back to top', 'Til toppen', 'Til toppen', 'Takaisin alkuun')}</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <PolicyModal 

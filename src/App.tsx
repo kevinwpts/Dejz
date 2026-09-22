@@ -1013,7 +1013,7 @@ export default function App() {
     }
 
     // Update theme-color meta tag for iOS Safari status bar and browser toolbar
-    const themeColor = shouldUseDarkMode ? "#16181C" : "#FBFBFA";
+    const themeColor = shouldUseDarkMode ? "#101214" : "#EAF0FF";
     const metaTags = document.querySelectorAll('meta[name="theme-color"]');
     if (metaTags.length > 0) {
       metaTags.forEach((tag) => tag.setAttribute("content", themeColor));
