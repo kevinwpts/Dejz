@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
 import { DejzLogo } from "./DejzLogo";
 
@@ -27,23 +27,67 @@ export function AppHeader({
   onOpenNotifications,
   isDemoMode,
 }: AppHeaderProps) {
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isAtTop, setIsAtTop] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      const currentScrollY = window.scrollY;
+
+      // 1. Utgångsläget: Längst upp integreras headern sömlöst utan bakgrund
+      if (currentScrollY <= 10) {
+        setIsAtTop(true);
+        setIsVisible(true);
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+
+      setIsAtTop(false);
+
+      // Skydd mot iOS bounce/rubber-banding
+      if (currentScrollY < 0) {
+        setIsVisible(true);
+        return;
+      }
+
+      const diff = currentScrollY - lastScrollY.current;
+
+      // Scrolla ner (> 8px) efter toppen -> göm headern
+      if (diff > 8 && currentScrollY > 50) {
+        setIsVisible(false);
+      } else if (diff < -8) {
+        // Scrolla upp -> visa headern
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
     };
-    setIsScrolled(window.scrollY > 10);
+
+    setIsAtTop(window.scrollY <= 10);
+    lastScrollY.current = window.scrollY;
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Visa alltid headern vid sidbyte eller titeländring
+  useEffect(() => {
+    setIsVisible(true);
+  }, [_navTrigger, title]);
+
   return (
     <header
-      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-[var(--bg-color)]/90 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-xs"
-          : "bg-[var(--bg-color)] border-b border-transparent shadow-none"
+      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
+        isVisible
+          ? "translate-y-0 opacity-100"
+          : isDemoMode
+          ? "-translate-y-[200%] opacity-0 pointer-events-none"
+          : "-translate-y-full opacity-0 pointer-events-none"
+      } ${
+        !isAtTop
+          ? "bg-[var(--bg-color)]/85 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-xs"
+          : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full`}>
