@@ -8,6 +8,7 @@ import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
 import { ManageAccountView } from './ManageAccountView';
 import { ReceiptsView } from './ReceiptsView';
+import { DejzLogo } from './DejzLogo';
 
 interface ProfileViewProps {
   onBack: () => void;
@@ -437,13 +438,7 @@ export function ProfileView({
         </div>
 
         <div className="flex flex-col items-center justify-center pt-8 pb-4 opacity-75">
-          <img 
-            src="https://i.imgur.com/QmqMPRy.png" 
-            alt="Logo" 
-            className="h-10 w-auto object-contain" 
-            onError={(e) => { e.currentTarget.src = "/logo.png"; }}
-            referrerPolicy="no-referrer" 
-          />
+          <DejzLogo className="text-3xl font-black" textColor="var(--logo-color, #0B3DA5)" />
         </div>
       </div>
     </motion.div>

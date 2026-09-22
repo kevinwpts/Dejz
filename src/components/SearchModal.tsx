@@ -33,7 +33,7 @@ export function SearchModal({
     return en;
   };
 
-  const isSv = config.language === 'sv';
+  const _isSv = config.language === 'sv';
 
   useEffect(() => {
     if (isOpen) {

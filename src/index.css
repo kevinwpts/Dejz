@@ -83,50 +83,57 @@ textarea {
   text-rendering: optimizeLegibility;
   font-feature-settings: "cv11", "ss01", "ss02", "ss03", "tnum";
 
-  /* Premium Soft Low-Contrast Light Theme (Dejz Premium Design System) */
-  --bg-color: #F5F5F7;
-  --bg-secondary: #EDEDF0;
-  --bg-gradient: #F5F5F7;
+  /* Dejz Brand Color Palette:
+     - Dejz Blue / Logo: #0B3DA5
+     - Bright Blue / Buttons & CTA: #356BFF
+     - Light Blue / Backgrounds: #EAF0FF
+  */
+  --logo-color: #0B3DA5;
+
+  /* Premium Light Theme (Dejz Color System) */
+  --bg-color: #EAF0FF;
+  --bg-secondary: #DFE8FD;
+  --bg-gradient: #EAF0FF;
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: rgba(0, 0, 0, 0.04);
-  --surface-tint: rgba(255, 255, 255, 0.04);
+  --surface-muted: rgba(53, 107, 255, 0.06);
+  --surface-tint: rgba(53, 107, 255, 0.04);
 
-  --text-primary: #000000;
-  --text-secondary: #52525B;
-  --text-tertiary: #71717A;
-  --text-inactive: #A1A1AA;
+  --text-primary: #0A1931;
+  --text-secondary: #4B5E80;
+  --text-tertiary: #6C7F9E;
+  --text-inactive: #9BAEC8;
 
-  --border-color: rgba(0, 0, 0, 0.07);
-  --border-strong: rgba(0, 0, 0, 0.12);
+  --border-color: rgba(11, 61, 165, 0.09);
+  --border-strong: rgba(11, 61, 165, 0.16);
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: rgba(0, 0, 0, 0.05);
+  --chip-bg: rgba(53, 107, 255, 0.08);
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #F5F5F7;
+  --card-nested-bg: #F4F7FF;
   --remaining-today-gradient: var(--surface-color);
 
-  /* Custom Elevation Levels - Light Mode (Soft Premium Glass Shadows) */
-  --shadow-level-1: 0 4px 16px rgba(0, 0, 0, 0.035);
-  --shadow-level-2: 0 6px 24px rgba(0, 0, 0, 0.05);
-  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.07);
+  /* Custom Elevation Levels - Light Mode (Soft Brand-Tinted Shadows) */
+  --shadow-level-1: 0 4px 16px rgba(11, 61, 165, 0.045);
+  --shadow-level-2: 0 6px 24px rgba(11, 61, 165, 0.07);
+  --shadow-level-3: 0 10px 30px rgba(11, 61, 165, 0.10);
 
-  /* Dejz Black Accent Color in Light Mode */
-  --accent-color: #000000;
-  --accent-hover: #1F1F23;
-  --accent-gradient: linear-gradient(145deg, #18181B 0%, #000000 100%);
+  /* Bright Blue Accent Color for Buttons & CTA (#356BFF) */
+  --accent-color: #356BFF;
+  --accent-hover: #2655E5;
+  --accent-gradient: linear-gradient(145deg, #356BFF 0%, #1E4ED8 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(0, 0, 0, 0.06);
-  --accent-glow: rgba(0, 0, 0, 0.12);
+  --accent-soft: rgba(53, 107, 255, 0.10);
+  --accent-glow: rgba(53, 107, 255, 0.28);
 
-  --modal-bg: rgba(255, 255, 255, 0.95);
+  --modal-bg: rgba(255, 255, 255, 0.96);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: rgba(0, 0, 0, 0.03);
+  --bg-hover: rgba(53, 107, 255, 0.04);
 
   --card-shadow: var(--shadow-level-2);
   --card-inner-stroke: none;
@@ -135,10 +142,10 @@ textarea {
   --danger-color: #e83e67;
   --warning-color: #f59e0b;
 
-  --nav-active-color: #000000;
+  --nav-active-color: #356BFF;
   --nav-inactive-color: #71717A;
-  --nav-plus-bg: #000000;
-  --nav-plus-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  --nav-plus-bg: #356BFF;
+  --nav-plus-shadow: 0 4px 16px rgba(53, 107, 255, 0.40);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -147,12 +154,12 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #000000;
+  --date-active-bg: #356BFF;
   --date-active-color: #FFFFFF;
-  --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
-  --date-inactive-bg: rgba(255, 255, 255, 0.80);
-  --date-inactive-border: rgba(0, 0, 0, 0.06);
-  --date-inactive-color: #52525B;
+  --date-active-shadow: 0 4px 14px rgba(53, 107, 255, 0.35);
+  --date-inactive-bg: rgba(255, 255, 255, 0.90);
+  --date-inactive-border: rgba(11, 61, 165, 0.08);
+  --date-inactive-color: #4B5E80;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;
@@ -192,13 +199,15 @@ textarea {
   --shadow-level-2: 0 4px 10px rgba(0, 0, 0, 0.15), 0 10px 25px -3px rgba(0, 0, 0, 0.3);
   --shadow-level-3: 0 16px 40px -6px rgba(0, 0, 0, 0.5), 0 6px 16px -2px rgba(0, 0, 0, 0.3);
 
-  /* Dejz Green Accent Color in Dark Mode (Premium Theme) */
-  --accent-color: #10B981;
-  --accent-hover: #34D399;
-  --accent-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
-  --text-on-accent: #101214;
-  --accent-soft: rgba(16, 185, 129, 0.12);
-  --accent-glow: rgba(16, 185, 129, 0.25);
+  --logo-color: #356BFF;
+
+  /* Bright Blue Accent Color in Dark Mode */
+  --accent-color: #356BFF;
+  --accent-hover: #4F80FF;
+  --accent-gradient: linear-gradient(135deg, #356BFF 0%, #1E4ED8 100%);
+  --text-on-accent: #FFFFFF;
+  --accent-soft: rgba(53, 107, 255, 0.16);
+  --accent-glow: rgba(53, 107, 255, 0.32);
 
   --modal-bg: #181B1F;
   --bg-primary: var(--bg-color);
@@ -212,10 +221,10 @@ textarea {
   --danger-color: #f43f5e;
   --warning-color: #f59e0b;
 
-  --nav-active-color: #10B981;
+  --nav-active-color: #356BFF;
   --nav-inactive-color: #717780;
   --nav-plus-bg: var(--accent-gradient);
-  --nav-plus-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  --nav-plus-shadow: 0 4px 14px rgba(53, 107, 255, 0.40);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -226,7 +235,7 @@ textarea {
 
   --date-active-bg: var(--accent-gradient);
   --date-active-color: var(--text-on-accent);
-  --date-active-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  --date-active-shadow: 0 4px 14px rgba(53, 107, 255, 0.35);
   --date-inactive-bg: var(--surface-color);
   --date-inactive-border: rgba(255, 255, 255, 0.03);
   --date-inactive-color: var(--text-secondary);
@@ -386,95 +395,6 @@ textarea {
 }
 
 @layer components {
-  /* Surface Tokens */
-  .card-hero {
-    @apply rounded-[28px] overflow-hidden border border-[var(--border-color)] dark:border-white/10 shadow-sm bg-[var(--surface-color)];
-  }
-
-  .card-secondary {
-    @apply rounded-[16px] border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] shadow-xs;
-  }
-
-  .card-nested {
-    @apply rounded-[16px] bg-[var(--surface-muted)] border border-[var(--border-color)]/50;
-  }
-
-  .card-flat {
-    @apply rounded-[24px] bg-[var(--surface-color)] border border-[var(--border-color)];
-  }
-
-  /* Typography Tokens */
-  .text-hero-amount {
-    @apply text-4xl sm:text-5xl md:text-6xl leading-none font-extrabold font-amount tabular-nums tracking-tighter;
-  }
-
-  .text-heading-xl {
-    @apply text-2xl font-bold tracking-tight;
-  }
-
-  .text-heading-lg {
-    @apply text-xl font-semibold tracking-tight;
-  }
-
-  .text-heading-md {
-    @apply text-[16px] font-bold tracking-tight;
-  }
-
-  .text-heading-sm {
-    @apply text-[15px] font-semibold tracking-tight;
-  }
-
-  .text-body-lg {
-    @apply text-base font-semibold tracking-tight;
-  }
-
-  .text-body-md {
-    @apply text-[15px] font-medium tracking-tight;
-  }
-
-  .text-body-sm {
-    @apply text-sm font-medium;
-  }
-
-  .text-metadata {
-    @apply text-[11px] font-normal;
-  }
-
-  .text-label-caps {
-    @apply text-xs font-semibold tracking-wide uppercase;
-  }
-
-  .text-label-sm {
-    @apply text-[10px] font-semibold uppercase tracking-wider;
-  }
-
-  /* Interactive Elements */
-  .btn-primary {
-    @apply px-4 py-2 bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold rounded-[12px] shadow-sm hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2;
-  }
-
-  .btn-pill {
-    @apply px-2.5 h-6 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)] dark:border-white/10 text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center gap-1;
-  }
-
-  .btn-action-sm {
-    @apply h-8 px-3.5 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)] text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all cursor-pointer flex items-center justify-center;
-  }
-
-  .icon-btn {
-    @apply p-1 text-[var(--text-primary)] dark:text-white hover:opacity-75 transition-opacity flex items-center justify-center cursor-pointer;
-  }
-
-  /* Layout Tokens */
-  .page-container {
-    @apply max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6;
-  }
-
-  .section-header {
-    @apply flex items-center justify-between px-2 mb-4;
-  }
-
-  /* Legacy Utilities Support */
   .module-surface {
     @apply rounded-[24px];
     background: var(--surface-gradient);

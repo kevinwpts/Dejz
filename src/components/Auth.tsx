@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { createFreshTestAccount } from '../utils/demoData';
 import { Mail, Lock, ChevronLeft, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { TranslationKey } from '../i18n';
+import { DejzLogo } from './DejzLogo';
 
 interface AuthProps {
   onShowToast: (message: string, type: 'success' | 'error') => void;
@@ -208,13 +209,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 )}
                 
                 <div className="flex flex-col items-center pt-1 mb-3 select-none">
-                  <img 
-                    src="https://i.imgur.com/QmqMPRy.png" 
-                    alt="dejz" 
-                    className="h-8 w-auto object-contain cursor-pointer" 
-                    onError={(e) => { e.currentTarget.src = "/logo.png"; }}
-                    referrerPolicy="no-referrer" 
-                  />
+                  <DejzLogo className="text-3xl font-black" textColor="var(--logo-color, #0B3DA5)" />
                 </div>
 
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1">

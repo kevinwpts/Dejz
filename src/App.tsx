@@ -69,7 +69,8 @@ import { CalculatorModal } from "./components/CalculatorModal";
 import { TransactionViewModal } from "./components/TransactionViewModal";
 import { BudgetView } from "./components/BudgetView";
 import { TransactionModal } from "./components/TransactionModal";
-import { OverviewView } from "./components/OverviewView";
+import { LogView } from "./components/LogView";
+import { AnalysisView } from "./components/AnalysisView";
 import { TodayView } from "./components/TodayView";
 import { AppHeader } from "./components/AppHeader";
 import { ProfileView } from "./components/ProfileView";
@@ -3132,36 +3133,19 @@ export default function App() {
                 transition={{ duration: 0.08 }}
               >
                 <TabWrapper tabKey="analysis" scrollPositionsRef={tabScrollPositions}>
-                  <OverviewView
+                  <AnalysisView
                     transactions={transactions}
                     stats={stats}
                     config={config}
-                    initialTab="analysis"
-                    onAddTransaction={() => {
-                      setTransactionType("expense");
-                      setTargetDate(new Date());
-                      setIsAddTransactionOpen(true);
-                    }}
-                    onAddIncome={() => {
-                      setTransactionType("income");
-                      setTargetDate(new Date());
-                      setIsAddTransactionOpen(true);
-                    }}
+                    t={t}
+                    fixedExpenses={fixedExpenses}
+                    currentLang={config.language as Language}
                     onViewTransaction={(t) => {
                       setViewingTransaction(t);
                     }}
+                    onDeleteTransaction={deleteTransaction}
                     onViewFixedExpense={(expense) => {
                       setViewingFixedExpense(expense);
-                    }}
-                    onDeleteTransaction={deleteTransaction}
-                    t={t}
-                    currentLang={config.language as Language}
-                    fixedExpenses={fixedExpenses}
-                    periods={periods}
-                    isPro={isPro(subscriptionStatus, trialEnd)}
-                    onUpgrade={() => {
-                      setActiveTab("profile");
-                      setProfileSection("pro");
                     }}
                   />
                 </TabWrapper>
@@ -3177,11 +3161,10 @@ export default function App() {
                 transition={{ duration: 0.08 }}
               >
                 <TabWrapper tabKey="transactions" scrollPositionsRef={tabScrollPositions}>
-                  <OverviewView
+                  <LogView
                     transactions={transactions}
                     stats={stats}
                     config={config}
-                    initialTab="log"
                     onAddTransaction={() => {
                       setTransactionType("expense");
                       setTargetDate(new Date());
@@ -3195,19 +3178,9 @@ export default function App() {
                     onViewTransaction={(t) => {
                       setViewingTransaction(t);
                     }}
-                    onViewFixedExpense={(expense) => {
-                      setViewingFixedExpense(expense);
-                    }}
                     onDeleteTransaction={deleteTransaction}
                     t={t}
                     currentLang={config.language as Language}
-                    fixedExpenses={fixedExpenses}
-                    periods={periods}
-                    isPro={isPro(subscriptionStatus, trialEnd)}
-                    onUpgrade={() => {
-                      setActiveTab("profile");
-                      setProfileSection("pro");
-                    }}
                   />
                 </TabWrapper>
               </motion.div>

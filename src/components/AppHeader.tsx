@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
+import { DejzLogo } from "./DejzLogo";
 
 interface AppHeaderProps {
   userName?: string;
@@ -62,15 +63,7 @@ export function AppHeader({
             </button>
           ) : (
             <div className="flex items-center gap-2.5">
-              <img
-                src="https://i.imgur.com/QmqMPRy.png"
-                alt="dejz"
-                className="h-6 w-auto object-contain"
-                onError={(e) => {
-                  e.currentTarget.src = "/logo.png";
-                }}
-                referrerPolicy="no-referrer"
-              />
+              <DejzLogo className="text-xl sm:text-2xl font-black" textColor="var(--logo-color, #0B3DA5)" />
             </div>
           )}
         </div>

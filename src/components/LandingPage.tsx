@@ -23,6 +23,7 @@ import {
 import { TranslationKey, Language, languageInfo } from '../i18n';
 import { PolicyModal } from './PolicyModal';
 import { LanguageFlag } from './LanguageFlag';
+import { DejzLogo } from './DejzLogo';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -72,7 +73,7 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
   );
 };
 
-export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin, currentLanguage, onLanguageChange, t }: LandingPageProps) {
+export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin, currentLanguage, onLanguageChange, t: _t }: LandingPageProps) {
   const [isLangOpen, setIsLangOpen] = React.useState(false);
   const [activePolicy, setActivePolicy] = React.useState<string | null>(null);
 
@@ -86,7 +87,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
     icon: info.flag
   }));
 
-  const isSv = currentLanguage === 'sv';
+  const _isSv = currentLanguage === 'sv';
 
   const getL10n = (
     sv: string,
@@ -116,15 +117,8 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
         {/* Navigation - Top Bar matching App's header feeling */}
         <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[var(--bg-color)]/80 border-b border-[var(--border-color)] pt-[env(safe-area-inset-top)] transition-all">
            <div className="max-w-7xl mx-auto px-5 sm:px-8 h-18 sm:h-20 flex items-center justify-between">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <img 
-                  src="https://i.imgur.com/QmqMPRy.png" 
-                  alt="dejz" 
-                  className="h-7 sm:h-8 w-auto cursor-pointer opacity-95 hover:opacity-100 transition-opacity object-contain" 
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-                  onError={(e) => { e.currentTarget.src = "/logo.png"; }}
-                  referrerPolicy="no-referrer" 
-                />
+              <div className="flex items-center gap-3 sm:gap-4 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                <DejzLogo className="text-2xl sm:text-3xl font-black" textColor="var(--logo-color, #0B3DA5)" />
 
                 {/* Language Selector */}
                 <div className="relative">
@@ -307,13 +301,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
 
                       {/* Simulated App Header */}
                       <div className="flex items-center justify-between pt-1 px-1">
-                        <img 
-                          src="https://i.imgur.com/QmqMPRy.png" 
-                          alt="dejz" 
-                          className="h-5.5 w-auto object-contain" 
-                          onError={(e) => { e.currentTarget.src = "/logo.png"; }}
-                          referrerPolicy="no-referrer" 
-                        />
+                        <DejzLogo className="text-lg font-black" textColor="var(--logo-color, #0B3DA5)" />
                         <div className="flex items-center gap-1.5">
                           <div className="w-7 h-7 rounded-[10px] bg-[var(--surface-color)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] shadow-2xs">
                             <Search size={13} />
@@ -720,13 +708,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
         <footer className="max-w-7xl mx-auto px-5 sm:px-8 py-16">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12 text-center md:text-left">
             <div className="space-y-2">
-              <img 
-                src="https://i.imgur.com/QmqMPRy.png" 
-                alt="dejz" 
-                className="h-7 w-auto object-contain mx-auto md:mx-0 opacity-95" 
-                onError={(e) => { e.currentTarget.src = "/logo.png"; }}
-                referrerPolicy="no-referrer" 
-              />
+              <DejzLogo className="text-2xl sm:text-3xl font-black mx-auto md:mx-0" textColor="var(--logo-color, #0B3DA5)" />
               <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium">
                 {getL10n('Få koll på dina pengar – en dag i taget.', 'Control your money – one day at a time.', 'Få kontroll over pengene dine – én dag om gangen.', 'Få styr på dine penge – en dag ad gangen.', 'Hallitse rahojasi – päivä kerrallaan.')}
               </p>

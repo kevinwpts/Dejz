@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ChevronRight } from 'lucide-react';
 import { TranslationKey } from '../i18n';
+import { DejzLogo } from './DejzLogo';
 
 interface WelcomeScreenProps {
   onAction: (isRegistering: boolean) => void;
@@ -25,14 +26,8 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="flex flex-col items-center space-y-6"
         >
-          <div className="p-4 rounded-[28px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs flex items-center justify-center">
-            <img 
-              src="https://i.imgur.com/QmqMPRy.png" 
-              alt="dejz" 
-              className="h-10 sm:h-12 w-auto object-contain" 
-              onError={(e) => { e.currentTarget.src = '/logo.png'; }}
-              referrerPolicy="no-referrer" 
-            />
+          <div className="p-4 px-6 rounded-[28px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs flex items-center justify-center">
+            <DejzLogo className="text-3xl sm:text-4xl font-black" textColor="var(--logo-color, #0B3DA5)" />
           </div>
           
           <div className="space-y-3 max-w-sm">
