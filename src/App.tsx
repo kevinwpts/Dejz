@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from "react";
+import { Analytics } from '@vercel/analytics/react';
 
 function TabWrapper({
   tabKey,
@@ -4061,6 +4062,7 @@ export default function App() {
         )}
       </AnimatePresence>
       <AddToHomeScreenModal t={t} theme={config?.appIconTheme} language={(config?.language as string) || landingLanguage} />
+      <Analytics />
     </div>
   );
 }
