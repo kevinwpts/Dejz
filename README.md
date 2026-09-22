@@ -16,3 +16,5 @@ Dayspend är en minimalistisk app för utgiftskontroll med dynamisk dagsbudget.
 
 ## Licens
 Apache-2.0
+
+Deployment test
