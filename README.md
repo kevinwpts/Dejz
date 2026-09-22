@@ -1,11 +1,18 @@
-<div align="center">
+# Dayspend
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Dayspend är en minimalistisk app för utgiftskontroll med dynamisk dagsbudget.
 
-  <h1>Built with AI Studio</h2>
+## Funktioner
+- Håll koll på dina utgifter.
+- Sätt upp sparmål.
+- Hantera fasta utgifter.
+- Få en tydlig överblick över din ekonomi.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Installation för utvecklare
+1. Klona projektet.
+2. Installera beroenden: `npm install`
+3. Konfigurera miljövariabler i `.env.local` (se `.env.example`).
+4. Starta utvecklingsservern: `npm run dev`
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
-
-</div>
+## Licens
+Apache-2.0

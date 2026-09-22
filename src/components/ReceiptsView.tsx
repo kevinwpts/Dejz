@@ -1,0 +1,228 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ChevronLeft, Search, Receipt, Calendar, Eye, ArrowUpRight, ArrowDownRight, Tag } from 'lucide-react';
+import { Transaction, Config } from '../types';
+
+interface ReceiptsViewProps {
+  onBack: () => void;
+  transactions: Transaction[];
+  config: Config;
+  onViewTransaction: (t: Transaction) => void;
+}
+
+export function ReceiptsView({
+  onBack,
+  transactions,
+  config,
+  onViewTransaction
+}: ReceiptsViewProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter transactions that have a receiptUrl
+  const receiptTransactions = transactions.filter(t => t.receiptUrl && t.receiptUrl.trim() !== '');
+
+  // Filter by search query
+  const filteredTransactions = receiptTransactions.filter(item => {
+    const query = searchQuery.toLowerCase();
+    const merchantMatch = item.merchant?.toLowerCase().includes(query) || false;
+    const categoryMatch = item.category?.toLowerCase().includes(query) || false;
+    const noteMatch = item.note?.toLowerCase().includes(query) || false;
+    const amountMatch = item.amount.toString().includes(query);
+    return merchantMatch || categoryMatch || noteMatch || amountMatch;
+  });
+
+  const formatAmount = (amount: number) => {
+    return new Intl.NumberFormat('sv-SE', {
+      style: 'currency',
+      currency: 'SEK',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount).replace(/\s/g, ' ');
+  };
+
+  const formatDate = (timestamp: number) => {
+    return new Intl.DateTimeFormat('sv-SE', {
+      dateStyle: 'medium',
+    }).format(new Date(timestamp));
+  };
+
+  const totalAmount = filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="space-y-6 pb-24"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onBack}
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)] active:scale-95 transition-all shadow-sm"
+          id="receipts_view_back_btn"
+        >
+          <ChevronLeft size={20} strokeWidth={1.5} />
+        </button>
+        <div>
+          <h2 className="text-[22px] font-bold text-[var(--text-primary)] tracking-tight">
+            {config.language === 'sv' ? 'Mina kvitton' : 'My Receipts'}
+          </h2>
+          <p className="text-xs text-[var(--text-secondary)] font-medium opacity-60">
+            {config.language === 'sv' 
+              ? 'Här visas alla dina transaktioner där du har bifogat ett kvitto.' 
+              : 'Here are all your transactions with an attached receipt.'}
+          </p>
+        </div>
+      </div>
+
+      {/* Stats Summary Panel */}
+      {receiptTransactions.length > 0 && (
+        <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-2xl bg-[var(--surface-color)] p-5 shadow-sm space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-70">
+              {config.language === 'sv' ? 'Sammanställning' : 'Summary'}
+            </span>
+            <span className="text-[11px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full">
+              {filteredTransactions.length} {config.language === 'sv' ? 'stycken' : 'items'}
+            </span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+              {formatAmount(totalAmount)}
+            </span>
+            <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-50">
+              {config.language === 'sv' ? 'totalt belopp' : 'total amount'}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Search Input */}
+      {receiptTransactions.length > 0 && (
+        <div className="relative">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[var(--text-secondary)] opacity-50">
+            <Search size={18} strokeWidth={1.5} />
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={config.language === 'sv' ? 'Sök köpställe, kategori eller belopp...' : 'Search merchant, category, or amount...'}
+            className="w-full pl-11 pr-4 py-3 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-2xl text-sm font-semibold placeholder-[var(--text-secondary)]/50 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent shadow-sm transition-all text-[var(--text-primary)]"
+            id="receipts_search_input"
+          />
+        </div>
+      )}
+
+      {/* Receipt Grid/List */}
+      <div className="space-y-3">
+        {filteredTransactions.length > 0 ? (
+          <div className="grid gap-3">
+            <AnimatePresence mode="popLayout">
+              {filteredTransactions.map((item) => (
+                <motion.div
+                  key={item.id}
+                  layoutId={`receipt-card-${item.id}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  onClick={() => onViewTransaction(item)}
+                  className="group flex items-center justify-between p-4 bg-[var(--surface-color)] border border-[var(--border-color)]/60 rounded-2xl shadow-sm hover:border-accent/40 active:scale-[0.99] transition-all cursor-pointer"
+                  id={`receipt_item_${item.id}`}
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    {/* Receipt thumbnail / Icon wrapper */}
+                    <div className="w-12 h-12 rounded-xl border border-[var(--border-color)]/80 overflow-hidden relative shrink-0 bg-[var(--bg-color)] flex items-center justify-center">
+                      {item.receiptUrl ? (
+                        <>
+                          <img
+                            src={item.receiptUrl}
+                            alt="Receipt thumbnail"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                            <Receipt size={14} className="text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                          </div>
+                        </>
+                      ) : (
+                        <Receipt size={20} className="text-[var(--text-secondary)]" strokeWidth={1.5} />
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className="font-bold text-[12px] text-[var(--text-primary)] truncate">
+                          {item.merchant || item.category}
+                        </span>
+                        {item.type === 'income' ? (
+                          <span className="p-0.5 rounded-full bg-emerald-500/10 text-emerald-600 shrink-0">
+                            <ArrowDownRight size={10} strokeWidth={2.5} />
+                          </span>
+                        ) : (
+                          <span className="p-0.5 rounded-full bg-rose-500/10 text-rose-600 shrink-0">
+                            <ArrowUpRight size={10} strokeWidth={2.5} />
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] font-semibold text-[var(--text-secondary)] opacity-60">
+                        <span className="flex items-center gap-1">
+                          <Calendar size={11} strokeWidth={1.5} />
+                          {formatDate(item.timestamp)}
+                        </span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1 text-[10px]">
+                          <Tag size={10} strokeWidth={1.5} />
+                          {item.category}
+                        </span>
+                      </div>
+                      {item.note && (
+                        <p className="text-[10px] text-[var(--text-secondary)] opacity-80 mt-1 truncate max-w-[180px]">
+                          {item.note}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <span className="font-extrabold text-[12px] text-[var(--text-primary)]">
+                        {formatAmount(item.amount)}
+                      </span>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)]/50 text-[var(--text-secondary)] group-hover:bg-accent/10 group-hover:text-accent flex items-center justify-center transition-all">
+                      <Eye size={14} strokeWidth={2} />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-12 border border-dashed border-[var(--border-color)]/80 rounded-2xl bg-[var(--surface-color)]/30 text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-[var(--surface-color)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] shadow-sm">
+              <Receipt size={28} strokeWidth={1.2} />
+            </div>
+            <div className="max-w-xs space-y-1">
+              <h3 className="font-bold text-sm text-[var(--text-primary)]">
+                {receiptTransactions.length === 0 
+                  ? (config.language === 'sv' ? 'Inga kvitton ännu' : 'No receipts yet')
+                  : (config.language === 'sv' ? 'Inga träffar' : 'No matches found')}
+              </h3>
+              <p className="text-[11px] font-semibold text-[var(--text-secondary)] leading-relaxed opacity-60">
+                {receiptTransactions.length === 0
+                  ? (config.language === 'sv' 
+                      ? 'Ladda upp eller fotografera ett kvitto när du registrerar en transaktion så sparas det här.' 
+                      : 'Attach or capture a receipt when recording a transaction to save it here.')
+                  : (config.language === 'sv' 
+                      ? 'Din sökning matchade inga kvitton. Testa att söka på något annat!' 
+                      : 'Your search did not match any receipts. Try searching for something else!')}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}

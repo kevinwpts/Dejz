@@ -1,0 +1,6 @@
+{
+  "name": "Dejz",
+  "description": "Dejz är en modern och kraftfull budgetapp för att hantera din personliga ekonomi, inkomster, fasta utgifter och sparande.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

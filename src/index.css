@@ -1,0 +1,669 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&display=swap");
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-black: #0a0a0a;
+  --font-sans:
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display:
+    "Plus Jakarta Sans", sans-serif;
+  --font-amount:
+    "Plus Jakarta Sans", sans-serif;
+  --font-logo:
+    "Plus Jakarta Sans", sans-serif;
+  --font-serif:
+    "Plus Jakarta Sans", sans-serif;
+  --font-mono:
+    "Plus Jakarta Sans", monospace;
+
+  --color-accent: var(--accent-color);
+  --color-accent-hover: var(--accent-hover);
+  --color-success: var(--success-color);
+  --color-danger: var(--danger-color);
+  --color-warning: var(--warning-color);
+
+  --radius-4xl: 32px;
+  --radius-3xl: 28px;
+  --radius-2xl: 24px;
+  --radius-xl: 20px;
+  --radius-lg: 16px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+
+  --shadow-2xs: var(--shadow-level-1);
+  --shadow-xs: var(--shadow-level-1);
+  --shadow-sm: var(--shadow-level-2);
+  --shadow-md: var(--shadow-level-3);
+  --shadow-lg: var(--shadow-level-3);
+  --shadow-xl: var(--shadow-level-3);
+}
+
+*,
+*::before,
+*::after,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+@utility font-serif {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+@utility font-logo {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+@utility font-amount {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+@utility font-display {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+:root {
+  font-size: 87.5%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11", "ss01", "ss02", "ss03", "tnum";
+
+  /* Premium Soft Low-Contrast Light Theme (Dejz Premium Design System) */
+  --bg-color: #F5F5F7;
+  --bg-secondary: #EDEDF0;
+  --bg-gradient: #F5F5F7;
+
+  --surface-color: #FFFFFF;
+  --surface-gradient: #FFFFFF;
+  --surface-elevated: #FFFFFF;
+  --surface-elevated-gradient: #FFFFFF;
+  --surface-solid: #FFFFFF;
+  --surface-muted: rgba(0, 0, 0, 0.04);
+  --surface-tint: rgba(255, 255, 255, 0.04);
+
+  --text-primary: #000000;
+  --text-secondary: #52525B;
+  --text-tertiary: #71717A;
+  --text-inactive: #A1A1AA;
+
+  --border-color: rgba(0, 0, 0, 0.07);
+  --border-strong: rgba(0, 0, 0, 0.12);
+  --inner-highlight: #FFFFFF;
+
+  --chip-bg: rgba(0, 0, 0, 0.05);
+  --transaction-bg: #FFFFFF;
+  --card-nested-bg: #F5F5F7;
+  --remaining-today-gradient: var(--surface-color);
+
+  /* Custom Elevation Levels - Light Mode (Soft Premium Glass Shadows) */
+  --shadow-level-1: 0 4px 16px rgba(0, 0, 0, 0.035);
+  --shadow-level-2: 0 6px 24px rgba(0, 0, 0, 0.05);
+  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.07);
+
+  /* Dejz Black Accent Color in Light Mode */
+  --accent-color: #000000;
+  --accent-hover: #1F1F23;
+  --accent-gradient: linear-gradient(145deg, #18181B 0%, #000000 100%);
+  --text-on-accent: #FFFFFF;
+  --accent-soft: rgba(0, 0, 0, 0.06);
+  --accent-glow: rgba(0, 0, 0, 0.12);
+
+  --modal-bg: rgba(255, 255, 255, 0.95);
+  --bg-primary: var(--bg-color);
+  --card-bg: var(--surface-color);
+  --bg-hover: rgba(0, 0, 0, 0.03);
+
+  --card-shadow: var(--shadow-level-2);
+  --card-inner-stroke: none;
+
+  --success-color: #10b981;
+  --danger-color: #e83e67;
+  --warning-color: #f59e0b;
+
+  --nav-active-color: #000000;
+  --nav-inactive-color: #71717A;
+  --nav-plus-bg: #000000;
+  --nav-plus-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+
+  --income-card-bg: var(--surface-color);
+  --income-card-text: var(--text-primary);
+  --expense-card-bg: var(--surface-color);
+  --expense-card-text: var(--text-primary);
+  --savings-card-bg: var(--surface-color);
+  --savings-card-text: var(--text-primary);
+
+  --date-active-bg: #000000;
+  --date-active-color: #FFFFFF;
+  --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  --date-inactive-bg: rgba(255, 255, 255, 0.80);
+  --date-inactive-border: rgba(0, 0, 0, 0.06);
+  --date-inactive-color: #52525B;
+
+  --ambient-glow: none;
+  --ambient-glow-strong: none;
+  --backdrop-blur: 22px;
+}
+
+.dark {
+  /* Premium Dark Theme Refinements (Dejz Design System) */
+  --bg-color: #101214;
+  --bg-secondary: #111315;
+  --bg-gradient: #101214;
+
+  --surface-color: #181B1F;
+  --surface-gradient: #181B1F;
+  --surface-elevated: #21252B;
+  --surface-elevated-gradient: #21252B;
+  --surface-solid: #181B1F;
+  --surface-muted: #262B31;
+  --surface-tint: rgba(255, 255, 255, 0.02);
+
+  --text-primary: #F4F5F6;
+  --text-secondary: #A3A8B0;
+  --text-tertiary: #717780;
+  --text-inactive: #4E525C;
+
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.1);
+  --inner-highlight: transparent;
+
+  --chip-bg: rgba(255, 255, 255, 0.055);
+  --transaction-bg: #1D2126;
+  --card-nested-bg: #21252B;
+  --remaining-today-gradient: linear-gradient(145deg, #0D251D 0%, #0B1D17 55%, #101A17 100%);
+
+  /* Custom Elevation Levels - Dark Mode */
+  --shadow-level-1: 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 16px -2px rgba(0, 0, 0, 0.2);
+  --shadow-level-2: 0 4px 10px rgba(0, 0, 0, 0.15), 0 10px 25px -3px rgba(0, 0, 0, 0.3);
+  --shadow-level-3: 0 16px 40px -6px rgba(0, 0, 0, 0.5), 0 6px 16px -2px rgba(0, 0, 0, 0.3);
+
+  /* Dejz Green Accent Color in Dark Mode (Premium Theme) */
+  --accent-color: #10B981;
+  --accent-hover: #34D399;
+  --accent-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  --text-on-accent: #101214;
+  --accent-soft: rgba(16, 185, 129, 0.12);
+  --accent-glow: rgba(16, 185, 129, 0.25);
+
+  --modal-bg: #181B1F;
+  --bg-primary: var(--bg-color);
+  --card-bg: var(--surface-color);
+  --bg-hover: #1D2126;
+
+  --card-shadow: var(--shadow-level-2);
+  --card-inner-stroke: none;
+
+  --success-color: #10b981;
+  --danger-color: #f43f5e;
+  --warning-color: #f59e0b;
+
+  --nav-active-color: #10B981;
+  --nav-inactive-color: #717780;
+  --nav-plus-bg: var(--accent-gradient);
+  --nav-plus-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+
+  --income-card-bg: var(--surface-color);
+  --income-card-text: var(--text-primary);
+  --expense-card-bg: var(--surface-color);
+  --expense-card-text: var(--text-primary);
+  --savings-card-bg: var(--surface-color);
+  --savings-card-text: var(--text-primary);
+
+  --date-active-bg: var(--accent-gradient);
+  --date-active-color: var(--text-on-accent);
+  --date-active-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  --date-inactive-bg: var(--surface-color);
+  --date-inactive-border: rgba(255, 255, 255, 0.03);
+  --date-inactive-color: var(--text-secondary);
+}
+
+/* Glass-Card Surface Utility (harmonized with theme tokens) */
+.glass-card {
+  background: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.dark .glass-card {
+  background-color: var(--surface-color) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Glass-Navigation Utility */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(26px) !important;
+  -webkit-backdrop-filter: blur(26px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.07) !important;
+}
+.dark .glass-nav {
+  background: rgba(25, 28, 32, 0.88) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.30) !important;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: smooth;
+  }
+
+  html, body {
+    @apply antialiased;
+    color: var(--text-primary);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;                
+    background: var(--bg-gradient);     
+    min-height: 100%;
+    touch-action: pan-x pan-y;
+    overscroll-behavior: auto;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-sans);
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100%;
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-sans);
+  }
+
+  #bg-gradient {
+    display: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  h1 {
+    @apply tracking-tight;
+  }
+
+  h2,
+  h3 {
+    @apply tracking-normal;
+  }
+
+  p {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+  }
+
+  .font-amount {
+    font-family: var(--font-amount);
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  .input-label,
+  .uppercase-label {
+    letter-spacing: normal;
+    @apply font-medium text-xs text-[var(--text-secondary)];
+  }
+
+  .tracking-wider {
+    letter-spacing: 0.01em;
+  }
+
+  .tracking-widest {
+    letter-spacing: 0.02em;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font-family: var(--font-sans);
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+    color: var(--text-primary);
+  }
+
+  button {
+    -webkit-tap-highlight-color: transparent;
+    font-weight: 500;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-inactive);
+    font-family: inherit;
+    font-weight: inherit;
+    opacity: 0.55;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--accent-color);
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@layer components {
+  /* Surface Tokens */
+  .card-hero {
+    @apply rounded-[28px] overflow-hidden border border-[var(--border-color)] dark:border-white/10 shadow-sm bg-[var(--surface-color)];
+  }
+
+  .card-secondary {
+    @apply rounded-[16px] border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] shadow-xs;
+  }
+
+  .card-nested {
+    @apply rounded-[16px] bg-[var(--surface-muted)] border border-[var(--border-color)]/50;
+  }
+
+  .card-flat {
+    @apply rounded-[24px] bg-[var(--surface-color)] border border-[var(--border-color)];
+  }
+
+  /* Typography Tokens */
+  .text-hero-amount {
+    @apply text-4xl sm:text-5xl md:text-6xl leading-none font-extrabold font-amount tabular-nums tracking-tighter;
+  }
+
+  .text-heading-xl {
+    @apply text-2xl font-bold tracking-tight;
+  }
+
+  .text-heading-lg {
+    @apply text-xl font-semibold tracking-tight;
+  }
+
+  .text-heading-md {
+    @apply text-[16px] font-bold tracking-tight;
+  }
+
+  .text-heading-sm {
+    @apply text-[15px] font-semibold tracking-tight;
+  }
+
+  .text-body-lg {
+    @apply text-base font-semibold tracking-tight;
+  }
+
+  .text-body-md {
+    @apply text-[15px] font-medium tracking-tight;
+  }
+
+  .text-body-sm {
+    @apply text-sm font-medium;
+  }
+
+  .text-metadata {
+    @apply text-[11px] font-normal;
+  }
+
+  .text-label-caps {
+    @apply text-xs font-semibold tracking-wide uppercase;
+  }
+
+  .text-label-sm {
+    @apply text-[10px] font-semibold uppercase tracking-wider;
+  }
+
+  /* Interactive Elements */
+  .btn-primary {
+    @apply px-4 py-2 bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold rounded-[12px] shadow-sm hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2;
+  }
+
+  .btn-pill {
+    @apply px-2.5 h-6 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)] dark:border-white/10 text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center gap-1;
+  }
+
+  .btn-action-sm {
+    @apply h-8 px-3.5 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)] text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all cursor-pointer flex items-center justify-center;
+  }
+
+  .icon-btn {
+    @apply p-1 text-[var(--text-primary)] dark:text-white hover:opacity-75 transition-opacity flex items-center justify-center cursor-pointer;
+  }
+
+  /* Layout Tokens */
+  .page-container {
+    @apply max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-6;
+  }
+
+  .section-header {
+    @apply flex items-center justify-between px-2 mb-4;
+  }
+
+  /* Legacy Utilities Support */
+  .module-surface {
+    @apply rounded-[24px];
+    background: var(--surface-gradient);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+  }
+
+  .surface-card,
+  .glass-card {
+    border-radius: 24px;
+    background: var(--surface-gradient);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-card {
+    border-radius: 24px;
+    background: var(--surface-gradient);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .flat-card {
+    border-radius: 24px;
+    background: var(--surface-gradient);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+  }
+
+  .surface-elevated {
+    border-radius: 24px;
+    background: var(--surface-elevated-gradient);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+  }
+
+  .surface-solid {
+    border-radius: 24px;
+    background: var(--surface-gradient);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+  }
+
+  .surface-muted {
+    border-radius: 16px;
+    background: var(--surface-muted);
+    border: 1px solid var(--border-color);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
+  .accent-button {
+    @apply inline-flex items-center justify-center font-semibold px-5 py-2.5 rounded-[14px] transition-all;
+    background: var(--accent-gradient);
+    color: var(--text-on-accent);
+    border: none;
+    font-size: 0.875rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  .accent-button-full {
+    @apply inline-flex items-center justify-center font-semibold px-5 py-3.5 rounded-[14px] transition-all w-full;
+    background: var(--accent-gradient);
+    color: var(--text-on-accent);
+    border: none;
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  .accent-button:hover,
+  .accent-button-full:hover {
+    background: var(--accent-hover);
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+  }
+
+  .accent-button:active,
+  .accent-button-full:active {
+    scale: 0.96;
+    opacity: 0.9;
+    transition: all 0.1s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .accent-button:disabled,
+  .accent-button-full:disabled {
+    @apply opacity-50 cursor-not-allowed transform-none scale-100;
+    background: var(--surface-muted);
+    color: var(--text-tertiary);
+    box-shadow: none;
+  }
+
+  .input-field {
+    @apply w-full font-medium px-4 py-3 rounded-[14px] border transition-all;
+    background: var(--surface-gradient);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: var(--surface-color);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .section-title {
+    @apply text-xl font-semibold tracking-tight mb-4;
+    color: var(--text-primary);
+  }
+
+  .section-subtitle,
+  .muted-text {
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+}
+
+@layer base {
+  .tertiary-text {
+    color: var(--text-tertiary);
+    font-weight: 400;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border-color);
+  }
+
+  .pill {
+    @apply inline-flex items-center justify-center;
+    border-radius: 9999px;
+    padding: 0.4rem 1rem;
+    background: var(--surface-muted);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .topbar-blur {
+    background: var(--header-bg);
+  }
+
+  .modal-surface {
+    border-radius: var(--radius-2xl);
+    background: var(--bg-color);
+    box-shadow: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+  }
+
+  /* Custom Range Slider Styling */
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: var(--accent-color);
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: none;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: var(--accent-color);
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: none;
+  }
+}

@@ -1,0 +1,87 @@
+import React from 'react';
+import { ChevronLeft, ChevronRight, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
+
+interface UniversalPeriodSelectorProps {
+  periods: any[];
+  currentDate: Date;
+  onChange: (date: Date) => void;
+  periodName?: string;
+  isCurrentPeriod?: boolean;
+  onOpenPicker?: () => void;
+}
+
+export function UniversalPeriodSelector({
+  periods,
+  currentDate,
+  onChange,
+  periodName = '',
+  isCurrentPeriod,
+  onOpenPicker,
+}: UniversalPeriodSelectorProps) {
+
+  const handlePrevPeriod = () => {
+    if (periods) {
+      const currentIndex = periods.findIndex(p => p.start.getTime() <= currentDate.getTime() && p.end.getTime() >= currentDate.getTime());
+      if (currentIndex > 0) {
+        onChange(periods[currentIndex - 1].date);
+      }
+    }
+  };
+
+  const handleNextPeriod = () => {
+    if (periods) {
+      const currentIndex = periods.findIndex(p => p.start.getTime() <= currentDate.getTime() && p.end.getTime() >= currentDate.getTime());
+      if (currentIndex !== -1 && currentIndex < periods.length - 1) {
+        onChange(periods[currentIndex + 1].date);
+      }
+    }
+  };
+
+  const [month, dates] = periodName.includes('(') 
+    ? periodName.split('(').map(s => s.replace(')', '').trim())
+    : [periodName, ''];
+
+  return (
+    <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-30 mb-4 transition-all">
+      <div className="bg-[var(--surface-color)] border border-[var(--border-color)] dark:border-white/10 rounded-full shadow-xs px-2 sm:px-3 py-1 flex items-center justify-between transition-all">
+        <button 
+          onClick={handlePrevPeriod}
+          className="p-2 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all active:scale-95 cursor-pointer"
+          aria-label="Föregående period"
+        >
+          <ChevronLeft size={18} strokeWidth={2.2} />
+        </button>
+            
+        <button 
+          onClick={onOpenPicker || (() => {
+            if (!isCurrentPeriod) {
+              onChange(new Date());
+            }
+          })}
+          className="flex flex-col items-center group/label px-3 py-1 rounded-full hover:bg-[var(--surface-muted)]/60 transition-all cursor-pointer"
+        >
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-bold tracking-tight transition-colors duration-300 text-[var(--text-primary)] group-hover/label:text-[var(--accent-color)]">
+              {month}
+            </span>
+            <CalendarIcon size={13} className="text-[var(--text-secondary)] opacity-70 group-hover/label:text-[var(--accent-color)] transition-colors" />
+            <ChevronDown size={14} className="text-[var(--text-secondary)] opacity-50 group-hover/label:opacity-100 transition-opacity" />
+          </div>
+          {dates && (
+            <span className="text-[11px] font-medium transition-opacity duration-300 text-[var(--text-secondary)] opacity-60">
+              {dates}
+            </span>
+          )}
+        </button>
+
+        <button 
+          onClick={handleNextPeriod}
+          className="p-2 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all active:scale-95 cursor-pointer"
+          aria-label="Nästa period"
+        >
+          <ChevronRight size={18} strokeWidth={2.2} />
+        </button>
+      </div>
+    </div>
+  );
+}

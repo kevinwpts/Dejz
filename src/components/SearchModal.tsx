@@ -1,0 +1,204 @@
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Search, X } from 'lucide-react';
+import { Transaction, Config } from '../types';
+import { TransactionItem } from './TransactionItem';
+import { useScrollLock } from '../hooks/useScrollLock';
+
+interface SearchModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  transactions: Transaction[];
+  config: Config;
+  onNavigate: (tab: string, section?: string) => void;
+  onViewTransaction: (transaction: Transaction) => void;
+}
+
+export function SearchModal({ 
+  isOpen, 
+  onClose, 
+  transactions, 
+  config, 
+  onViewTransaction 
+}: SearchModalProps) {
+  useScrollLock(isOpen);
+  const [query, setQuery] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const getL10n = (sv: string, en: string, no?: string, da?: string, fi?: string) => {
+    const lang = config.language || 'sv';
+    if (lang === 'sv') return sv;
+    if (lang === 'no') return no || sv;
+    if (lang === 'da') return da || sv;
+    if (lang === 'fi') return fi || sv;
+    return en;
+  };
+
+  const isSv = config.language === 'sv';
+
+  useEffect(() => {
+    if (isOpen) {
+      setQuery('');
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  const trimmedQuery = query.trim().toLowerCase();
+
+  const matchingTransactions = useMemo(() => {
+    if (!trimmedQuery) {
+      // When query is empty, show the most recent transactions
+      return [...(transactions || [])]
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, 10);
+    }
+    return (transactions || [])
+      .filter(t => {
+        const merchant = (t.merchant || '').toLowerCase();
+        const note = (t.note || '').toLowerCase();
+        const category = (t.category || '').toLowerCase();
+        const tags = (t.tags || []).map(tag => tag.toLowerCase());
+        const amountStr = String(Math.abs(t.amount));
+
+        return merchant.includes(trimmedQuery) ||
+               note.includes(trimmedQuery) ||
+               category.includes(trimmedQuery) ||
+               amountStr.includes(trimmedQuery) ||
+               tags.some(tag => tag.includes(trimmedQuery));
+      })
+      .sort((a, b) => b.timestamp - a.timestamp);
+  }, [transactions, trimmedQuery]);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          className="fixed inset-0 z-[100] flex flex-col bg-black/60 backdrop-blur-sm sm:items-center sm:justify-start sm:p-4 sm:pt-14"
+          onClick={onClose}
+        >
+          <motion.div 
+            initial={{ opacity: 0, y: -20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.98 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            className="bg-[var(--bg-color)] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[26px] border-0 sm:border border-[var(--border-color)] shadow-2xl flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Search Bar */}
+            <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-[var(--border-color)] flex items-center gap-2.5 shrink-0 bg-[var(--surface-color)]">
+              <div className="flex-1 relative flex items-center bg-[var(--surface-muted)] rounded-full border border-[var(--border-color)] px-3.5 h-11 transition-all focus-within:border-[var(--accent-color)] focus-within:bg-[var(--surface-color)] shadow-2xs">
+                <Search size={18} className="text-[var(--text-secondary)] opacity-60 shrink-0 mr-2.5" />
+                <input 
+                  ref={inputRef}
+                  type="text" 
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  autoComplete="off"
+                  placeholder={getL10n(
+                    "Sök transaktion, butik, kategori...",
+                    "Search transaction, merchant, category...",
+                    "Søk transaksjon, butikk, kategori...",
+                    "Søg transaktion, butik, kategori...",
+                    "Etsi tilitapahtumaa, kauppaa, kategoriaa..."
+                  )}
+                  className="w-full h-full bg-transparent text-[15px] font-medium text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 outline-none"
+                />
+                {query && (
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setQuery('');
+                      inputRef.current?.focus();
+                    }}
+                    className="w-6 h-6 rounded-full bg-[var(--border-color)]/60 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center cursor-pointer transition-colors shrink-0 active:scale-90"
+                    title={getL10n("Rensa", "Clear", "Tøm", "Ryd", "Tyhjennä")}
+                  >
+                    <X size={13} strokeWidth={2.5} />
+                  </button>
+                )}
+              </div>
+
+              <button 
+                type="button"
+                onClick={onClose} 
+                className="h-10 px-3 rounded-full text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all cursor-pointer shrink-0 active:scale-95"
+              >
+                {getL10n("Avbryt", "Cancel", "Avbryt", "Annuller", "Peruuta")}
+              </button>
+            </div>
+
+            {/* Results Scroll Container */}
+            <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-6 custom-scrollbar touch-pan-y overscroll-contain">
+              {/* Transactions Section */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-70">
+                    {trimmedQuery 
+                      ? `${getL10n("Transaktioner", "Transactions", "Transaksjoner", "Transaktioner", "Tapahtumat")} (${matchingTransactions.length})`
+                      : getL10n("Senaste händelser", "Recent transactions", "Nylige transaksjoner", "Seneste transaktioner", "Viimeisimmät tapahtumat")
+                    }
+                  </span>
+                </div>
+
+                {matchingTransactions.length > 0 ? (
+                  <div className="space-y-2">
+                    {matchingTransactions.map(t => (
+                      <TransactionItem 
+                        key={t.id} 
+                        transaction={t} 
+                        config={config} 
+                        showDate={true}
+                        onView={(trans) => {
+                          onViewTransaction(trans);
+                          onClose();
+                        }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  trimmedQuery && (
+                    <div className="text-center py-10 px-4 bg-[var(--surface-color)] rounded-[20px] border border-[var(--border-color)]">
+                      <div className="w-11 h-11 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] opacity-60 flex items-center justify-center mx-auto mb-2.5">
+                        <Search size={20} />
+                      </div>
+                      <p className="text-[14px] font-semibold text-[var(--text-primary)]">
+                        {getL10n(
+                          `Inga resultat för "${query}"`,
+                          `No results for "${query}"`,
+                          `Ingen resultater for "${query}"`,
+                          `Ingen resultater for "${query}"`,
+                          `Ei tuloksia haulle "${query}"`
+                        )}
+                      </p>
+                      <p className="text-[12px] font-medium text-[var(--text-secondary)] opacity-70 mt-0.5">
+                        {getL10n(
+                          'Testa att söka på butiksnamn, kategori eller belopp',
+                          'Try searching for merchant, category or amount',
+                          'Prøv å søke etter butikk, kategori eller beløp',
+                          'Prøv at søge efter butik, kategori eller beløb',
+                          'Kokeile hakea kaupan nimeä, kategoriaa tai summaa'
+                        )}
+                      </p>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
