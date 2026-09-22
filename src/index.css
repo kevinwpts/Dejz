@@ -283,6 +283,7 @@ textarea {
     margin: 0;
     padding: 0;
     overflow-y: auto;                
+    background-color: var(--bg-color) !important;
     background: var(--bg-gradient);     
     min-height: 100%;
     touch-action: pan-x pan-y;

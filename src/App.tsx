@@ -1012,8 +1012,13 @@ export default function App() {
       document.body.classList.add("light");
     }
 
-    // Update theme-color meta tag for iOS Safari status bar and browser toolbar
+    // Update theme-color meta tag and root background for iOS Safari status bar and browser toolbar
     const themeColor = shouldUseDarkMode ? "#101214" : "#EAF0FF";
+    
+    // Explicitly set body & documentElement background colors so iOS root canvas matches
+    document.documentElement.style.backgroundColor = themeColor;
+    document.body.style.backgroundColor = themeColor;
+
     const metaTags = document.querySelectorAll('meta[name="theme-color"]');
     if (metaTags.length > 0) {
       metaTags.forEach((tag) => tag.setAttribute("content", themeColor));
@@ -1022,6 +1027,12 @@ export default function App() {
       meta.setAttribute("name", "theme-color");
       meta.setAttribute("content", themeColor);
       document.head.appendChild(meta);
+    }
+
+    // Sync apple-mobile-web-app-status-bar-style for iOS PWA
+    const statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (statusBarMeta) {
+      statusBarMeta.setAttribute("content", shouldUseDarkMode ? "black-translucent" : "default");
     }
   }, [config?.darkMode, subscriptionStatus, config, session?.user?.email]);
 
@@ -2951,6 +2962,13 @@ export default function App() {
 
   return (
     <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden" style={{ background: 'var(--bg-gradient)' }}>
+      {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop */}
+      <div
+        className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
+        style={{ height: 'max(env(safe-area-inset-top, 0px), 1px)', backgroundColor: 'var(--bg-color)' }}
+        aria-hidden="true"
+      />
+
       {/* Top Subtle Blue Ambient Gradient */}
       <div className="absolute top-0 inset-x-0 h-80 sm:h-96 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[130%] h-80 bg-gradient-to-b from-blue-700/12 via-blue-900/8 to-transparent dark:from-blue-600/15 dark:via-blue-800/10 dark:to-transparent blur-3xl opacity-90" />
@@ -3002,7 +3020,7 @@ export default function App() {
       )}
 
       {isDemoMode && (
-        <div className="fixed top-0 left-0 right-0 z-[60] bg-[var(--surface-color)]/95 backdrop-blur-xl border-b border-[var(--border-color)] px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 flex items-center justify-between text-xs font-semibold shadow-xs">
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-[var(--bg-secondary)]/95 backdrop-blur-xl border-b border-[var(--border-color)] px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 flex items-center justify-between text-xs font-semibold shadow-xs">
           <div className="max-w-2xl mx-auto w-full flex items-center justify-between px-2 sm:px-4">
             <div className="flex items-center gap-2.5">
               <span className="relative flex h-2 w-2 shrink-0">

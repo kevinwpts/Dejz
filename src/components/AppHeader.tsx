@@ -42,8 +42,8 @@ export function AppHeader({
     <header
       className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-[var(--bg-color)]/85 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-xs"
-          : "bg-transparent border-b border-transparent shadow-none"
+          ? "bg-[var(--bg-color)]/90 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-xs"
+          : "bg-[var(--bg-color)] border-b border-transparent shadow-none"
       }`}
     >
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full`}>

@@ -119,7 +119,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
 
       <div className="relative z-10">
         {/* Navigation - Top Bar matching App's header feeling */}
-        <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[var(--bg-color)]/80 border-b border-[var(--border-color)] pt-[env(safe-area-inset-top)] transition-all">
+        <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[var(--bg-color)]/95 border-b border-[var(--border-color)] pt-[env(safe-area-inset-top)] transition-all">
            <div className="max-w-7xl mx-auto px-5 sm:px-8 h-18 sm:h-20 flex items-center justify-between">
               <div className="flex items-center gap-3 sm:gap-4 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <DejzLogo className="text-2xl sm:text-3xl font-black" textColor="var(--logo-color, #0B3DA5)" />
