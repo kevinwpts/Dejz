@@ -838,13 +838,14 @@ async function startServer() {
     };
     const color = themeColors[theme] || '#10b981';
     
-    // Simple SVG with the color background and a white icon (assuming the favicon is simple)
-    // Or I can read the existing favicon.svg and replace a placeholder
-    const svg = `<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="512" height="512" rx="128" fill="${color}"/>
-      <path d="M160 160H352V352H160V160Z" fill="white" fill-opacity="0.2"/>
-      <path d="M256 120L140 320H372L256 120Z" fill="white"/>
-    </svg>`;
+    // Use official dejz brand favicon SVG dynamically colored
+    let svg: string;
+    try {
+      const template = fs.readFileSync(path.resolve(process.cwd(), "public", "favicon.svg"), "utf8");
+      svg = template.replace(/fill="#1A2456"/g, `fill="${color}"`);
+    } catch {
+      svg = `<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="512" height="512" rx="128" fill="${color}"/></svg>`;
+    }
     
     res.setHeader('Content-Type', 'image/svg+xml');
     res.send(svg);

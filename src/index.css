@@ -83,8 +83,8 @@ textarea {
   text-rendering: optimizeLegibility;
   font-feature-settings: "cv11", "ss01", "ss02", "ss03", "tnum";
 
-  /* Dejz Clean Minimalist Brand Theme */
-  --logo-color: var(--text-primary);
+  /* Dejz Official Brand Logo Color (Authentic Navy Blue) */
+  --logo-color: #1A2456;
 
   /* Premium Light Theme (Dejz Design System) */
   --bg-color: #F8F9FA;
