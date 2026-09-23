@@ -361,7 +361,7 @@ export function LandingPage({
                 DIN EKONOMI. DAG FÖR DAG.
               </div>
 
-              <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-extrabold tracking-tight text-[#03070E] leading-[1.06]">
+              <h1 className="font-display text-4xl sm:text-6xl lg:text-[68px] font-bold tracking-[-0.03em] text-[#03070E] leading-[1.06]">
                 Se exakt vad du kan<br />
                 <span className="text-[#03070E]">spendera idag.</span>
               </h1>
@@ -412,7 +412,7 @@ export function LandingPage({
         <section className="py-20 sm:py-32 px-5 sm:px-8 border-t border-black/[0.06] bg-white">
           <div className="max-w-5xl mx-auto space-y-12 sm:space-y-16">
             <div className="max-w-2xl space-y-5">
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#03070E] leading-[1.12]">
+              <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-tight text-[#03070E] leading-[1.12]">
                 Pengar på kontot är inte samma sak som pengar att spendera.
               </h2>
               <p className="text-lg sm:text-xl text-[#525866] font-normal leading-relaxed">
@@ -466,7 +466,7 @@ export function LandingPage({
         {/* 4. SÅ FUNGERAR DEJZ */}
         <section id="how-it-works" className="py-20 sm:py-32 px-5 sm:px-8 max-w-7xl mx-auto space-y-16">
           <div className="max-w-2xl space-y-4">
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#03070E] leading-[1.12]">
+            <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-tight text-[#03070E] leading-[1.12]">
               Från din ekonomi till ett enda tydligt belopp.
             </h2>
             <p className="text-lg sm:text-xl text-[#525866] font-normal leading-relaxed">
@@ -536,7 +536,7 @@ export function LandingPage({
               <span className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-[#A0C5FD]">
                 Dynamisk beräkning
               </span>
-              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#FFFFFF] leading-[1.08]">
+              <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-[-0.02em] text-[#FFFFFF] leading-[1.08]">
                 Din ekonomi förändras.<br />
                 Din dagsbudget gör det också.
               </h2>
@@ -584,7 +584,7 @@ export function LandingPage({
         {/* 6. PRODUKTEN (Ljus stor sektion med stora placeholders i alternerande layout) */}
         <section id="features" className="py-24 sm:py-36 px-5 sm:px-8 max-w-7xl mx-auto space-y-24 sm:space-y-36">
           <div className="max-w-3xl space-y-4">
-            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#03070E] leading-[1.1]">
+            <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-[-0.02em] text-[#03070E] leading-[1.1]">
               Allt du behöver för att förstå dina pengar.
             </h2>
           </div>
@@ -670,7 +670,7 @@ export function LandingPage({
         <section id="privacy" className="py-20 sm:py-32 px-5 sm:px-8 border-t border-black/[0.06] bg-white">
           <div className="max-w-5xl mx-auto space-y-16">
             <div className="max-w-2xl space-y-4">
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#03070E] leading-[1.12]">
+              <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-tight text-[#03070E] leading-[1.12]">
                 Din ekonomi. Din kontroll.
               </h2>
               <p className="text-lg sm:text-xl text-[#525866] font-normal leading-relaxed">
@@ -757,7 +757,7 @@ export function LandingPage({
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             <div className="lg:col-span-6 space-y-6 sm:space-y-8">
               <div className="space-y-4">
-                <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#03070E] leading-[1.1]">
+                <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-tight text-[#03070E] leading-[1.1]">
                   Förstå Dejz på några sekunder.
                 </h2>
                 <p className="text-lg sm:text-xl text-[#525866] font-normal leading-relaxed">
@@ -792,7 +792,7 @@ export function LandingPage({
         {/* 10. FAQ (Accordion) */}
         <section id="faq" className="py-20 sm:py-32 px-5 sm:px-8 max-w-4xl mx-auto space-y-12">
           <div className="space-y-4 text-center sm:text-left">
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#03070E] leading-[1.12]">
+            <h2 className="font-display text-3xl sm:text-5xl font-bold tracking-tight text-[#03070E] leading-[1.12]">
               Det du kanske undrar.
             </h2>
           </div>
@@ -845,7 +845,7 @@ export function LandingPage({
               DIN EKONOMI. DAG FÖR DAG.
             </span>
 
-            <h2 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#FFFFFF] leading-[1.06]">
+            <h2 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] text-[#FFFFFF] leading-[1.06]">
               Sluta gissa.<br />
               Se vad du kan spendera idag.
             </h2>
