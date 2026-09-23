@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { motion, AnimatePresence } from 'motion/react';
 import { createFreshTestAccount } from '../utils/demoData';
-import { Mail, Lock, ChevronLeft, Loader2, AlertCircle, Sparkles, KeyRound, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, ChevronLeft, Sparkles, KeyRound, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { DejzLogo } from './DejzLogo';
+import { Button, Input, IconButton, SegmentedControl, Divider } from './ui';
 
 interface AuthProps {
   onShowToast: (message: string, type: 'success' | 'error') => void;
@@ -213,15 +214,16 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 </p>
               </div>
 
-              <button
+              <Button
                 onClick={() => {
                   setIsEmailSent(false);
                   setIsRegistering(false);
                 }}
-                className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+                variant="primary"
+                fullWidth
               >
                 {t('backToLogin' as any)}
-              </button>
+              </Button>
             </motion.div>
           ) : isResetSent ? (
             <motion.div
@@ -244,15 +246,16 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 </p>
               </div>
 
-              <button
+              <Button
                 onClick={() => {
                   setIsResetSent(false);
                   setIsForgotPassword(false);
                 }}
-                className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+                variant="primary"
+                fullWidth
               >
                 Tillbaka till inloggning
-              </button>
+              </Button>
             </motion.div>
           ) : isForgotPassword ? (
             <motion.div
@@ -263,16 +266,16 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               className="space-y-6"
             >
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
+                <IconButton
+                  icon={<ArrowLeft size={18} />}
                   onClick={() => {
                     setIsForgotPassword(false);
                     setError(null);
                   }}
-                  className="w-9 h-9 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
-                >
-                  <ArrowLeft size={18} />
-                </button>
+                  variant="muted"
+                  size="sm"
+                  aria-label="Tillbaka"
+                />
                 <div>
                   <h2 className="text-xl font-bold text-[var(--text-primary)]">
                     Glömt lösenord?
@@ -283,46 +286,30 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 </div>
               </div>
 
-              {error && (
-                <div className="bg-red-500/10 p-3.5 rounded-[16px] border border-red-500/20 flex items-center gap-2.5 text-red-500 text-xs font-semibold">
-                  <AlertCircle size={16} className="shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                   Ange den e-postadress som är kopplad till ditt konto så skickar vi en länk för att välja ett nytt lösenord.
                 </p>
 
-                <div className="relative">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none">
-                    <Mail size={16} />
-                  </div>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Din e-postadress"
-                    className="w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] pl-10 pr-4 py-3 font-medium text-xs sm:text-sm text-[var(--text-primary)] focus:border-[var(--accent-color)] outline-none transition-all placeholder-[var(--text-secondary)]/50"
-                  />
-                </div>
+                <Input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Din e-postadress"
+                  icon={<Mail size={16} />}
+                  error={error}
+                />
 
-                <button
+                <Button
                   type="submit"
-                  disabled={loading}
-                  className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs"
+                  loading={loading}
+                  variant="primary"
+                  fullWidth
+                  icon={<KeyRound size={15} />}
                 >
-                  {loading ? (
-                    <Loader2 className="animate-spin" size={16} />
-                  ) : (
-                    <span className="flex items-center gap-1.5">
-                      <KeyRound size={15} />
-                      Skicka återställningslänk
-                    </span>
-                  )}
-                </button>
+                  Skicka återställningslänk
+                </Button>
               </form>
             </motion.div>
           ) : (
@@ -335,13 +322,15 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               {/* Header with Back Button and Logo */}
               <div className="relative flex flex-col items-center mb-6">
                 {onBack && (
-                  <button 
-                    onClick={onBack}
-                    className="absolute top-0 left-0 w-9 h-9 flex items-center justify-center rounded-[12px] bg-[var(--surface-muted)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer shadow-2xs"
-                    aria-label="Tillbaka"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
+                  <div className="absolute top-0 left-0">
+                    <IconButton 
+                      icon={<ChevronLeft size={18} />}
+                      onClick={onBack}
+                      variant="muted"
+                      size="sm"
+                      aria-label="Tillbaka"
+                    />
+                  </div>
                 )}
                 
                 <div className="flex flex-col items-center pt-1 mb-3 select-none">
@@ -356,79 +345,42 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 </p>
               </div>
 
-              {/* Modern Segmented Pill Switcher */}
-              <div className="p-1 bg-[var(--surface-muted)] rounded-[16px] border border-[var(--border-color)] flex items-center mb-5 relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsRegistering(false);
+              {/* Segmented Pill Switcher */}
+              <div className="mb-5">
+                <SegmentedControl
+                  value={isRegistering ? 'register' : 'login'}
+                  onChange={(val) => {
+                    setIsRegistering(val === 'register');
                     setError(null);
                   }}
-                  className={`flex-1 py-2 rounded-[12px] text-xs font-bold transition-all relative z-10 cursor-pointer ${
-                    !isRegistering
-                      ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-2xs'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                >
-                  {t('login')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsRegistering(true);
-                    setError(null);
-                  }}
-                  className={`flex-1 py-2 rounded-[12px] text-xs font-bold transition-all relative z-10 cursor-pointer ${
-                    isRegistering
-                      ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-2xs'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                >
-                  {t('createAccount')}
-                </button>
+                  options={[
+                    { value: 'login', label: t('login') },
+                    { value: 'register', label: t('createAccount') },
+                  ]}
+                />
               </div>
 
               <form onSubmit={handleAuth} className="space-y-3.5">
-                {error && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-red-500/10 p-3.5 rounded-[16px] border border-red-500/20 flex items-center gap-2.5 text-red-500 text-xs font-semibold"
-                  >
-                    <AlertCircle size={16} className="shrink-0" />
-                    <span>{error}</span>
-                  </motion.div>
-                )}
-
                 <div className="space-y-2.5">
-                  <div className="relative">
-                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none">
-                      <Mail size={16} />
-                    </div>
-                    <input 
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Din e-postadress"
-                      className="w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] pl-10 pr-4 py-3 font-medium text-xs sm:text-sm text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 outline-none transition-all placeholder-[var(--text-secondary)]/50"
-                    />
-                  </div>
+                  <Input 
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Din e-postadress"
+                    icon={<Mail size={16} />}
+                  />
 
                   <div className="space-y-1.5">
-                    <div className="relative">
-                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none">
-                        <Lock size={16} />
-                      </div>
-                      <input 
-                        type="password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Ditt lösenord (minst 6 tecken)"
-                        className="w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] pl-10 pr-4 py-3 font-medium text-xs sm:text-sm text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 outline-none transition-all placeholder-[var(--text-secondary)]/50"
-                      />
-                    </div>
+                    <Input 
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Ditt lösenord (minst 6 tecken)"
+                      icon={<Lock size={16} />}
+                      error={error}
+                    />
 
                     {!isRegistering && (
                       <div className="flex justify-end pr-1">
@@ -448,60 +400,57 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 </div>
 
                 <div className="pt-1.5 space-y-2.5">
-                  <button 
+                  <Button 
                     type="submit"
-                    disabled={loading}
-                    className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-95 shadow-xs cursor-pointer"
+                    loading={loading}
+                    variant="primary"
+                    fullWidth
                   >
-                    {loading ? (
-                      <Loader2 className="animate-spin" size={16} />
-                    ) : (
-                      <span>{isRegistering ? t('createAccount') : t('login')}</span>
-                    )}
-                  </button>
+                    {isRegistering ? t('createAccount') : t('login')}
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={handleQuickTestLogin}
                     disabled={loading}
-                    className="w-full text-xs font-bold text-[var(--accent-color)] hover:text-[var(--accent-color)] bg-[var(--accent-color)]/8 hover:bg-[var(--accent-color)]/14 py-2.5 px-4 rounded-[16px] transition-all border border-[var(--accent-color)]/20 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
+                    variant="subtle"
+                    fullWidth
+                    icon={<Sparkles size={13} />}
                   >
-                    <Sparkles size={13} />
-                    <span>Snabbtest: Logga in med testkonto</span>
-                  </button>
+                    Snabbtest: Logga in med testkonto
+                  </Button>
                 </div>
               </form>
 
-              <div className="my-5 flex items-center gap-3">
-                <div className="h-px bg-[var(--border-color)] flex-1"></div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-60">{t('orContinueWith')}</span>
-                <div className="h-px bg-[var(--border-color)] flex-1"></div>
-              </div>
+              <Divider label={t('orContinueWith')} />
 
-              <button 
+              <Button 
                 onClick={() => handleSocialLogin('google')}
-                className="w-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] text-[var(--text-primary)] font-bold text-xs sm:text-sm py-3 px-4 rounded-[16px] flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer shadow-xs"
+                variant="secondary"
+                fullWidth
+                icon={
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fill="#4285F4"
+                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.28 1.5-1.11 2.76-2.36 3.61v3h3.84c2.25-2.07 3.65-5.12 3.65-8.46Z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-3c-1.07.72-2.45 1.16-4.09 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A11.986 11.986 0 0 0 12 24Z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.99 11.99 0 0 0 0 10.68l3.97-3.1Z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.33 2.67 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01Z"
+                    />
+                  </svg>
+                }
               >
-                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="#4285F4"
-                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.28 1.5-1.11 2.76-2.36 3.61v3h3.84c2.25-2.07 3.65-5.12 3.65-8.46Z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-3c-1.07.72-2.45 1.16-4.09 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A11.986 11.986 0 0 0 12 24Z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.99 11.99 0 0 0 0 10.68l3.97-3.1Z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.33 2.67 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01Z"
-                  />
-                </svg>
-                <span>{t('continueWithGoogle' as any)}</span>
-              </button>
+                {t('continueWithGoogle' as any)}
+              </Button>
 
               <div className="mt-5 pt-3 border-t border-[var(--border-color)] flex items-center justify-center gap-4 text-[11px] font-semibold text-[var(--text-secondary)]">
                 <button 

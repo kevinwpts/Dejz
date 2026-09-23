@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Lock, Loader2, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { Lock, CheckCircle2, X } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { Button, Input, IconButton } from './ui';
 
 interface ResetPasswordModalProps {
   isOpen: boolean;
@@ -69,14 +70,17 @@ export function ResetPasswordModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[26px] p-6 sm:p-7 w-full max-w-md shadow-2xl relative"
+          className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[28px] p-6 sm:p-7 w-full max-w-md shadow-2xl relative"
         >
-          <button
-            onClick={onClose}
-            className="absolute top-5 right-5 w-8 h-8 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X size={16} />
-          </button>
+          <div className="absolute top-5 right-5">
+            <IconButton
+              icon={<X size={16} />}
+              onClick={onClose}
+              variant="muted"
+              size="sm"
+              aria-label="Stäng"
+            />
+          </div>
 
           {success ? (
             <div className="text-center py-6 space-y-4">
@@ -94,7 +98,7 @@ export function ResetPasswordModal({
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1 text-left">
+              <div className="space-y-1 text-left pr-8">
                 <div className="w-10 h-10 rounded-[14px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center mb-3">
                   <Lock size={20} />
                 </div>
@@ -106,61 +110,38 @@ export function ResetPasswordModal({
                 </p>
               </div>
 
-              {error && (
-                <div className="bg-red-500/10 p-3 rounded-[14px] border border-red-500/20 flex items-center gap-2 text-red-500 text-xs font-semibold">
-                  <AlertCircle size={15} className="shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-
               <div className="space-y-3 pt-2">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] ml-1">
-                    Nytt lösenord
-                  </label>
-                  <div className="relative">
-                    <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] opacity-60" />
-                    <input
-                      type="password"
-                      required
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Minst 6 tecken"
-                      className="w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[14px] pl-9 pr-4 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent-color)] outline-none transition-all"
-                    />
-                  </div>
-                </div>
+                <Input
+                  label="Nytt lösenord"
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Minst 6 tecken"
+                  icon={<Lock size={15} />}
+                />
 
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] ml-1">
-                    Bekräfta lösenord
-                  </label>
-                  <div className="relative">
-                    <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] opacity-60" />
-                    <input
-                      type="password"
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Upprepa lösenordet"
-                      className="w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[14px] pl-9 pr-4 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent-color)] outline-none transition-all"
-                    />
-                  </div>
-                </div>
+                <Input
+                  label="Bekräfta lösenord"
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Upprepa lösenordet"
+                  icon={<Lock size={15} />}
+                  error={error}
+                />
               </div>
 
-              <div className="pt-3">
-                <button
+              <div className="pt-2">
+                <Button
                   type="submit"
-                  disabled={loading}
-                  className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3 px-4 rounded-[14px] font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs"
+                  fullWidth
+                  variant="primary"
+                  loading={loading}
                 >
-                  {loading ? (
-                    <Loader2 className="animate-spin" size={16} />
-                  ) : (
-                    <span>Spara nytt lösenord</span>
-                  )}
-                </button>
+                  Spara nytt lösenord
+                </Button>
               </div>
             </form>
           )}

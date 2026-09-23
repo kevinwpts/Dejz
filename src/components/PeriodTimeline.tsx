@@ -35,20 +35,21 @@ export function PeriodTimeline({
     return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   }, []);
 
-  // Center selected day inside the scroll container
-  const centerSelectedElement = (element: HTMLElement | null, behavior: ScrollBehavior = 'smooth') => {
-    if (!element || !scrollContainerRef.current) return;
+  // Function to center any given element within the container
+  const centerElement = (el: HTMLElement | null, behavior: ScrollBehavior = 'smooth') => {
+    if (!el || !scrollContainerRef.current) return;
     const container = scrollContainerRef.current;
+    
     const containerRect = container.getBoundingClientRect();
-    const elementRect = element.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
 
-    const elementCenter = elementRect.left + elementRect.width / 2;
+    const elementCenter = elRect.left + elRect.width / 2;
     const containerCenter = containerRect.left + containerRect.width / 2;
     const delta = elementCenter - containerCenter;
 
     if (Math.abs(delta) > 1) {
-      container.scrollBy({
-        left: delta,
+      container.scrollTo({
+        left: container.scrollLeft + delta,
         behavior,
       });
     }
@@ -56,13 +57,17 @@ export function PeriodTimeline({
 
   // Auto-scroll on mount and when selectedTime changes
   useEffect(() => {
-    if (selectedDayRef.current) {
-      centerSelectedElement(
-        selectedDayRef.current,
-        isInitialMount.current ? ('instant' as ScrollBehavior) : 'smooth'
-      );
-    }
-    isInitialMount.current = false;
+    const timer = setTimeout(() => {
+      if (selectedDayRef.current) {
+        centerElement(
+          selectedDayRef.current,
+          isInitialMount.current ? 'auto' : 'smooth'
+        );
+      }
+      isInitialMount.current = false;
+    }, 40);
+
+    return () => clearTimeout(timer);
   }, [selectedTime]);
 
   if (!calendarDays || calendarDays.length === 0) {
@@ -74,15 +79,15 @@ export function PeriodTimeline({
     e.stopPropagation();
     const targetEl = e.currentTarget;
     onSelectDate(new Date(dayDate));
-    centerSelectedElement(targetEl, 'smooth');
+    centerElement(targetEl, 'smooth');
   };
 
   return (
-    <div className="w-full mb-1 font-sans">
+    <div className="w-full my-1 font-sans">
       {/* Horizontal Scrollable Day Strip */}
       <div
         ref={scrollContainerRef}
-        className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-1 no-scrollbar scroll-smooth touch-pan-x overscroll-contain"
+        className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-3 no-scrollbar touch-pan-x overscroll-contain"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {calendarDays.map((day: any, index: number) => {

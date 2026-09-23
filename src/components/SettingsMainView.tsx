@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Tag, CreditCard, Globe, ChevronRight } from 'lucide-react';
+import { Calendar, Tag, CreditCard, Globe } from 'lucide-react';
 import { Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
+import { Card, ListRow } from './ui';
 
 interface SettingsMainViewProps {
   onBack: () => void;
@@ -108,77 +109,33 @@ export function SettingsMainView({
       exit={{ opacity: 0, y: -10 }}
       className="space-y-4 max-w-md mx-auto"
     >
-      <div className="surface-card overflow-hidden border-[0.5px] border-[var(--border-color)] rounded-2xl bg-[var(--surface-color)]/50">
-        <button
+      <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/50">
+        <ListRow
+          icon={<Calendar size={18} strokeWidth={1.5} />}
+          title={t('salary')}
+          subtitle={t('settings_salary_desc')}
           onClick={() => handleSectionClick('salary')}
-          className="w-full flex items-center justify-between p-4 hover:bg-[var(--surface-color)] transition-all group"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center">
-              <Calendar size={20} strokeWidth={1.5} />
-            </div>
-            <div className="text-left">
-              <span className="text-sm font-semibold text-[var(--text-primary)] block">{t('salary')}</span>
-              <span className="text-[11px] text-[var(--text-secondary)] opacity-60">{t('settings_salary_desc')}</span>
-            </div>
-          </div>
-          <ChevronRight size={16} strokeWidth={1.5} className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform" />
-        </button>
-
-        <div className="h-px bg-[var(--border-color)] mx-4 opacity-50" />
-
-        <button
+        />
+        <ListRow
+          icon={<Tag size={18} strokeWidth={1.5} />}
+          title={t('categories')}
+          subtitle={t('settings_categories_desc')}
           onClick={() => handleSectionClick('categories')}
-          className="w-full flex items-center justify-between p-4 hover:bg-[var(--surface-color)] transition-all group"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center">
-              <Tag size={20} strokeWidth={1.5} />
-            </div>
-            <div className="text-left">
-              <span className="text-sm font-semibold text-[var(--text-primary)] block">{t('categories')}</span>
-              <span className="text-[11px] text-[var(--text-secondary)] opacity-60">{t('settings_categories_desc')}</span>
-            </div>
-          </div>
-          <ChevronRight size={16} strokeWidth={1.5} className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform" />
-        </button>
-
-        <div className="h-px bg-[var(--border-color)] mx-4 opacity-50" />
-
-        <button
+        />
+        <ListRow
+          icon={<CreditCard size={18} strokeWidth={1.5} />}
+          title={t('paymentMethod')}
+          subtitle={t('settings_payment_methods_desc')}
           onClick={() => handleSectionClick('paymentMethods')}
-          className="w-full flex items-center justify-between p-4 hover:bg-[var(--surface-color)] transition-all group"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center">
-              <CreditCard size={20} strokeWidth={1.5} />
-            </div>
-            <div className="text-left">
-              <span className="text-sm font-semibold text-[var(--text-primary)] block">{t('paymentMethod')}</span>
-              <span className="text-[11px] text-[var(--text-secondary)] opacity-60">{t('settings_payment_methods_desc')}</span>
-            </div>
-          </div>
-          <ChevronRight size={16} strokeWidth={1.5} className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform" />
-        </button>
-
-        <div className="h-px bg-[var(--border-color)] mx-4 opacity-50" />
-
-        <button
+        />
+        <ListRow
+          icon={<Globe size={18} strokeWidth={1.5} />}
+          title={t('language')}
+          subtitle={t('settings_language_desc')}
           onClick={() => handleSectionClick('language')}
-          className="w-full flex items-center justify-between p-4 hover:bg-[var(--surface-color)] transition-all group"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center">
-              <Globe size={20} strokeWidth={1.5} />
-            </div>
-            <div className="text-left">
-              <span className="text-sm font-semibold text-[var(--text-primary)] block">{t('language')}</span>
-              <span className="text-[11px] text-[var(--text-secondary)] opacity-60">{t('settings_language_desc')}</span>
-            </div>
-          </div>
-          <ChevronRight size={16} strokeWidth={1.5} className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform" />
-        </button>
-      </div>
+        />
+      </Card>
     </motion.div>
   );
 }
+

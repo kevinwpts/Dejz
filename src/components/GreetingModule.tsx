@@ -149,18 +149,6 @@ export function GreetingModule({
   if (isPastPeriod) {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-        {/* Timeline of Period */}
-        {calendarDays && calendarDays.length > 0 && (
-          <PeriodTimeline
-            calendarDays={calendarDays}
-            selectedDate={date}
-            onSelectDate={setSelectedDate}
-            stats={stats}
-            language={language}
-            isCurrentPeriod={isCurrentPeriod}
-          />
-        )}
-
         {/* 1. Period Selector */}
         {periods && setCurrentPeriodDate && currentPeriodDate && (
           <UniversalPeriodSelector
@@ -170,6 +158,18 @@ export function GreetingModule({
             periodName={stats.periodName}
             isCurrentPeriod={isCurrentPeriod}
             onOpenPicker={() => setIsCalendarModalOpen(true)}
+          />
+        )}
+
+        {/* Timeline of Period */}
+        {calendarDays && calendarDays.length > 0 && (
+          <PeriodTimeline
+            calendarDays={calendarDays}
+            selectedDate={date}
+            onSelectDate={setSelectedDate}
+            stats={stats}
+            language={language}
+            isCurrentPeriod={isCurrentPeriod}
           />
         )}
 
@@ -241,18 +241,6 @@ export function GreetingModule({
 
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
-      {/* Timeline of Period */}
-      {calendarDays && calendarDays.length > 0 && (
-        <PeriodTimeline
-          calendarDays={calendarDays}
-          selectedDate={date}
-          onSelectDate={setSelectedDate}
-          stats={stats}
-          language={language}
-          isCurrentPeriod={isCurrentPeriod}
-        />
-      )}
-
       {/* 1. Period Selector */}
       {periods && setCurrentPeriodDate && currentPeriodDate && (
         <UniversalPeriodSelector
@@ -363,6 +351,18 @@ export function GreetingModule({
             <span className="font-amount tabular-nums">{formatAmount((stats?.disposablePot || 0) + (stats?.totalExtraIncomeUpToToday || 0), language)} {currency}</span>
           </div>
         </motion.div>
+      )}
+
+      {/* 4. Timeline of Period (Placed under Totalt kvar & Nästa lön) */}
+      {calendarDays && calendarDays.length > 0 && (
+        <PeriodTimeline
+          calendarDays={calendarDays}
+          selectedDate={date}
+          onSelectDate={setSelectedDate}
+          stats={stats}
+          language={language}
+          isCurrentPeriod={isCurrentPeriod}
+        />
       )}
 
       {/* Calculation Modal */}
