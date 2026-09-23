@@ -57,8 +57,8 @@ export function TodayView({
   fixedExpenses,
   selectedDate,
   setSelectedDate,
-  _onAddTransaction,
-  _onAddIncome,
+  onAddTransaction,
+  onAddIncome,
   onViewTransaction,
   onDeleteTransaction,
   onNavigate,
@@ -197,6 +197,13 @@ export function TodayView({
           currentPeriodDate={currentPeriodDate}
           config={config}
           onUpdateConfig={onUpdateConfig}
+          onAddTransaction={(type) => {
+            if (type === 'income' && onAddIncome) {
+              onAddIncome(normalizedSelectedDate);
+            } else if (onAddTransaction) {
+              onAddTransaction(normalizedSelectedDate);
+            }
+          }}
         />
       </motion.div>
 

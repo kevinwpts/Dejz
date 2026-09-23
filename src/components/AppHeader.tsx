@@ -100,7 +100,7 @@ export function AppHeader({
           : "-translate-y-full opacity-0 pointer-events-none"
       } ${
         !isAtTop
-          ? "bg-[var(--bg-color)]/85 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-xs"
+          ? "bg-[var(--bg-color)]/90 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-sm"
           : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >

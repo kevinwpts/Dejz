@@ -64,7 +64,7 @@ export function TransactionItem({
 
   const finalAmount = displayAmount !== undefined ? displayAmount : transaction.amount;
   
-  const amountColor = transaction.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]';
+  const amountColor = transaction.type === 'income' ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400';
 
   // Determine actual layout style classes based on variants & props
   let containerClasses = "";
