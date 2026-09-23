@@ -222,16 +222,6 @@ export function GreetingModule({
           </span>
         </div>
 
-        {/* Dagsstatus vid underskott */}
-        {isNegative && (
-          <div className="mt-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-danger/10 text-danger">
-              <span className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />
-              {language === 'en' ? 'Over daily budget by' : 'Över dagsbudget med'} {formatAmount(Math.round(Math.abs(displayAmount)), language)} {currency}
-            </span>
-          </div>
-        )}
-
         {/* Progress bar under Kvar idag */}
         <div className="w-full mt-5">
           <div className="w-full h-2 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
