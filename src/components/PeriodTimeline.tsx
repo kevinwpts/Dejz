@@ -243,7 +243,7 @@ export function PeriodTimeline({
                   ? 'text-[var(--text-primary)] font-semibold' 
                   : 'opacity-65 font-medium'
               }`}>
-                {isRealToday && !isSelected ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}
+                {isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}
               </span>
 
               {/* Day Number */}
