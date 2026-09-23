@@ -181,22 +181,6 @@ export default function App() {
     }
     return "today";
   });
-
-  // Dynamic Theme Color & Body Background for iOS Safari Status Bar / Dynamic Island
-  useEffect(() => {
-    const themeMetas = document.querySelectorAll('meta[name="theme-color"]');
-    const topIndigo = '#1E1A52';
-    const darkBg = '#080A10';
-    
-    if (activeTab === 'today') {
-      themeMetas.forEach(meta => meta.setAttribute('content', topIndigo));
-    } else {
-      themeMetas.forEach(meta => meta.setAttribute('content', darkBg));
-    }
-    
-    document.documentElement.style.backgroundColor = darkBg;
-    document.body.style.backgroundColor = darkBg;
-  }, [activeTab]);
   const [profileSection, setProfileSection] = useState<
     | "main"
     | "salary"
@@ -1060,7 +1044,7 @@ export default function App() {
 
   // --- Theme Logic ---
   useEffect(() => {
-    const shouldUseDarkMode = config?.darkMode !== undefined ? config.darkMode : true;
+    const shouldUseDarkMode = config?.darkMode !== undefined ? config.darkMode : false;
 
     if (shouldUseDarkMode) {
       document.documentElement.classList.add("dark");
@@ -3151,6 +3135,13 @@ export default function App() {
 
   return (
     <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden" style={{ background: 'var(--bg-gradient)' }}>
+      {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop */}
+      <div
+        className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
+        style={{ height: 'max(env(safe-area-inset-top, 0px), 1px)', backgroundColor: 'var(--bg-color)' }}
+        aria-hidden="true"
+      />
+
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 
       <ConfirmModal
@@ -3203,28 +3194,30 @@ export default function App() {
       )}
 
       {isDemoMode && (
-        <div className="fixed top-[calc(0.4rem+env(safe-area-inset-top))] left-1/2 -translate-x-1/2 z-[60] bg-slate-900/80 dark:bg-slate-950/80 text-white backdrop-blur-xl border border-white/20 px-3.5 py-1.5 rounded-full flex items-center justify-between text-xs font-semibold shadow-lg max-w-[92%] sm:max-w-md w-auto gap-3">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
-            </span>
-            <span className="text-xs font-bold text-accent">Demoläge</span>
-            <span className="hidden sm:inline text-slate-300 font-normal text-[11px]">— Exempeldata</span>
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-[var(--bg-secondary)]/95 backdrop-blur-xl border-b border-[var(--border-color)] px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 flex items-center justify-between text-xs font-semibold shadow-xs">
+          <div className="max-w-2xl mx-auto w-full flex items-center justify-between px-2 sm:px-4">
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+              </span>
+              <span className="text-xs font-bold text-accent">Demoläge aktivt</span>
+              <span className="hidden sm:inline text-[var(--text-secondary)] font-normal text-[11px]">— Du utforskar appen med exempeldata</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleExitDemo}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-sm"
+            >
+              <span>{t('exitDemo')}</span>
+              <LogOut size={12} strokeWidth={2.5} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleExitDemo}
-            className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-[11px] font-bold shrink-0 cursor-pointer shadow-xs"
-          >
-            <span>{t('exitDemo')}</span>
-            <LogOut size={11} strokeWidth={2.5} />
-          </button>
         </div>
       )}
 
             <PullToRefresh onRefresh={handleRefresh}>
-        <main className={`relative ${activeTab === 'today' ? 'w-full max-w-full px-0 pt-0' : 'max-w-2xl mx-auto px-4 sm:px-6 ' + (isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]')} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
+        <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
           <AnimatePresence>
             {activeTab === "today" && stats && (
               <motion.div
@@ -3694,6 +3687,7 @@ export default function App() {
       <AnimatePresence>
         {isFeedbackModalOpen && (
           <FeedbackModal
+            key="feedback-modal"
             onClose={() => setIsFeedbackModalOpen(false)}
             onSubmit={handleFeedbackSubmit}
             t={t}
@@ -3701,6 +3695,7 @@ export default function App() {
         )}
         {isDeleteAccountModalOpen && (
           <DeleteAccountModal
+            key="delete-account-modal"
             isOpen={isDeleteAccountModalOpen}
             onClose={() => setIsDeleteAccountModalOpen(false)}
             onConfirm={handleConfirmDeleteAccount}
@@ -3709,138 +3704,142 @@ export default function App() {
           />
         )}
 
-        <OnboardingModal
-          isOpen={isOnboarding}
-          config={config}
-          userId={session?.user.id}
-          currentPeriodId={currentPeriodId}
-          isPro={isPro(subscriptionStatus)}
-          onComplete={async (data) => {
-            setIsOnboarding(false);
-            const activeUserId = session?.user?.id || "demo-user";
+        {isOnboarding && (
+          <OnboardingModal
+            key="onboarding-modal"
+            isOpen={isOnboarding}
+            config={config}
+            userId={session?.user.id}
+            currentPeriodId={currentPeriodId}
+            isPro={isPro(subscriptionStatus)}
+            onComplete={async (data) => {
+              setIsOnboarding(false);
+              const activeUserId = session?.user?.id || "demo-user";
 
-            try {
-              // 1. Update full name in profiles table if available
-              if (data.fullName) {
-                try {
-                  await dataService.updateProfile(activeUserId, { full_name: data.fullName });
-                } catch (profErr) {
-                  console.warn("Could not update profile full_name:", profErr);
-                }
-              }
-
-              // 2. Map savings goals
-              const mappedSavingsGoals: SavingsGoal[] = (data.savingsGoals || []).map(
-                (g) => ({
-                  id: crypto.randomUUID(),
-                  title: g.title,
-                  targetAmount: Number(g.targetAmount) || 0,
-                  currentAmount: 0,
-                  priority: 0,
-                  icon: g.icon || "Target",
-                  logo: g.logo,
-                  deadline: g.deadline,
-                  createdAt: Date.now(),
-                }),
-              );
-
-              // 3. Update config with income, initialSpent, payday, and savings goals
-              const newConfig: Config = {
-                ...config,
-                darkMode: (config?.darkMode !== undefined && config?.darkMode !== null) ? config.darkMode : false,
-                payday: data.payday || 25,
-                initialSpent: data.initialSpent,
-                savingsGoals: mappedSavingsGoals,
-              };
-              await dataService.saveSettings(activeUserId, newConfig);
-              setConfig(newConfig);
-
-              // 4. Add income sources
-              const newIncomes: Income[] = [];
-              for (const inc of data.incomes || []) {
-                if (inc.amount > 0) {
-                  const incomeSource: Income = {
-                    id: crypto.randomUUID(),
-                    name: inc.name || "Lön",
-                    amount: Number(inc.amount) || 0,
-                    icon: inc.icon || "Wallet",
-                    logo: inc.logo,
-                  };
-                  await dataService.saveIncomeSource(
-                    activeUserId,
-                    incomeSource,
-                  );
-                  newIncomes.push(incomeSource);
-                }
-              }
-              setIncomes(newIncomes);
-
-              // 5. Add fixed expenses
-              const newFixedExpenses: FixedExpense[] = [];
-              for (const exp of data.fixedExpenses || []) {
-                if (exp.name && exp.amount > 0) {
-                  const fixed: FixedExpense = {
-                    id: crypto.randomUUID(),
-                    name: exp.name,
-                    amount: Number(exp.amount) || 0,
-                    paymentMethod: exp.paymentMethod || PaymentMethod.OVRIGT,
-                    frequency: exp.frequency || Frequency.MONTHLY,
-                    icon: exp.icon || "CreditCard",
-                    category: exp.category,
-                    logo: exp.logo,
-                  };
-                  await dataService.saveFixedExpense(activeUserId, fixed);
-                  newFixedExpenses.push(fixed);
-                }
-              }
-              setFixedExpenses(newFixedExpenses);
-
-              // 6. Add initial spent transaction if starting mid-period
-              if (data.initialSpent > 0) {
-                const initialTransaction = await dataService.addTransaction(
-                  activeUserId,
-                  {
-                    amount: data.initialSpent,
-                    category: "Övrigt",
-                    note: "Justering för start mitt i period",
-                    timestamp: Date.now(),
-                    type: "expense",
-                    isBackdated: false,
-                    tags: [],
-                  },
-                );
-                setTransactions((prev) => [initialTransaction, ...prev]);
-              }
-
-              // Refresh session to get updated metadata
               try {
-                await supabase.auth.refreshSession();
-              } catch (refreshErr) {
-                console.warn("Could not refresh auth session:", refreshErr);
+                // 1. Update full name in profiles table if available
+                if (data.fullName) {
+                  try {
+                    await dataService.updateProfile(activeUserId, { full_name: data.fullName });
+                  } catch (profErr) {
+                    console.warn("Could not update profile full_name:", profErr);
+                  }
+                }
+
+                // 2. Map savings goals
+                const mappedSavingsGoals: SavingsGoal[] = (data.savingsGoals || []).map(
+                  (g) => ({
+                    id: crypto.randomUUID(),
+                    title: g.title,
+                    targetAmount: Number(g.targetAmount) || 0,
+                    currentAmount: 0,
+                    priority: 0,
+                    icon: g.icon || "Target",
+                    logo: g.logo,
+                    deadline: g.deadline,
+                    createdAt: Date.now(),
+                  }),
+                );
+
+                // 3. Update config with income, initialSpent, payday, and savings goals
+                const newConfig: Config = {
+                  ...config,
+                  darkMode: (config?.darkMode !== undefined && config?.darkMode !== null) ? config.darkMode : false,
+                  payday: data.payday || 25,
+                  initialSpent: data.initialSpent,
+                  savingsGoals: mappedSavingsGoals,
+                };
+                await dataService.saveSettings(activeUserId, newConfig);
+                setConfig(newConfig);
+
+                // 4. Add income sources
+                const newIncomes: Income[] = [];
+                for (const inc of data.incomes || []) {
+                  if (inc.amount > 0) {
+                    const incomeSource: Income = {
+                      id: crypto.randomUUID(),
+                      name: inc.name || "Lön",
+                      amount: Number(inc.amount) || 0,
+                      icon: inc.icon || "Wallet",
+                      logo: inc.logo,
+                    };
+                    await dataService.saveIncomeSource(
+                      activeUserId,
+                      incomeSource,
+                    );
+                    newIncomes.push(incomeSource);
+                  }
+                }
+                setIncomes(newIncomes);
+
+                // 5. Add fixed expenses
+                const newFixedExpenses: FixedExpense[] = [];
+                for (const exp of data.fixedExpenses || []) {
+                  if (exp.name && exp.amount > 0) {
+                    const fixed: FixedExpense = {
+                      id: crypto.randomUUID(),
+                      name: exp.name,
+                      amount: Number(exp.amount) || 0,
+                      paymentMethod: exp.paymentMethod || PaymentMethod.OVRIGT,
+                      frequency: exp.frequency || Frequency.MONTHLY,
+                      icon: exp.icon || "CreditCard",
+                      category: exp.category,
+                      logo: exp.logo,
+                    };
+                    await dataService.saveFixedExpense(activeUserId, fixed);
+                    newFixedExpenses.push(fixed);
+                  }
+                }
+                setFixedExpenses(newFixedExpenses);
+
+                // 6. Add initial spent transaction if starting mid-period
+                if (data.initialSpent > 0) {
+                  const initialTransaction = await dataService.addTransaction(
+                    activeUserId,
+                    {
+                      amount: data.initialSpent,
+                      category: "Övrigt",
+                      note: "Justering för start mitt i period",
+                      timestamp: Date.now(),
+                      type: "expense",
+                      isBackdated: false,
+                      tags: [],
+                    },
+                  );
+                  setTransactions((prev) => [initialTransaction, ...prev]);
+                }
+
+                // Refresh session to get updated metadata
+                try {
+                  await supabase.auth.refreshSession();
+                } catch (refreshErr) {
+                  console.warn("Could not refresh auth session:", refreshErr);
+                }
+
+                // Trigger PWA modal after 10 seconds delay as requested by user
+                setTimeout(() => {
+                  window.dispatchEvent(new CustomEvent('trigger-pwa-modal'));
+                }, 10000);
+
+                addToast(
+                  data.fullName ? `Välkommen ${data.fullName}!` : "Välkommen!",
+                  "success",
+                );
+              } catch (err) {
+                console.error("Error saving onboarding data:", err);
+                addToast(
+                  "Dina inställningar sparades!",
+                  "success",
+                );
               }
-
-              // Trigger PWA modal after 10 seconds delay as requested by user
-              setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('trigger-pwa-modal'));
-              }, 10000);
-
-              addToast(
-                data.fullName ? `Välkommen ${data.fullName}!` : "Välkommen!",
-                "success",
-              );
-            } catch (err) {
-              console.error("Error saving onboarding data:", err);
-              addToast(
-                "Dina inställningar sparades!",
-                "success",
-              );
-            }
-          }}
-          t={t}
-        />
+            }}
+            t={t}
+          />
+        )}
 
         {isSecurityModalOpen && (
           <SecurityModal
+            key="security-modal"
             isOpen={isSecurityModalOpen}
             onClose={() => setIsSecurityModalOpen(false)}
             t={t}
@@ -3849,79 +3848,27 @@ export default function App() {
           />
         )}
 
-        {itemToUpdateVariable && config && (
+        {isVariableUpdateModalOpen && itemToUpdateVariable && config && (
           <VariableAmountUpdateModal
+            key="variable-amount-update-modal"
             isOpen={isVariableUpdateModalOpen}
             onClose={() => {
               setIsVariableUpdateModalOpen(false);
               setItemToUpdateVariable(null);
             }}
             item={itemToUpdateVariable}
+            onSave={(amount) => {
+              handleSaveVariableOverride(itemToUpdateVariable, amount);
+            }}
             config={config}
             t={t}
-            periodName={
-              stats
-                ? getPeriodName(
-                    stats.periodStart,
-                    stats.periodEnd,
-                    config.paydayType || PaydayType.TWENTY_FIFTH,
-                    config.language,
-                  )
-                : ""
-            }
-            onSave={(amount) => {
-              if (!itemToUpdateVariable) return;
-
-              const currentPeriodId = getPeriodId(
-                new Date(stats?.periodStart || new Date()),
-              );
-
-              const updatedItem = {
-                ...itemToUpdateVariable,
-                periodOverrides: {
-                  ...(itemToUpdateVariable.periodOverrides || {}),
-                  [currentPeriodId]: amount,
-                },
-              };
-
-              // Local update first for speed
-              if (itemToUpdateVariable.budgetType === "income") {
-                setIncomes((prev) =>
-                  prev.map((i) =>
-                    i.id === itemToUpdateVariable.id ? updatedItem : i,
-                  ),
-                );
-                dataService
-                  .saveIncomeSource(session!.user.id, updatedItem)
-                  .catch((e) => console.error(e));
-              } else if (itemToUpdateVariable.budgetType === "expense") {
-                setFixedExpenses((prev) =>
-                  prev.map((e) =>
-                    e.id === itemToUpdateVariable.id ? updatedItem : e,
-                  ),
-                );
-                dataService
-                  .saveFixedExpense(session!.user.id, updatedItem)
-                  .catch((e) => console.error(e));
-              } else if (itemToUpdateVariable.budgetType === "savings") {
-                const newItems =
-                  config.monthlySavingsItems?.map((s: any) =>
-                    s.id === itemToUpdateVariable.id ? updatedItem : s,
-                  ) || [];
-                const newConfig = { ...config, monthlySavingsItems: newItems };
-                setConfig(newConfig);
-                dataService
-                  .saveSettings(session!.user.id, newConfig)
-                  .catch((e) => console.error(e));
-              }
-
-              addToast(t("settingsSaved"), "success");
-              feedback.success();
-            }}
+            periodName={stats?.periodName}
           />
         )}
+
         {isManageAccountModalOpen && (
           <ManageAccountModal
+            key="manage-account-modal"
             isOpen={isManageAccountModalOpen}
             onClose={() => setIsManageAccountModalOpen(false)}
             user={session?.user || null}
@@ -3938,16 +3885,11 @@ export default function App() {
             trialEnd={trialEnd}
             nextBillingDate={nextBillingDate}
             onPaymentSuccess={async () => {
-              // Refresh subscription status
               const {
                 data: { session },
               } = await supabase.auth.getSession();
               if (session?.user) {
-                // Assuming there's a function to fetch subscription status
-                // I'll need to check how it's fetched in other places
-                // For now, I'll just trigger a re-fetch if possible
-                // Looking at the code, it seems it's fetched in a useEffect
-                // I might need to trigger that effect
+                // Subscription refresh logic
               }
             }}
           />
@@ -3955,6 +3897,7 @@ export default function App() {
 
         {viewingTransaction && (
           <TransactionViewModal
+            key="transaction-view-modal"
             transaction={viewingTransaction}
             onClose={() => setViewingTransaction(null)}
             onEdit={(t) => {
@@ -4001,6 +3944,7 @@ export default function App() {
 
         {isAddTransactionOpen && (
           <TransactionModal
+            key="add-transaction-modal"
             transactions={transactions}
             isPro={isPro(subscriptionStatus)}
             transaction={editingTransaction}
@@ -4081,6 +4025,7 @@ export default function App() {
         )}
         {isIncomeModalOpen && (
           <IncomeModal
+            key="income-modal"
             income={editingIncome}
             currentPeriodId={currentPeriodId}
             onClose={() => {
@@ -4103,6 +4048,7 @@ export default function App() {
         )}
         {viewingFixedExpense && (
           <FixedExpenseViewModal
+            key="fixed-expense-view-modal"
             expense={viewingFixedExpense}
             currentPeriodId={currentPeriodId}
             onClose={() => setViewingFixedExpense(null)}
@@ -4122,6 +4068,7 @@ export default function App() {
         )}
         {viewingIncome && (
           <IncomeViewModal
+            key="income-view-modal"
             income={viewingIncome}
             currentPeriodId={currentPeriodId}
             onClose={() => setViewingIncome(null)}
@@ -4141,6 +4088,7 @@ export default function App() {
         )}
         {isFixedExpenseModalOpen && (
           <FixedExpenseModal
+            key="fixed-expense-modal"
             expense={editingFixedExpense}
             currentPeriodId={currentPeriodId}
             onClose={() => {
@@ -4163,6 +4111,7 @@ export default function App() {
         )}
         {viewingMonthlySaving && (
           <MonthlySavingViewModal
+            key="monthly-saving-view-modal"
             saving={viewingMonthlySaving}
             onClose={() => setViewingMonthlySaving(null)}
             onEdit={(saving) => {
@@ -4181,6 +4130,7 @@ export default function App() {
         )}
         {isMonthlySavingModalOpen && (
           <MonthlySavingModal
+            key="monthly-saving-modal"
             saving={editingMonthlySaving}
             currentPeriodId={currentPeriodId}
             onClose={() => {
@@ -4202,6 +4152,7 @@ export default function App() {
         )}
         {isCalculatorOpen && (
           <CalculatorModal
+            key="calculator-modal"
             isOpen={isCalculatorOpen}
             onClose={() => setIsCalculatorOpen(false)}
             t={t}
@@ -4210,6 +4161,7 @@ export default function App() {
         
         {legalModal.isOpen && (
           <LegalModal
+            key="legal-modal"
             isOpen={legalModal.isOpen}
             type={legalModal.type}
             onClose={() =>
@@ -4220,13 +4172,15 @@ export default function App() {
         )}
         {isResetPasswordOpen && (
           <ResetPasswordModal
+            key="reset-password-modal"
             isOpen={isResetPasswordOpen}
             onClose={() => setIsResetPasswordOpen(false)}
             onShowToast={addToast}
           />
         )}
-        {config && (
+        {isSearchModalOpen && config && (
           <SearchModal
+            key="search-modal"
             isOpen={isSearchModalOpen}
             onClose={() => setIsSearchModalOpen(false)}
             transactions={transactions}
@@ -4237,29 +4191,15 @@ export default function App() {
         )}
         {isLocked && (
           <PinLockScreen
+            key="pin-lock-screen"
             mode="unlock"
             t={t}
             onSuccess={() => setIsLocked(false)}
           />
         )}
-        {isVariableUpdateModalOpen && itemToUpdateVariable && config && (
-          <VariableAmountUpdateModal
-            isOpen={isVariableUpdateModalOpen}
-            onClose={() => {
-              setIsVariableUpdateModalOpen(false);
-              setItemToUpdateVariable(null);
-            }}
-            item={itemToUpdateVariable}
-            onSave={(amount) => {
-              handleSaveVariableOverride(itemToUpdateVariable, amount);
-            }}
-            config={config}
-            t={t}
-            periodName={stats?.periodName}
-          />
-        )}
         {isCalendarModalOpen && (
           <CalendarModal
+            key="calendar-modal"
             isOpen={isCalendarModalOpen}
             onClose={() => setIsCalendarModalOpen(false)}
             calendarDays={calendarDays || []}
