@@ -242,11 +242,6 @@ export function GreetingModule({
               style={{ width: `${dayProgressPct}%` }}
             />
           </div>
-          
-          <div className="flex justify-between items-center mt-2 text-[10px] font-semibold text-[var(--text-secondary)] opacity-50 px-0.5">
-            <span className="font-amount tabular-nums">0</span>
-            <span className="font-amount tabular-nums">{formatAmount(dayBudgetTotal, language)} {currency}</span>
-          </div>
         </div>
       </motion.div>
 

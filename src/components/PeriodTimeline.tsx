@@ -227,7 +227,7 @@ export function PeriodTimeline({
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               whileTap={{ scale: 0.94 }}
-              className={`flex flex-col items-center justify-center gap-1 min-w-[42px] sm:min-w-[46px] h-[48px] sm:h-[52px] py-1.5 px-1 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
+              className={`flex flex-col items-center justify-center gap-1 min-w-[50px] sm:min-w-[54px] h-[58px] sm:h-[62px] py-1.5 px-1 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
                   ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-2xs dark:bg-white dark:text-black font-semibold'
                   : isRealToday
@@ -255,6 +255,16 @@ export function PeriodTimeline({
             </motion.button>
           );
         })}
+
+        {/* Lön / Payday Box in green at the end of timeline */}
+        <div 
+          className="flex flex-col items-center justify-center gap-1 min-w-[50px] sm:min-w-[54px] h-[58px] sm:h-[62px] py-1.5 px-1 rounded-[14px] bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 select-none shrink-0 cursor-default pointer-events-none"
+        >
+          <span className="text-[12px] leading-none">💸</span>
+          <span className="text-[10px] sm:text-[10.5px] font-bold tracking-tight uppercase">
+            {isEn ? 'Payday' : 'Lön'}
+          </span>
+        </div>
       </div>
 
       {/* Right Scroll Arrow Button */}
