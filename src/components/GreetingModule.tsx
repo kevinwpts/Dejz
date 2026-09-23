@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 
-import { X, Plus, Wallet, Sparkles, WalletCards, Bell, User, Search, ChevronRight } from 'lucide-react';
+import { X, Sparkles, Bell, User, Search, ChevronRight } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
 import { PeriodTimeline } from './PeriodTimeline';
 import { CalendarModal } from './CalendarModal';
@@ -66,7 +66,7 @@ export function GreetingModule({
   currentPeriodDate,
   config,
   onUpdateConfig: _onUpdateConfig,
-  onAddTransaction,
+  onAddTransaction: _onAddTransaction,
   onOpenNotifications,
   notificationCount = 0,
 }: GreetingModuleProps) {
@@ -231,7 +231,7 @@ export function GreetingModule({
   return (
     <div className="font-sans relative">
       {/* 1. Unified Soft Premium Dark Navy Hero Card */}
-      <div className="w-full relative overflow-hidden rounded-b-[32px] sm:rounded-b-[36px] bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#1E3A8A] text-white pb-8 shadow-xl shadow-slate-950/25 border-b border-slate-800/80">
+      <div className="w-full relative overflow-hidden rounded-b-[32px] sm:rounded-b-[36px] bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#1E3A8A] text-white pb-7 shadow-xl shadow-slate-950/25 border-b border-slate-800/80">
         {/* Soft Ambient Glows */}
         <div className="absolute top-0 right-0 w-72 h-72 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-56 h-56 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none" />
@@ -239,8 +239,8 @@ export function GreetingModule({
         {/* Collapsible Sticky Header (100% seamless when at top, compact glass on scroll) */}
         <div className={`sticky top-0 z-40 w-full transition-all duration-300 ${
           isScrolled 
-            ? 'bg-[#0F172A]/90 backdrop-blur-xl pt-[calc(0.75rem+env(safe-area-inset-top))] pb-2.5 border-b border-slate-800/80 shadow-md' 
-            : 'bg-transparent pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 border-b border-transparent shadow-none'
+            ? 'bg-[#0F172A]/95 backdrop-blur-xl pt-[calc(0.75rem+env(safe-area-inset-top,12px))] pb-2.5 border-b border-slate-800/80 shadow-md' 
+            : 'bg-transparent pt-[calc(0.85rem+env(safe-area-inset-top,12px))] pb-3 border-b border-transparent shadow-none'
         }`}>
           <div className="max-w-2xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 relative z-10">
             <div className="flex items-center gap-3">
@@ -263,7 +263,7 @@ export function GreetingModule({
                     {userName || 'Användare'}
                   </span>
                   {isScrolled && (
-                    <span className="text-[11px] font-black text-sky-300 bg-sky-950/80 px-2 py-0.5 rounded-full border border-sky-800/60 animate-fade-in font-amount">
+                    <span className="text-[11px] font-black text-sky-300 bg-sky-950/80 px-2.5 py-0.5 rounded-full border border-sky-800/60 animate-fade-in font-amount">
                       {formatAmount(displayAmount, language)} {currency}
                     </span>
                   )}
@@ -295,8 +295,8 @@ export function GreetingModule({
 
         <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-2">
           {/* Center Balance Display (Kinetic Variable Typography) */}
-          <div className="flex flex-col items-center text-center my-3 relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] font-bold tracking-wider text-white uppercase mb-2 shadow-2xs">
+          <div className="flex flex-col items-center text-center my-4 relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] font-extrabold tracking-wider text-white uppercase mb-2.5 shadow-2xs">
               <Sparkles size={12} className="text-amber-300" />
               <span>{topLabel}</span>
             </div>
@@ -315,7 +315,7 @@ export function GreetingModule({
             </div>
 
             {/* Progress bar with percentage pill */}
-            <div className="w-full max-w-xs mt-3 flex flex-col items-center gap-1.5">
+            <div className="w-full max-w-xs mt-3.5 flex flex-col items-center gap-1.5">
               <div className="w-full h-2.5 bg-white/25 backdrop-blur-md rounded-full overflow-hidden relative shadow-inner">
                 <div
                   className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
@@ -329,65 +329,6 @@ export function GreetingModule({
                 <span>{Math.round(dayProgressPct)}% utnyttjat</span>
               </div>
             </div>
-          </div>
-
-          {/* Quick Action Grid (4 Soft Translucent Glass Buttons with Micro-Interactions) */}
-          <div className="grid grid-cols-4 gap-2.5 pt-4 relative z-10">
-            <motion.button
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => onAddTransaction?.("expense")}
-              className="bg-white/20 hover:bg-white/30 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-3 px-1 flex flex-col items-center justify-center gap-1.5 text-white shadow-xs cursor-pointer group"
-            >
-              <div className="w-9 h-9 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/35 transition-all shadow-2xs">
-                <Plus size={20} strokeWidth={2.8} />
-              </div>
-              <span className="text-[11px] font-extrabold tracking-tight leading-tight truncate max-w-full">
-                {language === 'en' ? 'Expense' : 'Utgift'}
-              </span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => onAddTransaction?.("income")}
-              className="bg-white/20 hover:bg-white/30 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-3 px-1 flex flex-col items-center justify-center gap-1.5 text-white shadow-xs cursor-pointer group"
-            >
-              <div className="w-9 h-9 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/35 transition-all shadow-2xs">
-                <Wallet size={20} strokeWidth={2.2} />
-              </div>
-              <span className="text-[11px] font-extrabold tracking-tight leading-tight truncate max-w-full">
-                {language === 'en' ? 'Income' : 'Inkomst'}
-              </span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setIsSaveToPotOpen(true)}
-              className="bg-white/20 hover:bg-white/30 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-3 px-1 flex flex-col items-center justify-center gap-1.5 text-white shadow-xs cursor-pointer group"
-            >
-              <div className="w-9 h-9 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/35 transition-all shadow-2xs">
-                <Sparkles size={20} strokeWidth={2.2} />
-              </div>
-              <span className="text-[11px] font-extrabold tracking-tight leading-tight truncate max-w-full">
-                {language === 'en' ? 'Save' : 'Spara'}
-              </span>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => onNavigate("budget")}
-              className="bg-white/20 hover:bg-white/30 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-3 px-1 flex flex-col items-center justify-center gap-1.5 text-white shadow-xs cursor-pointer group"
-            >
-              <div className="w-9 h-9 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/35 transition-all shadow-2xs">
-                <WalletCards size={20} strokeWidth={2.2} />
-              </div>
-              <span className="text-[11px] font-extrabold tracking-tight leading-tight truncate max-w-full">
-                {language === 'en' ? 'Budget' : 'Budget'}
-              </span>
-            </motion.button>
           </div>
         </div>
       </div>
