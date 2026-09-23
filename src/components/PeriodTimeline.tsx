@@ -177,7 +177,7 @@ export function PeriodTimeline({
     <div className="relative group/timeline w-full my-1 font-sans">
       {/* Left Scroll Arrow Button */}
       {canScrollLeft && (
-        <div className="absolute left-0 top-0 bottom-0 z-20 flex items-center pl-0.5 pr-5 bg-gradient-to-r from-[var(--bg-color)] via-[var(--bg-color)]/90 to-transparent pointer-events-none">
+        <div className="hidden md:flex absolute left-0 top-0 bottom-0 z-20 items-center pl-0.5 pr-5 bg-gradient-to-r from-[var(--bg-color)] via-[var(--bg-color)]/90 to-transparent pointer-events-none">
           <button
             type="button"
             onClick={() => handleScrollBy(-220)}
@@ -275,7 +275,7 @@ export function PeriodTimeline({
 
       {/* Right Scroll Arrow Button */}
       {canScrollRight && (
-        <div className="absolute right-0 top-0 bottom-0 z-20 flex items-center pr-0.5 pl-5 bg-gradient-to-l from-[var(--bg-color)] via-[var(--bg-color)]/90 to-transparent pointer-events-none">
+        <div className="hidden md:flex absolute right-0 top-0 bottom-0 z-20 items-center pr-0.5 pl-5 bg-gradient-to-l from-[var(--bg-color)] via-[var(--bg-color)]/90 to-transparent pointer-events-none">
           <button
             type="button"
             onClick={() => handleScrollBy(220)}

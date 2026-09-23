@@ -3248,14 +3248,14 @@ export default function App() {
                     fixedExpenses={fixedExpenses}
                     selectedDate={targetDate}
                     setSelectedDate={setTargetDate}
-                    onAddTransaction={(date) => {
+                    onAddTransaction={() => {
                       setTransactionType("expense");
-                      if (date) setTargetDate(date);
+                      setTargetDate(new Date());
                       setIsAddTransactionOpen(true);
                     }}
-                    onAddIncome={(date) => {
+                    onAddIncome={() => {
                       setTransactionType("income");
-                      if (date) setTargetDate(date);
+                      setTargetDate(new Date());
                       setIsAddTransactionOpen(true);
                     }}
                     onViewTransaction={(t) => {

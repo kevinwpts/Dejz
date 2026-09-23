@@ -50,7 +50,7 @@ const COLORS = ['#2A2A2A', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#333333'
 export function TransactionModal({ 
   transaction, 
   type = 'expense', 
-  date, 
+  date: _date, 
   categories = [], 
   transactions,
   calendarDays = [],
@@ -208,25 +208,7 @@ export function TransactionModal({
     if (transaction?.timestamp) {
       return new Date(transaction.timestamp);
     }
-    
-    const now = new Date();
-    if (date) {
-      const d = new Date(date);
-      const isToday = d.getDate() === now.getDate() && 
-                      d.getMonth() === now.getMonth() && 
-                      d.getFullYear() === now.getFullYear();
-      
-      if (isToday) {
-        return now;
-      }
-      
-      if (d.getHours() === 0 && d.getMinutes() === 0 && d.getSeconds() === 0) {
-        d.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
-      }
-      return d;
-    }
-    
-    return now;
+    return new Date();
   });
 
   const previewTransaction = useMemo(() => ({

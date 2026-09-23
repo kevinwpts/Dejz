@@ -93,14 +93,14 @@ export function GreetingModule({
   const diffDays = Math.round((selected.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
   const formattedDate = useMemo(() => {
-    const d = date || new Date();
+    const d = new Date();
     const str = d.toLocaleDateString(language === 'en' ? 'en-US' : 'sv-SE', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
     });
     return str.charAt(0).toUpperCase() + str.slice(1);
-  }, [date, language]);
+  }, [language]);
 
   const selectedDayData = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return null;
@@ -204,7 +204,7 @@ export function GreetingModule({
           transition={{ delay: 0.05 }}
           className="rounded-[24px] border border-[var(--border-color)] p-5 sm:p-6 bg-[var(--surface-color)] shadow-sm transition-all duration-500"
         >
-          <div className="flex justify-between items-end mb-4">
+          <div className={`flex justify-between items-end ${diffDays === 0 ? 'mb-4' : 'mb-0'}`}>
             <div>
               <div className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
                 {t('totalRemaining' as any)}
@@ -219,24 +219,28 @@ export function GreetingModule({
                 {t('daysToNextSalary' as any)}
               </div>
               <div className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] font-amount leading-none">
-                {effectiveRemainingDays} <span className="opacity-40 text-sm font-normal font-sans">{effectiveRemainingDays === 1 ? t('oneDay' as any) : t('days' as any)}</span>
+                {stats?.remainingDays || 1} <span className="opacity-40 text-sm font-normal font-sans">{(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}</span>
               </div>
             </div>
           </div>
           
-          <div className="w-full h-2.5 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
-            <div 
-              className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'bg-danger' : 'bg-[var(--accent-color)]'
-              }`}
-              style={{ width: `${Math.max(0, Math.min(100, ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) * 100))}%` }}
-            />
-          </div>
-          
-          <div className="flex justify-between items-center mt-2.5 text-[10px] font-semibold text-[var(--text-secondary)] opacity-40 px-0.5">
-            <span className="font-amount tabular-nums">0</span>
-            <span className="font-amount tabular-nums">{formatAmount((stats?.disposablePot || 0) + (stats?.totalExtraIncomeUpToToday || 0), language)} {currency}</span>
-          </div>
+          {diffDays === 0 && (
+            <>
+              <div className="w-full h-2.5 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
+                <div 
+                  className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
+                    ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'bg-danger' : 'bg-[var(--accent-color)]'
+                  }`}
+                  style={{ width: `${Math.max(0, Math.min(100, ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) * 100))}%` }}
+                />
+              </div>
+              
+              <div className="flex justify-between items-center mt-2.5 text-[10px] font-semibold text-[var(--text-secondary)] opacity-40 px-0.5">
+                <span className="font-amount tabular-nums">0</span>
+                <span className="font-amount tabular-nums">{formatAmount((stats?.disposablePot || 0) + (stats?.totalExtraIncomeUpToToday || 0), language)} {currency}</span>
+              </div>
+            </>
+          )}
         </motion.div>
       )}
 
