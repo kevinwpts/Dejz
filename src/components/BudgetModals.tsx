@@ -16,6 +16,7 @@ import { CategoryTile } from './CategoryTile';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { QuickMathToolbar } from './QuickMathToolbar';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
+import { Button, IconButton } from './ui';
 
 // --- Income View Modal ---
 
@@ -96,32 +97,37 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               {income.name}
             </h2>
           </div>
-          <button 
-            onClick={onClose} 
-            className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 justify-self-end shrink-0 cursor-pointer"
-          >
-            <X size={17} />
-          </button>
+          <div className="flex justify-end">
+            <IconButton 
+              icon={<X size={17} />} 
+              onClick={onClose} 
+              variant="muted" 
+              size="sm" 
+              aria-label={t('close')}
+            />
+          </div>
         </div>
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
           {/* Actions Bar */}
           <div className="flex justify-end gap-2 pt-1">
-            <button 
+            <IconButton 
+              icon={<Pencil size={15} />} 
               onClick={() => onEdit(income)} 
-              className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 cursor-pointer"
+              variant="muted" 
+              size="sm" 
+              aria-label={t('edit')}
               title={t('edit')}
-            >
-              <Pencil size={15} />
-            </button>
-            <button 
+            />
+            <IconButton 
+              icon={<Trash2 size={15} />} 
               onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-danger/10 rounded-full transition-all text-danger active:scale-90 cursor-pointer"
+              variant="danger" 
+              size="sm" 
+              aria-label={t('delete')}
               title={t('delete')}
-            >
-              <Trash2 size={15} />
-            </button>
+            />
           </div>
 
           <div className="bg-[var(--surface-muted)]/50 p-5 rounded-[16px] border border-[var(--border-color)]">
@@ -320,12 +326,15 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               {income ? t('edit') : t('newIncome')}
             </h2>
           </div>
-          <button 
-            onClick={onClose} 
-            className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 justify-self-end shrink-0 cursor-pointer"
-          >
-            <X size={18} strokeWidth={2} />
-          </button>
+          <div className="flex justify-end">
+            <IconButton 
+              icon={<X size={18} strokeWidth={2} />} 
+              onClick={onClose} 
+              variant="muted" 
+              size="sm" 
+              aria-label={t('close')}
+            />
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -457,14 +466,16 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
         {/* Action Button Footer */}
         <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-[var(--border-color)] bg-[var(--bg-color)]">
-          <button 
+          <Button 
             type="button"
             onClick={handleSave} 
-            className="w-full py-3.5 px-5 rounded-[16px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+            variant="primary"
+            fullWidth
+            size="lg"
+            icon={<Check size={18} strokeWidth={2.5} />}
           >
-            <Check size={18} strokeWidth={2.5} />
-            <span className="font-semibold tracking-tight text-sm">{income ? t('saveChanges') : t('addIncome')}</span>
-          </button>
+            {income ? t('saveChanges') : t('addIncome')}
+          </Button>
         </div>
 
         {/* Compact Icon Selector Popover */}
@@ -490,12 +501,13 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
                     <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
-                  <button 
+                  <IconButton 
+                    icon={<X size={16} strokeWidth={1.5} />}
                     onClick={() => setShowIconSelector(false)}
-                    className="w-8 h-8 rounded-[10px] bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--border-color)] border border-[var(--border-color)] transition-colors cursor-pointer"
-                  >
-                    <X size={16} strokeWidth={1.5} />
-                  </button>
+                    variant="muted"
+                    size="sm"
+                    aria-label={t('close')}
+                  />
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 min-h-0">
                   <IconSelector
@@ -619,32 +631,37 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               {expense.name}
             </h2>
           </div>
-          <button 
-            onClick={onClose} 
-            className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 justify-self-end shrink-0 cursor-pointer"
-          >
-            <X size={17} />
-          </button>
+          <div className="flex justify-end">
+            <IconButton 
+              icon={<X size={17} />} 
+              onClick={onClose} 
+              variant="muted" 
+              size="sm" 
+              aria-label={t('close')}
+            />
+          </div>
         </div>
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
           {/* Actions Bar */}
           <div className="flex justify-end gap-2 pt-1">
-            <button 
+            <IconButton 
+              icon={<Pencil size={15} />} 
               onClick={() => onEdit(expense)} 
-              className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 cursor-pointer"
+              variant="muted" 
+              size="sm" 
+              aria-label={t('edit')}
               title={t('edit')}
-            >
-              <Pencil size={15} />
-            </button>
-            <button 
+            />
+            <IconButton 
+              icon={<Trash2 size={15} />} 
               onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-danger/10 rounded-full transition-all text-danger active:scale-90 cursor-pointer"
+              variant="danger" 
+              size="sm" 
+              aria-label={t('delete')}
               title={t('delete')}
-            >
-              <Trash2 size={15} />
-            </button>
+            />
           </div>
 
           <div className="bg-[var(--surface-muted)]/50 p-5 rounded-[16px] border border-[var(--border-color)]">
@@ -866,12 +883,15 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               {expense ? t('edit') : t('newFixedExpense')}
             </h2>
           </div>
-          <button 
-            onClick={onClose} 
-            className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 justify-self-end shrink-0 cursor-pointer"
-          >
-            <X size={18} strokeWidth={2} />
-          </button>
+          <div className="flex justify-end">
+            <IconButton 
+              icon={<X size={18} strokeWidth={2} />} 
+              onClick={onClose} 
+              variant="muted" 
+              size="sm" 
+              aria-label={t('close')}
+            />
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -932,7 +952,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           <div className="space-y-2">
             <div className="flex items-center justify-between px-1">
               <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1">
-                {t('fixedExpensePlaceholder')}
+                {t('fixedExpenseLabel')}
               </label>
               {autoLogo && !manualSelectionThisSession && name !== originalName.current && (
                 <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full animate-pulse">
@@ -1039,14 +1059,16 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
         {/* Action Button Footer */}
         <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-[var(--border-color)] bg-[var(--bg-color)]">
-          <button 
+          <Button 
             type="button"
             onClick={handleSave} 
-            className="w-full py-3.5 px-5 rounded-[16px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+            variant="primary"
+            fullWidth
+            size="lg"
+            icon={<Check size={18} strokeWidth={2.5} />}
           >
-            <Check size={18} strokeWidth={2.5} />
-            <span className="font-semibold tracking-tight text-sm">{expense ? t('saveChanges') : t('addFixedExpense')}</span>
-          </button>
+            {expense ? t('saveChanges') : t('addFixedExpense')}
+          </Button>
         </div>
 
         {/* Compact Icon Selector Popover */}
@@ -1072,12 +1094,13 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
                     <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
-                  <button 
+                  <IconButton 
+                    icon={<X size={16} strokeWidth={1.5} />}
                     onClick={() => setShowIconSelector(false)}
-                    className="w-8 h-8 rounded-[10px] bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--border-color)] border border-[var(--border-color)] transition-colors cursor-pointer"
-                  >
-                    <X size={16} strokeWidth={1.5} />
-                  </button>
+                    variant="muted"
+                    size="sm"
+                    aria-label={t('close')}
+                  />
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 min-h-0">
                   <IconSelector
@@ -1200,32 +1223,37 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
               {saving.name}
             </h2>
           </div>
-          <button 
-            onClick={onClose} 
-            className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 justify-self-end shrink-0 cursor-pointer"
-          >
-            <X size={17} />
-          </button>
+          <div className="flex justify-end">
+            <IconButton 
+              icon={<X size={17} />} 
+              onClick={onClose} 
+              variant="muted" 
+              size="sm" 
+              aria-label={t('close')}
+            />
+          </div>
         </div>
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
           {/* Actions Bar */}
           <div className="flex justify-end gap-2 pt-1">
-            <button 
+            <IconButton 
+              icon={<Pencil size={15} />} 
               onClick={() => onEdit(saving)} 
-              className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 cursor-pointer"
+              variant="muted" 
+              size="sm" 
+              aria-label={t('edit')}
               title={t('edit')}
-            >
-              <Pencil size={15} />
-            </button>
-            <button 
+            />
+            <IconButton 
+              icon={<Trash2 size={15} />} 
               onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-danger/10 rounded-full transition-all text-danger active:scale-90 cursor-pointer"
+              variant="danger" 
+              size="sm" 
+              aria-label={t('delete')}
               title={t('delete')}
-            >
-              <Trash2 size={15} />
-            </button>
+            />
           </div>
 
           <div className="bg-[var(--surface-muted)]/50 p-5 rounded-[16px] border border-[var(--border-color)]">
@@ -1428,12 +1456,15 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               {saving ? `${t('edit')} ${saving.name}` : `${t('new')} ${t('monthlySavings').toLowerCase()}`}
             </h2>
           </div>
-          <button 
-            onClick={onClose} 
-            className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 justify-self-end shrink-0 cursor-pointer"
-          >
-            <X size={18} strokeWidth={2} />
-          </button>
+          <div className="flex justify-end">
+            <IconButton 
+              icon={<X size={18} strokeWidth={2} />} 
+              onClick={onClose} 
+              variant="muted" 
+              size="sm" 
+              aria-label={t('close')}
+            />
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -1508,7 +1539,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 type="text" 
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
-                placeholder={t('whatAreYouSavingFor')} 
+                placeholder={t('savingsGoalPlaceholder')} 
                 className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40" 
               />
               {name && (
@@ -1526,14 +1557,16 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
 
         {/* Action Button Footer */}
         <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-[var(--border-color)] bg-[var(--bg-color)]">
-          <button 
+          <Button 
             type="button"
             onClick={handleSave} 
-            className="w-full py-3.5 px-5 rounded-[16px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+            variant="primary"
+            fullWidth
+            size="lg"
+            icon={<Check size={18} strokeWidth={2.5} />}
           >
-            <Check size={18} strokeWidth={2.5} />
-            <span className="font-semibold tracking-tight text-sm">{saving ? t('saveChanges') : t('addSaving')}</span>
-          </button>
+            {saving ? t('saveChanges') : t('addSaving')}
+          </Button>
         </div>
 
         {/* Compact Icon Selector Popover */}
@@ -1559,12 +1592,13 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                     <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
                     <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
-                  <button 
+                  <IconButton 
+                    icon={<X size={16} strokeWidth={1.5} />}
                     onClick={() => setShowIconSelector(false)}
-                    className="w-8 h-8 rounded-[10px] bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--border-color)] border border-[var(--border-color)] transition-colors cursor-pointer"
-                  >
-                    <X size={16} strokeWidth={1.5} />
-                  </button>
+                    variant="muted"
+                    size="sm"
+                    aria-label={t('close')}
+                  />
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 min-h-0">
                   <IconSelector
@@ -1658,19 +1692,21 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
             </h2>
             <div className="flex items-center gap-2">
               {initialName && onDelete && (
-                <button 
+                <IconButton 
+                  icon={<Trash2 size={16} />}
                   onClick={() => { onDelete(); onClose(); }}
-                  className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-danger/10 text-danger rounded-full transition-all cursor-pointer"
-                >
-                  <Trash2 size={16} />
-                </button>
+                  variant="danger"
+                  size="sm"
+                  aria-label={t('delete')}
+                />
               )}
-              <button 
+              <IconButton 
+                icon={<X size={18} strokeWidth={2} />}
                 onClick={onClose}
-                className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-full transition-all cursor-pointer"
-              >
-                <X size={18} strokeWidth={2} />
-              </button>
+                variant="muted"
+                size="sm"
+                aria-label={t('close')}
+              />
             </div>
           </div>
 
@@ -1706,13 +1742,15 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
                 ))}
               </div>
 
-              <button
+              <Button
                 onClick={() => { if (name.trim()) { onSave(name.trim(), icon, color); onClose(); } }}
                 disabled={!name.trim()}
-                className="w-full py-3.5 px-5 rounded-[16px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-sm"
+                variant="primary"
+                fullWidth
+                size="lg"
               >
                 {t('save')}
-              </button>
+              </Button>
             </div>
           </div>
         </motion.div>

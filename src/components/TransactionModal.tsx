@@ -17,6 +17,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { QuickMathToolbar } from './QuickMathToolbar';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
+import { Button, IconButton, SegmentedControl } from './ui';
 
 interface TransactionModalProps {
   transaction: Transaction | null;
@@ -295,28 +296,16 @@ export function TransactionModal({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="inline-flex p-1 bg-[var(--surface-muted)] rounded-[10px] border border-[var(--border-color)]"
                 >
-                  <button
-                    onClick={() => onChangeType('expense')}
-                    className={`px-4 py-1.5 text-[11px] font-semibold rounded-[8px] transition-all ${
-                      type === 'expense' 
-                        ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs' 
-                        : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
-                    }`}
-                  >
-                    {t('expense')}
-                  </button>
-                  <button
-                    onClick={() => onChangeType('income')}
-                    className={`px-4 py-1.5 text-[11px] font-semibold rounded-[8px] transition-all ${
-                      type === 'income' 
-                        ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs' 
-                        : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
-                    }`}
-                  >
-                    {t('income')}
-                  </button>
+                  <SegmentedControl
+                    options={[
+                      { value: 'expense', label: t('expense') },
+                      { value: 'income', label: t('income') }
+                    ]}
+                    value={type}
+                    onChange={(val) => onChangeType(val as 'expense' | 'income')}
+                    size="sm"
+                  />
                 </motion.div>
               ) : (
                 <motion.h2 
@@ -331,12 +320,15 @@ export function TransactionModal({
               )}
             </AnimatePresence>
           </div>
-          <button 
-            onClick={onClose} 
-            className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 justify-self-end shrink-0"
-          >
-            <X size={18} strokeWidth={2} />
-          </button>
+          <div className="flex justify-end">
+            <IconButton 
+              icon={<X size={18} strokeWidth={2} />} 
+              onClick={onClose} 
+              variant="muted" 
+              size="sm" 
+              aria-label={t('close')}
+            />
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -828,7 +820,7 @@ export function TransactionModal({
 
           {/* Register Button */}
           <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-[var(--border-color)] bg-[var(--bg-color)]">
-            <button 
+            <Button 
               disabled={!isSplitsValid}
               onClick={() => {
                 if (!isSplitsValid) return;
@@ -848,11 +840,13 @@ export function TransactionModal({
                 });
                 onClose();
               }}
-              className="w-full py-3.5 px-5 rounded-[16px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:grayscale cursor-pointer disabled:cursor-not-allowed"
+              variant="primary"
+              fullWidth
+              size="lg"
+              icon={<Check size={18} strokeWidth={2.5} />}
             >
-              <Check size={18} strokeWidth={2.5} />
               {type === 'income' ? (t('registerIncome' as any) || 'Registrera inkomst') : (t('registerExpense' as any) || 'Registrera utgift')}
-            </button>
+            </Button>
           </div>
 
 
@@ -879,12 +873,13 @@ export function TransactionModal({
                     <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
                     <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
-                  <button 
+                  <IconButton 
+                    icon={<X size={16} strokeWidth={1.5} />}
                     onClick={() => setShowIconSelector(false)}
-                    className="w-8 h-8 rounded-[10px] bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--border-color)] border border-[var(--border-color)] transition-colors"
-                  >
-                    <X size={16} strokeWidth={1.5} />
-                  </button>
+                    variant="muted"
+                    size="sm"
+                    aria-label={t('close')}
+                  />
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 min-h-0">
                   <IconSelector
