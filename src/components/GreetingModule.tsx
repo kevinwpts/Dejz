@@ -216,8 +216,8 @@ export function GreetingModule({
 
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
-      {/* 1. Soft Fintech Cyan-Blue Hero Card (Full edge-to-edge bleed & top edge) */}
-      <div className="-mx-4 sm:-mx-6 -mt-[calc(5.2rem+env(safe-area-inset-top))] relative overflow-hidden rounded-b-[36px] bg-gradient-to-br from-[#0EA5E9] via-[#0284C7] to-[#2563EB] text-white pt-[calc(1.4rem+env(safe-area-inset-top))] px-5 sm:px-8 pb-8 shadow-xl shadow-sky-500/15 border-b border-sky-400/30">
+      {/* 1. Soft Fintech Cyan-Blue Hero Card (Full edge-to-edge & top bleed under status bar / dynamic island) */}
+      <div className="-mx-4 sm:-mx-6 relative overflow-hidden rounded-b-[36px] bg-gradient-to-br from-[#0EA5E9] via-[#0284C7] to-[#2563EB] text-white pt-[calc(1.2rem+env(safe-area-inset-top))] px-5 sm:px-8 pb-8 shadow-xl shadow-sky-500/15 border-b border-sky-400/30">
         {/* Soft Ambient Light Circles */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-sky-300/20 rounded-full blur-xl pointer-events-none" />

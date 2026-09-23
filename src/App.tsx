@@ -3138,7 +3138,10 @@ export default function App() {
       {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop */}
       <div
         className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
-        style={{ height: 'max(env(safe-area-inset-top, 0px), 1px)', backgroundColor: 'var(--bg-color)' }}
+        style={{
+          height: 'max(env(safe-area-inset-top, 0px), 1px)',
+          backgroundColor: activeTab === 'today' ? '#0EA5E9' : 'var(--bg-color)',
+        }}
         aria-hidden="true"
       />
 
@@ -3217,7 +3220,7 @@ export default function App() {
       )}
 
             <PullToRefresh onRefresh={handleRefresh}>
-        <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
+        <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${activeTab === 'today' ? (isDemoMode ? 'pt-[calc(2.6rem+env(safe-area-inset-top))]' : 'pt-0') : (isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]')} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
           <AnimatePresence>
             {activeTab === "today" && stats && (
               <motion.div
