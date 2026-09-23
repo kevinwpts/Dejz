@@ -22,7 +22,7 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
     c => c.name.trim().toLowerCase() === searchCategory
   ) : null;
 
-  const containerSize = size === 'lg' ? 'w-16 h-16 rounded-full' : size === 'sm' ? 'w-10 h-10 rounded-full' : 'w-[46px] h-[46px] rounded-full';
+  const containerSize = size === 'lg' ? 'w-16 h-16 rounded-2xl' : size === 'sm' ? 'w-10 h-10 rounded-xl' : 'w-[46px] h-[46px] rounded-2xl';
   const iconSize = size === 'lg' ? 28 : size === 'sm' ? 17 : 21;
 
   const hasContent = !!(transaction.merchant || transaction.note || (transaction.logo && transaction.logo !== 'none') || (transaction.icon && transaction.icon !== 'none' && transaction.icon !== 'receipt'));
@@ -81,7 +81,7 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
         <img 
           src={explicitLogo!} 
           alt={title} 
-          className="w-full h-full object-cover rounded-full"
+          className="w-full h-full object-cover rounded-2xl"
           onError={() => setImgError(true)}
           referrerPolicy="no-referrer"
         />
@@ -96,7 +96,7 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
         <img 
           src={brandLogo} 
           alt={title} 
-          className="w-full h-full object-cover rounded-full"
+          className="w-full h-full object-cover rounded-2xl p-1.5"
           onError={() => setImgError(true)}
           referrerPolicy="no-referrer"
         />

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { motion } from 'motion/react';
 
 import { X } from 'lucide-react';
@@ -35,10 +35,13 @@ interface GreetingModuleProps {
   currentPeriodDate?: Date;
   config: any;
   onUpdateConfig?: (newConfig: any) => void;
+  onAddTransaction?: (type: "income" | "expense") => void;
+  onOpenNotifications?: () => void;
+  notificationCount?: number;
 }
 
 export function GreetingModule({
-  userName,
+  userName: _userName,
   availableForD,
   currency,
   isToday: _isToday,
@@ -62,7 +65,10 @@ export function GreetingModule({
   isCurrentPeriod,
   currentPeriodDate,
   config,
-  onUpdateConfig: _onUpdateConfig
+  onUpdateConfig: _onUpdateConfig,
+  onAddTransaction: _onAddTransaction,
+  onOpenNotifications: _onOpenNotifications,
+  notificationCount: _notificationCount = 0,
 }: GreetingModuleProps) {
   const [isCalculationModalOpen, setIsCalculationModalOpen] = useState(false);
   const [isSaveToPotOpen, setIsSaveToPotOpen] = useState(false);
@@ -92,7 +98,7 @@ export function GreetingModule({
   selected.setHours(0, 0, 0, 0);
   const diffDays = Math.round((selected.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-  const formattedDate = useMemo(() => {
+  const _formattedDate = useMemo(() => {
     const d = new Date();
     const str = d.toLocaleDateString(language === 'en' ? 'en-US' : 'sv-SE', {
       weekday: 'long',
@@ -208,73 +214,74 @@ export function GreetingModule({
     };
   }, [stats, todayDayData, availableForD, language, currency]);
 
+  const numberFormatter = useCallback((val: number) => formatAmount(val, language), [language]);
+
   return (
-    <div className="space-y-4 sm:space-y-5 font-sans relative">
-      {/* Personal Greeting & Date Header */}
-      <div className="flex flex-col gap-0.5 px-1 pt-0.5 pb-0.5 select-none">
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
-          <span>{userName ? `Hej ${userName}` : 'Hej'}</span>
-          <span className="inline-block origin-bottom-right hover:rotate-12 transition-transform duration-200">👋</span>
-        </h1>
-        <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] opacity-70 capitalize">
-          {formattedDate}
-        </p>
-      </div>
+    <div className="font-sans relative pt-[calc(3.5rem+env(safe-area-inset-top))]">
+      {/* 1. Electric Indigo & Royal Blue Glowing Hero Module (Continuous Flow) */}
+      <div className="w-full relative pt-2 pb-3">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          {/* Center Balance Display (Kinetic Variable Typography) */}
+          <div className="flex flex-col items-center text-center my-3 relative z-10">
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/12 border border-white/15 text-[11px] font-bold tracking-wider text-white uppercase mb-2 shadow-2xs">
+              <span>{topLabel}</span>
+            </div>
 
-      {/* 1. Dagsbudget Hero Card */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1, duration: 0.5 }}
-        className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center"
-      >
-        <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2.5 block">
-          {topLabel}
-        </span>
-        <div className="flex items-baseline justify-center gap-1.5">
-          <AnimatedNumber 
-            value={displayAmount} 
-            className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
-              isNegative ? 'text-danger' : ''
-            }`}
-            formatter={(val) => formatAmount(val, language)}
-          />
-          <span className={`text-base sm:text-lg font-light opacity-60 ${
-            isNegative ? 'text-danger' : 'text-[var(--text-secondary)]'
-          }`}>
-            {currency}
-          </span>
-        </div>
+            <div className="flex items-baseline justify-center gap-2 my-1">
+              <AnimatedNumber
+                value={displayAmount}
+                className={`text-5xl sm:text-6xl font-black text-white font-amount tabular-nums tracking-tight ${
+                  isNegative ? 'text-rose-200' : ''
+                }`}
+                formatter={numberFormatter}
+              />
+              <span className="text-xl sm:text-2xl font-extrabold text-white/85 font-sans">
+                {currency}
+              </span>
+            </div>
 
-        {/* Progress bar under Kvar idag */}
-        <div className="w-full mt-5">
-          <div className="w-full h-2 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
-            <div 
-              className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                isNegative || dayProgressPct < 10 ? 'bg-danger' : 'bg-[var(--accent-color)]'
-              }`}
-              style={{ width: `${dayProgressPct}%` }}
-            />
+            {/* Progress bar with percentage pill */}
+            <div className="w-full max-w-xs mt-3 flex flex-col items-center gap-1.5">
+              <div className="w-full h-2.5 bg-white/20 rounded-full overflow-hidden relative shadow-inner">
+                <div
+                  className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
+                    isNegative ? 'bg-rose-300' : 'bg-gradient-to-r from-white to-sky-100 shadow-sm'
+                  }`}
+                  style={{ width: `${dayProgressPct}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between w-full text-[10px] font-semibold text-white/80 px-1">
+                <span>0 {currency}</span>
+                <span>{Math.round(dayProgressPct)}% utnyttjat</span>
+              </div>
+            </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Dejzi Mascot Card */}
+      {/* Content below hero card centered in max-w-2xl */}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 space-y-4 sm:space-y-5 pt-4">
+
+      {/* Dejzi Mascot Card (2026 Adaptive Personalization & Organic Shapes) */}
       {dejziInfo && (
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
+          whileHover={{ y: -2 }}
           transition={{ delay: 0.12 }}
-          className="rounded-[22px] border border-[var(--border-color)] p-4 sm:p-5 bg-gradient-to-br from-[var(--surface-color)] via-[var(--surface-color)] to-[var(--surface-muted)]/50 shadow-sm relative overflow-hidden flex items-start gap-3.5"
+          className="rounded-[24px] border border-[var(--border-color)] p-4 sm:p-5 bg-[var(--surface-color)] shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden flex items-start gap-3.5 group cursor-pointer"
         >
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-amber-400/25 via-emerald-400/25 to-sky-400/25 border border-[var(--accent-color)]/30 flex items-center justify-center text-xl shrink-0 shadow-inner">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-950/40 dark:to-blue-950/40 border border-sky-200/50 dark:border-sky-800/40 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
             🌼
           </div>
 
           <div className="flex-1 min-w-0 pr-1">
-            <div className="mb-1">
+            <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-bold tracking-tight text-[var(--text-primary)]">
                 Dejzi
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                {language === 'en' ? 'Smart Insight' : 'Dagens Insikt'}
               </span>
             </div>
 
@@ -291,30 +298,38 @@ export function GreetingModule({
         </motion.div>
       )}
 
-      {/* 3. Egen Modul: Totalt kvar & Nästa lön */}
+      {/* 3. Egen Modul: Totalt kvar & Nästa lön (Organic Card with Interactive Detail Trigger) */}
       {effectiveRemainingDays !== undefined && (
         <motion.div 
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
+          whileHover={{ y: -2 }}
           transition={{ delay: 0.05 }}
-          className="rounded-[24px] border border-[var(--border-color)] p-5 sm:p-6 bg-[var(--surface-color)] shadow-sm transition-all duration-500"
+          onClick={() => setIsCalculationModalOpen(true)}
+          className="rounded-[26px] border border-[var(--border-color)]/80 p-5 sm:p-6 bg-[var(--surface-color)] shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer group relative overflow-hidden"
         >
-          <div className="flex justify-between items-end">
-            <div>
-              <div className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+          <div className="grid grid-cols-2 gap-4 items-end">
+            {/* Vänster: Totalt kvar */}
+            <div className="flex flex-col text-left">
+              <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
                 {t('totalRemaining' as any)}
-              </div>
-              <div className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] font-amount leading-none">
-                {formatAmount(stats?.remainingPeriodCents || 0, language)} <span className="opacity-40 text-lg font-normal">{currency}</span>
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] font-amount tracking-tight leading-none">
+                {formatAmount(stats?.remainingPeriodCents || 0, language)}{' '}
+                <span className="text-sm sm:text-base font-bold text-[var(--text-secondary)] opacity-70 font-sans">{currency}</span>
               </div>
             </div>
-            
-            <div className="text-right">
-              <div className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+
+            {/* Höger: Nästa lön */}
+            <div className="flex flex-col text-right">
+              <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
                 {t('daysToNextSalary' as any)}
-              </div>
-              <div className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] font-amount leading-none">
-                {stats?.remainingDays || 1} <span className="opacity-40 text-sm font-normal font-sans">{(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}</span>
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] font-amount tracking-tight leading-none">
+                {stats?.remainingDays || 1}{' '}
+                <span className="text-sm font-bold text-[var(--text-secondary)] opacity-70 font-sans">
+                  {(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}
+                </span>
               </div>
             </div>
           </div>
@@ -332,6 +347,7 @@ export function GreetingModule({
           isCurrentPeriod={isCurrentPeriod}
         />
       )}
+      </div>
 
       {/* Calculation Modal */}
       <div>

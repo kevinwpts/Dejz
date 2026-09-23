@@ -64,25 +64,25 @@ export function TransactionItem({
 
   const finalAmount = displayAmount !== undefined ? displayAmount : transaction.amount;
   
-  const amountColor = transaction.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]';
+  const amountColor = transaction.type === 'income' ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400';
 
   // Determine actual layout style classes based on variants & props
   let containerClasses = "";
-  let paddingClasses = "px-[16px] py-[12px] min-h-[72px]";
+  let paddingClasses = "px-4 sm:px-5 py-3.5 sm:py-4 min-h-[76px]";
   if (squared) {
-    containerClasses = "bg-transparent rounded-none shadow-none border-b border-[var(--border-color)]/20 last:border-none py-2 px-1";
+    containerClasses = "bg-transparent rounded-none shadow-none border-b border-[var(--border-color)]/20 last:border-none py-2.5 px-1";
     paddingClasses = "";
   } else if (variant === 'transparent') {
-    containerClasses = "bg-transparent hover:bg-[var(--surface-muted)]/60 rounded-none first:rounded-t-[20px] last:rounded-b-[20px] shadow-none border-none";
+    containerClasses = "bg-transparent hover:bg-[var(--surface-muted)]/60 rounded-none first:rounded-t-[22px] last:rounded-b-[22px] shadow-none border-none";
   } else if (variant === 'nested') {
-    containerClasses = "bg-[var(--card-nested-bg)] hover:bg-[var(--card-nested-bg)]/85 shadow-none border border-[var(--border-color)]/10 rounded-[16px]";
+    containerClasses = "bg-[var(--card-nested-bg)] hover:bg-[var(--card-nested-bg)]/85 shadow-none border border-[var(--border-color)]/20 rounded-[20px]";
   } else {
     // Default individual transaction card look
     const isTransparentGrouped = isGrouped && !variant;
     if (isTransparentGrouped) {
-      containerClasses = "bg-transparent hover:bg-[var(--surface-muted)] rounded-[16px] shadow-none border-none";
+      containerClasses = "bg-transparent hover:bg-[var(--surface-muted)] rounded-[20px] shadow-none border-none";
     } else {
-      containerClasses = "bg-[var(--transaction-bg)] shadow-xs border border-[var(--border-color)] rounded-[16px] hover:bg-[var(--surface-muted)]";
+      containerClasses = "bg-[var(--surface-color)] shadow-2xs hover:shadow-md border border-[var(--border-color)]/70 rounded-[22px] hover:bg-[var(--surface-muted)]/50 transition-all duration-300";
     }
   }
 
@@ -137,10 +137,10 @@ export function TransactionItem({
         </div>
         
         <div className="min-w-0 flex-1 flex flex-col justify-center">
-          <p className="text-[13px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors group-hover:text-[var(--accent-color)]">
+          <p className="text-[14px] font-bold text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors group-hover:text-[var(--accent-color)]">
             {isFixed ? (transaction.name || transaction.merchant || transaction.category) : (transaction.merchant || transaction.category)}
           </p>
-          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
+          <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden">
             {hideCategoryBadge ? (
               (transaction.timestamp || transaction.date) ? (
                 <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-80 tabular-nums">

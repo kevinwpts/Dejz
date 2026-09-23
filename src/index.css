@@ -77,7 +77,6 @@ textarea {
 }
 
 :root {
-  font-size: 87.5%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
