@@ -47,7 +47,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     return { totalFixed: fixedSum, totalSpentInPeriod: spentSum };
   }, [filteredExpenses, fixedExpenses, stats.periodId]);
 
-  const totalSpent = totalSpentInPeriod + (config.includeFixedExpensesInAnalysis ? totalFixed : 0);
+  const totalSpent = totalSpentInPeriod + totalFixed;
 
   const daysElapsed = useMemo(() => {
     const now = new Date();

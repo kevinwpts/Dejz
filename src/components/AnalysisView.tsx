@@ -108,7 +108,7 @@ export function AnalysisView({
           default: break;
         }
         
-        if (analysisFilter === 'fixed' || config.includeFixedExpensesInAnalysis) {
+        if (analysisFilter !== 'variable') {
           fixedSum += amount;
           breakdown[category] = (breakdown[category] || 0) + amount;
         }
@@ -135,10 +135,10 @@ export function AnalysisView({
       totalFixed: fixedSum, 
       totalSpentInPeriod: spentSum,
     };
-  }, [filteredExpenses, fixedExpenses, t, analysisFilter, config.includeFixedExpensesInAnalysis, config.categories, config.incomeCategories]);
+  }, [filteredExpenses, fixedExpenses, t, analysisFilter, config.categories, config.incomeCategories]);
 
   const totalSpent = (analysisFilter === 'fixed' ? 0 : totalSpentInPeriod) + 
-    ((analysisFilter === 'fixed' || config.includeFixedExpensesInAnalysis) && analysisFilter !== 'variable' ? totalFixed : 0);
+    (analysisFilter !== 'variable' ? totalFixed : 0);
   const COLORS = ['#2A2A2A', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#333333', '#222222', '#555555', '#444444'];
 
   return (
@@ -319,13 +319,11 @@ export function AnalysisView({
               .sort((a, b) => b.timestamp - a.timestamp);
               
             // Get fixed expenses for this category
-            const categoryFixedExpenses = analysisFilter === 'variable' ? [] : (
-              (analysisFilter === 'fixed' || config.includeFixedExpensesInAnalysis) ? fixedExpenses
+            const categoryFixedExpenses = analysisFilter === 'variable' ? [] : fixedExpenses
                 .filter(e => {
                   const catName = e.category || t('fixedExpenses');
                   return catName === item.name;
-                }) : []
-            );
+                });
 
             const totalItemCount = categoryTransactions.length + categoryFixedExpenses.length;
             

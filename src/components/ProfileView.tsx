@@ -346,24 +346,6 @@ export function ProfileView({
                 {t('showFixedExpensesInCalendarDesc')}
               </p>
             </div>
-            <div className="h-px bg-[var(--border-color)] mx-4 opacity-50" />
-            <div className="p-4 space-y-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
-                    <PieChart size={20} strokeWidth={1.5} />
-                  </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">{t('includeFixedExpensesInAnalysis')}</span>
-                </div>
-                <ToggleSwitch 
-                  isOn={config.includeFixedExpensesInAnalysis} 
-                  onToggle={() => setConfig({ ...config, includeFixedExpensesInAnalysis: !config.includeFixedExpensesInAnalysis })} 
-                />
-              </div>
-              <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed pl-14 mt-1">
-                {t('includeFixedExpensesInAnalysisDesc')}
-              </p>
-            </div>
           </div>
         </div>
 

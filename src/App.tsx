@@ -134,6 +134,30 @@ import { resolveLucideIcon, isEmojiString } from "./utils/icons";
 
 type Tab = "today" | "transactions" | "analysis" | "budget" | "profile" | "settings" | "notifications";
 
+const normalizePaymentMethods = (methods: any[] | null | undefined): any[] => {
+  if (!methods || !Array.isArray(methods) || methods.length === 0) {
+    return DEFAULT_PAYMENT_METHODS;
+  }
+  return methods.map(m => {
+    if (typeof m === 'string') {
+      const found = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === m.toLowerCase());
+      if (found) return found;
+      if (m.toLowerCase() === 'e-faktura' || m.toLowerCase() === 'faktura') {
+        return { name: "Faktura", icon: "receipt", color: "#f59e0b" };
+      }
+      if (m.toLowerCase() === 'kort') {
+        return { name: "Kortbetalning", icon: "credit-card", color: "#ec4899" };
+      }
+      return { name: m, icon: 'credit-card', color: '#6366f1' };
+    }
+    return {
+      name: m.name || '',
+      icon: m.icon || 'credit-card',
+      color: m.color || '#6366f1'
+    };
+  });
+};
+
 // Header component removed as per user request to save space.
 
 // Rebuild trigger: Accent theme
@@ -527,13 +551,7 @@ export default function App() {
           savingsPot: dbSettings.savingsPot || 0,
           savingsGoals: dbSettings.savingsGoals || [],
           totalSavedLifetime: dbSettings.totalSavedLifetime || 0,
-          paymentMethods: dbSettings.paymentMethods || [
-            "Autogiro",
-            "E-faktura",
-            "Kort",
-            "Faktura",
-            "Övrigt",
-          ],
+          paymentMethods: normalizePaymentMethods(dbSettings.paymentMethods),
           surplusIncome: dbSettings.surplusIncome || 0,
           monthlySavings: dbSettings.monthlySavings || 0,
           appIconTheme: dbSettings.appIconTheme,
@@ -548,7 +566,7 @@ export default function App() {
           showFixedExpensesInCalendar:
             dbSettings.showFixedExpensesInCalendar !== undefined
               ? dbSettings.showFixedExpensesInCalendar
-              : false,
+              : true,
         });
       }
 
@@ -1437,7 +1455,7 @@ export default function App() {
       monthlySavingsItems: [],
       includeFixedExpensesInAnalysis: true,
       showFixedExpensesInTodayView: true,
-      showFixedExpensesInCalendar: false,
+      showFixedExpensesInCalendar: true,
     };
 
     try {
@@ -1592,13 +1610,7 @@ export default function App() {
           darkMode: (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null) ? dbProfile.dark_mode : false,
           quickChoices: dbProfile.quick_choices || [],
           savingsPot: dbProfile.savings_pot || 0,
-          paymentMethods: dbProfile.payment_methods || [
-            "Autogiro",
-            "Faktura",
-            "Kortbetalning",
-            "Swish",
-            "Övrigt",
-          ],
+          paymentMethods: normalizePaymentMethods(dbProfile.payment_methods),
           surplusIncome: dbProfile.surplus_income || 0,
           monthlySavings: dbProfile.monthly_savings || 0,
           monthlySavingsItems: dbProfile.monthly_savings_items || [],
@@ -1615,7 +1627,7 @@ export default function App() {
           showFixedExpensesInCalendar:
             dbProfile.show_fixed_expenses_in_calendar !== undefined
               ? dbProfile.show_fixed_expenses_in_calendar
-              : false,
+              : true,
           appIconTheme: dbProfile.app_icon_theme,
         };
         setConfig(mappedConfig);
@@ -2962,14 +2974,8 @@ export default function App() {
           monthlySavingsItems: [],
           includeFixedExpensesInAnalysis: true,
           showFixedExpensesInTodayView: true,
-          showFixedExpensesInCalendar: false,
-          paymentMethods: [
-            "Autogiro",
-            "Faktura",
-            "Kortbetalning",
-            "Swish",
-            "Övrigt",
-          ],
+          showFixedExpensesInCalendar: true,
+          paymentMethods: DEFAULT_PAYMENT_METHODS,
         };
 
         await dataService.saveSettings(session.user.id, defaultConfig);

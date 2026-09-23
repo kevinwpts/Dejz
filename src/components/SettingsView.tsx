@@ -5,7 +5,7 @@ import { Config, PaydayType, WeekendAdjustment } from '../types';
 import { getActualPayday } from '../utils/date';
 import { Language, TranslationKey, languageInfo } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
-import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
+import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES, DEFAULT_PAYMENT_METHODS } from '../constants';
 import { CategoryModal } from './CategoryModal';
 import { PaymentMethodModal } from './BudgetModals';
 import { ConfirmModal } from './ConfirmModal';
@@ -234,7 +234,7 @@ export function SettingsView({
   const handleResetPaymentMethods = () => {
     setConfig({
       ...config,
-      paymentMethods: ['Autogiro', 'Faktura', 'Kortbetalning', 'Swish', 'Övrigt']
+      paymentMethods: DEFAULT_PAYMENT_METHODS
     });
   };
 
@@ -506,11 +506,19 @@ export function SettingsView({
 
   const renderPaymentMethodsSettings = () => {
     const header = sectionHeaders[config.language || 'sv']?.paymentMethods || sectionHeaders.sv.paymentMethods;
+    const methodsList = (config.paymentMethods || []).map((method) => {
+      if (typeof method === 'string') {
+        const found = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === (method as string).toLowerCase());
+        return found || { name: method, icon: 'credit-card', color: '#6366f1' };
+      }
+      return method;
+    });
+
     return (
       <div className="space-y-4 max-w-md mx-auto py-2">
         <SectionHeading icon={CreditCard} title={header.title} subtitle={header.subtitle} />
         <div className="grid grid-cols-3 gap-3">
-          {(config.paymentMethods || []).map((method, index) => (
+          {methodsList.map((method, index) => (
             <button
               key={index}
               onClick={() => {
