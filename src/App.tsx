@@ -1089,7 +1089,7 @@ export default function App() {
       try {
         const demoSession = JSON.parse(demoSessionStr);
         const demoVersion = localStorage.getItem('demo_data_version');
-        if (demoVersion !== 'v5_realistic_light' && demoVersion !== 'v_fresh_test_account') {
+        if (demoVersion !== 'v6_historical_rich' && demoVersion !== 'v_fresh_test_account') {
           seedDemoData();
         }
         setSession(demoSession);

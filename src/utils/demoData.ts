@@ -214,6 +214,7 @@ export function seedDemoData() {
   ];
 
   const demoTransactions: Transaction[] = [
+    // --- NUVARANDE MÅNAD (0-14 dagar sedan) ---
     {
       id: 'demo-tx-1',
       amount: 342,
@@ -389,6 +390,408 @@ export function seedDemoData() {
       type: 'expense',
       tags: [],
       paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-sub-1',
+      amount: 119,
+      category: 'Nöje & Fritid',
+      merchant: 'Spotify Premium',
+      note: 'Månadsabonnemang musik',
+      timestamp: now - dayMs * 14.1,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+
+    // --- FÖRRA MÅNADEN / PERIODEN (15-44 dagar sedan) ---
+    {
+      id: 'demo-tx-income-1',
+      amount: 31200,
+      category: 'Lön',
+      merchant: 'Spotify AB',
+      note: 'Månadslön Elin',
+      timestamp: now - dayMs * 29.1,
+      type: 'income',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-rent-1',
+      amount: 8950,
+      category: 'Boende',
+      merchant: 'Hyra & Bostad',
+      note: 'Månadshyra Vasastaden',
+      timestamp: now - dayMs * 27.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-vattenfall-1',
+      amount: 420,
+      category: 'Räkningar',
+      merchant: 'Vattenfall',
+      note: 'Elräkning',
+      timestamp: now - dayMs * 28.1,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-bahnhof-1',
+      amount: 399,
+      category: 'Räkningar',
+      merchant: 'Bahnhof',
+      note: 'Bredband 250/250',
+      timestamp: now - dayMs * 27.5,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-sats-1',
+      amount: 649,
+      category: 'Hälsa & Skönhet',
+      merchant: 'SATS Gym',
+      note: 'Träningskort',
+      timestamp: now - dayMs * 28.3,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-netflix-1',
+      amount: 149,
+      category: 'Nöje & Fritid',
+      merchant: 'Netflix',
+      note: 'Standard HD streaming',
+      timestamp: now - dayMs * 21.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m1-1',
+      amount: 720,
+      category: 'Mat & Livsmedel',
+      merchant: 'ICA Kvantum',
+      note: 'Veckohandling',
+      timestamp: now - dayMs * 16.5,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m1-2',
+      amount: 610,
+      category: 'Mat & Livsmedel',
+      merchant: 'Willys',
+      note: 'Storhandling torrvaror',
+      timestamp: now - dayMs * 18.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m1-3',
+      amount: 85,
+      category: 'Restaurang & Fika',
+      merchant: 'Espresso House',
+      note: 'Fika möte',
+      timestamp: now - dayMs * 20.1,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m1-4',
+      amount: 540,
+      category: 'Transport & Bensin',
+      merchant: 'Circle K',
+      note: 'Tanka bilen',
+      timestamp: now - dayMs * 22.4,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m1-5',
+      amount: 450,
+      category: 'Shopping & Kläder',
+      merchant: 'H&M',
+      note: 'Presenter & strumpor',
+      timestamp: now - dayMs * 25.3,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m1-6',
+      amount: 320,
+      category: 'Nöje & Fritid',
+      merchant: 'Padel Zenter',
+      note: 'Träning med kompis',
+      timestamp: now - dayMs * 28.5,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.SWISH
+    },
+    {
+      id: 'demo-tx-m1-7',
+      amount: 310,
+      category: 'Mat & Livsmedel',
+      merchant: 'Systembolaget',
+      note: 'Helg dryck',
+      timestamp: now - dayMs * 30.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m1-8',
+      amount: 180,
+      category: 'Transport & Bensin',
+      merchant: 'Uber',
+      note: 'Taxiresa hem',
+      timestamp: now - dayMs * 32.1,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m1-9',
+      amount: 450,
+      category: 'Mat & Livsmedel',
+      merchant: 'Coop Konsum',
+      note: 'Middagsköp',
+      timestamp: now - dayMs * 35.4,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m1-10',
+      amount: 380,
+      category: 'Mat & Livsmedel',
+      merchant: 'ICA Supermarket',
+      note: 'Kompletteringshandling',
+      timestamp: now - dayMs * 40.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-sub-2',
+      amount: 119,
+      category: 'Nöje & Fritid',
+      merchant: 'Spotify Premium',
+      note: 'Månadsabonnemang musik',
+      timestamp: now - dayMs * 44.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+
+    // --- TVÅ MÅNADER SEDAN (45-74 dagar sedan) ---
+    {
+      id: 'demo-tx-income-2',
+      amount: 31200,
+      category: 'Lön',
+      merchant: 'Spotify AB',
+      note: 'Månadslön Elin',
+      timestamp: now - dayMs * 59.1,
+      type: 'income',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-rent-2',
+      amount: 8950,
+      category: 'Boende',
+      merchant: 'Hyra & Bostad',
+      note: 'Månadshyra Vasastaden',
+      timestamp: now - dayMs * 57.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-bahnhof-2',
+      amount: 399,
+      category: 'Räkningar',
+      merchant: 'Bahnhof',
+      note: 'Bredband 250/250',
+      timestamp: now - dayMs * 57.5,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-sats-2',
+      amount: 649,
+      category: 'Hälsa & Skönhet',
+      merchant: 'SATS Gym',
+      note: 'Träningskort',
+      timestamp: now - dayMs * 58.3,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-netflix-2',
+      amount: 149,
+      category: 'Nöje & Fritid',
+      merchant: 'Netflix',
+      note: 'Standard HD streaming',
+      timestamp: now - dayMs * 51.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m2-1',
+      amount: 145,
+      category: 'Restaurang & Fika',
+      merchant: 'Lunchrestaurang',
+      note: 'Lunch med kollegor',
+      timestamp: now - dayMs * 45.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m2-2',
+      amount: 1290,
+      category: 'Shopping & Kläder',
+      merchant: 'Elgiganten',
+      note: 'Hörlurar bluetooth',
+      timestamp: now - dayMs * 50.4,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m2-3',
+      amount: 165,
+      category: 'Hälsa & Skönhet',
+      merchant: 'Apoteket',
+      note: 'Apoteksvaror',
+      timestamp: now - dayMs * 52.1,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m2-4',
+      amount: 890,
+      category: 'Mat & Livsmedel',
+      merchant: 'Willys',
+      note: 'Veckohandling mat',
+      timestamp: now - dayMs * 60.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m2-5',
+      amount: 320,
+      category: 'Nöje & Fritid',
+      merchant: 'Padel Zenter',
+      note: 'Padel med gänget',
+      timestamp: now - dayMs * 65.5,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.SWISH
+    },
+    {
+      id: 'demo-tx-m2-6',
+      amount: 620,
+      category: 'Transport & Bensin',
+      merchant: 'Shell',
+      note: 'Tanka bilen inför helg',
+      timestamp: now - dayMs * 70.1,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-sub-3',
+      amount: 119,
+      category: 'Nöje & Fritid',
+      merchant: 'Spotify Premium',
+      note: 'Månadsabonnemang musik',
+      timestamp: now - dayMs * 74.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+
+    // --- TRE MÅNADER SEDAN (75-95 dagar sedan) ---
+    {
+      id: 'demo-tx-income-3',
+      amount: 31200,
+      category: 'Lön',
+      merchant: 'Spotify AB',
+      note: 'Månadslön Elin',
+      timestamp: now - dayMs * 89.1,
+      type: 'income',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-rent-3',
+      amount: 8950,
+      category: 'Boende',
+      merchant: 'Hyra & Bostad',
+      note: 'Månadshyra Vasastaden',
+      timestamp: now - dayMs * 87.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.AUTOGIRO
+    },
+    {
+      id: 'demo-tx-netflix-3',
+      amount: 149,
+      category: 'Nöje & Fritid',
+      merchant: 'Netflix',
+      note: 'Standard HD streaming',
+      timestamp: now - dayMs * 81.2,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m3-1',
+      amount: 850,
+      category: 'Restaurang & Fika',
+      merchant: 'Middag ute',
+      note: 'Lördagsmiddag restaurang',
+      timestamp: now - dayMs * 75.3,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m3-2',
+      amount: 750,
+      category: 'Mat & Livsmedel',
+      merchant: 'ICA Kvantum',
+      note: 'Veckohandel familj',
+      timestamp: now - dayMs * 80.4,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
+    },
+    {
+      id: 'demo-tx-m3-3',
+      amount: 120,
+      category: 'Hälsa & Skönhet',
+      merchant: 'Apoteket Hjärtat',
+      note: 'Apoteksköp',
+      timestamp: now - dayMs * 85.1,
+      type: 'expense',
+      tags: [],
+      paymentMethod: PaymentMethod.KORTBETALNING
     }
   ];
 
@@ -427,7 +830,7 @@ export function seedDemoData() {
   localStorage.setItem('demo_transactions', JSON.stringify(demoTransactions));
   localStorage.setItem('demo_accounts', JSON.stringify(demoAccounts));
   localStorage.setItem('demo_profile', JSON.stringify(demoProfile));
-  localStorage.setItem('demo_data_version', 'v5_realistic_light');
+  localStorage.setItem('demo_data_version', 'v6_historical_rich');
 
   const mockSession = {
     access_token: 'demo-token',
