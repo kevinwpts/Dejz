@@ -167,12 +167,8 @@ export function TodayView({
       transition={{ duration: 0.4 }}
       className="space-y-4 relative min-h-screen bg-[#080A10] text-[var(--text-primary)] pb-12 overflow-x-hidden"
     >
-      {/* Top Deep Dark Indigo Aura Background (extends all the way past top safe area under Dynamic Island) */}
-      <div className="absolute -top-[env(safe-area-inset-top,44px)] sm:-top-12 left-0 right-0 h-[320px] sm:h-[340px] bg-gradient-to-b from-[#110E33] via-[#0B0922] via-65% to-transparent pointer-events-none z-0" />
-
-      {/* Ultra-subtle, dark Ambient Light Spotlights */}
-      <div className="absolute -top-[env(safe-area-inset-top,44px)] right-0 w-[300px] h-[200px] bg-gradient-to-br from-blue-600/10 via-sky-500/5 to-indigo-600/5 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="absolute top-[20px] -left-10 w-[220px] h-[160px] bg-purple-600/08 rounded-full blur-3xl pointer-events-none z-0" />
+      {/* Top subtle ~10% lighter dark background gradient (smooth transition into bottom #080A10) */}
+      <div className="absolute -top-[env(safe-area-inset-top,44px)] sm:-top-12 left-0 right-0 h-[300px] sm:h-[320px] bg-gradient-to-b from-[#121626] to-transparent pointer-events-none z-0" />
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}

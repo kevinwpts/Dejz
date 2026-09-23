@@ -39,7 +39,7 @@ export function AppHeader({
   periodName: _periodName,
   isCurrentPeriod: _isCurrentPeriod,
   onOpenCalendarPicker: _onOpenCalendarPicker,
-  activeTab,
+  activeTab: _activeTab,
 }: AppHeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isAtTop, setIsAtTop] = useState(true);
@@ -86,11 +86,7 @@ export function AppHeader({
     setIsVisible(true);
   }, [_navTrigger, title]);
 
-  // Hide header on today tab since GreetingModule renders the full bleed top hero bar
-  if (activeTab === 'today') {
-    return null;
-  }
-
+  // Visa alltid AppHeader
   return (
     <header
       className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out ${

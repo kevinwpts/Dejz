@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 
-import { X, Bell, User, Search } from 'lucide-react';
+import { X } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
 import { PeriodTimeline } from './PeriodTimeline';
 import { CalendarModal } from './CalendarModal';
@@ -41,7 +41,7 @@ interface GreetingModuleProps {
 }
 
 export function GreetingModule({
-  userName,
+  userName: _userName,
   availableForD,
   currency,
   isToday: _isToday,
@@ -59,16 +59,16 @@ export function GreetingModule({
   periods,
   variant: _variant = 'default',
   showPeriodSelector: _showPeriodSelector = false,
-  avatarUrl,
-  onNavigate,
+  avatarUrl: _avatarUrl,
+  onNavigate: _onNavigate,
   showFixedInCalendar: _showFixedInCalendar,
   isCurrentPeriod,
   currentPeriodDate,
   config,
   onUpdateConfig: _onUpdateConfig,
   onAddTransaction: _onAddTransaction,
-  onOpenNotifications,
-  notificationCount = 0,
+  onOpenNotifications: _onOpenNotifications,
+  notificationCount: _notificationCount = 0,
 }: GreetingModuleProps) {
   const [isCalculationModalOpen, setIsCalculationModalOpen] = useState(false);
   const [isSaveToPotOpen, setIsSaveToPotOpen] = useState(false);
@@ -97,19 +97,6 @@ export function GreetingModule({
   const selected = new Date(date || new Date());
   selected.setHours(0, 0, 0, 0);
   const diffDays = Math.round((selected.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  const greetingPhrase = useMemo(() => {
-    const hour = new Date().getHours();
-    if (language === 'en') {
-      if (hour < 12) return 'Good morning';
-      if (hour < 18) return 'Good afternoon';
-      return 'Good evening';
-    } else {
-      if (hour < 10) return 'God morgon';
-      if (hour < 18) return 'God dag';
-      return 'God kväll';
-    }
-  }, [language]);
 
   const _formattedDate = useMemo(() => {
     const d = new Date();
@@ -228,53 +215,7 @@ export function GreetingModule({
   }, [stats, todayDayData, availableForD, language, currency]);
 
   return (
-    <div className="font-sans relative">
-      {/* Sticky Top Header Bar (Sits directly on page background) */}
-      <div className="sticky top-0 z-40 w-full bg-transparent text-white pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 transition-all">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 relative z-10">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => onNavigate("profile")}
-              className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 flex items-center justify-center text-white overflow-hidden shrink-0 transition-transform active:scale-95 cursor-pointer shadow-xs"
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
-              ) : (
-                <User size={20} strokeWidth={2.2} />
-              )}
-            </button>
-            <div className="flex flex-col text-left">
-              <span className="text-[11px] font-semibold text-slate-300 leading-none mb-1 tracking-wide">
-                {greetingPhrase} 👋
-              </span>
-              <span className="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none">
-                {userName || 'Användare'}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onNavigate("search")}
-              className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs"
-              aria-label="Sök"
-            >
-              <Search size={18} strokeWidth={2.2} />
-            </button>
-            <button
-              onClick={onOpenNotifications || (() => onNavigate("notifications"))}
-              className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-all active:scale-95 cursor-pointer relative shadow-xs"
-              aria-label="Notiser"
-            >
-              <Bell size={18} strokeWidth={2.2} fill="currentColor" className="opacity-90" />
-              {notificationCount > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-slate-900 animate-pulse" />
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
+    <div className="font-sans relative pt-[calc(3.5rem+env(safe-area-inset-top))]">
       {/* 1. Electric Indigo & Royal Blue Glowing Hero Module (Continuous Flow) */}
       <div className="w-full relative pt-2 pb-3">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
