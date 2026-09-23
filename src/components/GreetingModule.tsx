@@ -229,13 +229,13 @@ export function GreetingModule({
 
   return (
     <div className="font-sans relative">
-      {/* Sticky Top Header Bar (Seamlessly integrated with Hero Card) */}
-      <div className="sticky top-0 z-40 w-full bg-gradient-to-r from-[#0EA5E9] via-[#0284C7] to-[#2563EB] text-white pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 border-b border-white/10 shadow-sm transition-all">
+      {/* Sticky Top Header Bar (Dark Navy Palette, seamless status bar) */}
+      <div className="sticky top-0 z-40 w-full bg-[#0F172A] text-white pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 border-b border-white/10 shadow-sm transition-all">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 relative z-10">
           <div className="flex items-center gap-3">
             <button
               onClick={() => onNavigate("profile")}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 flex items-center justify-center text-white overflow-hidden shrink-0 transition-transform active:scale-95 cursor-pointer shadow-xs"
+              className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 flex items-center justify-center text-white overflow-hidden shrink-0 transition-transform active:scale-95 cursor-pointer shadow-xs"
             >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
@@ -244,7 +244,7 @@ export function GreetingModule({
               )}
             </button>
             <div className="flex flex-col text-left">
-              <span className="text-[11px] font-semibold text-white/80 leading-none mb-1 tracking-wide">
+              <span className="text-[11px] font-semibold text-slate-300 leading-none mb-1 tracking-wide">
                 {greetingPhrase} 👋
               </span>
               <span className="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none">
@@ -256,30 +256,30 @@ export function GreetingModule({
           <div className="flex items-center gap-2">
             <button
               onClick={() => onNavigate("search")}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs"
+              className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs"
               aria-label="Sök"
             >
               <Search size={18} strokeWidth={2.2} />
             </button>
             <button
               onClick={onOpenNotifications || (() => onNavigate("notifications"))}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer relative shadow-xs"
+              className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-all active:scale-95 cursor-pointer relative shadow-xs"
               aria-label="Notiser"
             >
               <Bell size={18} strokeWidth={2.2} fill="currentColor" className="opacity-90" />
               {notificationCount > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-sky-600 animate-pulse" />
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-slate-900 animate-pulse" />
               )}
             </button>
           </div>
         </div>
       </div>
 
-      {/* 1. Soft Fintech Cyan-Blue Hero Card Body */}
-      <div className="w-full relative overflow-hidden rounded-b-[32px] sm:rounded-b-[36px] bg-gradient-to-br from-[#0EA5E9] via-[#0284C7] to-[#2563EB] text-white pt-2 pb-8 shadow-xl shadow-sky-500/15 border-b border-sky-400/30">
-        {/* Soft Ambient Light Circles */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-56 h-56 bg-sky-300/20 rounded-full blur-2xl pointer-events-none" />
+      {/* 1. Soft Premium Dark Navy Hero Card Body */}
+      <div className="w-full relative overflow-hidden rounded-b-[32px] sm:rounded-b-[36px] bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#1E3A8A] text-white pt-2 pb-8 shadow-xl shadow-slate-950/25 border-b border-slate-800/80">
+        {/* Soft Ambient Glows */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-56 h-56 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none" />
 
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           {/* Center Balance Display (Kinetic Variable Typography) */}

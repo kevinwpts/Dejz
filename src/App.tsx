@@ -185,10 +185,11 @@ export default function App() {
   // Dynamic Theme Color & Body Background for iOS Safari Status Bar / Dynamic Island
   useEffect(() => {
     const themeMetas = document.querySelectorAll('meta[name="theme-color"]');
+    const darkNavy = '#0F172A';
     if (activeTab === 'today') {
-      themeMetas.forEach(meta => meta.setAttribute('content', '#0EA5E9'));
-      document.documentElement.style.backgroundColor = '#0EA5E9';
-      document.body.style.backgroundColor = '#0EA5E9';
+      themeMetas.forEach(meta => meta.setAttribute('content', darkNavy));
+      document.documentElement.style.backgroundColor = darkNavy;
+      document.body.style.backgroundColor = darkNavy;
     } else {
       themeMetas.forEach(meta => meta.setAttribute('content', '#F8F9FA'));
       document.documentElement.style.backgroundColor = '';
@@ -3154,7 +3155,7 @@ export default function App() {
         className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
         style={{
           height: 'max(env(safe-area-inset-top, 0px), 0px)',
-          backgroundColor: activeTab === 'today' ? '#0EA5E9' : 'var(--bg-color)',
+          backgroundColor: activeTab === 'today' ? '#0F172A' : 'var(--bg-color)',
         }}
         aria-hidden="true"
       />
