@@ -139,30 +139,42 @@ export function GreetingModule({
 
     const spentTodayRound = todayDayData ? Math.round(todayDayData.daySpent || 0) : 0;
     const remainingToday = Math.round(availableForD || 0);
-    const daysLeft = Math.max(1, (stats.remainingDays || 1) - 1);
+    const remainingDaysTotal = stats.remainingDays || 1;
+    const futureDaysLeft = Math.max(0, remainingDaysTotal - 1);
 
     if (remainingToday < 0) {
       const overAmount = Math.abs(remainingToday);
-      const perDayDecrease = Math.round(overAmount / daysLeft);
+      
+      let detailStr = null;
+      if (futureDaysLeft === 0) {
+        detailStr = language === 'en'
+          ? `Tomorrow is payday! Try to hold tight until then.`
+          : `Imorgon är det lön! Försök att hålla i pengarna tills dess.`;
+      } else if (futureDaysLeft === 1) {
+        const perDayDecrease = Math.round(overAmount / 1);
+        detailStr = language === 'en'
+          ? `This reduces your allowance for tomorrow by approx. ${formatAmount(perDayDecrease, language)} ${currency}.`
+          : `Det gör att ditt utrymme imorgon minskar med cirka ${formatAmount(perDayDecrease, language)} ${currency}.`;
+      } else {
+        const perDayDecrease = Math.round(overAmount / futureDaysLeft);
+        detailStr = language === 'en'
+          ? `This reduces your daily allowance by approx. ${formatAmount(perDayDecrease, language)} ${currency}/day over the next ${futureDaysLeft} days.`
+          : `Det gör att ditt utrymme minskar med cirka ${formatAmount(perDayDecrease, language)} ${currency}/dag de kommande ${futureDaysLeft} dagarna.`;
+      }
+
       return {
         message: language === 'en'
           ? `You are ${formatAmount(overAmount, language)} ${currency} over today's budget.`
           : `Du ligger ${formatAmount(overAmount, language)} ${currency} över dagens plan.`,
-        detail: daysLeft > 0 
-          ? (language === 'en'
-              ? `This reduces your daily allowance by approx. ${formatAmount(perDayDecrease, language)} ${currency}/day over the next ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}.`
-              : `Det gör att ditt utrymme minskar med cirka ${formatAmount(perDayDecrease, language)} ${currency}/dag de kommande ${daysLeft} ${daysLeft === 1 ? 'dagarna' : 'dagarna'}.`)
-          : null,
+        detail: detailStr,
         type: 'warning'
       };
     }
 
-    const perDayBonus = Math.round(remainingToday / daysLeft);
-
     let msg = '';
     if (spentTodayRound === 0) {
       msg = language === 'en'
-        ? `You haven't spent anything yet today! You have ${formatAmount(remainingToday, language)} ${currency} available.`
+        ? `You haven't spent anything yet today! You have ${formatAmount(remainingToday, language)} ${currency} left.`
         : `Du har inte spenderat något än idag! Du har ${formatAmount(remainingToday, language)} ${currency} kvar.`;
     } else {
       msg = language === 'en'
@@ -171,10 +183,22 @@ export function GreetingModule({
     }
 
     let detail = null;
-    if (remainingToday > 0 && daysLeft > 0) {
-      detail = language === 'en'
-        ? `If you don't spend more today, you get approx. ${formatAmount(perDayBonus, language)} ${currency} more per day for the next ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}.`
-        : `Om du inte spenderar mer idag får du cirka ${formatAmount(perDayBonus, language)} ${currency} mer per dag de kommande ${daysLeft} ${daysLeft === 1 ? 'dagarna' : 'dagarna'}.`;
+    if (remainingToday > 0) {
+      if (futureDaysLeft === 0) {
+        detail = language === 'en'
+          ? `If you don't spend more today, you finish the period with ${formatAmount(remainingToday, language)} ${currency} in surplus! 🎉`
+          : `Om du inte spenderar mer idag klarar du perioden med ${formatAmount(remainingToday, language)} ${currency} i överskott! 🎉`;
+      } else if (futureDaysLeft === 1) {
+        const perDayBonus = Math.round(remainingToday / 1);
+        detail = language === 'en'
+          ? `If you don't spend more today, you get approx. ${formatAmount(perDayBonus, language)} ${currency} more tomorrow!`
+          : `Om du inte spenderar mer idag får du cirka ${formatAmount(perDayBonus, language)} ${currency} mer imorgon!`;
+      } else {
+        const perDayBonus = Math.round(remainingToday / futureDaysLeft);
+        detail = language === 'en'
+          ? `If you don't spend more today, you get approx. ${formatAmount(perDayBonus, language)} ${currency} more per day for the next ${futureDaysLeft} days.`
+          : `Om du inte spenderar mer idag får du cirka ${formatAmount(perDayBonus, language)} ${currency} mer per dag de kommande ${futureDaysLeft} dagarna.`;
+      }
     }
 
     return {
