@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Zap, TrendingDown, Target, Calendar as CalendarIcon, X } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
 import { UniversalPeriodSelector } from './UniversalPeriodSelector';
+import { PeriodTimeline } from './PeriodTimeline';
 import { CalendarModal } from './CalendarModal';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
@@ -47,7 +48,7 @@ export function GreetingModule({
   stats,
   t,
   calendarDays,
-  setSelectedDate: _setSelectedDate,
+  setSelectedDate,
   setCurrentPeriodDate,
   periodStart: _periodStart,
   periodEnd: _periodEnd,
@@ -148,6 +149,18 @@ export function GreetingModule({
   if (isPastPeriod) {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        {/* Timeline of Period */}
+        {calendarDays && calendarDays.length > 0 && (
+          <PeriodTimeline
+            calendarDays={calendarDays}
+            selectedDate={date}
+            onSelectDate={setSelectedDate}
+            stats={stats}
+            language={language}
+            isCurrentPeriod={isCurrentPeriod}
+          />
+        )}
+
         {/* 1. Period Selector */}
         {periods && setCurrentPeriodDate && currentPeriodDate && (
           <UniversalPeriodSelector
@@ -227,7 +240,19 @@ export function GreetingModule({
   }
 
   return (
-    <div className="space-y-5 sm:space-y-6 font-sans relative">
+    <div className="space-y-4 sm:space-y-5 font-sans relative">
+      {/* Timeline of Period */}
+      {calendarDays && calendarDays.length > 0 && (
+        <PeriodTimeline
+          calendarDays={calendarDays}
+          selectedDate={date}
+          onSelectDate={setSelectedDate}
+          stats={stats}
+          language={language}
+          isCurrentPeriod={isCurrentPeriod}
+        />
+      )}
+
       {/* 1. Period Selector */}
       {periods && setCurrentPeriodDate && currentPeriodDate && (
         <UniversalPeriodSelector

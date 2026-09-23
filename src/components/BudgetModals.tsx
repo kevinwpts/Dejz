@@ -1256,24 +1256,28 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
               </div>
             </div>
 
-            <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
-              <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('deductionDay')}</p>
-              <p className="text-base font-medium text-[var(--text-primary)]">{saving.deductionDay ? `${saving.deductionDay}e` : '-'}</p>
-            </div>
-
-            <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
-              <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('paymentMethod')}</p>
-              <div className="flex items-center gap-2">
-                {(() => {
-                  const methodStr = typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : (saving.paymentMethod || '');
-                  const PaymentIcon = getPaymentMethodIcon(methodStr);
-                  return <span className="text-[var(--text-secondary)]"><PaymentIcon size={16} /></span>;
-                })()}
-                <p className="text-base font-medium text-[var(--text-primary)] break-words">
-                  {typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : (saving.paymentMethod || '-')}
-                </p>
+            {saving.deductionDay ? (
+              <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
+                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('deductionDay')}</p>
+                <p className="text-base font-medium text-[var(--text-primary)]">{`${saving.deductionDay}e`}</p>
               </div>
-            </div>
+            ) : null}
+
+            {saving.paymentMethod ? (
+              <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
+                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('paymentMethod')}</p>
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const methodStr = typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : (saving.paymentMethod || '');
+                    const PaymentIcon = getPaymentMethodIcon(methodStr);
+                    return <span className="text-[var(--text-secondary)]"><PaymentIcon size={16} /></span>;
+                  })()}
+                  <p className="text-base font-medium text-[var(--text-primary)] break-words">
+                    {typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : saving.paymentMethod}
+                  </p>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </motion.div>
@@ -1315,9 +1319,9 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
   const [name, setName] = useState(saving?.name || '');
   const [amount, setAmount] = useState(formatAmount(saving?.amount || ''));
   
-  const [deductionDay, setDeductionDay] = useState(saving?.deductionDay || 1);
+  const deductionDay = saving?.deductionDay || 1;
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
-  const [paymentMethod, setPaymentMethod] = useState(typeof saving?.paymentMethod === 'string' ? saving.paymentMethod : (saving?.paymentMethod as any)?.name || firstPaymentMethod);
+  const paymentMethod = typeof saving?.paymentMethod === 'string' ? saving.paymentMethod : (saving?.paymentMethod as any)?.name || firstPaymentMethod;
   const [isVariable, setIsVariable] = useState(saving?.isVariable || false);
   const [icon, setIcon] = useState(saving?.icon || 'piggy-bank');
   const originalName = useRef(saving?.name || '');
@@ -1490,7 +1494,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           <div className="space-y-2">
             <div className="flex items-center justify-between px-1">
               <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1">
-                {t('descriptionPlaceholder')}
+                {t('whatAreYouSavingFor')}
               </label>
               {autoLogo && !manualSelectionThisSession && name !== originalName.current && (
                 <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full animate-pulse">
@@ -1504,7 +1508,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 type="text" 
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
-                placeholder={t('descriptionPlaceholder')} 
+                placeholder={t('whatAreYouSavingFor')} 
                 className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40" 
               />
               {name && (
@@ -1516,43 +1520,6 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   <X size={18} strokeWidth={2} />
                 </button>
               )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('deductionDay')}</label>
-              <div className="relative">
-                <select
-                  value={deductionDay}
-                  onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
-                >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                    <option key={day} value={day}>{day}</option>
-                  ))}
-                </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('paymentMethod')}</label>
-              <div className="relative">
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
-                >
-                  {(paymentMethods || []).map((method, idx) => {
-                    const methodName = typeof method === 'string' ? method : method?.name || '';
-                    return (
-                      <option key={methodName || idx} value={methodName}>{methodName}</option>
-                    );
-                  })}
-                </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
-              </div>
             </div>
           </div>
         </div>
