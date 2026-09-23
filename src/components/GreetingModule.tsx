@@ -229,8 +229,8 @@ export function GreetingModule({
 
   return (
     <div className="font-sans relative">
-      {/* Sticky Top Header Bar (Dark Navy Palette, seamless status bar) */}
-      <div className="sticky top-0 z-40 w-full bg-[#0F172A] text-white pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 transition-all">
+      {/* Sticky Top Header Bar (Royal Electric Indigo Palette, seamless status bar) */}
+      <div className="sticky top-0 z-40 w-full bg-[#1E1A52] text-white pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 transition-all">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 relative z-10">
           <div className="flex items-center gap-3">
             <button
@@ -275,11 +275,12 @@ export function GreetingModule({
         </div>
       </div>
 
-      {/* 1. Soft Premium Dark Navy Hero Module (Gradient Fade Connection) */}
-      <div className="w-full relative overflow-hidden bg-gradient-to-b from-[#0F172A] via-[#0F172A]/90 to-transparent text-white pt-2 pb-8">
-        {/* Soft Ambient Glows */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-56 h-56 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none" />
+      {/* 1. Electric Indigo & Royal Blue Glowing Hero Module (Aura Gradient Connection) */}
+      <div className="w-full relative overflow-hidden bg-gradient-to-b from-[#1E1A52] via-[#1A1648] via-70% to-transparent text-white pt-2 pb-10">
+        {/* Soft Ambient Radial Glows matching reference image */}
+        <div className="absolute -top-10 right-0 w-80 h-80 bg-gradient-to-br from-blue-500/35 via-sky-400/25 to-indigo-600/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 -left-10 w-72 h-72 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-500/15 via-indigo-500/10 to-transparent pointer-events-none" />
 
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           {/* Center Balance Display (Kinetic Variable Typography) */}
