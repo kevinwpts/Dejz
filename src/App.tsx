@@ -3149,15 +3149,17 @@ export default function App() {
 
   return (
     <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden" style={{ background: 'var(--bg-gradient)' }}>
-      {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop */}
-      <div
-        className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
-        style={{
-          height: activeTab === 'today' ? 'max(env(safe-area-inset-top, 0px), 54px)' : 'max(env(safe-area-inset-top, 0px), 1px)',
-          backgroundColor: activeTab === 'today' ? '#0EA5E9' : 'var(--bg-color)',
-        }}
-        aria-hidden="true"
-      />
+      {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop (for non-today tabs) */}
+      {activeTab !== 'today' && (
+        <div
+          className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
+          style={{
+            height: 'max(env(safe-area-inset-top, 0px), 1px)',
+            backgroundColor: 'var(--bg-color)',
+          }}
+          aria-hidden="true"
+        />
+      )}
 
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 
