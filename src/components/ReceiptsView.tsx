@@ -88,7 +88,7 @@ export function ReceiptsView({
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            <span className="text-3xl font-extrabold text-[var(--text-primary)] tracking-tight font-amount tabular-nums">
               {formatAmount(totalAmount)}
             </span>
             <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-50">

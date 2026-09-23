@@ -336,8 +336,8 @@ export function GreetingModule({
           </div>
           
           <div className="flex justify-between items-center mt-2.5 text-[10px] font-semibold text-[var(--text-secondary)] opacity-40 px-0.5">
-            <span>0</span>
-            <span>{formatAmount((stats?.disposablePot || 0) + (stats?.totalExtraIncomeUpToToday || 0), language)} {currency}</span>
+            <span className="font-amount tabular-nums">0</span>
+            <span className="font-amount tabular-nums">{formatAmount((stats?.disposablePot || 0) + (stats?.totalExtraIncomeUpToToday || 0), language)} {currency}</span>
           </div>
         </motion.div>
       )}
