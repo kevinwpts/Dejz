@@ -19,7 +19,7 @@ export function EmptyState({
   className = '',
 }: EmptyStateProps) {
   return (
-    <div className={`bg-[var(--surface-color)] border border-[var(--border-color)] dark:border-white/10 rounded-[16px] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-2xs ${className}`}>
+    <div className={`bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-2xs ${className}`}>
       {Icon && (
         <div className="w-12 h-12 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)]/40 flex items-center justify-center text-[var(--text-secondary)] mb-3 shadow-2xs">
           <Icon size={20} strokeWidth={1.5} />

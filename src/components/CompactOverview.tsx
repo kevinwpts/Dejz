@@ -26,7 +26,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
   return (
     <div className="space-y-8 px-4">
       {/* Budget Status */}
-      <div className="p-5 rounded-[16px] bg-[var(--surface-color)] border border-[var(--border-color)] dark:border-white/10 shadow-2xs">
+      <div className="p-5 rounded-[16px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-2xs">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xs font-semibold text-[var(--text-secondary)] opacity-70">
             {t('budgetUsage')}
@@ -58,7 +58,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
         </h3>
         <div className="grid grid-cols-1 gap-2">
           {Object.entries(categoryTotals).slice(0, 4).map(([cat, amount]) => (
-            <div key={cat} className="flex items-center justify-between p-3.5 rounded-[16px] bg-[var(--surface-color)] border border-[var(--border-color)] dark:border-white/10 hover:bg-[var(--surface-muted)] hover:scale-[1.005] active:scale-[0.99] transition-all group shadow-2xs">
+            <div key={cat} className="flex items-center justify-between p-3.5 rounded-[16px] bg-[var(--surface-color)] border border-[var(--border-color)] hover:bg-[var(--surface-muted)] hover:scale-[1.005] active:scale-[0.99] transition-all group shadow-2xs">
               <span className="text-[12px] font-medium text-[var(--text-primary)] leading-tight truncate tracking-tight">
                 {cat}
               </span>

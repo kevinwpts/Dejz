@@ -93,7 +93,7 @@ export function LogView({
   return (
     <div className="space-y-6">
       <div className="space-y-3 bg-transparent p-0">
-        <div className="relative group bg-[var(--surface-color)] rounded-full border border-[var(--border-color)] dark:border-white/10 shadow-xs h-11 flex items-center">
+        <div className="relative group bg-[var(--surface-color)] rounded-full border border-[var(--border-color)] shadow-xs h-11 flex items-center">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] opacity-50 w-4 h-4 transition-all group-focus-within:text-[var(--accent-color)] group-focus-within:opacity-100" />
           <input 
             type="text" 
@@ -113,7 +113,7 @@ export function LogView({
         </div>
 
         {/* Type Filters (Alla, Utgift, Inkomst, Kvitto) */}
-        <div className="grid grid-cols-4 gap-1 p-1 bg-[var(--surface-color)] rounded-full border border-[var(--border-color)] dark:border-white/10 shadow-xs">
+        <div className="grid grid-cols-4 gap-1 p-1 bg-[var(--surface-color)] rounded-full border border-[var(--border-color)] shadow-xs">
           {(['all', 'expense', 'income', 'receipt'] as const).map(type => {
             const isActive = typeFilter === type;
             return (
@@ -152,7 +152,7 @@ export function LogView({
                   {new Date(date).toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
                 </span>
               </div>
-              <div className="bg-[var(--surface-color)] rounded-[16px] border border-[var(--border-color)] dark:border-white/10 shadow-xs divide-y divide-[var(--border-color)]/30 overflow-hidden">
+              <div className="bg-[var(--surface-color)] rounded-[16px] border border-[var(--border-color)] shadow-xs divide-y divide-[var(--border-color)]/30 overflow-hidden">
                 {dayTransactions.map((transaction: Transaction) => (
                   <TransactionItem 
                     key={transaction.id}

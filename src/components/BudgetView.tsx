@@ -76,7 +76,7 @@ export function BudgetView({
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center"
+          className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center"
         >
           <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2.5 block">
             {t('monthlyDisposable')}
@@ -100,7 +100,7 @@ export function BudgetView({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] overflow-hidden"
+            className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden"
           >
             <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">{t('incomes') || 'Inkomster'}</span>
             <span className="text-[16px] sm:text-[18px] font-bold font-amount tabular-nums text-success text-center truncate w-full">+{formatAmount(stats.totalIncome)}</span>
@@ -110,7 +110,7 @@ export function BudgetView({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] overflow-hidden"
+            className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden"
           >
             <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">{t('fixedExpenses') || 'Fasta utgifter'}</span>
             <span className="text-[16px] sm:text-[18px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(stats.totalFixed)}</span>
@@ -120,7 +120,7 @@ export function BudgetView({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] overflow-hidden"
+            className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden"
           >
             <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">{t('monthlySavings') || 'Månadssparande'}</span>
             <span className="text-[16px] sm:text-[18px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(totalSavings)}</span>
@@ -279,7 +279,7 @@ export function BudgetView({
             <button 
               type="button"
               onClick={onAddMonthlySaving}
-              className="w-full bg-[var(--surface-color)] p-4 sm:p-5 rounded-[16px] border border-[var(--border-color)] dark:border-white/10 hover:bg-[var(--surface-muted)] transition-all flex items-center justify-between text-left group shadow-xs cursor-pointer active:scale-[0.99]"
+              className="w-full bg-[var(--surface-color)] p-4 sm:p-5 rounded-[16px] border border-[var(--border-color)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-between text-left group shadow-xs cursor-pointer active:scale-[0.99]"
             >
               <div className="flex items-center gap-3.5 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform shrink-0">

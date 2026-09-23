@@ -273,7 +273,7 @@ export function TodayView({
             {!isTodaySelected && (
               <button
                 onClick={handleGoToToday}
-                className="flex items-center gap-1 px-2.5 h-6 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)] dark:border-white/10 text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+                className="flex items-center gap-1 px-2.5 h-6 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all active:scale-95 shadow-2xs cursor-pointer"
               >
                 <RotateCcw size={10} strokeWidth={2} />
                 <span>{config.language === "en" ? "Today" : "Idag"}</span>

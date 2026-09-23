@@ -66,7 +66,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
   return (
     <div className="space-y-4">
       {/* Primary Hero Metric: Total Remaining */}
-      <div className="p-6 sm:p-7 rounded-[28px] overflow-hidden border border-[var(--border-color)] dark:border-white/10 shadow-sm flex flex-col items-center text-center bg-[var(--surface-color)] relative group">
+      <div className="p-6 sm:p-7 rounded-[28px] overflow-hidden border border-[var(--border-color)] shadow-sm flex flex-col items-center text-center bg-[var(--surface-color)] relative group">
         <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2.5 block">
           {t('totalRemaining' as any)}
         </span>
@@ -82,7 +82,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
 
       {/* Secondary Metrics: 3-column Grid (Compact & Lower) */}
       <div className="grid grid-cols-3 gap-2.5">
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)]">
+        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] bg-[var(--surface-color)]">
           <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">
             {t('spent')}
           </span>
@@ -91,7 +91,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
           </span>
         </div>
         
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)]">
+        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] bg-[var(--surface-color)]">
           <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">
             {t('averagePerDay')}
           </span>
@@ -100,7 +100,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
           </span>
         </div>
 
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)]">
+        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] bg-[var(--surface-color)]">
           <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">
             {t('baseDailyBudget')}
           </span>
@@ -110,7 +110,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
         </div>
       </div>
 
-      <div className="p-5 sm:p-6 rounded-[16px] border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] relative overflow-hidden shadow-xs">
+      <div className="p-5 sm:p-6 rounded-[16px] border border-[var(--border-color)] bg-[var(--surface-color)] relative overflow-hidden shadow-xs">
         <div className="flex justify-between items-end mb-3.5 relative z-10">
           <p className="text-xs font-semibold text-[var(--text-secondary)] opacity-60">{t('budgetLeft')}</p>
           <p className={`text-xl font-bold tracking-tight leading-none ${(stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'text-danger' : 'text-[var(--text-primary)]'}`}>

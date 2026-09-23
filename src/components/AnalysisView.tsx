@@ -143,7 +143,7 @@ export function AnalysisView({
       />
 
       {/* Analysis Filter - Segmented Control */}
-      <div className="grid grid-cols-3 gap-1 p-1 bg-[var(--surface-color)] border border-[var(--border-color)] dark:border-white/10 rounded-full shadow-xs">
+      <div className="grid grid-cols-3 gap-1 p-1 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full shadow-xs">
         <button
           onClick={() => {
             setAnalysisFilter('all');
@@ -185,7 +185,7 @@ export function AnalysisView({
         </button>
       </div>
 
-      <div className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] shadow-sm flex flex-col items-center relative overflow-hidden">
+      <div className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center relative overflow-hidden">
         <h3 className="text-[15px] font-bold text-[var(--text-primary)] tracking-tight self-start mb-4 relative z-10">{t('distribution')}</h3>
         <div className="w-full h-72 relative z-10">
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20">
@@ -314,7 +314,7 @@ export function AnalysisView({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className={isExpanded ? "rounded-[16px] border border-[var(--border-color)] dark:border-white/15 shadow-xs overflow-hidden bg-[var(--surface-color)] transition-all duration-200" : ""}
+                className={isExpanded ? "rounded-[16px] border border-[var(--border-color)] shadow-xs overflow-hidden bg-[var(--surface-color)] transition-all duration-200" : ""}
               >
                 <motion.div 
                   whileHover={isExpanded ? undefined : { scale: 1.005 }}

@@ -161,7 +161,7 @@ export function GreetingModule({
         )}
 
         {/* Main Summary Card */}
-        <div className="bg-[var(--surface-color)] border border-[var(--border-color)] dark:border-white/10 p-8 sm:p-10 relative overflow-hidden flex flex-col justify-between min-h-[300px] rounded-[28px] shadow-sm">
+        <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-8 sm:p-10 relative overflow-hidden flex flex-col justify-between min-h-[300px] rounded-[28px] shadow-sm">
           <div className="relative z-10 flex flex-col items-center w-full">
             <div className="flex flex-col items-center mb-7">
               <div className="w-12 h-12 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--accent-color)] mb-4">
@@ -211,7 +211,7 @@ export function GreetingModule({
             { label: t('fixed'), value: stats.totalFixed, icon: TrendingDown, color: 'text-danger' },
             { label: t('days'), value: stats.totalDaysInPeriod, icon: CalendarIcon, color: 'text-success', isRaw: true }
           ].map((item, i) => (
-            <div key={i} className="bg-[var(--surface-color)] p-3.5 sm:p-4 rounded-[16px] border border-[var(--border-color)] dark:border-white/10 flex flex-col items-center justify-center hover:bg-[var(--surface-muted)]/50 transition-colors shadow-xs">
+            <div key={i} className="bg-[var(--surface-color)] p-3.5 sm:p-4 rounded-[16px] border border-[var(--border-color)] flex flex-col items-center justify-center hover:bg-[var(--surface-muted)]/50 transition-colors shadow-xs">
               <div className={`w-8 h-8 rounded-full bg-[var(--surface-muted)] flex items-center justify-center ${item.color} opacity-90 mb-2`}>
                 <item.icon size={15} strokeWidth={1.75} />
               </div>
@@ -244,7 +244,7 @@ export function GreetingModule({
       <motion.div 
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`rounded-[28px] overflow-hidden border border-[var(--border-color)] dark:border-white/10 shadow-sm transition-all duration-500 flex flex-col ${
+        className={`rounded-[28px] overflow-hidden border border-[var(--border-color)] shadow-sm transition-all duration-500 flex flex-col ${
           diffDays === 0 ? 'bg-[#F4F7FF] dark:bg-[#161B26]' : 'bg-[var(--surface-color)]'
         }`}
       >
@@ -304,7 +304,7 @@ export function GreetingModule({
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="rounded-[24px] border border-[var(--border-color)] dark:border-white/10 p-5 sm:p-6 bg-[var(--surface-color)] shadow-sm transition-all duration-500"
+          className="rounded-[24px] border border-[var(--border-color)] p-5 sm:p-6 bg-[var(--surface-color)] shadow-sm transition-all duration-500"
         >
           <div className="flex justify-between items-end mb-4">
             <div>

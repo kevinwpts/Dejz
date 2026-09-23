@@ -43,7 +43,7 @@ export function UniversalPeriodSelector({
 
   return (
     <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-30 mb-4 transition-all">
-      <div className="bg-[var(--surface-color)] border border-[var(--border-color)] dark:border-white/10 rounded-full shadow-xs px-2 sm:px-3 py-1 flex items-center justify-between transition-all">
+      <div className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full shadow-xs px-2 sm:px-3 py-1 flex items-center justify-between transition-all">
         <button 
           onClick={handlePrevPeriod}
           className="p-2 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all active:scale-95 cursor-pointer"
