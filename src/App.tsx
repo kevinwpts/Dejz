@@ -388,7 +388,7 @@ export default function App() {
             id: session.user.id,
             email: session.user.email,
             role:
-              session.user.email === "kevinwpts@gmail.com" ? "admin" : "user",
+              session.user.email === "hej@dejz.se" || session.user.email === "kevinwpts@gmail.com" ? "admin" : "user",
             language: landingLanguage,
             dark_mode: false,
           })
@@ -786,7 +786,7 @@ export default function App() {
 
 
   const _isAdmin =
-    profile?.role === "admin" || session?.user?.email === "kevinwpts@gmail.com";
+    profile?.role === "admin" || session?.user?.email === "hej@dejz.se" || session?.user?.email === "kevinwpts@gmail.com";
 
   const _handleResetTotalSaved = async () => {
     if (!session || !config) return;
@@ -1429,7 +1429,7 @@ export default function App() {
           full_name: session.user.user_metadata?.full_name || "",
           avatar_url: session.user.user_metadata?.avatar_url || "",
           role:
-            session.user.email === "kevinwpts@gmail.com" ? "admin" : "user",
+            session.user.email === "hej@dejz.se" || session.user.email === "kevinwpts@gmail.com" ? "admin" : "user",
           currency: defaultConfig.currency,
           language: defaultConfig.language,
           payday: defaultConfig.payday,

@@ -195,7 +195,7 @@ export function PublicLegalPage({
             <span>•</span>
             <button onClick={() => handleSelectDoc('cookies')} className="hover:underline cursor-pointer">Cookiepolicy</button>
             <span>•</span>
-            <a href="mailto:kevinwpts@gmail.com" className="hover:underline">Kontakt & Support</a>
+            <a href="mailto:hej@dejz.se" className="hover:underline">Kontakt & Support</a>
           </p>
         </div>
       </main>
@@ -241,8 +241,8 @@ function SwedishPrivacyPolicy() {
         <p className="text-sm leading-relaxed">
           Dejz (nedan kallat &quot;vi&quot;, &quot;oss&quot; eller &quot;vår&quot;) ansvarar för behandlingen av dina personuppgifter när du använder webbapplikationen Dejz.
           För alla frågor rörande dataskydd och dina rättigheter kan du kontakta oss via e-post på{' '}
-          <a href="mailto:kevinwpts@gmail.com" className="text-[var(--accent-color)] font-medium underline">
-            kevinwpts@gmail.com
+          <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] font-medium underline">
+            hej@dejz.se
           </a>.
         </p>
       </section>
@@ -328,7 +328,7 @@ function SwedishPrivacyPolicy() {
         <p className="text-sm leading-relaxed">
           Vi lagrar dina uppgifter endast så länge ditt konto är aktivt. 
           Du kan när som helst <strong>radera ditt konto och all tillhörande data permanent</strong> direkt inifrån appens inställningsmeny, eller genom att kontakta oss på{' '}
-          <a href="mailto:kevinwpts@gmail.com" className="text-[var(--accent-color)] underline">kevinwpts@gmail.com</a>. Vid radering raderas alla dina budgetposter, sparkonton och personuppgifter omedelbart och oåterkalleligt från våra databaser.
+          <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] underline">hej@dejz.se</a>. Vid radering raderas alla dina budgetposter, sparkonton och personuppgifter omedelbart och oåterkalleligt från våra databaser.
         </p>
       </section>
 
@@ -365,7 +365,7 @@ function SwedishPrivacyPolicy() {
         </p>
         <div className="p-4 rounded-xl bg-[var(--surface-muted)] text-sm space-y-1 border border-[var(--border-color)]">
           <p><strong>App:</strong> Dejz Personal Budgeting</p>
-          <p><strong>Support & Dataskydd:</strong> <a href="mailto:kevinwpts@gmail.com" className="text-[var(--accent-color)] underline">kevinwpts@gmail.com</a></p>
+          <p><strong>Support & Dataskydd:</strong> <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] underline">hej@dejz.se</a></p>
           <p><strong>Webbplats:</strong> <a href={window.location.origin} className="text-[var(--accent-color)] underline">{window.location.origin}</a></p>
         </div>
       </section>
@@ -411,8 +411,8 @@ function EnglishPrivacyPolicy() {
         <p className="text-sm leading-relaxed">
           Dejz (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is the controller responsible for the processing of your personal data when using the Dejz application.
           For any data protection inquiries, you can reach our team via email at{' '}
-          <a href="mailto:kevinwpts@gmail.com" className="text-[var(--accent-color)] font-medium underline">
-            kevinwpts@gmail.com
+          <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] font-medium underline">
+            hej@dejz.se
           </a>.
         </p>
       </section>
@@ -479,7 +479,7 @@ function EnglishPrivacyPolicy() {
         <h2 className="text-lg font-bold text-[var(--text-primary)]">5. Data Retention & Account Deletion</h2>
         <p className="text-sm leading-relaxed">
           We retain your data only for as long as your account remains active. You can <strong>permanently delete your account and all associated budget data</strong> at any time directly in the application settings, or by emailing{' '}
-          <a href="mailto:kevinwpts@gmail.com" className="text-[var(--accent-color)] underline">kevinwpts@gmail.com</a>. Account deletion immediately and irreversibly wipes all your records from our databases.
+          <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] underline">hej@dejz.se</a>. Account deletion immediately and irreversibly wipes all your records from our databases.
         </p>
       </section>
 
@@ -487,7 +487,7 @@ function EnglishPrivacyPolicy() {
         <h2 className="text-lg font-bold text-[var(--text-primary)]">6. Your Rights Under GDPR</h2>
         <p className="text-sm leading-relaxed">
           Under European data protection laws, you have the right to access, rectify, export, restrict, or erase your personal data. To exercise any of these rights, contact us at{' '}
-          <a href="mailto:kevinwpts@gmail.com" className="text-[var(--accent-color)] underline">kevinwpts@gmail.com</a>.
+          <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] underline">hej@dejz.se</a>.
         </p>
       </section>
 
@@ -498,7 +498,7 @@ function EnglishPrivacyPolicy() {
         </p>
         <div className="p-4 rounded-xl bg-[var(--surface-muted)] text-sm space-y-1 border border-[var(--border-color)]">
           <p><strong>App:</strong> Dejz Personal Budgeting</p>
-          <p><strong>Contact Email:</strong> <a href="mailto:kevinwpts@gmail.com" className="text-[var(--accent-color)] underline">kevinwpts@gmail.com</a></p>
+          <p><strong>Contact Email:</strong> <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] underline">hej@dejz.se</a></p>
         </div>
       </section>
     </article>
@@ -607,7 +607,7 @@ function SwedishTermsOfService() {
         <h2 className="text-lg font-bold text-[var(--text-primary)]">10. Tillämplig lag & Kontakt</h2>
         <p className="text-sm leading-relaxed">
           Dessa villkor tolkas och tillämpas i enlighet med svensk lagstiftning. 
-          För frågor angående dessa villkor, kontakta oss på <a href="mailto:kevinwpts@gmail.com" className="text-[var(--accent-color)] underline">kevinwpts@gmail.com</a>.
+          För frågor angående dessa villkor, kontakta oss på <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] underline">hej@dejz.se</a>.
         </p>
       </section>
     </article>
@@ -664,7 +664,7 @@ function EnglishTermsOfService() {
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-[var(--text-primary)]">5. User Data Ownership & Account Termination</h2>
         <p className="text-sm leading-relaxed">
-          You retain full ownership of the financial entries and content you submit to Dejz. You can delete your account and all associated data at any time via the in-app settings or by contacting <a href="mailto:kevinwpts@gmail.com" className="text-[var(--accent-color)] underline">kevinwpts@gmail.com</a>.
+          You retain full ownership of the financial entries and content you submit to Dejz. You can delete your account and all associated data at any time via the in-app settings or by contacting <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] underline">hej@dejz.se</a>.
         </p>
       </section>
 
@@ -672,7 +672,7 @@ function EnglishTermsOfService() {
         <h2 className="text-lg font-bold text-[var(--text-primary)]">6. Governing Law & Contact</h2>
         <p className="text-sm leading-relaxed">
           These Terms are governed by and construed in accordance with the laws of Sweden. 
-          For questions, reach out to <a href="mailto:kevinwpts@gmail.com" className="text-[var(--accent-color)] underline">kevinwpts@gmail.com</a>.
+          For questions, reach out to <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] underline">hej@dejz.se</a>.
         </p>
       </section>
     </article>

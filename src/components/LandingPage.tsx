@@ -690,7 +690,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                 {getL10n('Vanliga frågor', 'Frequently Asked Questions', 'Ofte stilte spørsmål', 'Ofte stillede spørgsmål', 'Usein kysytyt kysymykset')}
               </h2>
               <p className="text-sm sm:text-base text-[var(--text-secondary)] font-medium">
-                {getL10n('Hittar du inte svaret du söker? Kontakta oss på', 'Need more help? Email us at', 'Finner du ikke svaret du leter etter? Kontakt oss på', 'Finder du ikke det svar, du søger? Kontakt os på', 'Etkö löydä etsimääsi vastausta? Ota yhteyttä osoitteeseen')} <a href="mailto:support@dejz.se" className="text-[var(--accent-color)] font-bold hover:underline">support@dejz.se</a>
+                {getL10n('Hittar du inte svaret du söker? Kontakta oss på', 'Need more help? Email us at', 'Finner du ikke svaret du leter etter? Kontakt oss på', 'Finder du ikke det svar, du søger? Kontakt os på', 'Etkö löydä etsimääsi vastausta? Ota yhteyttä osoitteeseen')} <a href="mailto:hej@dejz.se" className="text-[var(--accent-color)] font-bold hover:underline">hej@dejz.se</a>
               </p>
             </div>
             

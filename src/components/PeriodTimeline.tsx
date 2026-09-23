@@ -17,7 +17,7 @@ export function PeriodTimeline({
   language = 'sv',
 }: PeriodTimelineProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const selectedDayRef = useRef<HTMLButtonElement>(null);
+  const dayRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
   const isInitialMount = useRef(true);
 
   const isEn = language === 'en';
@@ -40,16 +40,19 @@ export function PeriodTimeline({
     if (!el || !scrollContainerRef.current) return;
     const container = scrollContainerRef.current;
     
-    const containerRect = container.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
+    // Deterministic offset relative to container
+    let elementOffsetLeft = el.offsetLeft;
+    if (el.offsetParent !== container) {
+      const containerRect = container.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      elementOffsetLeft = elRect.left - containerRect.left + container.scrollLeft;
+    }
 
-    const elementCenter = elRect.left + elRect.width / 2;
-    const containerCenter = containerRect.left + containerRect.width / 2;
-    const delta = elementCenter - containerCenter;
+    const targetScrollLeft = elementOffsetLeft - (container.clientWidth - el.offsetWidth) / 2;
 
-    if (Math.abs(delta) > 1) {
+    if (Math.abs(container.scrollLeft - targetScrollLeft) > 1) {
       container.scrollTo({
-        left: container.scrollLeft + delta,
+        left: targetScrollLeft,
         behavior,
       });
     }
@@ -57,10 +60,13 @@ export function PeriodTimeline({
 
   // Auto-scroll on mount and when selectedTime changes
   useEffect(() => {
+    if (!selectedTime) return;
     const timer = setTimeout(() => {
-      if (selectedDayRef.current) {
+      const el = dayRefs.current.get(selectedTime) || 
+        scrollContainerRef.current?.querySelector<HTMLButtonElement>(`[data-time="${selectedTime}"]`);
+      if (el) {
         centerElement(
-          selectedDayRef.current,
+          el,
           isInitialMount.current ? 'auto' : 'smooth'
         );
       }
@@ -68,13 +74,13 @@ export function PeriodTimeline({
     }, 40);
 
     return () => clearTimeout(timer);
-  }, [selectedTime]);
+  }, [selectedTime, calendarDays]);
 
   if (!calendarDays || calendarDays.length === 0) {
     return null;
   }
 
-  const handleSelect = (dayDate: any, e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSelect = (dayDate: any, dayTime: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     const targetEl = e.currentTarget;
@@ -87,7 +93,7 @@ export function PeriodTimeline({
       {/* Horizontal Scrollable Day Strip */}
       <div
         ref={scrollContainerRef}
-        className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-3 no-scrollbar touch-pan-x overscroll-contain"
+        className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-3 no-scrollbar touch-pan-x overscroll-contain"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {calendarDays.map((day: any, index: number) => {
@@ -108,9 +114,17 @@ export function PeriodTimeline({
           return (
             <motion.button
               key={`${day.date}-${index}`}
-              ref={isSelected ? selectedDayRef : null}
+              ref={(node) => {
+                if (node) {
+                  dayRefs.current.set(dayTime, node);
+                } else {
+                  dayRefs.current.delete(dayTime);
+                }
+              }}
+              data-time={dayTime}
+              data-selected={isSelected}
               type="button"
-              onClick={(e) => handleSelect(day.date, e)}
+              onClick={(e) => handleSelect(day.date, dayTime, e)}
               whileTap={{ scale: 0.94 }}
               className={`flex flex-col items-center justify-between min-w-[42px] sm:min-w-[46px] h-[52px] sm:h-[56px] py-1.5 px-1 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
