@@ -187,7 +187,7 @@ export function ReceiptsView({
 
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <span className="font-extrabold text-[12px] text-[var(--text-primary)]">
+                      <span className="font-extrabold text-[13.5px] text-[var(--text-primary)] font-amount tabular-nums">
                         {formatAmount(item.amount)}
                       </span>
                     </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { CategoryIcon } from './CategoryIcon';
 
 interface CategoryTileProps {
-  name: string;
+  name: string | any;
   icon: string;
   color?: string;
   isActive?: boolean;
@@ -18,6 +18,8 @@ export function CategoryTile({
   onClick,
   className = ''
 }: CategoryTileProps) {
+  const displayName = typeof name === 'object' ? (name?.name || '') : (name || '');
+
   return (
     <button
       type="button"
@@ -35,7 +37,7 @@ export function CategoryTile({
         isActive={isActive}
       />
       <span className="text-[11.5px] font-medium tracking-tight text-center line-clamp-2 leading-snug break-words hyphens-auto opacity-90 w-full px-0.5 min-h-[2.4em] flex items-center justify-center">
-        {name}
+        {displayName}
       </span>
     </button>
   );

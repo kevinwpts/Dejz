@@ -101,10 +101,10 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
       </div>
       
       <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-        <p className={`text-[13px] font-medium whitespace-nowrap tracking-tight ${type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
-          <span className="opacity-60 mr-1 text-[12px]">{type === 'income' ? '+' : '-'}</span>
-          <span className="font-amount tabular-nums font-semibold">{formatAmount(currentAmount, language)}</span>
-          <span className="text-[10px] font-normal opacity-50 ml-1">{currency}</span>
+        <p className={`text-[14.5px] sm:text-[15px] font-bold whitespace-nowrap tracking-tight ${type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
+          <span className="opacity-70 mr-0.5 text-[13px] font-bold">{type === 'income' ? '+' : '-'}</span>
+          <span className="font-amount tabular-nums font-bold tracking-tight">{formatAmount(currentAmount, language)}</span>
+          <span className="text-[11px] font-semibold opacity-60 ml-1">{currency}</span>
         </p>
         {(hasOverride || item.isVariable) && (
           <span className="text-[10px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">

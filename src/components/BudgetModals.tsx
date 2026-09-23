@@ -204,15 +204,16 @@ interface IncomeModalProps {
   categories: Category[];
 }
 
-export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, userId, isPro, categories, paymentMethods, _currentPeriodId }: IncomeModalProps & { paymentMethods: string[], _currentPeriodId?: string, currentPeriodId?: string }) {
+export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, userId, isPro, categories, paymentMethods, _currentPeriodId }: IncomeModalProps & { paymentMethods: any[], _currentPeriodId?: string, currentPeriodId?: string }) {
   useScrollLock(true);
   const [name, setName] = useState(income?.name || '');
   const [amount, setAmount] = useState(formatAmount(income?.amount || ''));
   
   const [deductionDay, setDeductionDay] = useState(income?.deductionDay || 1);
-  const paymentMethod = income?.paymentMethod || (paymentMethods && paymentMethods.length > 0 ? paymentMethods[0] : 'Autogiro');
+  const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
+  const paymentMethod = typeof income?.paymentMethod === 'string' ? income.paymentMethod : (income?.paymentMethod as any)?.name || firstPaymentMethod;
   const [isVariable, setIsVariable] = useState(income?.isVariable || false);
-  const [category, setCategory] = useState(income?.category || (categories && categories.length > 0 ? categories[0].name : ''));
+  const [category, setCategory] = useState(typeof income?.category === 'object' ? (income.category as any)?.name : (income?.category || (categories && categories.length > 0 ? categories[0].name : '')));
   const [icon, setIcon] = useState(income?.icon || '💰');
   const originalName = useRef(income?.name || '');
   const [manualSelectionThisSession, setManualSelectionThisSession] = useState(false);
@@ -677,7 +678,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                   size="sm" 
                 />
                 <p className="text-base font-medium text-[var(--text-primary)] break-words">
-                  {expense.category}
+                  {typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || '')}
                 </p>
               </div>
             </div>
@@ -701,11 +702,12 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('paymentMethod')}</p>
               <div className="flex items-center gap-2">
                 {(() => {
-                  const PaymentIcon = getPaymentMethodIcon(expense.paymentMethod || '');
+                  const methodStr = typeof expense.paymentMethod === 'object' ? (expense.paymentMethod as any)?.name : (expense.paymentMethod || '');
+                  const PaymentIcon = getPaymentMethodIcon(methodStr);
                   return <span className="text-[var(--text-secondary)]"><PaymentIcon size={16} /></span>;
                 })()}
                 <p className="text-base font-medium text-[var(--text-primary)] break-words">
-                  {expense.paymentMethod || '-'}
+                  {typeof expense.paymentMethod === 'object' ? (expense.paymentMethod as any)?.name : (expense.paymentMethod || '-')}
                 </p>
               </div>
             </div>
@@ -743,18 +745,19 @@ interface FixedExpenseModalProps {
   currency: string;
   userId?: string;
   isPro: boolean;
-  paymentMethods: string[];
+  paymentMethods: any[];
 }
 
 export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, currency, categories, userId, isPro, paymentMethods, _currentPeriodId }: FixedExpenseModalProps & { categories: Category[], _currentPeriodId?: string, currentPeriodId?: string }) {
   useScrollLock(true);
   const [amount, setAmount] = useState(formatAmount(expense?.amount || ''));
   
-  const [category, setCategory] = useState(expense?.category || (categories && categories.length > 0 ? categories[0].name : ''));
+  const [category, setCategory] = useState(typeof expense?.category === 'object' ? (expense.category as any)?.name : (expense?.category || (categories && categories.length > 0 ? categories[0].name : '')));
   const [name, setName] = useState(expense?.name || '');
   const [deductionDay, setDeductionDay] = useState(expense?.deductionDay || 1);
   const [frequency, setFrequency] = useState(expense?.frequency || Frequency.MONTHLY);
-  const [paymentMethod, setPaymentMethod] = useState(expense?.paymentMethod || (paymentMethods && paymentMethods.length > 0 ? paymentMethods[0] : 'Autogiro'));
+  const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
+  const [paymentMethod, setPaymentMethod] = useState(typeof expense?.paymentMethod === 'string' ? expense.paymentMethod : (expense?.paymentMethod as any)?.name || firstPaymentMethod);
   const [isVariable, setIsVariable] = useState(expense?.isVariable || false);
   const [icon, setIcon] = useState(expense?.icon || '🏠');
   const originalName = useRef(expense?.name || '');
@@ -983,9 +986,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
                 >
-                  {(paymentMethods || []).map(method => (
-                    <option key={method} value={method}>{method}</option>
-                  ))}
+                  {(paymentMethods || []).map((method, idx) => {
+                    const methodName = typeof method === 'string' ? method : method?.name || '';
+                    return (
+                      <option key={methodName || idx} value={methodName}>{methodName}</option>
+                    );
+                  })}
                 </select>
                 <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
               </div>
@@ -1259,11 +1265,12 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('paymentMethod')}</p>
               <div className="flex items-center gap-2">
                 {(() => {
-                  const PaymentIcon = getPaymentMethodIcon(saving.paymentMethod || '');
+                  const methodStr = typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : (saving.paymentMethod || '');
+                  const PaymentIcon = getPaymentMethodIcon(methodStr);
                   return <span className="text-[var(--text-secondary)]"><PaymentIcon size={16} /></span>;
                 })()}
                 <p className="text-base font-medium text-[var(--text-primary)] break-words">
-                  {saving.paymentMethod || '-'}
+                  {typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : (saving.paymentMethod || '-')}
                 </p>
               </div>
             </div>
@@ -1303,13 +1310,14 @@ interface MonthlySavingModalProps {
   isPro: boolean;
 }
 
-export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, currency, userId, isPro, paymentMethods, _currentPeriodId }: MonthlySavingModalProps & { paymentMethods: string[], _currentPeriodId?: string, currentPeriodId?: string }) {
+export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, currency, userId, isPro, paymentMethods, _currentPeriodId }: MonthlySavingModalProps & { paymentMethods: any[], _currentPeriodId?: string, currentPeriodId?: string }) {
   useScrollLock(true);
   const [name, setName] = useState(saving?.name || '');
   const [amount, setAmount] = useState(formatAmount(saving?.amount || ''));
   
   const [deductionDay, setDeductionDay] = useState(saving?.deductionDay || 1);
-  const [paymentMethod, setPaymentMethod] = useState(saving?.paymentMethod || (paymentMethods && paymentMethods.length > 0 ? paymentMethods[0] : 'Autogiro'));
+  const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
+  const [paymentMethod, setPaymentMethod] = useState(typeof saving?.paymentMethod === 'string' ? saving.paymentMethod : (saving?.paymentMethod as any)?.name || firstPaymentMethod);
   const [isVariable, setIsVariable] = useState(saving?.isVariable || false);
   const [icon, setIcon] = useState(saving?.icon || 'piggy-bank');
   const originalName = useRef(saving?.name || '');
@@ -1536,9 +1544,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
                 >
-                  {(paymentMethods || []).map(method => (
-                    <option key={method} value={method}>{method}</option>
-                  ))}
+                  {(paymentMethods || []).map((method, idx) => {
+                    const methodName = typeof method === 'string' ? method : method?.name || '';
+                    return (
+                      <option key={methodName || idx} value={methodName}>{methodName}</option>
+                    );
+                  })}
                 </select>
                 <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
               </div>

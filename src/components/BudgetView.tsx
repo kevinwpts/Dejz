@@ -103,7 +103,7 @@ export function BudgetView({
             className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] overflow-hidden"
           >
             <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">{t('incomes') || 'Inkomster'}</span>
-            <span className="text-[15px] sm:text-[17px] font-semibold font-amount tabular-nums text-success text-center truncate w-full">+{formatAmount(stats.totalIncome)}</span>
+            <span className="text-[16px] sm:text-[18px] font-bold font-amount tabular-nums text-success text-center truncate w-full">+{formatAmount(stats.totalIncome)}</span>
           </motion.div>
 
           <motion.div 
@@ -113,7 +113,7 @@ export function BudgetView({
             className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] overflow-hidden"
           >
             <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">{t('fixedExpenses') || 'Fasta utgifter'}</span>
-            <span className="text-[15px] sm:text-[17px] font-semibold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(stats.totalFixed)}</span>
+            <span className="text-[16px] sm:text-[18px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(stats.totalFixed)}</span>
           </motion.div>
 
           <motion.div 
@@ -123,7 +123,7 @@ export function BudgetView({
             className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] dark:border-white/10 bg-[var(--surface-color)] overflow-hidden"
           >
             <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">{t('monthlySavings') || 'Månadssparande'}</span>
-            <span className="text-[15px] sm:text-[17px] font-semibold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(totalSavings)}</span>
+            <span className="text-[16px] sm:text-[18px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(totalSavings)}</span>
           </motion.div>
         </div>
       </div>

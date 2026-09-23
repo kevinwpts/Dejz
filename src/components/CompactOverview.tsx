@@ -62,7 +62,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
               <span className="text-[12px] font-medium text-[var(--text-primary)] leading-tight truncate tracking-tight">
                 {cat}
               </span>
-              <span className="text-[12px] font-medium text-[var(--text-primary)] font-amount">
+              <span className="text-[13.5px] font-bold text-[var(--text-primary)] font-amount tabular-nums">
                 {formatAmount(amount, config.language)}
               </span>
             </div>

@@ -157,7 +157,9 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             {/* Merchant */}
             <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('merchant')}</p>
-               <p className="text-base font-medium text-[var(--text-primary)] break-words">{transaction.merchant || transaction.category}</p>
+               <p className="text-base font-medium text-[var(--text-primary)] break-words">
+                 {typeof transaction.merchant === 'object' ? (transaction.merchant as any)?.name : (transaction.merchant || (typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category))}
+               </p>
             </div>
 
             {/* Date */}
@@ -181,16 +183,17 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                <div className="space-y-3">
                  {transaction.splits && transaction.splits.length > 0 ? (
                    transaction.splits.map((split, idx) => {
-                     const searchCat = (split.category || '').trim().toLowerCase();
+                     const splitCatName = typeof split.category === 'object' ? (split.category as any)?.name : (split.category || '');
+                     const searchCat = splitCatName.trim().toLowerCase();
                      const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
                        c => c.name.trim().toLowerCase() === searchCat
                      );
-                     const iconKey = cat?.icon || getCategoryIconName(split.category || '');
+                     const iconKey = cat?.icon || getCategoryIconName(splitCatName);
                      return (
                        <div key={split.id || idx} className="flex items-center justify-between">
                          <div className="flex items-center gap-2.5">
                            {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="sm" />}
-                           <p className="text-base font-medium text-[var(--text-primary)] break-words">{split.category}</p>
+                           <p className="text-base font-medium text-[var(--text-primary)] break-words">{splitCatName}</p>
                          </div>
                          <p className="text-sm font-medium text-[var(--text-secondary)] opacity-60">
                            {formatAmount(split.amount, config.language)} {config.currency}
@@ -201,15 +204,18 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                  ) : (
                    <div className="flex items-center gap-2.5">
                      {(() => {
-                       const searchCat = (transaction.category || '').trim().toLowerCase();
+                       const catName = typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '');
+                       const searchCat = catName.trim().toLowerCase();
                        const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
                          c => c.name.trim().toLowerCase() === searchCat
                        );
-                       const iconKey = cat?.icon || getCategoryIconName(transaction.category || '');
+                       const iconKey = cat?.icon || getCategoryIconName(catName);
                        if (!iconKey) return null;
                        return <CategoryIcon icon={iconKey} color={cat?.color} size="sm" />;
                      })()}
-                     <p className="text-base font-medium text-[var(--text-primary)] break-words">{transaction.category}</p>
+                     <p className="text-base font-medium text-[var(--text-primary)] break-words">
+                       {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}
+                     </p>
                    </div>
                  )}
                </div>

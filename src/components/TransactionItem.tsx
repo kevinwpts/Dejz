@@ -174,10 +174,10 @@ export function TransactionItem({
       </div>
       
       <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-        <p className={`text-[13px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
-          <span className="opacity-60 mr-1 text-[12px]">{transaction.type === 'income' ? '+' : '-'}</span>
-          <span className="font-amount tabular-nums font-semibold">{formatAmount(finalAmount, config.language)}</span>
-          <span className="text-[10px] font-normal opacity-50 ml-1">{config.currency}</span>
+        <p className={`text-[14.5px] sm:text-[15px] font-bold whitespace-nowrap tracking-tight ${amountColor}`}>
+          <span className="opacity-70 mr-0.5 text-[13px] font-bold">{transaction.type === 'income' ? '+' : '-'}</span>
+          <span className="font-amount tabular-nums font-bold tracking-tight">{formatAmount(finalAmount, config.language)}</span>
+          <span className="text-[11px] font-semibold opacity-60 ml-1">{config.currency}</span>
         </p>
         {(transaction.timestamp || transaction.date) && !isFixed ? (
           <p className="text-[11px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5 tabular-nums">

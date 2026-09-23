@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-black: #0a0a0a;
+  --color-black: #18191e;
   --font-sans:
     "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display:
@@ -99,7 +99,7 @@ textarea {
   --surface-muted: rgba(0, 0, 0, 0.04);
   --surface-tint: rgba(0, 0, 0, 0.02);
 
-  --text-primary: #121417;
+  --text-primary: #181a1f;
   --text-secondary: #636A75;
   --text-tertiary: #8C94A0;
   --text-inactive: #B8BFC9;
@@ -118,13 +118,13 @@ textarea {
   --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.06);
   --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.08);
 
-  /* Clean Minimalist Accent Color for Buttons & CTA */
-  --accent-color: #18181B;
-  --accent-hover: #27272A;
-  --accent-gradient: linear-gradient(145deg, #27272A 0%, #18181B 100%);
+  /* Clean Minimalist Accent Color for Buttons & CTA - Refined Near-Black */
+  --accent-color: #1e2024;
+  --accent-hover: #2c2f35;
+  --accent-gradient: linear-gradient(145deg, #2c2f35 0%, #1e2024 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(0, 0, 0, 0.06);
-  --accent-glow: rgba(0, 0, 0, 0.14);
+  --accent-soft: rgba(30, 32, 36, 0.08);
+  --accent-glow: rgba(30, 32, 36, 0.16);
 
   --modal-bg: rgba(255, 255, 255, 0.96);
   --bg-primary: var(--bg-color);
@@ -138,10 +138,10 @@ textarea {
   --danger-color: #e83e67;
   --warning-color: #f59e0b;
 
-  --nav-active-color: #18181B;
+  --nav-active-color: #1e2024;
   --nav-inactive-color: #71717A;
-  --nav-plus-bg: #18181B;
-  --nav-plus-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  --nav-plus-bg: #1e2024;
+  --nav-plus-shadow: 0 4px 14px rgba(24, 25, 30, 0.25);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -150,9 +150,9 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #18181B;
+  --date-active-bg: #1e2024;
   --date-active-color: #FFFFFF;
-  --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.20);
+  --date-active-shadow: 0 4px 14px rgba(24, 25, 30, 0.20);
   --date-inactive-bg: rgba(255, 255, 255, 0.90);
   --date-inactive-border: rgba(0, 0, 0, 0.06);
   --date-inactive-color: #636A75;
@@ -163,17 +163,17 @@ textarea {
 }
 
 .dark {
-  /* Premium Dark Theme Refinements (Dejz Design System) */
-  --bg-color: #101214;
-  --bg-secondary: #111315;
-  --bg-gradient: #101214;
+  /* Premium Dark Theme Refinements (Dejz Design System) - Soft Near-Black Charcoal */
+  --bg-color: #141619;
+  --bg-secondary: #181a1e;
+  --bg-gradient: #141619;
 
-  --surface-color: #181B1F;
-  --surface-gradient: #181B1F;
-  --surface-elevated: #21252B;
-  --surface-elevated-gradient: #21252B;
-  --surface-solid: #181B1F;
-  --surface-muted: #262B31;
+  --surface-color: #1c1f24;
+  --surface-gradient: #1c1f24;
+  --surface-elevated: #24282f;
+  --surface-elevated-gradient: #24282f;
+  --surface-solid: #1c1f24;
+  --surface-muted: #282d35;
   --surface-tint: rgba(255, 255, 255, 0.02);
 
   --text-primary: #F4F5F6;
@@ -186,9 +186,9 @@ textarea {
   --inner-highlight: transparent;
 
   --chip-bg: rgba(255, 255, 255, 0.055);
-  --transaction-bg: #1D2126;
-  --card-nested-bg: #21252B;
-  --remaining-today-gradient: linear-gradient(145deg, #0D251D 0%, #0B1D17 55%, #101A17 100%);
+  --transaction-bg: #20242a;
+  --card-nested-bg: #24282f;
+  --remaining-today-gradient: linear-gradient(145deg, #122820 0%, #10221c 55%, #141f1c 100%);
 
   /* Custom Elevation Levels - Dark Mode */
   --shadow-level-1: 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 16px -2px rgba(0, 0, 0, 0.2);
@@ -201,14 +201,14 @@ textarea {
   --accent-color: #FFFFFF;
   --accent-hover: #F4F4F5;
   --accent-gradient: linear-gradient(135deg, #FFFFFF 0%, #E4E4E7 100%);
-  --text-on-accent: #101214;
+  --text-on-accent: #141619;
   --accent-soft: rgba(255, 255, 255, 0.12);
   --accent-glow: rgba(255, 255, 255, 0.25);
 
-  --modal-bg: #181B1F;
+  --modal-bg: #1c1f24;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #1D2126;
+  --bg-hover: #20242a;
 
   --card-shadow: var(--shadow-level-2);
   --card-inner-stroke: none;
@@ -230,7 +230,7 @@ textarea {
   --savings-card-text: var(--text-primary);
 
   --date-active-bg: #FFFFFF;
-  --date-active-color: #101214;
+  --date-active-color: #141619;
   --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   --date-inactive-bg: var(--surface-color);
   --date-inactive-border: rgba(255, 255, 255, 0.03);
@@ -333,7 +333,7 @@ textarea {
     font-family: var(--font-amount);
     font-feature-settings: "tnum" 1;
     letter-spacing: -0.02em;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .input-label,
