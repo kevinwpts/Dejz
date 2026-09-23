@@ -208,7 +208,7 @@ export function TodayView({
                 <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">
                   {t("actionRequired")}
                 </h4>
-                <div className="w-5 h-5 rounded-full bg-[#FFF3E3] text-[#E58A17] dark:bg-[#E58A17]/20 dark:text-[#FFA947] text-[10px] font-bold flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[10px] font-bold flex items-center justify-center text-[var(--text-on-accent)]">
                   {attentionItems.length}
                 </div>
               </div>
@@ -223,7 +223,7 @@ export function TodayView({
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     transition={{ delay: 0.2 + index * 0.05 }}
                     onClick={() => onEditAttentionItem?.(item)}
-                    className="flex-shrink-0 flex flex-col gap-3 bg-[#FFF3E3]/35 dark:bg-[#161A22] border border-[#E58A17]/20 dark:border-[#E58A17]/30 p-5 rounded-[16px] hover:bg-[#FFF3E3]/65 dark:hover:bg-[#1D222C] transition-all group relative overflow-hidden active:scale-[0.98] min-w-[160px] shadow-xs"
+                    className="flex-shrink-0 flex flex-col gap-3 bg-[var(--surface-color)] border border-[var(--border-color)] dark:border-white/10 p-5 rounded-[16px] hover:bg-[var(--surface-muted)] transition-all group relative overflow-hidden active:scale-[0.98] min-w-[160px] shadow-xs"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="w-10 h-10 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0 [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full [&_span]:text-lg">

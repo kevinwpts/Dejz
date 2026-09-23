@@ -10,7 +10,7 @@ export function ToggleSwitch({ isOn, onToggle }: ToggleSwitchProps) {
   return (
     <button
       onClick={onToggle}
-      className={`w-[51px] h-[31px] rounded-full relative transition-colors duration-300 flex-shrink-0 border border-black/5 dark:border-white/5 ${isOn ? 'bg-[#356BFF]' : 'bg-[var(--bg-secondary)]'}`}
+      className={`w-[51px] h-[31px] rounded-full relative transition-colors duration-300 flex-shrink-0 border border-black/5 dark:border-white/5 ${isOn ? 'bg-[var(--success-color)]' : 'bg-[var(--bg-secondary)]'}`}
       style={{ boxShadow: isOn ? 'none' : 'inset 0 0 0 1px var(--border-color)' }}
     >
       <motion.div

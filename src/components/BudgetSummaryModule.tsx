@@ -119,7 +119,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
         </div>
         <div className="w-full h-2.5 bg-[var(--surface-muted)] rounded-full overflow-hidden mb-1 relative z-10">
            <div 
-             className={`h-full rounded-full transition-all duration-1000 ease-out ${(stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'bg-danger' : 'bg-[#356BFF]'}`} 
+             className={`h-full rounded-full transition-all duration-1000 ease-out ${(stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'bg-danger' : 'bg-[var(--accent-color)]'}`} 
              style={{ width: `${Math.max(0, Math.min(100, (stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) * 100))}%` }}
            />
         </div>

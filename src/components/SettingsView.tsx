@@ -378,7 +378,7 @@ export function SettingsView({
           <button 
             onClick={() => handleUpdateWeekendHandling(!config.paydayBeforeWeekend)}
             className={`w-10 h-6 rounded-full relative transition-colors duration-200 flex-shrink-0 outline-none ${
-              config.paydayBeforeWeekend ? 'bg-[#356BFF]' : 'bg-[var(--border-color)]'
+              config.paydayBeforeWeekend ? 'bg-success' : 'bg-[var(--border-color)]'
             }`}
           >
             <motion.div 
