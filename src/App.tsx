@@ -2578,6 +2578,12 @@ export default function App() {
     }
 
     setActiveTab(targetTab as Tab);
+    if (targetTab === "today") {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      setCurrentPeriodDate(now);
+      setTargetDate(now);
+    }
     if (targetTab === "profile" && targetSection) {
       setProfileSection(targetSection as any);
     } else if (targetTab === "profile") {
@@ -3603,8 +3609,14 @@ export default function App() {
               if (tab === activeTab) {
                 tabScrollPositions.current[tab] = 0;
                 window.scrollTo({ top: 0, behavior: "smooth" });
+                if (tab === "today") {
+                  const now = new Date();
+                  now.setHours(0, 0, 0, 0);
+                  setCurrentPeriodDate(now);
+                  setTargetDate(now);
+                }
               } else {
-                setActiveTab(tab);
+                handleNavigate(tab);
               }
             }}
             language={(config?.language as Language) || "sv"}

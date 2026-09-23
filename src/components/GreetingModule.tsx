@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 
-import { Zap, TrendingDown, Target, Calendar as CalendarIcon, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
 import { UniversalPeriodSelector } from './UniversalPeriodSelector';
 import { PeriodTimeline } from './PeriodTimeline';
@@ -52,8 +52,8 @@ export function GreetingModule({
   setCurrentPeriodDate,
   periodStart: _periodStart,
   periodEnd: _periodEnd,
-  isFuturePeriod,
-  isPastPeriod,
+  isFuturePeriod: _isFuturePeriod,
+  isPastPeriod: _isPastPeriod,
   periods,
   variant: _variant = 'default',
   showPeriodSelector = false,
@@ -86,11 +86,6 @@ export function GreetingModule({
 
   const futureDays = Math.max(1, effectiveRemainingDays - 1);
   const _impact = Math.round(Math.abs(availableForD) / futureDays);
-
-  const totalSpent = stats.totalSpentInPeriod || 0;
-  const originalBudget = stats.disposablePot || 0;
-  const result = originalBudget - totalSpent;
-  const isPositive = result >= 0;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -142,99 +137,6 @@ export function GreetingModule({
     periodStart.setHours(0, 0, 0, 0);
     return today.getTime() === periodStart.getTime();
   }, [isToday, stats]);
-
-  if (isPastPeriod) {
-    return (
-      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-        {/* 1. Period Selector */}
-        {showPeriodSelector && periods && setCurrentPeriodDate && currentPeriodDate && (
-          <UniversalPeriodSelector
-            periods={periods}
-            currentDate={currentPeriodDate}
-            onChange={setCurrentPeriodDate}
-            periodName={stats.periodName}
-            isCurrentPeriod={isCurrentPeriod}
-            onOpenPicker={() => setIsCalendarModalOpen(true)}
-          />
-        )}
-
-        {/* Timeline of Period */}
-        {calendarDays && calendarDays.length > 0 && (
-          <PeriodTimeline
-            calendarDays={calendarDays}
-            selectedDate={date}
-            onSelectDate={setSelectedDate}
-            stats={stats}
-            language={language}
-            isCurrentPeriod={isCurrentPeriod}
-          />
-        )}
-
-        {/* Main Summary Card */}
-        <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-8 sm:p-10 relative overflow-hidden flex flex-col justify-between min-h-[300px] rounded-[28px] shadow-sm">
-          <div className="relative z-10 flex flex-col items-center w-full">
-            <div className="flex flex-col items-center mb-7">
-              <div className="w-12 h-12 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--accent-color)] mb-4">
-                <Target size={24} strokeWidth={1.75} />
-              </div>
-              <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-75">
-                {t('periodClosing')}
-              </span>
-              <div className={`mt-3 px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide ${
-                isPositive 
-                  ? 'bg-success/10 text-success' 
-                  : 'bg-danger/10 text-danger'
-              }`}>
-                {isPositive ? t('surplus') : t('deficit')}
-              </div>
-            </div>
-
-            <div className="flex items-baseline justify-center gap-2 mb-2">
-              <AnimatedNumber 
-                value={totalSpent} 
-                className="text-5xl sm:text-6xl md:text-7xl leading-none font-bold tracking-tight font-amount tabular-nums text-[var(--text-primary)]"
-                formatter={(val) => formatAmount(val, language)}
-              />
-              <span className="text-xl sm:text-2xl font-light text-[var(--text-secondary)] opacity-40">
-                {currency}
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] opacity-60 mb-8">
-              {t('totalSpent')}
-            </p>
-
-            <div className="flex flex-col items-center justify-center w-full max-w-[340px] bg-[var(--surface-muted)] rounded-[16px] p-5 transition-colors border border-[var(--border-color)]/50">
-                <span className="text-xs font-medium text-[var(--text-secondary)] opacity-70 mb-1">
-                  {t('result')}
-                </span>
-                <span className={`text-2xl font-bold font-amount tabular-nums tracking-tight ${isPositive ? 'text-success' : 'text-danger'}`}>
-                  {isPositive ? '+' : ''}{formatAmount(result, language)} <span className="text-sm font-semibold opacity-40 ml-1 font-sans">{currency}</span>
-                </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Secondary Stats Grid */}
-        <div className="grid grid-cols-3 gap-2.5">
-          {[
-            { label: t('income'), value: stats.totalIncome, icon: Zap, color: 'text-[var(--accent-color)]' },
-            { label: t('fixed'), value: stats.totalFixed, icon: TrendingDown, color: 'text-danger' },
-            { label: t('days'), value: stats.totalDaysInPeriod, icon: CalendarIcon, color: 'text-success', isRaw: true }
-          ].map((item, i) => (
-            <div key={i} className="bg-[var(--surface-color)] p-3.5 sm:p-4 rounded-[16px] border border-[var(--border-color)] flex flex-col items-center justify-center hover:bg-[var(--surface-muted)]/50 transition-colors shadow-xs">
-              <div className={`w-8 h-8 rounded-full bg-[var(--surface-muted)] flex items-center justify-center ${item.color} opacity-90 mb-2`}>
-                <item.icon size={15} strokeWidth={1.75} />
-              </div>
-              <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-75 mb-0.5 text-center">{item.label}</span>
-              <span className={`text-[15px] font-bold text-[var(--text-primary)] tracking-tight ${!item.isRaw ? 'font-amount tabular-nums' : ''}`}>
-                {item.isRaw ? item.value : formatAmount(item.value || 0, language)}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">

@@ -63,6 +63,73 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
 
   const disposablePot = stats.disposablePot;
 
+  if (stats.isPastPeriod) {
+    const result = Math.round(stats.remainingPeriodCents);
+    const isPositive = result >= 0;
+
+    return (
+      <div className="space-y-4">
+        {/* Period Closing Hero */}
+        <div className="p-7 sm:p-8 rounded-[28px] overflow-hidden border border-[var(--border-color)] shadow-sm flex flex-col items-center text-center bg-[var(--surface-color)] relative">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-80 uppercase tracking-wider">
+              {t('periodClosing' as any) || 'Periodavslut'}
+            </span>
+            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-tight ${
+              isPositive ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+            }`}>
+              {isPositive ? (t('surplus' as any) || 'Överskott') : (t('deficit' as any) || 'Underskott')}
+            </span>
+          </div>
+
+          <div className="flex items-baseline justify-center gap-1.5 mb-1">
+            <span className={`text-4xl sm:text-5xl leading-none font-bold font-amount tabular-nums tracking-tight ${
+              isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+            }`}>
+              {isPositive ? '+' : ''}{result.toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
+            </span>
+            <span className="text-xl sm:text-2xl font-light opacity-60 text-[var(--text-secondary)]">
+              {config.currency}
+            </span>
+          </div>
+          <span className="text-xs text-[var(--text-secondary)] opacity-60">
+            {t('result' as any) || 'Resultat'}
+          </span>
+        </div>
+
+        {/* 3-column Grid for Past Period */}
+        <div className="grid grid-cols-3 gap-2.5">
+          <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] bg-[var(--surface-color)]">
+            <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">
+              {t('totalSpent' as any) || 'Spenderat'}
+            </span>
+            <span className="text-[12px] sm:text-[14px] font-bold font-amount tabular-nums text-center truncate w-full text-[var(--text-primary)]">
+              {formatAmount(Math.round(totalSpent), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-65">{config.currency || 'kr'}</span>
+            </span>
+          </div>
+
+          <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] bg-[var(--surface-color)]">
+            <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">
+              {t('income' as any) || 'Inkomst'}
+            </span>
+            <span className="text-[12px] sm:text-[14px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
+              {formatAmount(Math.round(stats.totalIncome || 0), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-65">{config.currency || 'kr'}</span>
+            </span>
+          </div>
+
+          <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-xs border border-[var(--border-color)] bg-[var(--surface-color)]">
+            <span className="text-[11px] sm:text-xs font-medium text-[var(--text-secondary)] tracking-tight opacity-75 text-center truncate w-full">
+              {t('fixed' as any) || 'Fasta kostnader'}
+            </span>
+            <span className="text-[12px] sm:text-[14px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
+              {formatAmount(Math.round(totalFixed || stats.totalFixedExpenses || 0), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-65">{config.currency || 'kr'}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Primary Hero Metric: Total Remaining */}

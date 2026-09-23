@@ -9,6 +9,7 @@ interface UniversalPeriodSelectorProps {
   isCurrentPeriod?: boolean;
   onOpenPicker?: () => void;
   variant?: 'standalone' | 'header' | 'modal';
+  allowFuture?: boolean;
 }
 
 export function UniversalPeriodSelector({
@@ -19,6 +20,7 @@ export function UniversalPeriodSelector({
   isCurrentPeriod,
   onOpenPicker,
   variant = 'standalone',
+  allowFuture = true,
 }: UniversalPeriodSelectorProps) {
   const currentIndex = periods && currentDate
     ? periods.findIndex(
@@ -27,7 +29,9 @@ export function UniversalPeriodSelector({
     : -1;
 
   const canGoPrev = currentIndex > 0;
-  const canGoNext = currentIndex !== -1 && currentIndex < periods.length - 1;
+  const canGoNext = allowFuture
+    ? (currentIndex !== -1 && currentIndex < periods.length - 1)
+    : (!isCurrentPeriod && currentIndex !== -1 && currentIndex < periods.length - 1);
 
   const handlePrevPeriod = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -45,7 +49,7 @@ export function UniversalPeriodSelector({
   const handleNextPeriod = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!periods || periods.length === 0) return;
+    if (!canGoNext || !periods || periods.length === 0) return;
     let idx = currentIndex;
     if (idx === -1) {
       idx = periods.findIndex(p => p.date && p.date.getTime() >= currentDate.getTime());

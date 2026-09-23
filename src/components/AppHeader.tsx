@@ -105,7 +105,7 @@ export function AppHeader({
       }`}
     >
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2`}>
-        {/* Left: Back button + Title OR Period Selector */}
+        {/* Left: Back button + Title OR Period Selector OR Page Title */}
         <div className="flex items-center min-w-0">
           {onBack ? (
             <button
@@ -119,11 +119,7 @@ export function AppHeader({
                 </h1>
               )}
             </button>
-          ) : (activeTab === 'settings' || activeTab === 'profile') && title ? (
-            <h1 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
-              {title}
-            </h1>
-          ) : periods && onPeriodChange && currentPeriodDate ? (
+          ) : (activeTab === 'transactions' || activeTab === 'analysis') && periods && onPeriodChange && currentPeriodDate ? (
             <UniversalPeriodSelector
               periods={periods}
               currentDate={currentPeriodDate}
@@ -132,6 +128,7 @@ export function AppHeader({
               isCurrentPeriod={isCurrentPeriod}
               onOpenPicker={onOpenCalendarPicker}
               variant="header"
+              allowFuture={false}
             />
           ) : title ? (
             <h1 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">

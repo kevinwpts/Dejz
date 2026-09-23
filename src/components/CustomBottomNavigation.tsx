@@ -32,7 +32,7 @@ export function CustomBottomNavigation({
   const t = (key: TranslationKey) => translations[language]?.[key] || translations["sv"]?.[key] || key;
 
   return (
-    <div className="fixed bottom-[calc(6px+env(safe-area-inset-bottom,0px))] sm:bottom-[calc(10px+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 px-3 sm:px-6 pointer-events-none flex justify-center">
+    <div className="fixed bottom-[calc(1px+env(safe-area-inset-bottom,0px))] sm:bottom-2 left-0 right-0 z-40 px-3 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
         className="w-[92%] sm:w-[84%] max-w-[410px] sm:max-w-[430px] h-[64px] sm:h-[68px] rounded-full px-2.5 sm:px-4 bg-black/95 text-white backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)] flex items-center justify-between gap-1 sm:gap-2 pointer-events-auto border border-white/10"
         initial={{ y: 20, opacity: 0 }}
