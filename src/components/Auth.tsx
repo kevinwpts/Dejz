@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { motion, AnimatePresence } from 'motion/react';
 import { createFreshTestAccount } from '../utils/demoData';
-import { Mail, Lock, ChevronLeft, Sparkles, KeyRound, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, ChevronLeft, Sparkles, KeyRound, CheckCircle2 } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { DejzLogo } from './DejzLogo';
 import { Button, Input, IconButton, SegmentedControl, Divider } from './ui';
@@ -186,291 +185,289 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[340px] sm:w-[480px] h-[340px] sm:h-[480px] bg-gradient-to-tr from-black/[0.03] via-black/[0.015] to-transparent dark:from-white/[0.04] dark:via-white/[0.02] blur-[120px] rounded-full pointer-events-none" />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
+      <div
         className="w-full max-w-[420px] bg-[var(--surface-color)] p-6 sm:p-8 rounded-[28px] border border-[var(--border-color)] shadow-xs relative z-10"
       >
-        <AnimatePresence mode="wait">
-          {isEmailSent ? (
-            <motion.div
-              key="email-sent"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              className="text-center py-4 space-y-6"
+        {isEmailSent ? (
+          <div
+            className="text-center py-4 space-y-6"
+          >
+            <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[20px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
+              <Mail size={28} />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+                {t('checkEmailTitle' as any)}
+              </h2>
+              <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
+                {t('checkEmailDesc' as any)}
+              </p>
+            </div>
+
+            <Button
+              onClick={() => {
+                setIsEmailSent(false);
+                setIsRegistering(false);
+              }}
+              variant="primary"
+              fullWidth
             >
-              <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[20px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
-                <Mail size={28} />
-              </div>
+              {t('backToLogin' as any)}
+            </Button>
+          </div>
+        ) : isResetSent ? (
+          <div
+            className="text-center py-4 space-y-6"
+          >
+            <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-[20px] flex items-center justify-center mx-auto border border-emerald-500/20 shadow-xs">
+              <CheckCircle2 size={30} />
+            </div>
 
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-                  {t('checkEmailTitle' as any)}
-                </h2>
-                <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
-                  {t('checkEmailDesc' as any)}
-                </p>
-              </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+                Kolla din inkorg
+              </h2>
+              <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
+                Vi har skickat en återställningslänk till <strong className="text-[var(--text-primary)]">{email}</strong>. Följ instruktionerna i mailet för att välja ett nytt lösenord.
+              </p>
+            </div>
 
-              <Button
-                onClick={() => {
-                  setIsEmailSent(false);
-                  setIsRegistering(false);
-                }}
-                variant="primary"
-                fullWidth
-              >
-                {t('backToLogin' as any)}
-              </Button>
-            </motion.div>
-          ) : isResetSent ? (
-            <motion.div
-              key="reset-sent"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              className="text-center py-4 space-y-6"
+            <Button
+              onClick={() => {
+                setIsResetSent(false);
+                setIsForgotPassword(false);
+              }}
+              variant="primary"
+              fullWidth
             >
-              <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-[20px] flex items-center justify-center mx-auto border border-emerald-500/20 shadow-xs">
-                <CheckCircle2 size={30} />
-              </div>
-
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-                  Kolla din inkorg
-                </h2>
-                <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
-                  Vi har skickat en återställningslänk till <strong className="text-[var(--text-primary)]">{email}</strong>. Följ instruktionerna i mailet för att välja ett nytt lösenord.
-                </p>
-              </div>
-
-              <Button
-                onClick={() => {
-                  setIsResetSent(false);
-                  setIsForgotPassword(false);
-                }}
-                variant="primary"
-                fullWidth
-              >
-                Tillbaka till inloggning
-              </Button>
-            </motion.div>
-          ) : isForgotPassword ? (
-            <motion.div
-              key="forgot-password"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
-            >
-              <div className="flex items-center gap-3">
-                <IconButton
-                  icon={<ArrowLeft size={18} />}
+              Tillbaka till inloggning
+            </Button>
+          </div>
+        ) : isForgotPassword ? (
+          <div>
+            {/* Header with Back Button and Logo */}
+            <div className="relative flex flex-col items-center mb-6">
+              <div className="absolute top-0 left-0">
+                <IconButton 
+                  icon={<ChevronLeft size={18} />}
                   onClick={() => {
                     setIsForgotPassword(false);
                     setError(null);
                   }}
                   variant="muted"
                   size="sm"
-                  aria-label="Tillbaka"
+                  aria-label="Tillbaka till inloggning"
                 />
-                <div>
-                  <h2 className="text-xl font-bold text-[var(--text-primary)]">
-                    Glömt lösenord?
-                  </h2>
-                  <p className="text-xs text-[var(--text-secondary)]">
-                    Återställ ditt lösenord via e-post
-                  </p>
-                </div>
+              </div>
+              
+              <div className="flex flex-col items-center pt-1 mb-3 select-none">
+                <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
               </div>
 
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                  Ange den e-postadress som är kopplad till ditt konto så skickar vi en länk för att välja ett nytt lösenord.
-                </p>
+              <div className="w-12 h-12 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[16px] flex items-center justify-center mb-3">
+                <KeyRound size={22} />
+              </div>
 
-                <Input
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1 text-center">
+                Glömt lösenord?
+              </h1>
+              <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] text-center max-w-[300px]">
+                Ange din e-postadress så skickar vi en länk för att välja ett nytt lösenord.
+              </p>
+            </div>
+
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <Input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Din e-postadress"
+                icon={<Mail size={16} />}
+                error={error}
+              />
+
+              <div className="space-y-2 pt-1">
+                <Button
+                  type="submit"
+                  loading={loading}
+                  variant="primary"
+                  fullWidth
+                  size="lg"
+                  icon={<KeyRound size={16} />}
+                >
+                  Skicka återställningslänk
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPassword(false);
+                    setError(null);
+                  }}
+                  variant="ghost"
+                  fullWidth
+                  size="md"
+                >
+                  Avbryt och logga in
+                </Button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <div>
+            {/* Header with Back Button and Logo */}
+            <div className="relative flex flex-col items-center mb-6">
+              {onBack && (
+                <div className="absolute top-0 left-0">
+                  <IconButton 
+                    icon={<ChevronLeft size={18} />}
+                    onClick={onBack}
+                    variant="muted"
+                    size="sm"
+                    aria-label="Tillbaka"
+                  />
+                </div>
+              )}
+              
+              <div className="flex flex-col items-center pt-1 mb-3 select-none">
+                <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
+              </div>
+
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1">
+                {isRegistering ? t('createAccount') : t('welcome')}
+              </h1>
+              <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
+                {isRegistering ? 'Skapa ditt konto på några sekunder' : 'Logga in för att fortsätta'}
+              </p>
+            </div>
+
+            {/* Segmented Pill Switcher */}
+            <div className="mb-5">
+              <SegmentedControl
+                value={isRegistering ? 'register' : 'login'}
+                onChange={(val) => {
+                  setIsRegistering(val === 'register');
+                  setError(null);
+                }}
+                options={[
+                  { value: 'login', label: t('login') },
+                  { value: 'register', label: t('createAccount') },
+                ]}
+              />
+            </div>
+
+            <form onSubmit={handleAuth} className="space-y-3.5">
+              <div className="space-y-2.5">
+                <Input 
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Din e-postadress"
                   icon={<Mail size={16} />}
-                  error={error}
                 />
 
-                <Button
+                <div className="space-y-1.5">
+                  <Input 
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Ditt lösenord (minst 6 tecken)"
+                    icon={<Lock size={16} />}
+                    error={error}
+                  />
+
+                  {!isRegistering && (
+                    <div className="flex justify-end pr-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsForgotPassword(true);
+                          setError(null);
+                        }}
+                        className="text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                      >
+                        Glömt lösenord?
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-1.5 space-y-2.5">
+                <Button 
                   type="submit"
                   loading={loading}
                   variant="primary"
                   fullWidth
-                  icon={<KeyRound size={15} />}
                 >
-                  Skicka återställningslänk
+                  {isRegistering ? t('createAccount') : t('login')}
                 </Button>
-              </form>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="auth-form"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              {/* Header with Back Button and Logo */}
-              <div className="relative flex flex-col items-center mb-6">
-                {onBack && (
-                  <div className="absolute top-0 left-0">
-                    <IconButton 
-                      icon={<ChevronLeft size={18} />}
-                      onClick={onBack}
-                      variant="muted"
-                      size="sm"
-                      aria-label="Tillbaka"
-                    />
-                  </div>
-                )}
-                
-                <div className="flex flex-col items-center pt-1 mb-3 select-none">
-                  <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
-                </div>
 
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1">
-                  {isRegistering ? t('createAccount') : t('welcome')}
-                </h1>
-                <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                  {isRegistering ? 'Skapa ditt konto på några sekunder' : 'Logga in för att fortsätta'}
-                </p>
+                <Button
+                  type="button"
+                  onClick={handleQuickTestLogin}
+                  disabled={loading}
+                  variant="subtle"
+                  fullWidth
+                  icon={<Sparkles size={13} />}
+                >
+                  Snabbtest: Logga in med testkonto
+                </Button>
               </div>
+            </form>
 
-              {/* Segmented Pill Switcher */}
-              <div className="mb-5">
-                <SegmentedControl
-                  value={isRegistering ? 'register' : 'login'}
-                  onChange={(val) => {
-                    setIsRegistering(val === 'register');
-                    setError(null);
-                  }}
-                  options={[
-                    { value: 'login', label: t('login') },
-                    { value: 'register', label: t('createAccount') },
-                  ]}
-                />
-              </div>
+            <Divider label={t('orContinueWith')} />
 
-              <form onSubmit={handleAuth} className="space-y-3.5">
-                <div className="space-y-2.5">
-                  <Input 
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Din e-postadress"
-                    icon={<Mail size={16} />}
+            <Button 
+              onClick={() => handleSocialLogin('google')}
+              variant="secondary"
+              fullWidth
+              icon={
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="#4285F4"
+                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.28 1.5-1.11 2.76-2.36 3.61v3h3.84c2.25-2.07 3.65-5.12 3.65-8.46Z"
                   />
+                  <path
+                    fill="#34A853"
+                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-3c-1.07.72-2.45 1.16-4.09 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A11.986 11.986 0 0 0 12 24Z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.99 11.99 0 0 0 0 10.68l3.97-3.1Z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.33 2.67 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01Z"
+                  />
+                </svg>
+              }
+            >
+              {t('continueWithGoogle' as any)}
+            </Button>
 
-                  <div className="space-y-1.5">
-                    <Input 
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Ditt lösenord (minst 6 tecken)"
-                      icon={<Lock size={16} />}
-                      error={error}
-                    />
-
-                    {!isRegistering && (
-                      <div className="flex justify-end pr-1">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsForgotPassword(true);
-                            setError(null);
-                          }}
-                          className="text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                        >
-                          Glömt lösenord?
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="pt-1.5 space-y-2.5">
-                  <Button 
-                    type="submit"
-                    loading={loading}
-                    variant="primary"
-                    fullWidth
-                  >
-                    {isRegistering ? t('createAccount') : t('login')}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handleQuickTestLogin}
-                    disabled={loading}
-                    variant="subtle"
-                    fullWidth
-                    icon={<Sparkles size={13} />}
-                  >
-                    Snabbtest: Logga in med testkonto
-                  </Button>
-                </div>
-              </form>
-
-              <Divider label={t('orContinueWith')} />
-
-              <Button 
-                onClick={() => handleSocialLogin('google')}
-                variant="secondary"
-                fullWidth
-                icon={
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      fill="#4285F4"
-                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.28 1.5-1.11 2.76-2.36 3.61v3h3.84c2.25-2.07 3.65-5.12 3.65-8.46Z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-3c-1.07.72-2.45 1.16-4.09 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A11.986 11.986 0 0 0 12 24Z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.99 11.99 0 0 0 0 10.68l3.97-3.1Z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.33 2.67 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01Z"
-                    />
-                  </svg>
-                }
+            <div className="mt-5 pt-3 border-t border-[var(--border-color)] flex items-center justify-center gap-4 text-[11px] font-semibold text-[var(--text-secondary)]">
+              <button 
+                onClick={() => onLegalClick('privacy')}
+                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
-                {t('continueWithGoogle' as any)}
-              </Button>
-
-              <div className="mt-5 pt-3 border-t border-[var(--border-color)] flex items-center justify-center gap-4 text-[11px] font-semibold text-[var(--text-secondary)]">
-                <button 
-                  onClick={() => onLegalClick('privacy')}
-                  className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                >
-                  {t('privacyPolicy' as any)}
-                </button>
-                <span>•</span>
-                <button 
-                  onClick={() => onLegalClick('terms')}
-                  className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                >
-                  {t('termsOfService' as any)}
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+                {t('privacyPolicy' as any)}
+              </button>
+              <span>•</span>
+              <button 
+                onClick={() => onLegalClick('terms')}
+                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                {t('termsOfService' as any)}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

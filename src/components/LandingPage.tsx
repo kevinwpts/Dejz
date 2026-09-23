@@ -34,6 +34,7 @@ interface LandingPageProps {
   onLogin?: () => void;
   onStartDemo?: () => void;
   onGoogleLogin?: () => void;
+  onLegalClick?: (type: 'privacy' | 'terms' | 'cookies') => void;
   t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   currentLanguage: Language;
   onLanguageChange: (lang: Language) => void;
@@ -77,7 +78,7 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
   );
 };
 
-export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin, currentLanguage, onLanguageChange, t: _t }: LandingPageProps) {
+export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin, onLegalClick, currentLanguage, onLanguageChange, t: _t }: LandingPageProps) {
   const [isLangOpen, setIsLangOpen] = React.useState(false);
   const [activePolicy, setActivePolicy] = React.useState<string | null>(null);
 
@@ -795,7 +796,15 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                   </h4>
                   <div className="flex flex-col gap-2 text-xs font-medium">
                     <button 
-                      onClick={() => setActivePolicy('terms')} 
+                      onClick={() => onLegalClick ? onLegalClick('privacy') : setActivePolicy('privacy')} 
+                      className="flex items-center justify-between p-2 rounded-[12px] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer text-left"
+                    >
+                      <span>{getL10n('Integritetspolicy', 'Privacy Policy', 'Personvernerklæring', 'Privatlivspolitik', 'Tietosuojaseloste')}</span>
+                      <ChevronRight size={14} className="opacity-50" />
+                    </button>
+
+                    <button 
+                      onClick={() => onLegalClick ? onLegalClick('terms') : setActivePolicy('terms')} 
                       className="flex items-center justify-between p-2 rounded-[12px] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer text-left"
                     >
                       <span>{getL10n('Användarvillkor', 'Terms of Service', 'Brukervilkår', 'Brugervilkår', 'Käyttöehdot')}</span>
@@ -803,10 +812,10 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                     </button>
                     
                     <button 
-                      onClick={() => setActivePolicy('cookies')} 
+                      onClick={() => onLegalClick ? onLegalClick('cookies') : setActivePolicy('cookies')} 
                       className="flex items-center justify-between p-2 rounded-[12px] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer text-left"
                     >
-                      <span>{getL10n('Integritet & Cookies', 'Privacy & Cookies', 'Personvern & informasjonskapsler', 'Privatliv & Cookies', 'Tietosuoja & Evästeet')}</span>
+                      <span>{getL10n('Cookiepolicy', 'Cookie Policy', 'Informasjonskapsler', 'Cookiepolitik', 'Evästekäytäntö')}</span>
                       <ChevronRight size={14} className="opacity-50" />
                     </button>
 

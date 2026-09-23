@@ -98,6 +98,7 @@ import { SearchModal } from "./components/SearchModal";
 import { ResetPasswordModal } from "./components/ResetPasswordModal";
 
 import { LegalModal } from "./components/LegalModals";
+import { PublicLegalPage, LegalDocType } from "./components/PublicLegalPage";
 import { PullToRefresh } from "./components/PullToRefresh";
 import { Session } from "@supabase/supabase-js";
 import { ToastContainer, ToastMessage, ToastType } from "./components/Toast";
@@ -286,6 +287,38 @@ export default function App() {
     type: "terms",
   });
 
+  const [publicLegalDoc, setPublicLegalDoc] = useState<LegalDocType | null>(() => {
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    if (path.includes('privacy') || hash.includes('privacy') || path.includes('integritet')) return 'privacy';
+    if (path.includes('terms') || hash.includes('terms') || path.includes('villkor')) return 'terms';
+    if (path.includes('cookie') || hash.includes('cookie')) return 'cookies';
+    return null;
+  });
+
+  useEffect(() => {
+    const checkLegalUrl = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      if (path.includes('privacy') || hash.includes('privacy') || path.includes('integritet')) {
+        setPublicLegalDoc('privacy');
+      } else if (path.includes('terms') || hash.includes('terms') || path.includes('villkor')) {
+        setPublicLegalDoc('terms');
+      } else if (path.includes('cookie') || hash.includes('cookie')) {
+        setPublicLegalDoc('cookies');
+      } else if (path === '/' || path === '') {
+        setPublicLegalDoc(null);
+      }
+    };
+
+    window.addEventListener('popstate', checkLegalUrl);
+    window.addEventListener('hashchange', checkLegalUrl);
+    return () => {
+      window.removeEventListener('popstate', checkLegalUrl);
+      window.removeEventListener('hashchange', checkLegalUrl);
+    };
+  }, []);
+
   const [isLocked, setIsLocked] = useState(false);
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState<string[]>(() => {
     try {
@@ -305,7 +338,16 @@ export default function App() {
   const handleLegalClick = (
     type: "privacy" | "terms" | "cookies" | "contact",
   ) => {
-    setLegalModal({ isOpen: true, type });
+    if (type === 'privacy' || type === 'terms' || type === 'cookies') {
+      try {
+        window.history.pushState({}, '', `/${type}`);
+      } catch (_e) {
+        // ignore
+      }
+      setPublicLegalDoc(type);
+    } else {
+      setLegalModal({ isOpen: true, type });
+    }
   };
 
   // Update app icon and manifest based on theme
@@ -1111,11 +1153,29 @@ export default function App() {
       }
     });
 
+    const hash = window.location.hash;
+    const search = window.location.search;
+
     if (
-      window.location.hash.includes('type=recovery') ||
-      window.location.search.includes('type=recovery')
+      hash.includes('type=recovery') ||
+      search.includes('type=recovery')
     ) {
       setIsResetPasswordOpen(true);
+      setShowLanding(false);
+      setShowWelcome(false);
+    }
+
+    if (hash.includes('error=') || search.includes('error=')) {
+      try {
+        const hashParams = new URLSearchParams(hash.replace(/^#/, '?'));
+        const searchParams = new URLSearchParams(search);
+        const errorDesc = hashParams.get('error_description') || searchParams.get('error_description');
+        if (errorDesc) {
+          addToast(decodeURIComponent(errorDesc.replace(/\+/g, ' ')), 'error');
+        }
+      } catch (err) {
+        console.warn('Error parsing recovery error:', err);
+      }
     }
 
     return () => subscription.unsubscribe();
@@ -2888,6 +2948,24 @@ export default function App() {
     );
   }
 
+  if (publicLegalDoc) {
+    return (
+      <div className={config?.darkMode ? 'dark' : ''}>
+        <PublicLegalPage
+          initialDoc={publicLegalDoc}
+          onNavigateHome={() => {
+            try {
+              window.history.pushState({}, '', '/');
+            } catch (_e) {
+              // ignore
+            }
+            setPublicLegalDoc(null);
+          }}
+        />
+      </div>
+    );
+  }
+
   if (isAuthLoading) {
     return (
       <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative pt-[env(safe-area-inset-top)] bg-[var(--bg-color)] ${config?.darkMode ? 'dark' : ''}`}>
@@ -2927,6 +3005,7 @@ export default function App() {
                 addToast("Välkommen till demoläget!", "success");
               }}
               onGoogleLogin={handleGoogleLogin}
+              onLegalClick={handleLegalClick}
               t={t}
               currentLanguage={landingLanguage}
               onLanguageChange={(lang) => {
@@ -2934,7 +3013,7 @@ export default function App() {
                 localStorage.setItem('app_language', lang);
               }}
             />
-            <CookieConsentModal t={t} onOpenPrivacyPolicy={() => setLegalModal({ isOpen: true, type: 'privacy' })} />
+            <CookieConsentModal t={t} onOpenPrivacyPolicy={() => handleLegalClick('privacy')} />
           </>
         ) : showWelcome ? (
           <WelcomeScreen
@@ -2954,6 +3033,22 @@ export default function App() {
             onBack={() => setShowLanding(true)}
           />
         )}
+
+        {isResetPasswordOpen && (
+          <ResetPasswordModal
+            isOpen={isResetPasswordOpen}
+            onClose={() => {
+              setIsResetPasswordOpen(false);
+              try {
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+              } catch (historyErr) {
+                console.warn('Could not clean history:', historyErr);
+              }
+            }}
+            onShowToast={addToast}
+          />
+        )}
       </div>
     );
   }
@@ -2969,6 +3064,22 @@ export default function App() {
             </p>
           </div>
         </div>
+
+        {isResetPasswordOpen && (
+          <ResetPasswordModal
+            isOpen={isResetPasswordOpen}
+            onClose={() => {
+              setIsResetPasswordOpen(false);
+              try {
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+              } catch (historyErr) {
+                console.warn('Could not clean history:', historyErr);
+              }
+            }}
+            onShowToast={addToast}
+          />
+        )}
       </div>
     );
   }
