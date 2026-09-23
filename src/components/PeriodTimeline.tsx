@@ -243,6 +243,7 @@ export function PeriodTimeline({
                   ? 'text-[var(--text-primary)] font-semibold' 
                   : 'opacity-65 font-medium'
               }`}>
+                {/* Always display Today/Idag for the current date, regardless of selection */}
                 {isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}
               </span>
 
