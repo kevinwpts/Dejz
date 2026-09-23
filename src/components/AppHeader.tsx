@@ -45,16 +45,10 @@ export function AppHeader({
   const [isAtTop, setIsAtTop] = useState(true);
   const lastScrollY = useRef(0);
 
-  // Hide header on today tab since GreetingModule renders the full bleed top hero bar
-  if (activeTab === 'today') {
-    return null;
-  }
-
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // 1. Utgångsläget: Längst upp integreras headern sömlöst utan bakgrund
       if (currentScrollY <= 10) {
         setIsAtTop(true);
         setIsVisible(true);
@@ -64,7 +58,6 @@ export function AppHeader({
 
       setIsAtTop(false);
 
-      // Skydd mot iOS bounce/rubber-banding
       if (currentScrollY < 0) {
         setIsVisible(true);
         return;
@@ -72,11 +65,9 @@ export function AppHeader({
 
       const diff = currentScrollY - lastScrollY.current;
 
-      // Scrolla ner (> 8px) efter toppen -> göm headern
       if (diff > 8 && currentScrollY > 50) {
         setIsVisible(false);
       } else if (diff < -8) {
-        // Scrolla upp -> visa headern
         setIsVisible(true);
       }
 
@@ -94,6 +85,11 @@ export function AppHeader({
   useEffect(() => {
     setIsVisible(true);
   }, [_navTrigger, title]);
+
+  // Hide header on today tab since GreetingModule renders the full bleed top hero bar
+  if (activeTab === 'today') {
+    return null;
+  }
 
   return (
     <header
