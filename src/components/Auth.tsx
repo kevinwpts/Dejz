@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { motion, AnimatePresence } from 'motion/react';
 import { createFreshTestAccount } from '../utils/demoData';
-import { Mail, Lock, ChevronLeft, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { Mail, Lock, ChevronLeft, Loader2, AlertCircle, Sparkles, KeyRound, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { DejzLogo } from './DejzLogo';
 
@@ -18,6 +18,8 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
   const [loading, setLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(initialIsRegistering);
   const [isEmailSent, setIsEmailSent] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isResetSent, setIsResetSent] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +33,38 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
       onShowToast("Nytt testkonto initierat! Startar onboarding...", "success");
       window.location.reload();
     }, 400);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      setError('Ange din e-postadress');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: window.location.origin,
+      });
+
+      if (error) throw error;
+
+      setIsResetSent(true);
+      onShowToast('Återställningslänk har skickats!', 'success');
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      let message = err.message || 'Kunde inte skicka återställningslänk.';
+      if (message.includes('rate limit')) {
+        message = 'För många förfrågningar. Vänta en stund och försök igen.';
+      }
+      setError(message);
+      onShowToast(message, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -189,6 +223,108 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 {t('backToLogin' as any)}
               </button>
             </motion.div>
+          ) : isResetSent ? (
+            <motion.div
+              key="reset-sent"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              className="text-center py-4 space-y-6"
+            >
+              <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-[20px] flex items-center justify-center mx-auto border border-emerald-500/20 shadow-xs">
+                <CheckCircle2 size={30} />
+              </div>
+
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+                  Kolla din inkorg
+                </h2>
+                <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
+                  Vi har skickat en återställningslänk till <strong className="text-[var(--text-primary)]">{email}</strong>. Följ instruktionerna i mailet för att välja ett nytt lösenord.
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setIsResetSent(false);
+                  setIsForgotPassword(false);
+                }}
+                className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+              >
+                Tillbaka till inloggning
+              </button>
+            </motion.div>
+          ) : isForgotPassword ? (
+            <motion.div
+              key="forgot-password"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsForgotPassword(false);
+                    setError(null);
+                  }}
+                  className="w-9 h-9 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <ArrowLeft size={18} />
+                </button>
+                <div>
+                  <h2 className="text-xl font-bold text-[var(--text-primary)]">
+                    Glömt lösenord?
+                  </h2>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    Återställ ditt lösenord via e-post
+                  </p>
+                </div>
+              </div>
+
+              {error && (
+                <div className="bg-red-500/10 p-3.5 rounded-[16px] border border-red-500/20 flex items-center gap-2.5 text-red-500 text-xs font-semibold">
+                  <AlertCircle size={16} className="shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                  Ange den e-postadress som är kopplad till ditt konto så skickar vi en länk för att välja ett nytt lösenord.
+                </p>
+
+                <div className="relative">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none">
+                    <Mail size={16} />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Din e-postadress"
+                    className="w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] pl-10 pr-4 py-3 font-medium text-xs sm:text-sm text-[var(--text-primary)] focus:border-[var(--accent-color)] outline-none transition-all placeholder-[var(--text-secondary)]/50"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs"
+                >
+                  {loading ? (
+                    <Loader2 className="animate-spin" size={16} />
+                  ) : (
+                    <span className="flex items-center gap-1.5">
+                      <KeyRound size={15} />
+                      Skicka återställningslänk
+                    </span>
+                  )}
+                </button>
+              </form>
+            </motion.div>
           ) : (
             <motion.div
               key="auth-form"
@@ -279,18 +415,35 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                     />
                   </div>
 
-                  <div className="relative">
-                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none">
-                      <Lock size={16} />
+                  <div className="space-y-1.5">
+                    <div className="relative">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none">
+                        <Lock size={16} />
+                      </div>
+                      <input 
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Ditt lösenord (minst 6 tecken)"
+                        className="w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] pl-10 pr-4 py-3 font-medium text-xs sm:text-sm text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 outline-none transition-all placeholder-[var(--text-secondary)]/50"
+                      />
                     </div>
-                    <input 
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Ditt lösenord (minst 6 tecken)"
-                      className="w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] pl-10 pr-4 py-3 font-medium text-xs sm:text-sm text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 outline-none transition-all placeholder-[var(--text-secondary)]/50"
-                    />
+
+                    {!isRegistering && (
+                      <div className="flex justify-end pr-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsForgotPassword(true);
+                            setError(null);
+                          }}
+                          className="text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                        >
+                          Glömt lösenord?
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 

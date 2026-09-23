@@ -38,6 +38,9 @@ export function SearchModal({
   useEffect(() => {
     if (isOpen) {
       setQuery('');
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   }, [isOpen]);
 
@@ -55,10 +58,7 @@ export function SearchModal({
 
   const matchingTransactions = useMemo(() => {
     if (!trimmedQuery) {
-      // When query is empty, show the most recent transactions
-      return [...(transactions || [])]
-        .sort((a, b) => b.timestamp - a.timestamp)
-        .slice(0, 10);
+      return [];
     }
     return (transactions || [])
       .filter(t => {
@@ -141,34 +141,54 @@ export function SearchModal({
 
             {/* Results Scroll Container */}
             <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-6 custom-scrollbar touch-pan-y overscroll-contain">
-              {/* Transactions Section */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-70">
-                    {trimmedQuery 
-                      ? `${getL10n("Transaktioner", "Transactions", "Transaksjoner", "Transaktioner", "Tapahtumat")} (${matchingTransactions.length})`
-                      : getL10n("Senaste händelser", "Recent transactions", "Nylige transaksjoner", "Seneste transaktioner", "Viimeisimmät tapahtumat")
-                    }
-                  </span>
-                </div>
-
-                {matchingTransactions.length > 0 ? (
-                  <div className="space-y-2">
-                    {matchingTransactions.map(t => (
-                      <TransactionItem 
-                        key={t.id} 
-                        transaction={t} 
-                        config={config} 
-                        showDate={true}
-                        onView={(trans) => {
-                          onViewTransaction(trans);
-                          onClose();
-                        }}
-                      />
-                    ))}
+              {!trimmedQuery ? (
+                <div className="text-center py-16 px-4">
+                  <div className="w-12 h-12 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] opacity-60 flex items-center justify-center mx-auto mb-3">
+                    <Search size={22} />
                   </div>
-                ) : (
-                  trimmedQuery && (
+                  <p className="text-[14px] font-semibold text-[var(--text-primary)]">
+                    {getL10n(
+                      'Sök i din ekonomi',
+                      'Search your finances',
+                      'Søk i økonomien din',
+                      'Søg i din økonomi',
+                      'Hae taloudestasi'
+                    )}
+                  </p>
+                  <p className="text-[12.5px] font-medium text-[var(--text-secondary)] opacity-70 mt-1 max-w-xs mx-auto">
+                    {getL10n(
+                      'Skriv in butik, anteckning, kategori eller belopp för att söka.',
+                      'Type a store, note, category or amount to search.',
+                      'Skriv inn butikk, notat, kategori eller beløp for å søke.',
+                      'Indtast butik, note, kategori eller beløb for at søge.',
+                      'Kirjoita kauppa, muistiinpano, kategoria tai summa hakeaksesi.'
+                    )}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-70">
+                      {getL10n("Transaktioner", "Transactions", "Transaksjoner", "Transaktioner", "Tapahtumat")} ({matchingTransactions.length})
+                    </span>
+                  </div>
+
+                  {matchingTransactions.length > 0 ? (
+                    <div className="space-y-2">
+                      {matchingTransactions.map(t => (
+                        <TransactionItem 
+                          key={t.id} 
+                          transaction={t} 
+                          config={config} 
+                          showDate={true}
+                          onView={(trans) => {
+                            onViewTransaction(trans);
+                            onClose();
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ) : (
                     <div className="text-center py-10 px-4 bg-[var(--surface-color)] rounded-[20px] border border-[var(--border-color)]">
                       <div className="w-11 h-11 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] opacity-60 flex items-center justify-center mx-auto mb-2.5">
                         <Search size={20} />
@@ -192,9 +212,9 @@ export function SearchModal({
                         )}
                       </p>
                     </div>
-                  )
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           </motion.div>
         </motion.div>

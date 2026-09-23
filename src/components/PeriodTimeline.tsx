@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
 
 interface PeriodTimelineProps {
@@ -18,37 +18,68 @@ export function PeriodTimeline({
 }: PeriodTimelineProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const selectedDayRef = useRef<HTMLButtonElement>(null);
+  const isInitialMount = useRef(true);
 
   const isEn = language === 'en';
   const locale = isEn ? 'en-US' : 'sv-SE';
 
   // Normalize selected date for comparison
-  const selectedTime = selectedDate ? new Date(selectedDate).setHours(0, 0, 0, 0) : null;
-  const todayTime = new Date().setHours(0, 0, 0, 0);
+  const selectedTime = useMemo(() => {
+    if (!selectedDate) return null;
+    const d = new Date(selectedDate);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  }, [selectedDate]);
 
-  // Auto-scroll selected day into view
-  useEffect(() => {
-    if (selectedDayRef.current && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const element = selectedDayRef.current;
-      const elementLeft = element.offsetLeft;
-      const elementWidth = element.offsetWidth;
-      const containerWidth = container.offsetWidth;
+  const todayTime = useMemo(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  }, []);
 
-      container.scrollTo({
-        left: elementLeft - containerWidth / 2 + elementWidth / 2,
-        behavior: 'smooth',
+  // Center selected day inside the scroll container
+  const centerSelectedElement = (element: HTMLElement | null, behavior: ScrollBehavior = 'smooth') => {
+    if (!element || !scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+
+    const elementCenter = elementRect.left + elementRect.width / 2;
+    const containerCenter = containerRect.left + containerRect.width / 2;
+    const delta = elementCenter - containerCenter;
+
+    if (Math.abs(delta) > 1) {
+      container.scrollBy({
+        left: delta,
+        behavior,
       });
     }
+  };
+
+  // Auto-scroll on mount and when selectedTime changes
+  useEffect(() => {
+    if (selectedDayRef.current) {
+      centerSelectedElement(
+        selectedDayRef.current,
+        isInitialMount.current ? ('instant' as ScrollBehavior) : 'smooth'
+      );
+    }
+    isInitialMount.current = false;
   }, [selectedTime]);
 
   if (!calendarDays || calendarDays.length === 0) {
     return null;
   }
 
+  const handleSelect = (dayDate: any, e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const targetEl = e.currentTarget;
+    onSelectDate(new Date(dayDate));
+    centerSelectedElement(targetEl, 'smooth');
+  };
+
   return (
     <div className="w-full mb-1 font-sans">
-      {/* Horizontal Scrollable Day Strip - Direct layout without card wrapper */}
+      {/* Horizontal Scrollable Day Strip */}
       <div
         ref={scrollContainerRef}
         className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-1 no-scrollbar scroll-smooth touch-pan-x overscroll-contain"
@@ -57,13 +88,13 @@ export function PeriodTimeline({
         {calendarDays.map((day: any, index: number) => {
           if (!day.date) return null;
           const dayDate = new Date(day.date);
-          const dayTime = dayDate.setHours(0, 0, 0, 0);
+          const dayTime = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate()).getTime();
           const isSelected = selectedTime === dayTime;
           const isRealToday = dayTime === todayTime;
-          const dayNumber = new Date(day.date).getDate();
+          const dayNumber = dayDate.getDate();
           
           // Day name in short form (e.g. Mån, Tis or Mon, Tue)
-          const dayWeekday = new Date(day.date).toLocaleDateString(locale, { weekday: 'short' });
+          const dayWeekday = dayDate.toLocaleDateString(locale, { weekday: 'short' });
           const dayWeekdayShort = dayWeekday.slice(0, 3);
 
           const hasSpend = (day.daySpent || 0) > 0;
@@ -74,7 +105,7 @@ export function PeriodTimeline({
               key={`${day.date}-${index}`}
               ref={isSelected ? selectedDayRef : null}
               type="button"
-              onClick={() => onSelectDate(new Date(day.date))}
+              onClick={(e) => handleSelect(day.date, e)}
               whileTap={{ scale: 0.94 }}
               className={`flex flex-col items-center justify-between min-w-[48px] sm:min-w-[52px] h-[62px] sm:h-[66px] py-1.5 px-1 rounded-[16px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected

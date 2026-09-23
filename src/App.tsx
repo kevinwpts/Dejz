@@ -95,6 +95,7 @@ import { Auth } from "./components/Auth";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import { OnboardingModal } from "./components/OnboardingModal";
 import { SearchModal } from "./components/SearchModal";
+import { ResetPasswordModal } from "./components/ResetPasswordModal";
 
 import { LegalModal } from "./components/LegalModals";
 import { PullToRefresh } from "./components/PullToRefresh";
@@ -270,7 +271,8 @@ export default function App() {
   const [navTrigger, setNavTrigger] = useState(0);
 
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
-    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
     useState(false);
   const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
@@ -1089,6 +1091,10 @@ export default function App() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (localStorage.getItem('dejz_demo_session')) return;
       
+      if (_event === 'PASSWORD_RECOVERY') {
+        setIsResetPasswordOpen(true);
+      }
+      
       setSession(session);
       setIsAuthLoading(false);
       if (session?.provider_token) {
@@ -1104,6 +1110,13 @@ export default function App() {
         );
       }
     });
+
+    if (
+      window.location.hash.includes('type=recovery') ||
+      window.location.search.includes('type=recovery')
+    ) {
+      setIsResetPasswordOpen(true);
+    }
 
     return () => subscription.unsubscribe();
   }, []);
@@ -4009,6 +4022,13 @@ export default function App() {
               setLegalModal((prev) => ({ ...prev, isOpen: false }))
             }
             t={t}
+          />
+        )}
+        {isResetPasswordOpen && (
+          <ResetPasswordModal
+            isOpen={isResetPasswordOpen}
+            onClose={() => setIsResetPasswordOpen(false)}
+            onShowToast={addToast}
           />
         )}
         {config && (
