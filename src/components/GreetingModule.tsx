@@ -223,10 +223,6 @@ export function GreetingModule({
 
       {/* 1. Dagsbudget Hero Card */}
       <div className="relative">
-        <div 
-          className="absolute inset-0 bg-[#A0C5FD]/25 rounded-[32px] blur-2xl -z-10 pointer-events-none transform -translate-y-1 scale-95 opacity-70" 
-          aria-hidden="true" 
-        />
         <motion.div 
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -253,7 +249,7 @@ export function GreetingModule({
 
           {/* Progress bar under Kvar idag */}
           <div className="w-full mt-5">
-            <div className="w-full h-2 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
+            <div className="w-full h-2 bg-[var(--surface-secondary)] rounded-full overflow-hidden relative">
               <div 
                 className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
                   isNegative || dayProgressPct < 10 ? 'bg-danger' : 'bg-[var(--accent-color)]'
@@ -271,9 +267,9 @@ export function GreetingModule({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
-          className="rounded-[22px] border border-[var(--border-color)] p-4 sm:p-5 bg-gradient-to-br from-[var(--surface-color)] via-[var(--surface-color)] to-[var(--surface-muted)]/50 shadow-sm relative overflow-hidden flex items-start gap-3.5"
+          className="rounded-[22px] border border-[var(--border-color)] p-4 sm:p-5 bg-[var(--surface-color)] shadow-sm relative overflow-hidden flex items-start gap-3.5"
         >
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-amber-400/25 via-emerald-400/25 to-sky-400/25 border border-[var(--accent-color)]/30 flex items-center justify-center text-xl shrink-0 shadow-inner">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[var(--surface-secondary)] border border-[var(--border-color)] flex items-center justify-center text-xl shrink-0">
             🌼
           </div>
 
