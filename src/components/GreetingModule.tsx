@@ -215,139 +215,144 @@ export function GreetingModule({
   }, [stats, todayDayData, availableForD, language, currency]);
 
   return (
-    <div className="space-y-4 sm:space-y-5 font-sans relative">
+    <div className="font-sans relative">
       {/* 1. Soft Fintech Cyan-Blue Hero Card (Full edge-to-edge & top bleed under status bar / dynamic island) */}
-      <div className="-mx-4 sm:-mx-6 relative overflow-hidden rounded-b-[36px] bg-gradient-to-br from-[#0EA5E9] via-[#0284C7] to-[#2563EB] text-white pt-[calc(1.2rem+env(safe-area-inset-top))] px-5 sm:px-8 pb-8 shadow-xl shadow-sky-500/15 border-b border-sky-400/30">
+      <div className="w-full relative overflow-hidden rounded-b-[36px] bg-gradient-to-br from-[#0EA5E9] via-[#0284C7] to-[#2563EB] text-white pt-[calc(1.2rem+env(safe-area-inset-top))] pb-8 shadow-xl shadow-sky-500/15 border-b border-sky-400/30">
         {/* Soft Ambient Light Circles */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-sky-300/20 rounded-full blur-xl pointer-events-none" />
 
-        {/* Top Header inside Hero */}
-        <div className="flex items-center justify-between gap-3 relative z-10 pb-3">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => onNavigate("profile")}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 flex items-center justify-center text-white overflow-hidden shrink-0 transition-transform active:scale-95 cursor-pointer shadow-xs"
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
-              ) : (
-                <User size={20} strokeWidth={2.2} />
-              )}
-            </button>
-            <div className="flex flex-col text-left">
-              <span className="text-[11px] font-medium text-white/80 leading-none mb-1">
-                {language === 'en' ? 'Hello' : 'Hej'} 👋
-              </span>
-              <span className="text-sm font-bold text-white tracking-tight leading-none">
-                {userName || 'Användare'}
-              </span>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          {/* Top Header inside Hero */}
+          <div className="flex items-center justify-between gap-3 relative z-10 pb-3">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => onNavigate("profile")}
+                className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 flex items-center justify-center text-white overflow-hidden shrink-0 transition-transform active:scale-95 cursor-pointer shadow-xs"
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                ) : (
+                  <User size={20} strokeWidth={2.2} />
+                )}
+              </button>
+              <div className="flex flex-col text-left">
+                <span className="text-[11px] font-medium text-white/80 leading-none mb-1">
+                  {language === 'en' ? 'Hello' : 'Hej'} 👋
+                </span>
+                <span className="text-sm font-bold text-white tracking-tight leading-none">
+                  {userName || 'Användare'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onNavigate("search")}
+                className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+                aria-label="Sök"
+              >
+                <Search size={18} strokeWidth={2.2} />
+              </button>
+              <button
+                onClick={onOpenNotifications || (() => onNavigate("notifications"))}
+                className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer relative"
+                aria-label="Notiser"
+              >
+                <Bell size={18} strokeWidth={2.2} fill="currentColor" className="opacity-90" />
+                {notificationCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-sky-600" />
+                )}
+              </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onNavigate("search")}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
-              aria-label="Sök"
-            >
-              <Search size={18} strokeWidth={2.2} />
-            </button>
-            <button
-              onClick={onOpenNotifications || (() => onNavigate("notifications"))}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer relative"
-              aria-label="Notiser"
-            >
-              <Bell size={18} strokeWidth={2.2} fill="currentColor" className="opacity-90" />
-              {notificationCount > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-sky-600" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Center Balance Display */}
-        <div className="flex flex-col items-center text-center my-2 relative z-10">
-          <span className="text-[11px] font-bold tracking-wider text-white/80 uppercase mb-1">
-            {topLabel}
-          </span>
-          <div className="flex items-baseline justify-center gap-1.5 my-1">
-            <AnimatedNumber
-              value={displayAmount}
-              className={`text-4xl sm:text-5xl font-black text-white font-amount tabular-nums tracking-tight ${
-                isNegative ? 'text-rose-200' : ''
-              }`}
-              formatter={(val) => formatAmount(val, language)}
-            />
-            <span className="text-lg font-semibold text-white/80 font-sans">
-              {currency}
+          {/* Center Balance Display */}
+          <div className="flex flex-col items-center text-center my-2 relative z-10">
+            <span className="text-[11px] font-bold tracking-wider text-white/80 uppercase mb-1">
+              {topLabel}
             </span>
-          </div>
-
-          {/* Progress bar */}
-          <div className="w-full max-w-xs mt-3">
-            <div className="w-full h-2 bg-white/25 backdrop-blur-md rounded-full overflow-hidden relative">
-              <div
-                className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                  isNegative ? 'bg-rose-300' : 'bg-white shadow-sm'
+            <div className="flex items-baseline justify-center gap-1.5 my-1">
+              <AnimatedNumber
+                value={displayAmount}
+                className={`text-4xl sm:text-5xl font-black text-white font-amount tabular-nums tracking-tight ${
+                  isNegative ? 'text-rose-200' : ''
                 }`}
-                style={{ width: `${dayProgressPct}%` }}
+                formatter={(val) => formatAmount(val, language)}
               />
+              <span className="text-lg font-semibold text-white/80 font-sans">
+                {currency}
+              </span>
+            </div>
+
+            {/* Progress bar */}
+            <div className="w-full max-w-xs mt-3">
+              <div className="w-full h-2 bg-white/25 backdrop-blur-md rounded-full overflow-hidden relative">
+                <div
+                  className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
+                    isNegative ? 'bg-rose-300' : 'bg-white shadow-sm'
+                  }`}
+                  style={{ width: `${dayProgressPct}%` }}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Quick Action Grid (4 Soft Translucent Glass Buttons) */}
-        <div className="grid grid-cols-4 gap-2 pt-4 relative z-10">
-          <button
-            onClick={() => onAddTransaction?.("expense")}
-            className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Plus size={18} strokeWidth={2.8} />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
-              {language === 'en' ? 'Expense' : 'Utgift'}
-            </span>
-          </button>
+          {/* Quick Action Grid (4 Soft Translucent Glass Buttons) */}
+          <div className="grid grid-cols-4 gap-2 pt-4 relative z-10">
+            <button
+              onClick={() => onAddTransaction?.("expense")}
+              className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Plus size={18} strokeWidth={2.8} />
+              </div>
+              <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
+                {language === 'en' ? 'Expense' : 'Utgift'}
+              </span>
+            </button>
 
-          <button
-            onClick={() => onAddTransaction?.("income")}
-            className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Wallet size={18} strokeWidth={2.2} />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
-              {language === 'en' ? 'Income' : 'Inkomst'}
-            </span>
-          </button>
+            <button
+              onClick={() => onAddTransaction?.("income")}
+              className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Wallet size={18} strokeWidth={2.2} />
+              </div>
+              <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
+                {language === 'en' ? 'Income' : 'Inkomst'}
+              </span>
+            </button>
 
-          <button
-            onClick={() => onNavigate("budget")}
-            className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Sparkles size={18} strokeWidth={2.2} />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
-              {language === 'en' ? 'Save' : 'Spara'}
-            </span>
-          </button>
+            <button
+              onClick={() => onNavigate("budget")}
+              className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Sparkles size={18} strokeWidth={2.2} />
+              </div>
+              <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
+                {language === 'en' ? 'Save' : 'Spara'}
+              </span>
+            </button>
 
-          <button
-            onClick={() => onNavigate("budget")}
-            className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <WalletCards size={18} strokeWidth={2.2} />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
-              {language === 'en' ? 'Budget' : 'Budget'}
-            </span>
-          </button>
+            <button
+              onClick={() => onNavigate("budget")}
+              className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <WalletCards size={18} strokeWidth={2.2} />
+              </div>
+              <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
+                {language === 'en' ? 'Budget' : 'Budget'}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Content below hero card centered in max-w-2xl */}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 space-y-4 sm:space-y-5 pt-4">
 
       {/* Dejzi Mascot Card */}
       {dejziInfo && (
@@ -422,6 +427,7 @@ export function GreetingModule({
           isCurrentPeriod={isCurrentPeriod}
         />
       )}
+      </div>
 
       {/* Calculation Modal */}
       <div>

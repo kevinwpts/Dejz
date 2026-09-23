@@ -3220,7 +3220,7 @@ export default function App() {
       )}
 
             <PullToRefresh onRefresh={handleRefresh}>
-        <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${activeTab === 'today' ? (isDemoMode ? 'pt-[calc(2.6rem+env(safe-area-inset-top))]' : 'pt-0') : (isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]')} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
+        <main className={`relative ${activeTab === 'today' ? 'w-full max-w-full px-0 pt-0' : 'max-w-2xl mx-auto px-4 sm:px-6 ' + (isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]')} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
           <AnimatePresence>
             {activeTab === "today" && stats && (
               <motion.div
