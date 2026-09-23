@@ -860,7 +860,7 @@ export default function App() {
     // Also try to save to DB if table exists (optional, silent fail)
     try {
       await dataService.saveFeedback(session.user.id, message);
-    } catch (_error) {
+    } catch (error) {
       // Ignore DB error if table doesn't exist, since we opened email client
       console.warn("Could not save feedback to database:", error);
     }
