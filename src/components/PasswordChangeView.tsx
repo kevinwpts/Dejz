@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Loader2, ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Lock } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { TranslationKey } from '../i18n';
+import { Button, Input, IconButton } from './ui';
 
 interface PasswordChangeViewProps {
   onBack: () => void;
@@ -61,69 +62,64 @@ export function PasswordChangeView({ onBack, t, addToast, userEmail }: PasswordC
   };
 
   return (
-    <div className="space-y-6">
-      <button onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)]">
-        <ChevronLeft size={16} />
-        {t('back' as any)}
-      </button>
-
-      <div className="space-y-5">
-        <div className="space-y-2 text-left">
-          <label className="text-label-caps text-[var(--text-secondary)] ml-1">
-            {t('currentPassword' as any)}
-          </label>
-          <input
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="w-full bg-[var(--surface-muted)] hover:bg-[var(--surface-color)]/55 focus:bg-[var(--surface-color)] border border-[var(--border-color)] focus:border-[var(--accent-color)]/40 rounded-[14px] px-6 py-4 text-body-md font-semibold text-[var(--text-primary)] transition-all duration-300 outline-none shadow-xs placeholder:text-[var(--text-secondary)]/30 tracking-tight"
-            placeholder="••••••••"
-          />
+    <div className="space-y-6 max-w-md mx-auto">
+      <div className="flex items-center gap-3">
+        <IconButton
+          icon={<ChevronLeft size={18} />}
+          onClick={onBack}
+          variant="muted"
+          size="sm"
+          aria-label="Tillbaka"
+        />
+        <div>
+          <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)]">
+            {t('changePassword' as any) || 'Ändra lösenord'}
+          </h2>
+          <p className="text-xs text-[var(--text-secondary)] opacity-80">
+            {userEmail}
+          </p>
         </div>
+      </div>
 
-        <div className="space-y-2 text-left">
-          <label className="text-label-caps text-[var(--text-secondary)] ml-1">
-            {t('newPassword' as any)}
-          </label>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full bg-[var(--surface-muted)] hover:bg-[var(--surface-color)]/55 focus:bg-[var(--surface-color)] border border-[var(--border-color)] focus:border-[var(--accent-color)]/40 rounded-[14px] px-6 py-4 text-body-md font-semibold text-[var(--text-primary)] transition-all duration-300 outline-none shadow-xs placeholder:text-[var(--text-secondary)]/30 tracking-tight"
-            placeholder="••••••••"
-          />
+      <div className="space-y-4">
+        <Input
+          label={t('currentPassword' as any) || 'Nuvarande lösenord'}
+          type="password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          placeholder="••••••••"
+          icon={<Lock size={16} />}
+        />
+
+        <Input
+          label={t('newPassword' as any) || 'Nytt lösenord'}
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          placeholder="••••••••"
+          icon={<Lock size={16} />}
+        />
+
+        <Input
+          label={t('confirmNewPassword' as any) || 'Bekräfta nytt lösenord'}
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="••••••••"
+          icon={<Lock size={16} />}
+          error={error}
+        />
+
+        <div className="pt-2">
+          <Button 
+            onClick={handleUpdatePassword}
+            loading={isUpdating}
+            variant="primary"
+            fullWidth
+          >
+            {t('updatePassword' as any) || 'Uppdatera lösenord'}
+          </Button>
         </div>
-
-        <div className="space-y-2 text-left">
-          <label className="text-label-caps text-[var(--text-secondary)] ml-1">
-            {t('confirmNewPassword' as any)}
-          </label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full bg-[var(--surface-muted)] hover:bg-[var(--surface-color)]/55 focus:bg-[var(--surface-color)] border border-[var(--border-color)] focus:border-[var(--accent-color)]/40 rounded-[14px] px-6 py-4 text-body-md font-semibold text-[var(--text-primary)] transition-all duration-300 outline-none shadow-xs placeholder:text-[var(--text-secondary)]/30 tracking-tight"
-            placeholder="••••••••"
-          />
-          {error && (
-            <p className="text-xs font-semibold text-danger ml-1 uppercase tracking-tight">{error}</p>
-          )}
-        </div>
-
-        <button 
-          onClick={handleUpdatePassword}
-          disabled={isUpdating}
-          className="btn-primary w-full py-4 h-auto text-sm shadow-xs uppercase font-bold"
-        >
-          {isUpdating ? (
-            <>
-              <Loader2 size={18} className="animate-spin" />
-              {t('updating' as any)}
-            </>
-          ) : (
-            t('updatePassword' as any)
-          )}
-        </button>
       </div>
     </div>
   );

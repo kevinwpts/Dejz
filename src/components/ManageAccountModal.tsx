@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-
-import { X, User, Mail, LogOut, Loader2, Camera, Unlink, Globe, MailCheck } from 'lucide-react';
+import { User, Mail, LogOut, Camera, Unlink, Globe, MailCheck } from 'lucide-react';
 
 import { ConfirmModal } from './ConfirmModal';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { useScrollLock } from '../hooks/useScrollLock';
+import { Modal, Button, Input, IconButton, Card, ListRow } from './ui';
 
 interface ManageAccountModalProps {
   isOpen: boolean;
@@ -19,10 +17,10 @@ interface ManageAccountModalProps {
   addToast: (message: string, type: 'success' | 'error') => void;
   onUploadAvatar: (file: File) => void;
   avatarUrl?: string | null;
-  subscriptionStatus: string | null;
-  trialEnd: string | null;
-  nextBillingDate: string | null;
-  onPaymentSuccess: () => void;
+  subscriptionStatus?: string | null;
+  trialEnd?: string | null;
+  nextBillingDate?: string | null;
+  onPaymentSuccess?: () => void;
 }
 
 export function ManageAccountModal({ 
@@ -35,12 +33,7 @@ export function ManageAccountModal({
   addToast,
   onUploadAvatar,
   avatarUrl,
-  subscriptionStatus: _subscriptionStatus,
-  trialEnd: _trialEnd,
-  nextBillingDate: _nextBillingDate,
-  onPaymentSuccess: _onPaymentSuccess
 }: ManageAccountModalProps) {
-  useScrollLock(isOpen);
   const [fullName, setFullName] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [identities, setIdentities] = useState<any[]>([]);
@@ -85,7 +78,7 @@ export function ManageAccountModal({
           
           setIdentities(identities.filter(id => id.identity_id !== identity.identity_id));
           addToast(t('accountDisconnected' as any), 'success');
-        } catch (_error) {
+        } catch (error: any) {
           console.error('Error unlinking account:', error);
           addToast(error.message || t('error'), 'error');
         } finally {
@@ -108,7 +101,7 @@ export function ManageAccountModal({
       addToast(t('profileUpdated'), 'success');
       onUpdateProfile();
       onClose();
-    } catch (_error) {
+    } catch (error: any) {
       console.error('Error updating profile:', error);
       addToast(error.message || t('error'), 'error');
     } finally {
@@ -124,177 +117,142 @@ export function ManageAccountModal({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && user && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="bg-[var(--surface-solid)] w-full max-w-sm rounded-[24px] p-6 sm:p-7 relative border border-[var(--border-color)] max-h-[90vh] overflow-y-auto custom-scrollbar overscroll-contain pt-[env(safe-area-inset-top)] shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button 
-              onClick={onClose}
-              className="absolute right-5 top-5 w-7 h-7 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] bg-[var(--surface-color)] rounded-[8px] border border-[var(--border-color)] transition-all cursor-pointer"
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={t('editProfile') || 'Redigera profil'}
+        size="sm"
+      >
+        <div className="space-y-4 pt-1">
+          {/* Profile Avatar Upload */}
+          <div className="text-center py-1 flex flex-col items-center justify-center">
+            <label htmlFor="avatar-modal" className="relative w-16 h-16 mb-2 block cursor-pointer group">
+              <div className="w-16 h-16 rounded-[16px] overflow-hidden border border-[var(--border-color)] bg-[var(--surface-color)] relative group-hover:scale-105 active:scale-95 transition-all shadow-sm">
+                {avatarUrl ? (
+                  <img 
+                    src={avatarUrl} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-xl font-bold uppercase">
+                    {fullName ? fullName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 backdrop-blur-[2px]">
+                  <Camera size={16} className="text-white" />
+                </div>
+              </div>
+              <input 
+                id="avatar-modal"
+                type="file" 
+                className="hidden" 
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </label>
+            <p className="text-[11px] font-semibold text-[var(--text-secondary)] opacity-70">
+              Tryck för att ändra profilbild
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Input
+              label={t('fullName')}
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="John Doe"
+              icon={<User size={16} />}
+            />
+
+            <Input
+              label={t('email')}
+              type="text"
+              readOnly
+              disabled
+              value={user.email || ''}
+              icon={<Mail size={16} />}
+            />
+          </div>
+
+          {identities.length > 0 && (
+            <div className="space-y-2 pt-1">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-1 block">
+                {t('connectedAccounts' as any) || 'Kopplade konton'}
+              </span>
+              <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/50">
+                {identities.map((identity) => (
+                  <ListRow
+                    key={identity.id}
+                    icon={
+                      identity.provider === 'google' ? (
+                        <Globe size={16} strokeWidth={1.75} className="text-[var(--accent-color)]" />
+                      ) : (
+                        <MailCheck size={16} strokeWidth={1.75} className="text-[var(--text-secondary)]" />
+                      )
+                    }
+                    title={
+                      identity.provider === 'email'
+                        ? t('providerEmail' as any) || 'E-post'
+                        : identity.provider === 'google'
+                        ? t('providerGoogle' as any) || 'Google'
+                        : identity.provider
+                    }
+                    subtitle={identity.identity_data?.email}
+                    rightElement={
+                      identities.length > 1 ? (
+                        <IconButton
+                          icon={<Unlink size={14} />}
+                          onClick={() => handleUnlink(identity)}
+                          disabled={isUpdating}
+                          variant="danger"
+                          size="xs"
+                          aria-label="Koppla från konto"
+                        />
+                      ) : undefined
+                    }
+                  />
+                ))}
+              </Card>
+            </div>
+          )}
+
+          <div className="pt-2 space-y-2.5">
+            <Button 
+              onClick={handleSave}
+              loading={isUpdating}
+              variant="primary"
+              fullWidth
             >
-              <X size={14} />
-            </button>
+              {t('saveChanges')}
+            </Button>
+            
+            <Button 
+              onClick={() => {
+                setConfirmConfig({
+                  isOpen: true,
+                  title: t('signOut'),
+                  message: t('signOutConfirm'),
+                  onConfirm: () => {
+                    onLogout();
+                    onClose();
+                    setConfirmConfig(prev => ({ ...prev, isOpen: false }))
+                  }
+                });
+              }}
+              variant="ghost"
+              fullWidth
+              icon={<LogOut size={15} strokeWidth={1.75} />}
+            >
+              {t('signOut')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
-            <div className="text-center mb-6">
-              <div className="relative w-20 h-20 mx-auto mb-3">
-                <div className="w-20 h-20 rounded-[14px] overflow-hidden border border-[var(--border-color)] bg-[var(--surface-color)] relative group shadow-xs transition-transform hover:scale-[1.01]">
-                  {avatarUrl ? (
-                    <img 
-                      src={avatarUrl} 
-                      alt="Profile" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-2xl font-bold font-display">
-                      {fullName ? fullName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <label className="absolute inset-0 bg-black/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 backdrop-blur-[2px] cursor-pointer duration-200">
-                    <Camera size={18} className="text-white" />
-                    <input 
-                      type="file" 
-                      className="hidden" 
-                      accept="image/*"
-                      onChange={handleFileChange}
-                    />
-                  </label>
-                </div>
-              </div>
-              <h2 className="text-xl font-bold text-[var(--text-primary)] tracking-tight font-display">{t('editProfile')}</h2>
-              <p className="text-xs text-[var(--text-secondary)] opacity-60 mt-0.5 font-sans">{t('manageYourAccount')}</p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[var(--text-secondary)] ml-1 block font-sans">
-                  {t('fullName')}
-                </label>
-                <div className="relative group">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--accent-color)]">
-                    <User size={15} strokeWidth={1.5} />
-                  </div>
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-[var(--surface-muted)] hover:bg-[var(--surface-color)]/55 focus:bg-[var(--surface-color)] border border-[var(--border-color)] focus:border-[var(--accent-color)]/40 rounded-[12px] pl-10 pr-4 py-3 text-sm font-semibold text-[var(--text-primary)] transition-all duration-200 outline-none shadow-xs placeholder:text-[var(--text-secondary)]/30"
-                    placeholder="John Doe"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[var(--text-secondary)] ml-1 block font-sans">
-                  {t('email')}
-                </label>
-                <div className="relative opacity-60">
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] font-mono">
-                    <Mail size={15} strokeWidth={1.5} />
-                  </div>
-                  <input
-                    type="text"
-                    readOnly
-                    value={user.email}
-                    className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)]/50 rounded-[12px] pl-10 pr-4 py-3 text-sm font-semibold text-[var(--text-secondary)] outline-none cursor-not-allowed font-mono"
-                  />
-                </div>
-              </div>
-
-              {identities.length > 0 && (
-                <div className="space-y-2 pt-1">
-                  <h4 className="text-xs font-semibold text-[var(--text-secondary)] px-1 block">
-                    {t('connectedAccounts' as any) || 'Kopplade konton'}
-                  </h4>
-                  <div className="space-y-2">
-                    {identities.map((identity) => (
-                      <div 
-                        key={identity.id} 
-                        className="flex items-center justify-between p-3 bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[14px] hover:bg-[var(--surface-muted)]/80 transition-all duration-200 shadow-xs"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-[8px] bg-[var(--bg-color)] flex items-center justify-center text-[var(--text-primary)] border border-[var(--border-color)]">
-                            {identity.provider === 'google' ? (
-                              <Globe size={15} strokeWidth={1.5} className="text-[var(--accent-color)]" />
-                            ) : (
-                              <MailCheck size={15} strokeWidth={1.5} className="text-[var(--text-secondary)]" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-[var(--text-primary)]">
-                              {identity.provider === 'email' ? (t('providerEmail' as any) || 'E-post') : 
-                               identity.provider === 'google' ? (t('providerGoogle' as any) || 'Google') : 
-                               identity.provider}
-                            </p>
-                            {identity.identity_data?.email && (
-                              <p className="text-[10px] font-mono text-[var(--text-secondary)] opacity-60 mt-0.5">{identity.identity_data.email}</p>
-                            )}
-                          </div>
-                        </div>
-                        {identities.length > 1 && (
-                          <button
-                            onClick={() => handleUnlink(identity)}
-                            disabled={isUpdating}
-                            className="p-2 text-[var(--text-secondary)] hover:text-danger hover:bg-danger/10 rounded-[8px] transition-all active:scale-90 disabled:opacity-50 cursor-pointer"
-                          >
-                            <Unlink size={13} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-2 space-y-2.5">
-                <button 
-                  onClick={handleSave}
-                  disabled={isUpdating}
-                  className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:brightness-105 py-3 px-4 rounded-[12px] font-semibold text-sm active:scale-[0.98] transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  {isUpdating ? (
-                    <Loader2 size={14} className="div-spin" />
-                  ) : (
-                    <span>{t('saveChanges')}</span>
-                  )}
-                </button>
-                
-                <button 
-                  onClick={() => {
-                    setConfirmConfig({
-                      isOpen: true,
-                      title: t('signOut'),
-                      message: t('signOutConfirm'),
-                      onConfirm: () => {
-                        onLogout();
-                        onClose();
-                        setConfirmConfig(prev => ({ ...prev, isOpen: false }))
-                      }
-                    });
-                  }}
-                  className="w-full py-3 px-4 rounded-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] active:scale-[0.98] transition-all text-sm border border-[var(--border-color)] bg-transparent flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <LogOut size={14} strokeWidth={1.5} />
-                  <span>{t('signOut')}</span>
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
       {confirmConfig.isOpen && (
         <ConfirmModal
           isOpen={confirmConfig.isOpen}
@@ -305,6 +263,6 @@ export function ManageAccountModal({
           t={t}
         />
       )}
-    </AnimatePresence>
+    </>
   );
 }
