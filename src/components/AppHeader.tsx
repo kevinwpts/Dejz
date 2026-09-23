@@ -49,6 +49,7 @@ export function AppHeader({
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
+      // 1. Utgångsläget: Längst upp integreras headern sömlöst utan bakgrund
       if (currentScrollY <= 10) {
         setIsAtTop(true);
         setIsVisible(true);
@@ -58,6 +59,7 @@ export function AppHeader({
 
       setIsAtTop(false);
 
+      // Skydd mot iOS bounce/rubber-banding
       if (currentScrollY < 0) {
         setIsVisible(true);
         return;
@@ -65,9 +67,11 @@ export function AppHeader({
 
       const diff = currentScrollY - lastScrollY.current;
 
+      // Scrolla ner (> 8px) efter toppen -> göm headern
       if (diff > 8 && currentScrollY > 50) {
         setIsVisible(false);
       } else if (diff < -8) {
+        // Scrolla upp -> visa headern
         setIsVisible(true);
       }
 
@@ -86,7 +90,6 @@ export function AppHeader({
     setIsVisible(true);
   }, [_navTrigger, title]);
 
-  // Visa alltid AppHeader
   return (
     <header
       className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
@@ -97,7 +100,7 @@ export function AppHeader({
           : "-translate-y-full opacity-0 pointer-events-none"
       } ${
         !isAtTop
-          ? "bg-[var(--bg-color)]/90 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-sm"
+          ? "bg-[var(--bg-color)]/85 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-xs"
           : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >
@@ -122,7 +125,7 @@ export function AppHeader({
               className="flex items-center gap-2 group active:scale-95 transition-transform py-0.5 cursor-pointer"
               aria-label="Dejz Hem"
             >
-              <DejzLogo className="h-6 w-auto" textColor="var(--text-primary)" />
+              <DejzLogo className="h-6 w-auto text-[var(--text-primary)]" />
             </button>
           )}
         </div>

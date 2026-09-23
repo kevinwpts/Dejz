@@ -181,22 +181,6 @@ export default function App() {
     }
     return "today";
   });
-
-  // Dynamic Theme Color & Body Background for iOS Safari Status Bar / Dynamic Island
-  useEffect(() => {
-    const themeMetas = document.querySelectorAll('meta[name="theme-color"]');
-    const topIndigo = '#1E1A52';
-    const darkBg = '#080A10';
-    
-    if (activeTab === 'today') {
-      themeMetas.forEach(meta => meta.setAttribute('content', topIndigo));
-    } else {
-      themeMetas.forEach(meta => meta.setAttribute('content', darkBg));
-    }
-    
-    document.documentElement.style.backgroundColor = darkBg;
-    document.body.style.backgroundColor = darkBg;
-  }, [activeTab]);
   const [profileSection, setProfileSection] = useState<
     | "main"
     | "salary"
@@ -1060,7 +1044,7 @@ export default function App() {
 
   // --- Theme Logic ---
   useEffect(() => {
-    const shouldUseDarkMode = config?.darkMode !== undefined ? config.darkMode : true;
+    const shouldUseDarkMode = config?.darkMode !== undefined ? config.darkMode : false;
 
     if (shouldUseDarkMode) {
       document.documentElement.classList.add("dark");
@@ -3151,6 +3135,13 @@ export default function App() {
 
   return (
     <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden" style={{ background: 'var(--bg-gradient)' }}>
+      {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop */}
+      <div
+        className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
+        style={{ height: 'max(env(safe-area-inset-top, 0px), 1px)', backgroundColor: 'var(--bg-color)' }}
+        aria-hidden="true"
+      />
+
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 
       <ConfirmModal
@@ -3203,28 +3194,30 @@ export default function App() {
       )}
 
       {isDemoMode && (
-        <div className="fixed top-[calc(0.4rem+env(safe-area-inset-top))] left-1/2 -translate-x-1/2 z-[60] bg-slate-900/80 dark:bg-slate-950/80 text-white backdrop-blur-xl border border-white/20 px-3.5 py-1.5 rounded-full flex items-center justify-between text-xs font-semibold shadow-lg max-w-[92%] sm:max-w-md w-auto gap-3">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
-            </span>
-            <span className="text-xs font-bold text-accent">Demoläge</span>
-            <span className="hidden sm:inline text-slate-300 font-normal text-[11px]">— Exempeldata</span>
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-[var(--bg-secondary)]/95 backdrop-blur-xl border-b border-[var(--border-color)] px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 flex items-center justify-between text-xs font-semibold shadow-xs">
+          <div className="max-w-2xl mx-auto w-full flex items-center justify-between px-2 sm:px-4">
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+              </span>
+              <span className="text-xs font-bold text-accent">Demoläge aktivt</span>
+              <span className="hidden sm:inline text-[var(--text-secondary)] font-normal text-[11px]">— Du utforskar appen med exempeldata</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleExitDemo}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-sm"
+            >
+              <span>{t('exitDemo')}</span>
+              <LogOut size={12} strokeWidth={2.5} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleExitDemo}
-            className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-[11px] font-bold shrink-0 cursor-pointer shadow-xs"
-          >
-            <span>{t('exitDemo')}</span>
-            <LogOut size={11} strokeWidth={2.5} />
-          </button>
         </div>
       )}
 
             <PullToRefresh onRefresh={handleRefresh}>
-        <main className={`relative ${activeTab === 'today' ? 'w-full max-w-full px-0 pt-0' : 'max-w-2xl mx-auto px-4 sm:px-6 ' + (isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]')} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
+        <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
           <AnimatePresence>
             {activeTab === "today" && stats && (
               <motion.div

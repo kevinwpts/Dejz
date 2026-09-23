@@ -107,8 +107,9 @@ export function PeriodTimeline({
 
     // Horizontal wheel scroll handler for desktop mouse users
     const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        container.scrollLeft += e.deltaX;
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        container.scrollLeft += e.deltaY;
       }
     };
 
@@ -196,7 +197,7 @@ export function PeriodTimeline({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-3 no-scrollbar cursor-grab active:cursor-grabbing"
+        className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-3 no-scrollbar touch-pan-x overscroll-contain cursor-grab active:cursor-grabbing"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {calendarDays.map((day: any, index: number) => {
@@ -226,11 +227,11 @@ export function PeriodTimeline({
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               whileTap={{ scale: 0.94 }}
-              className={`flex flex-col items-center justify-center gap-1 min-w-[50px] sm:min-w-[54px] h-[58px] sm:h-[62px] py-1.5 px-1 rounded-[16px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
+              className={`flex flex-col items-center justify-center gap-1 min-w-[50px] sm:min-w-[54px] h-[58px] sm:h-[62px] py-1.5 px-1 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-gradient-to-tr from-[#0EA5E9] to-[#3B82F6] text-white shadow-md shadow-sky-500/20 font-bold'
+                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs font-semibold'
                   : isRealToday
-                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-[#0EA5E9]/50 dark:border-sky-400/50'
+                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--text-primary)]/50 hover:border-[var(--text-primary)]/80'
                   : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
               }`}
             >
@@ -247,7 +248,7 @@ export function PeriodTimeline({
 
               {/* Day Number */}
               <span className={`text-[13px] sm:text-[14px] leading-none font-medium tabular-nums ${
-                isSelected ? 'text-white font-extrabold' : 'text-[var(--text-primary)]'
+                isSelected ? 'text-[var(--text-on-accent)] font-semibold' : 'text-[var(--text-primary)]'
               }`}>
                 {dayNumber}
               </span>
