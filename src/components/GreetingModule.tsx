@@ -52,7 +52,7 @@ export function GreetingModule({
   setCurrentPeriodDate,
   periodStart: _periodStart,
   periodEnd: _periodEnd,
-  isFuturePeriod: _isFuturePeriod,
+  isFuturePeriod,
   isPastPeriod: _isPastPeriod,
   periods,
   variant: _variant = 'default',
