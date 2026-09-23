@@ -352,14 +352,10 @@ export function LandingPage({
 
       <main>
         {/* 2. HERO */}
-        <section className="relative pt-12 sm:pt-20 lg:pt-28 pb-16 sm:pb-28 px-5 sm:px-8 max-w-7xl mx-auto overflow-hidden">
-          {/* Subtle ambient background glow */}
+        <section className="relative pt-12 sm:pt-20 lg:pt-28 pb-16 sm:pb-28 px-5 sm:px-8 max-w-7xl mx-auto">
+          {/* Subtle ambient background glow centered behind phone */}
           <div 
-            className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[500px] rounded-full aura-blue pointer-events-none -z-10 blur-3xl opacity-60"
-            aria-hidden="true" 
-          />
-          <div 
-            className="absolute top-20 left-10 w-[350px] h-[350px] rounded-full bg-[#A0C5FD]/15 pointer-events-none -z-10 blur-3xl"
+            className="absolute top-1/2 right-10 -translate-y-1/2 w-[420px] h-[420px] rounded-full aura-blue pointer-events-none -z-10 blur-3xl opacity-50 hidden lg:block"
             aria-hidden="true" 
           />
 

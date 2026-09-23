@@ -125,7 +125,7 @@ export function AppHeader({
               className="flex items-center gap-2 group active:scale-95 transition-transform py-0.5 cursor-pointer"
               aria-label="Dejz Hem"
             >
-              <DejzLogo className="h-6 w-auto text-[var(--text-primary)]" />
+              <DejzLogo className="h-6 w-auto" textColor="var(--text-primary)" />
             </button>
           )}
         </div>
