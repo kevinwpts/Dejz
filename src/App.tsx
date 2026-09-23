@@ -1059,7 +1059,7 @@ export default function App() {
 
   // --- Theme Logic ---
   useEffect(() => {
-    const shouldUseDarkMode = config?.darkMode !== undefined ? config.darkMode : false;
+    const shouldUseDarkMode = config?.darkMode !== undefined ? config.darkMode : true;
 
     if (shouldUseDarkMode) {
       document.documentElement.classList.add("dark");
@@ -3149,7 +3149,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden" style={{ background: activeTab === 'today' ? '#0F172A' : 'var(--bg-gradient)' }}>
+    <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden" style={{ background: 'var(--bg-gradient)' }}>
       {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop */}
       <div
         className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 
-import { X, Sparkles, Bell, User, Search, ChevronRight } from 'lucide-react';
+import { X, Sparkles, Bell, User, Search } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
 import { PeriodTimeline } from './PeriodTimeline';
 import { CalendarModal } from './CalendarModal';
@@ -111,16 +111,15 @@ export function GreetingModule({
     }
   }, [language]);
 
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
-    };
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const _formattedDate = useMemo(() => {
+    const d = new Date();
+    const str = d.toLocaleDateString(language === 'en' ? 'en-US' : 'sv-SE', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }, [language]);
 
   const _selectedDayData = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return null;
@@ -230,73 +229,62 @@ export function GreetingModule({
 
   return (
     <div className="font-sans relative">
-      {/* 1. Unified Soft Premium Dark Navy Hero Card */}
-      <div className="w-full relative overflow-hidden rounded-b-[32px] sm:rounded-b-[36px] bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#1E3A8A] text-white pb-7 shadow-xl shadow-slate-950/25 border-b border-slate-800/80">
+      {/* Sticky Top Header Bar (Dark Navy Palette, seamless status bar) */}
+      <div className="sticky top-0 z-40 w-full bg-[#0F172A] text-white pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 transition-all">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 relative z-10">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onNavigate("profile")}
+              className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 flex items-center justify-center text-white overflow-hidden shrink-0 transition-transform active:scale-95 cursor-pointer shadow-xs"
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+              ) : (
+                <User size={20} strokeWidth={2.2} />
+              )}
+            </button>
+            <div className="flex flex-col text-left">
+              <span className="text-[11px] font-semibold text-slate-300 leading-none mb-1 tracking-wide">
+                {greetingPhrase} 👋
+              </span>
+              <span className="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none">
+                {userName || 'Användare'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onNavigate("search")}
+              className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs"
+              aria-label="Sök"
+            >
+              <Search size={18} strokeWidth={2.2} />
+            </button>
+            <button
+              onClick={onOpenNotifications || (() => onNavigate("notifications"))}
+              className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-all active:scale-95 cursor-pointer relative shadow-xs"
+              aria-label="Notiser"
+            >
+              <Bell size={18} strokeWidth={2.2} fill="currentColor" className="opacity-90" />
+              {notificationCount > 0 && (
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-slate-900 animate-pulse" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 1. Soft Premium Dark Navy Hero Module (Gradient Fade Connection) */}
+      <div className="w-full relative overflow-hidden bg-gradient-to-b from-[#0F172A] via-[#0F172A]/90 to-transparent text-white pt-2 pb-8">
         {/* Soft Ambient Glows */}
         <div className="absolute top-0 right-0 w-72 h-72 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-56 h-56 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Collapsible Sticky Header (100% seamless when at top, compact glass on scroll) */}
-        <div className={`sticky top-0 z-40 w-full transition-all duration-300 ${
-          isScrolled 
-            ? 'bg-[#0F172A]/95 backdrop-blur-xl pt-[calc(0.75rem+env(safe-area-inset-top,12px))] pb-2.5 border-b border-slate-800/80 shadow-md' 
-            : 'bg-transparent pt-[calc(0.85rem+env(safe-area-inset-top,12px))] pb-3 border-b border-transparent shadow-none'
-        }`}>
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 relative z-10">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => onNavigate("profile")}
-                className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 flex items-center justify-center text-white overflow-hidden shrink-0 transition-transform active:scale-95 cursor-pointer shadow-xs"
-              >
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
-                ) : (
-                  <User size={20} strokeWidth={2.2} />
-                )}
-              </button>
-              <div className="flex flex-col text-left">
-                <span className="text-[11px] font-semibold text-slate-300 leading-none mb-1 tracking-wide">
-                  {greetingPhrase} 👋
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none">
-                    {userName || 'Användare'}
-                  </span>
-                  {isScrolled && (
-                    <span className="text-[11px] font-black text-sky-300 bg-sky-950/80 px-2.5 py-0.5 rounded-full border border-sky-800/60 animate-fade-in font-amount">
-                      {formatAmount(displayAmount, language)} {currency}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => onNavigate("search")}
-                className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs"
-                aria-label="Sök"
-              >
-                <Search size={18} strokeWidth={2.2} />
-              </button>
-              <button
-                onClick={onOpenNotifications || (() => onNavigate("notifications"))}
-                className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-all active:scale-95 cursor-pointer relative shadow-xs"
-                aria-label="Notiser"
-              >
-                <Bell size={18} strokeWidth={2.2} fill="currentColor" className="opacity-90" />
-                {notificationCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-slate-900 animate-pulse" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 pt-2">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6">
           {/* Center Balance Display (Kinetic Variable Typography) */}
-          <div className="flex flex-col items-center text-center my-4 relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] font-extrabold tracking-wider text-white uppercase mb-2.5 shadow-2xs">
+          <div className="flex flex-col items-center text-center my-3 relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] font-bold tracking-wider text-white uppercase mb-2 shadow-2xs">
               <Sparkles size={12} className="text-amber-300" />
               <span>{topLabel}</span>
             </div>
@@ -315,7 +303,7 @@ export function GreetingModule({
             </div>
 
             {/* Progress bar with percentage pill */}
-            <div className="w-full max-w-xs mt-3.5 flex flex-col items-center gap-1.5">
+            <div className="w-full max-w-xs mt-3 flex flex-col items-center gap-1.5">
               <div className="w-full h-2.5 bg-white/25 backdrop-blur-md rounded-full overflow-hidden relative shadow-inner">
                 <div
                   className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
@@ -385,10 +373,6 @@ export function GreetingModule({
           <div className="flex justify-between items-center mb-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
               <span>{t('totalRemaining' as any)}</span>
-            </div>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 px-2.5 py-0.5 rounded-full border border-sky-200/60 dark:border-sky-800/50 group-hover:bg-sky-100 transition-colors">
-              <span>Visa kalkyler</span>
-              <ChevronRight size={12} strokeWidth={2.5} />
             </div>
           </div>
 
