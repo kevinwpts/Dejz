@@ -19,10 +19,7 @@ import {
   Sparkles,
   Calendar,
   Clock,
-  ArrowUp,
-  Shield,
-  FileText,
-  Smartphone
+  ArrowUp
 } from 'lucide-react';
 import { TranslationKey, Language, languageInfo } from '../i18n';
 import { PolicyModal } from './PolicyModal';
@@ -34,6 +31,7 @@ interface LandingPageProps {
   onLogin?: () => void;
   onStartDemo?: () => void;
   onGoogleLogin?: () => void;
+  onFacebookLogin?: () => void;
   onLegalClick?: (type: 'privacy' | 'terms' | 'cookies') => void;
   t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   currentLanguage: Language;
@@ -78,7 +76,7 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
   );
 };
 
-export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin, onLegalClick, currentLanguage, onLanguageChange, t: _t }: LandingPageProps) {
+export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin, onFacebookLogin, onLegalClick, currentLanguage, onLanguageChange, t: _t }: LandingPageProps) {
   const [isLangOpen, setIsLangOpen] = React.useState(false);
   const [activePolicy, setActivePolicy] = React.useState<string | null>(null);
 
@@ -244,8 +242,8 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                     )}
                   </motion.div>
 
-                  {/* Google Login CTA */}
-                  {onGoogleLogin && (
+                  {/* Social Login CTAs */}
+                  {(onGoogleLogin || onFacebookLogin) && (
                     <motion.div
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -258,30 +256,46 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                         <div className="h-px bg-[var(--border-color)] w-8"></div>
                       </div>
                       
-                      <button
-                        onClick={onGoogleLogin}
-                        className="inline-flex items-center justify-center gap-2.5 px-5 py-2.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] text-[var(--text-primary)] font-bold text-xs active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                      >
-                        <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                          <path
-                            fill="#4285F4"
-                            d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.28 1.5-1.11 2.76-2.36 3.61v3h3.84c2.25-2.07 3.65-5.12 3.65-8.46Z"
-                          />
-                          <path
-                            fill="#34A853"
-                            d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-3c-1.07.72-2.45 1.16-4.09 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A11.986 11.986 0 0 0 12 24Z"
-                          />
-                          <path
-                            fill="#FBBC05"
-                            d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.99 11.99 0 0 0 0 10.68l3.97-3.1Z"
-                          />
-                          <path
-                            fill="#EA4335"
-                            d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.33 2.67 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01Z"
-                          />
-                        </svg>
-                        <span>Google</span>
-                      </button>
+                      <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                        {onGoogleLogin && (
+                          <button
+                            onClick={onGoogleLogin}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] text-[var(--text-primary)] font-bold text-xs active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                          >
+                            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                              <path
+                                fill="#4285F4"
+                                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.28 1.5-1.11 2.76-2.36 3.61v3h3.84c2.25-2.07 3.65-5.12 3.65-8.46Z"
+                              />
+                              <path
+                                fill="#34A853"
+                                d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-3c-1.07.72-2.45 1.16-4.09 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A11.986 11.986 0 0 0 12 24Z"
+                              />
+                              <path
+                                fill="#FBBC05"
+                                d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.99 11.99 0 0 0 0 10.68l3.97-3.1Z"
+                              />
+                              <path
+                                fill="#EA4335"
+                                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.33 2.67 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01Z"
+                              />
+                            </svg>
+                            <span>Google</span>
+                          </button>
+                        )}
+
+                        {onFacebookLogin && (
+                          <button
+                            onClick={onFacebookLogin}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] text-[var(--text-primary)] font-bold text-xs active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                          >
+                            <svg className="w-3.5 h-3.5 shrink-0 text-[#1877F2]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                            <span>Facebook</span>
+                          </button>
+                        )}
+                      </div>
                     </motion.div>
                   )}
               </div>
@@ -709,149 +723,57 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
           </div>
         </section>
 
-        {/* Footer styled to match the app's clean card and navigation aesthetic */}
-        <footer className="w-full bg-[var(--bg-color)] border-t border-[var(--border-color)] pt-12 pb-16 sm:pb-20">
-          <div className="max-w-7xl mx-auto px-5 sm:px-8 space-y-8">
-            {/* Main App-styled Footer Container */}
-            <div className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[24px] p-6 sm:p-10 shadow-xs relative overflow-hidden">
-              {/* Subtle top ambient indicator */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--accent-color)]/30 to-transparent" />
+        {/* Minimal Clean Footer */}
+        <footer className="w-full bg-[var(--bg-color)] border-t border-[var(--border-color)] py-7 transition-colors">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-[var(--text-secondary)]">
+            {/* Left: Brand & Copyright */}
+            <div className="flex items-center gap-2.5">
+              <DejzLogo className="text-lg font-bold" textColor="var(--logo-color)" />
+              <span className="opacity-40">•</span>
+              <span>© {new Date().getFullYear()} Dejz</span>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-                {/* Brand & Mission column */}
-                <div className="md:col-span-5 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <DejzLogo className="text-2xl sm:text-3xl font-black" textColor="var(--logo-color)" />
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--accent-color)]/10 text-[var(--accent-color)]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)] animate-pulse" />
-                      App v2.4
-                    </span>
-                  </div>
-                  <p className="text-sm text-[var(--text-secondary)] font-medium leading-relaxed max-w-sm">
-                    {getL10n(
-                      'En modern ekonomiplanerare byggd för enkelhet. Se exakt vad du kan spendera idag och få full kontroll fram till nästa lön.',
-                      'A modern budget companion crafted for clarity. Know exactly what you can spend today and stay in control until payday.',
-                      'En moderne økonomiplanlegger bygget for enkelhet. Se nøyaktig hva du kan bruke i dag og få full kontroll frem til neste lønn.',
-                      'En moderne budgetplanlægger bygget for enkelhed. Se præcis hvad du kan bruge i dag og få fuld kontrol indtil næste løn.',
-                      'Moderni taloussuunnittelija, joka on tehty selkeäksi. Tiedä tarkalleen, mitä voit käyttää tänään palkkapäivään asti.'
-                    )}
-                  </p>
+            {/* Right: Inline Links */}
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
+              <button 
+                onClick={() => onLegalClick ? onLegalClick('privacy') : setActivePolicy('privacy')} 
+                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                {getL10n('Integritetspolicy', 'Privacy Policy', 'Personvernerklæring', 'Privatlivspolitik', 'Tietosuojaseloste')}
+              </button>
 
-                  <div className="pt-1 flex flex-wrap items-center gap-2">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-[var(--surface-muted)] text-[11px] font-semibold text-[var(--text-secondary)] border border-[var(--border-color)]">
-                      <Shield size={13} className="text-[var(--accent-color)]" />
-                      <span>{getL10n('Krypterad data', 'Encrypted data', 'Kryptert data', 'Krypteret data', 'Salattu data')}</span>
-                    </div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-[var(--surface-muted)] text-[11px] font-semibold text-[var(--text-secondary)] border border-[var(--border-color)]">
-                      <Smartphone size={13} className="text-[var(--accent-color)]" />
-                      <span>PWA / Mobil & Web</span>
-                    </div>
-                  </div>
-                </div>
+              <button 
+                onClick={() => onLegalClick ? onLegalClick('terms') : setActivePolicy('terms')} 
+                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                {getL10n('Användarvillkor', 'Terms of Service', 'Brukervilkår', 'Brugervilkår', 'Käyttöehdot')}
+              </button>
 
-                {/* Quick Navigation - In-app style pills */}
-                <div className="md:col-span-4 space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-75">
-                    {getL10n('Utforska', 'Explore', 'Utforsk', 'Udforsk', 'Tutki')}
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
-                    <button 
-                      onClick={() => { const el = document.getElementById('features'); el?.scrollIntoView({ behavior: 'smooth' }); }}
-                      className="flex items-center gap-2 p-2.5 rounded-[14px] bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] text-[var(--text-primary)] transition-all text-left cursor-pointer border border-[var(--border-color)]/60"
-                    >
-                      <Sparkles size={14} className="text-[var(--accent-color)] shrink-0" />
-                      <span>{getL10n('Funktioner', 'Features', 'Funksjoner', 'Funktioner', 'Ominaisuudet')}</span>
-                    </button>
+              <button 
+                onClick={() => onLegalClick ? onLegalClick('cookies') : setActivePolicy('cookies')} 
+                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                {getL10n('Cookies', 'Cookies', 'Cookies', 'Cookies', 'Evästeet')}
+              </button>
 
-                    <button 
-                      onClick={() => { const el = document.getElementById('daily-budget'); el?.scrollIntoView({ behavior: 'smooth' }); }}
-                      className="flex items-center gap-2 p-2.5 rounded-[14px] bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] text-[var(--text-primary)] transition-all text-left cursor-pointer border border-[var(--border-color)]/60"
-                    >
-                      <Calendar size={14} className="text-[var(--accent-color)] shrink-0" />
-                      <span>{getL10n('Dagsbudget', 'Daily Budget', 'Dagsbudsjett', 'Dagsbudget', 'Päiväbudjetti')}</span>
-                    </button>
+              <a 
+                href="https://instagram.com/dejz.se" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-[var(--text-primary)] transition-colors"
+              >
+                <Instagram size={13} className="text-[#E1306C]" />
+                <span>Instagram</span>
+              </a>
 
-                    <button 
-                      onClick={() => { const el = document.getElementById('faq'); el?.scrollIntoView({ behavior: 'smooth' }); }}
-                      className="flex items-center gap-2 p-2.5 rounded-[14px] bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] text-[var(--text-primary)] transition-all text-left cursor-pointer border border-[var(--border-color)]/60"
-                    >
-                      <FileText size={14} className="text-[var(--accent-color)] shrink-0" />
-                      <span>{getL10n('Frågor & Svar', 'FAQ', 'Spørsmål & Svar', 'Spørgsmål & Svar', 'UKK')}</span>
-                    </button>
-
-                    <button 
-                      onClick={onGetStarted}
-                      className="flex items-center gap-2 p-2.5 rounded-[14px] bg-[var(--accent-color)]/10 hover:bg-[var(--accent-color)]/15 text-[var(--accent-color)] transition-all text-left cursor-pointer border border-[var(--accent-color)]/20"
-                    >
-                      <Plus size={14} className="shrink-0" />
-                      <span>{getL10n('Skapa konto', 'Create account', 'Opprett konto', 'Opret konto', 'Luo tili')}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Legal & Socials */}
-                <div className="md:col-span-3 space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-75">
-                    {getL10n('Villkor & Socialt', 'Legal & Social', 'Vilkår & Sosiale medier', 'Vilkår & Sociale medier', 'Ehdot & Yhteisö')}
-                  </h4>
-                  <div className="flex flex-col gap-2 text-xs font-medium">
-                    <button 
-                      onClick={() => onLegalClick ? onLegalClick('privacy') : setActivePolicy('privacy')} 
-                      className="flex items-center justify-between p-2 rounded-[12px] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer text-left"
-                    >
-                      <span>{getL10n('Integritetspolicy', 'Privacy Policy', 'Personvernerklæring', 'Privatlivspolitik', 'Tietosuojaseloste')}</span>
-                      <ChevronRight size={14} className="opacity-50" />
-                    </button>
-
-                    <button 
-                      onClick={() => onLegalClick ? onLegalClick('terms') : setActivePolicy('terms')} 
-                      className="flex items-center justify-between p-2 rounded-[12px] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer text-left"
-                    >
-                      <span>{getL10n('Användarvillkor', 'Terms of Service', 'Brukervilkår', 'Brugervilkår', 'Käyttöehdot')}</span>
-                      <ChevronRight size={14} className="opacity-50" />
-                    </button>
-                    
-                    <button 
-                      onClick={() => onLegalClick ? onLegalClick('cookies') : setActivePolicy('cookies')} 
-                      className="flex items-center justify-between p-2 rounded-[12px] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer text-left"
-                    >
-                      <span>{getL10n('Cookiepolicy', 'Cookie Policy', 'Informasjonskapsler', 'Cookiepolitik', 'Evästekäytäntö')}</span>
-                      <ChevronRight size={14} className="opacity-50" />
-                    </button>
-
-                    <a 
-                      href="https://instagram.com/dejz.se" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between p-2 rounded-[12px] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all text-left"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Instagram size={14} className="text-[#E1306C]" />
-                        <span>@dejz.se</span>
-                      </span>
-                      <span className="text-[11px] font-bold text-[var(--accent-color)]">Följ</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom bar inside card */}
-              <div className="mt-8 pt-6 border-t border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-[var(--text-secondary)]">
-                <div className="flex items-center gap-2">
-                  <span>© {new Date().getFullYear()} Dejz.</span>
-                  <span className="opacity-50">•</span>
-                  <span>{getL10n('Byggd med precision för din vardagsekonomi', 'Built with precision for everyday finance', 'Bygget med presisjon for din hverdagsøkonomi', 'Bygget med præcision til din hverdagsøkonomi', 'Rakennettu tarkkuudella arkitalouteesi')}</span>
-                </div>
-
-                <button 
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-muted)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer active:scale-95 shadow-2xs"
-                  title="Till toppen"
-                >
-                  <ArrowUp size={13} />
-                  <span>{getL10n('Till toppen', 'Back to top', 'Til toppen', 'Til toppen', 'Takaisin alkuun')}</span>
-                </button>
-              </div>
+              <button 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="inline-flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors cursor-pointer ml-1"
+                title="Till toppen"
+              >
+                <ArrowUp size={12} />
+                <span>{getL10n('Till toppen', 'Top', 'Til toppen', 'Til toppen', 'Alkuun')}</span>
+              </button>
             </div>
           </div>
 

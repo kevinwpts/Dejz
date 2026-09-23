@@ -137,7 +137,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
     }
   };
 
-  const handleSocialLogin = async (provider: 'google') => {
+  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
     try {
       let inIframe = false;
       try {
@@ -151,10 +151,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
         options: {
           redirectTo: window.location.origin,
           skipBrowserRedirect: inIframe,
-          queryParams: {
+          queryParams: provider === 'google' ? {
             prompt: 'select_account',
             access_type: 'offline',
-          },
+          } : undefined,
         },
       });
       if (error) throw error;
@@ -171,7 +171,8 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
     } catch (err: any) {
       let msg = err.message || t('error');
       if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
-        msg = "Google-inloggning är inte aktiverad i din Supabase-instrumentpanel ännu.";
+        const pName = provider === 'facebook' ? 'Facebook' : 'Google';
+        msg = `${pName}-inloggning är inte aktiverad i din Supabase-instrumentpanel ännu.`;
       }
       setError(msg);
       onShowToast(msg, 'error');
@@ -422,33 +423,50 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
 
             <Divider label={t('orContinueWith')} />
 
-            <Button 
-              onClick={() => handleSocialLogin('google')}
-              variant="secondary"
-              fullWidth
-              icon={
-                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="#4285F4"
-                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.28 1.5-1.11 2.76-2.36 3.61v3h3.84c2.25-2.07 3.65-5.12 3.65-8.46Z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-3c-1.07.72-2.45 1.16-4.09 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A11.986 11.986 0 0 0 12 24Z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.99 11.99 0 0 0 0 10.68l3.97-3.1Z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.33 2.67 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01Z"
-                  />
-                </svg>
-              }
-            >
-              {t('continueWithGoogle' as any)}
-            </Button>
+            <div className="space-y-2.5">
+              <Button 
+                type="button"
+                onClick={() => handleSocialLogin('google')}
+                variant="secondary"
+                fullWidth
+                icon={
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fill="#4285F4"
+                      d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.28 1.5-1.11 2.76-2.36 3.61v3h3.84c2.25-2.07 3.65-5.12 3.65-8.46Z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-3c-1.07.72-2.45 1.16-4.09 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A11.986 11.986 0 0 0 12 24Z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.99 11.99 0 0 0 0 10.68l3.97-3.1Z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.33 2.67 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01Z"
+                    />
+                  </svg>
+                }
+              >
+                {t('continueWithGoogle' as any)}
+              </Button>
+
+              <Button 
+                type="button"
+                onClick={() => handleSocialLogin('facebook')}
+                variant="secondary"
+                fullWidth
+                icon={
+                  <svg className="w-4 h-4 shrink-0 text-[#1877F2]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                }
+              >
+                {t('continueWithFacebook' as any)}
+              </Button>
+            </div>
 
             <div className="mt-5 pt-3 border-t border-[var(--border-color)] flex items-center justify-center gap-4 text-[11px] font-semibold text-[var(--text-secondary)]">
               <button 

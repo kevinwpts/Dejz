@@ -112,28 +112,28 @@ export function PeriodTimeline({
               type="button"
               onClick={(e) => handleSelect(day.date, e)}
               whileTap={{ scale: 0.94 }}
-              className={`flex flex-col items-center justify-between min-w-[48px] sm:min-w-[52px] h-[62px] sm:h-[66px] py-1.5 px-1 rounded-[16px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
+              className={`flex flex-col items-center justify-between min-w-[42px] sm:min-w-[46px] h-[52px] sm:h-[56px] py-1.5 px-1 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-sm dark:bg-white dark:text-black font-semibold'
+                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-2xs dark:bg-white dark:text-black font-semibold'
                   : isRealToday
-                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border-2 border-[var(--text-primary)]/40 hover:border-[var(--text-primary)]/70'
+                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--text-primary)]/50 hover:border-[var(--text-primary)]/80'
                   : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
               }`}
             >
               {/* Day of Week */}
-              <span className={`text-[10px] sm:text-[10.5px] tracking-tight uppercase ${
+              <span className={`text-[9px] sm:text-[9.5px] tracking-tight uppercase ${
                 isSelected 
-                  ? 'opacity-90 font-bold' 
+                  ? 'opacity-90 font-semibold' 
                   : isRealToday 
-                  ? 'text-[var(--text-primary)] font-bold' 
+                  ? 'text-[var(--text-primary)] font-semibold' 
                   : 'opacity-65 font-medium'
               }`}>
                 {isRealToday && !isSelected ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}
               </span>
 
               {/* Day Number */}
-              <span className={`text-[16px] sm:text-[18px] leading-none font-amount font-bold ${
-                isSelected ? 'text-[var(--text-on-accent)] dark:text-black' : 'text-[var(--text-primary)]'
+              <span className={`text-[13px] sm:text-[14px] leading-none font-medium tabular-nums ${
+                isSelected ? 'text-[var(--text-on-accent)] dark:text-black font-semibold' : 'text-[var(--text-primary)]'
               }`}>
                 {dayNumber}
               </span>

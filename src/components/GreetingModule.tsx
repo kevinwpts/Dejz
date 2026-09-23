@@ -132,11 +132,7 @@ export function GreetingModule({
     isNegative = displayAmount < 0;
   }
 
-  // Calculate daily budget remaining percentage & rainbow gradient
-  const baseDailyTarget = stats?.baseDailyBudgetCents || (stats?.disposablePot ? Math.round(stats.disposablePot / (stats.totalDaysInPeriod || 30)) : 0);
-  const rawPct = baseDailyTarget > 0 ? (displayAmount / baseDailyTarget) * 100 : (displayAmount > 0 ? 100 : 0);
-  const dailyPercentage = Math.max(0, Math.min(100, rawPct));
-
+  // Calculate daily budget
   const _isPayday = useMemo(() => {
     if (!isToday || !stats) return false;
     const today = new Date();
@@ -253,60 +249,40 @@ export function GreetingModule({
         />
       )}
 
-      {/* 2. Dagsbudget Hero Card */}
+      {/* 2. Dagsbudget Hero Card - Identical aesthetic to "Kvar varje månad" in Budget */}
       <motion.div 
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-[28px] overflow-hidden border border-[var(--border-color)] shadow-sm transition-all duration-500 flex flex-col bg-[var(--surface-color)]"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
+        className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center"
       >
-        <div className="relative overflow-hidden flex flex-col">
-          <div className="pt-6 pb-5 sm:pt-7 sm:pb-6 px-6 sm:px-8 flex flex-col items-start text-left relative z-10">
-            {/* Header-rad med etikett */}
-            <div className="w-full flex items-center justify-between gap-3 mb-1">
-              <span className="text-[12px] sm:text-[14px] font-semibold tracking-tight text-[var(--text-secondary)]">
-                {topLabel}
-              </span>
-            </div>
-            
-            {/* Beloppet */}
-            <div className="flex items-baseline justify-start gap-2 whitespace-nowrap my-0.5">
-              <AnimatedNumber 
-                value={displayAmount} 
-                className={`text-3xl sm:text-4xl md:text-5xl leading-none font-extrabold font-amount tabular-nums tracking-tighter ${
-                  isNegative ? 'text-danger' : 'text-[var(--text-primary)]'
-                }`}
-                formatter={(val) => formatAmount(val, language)}
-              />
-              <span className={`text-lg sm:text-xl font-bold ${
-                isNegative ? 'text-danger' : 'text-[var(--text-secondary)]'
-              } opacity-80`}>
-                {currency}
-              </span>
-            </div>
-
-            {/* Progressbar för dagsbudgeten */}
-            <div className="w-full mt-4">
-              <div className="w-full h-5 sm:h-6 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${dailyPercentage}%` }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  className={`h-full rounded-full ${isNegative ? 'bg-danger' : 'bg-[var(--accent-color)]'}`}
-                />
-              </div>
-            </div>
-
-            {/* Dagsstatus vid underskott */}
-            {isNegative && (
-              <div className="mt-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-danger/10 text-danger">
-                  <span className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />
-                  {language === 'en' ? 'Over daily budget by' : 'Över dagsbudget med'} {formatAmount(Math.round(Math.abs(displayAmount)), language)} {currency}
-                </span>
-              </div>
-            )}
-          </div>
+        <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2.5 block">
+          {topLabel}
+        </span>
+        <div className="flex items-baseline justify-center gap-1.5">
+          <AnimatedNumber 
+            value={displayAmount} 
+            className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
+              isNegative ? 'text-danger' : ''
+            }`}
+            formatter={(val) => formatAmount(val, language)}
+          />
+          <span className={`text-base sm:text-lg font-light opacity-60 ${
+            isNegative ? 'text-danger' : 'text-[var(--text-secondary)]'
+          }`}>
+            {currency}
+          </span>
         </div>
+
+        {/* Dagsstatus vid underskott */}
+        {isNegative && (
+          <div className="mt-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-danger/10 text-danger">
+              <span className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />
+              {language === 'en' ? 'Over daily budget by' : 'Över dagsbudget med'} {formatAmount(Math.round(Math.abs(displayAmount)), language)} {currency}
+            </span>
+          </div>
+        )}
       </motion.div>
 
       {/* 3. Egen Modul: Totalt kvar & Nästa lön */}

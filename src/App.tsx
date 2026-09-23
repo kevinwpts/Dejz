@@ -1247,6 +1247,41 @@ export default function App() {
     }
   };
 
+  const handleFacebookLogin = async () => {
+    try {
+      let inIframe = false;
+      try {
+        inIframe = window.self !== window.top;
+      } catch (_e) {
+        inIframe = true;
+      }
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: window.location.origin,
+          skipBrowserRedirect: inIframe,
+        },
+      });
+      if (error) throw error;
+      
+      if (inIframe && data?.url) {
+        const popup = window.open(data.url, '_blank');
+        if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+          addToast("Inloggningsfönstret blockerades. Tillåt popup-fönster i din webbläsare eller öppna appen i en ny flik.", "error");
+        } else {
+          addToast("Öppnade inloggning i ett nytt fönster.", "success");
+        }
+      }
+    } catch (err: any) {
+      let msg = err.message || t('error');
+      if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
+        msg = "Facebook-inloggning är inte aktiverad i din Supabase-instrumentpanel ännu.";
+      }
+      addToast(msg, "error");
+    }
+  };
+
   const handleUploadAvatar = async (file: File) => {
     if (!session?.user) return;
 
@@ -3005,6 +3040,7 @@ export default function App() {
                 addToast("Välkommen till demoläget!", "success");
               }}
               onGoogleLogin={handleGoogleLogin}
+              onFacebookLogin={handleFacebookLogin}
               onLegalClick={handleLegalClick}
               t={t}
               currentLanguage={landingLanguage}
