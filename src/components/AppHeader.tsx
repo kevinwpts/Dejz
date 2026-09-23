@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
-import { DejzLogo } from "./DejzLogo";
+import { UniversalPeriodSelector } from "./UniversalPeriodSelector";
 
 interface AppHeaderProps {
   userName?: string;
@@ -13,6 +13,13 @@ interface AppHeaderProps {
   notificationCount?: number;
   onOpenNotifications?: () => void;
   isDemoMode?: boolean;
+  periods?: any[];
+  currentPeriodDate?: Date;
+  onPeriodChange?: (date: Date) => void;
+  periodName?: string;
+  isCurrentPeriod?: boolean;
+  onOpenCalendarPicker?: () => void;
+  activeTab?: string;
 }
 
 export function AppHeader({
@@ -26,6 +33,13 @@ export function AppHeader({
   notificationCount = 0,
   onOpenNotifications,
   isDemoMode,
+  periods,
+  currentPeriodDate,
+  onPeriodChange,
+  periodName,
+  isCurrentPeriod,
+  onOpenCalendarPicker,
+  activeTab,
 }: AppHeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isAtTop, setIsAtTop] = useState(true);
@@ -90,9 +104,9 @@ export function AppHeader({
           : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >
-      <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full`}>
-        {/* Left: Back button + Title OR Brand Logo */}
-        <div className="flex items-center gap-2.5">
+      <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2`}>
+        {/* Left: Back button + Title OR Period Selector */}
+        <div className="flex items-center min-w-0">
           {onBack ? (
             <button
               onClick={onBack}
@@ -100,16 +114,30 @@ export function AppHeader({
             >
               <ChevronLeft size={24} strokeWidth={3} />
               {title && (
-                <h1 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">
+                <h1 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight truncate">
                   {title}
                 </h1>
               )}
             </button>
-          ) : (
-            <div className="flex items-center">
-              <DejzLogo className="h-6 w-auto" textColor="var(--logo-color)" />
-            </div>
-          )}
+          ) : (activeTab === 'settings' || activeTab === 'profile') && title ? (
+            <h1 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
+              {title}
+            </h1>
+          ) : periods && onPeriodChange && currentPeriodDate ? (
+            <UniversalPeriodSelector
+              periods={periods}
+              currentDate={currentPeriodDate}
+              onChange={onPeriodChange}
+              periodName={periodName}
+              isCurrentPeriod={isCurrentPeriod}
+              onOpenPicker={onOpenCalendarPicker}
+              variant="header"
+            />
+          ) : title ? (
+            <h1 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
+              {title}
+            </h1>
+          ) : null}
         </div>
 
         {/* Right Actions: Notifications, Search, Profile with solid filled styles */}

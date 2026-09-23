@@ -56,6 +56,7 @@ export function GreetingModule({
   isPastPeriod,
   periods,
   variant: _variant = 'default',
+  showPeriodSelector = false,
   avatarUrl: _avatarUrl,
   onNavigate: _onNavigate,
   showFixedInCalendar: _showFixedInCalendar,
@@ -146,7 +147,7 @@ export function GreetingModule({
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
         {/* 1. Period Selector */}
-        {periods && setCurrentPeriodDate && currentPeriodDate && (
+        {showPeriodSelector && periods && setCurrentPeriodDate && currentPeriodDate && (
           <UniversalPeriodSelector
             periods={periods}
             currentDate={currentPeriodDate}
@@ -238,7 +239,7 @@ export function GreetingModule({
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
       {/* 1. Period Selector */}
-      {periods && setCurrentPeriodDate && currentPeriodDate && (
+      {showPeriodSelector && periods && setCurrentPeriodDate && currentPeriodDate && (
         <UniversalPeriodSelector
           periods={periods}
           currentDate={currentPeriodDate}

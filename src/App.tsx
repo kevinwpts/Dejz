@@ -56,7 +56,7 @@ import {
 } from "lucide-react";
 
 
-import { UniversalPeriodSelector } from './components/UniversalPeriodSelector';
+import { CalendarModal } from './components/CalendarModal';
 import {
   IncomeModal,
   FixedExpenseModal,
@@ -203,6 +203,7 @@ export default function App() {
     "income" | "expense" | "savings"
   >("expense");
   const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
 
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
@@ -3170,6 +3171,13 @@ export default function App() {
           notificationCount={notifications.length}
           onOpenNotifications={() => handleNavigate("notifications")}
           isDemoMode={isDemoMode}
+          periods={periods}
+          currentPeriodDate={currentPeriodDate}
+          onPeriodChange={setCurrentPeriodDate}
+          periodName={stats?.periodName}
+          isCurrentPeriod={isCurrentPeriod}
+          onOpenCalendarPicker={() => setIsCalendarModalOpen(true)}
+          activeTab={activeTab}
         />
       )}
 
@@ -3198,17 +3206,6 @@ export default function App() {
 
             <PullToRefresh onRefresh={handleRefresh}>
         <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
-          {activeTab !== 'today' && activeTab !== 'settings' && activeTab !== 'profile' && activeTab !== 'budget' && activeTab !== 'notifications' && stats && (
-            <UniversalPeriodSelector
-              periods={periods}
-              currentDate={currentPeriodDate}
-              onChange={setCurrentPeriodDate}
-              periodName={stats.periodName}
-              isCurrentPeriod={isCurrentPeriod}
-              config={config}
-            />
-          )}
-
           <AnimatePresence>
             {activeTab === "today" && stats && (
               <motion.div
@@ -4209,6 +4206,31 @@ export default function App() {
             config={config}
             t={t}
             periodName={stats?.periodName}
+          />
+        )}
+        {isCalendarModalOpen && (
+          <CalendarModal
+            isOpen={isCalendarModalOpen}
+            onClose={() => setIsCalendarModalOpen(false)}
+            calendarDays={calendarDays || []}
+            selectedDate={targetDate}
+            onSelectDate={(newDate) => {
+              setTargetDate(newDate);
+              if (setCurrentPeriodDate) {
+                setCurrentPeriodDate(newDate);
+              }
+              setIsCalendarModalOpen(false);
+            }}
+            periods={periods}
+            currentPeriodDate={currentPeriodDate}
+            onPeriodChange={(newDate) => {
+              setCurrentPeriodDate(newDate);
+            }}
+            periodName={stats?.periodName}
+            isCurrentPeriod={isCurrentPeriod}
+            t={t}
+            language={(config?.language as Language) || 'sv'}
+            showFixedInCalendar={config?.showFixedExpensesInCalendar}
           />
         )}
       </AnimatePresence>
