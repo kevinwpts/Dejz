@@ -38,7 +38,7 @@ interface GreetingModuleProps {
 }
 
 export function GreetingModule({
-  userName: _userName,
+  userName,
   availableForD,
   currency,
   isToday,
@@ -149,16 +149,15 @@ export function GreetingModule({
 
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
-      {/* Date & Period Indicator */}
-      <div className="flex items-baseline justify-between px-1 pt-0.5 pb-0.5 select-none">
-        <h2 className="text-[15px] sm:text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
+      {/* Personal Greeting & Date Header */}
+      <div className="flex flex-col gap-0.5 px-1 pt-0.5 pb-0.5 select-none">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
+          <span>{userName ? `Hej ${userName}` : 'Hej'}</span>
+          <span className="inline-block origin-bottom-right hover:rotate-12 transition-transform duration-200">👋</span>
+        </h1>
+        <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] opacity-70 capitalize">
           {formattedDate}
-        </h2>
-        {stats?.periodName && (
-          <span className="text-[12px] font-medium text-[var(--text-secondary)] opacity-70">
-            {stats.periodName.split('(')[0].trim()}
-          </span>
-        )}
+        </p>
       </div>
 
       {/* 1. Dagsbudget Hero Card - Identical aesthetic to "Kvar varje månad" in Budget */}

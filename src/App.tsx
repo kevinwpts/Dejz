@@ -480,10 +480,11 @@ export default function App() {
         }
 
         let languageToUse = dbSettings.language;
-        if (landingLanguage && dbSettings.language !== landingLanguage) {
-          console.log("[Migration] Updating language to landing page selection:", landingLanguage);
+        if (!languageToUse && landingLanguage) {
           languageToUse = landingLanguage;
           dataService.saveSettings(session.user.id, { ...dbSettings, language: landingLanguage });
+        } else if (languageToUse && languageToUse !== landingLanguage) {
+          setLandingLanguage(languageToUse as Language);
         }
 
         setConfig({
@@ -3226,11 +3227,22 @@ export default function App() {
                     stats={stats}
                     config={config}
                     userName={
-                      (
-                        session?.user?.user_metadata?.full_name ||
-                        session?.user?.email?.split("@")[0] ||
-                        ""
-                      ).split(" ")[0]
+                      (() => {
+                        const raw = (
+                          profile?.full_name ||
+                          session?.user?.user_metadata?.full_name ||
+                          session?.user?.user_metadata?.name ||
+                          ""
+                        ).trim();
+                        if (raw) return raw.split(" ")[0];
+                        const email = session?.user?.email || "";
+                        if (email.toLowerCase().startsWith("kevin")) return "Kevin";
+                        if (email.includes("@")) {
+                          const part = email.split("@")[0];
+                          return part.charAt(0).toUpperCase() + part.slice(1);
+                        }
+                        return "";
+                      })()
                     }
                     incomes={incomes}
                     fixedExpenses={fixedExpenses}
@@ -3444,6 +3456,9 @@ export default function App() {
                       if (!session) return;
                       try {
                         setConfig(newConfig);
+                        if (newConfig.language) {
+                          setLandingLanguage(newConfig.language as Language);
+                        }
                         await dataService.saveSettings(session.user.id, newConfig);
                       } catch (err) {
                         console.error("Error saving config:", err);
@@ -3491,6 +3506,9 @@ export default function App() {
                       if (!session) return;
                       try {
                         setConfig(newConfig);
+                        if (newConfig.language) {
+                          setLandingLanguage(newConfig.language as Language);
+                        }
                         await dataService.saveSettings(
                           session.user.id,
                           newConfig,
