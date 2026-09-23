@@ -227,10 +227,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
 
             <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-                Kolla din inkorg
+                {t('checkInboxTitle' as any)}
               </h2>
               <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
-                Vi har skickat en återställningslänk till <strong className="text-[var(--text-primary)]">{email}</strong>. Följ instruktionerna i mailet för att välja ett nytt lösenord.
+                {t('checkInboxDesc' as any, { email })}
               </p>
             </div>
 
@@ -242,7 +242,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               variant="primary"
               fullWidth
             >
-              Tillbaka till inloggning
+              {t('backToLogin' as any)}
             </Button>
           </div>
         ) : isForgotPassword ? (
@@ -258,7 +258,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   }}
                   variant="muted"
                   size="sm"
-                  aria-label="Tillbaka till inloggning"
+                  aria-label={t('backToLogin' as any)}
                 />
               </div>
               
@@ -271,10 +271,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               </div>
 
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1 text-center">
-                Glömt lösenord?
+                {t('forgotPasswordTitle' as any)}
               </h1>
               <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] text-center max-w-[300px]">
-                Ange din e-postadress så skickar vi en länk för att välja ett nytt lösenord.
+                {t('forgotPasswordDesc' as any)}
               </p>
             </div>
 
@@ -284,7 +284,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Din e-postadress"
+                placeholder={t('email')}
                 icon={<Mail size={16} />}
                 error={error}
               />
@@ -298,7 +298,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   size="lg"
                   icon={<KeyRound size={16} />}
                 >
-                  Skicka återställningslänk
+                  {t('sendResetLink' as any)}
                 </Button>
 
                 <Button
@@ -311,7 +311,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   fullWidth
                   size="md"
                 >
-                  Avbryt och logga in
+                  {t('cancelAndLogin' as any)}
                 </Button>
               </div>
             </form>
@@ -340,7 +340,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 {isRegistering ? t('createAccount') : t('welcome')}
               </h1>
               <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                {isRegistering ? 'Skapa ditt konto på några sekunder' : 'Logga in för att fortsätta'}
+                {isRegistering ? t('createAccountSubtitle' as any) : t('loginSubtitle' as any)}
               </p>
             </div>
 
@@ -366,7 +366,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Din e-postadress"
+                  placeholder={t('email')}
                   icon={<Mail size={16} />}
                 />
 
@@ -376,7 +376,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Ditt lösenord (minst 6 tecken)"
+                    placeholder={t('passwordPlaceholder' as any)}
                     icon={<Lock size={16} />}
                     error={error}
                   />
@@ -391,7 +391,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                         }}
                         className="text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                       >
-                        Glömt lösenord?
+                        {t('forgotPassword' as any)}
                       </button>
                     </div>
                   )}
@@ -416,7 +416,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   fullWidth
                   icon={<Sparkles size={13} />}
                 >
-                  Snabbtest: Logga in med testkonto
+                  {t('quickTestBtn' as any)}
                 </Button>
               </div>
             </form>
