@@ -36,7 +36,7 @@ export function LogView({
   periods,
   currentPeriodDate,
   onPeriodChange,
-  onOpenCalendarPicker
+  _onOpenCalendarPicker
 }: LogViewProps) {
   const getLocale = () => {
     const lang = currentLang || 'sv';
@@ -109,7 +109,6 @@ export function LogView({
           onChange={onPeriodChange}
           periodName={stats.periodName}
           isCurrentPeriod={stats.isCurrentPeriod}
-          onOpenPicker={onOpenCalendarPicker}
           variant="standalone"
           allowFuture={false}
         />

@@ -90,24 +90,39 @@ export function UniversalPeriodSelector({
           <ChevronLeft size={16} strokeWidth={2.5} />
         </button>
             
-        <button 
-          type="button"
-          onClick={handleCenterClick}
-          className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-full hover:bg-[var(--surface-muted)]/70 transition-all cursor-pointer group min-w-0"
-          title={periodName || month}
-        >
-          <div className="flex items-baseline gap-1 min-w-0">
-            <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate">
-              {month}
-            </span>
-            {dates && (
-              <span className="hidden md:inline text-[11px] font-medium text-[var(--text-secondary)] opacity-60 shrink-0">
-                ({dates})
+        {onOpenPicker ? (
+          <button 
+            type="button"
+            onClick={handleCenterClick}
+            className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-full hover:bg-[var(--surface-muted)]/70 transition-all cursor-pointer group min-w-0"
+            title={periodName || month}
+          >
+            <div className="flex items-baseline gap-1 min-w-0">
+              <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate">
+                {month}
               </span>
-            )}
+              {dates && (
+                <span className="hidden md:inline text-[11px] font-medium text-[var(--text-secondary)] opacity-60 shrink-0">
+                  ({dates})
+                </span>
+              )}
+            </div>
+            <ChevronDown size={13} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:text-[var(--accent-color)] transition-all shrink-0" />
+          </button>
+        ) : (
+          <div className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 min-w-0 select-none">
+            <div className="flex items-baseline gap-1 min-w-0">
+              <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)] truncate">
+                {month}
+              </span>
+              {dates && (
+                <span className="hidden md:inline text-[11px] font-medium text-[var(--text-secondary)] opacity-60 shrink-0">
+                  ({dates})
+                </span>
+              )}
+            </div>
           </div>
-          <ChevronDown size={13} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:text-[var(--accent-color)] transition-all shrink-0" />
-        </button>
+        )}
 
         <button 
           type="button"
@@ -147,24 +162,37 @@ export function UniversalPeriodSelector({
           <ChevronLeft size={18} strokeWidth={2.2} />
         </button>
             
-        <button 
-          type="button"
-          onClick={handleCenterClick}
-          className="flex flex-col items-center group/label px-3 py-1 rounded-full hover:bg-[var(--surface-muted)]/60 transition-all cursor-pointer"
-        >
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-bold tracking-tight transition-colors duration-300 text-[var(--text-primary)] group-hover/label:text-[var(--accent-color)]">
+        {onOpenPicker ? (
+          <button 
+            type="button"
+            onClick={handleCenterClick}
+            className="flex flex-col items-center group/label px-3 py-1 rounded-full hover:bg-[var(--surface-muted)]/60 transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-bold tracking-tight transition-colors duration-300 text-[var(--text-primary)] group-hover/label:text-[var(--accent-color)]">
+                {month}
+              </span>
+              <CalendarIcon size={13} className="text-[var(--text-secondary)] opacity-70 group-hover/label:text-[var(--accent-color)] transition-colors" />
+              <ChevronDown size={14} className="text-[var(--text-secondary)] opacity-50 group-hover/label:opacity-100 transition-opacity" />
+            </div>
+            {dates && (
+              <span className="text-[11px] font-medium transition-opacity duration-300 text-[var(--text-secondary)] opacity-60">
+                {dates}
+              </span>
+            )}
+          </button>
+        ) : (
+          <div className="flex flex-col items-center px-3 py-0.5 select-none">
+            <span className="text-sm font-bold tracking-tight text-[var(--text-primary)]">
               {month}
             </span>
-            <CalendarIcon size={13} className="text-[var(--text-secondary)] opacity-70 group-hover/label:text-[var(--accent-color)] transition-colors" />
-            <ChevronDown size={14} className="text-[var(--text-secondary)] opacity-50 group-hover/label:opacity-100 transition-opacity" />
+            {dates && (
+              <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-60">
+                {dates}
+              </span>
+            )}
           </div>
-          {dates && (
-            <span className="text-[11px] font-medium transition-opacity duration-300 text-[var(--text-secondary)] opacity-60">
-              {dates}
-            </span>
-          )}
-        </button>
+        )}
 
         <button 
           type="button"

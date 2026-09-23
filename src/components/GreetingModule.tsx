@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 
-import { X } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
 import { PeriodTimeline } from './PeriodTimeline';
 import { CalendarModal } from './CalendarModal';
@@ -41,7 +41,7 @@ export function GreetingModule({
   userName,
   availableForD,
   currency,
-  isToday,
+  isToday: _isToday,
   date,
   language,
   stats,
@@ -137,15 +137,78 @@ export function GreetingModule({
     isNegative = displayAmount < 0;
   }
 
-  // Calculate daily budget
-  const _isPayday = useMemo(() => {
-    if (!isToday || !stats) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const periodStart = new Date(stats.periodStart);
-    periodStart.setHours(0, 0, 0, 0);
-    return today.getTime() === periodStart.getTime();
-  }, [isToday, stats]);
+  // Calculate daily progress bar values
+  const spentToday = selectedDayData ? selectedDayData.daySpent : 0;
+  const dayBudgetTotal = Math.max(1, spentToday + Math.max(0, displayAmount));
+  const dayProgressPct = isNegative 
+    ? 0 
+    : Math.max(0, Math.min(100, (Math.max(0, displayAmount) / dayBudgetTotal) * 100));
+
+  // Dejzi mascot advice calculation
+  const dejziInfo = useMemo(() => {
+    if (!stats) return null;
+
+    const baseDaily = Math.round(stats.baseDailyBudgetCents || 0);
+    const spentTodayRound = selectedDayData ? Math.round(selectedDayData.daySpent || 0) : 0;
+    const remainingToday = Math.round(availableForD || 0);
+    const daysLeft = Math.max(1, (stats.remainingDays || 1) - 1);
+
+    if (diffDays !== 0) {
+      return {
+        message: language === 'en' 
+          ? `You are viewing ${selected.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' })}.`
+          : `Du tittar på ${selected.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}.`,
+        detail: null
+      };
+    }
+
+    if (remainingToday < 0) {
+      const overAmount = Math.abs(remainingToday);
+      const perDayDecrease = Math.round(overAmount / daysLeft);
+      return {
+        message: language === 'en'
+          ? `You are ${formatAmount(overAmount, language)} ${currency} over today's budget.`
+          : `Du ligger ${formatAmount(overAmount, language)} ${currency} över dagens plan.`,
+        detail: daysLeft > 0 
+          ? (language === 'en'
+              ? `This reduces your daily allowance by approx. ${formatAmount(perDayDecrease, language)} ${currency}/day over the next ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}.`
+              : `Det gör att ditt utrymme minskar med cirka ${formatAmount(perDayDecrease, language)} ${currency}/dag de kommande ${daysLeft} ${daysLeft === 1 ? 'dagen' : 'dagarna'}.`)
+          : null,
+        type: 'warning'
+      };
+    }
+
+    const diffFromBase = baseDaily - spentTodayRound;
+    const perDayBonus = Math.round(remainingToday / daysLeft);
+
+    let msg = '';
+    if (spentTodayRound === 0) {
+      msg = language === 'en'
+        ? `You haven't spent anything yet today! You have ${formatAmount(remainingToday, language)} ${currency} left.`
+        : `Du har inte spenderat något än idag! Du har ${formatAmount(remainingToday, language)} ${currency} kvar.`;
+    } else if (diffFromBase > 0) {
+      msg = language === 'en'
+        ? `You are ${formatAmount(diffFromBase, language)} ${currency} under today's plan.`
+        : `Du ligger ${formatAmount(diffFromBase, language)} ${currency} under dagens plan.`;
+    } else {
+      msg = language === 'en'
+        ? `You are right on track with today's plan!`
+        : `Du håller dig precis inom dagens plan!`;
+    }
+
+    let detail = null;
+    if (remainingToday > 0 && daysLeft > 0) {
+      detail = language === 'en'
+        ? `If you don't spend more today, you get approx. ${formatAmount(perDayBonus, language)} ${currency} more per day for the next ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}.`
+        : `Om du inte spenderar mer idag får du cirka ${formatAmount(perDayBonus, language)} ${currency} mer per dag de kommande ${daysLeft} ${daysLeft === 1 ? 'dagen' : 'dagarna'}.`;
+    }
+
+    return {
+      message: msg,
+      detail: detail,
+      type: 'success'
+    };
+  }, [stats, selectedDayData, availableForD, diffDays, selected, language, currency]);
 
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
@@ -160,7 +223,7 @@ export function GreetingModule({
         </p>
       </div>
 
-      {/* 1. Dagsbudget Hero Card - Identical aesthetic to "Kvar varje månad" in Budget */}
+      {/* 1. Dagsbudget Hero Card */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -194,7 +257,60 @@ export function GreetingModule({
             </span>
           </div>
         )}
+
+        {/* Progress bar under Kvar idag */}
+        <div className="w-full mt-5">
+          <div className="w-full h-2 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
+            <div 
+              className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
+                isNegative || dayProgressPct < 10 ? 'bg-danger' : 'bg-[var(--accent-color)]'
+              }`}
+              style={{ width: `${dayProgressPct}%` }}
+            />
+          </div>
+          
+          <div className="flex justify-between items-center mt-2 text-[10px] font-semibold text-[var(--text-secondary)] opacity-50 px-0.5">
+            <span className="font-amount tabular-nums">0</span>
+            <span className="font-amount tabular-nums">{formatAmount(dayBudgetTotal, language)} {currency}</span>
+          </div>
+        </div>
       </motion.div>
+
+      {/* Dejzi Mascot Card */}
+      {dejziInfo && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+          className="rounded-[22px] border border-[var(--border-color)] p-4 sm:p-5 bg-gradient-to-br from-[var(--surface-color)] via-[var(--surface-color)] to-[var(--surface-muted)]/50 shadow-sm relative overflow-hidden flex items-start gap-3.5"
+        >
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-amber-400/25 via-emerald-400/25 to-sky-400/25 border border-[var(--accent-color)]/30 flex items-center justify-center text-xl shrink-0 shadow-inner">
+            🌼
+          </div>
+
+          <div className="flex-1 min-w-0 pr-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-1.5">
+                Dejzi
+                <Sparkles size={12} className="text-[var(--accent-color)]" />
+              </span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)]">
+                Maskot
+              </span>
+            </div>
+
+            <p className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
+              {dejziInfo.message}
+            </p>
+
+            {dejziInfo.detail && (
+              <p className="text-xs text-[var(--text-secondary)] opacity-85 mt-1 leading-relaxed">
+                {dejziInfo.detail}
+              </p>
+            )}
+          </div>
+        </motion.div>
+      )}
 
       {/* 3. Egen Modul: Totalt kvar & Nästa lön */}
       {effectiveRemainingDays !== undefined && (
@@ -204,7 +320,7 @@ export function GreetingModule({
           transition={{ delay: 0.05 }}
           className="rounded-[24px] border border-[var(--border-color)] p-5 sm:p-6 bg-[var(--surface-color)] shadow-sm transition-all duration-500"
         >
-          <div className={`flex justify-between items-end ${diffDays === 0 ? 'mb-4' : 'mb-0'}`}>
+          <div className="flex justify-between items-end">
             <div>
               <div className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
                 {t('totalRemaining' as any)}
@@ -223,24 +339,6 @@ export function GreetingModule({
               </div>
             </div>
           </div>
-          
-          {diffDays === 0 && (
-            <>
-              <div className="w-full h-2.5 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
-                <div 
-                  className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                    ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'bg-danger' : 'bg-[var(--accent-color)]'
-                  }`}
-                  style={{ width: `${Math.max(0, Math.min(100, ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) * 100))}%` }}
-                />
-              </div>
-              
-              <div className="flex justify-between items-center mt-2.5 text-[10px] font-semibold text-[var(--text-secondary)] opacity-40 px-0.5">
-                <span className="font-amount tabular-nums">0</span>
-                <span className="font-amount tabular-nums">{formatAmount((stats?.disposablePot || 0) + (stats?.totalExtraIncomeUpToToday || 0), language)} {currency}</span>
-              </div>
-            </>
-          )}
         </motion.div>
       )}
 

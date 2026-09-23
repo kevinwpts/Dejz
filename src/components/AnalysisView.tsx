@@ -42,7 +42,7 @@ export function AnalysisView({
   periods,
   currentPeriodDate,
   onPeriodChange,
-  onOpenCalendarPicker
+  _onOpenCalendarPicker
 }: AnalysisViewProps) {
   if (!stats) return null;
 
@@ -151,7 +151,6 @@ export function AnalysisView({
           onChange={onPeriodChange}
           periodName={stats.periodName}
           isCurrentPeriod={stats.isCurrentPeriod}
-          onOpenPicker={onOpenCalendarPicker}
           variant="standalone"
           allowFuture={false}
         />
