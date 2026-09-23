@@ -361,7 +361,7 @@ export function LandingPage({
                 DIN EKONOMI. DAG FÖR DAG.
               </div>
 
-              <h1 className="font-display text-4xl sm:text-6xl lg:text-[68px] font-bold tracking-[-0.03em] text-[#03070E] leading-[1.06]">
+              <h1 className="font-display text-4xl sm:text-6xl lg:text-[66px] font-extrabold tracking-[-0.03em] text-[#03070E] leading-[1.06]">
                 Se exakt vad du kan<br />
                 <span className="text-[#03070E]">spendera idag.</span>
               </h1>
@@ -845,7 +845,7 @@ export function LandingPage({
               DIN EKONOMI. DAG FÖR DAG.
             </span>
 
-            <h2 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] text-[#FFFFFF] leading-[1.06]">
+            <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-[-0.035em] text-[#FFFFFF] leading-[1.12]">
               Sluta gissa.<br />
               Se vad du kan spendera idag.
             </h2>
