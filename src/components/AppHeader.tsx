@@ -45,6 +45,10 @@ export function AppHeader({
   const [isAtTop, setIsAtTop] = useState(true);
   const lastScrollY = useRef(0);
 
+  const [month, dates] = periodName && periodName.includes('(')
+    ? periodName.split('(').map(s => s.replace(')', '').trim())
+    : [periodName || '', ''];
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -130,6 +134,32 @@ export function AppHeader({
               variant="header"
               allowFuture={false}
             />
+          ) : activeTab === 'today' && periodName ? (
+            <div 
+              onClick={onOpenCalendarPicker}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-color)]/80 text-[var(--text-primary)] shadow-2xs select-none ${onOpenCalendarPicker ? 'cursor-pointer hover:bg-[var(--surface-muted)] transition-colors' : ''}`}
+              title={periodName}
+            >
+              <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)]">
+                {month}
+              </span>
+              {dates && (
+                <span className="hidden sm:inline text-[11px] font-medium text-[var(--text-secondary)] opacity-60">
+                  ({dates})
+                </span>
+              )}
+            </div>
+          ) : activeTab === 'budget' ? (
+            <div className="flex items-center gap-2">
+              <h1 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
+                {title || 'Budget'}
+              </h1>
+              {month && (
+                <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] bg-[var(--surface-color)] px-2.5 py-0.5 rounded-full border border-[var(--border-color)]/80 shadow-2xs">
+                  {month}
+                </span>
+              )}
+            </div>
           ) : title ? (
             <h1 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
               {title}
