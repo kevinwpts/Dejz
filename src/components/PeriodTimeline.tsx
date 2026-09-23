@@ -107,9 +107,8 @@ export function PeriodTimeline({
 
     // Horizontal wheel scroll handler for desktop mouse users
     const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        e.preventDefault();
-        container.scrollLeft += e.deltaY;
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        container.scrollLeft += e.deltaX;
       }
     };
 
@@ -197,7 +196,7 @@ export function PeriodTimeline({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-3 no-scrollbar touch-pan-x overscroll-contain cursor-grab active:cursor-grabbing"
+        className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-3 no-scrollbar cursor-grab active:cursor-grabbing"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {calendarDays.map((day: any, index: number) => {

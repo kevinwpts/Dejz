@@ -186,16 +186,16 @@ export default function App() {
   useEffect(() => {
     const themeMetas = document.querySelectorAll('meta[name="theme-color"]');
     const topIndigo = '#1E1A52';
+    const darkBg = '#080A10';
+    
     if (activeTab === 'today') {
       themeMetas.forEach(meta => meta.setAttribute('content', topIndigo));
-      document.documentElement.style.backgroundColor = topIndigo;
-      document.body.style.backgroundColor = topIndigo;
     } else {
-      const darkBg = '#0A0C14';
       themeMetas.forEach(meta => meta.setAttribute('content', darkBg));
-      document.documentElement.style.backgroundColor = darkBg;
-      document.body.style.backgroundColor = darkBg;
     }
+    
+    document.documentElement.style.backgroundColor = darkBg;
+    document.body.style.backgroundColor = darkBg;
   }, [activeTab]);
   const [profileSection, setProfileSection] = useState<
     | "main"
@@ -3151,16 +3151,6 @@ export default function App() {
 
   return (
     <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden" style={{ background: 'var(--bg-gradient)' }}>
-      {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop */}
-      <div
-        className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
-        style={{
-          height: 'max(env(safe-area-inset-top, 0px), 0px)',
-          backgroundColor: activeTab === 'today' ? '#0F172A' : 'var(--bg-color)',
-        }}
-        aria-hidden="true"
-      />
-
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 
       <ConfirmModal
