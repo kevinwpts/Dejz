@@ -165,8 +165,11 @@ export function TodayView({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="space-y-4 relative"
+      className="space-y-4 relative min-h-screen bg-gradient-to-b from-[#1E1A52] via-[#15123D] via-45% to-[#080A10] text-[var(--text-primary)] pb-12 overflow-x-hidden"
     >
+      {/* Full Page Ambient Glows matching reference image */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-blue-500/30 via-sky-400/20 to-indigo-600/25 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="absolute top-[280px] -left-20 w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-3xl pointer-events-none z-0" />
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
