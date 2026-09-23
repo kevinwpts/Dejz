@@ -34,7 +34,7 @@ export function CustomBottomNavigation({
   return (
     <div className="fixed bottom-[calc(1px+env(safe-area-inset-bottom,0px))] sm:bottom-2 left-0 right-0 z-40 px-3 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
-        className="w-[92%] sm:w-[84%] max-w-[410px] sm:max-w-[430px] h-[64px] sm:h-[68px] rounded-full px-2.5 sm:px-4 bg-black/95 text-white backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)] flex items-center justify-between gap-1 sm:gap-2 pointer-events-auto border border-white/10"
+        className="w-[92%] sm:w-[84%] max-w-[410px] sm:max-w-[430px] h-[64px] sm:h-[68px] rounded-full px-2.5 sm:px-4 bg-black/70 text-white backdrop-blur-xl saturate-180 shadow-[0_12px_40px_rgba(0,0,0,0.35)] flex items-center justify-between gap-1 sm:gap-2 pointer-events-auto border border-white/20"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 28 }}

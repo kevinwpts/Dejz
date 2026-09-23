@@ -118,13 +118,13 @@ textarea {
   --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.06);
   --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.08);
 
-  /* Premium Indigo Accent Color for Dejz Brand Identity */
-  --accent-color: #4F46E5;
-  --accent-hover: #4338CA;
-  --accent-gradient: linear-gradient(145deg, #6366F1 0%, #4F46E5 100%);
+  /* Deep Navy Accent Color (#09315c) for Dejz Brand Identity */
+  --accent-color: #09315c;
+  --accent-hover: #062242;
+  --accent-gradient: linear-gradient(145deg, #0d427b 0%, #09315c 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(79, 70, 229, 0.08);
-  --accent-glow: rgba(79, 70, 229, 0.20);
+  --accent-soft: rgba(9, 49, 92, 0.08);
+  --accent-glow: rgba(9, 49, 92, 0.20);
 
   --modal-bg: rgba(255, 255, 255, 0.96);
   --bg-primary: var(--bg-color);
@@ -197,13 +197,13 @@ textarea {
 
   --logo-color: #FFFFFF;
 
-  /* Premium Indigo Accent Color in Dark Mode */
-  --accent-color: #6366F1;
-  --accent-hover: #4F46E5;
-  --accent-gradient: linear-gradient(135deg, #818CF8 0%, #6366F1 100%);
+  /* Deep Navy Accent Color in Dark Mode (Luminous shade for dark background) */
+  --accent-color: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(99, 102, 241, 0.12);
-  --accent-glow: rgba(99, 102, 241, 0.28);
+  --accent-soft: rgba(59, 130, 246, 0.15);
+  --accent-glow: rgba(59, 130, 246, 0.30);
 
   --modal-bg: #1c1f24;
   --bg-primary: var(--bg-color);
