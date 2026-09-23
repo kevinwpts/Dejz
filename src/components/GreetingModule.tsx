@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 
-import { X, Plus, Wallet, Sparkles, WalletCards, Bell, User, Search } from 'lucide-react';
+import { X, Plus, Wallet, Sparkles, WalletCards, Bell, User, Search, ChevronRight } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
 import { PeriodTimeline } from './PeriodTimeline';
 import { CalendarModal } from './CalendarModal';
@@ -229,8 +229,8 @@ export function GreetingModule({
 
   return (
     <div className="font-sans relative">
-      {/* Sticky Top Header Bar (Never disappears when scrolling) */}
-      <div className="sticky top-0 z-40 w-full bg-[#0EA5E9]/95 backdrop-blur-md pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 border-b border-white/10 shadow-sm text-white">
+      {/* Sticky Top Header Bar (Seamlessly integrated with Hero Card) */}
+      <div className="sticky top-0 z-40 w-full bg-gradient-to-r from-[#0EA5E9] via-[#0284C7] to-[#2563EB] text-white pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 border-b border-white/10 shadow-sm transition-all">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 relative z-10">
           <div className="flex items-center gap-3">
             <button
@@ -244,10 +244,10 @@ export function GreetingModule({
               )}
             </button>
             <div className="flex flex-col text-left">
-              <span className="text-[11px] font-medium text-white/80 leading-none mb-1">
+              <span className="text-[11px] font-semibold text-white/80 leading-none mb-1 tracking-wide">
                 {greetingPhrase} 👋
               </span>
-              <span className="text-sm font-bold text-white tracking-tight leading-none">
+              <span className="text-sm sm:text-base font-extrabold text-white tracking-tight leading-none">
                 {userName || 'Användare'}
               </span>
             </div>
@@ -256,19 +256,19 @@ export function GreetingModule({
           <div className="flex items-center gap-2">
             <button
               onClick={() => onNavigate("search")}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs"
               aria-label="Sök"
             >
               <Search size={18} strokeWidth={2.2} />
             </button>
             <button
               onClick={onOpenNotifications || (() => onNavigate("notifications"))}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer relative"
+              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer relative shadow-xs"
               aria-label="Notiser"
             >
               <Bell size={18} strokeWidth={2.2} fill="currentColor" className="opacity-90" />
               {notificationCount > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-sky-600" />
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-sky-600 animate-pulse" />
               )}
             </button>
           </div>
@@ -276,92 +276,106 @@ export function GreetingModule({
       </div>
 
       {/* 1. Soft Fintech Cyan-Blue Hero Card Body */}
-      <div className="w-full relative overflow-hidden rounded-b-[36px] bg-gradient-to-br from-[#0EA5E9] via-[#0284C7] to-[#2563EB] text-white pt-3 pb-8 shadow-xl shadow-sky-500/15 border-b border-sky-400/30">
+      <div className="w-full relative overflow-hidden rounded-b-[32px] sm:rounded-b-[36px] bg-gradient-to-br from-[#0EA5E9] via-[#0284C7] to-[#2563EB] text-white pt-2 pb-8 shadow-xl shadow-sky-500/15 border-b border-sky-400/30">
         {/* Soft Ambient Light Circles */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-sky-300/20 rounded-full blur-xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-56 h-56 bg-sky-300/20 rounded-full blur-2xl pointer-events-none" />
 
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
-          {/* Center Balance Display */}
-          <div className="flex flex-col items-center text-center my-2 relative z-10">
-            <span className="text-[11px] font-bold tracking-wider text-white/80 uppercase mb-1">
-              {topLabel}
-            </span>
-            <div className="flex items-baseline justify-center gap-1.5 my-1">
+          {/* Center Balance Display (Kinetic Variable Typography) */}
+          <div className="flex flex-col items-center text-center my-3 relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] font-bold tracking-wider text-white uppercase mb-2 shadow-2xs">
+              <Sparkles size={12} className="text-amber-300" />
+              <span>{topLabel}</span>
+            </div>
+
+            <div className="flex items-baseline justify-center gap-2 my-1">
               <AnimatedNumber
                 value={displayAmount}
-                className={`text-4xl sm:text-5xl font-black text-white font-amount tabular-nums tracking-tight ${
+                className={`text-5xl sm:text-6xl font-black text-white font-amount tabular-nums tracking-tight ${
                   isNegative ? 'text-rose-200' : ''
                 }`}
                 formatter={(val) => formatAmount(val, language)}
               />
-              <span className="text-lg font-semibold text-white/80 font-sans">
+              <span className="text-xl sm:text-2xl font-extrabold text-white/85 font-sans">
                 {currency}
               </span>
             </div>
 
-            {/* Progress bar */}
-            <div className="w-full max-w-xs mt-3">
-              <div className="w-full h-2 bg-white/25 backdrop-blur-md rounded-full overflow-hidden relative">
+            {/* Progress bar with percentage pill */}
+            <div className="w-full max-w-xs mt-3 flex flex-col items-center gap-1.5">
+              <div className="w-full h-2.5 bg-white/25 backdrop-blur-md rounded-full overflow-hidden relative shadow-inner">
                 <div
                   className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                    isNegative ? 'bg-rose-300' : 'bg-white shadow-sm'
+                    isNegative ? 'bg-rose-300' : 'bg-gradient-to-r from-white to-sky-100 shadow-sm'
                   }`}
                   style={{ width: `${dayProgressPct}%` }}
                 />
               </div>
+              <div className="flex items-center justify-between w-full text-[10px] font-semibold text-white/80 px-1">
+                <span>0 {currency}</span>
+                <span>{Math.round(dayProgressPct)}% utnyttjat</span>
+              </div>
             </div>
           </div>
 
-          {/* Quick Action Grid (4 Soft Translucent Glass Buttons) */}
-          <div className="grid grid-cols-4 gap-2 pt-4 relative z-10">
-            <button
+          {/* Quick Action Grid (4 Soft Translucent Glass Buttons with Micro-Interactions) */}
+          <div className="grid grid-cols-4 gap-2.5 pt-4 relative z-10">
+            <motion.button
+              whileHover={{ y: -3, scale: 1.02 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => onAddTransaction?.("expense")}
-              className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
+              className="bg-white/20 hover:bg-white/30 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-3 px-1 flex flex-col items-center justify-center gap-1.5 text-white shadow-xs cursor-pointer group"
             >
-              <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Plus size={18} strokeWidth={2.8} />
+              <div className="w-9 h-9 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/35 transition-all shadow-2xs">
+                <Plus size={20} strokeWidth={2.8} />
               </div>
-              <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
+              <span className="text-[11px] font-extrabold tracking-tight leading-tight truncate max-w-full">
                 {language === 'en' ? 'Expense' : 'Utgift'}
               </span>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ y: -3, scale: 1.02 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => onAddTransaction?.("income")}
-              className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
+              className="bg-white/20 hover:bg-white/30 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-3 px-1 flex flex-col items-center justify-center gap-1.5 text-white shadow-xs cursor-pointer group"
             >
-              <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Wallet size={18} strokeWidth={2.2} />
+              <div className="w-9 h-9 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/35 transition-all shadow-2xs">
+                <Wallet size={20} strokeWidth={2.2} />
               </div>
-              <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
+              <span className="text-[11px] font-extrabold tracking-tight leading-tight truncate max-w-full">
                 {language === 'en' ? 'Income' : 'Inkomst'}
               </span>
-            </button>
+            </motion.button>
 
-            <button
-              onClick={() => onNavigate("budget")}
-              className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
+            <motion.button
+              whileHover={{ y: -3, scale: 1.02 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => setIsSaveToPotOpen(true)}
+              className="bg-white/20 hover:bg-white/30 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-3 px-1 flex flex-col items-center justify-center gap-1.5 text-white shadow-xs cursor-pointer group"
             >
-              <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Sparkles size={18} strokeWidth={2.2} />
+              <div className="w-9 h-9 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/35 transition-all shadow-2xs">
+                <Sparkles size={20} strokeWidth={2.2} />
               </div>
-              <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
+              <span className="text-[11px] font-extrabold tracking-tight leading-tight truncate max-w-full">
                 {language === 'en' ? 'Save' : 'Spara'}
               </span>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ y: -3, scale: 1.02 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => onNavigate("budget")}
-              className="bg-white/20 hover:bg-white/30 active:scale-95 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-2.5 px-1 flex flex-col items-center justify-center gap-1 text-white shadow-xs cursor-pointer group"
+              className="bg-white/20 hover:bg-white/30 transition-all backdrop-blur-md border border-white/25 rounded-2xl py-3 px-1 flex flex-col items-center justify-center gap-1.5 text-white shadow-xs cursor-pointer group"
             >
-              <div className="w-8 h-8 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <WalletCards size={18} strokeWidth={2.2} />
+              <div className="w-9 h-9 rounded-xl bg-white/25 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/35 transition-all shadow-2xs">
+                <WalletCards size={20} strokeWidth={2.2} />
               </div>
-              <span className="text-[10px] sm:text-[11px] font-bold leading-tight truncate max-w-full">
+              <span className="text-[11px] font-extrabold tracking-tight leading-tight truncate max-w-full">
                 {language === 'en' ? 'Budget' : 'Budget'}
               </span>
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
@@ -405,30 +419,43 @@ export function GreetingModule({
         </motion.div>
       )}
 
-      {/* 3. Egen Modul: Totalt kvar & Nästa lön */}
+      {/* 3. Egen Modul: Totalt kvar & Nästa lön (Organic Card with Interactive Detail Trigger) */}
       {effectiveRemainingDays !== undefined && (
         <motion.div 
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
+          whileHover={{ y: -2 }}
           transition={{ delay: 0.05 }}
-          className="rounded-[24px] border border-[var(--border-color)] p-5 sm:p-6 bg-[var(--surface-color)] shadow-sm transition-all duration-500"
+          onClick={() => setIsCalculationModalOpen(true)}
+          className="rounded-[26px] border border-[var(--border-color)]/80 p-5 sm:p-6 bg-[var(--surface-color)] shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer group relative overflow-hidden"
         >
-          <div className="flex justify-between items-end">
+          <div className="flex justify-between items-center mb-1">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+              <span>{t('totalRemaining' as any)}</span>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 px-2.5 py-0.5 rounded-full border border-sky-200/60 dark:border-sky-800/50 group-hover:bg-sky-100 transition-colors">
+              <span>Visa kalkyler</span>
+              <ChevronRight size={12} strokeWidth={2.5} />
+            </div>
+          </div>
+
+          <div className="flex justify-between items-end pt-2">
             <div>
-              <div className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
-                {t('totalRemaining' as any)}
-              </div>
-              <div className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] font-amount leading-none">
-                {formatAmount(stats?.remainingPeriodCents || 0, language)} <span className="opacity-40 text-lg font-normal">{currency}</span>
+              <div className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] font-amount tracking-tight leading-none">
+                {formatAmount(stats?.remainingPeriodCents || 0, language)}{' '}
+                <span className="text-base font-bold text-[var(--text-secondary)] opacity-70">{currency}</span>
               </div>
             </div>
             
             <div className="text-right">
-              <div className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
+              <div className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
                 {t('daysToNextSalary' as any)}
               </div>
-              <div className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] font-amount leading-none">
-                {stats?.remainingDays || 1} <span className="opacity-40 text-sm font-normal font-sans">{(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}</span>
+              <div className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] font-amount tracking-tight leading-none">
+                {stats?.remainingDays || 1}{' '}
+                <span className="text-sm font-bold text-[var(--text-secondary)] opacity-70 font-sans">
+                  {(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}
+                </span>
               </div>
             </div>
           </div>
