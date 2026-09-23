@@ -39,11 +39,16 @@ export function AppHeader({
   periodName: _periodName,
   isCurrentPeriod: _isCurrentPeriod,
   onOpenCalendarPicker: _onOpenCalendarPicker,
-  activeTab: _activeTab,
+  activeTab,
 }: AppHeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isAtTop, setIsAtTop] = useState(true);
   const lastScrollY = useRef(0);
+
+  // Hide header on today tab since GreetingModule renders the full bleed top hero bar
+  if (activeTab === 'today') {
+    return null;
+  }
 
   useEffect(() => {
     const handleScroll = () => {
