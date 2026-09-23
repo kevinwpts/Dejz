@@ -395,14 +395,13 @@ export function LandingPage({
               </div>
             </div>
 
-            {/* Höger: STOR placeholder för Dejz Home-mockup */}
-            <div className="lg:col-span-6 w-full">
-              <div className="relative mx-auto max-w-md lg:max-w-none">
-                <MockupPlaceholder 
-                  label="Dejz Home – produktmockup"
-                  sublabel="Produktmockup – ersätts med uppladdad bild"
-                  aspect="aspect-[4/5] sm:aspect-[1/1] lg:aspect-[4/4.5]"
-                  className="shadow-xl"
+            {/* Höger: Dejz Home Mockup */}
+            <div className="lg:col-span-6 w-full flex justify-center items-center py-2 sm:py-4">
+              <div className="relative mx-auto max-w-[280px] sm:max-w-[315px] lg:max-w-[350px] w-full flex justify-center">
+                <img 
+                  src="/hero_mockup.png" 
+                  alt="Dejz app – Se exakt vad du kan spendera idag" 
+                  className="w-full h-auto object-contain select-none hover:scale-[1.015] transition-transform duration-300" 
                 />
               </div>
             </div>
