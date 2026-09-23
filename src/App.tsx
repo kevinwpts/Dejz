@@ -1940,31 +1940,36 @@ export default function App() {
             ? dayInfos[todayIndex].spend
             : 0;
 
-        // 2. Calculate the pot for distribution
-        const potForDistribution =
-          remainingPeriodCents + spentTodayCents;
+        // 2. Calculate dynamic budget or total deficit
+        let availableTodayCents = 0;
+        let availableFutureBaseCents = 0;
 
-        // 3. DYNAMIC daily budget: Spread the remaining pot over remaining days.
-        const dynamicBaseBudgetCents = Math.max(
-          0,
-          Math.floor(potForDistribution / remainingDaysIncludingToday),
-        );
+        if (remainingPeriodCents <= 0) {
+          // If total remaining in period is 0 or negative (overspent whole period),
+          // Kvar idag equals Totalt kvar (the deficit)
+          availableTodayCents = remainingPeriodCents;
+          availableFutureBaseCents = remainingPeriodCents;
+        } else {
+          // Calculate the pot for distribution
+          const potForDistribution = remainingPeriodCents + spentTodayCents;
 
-        // 4. Current available today is the dynamic budget minus today's spending.
-        const availableTodayCents = dynamicBaseBudgetCents - spentTodayCents;
-
-        // 5. Future days get the dynamic budget, but if today is negative, we redistribute the deficit immediately.
-        let availableFutureBaseCents = dynamicBaseBudgetCents;
-        if (availableTodayCents < 0 && remainingDaysIncludingToday > 1) {
-          // If we overspent today, the future days must absorb the hit.
-          const remainingPotAfterToday =
-            remainingPeriodCents;
-          availableFutureBaseCents = Math.max(
+          // DYNAMIC daily budget: Spread the remaining pot over remaining days.
+          const dynamicBaseBudgetCents = Math.max(
             0,
-            Math.floor(
-              remainingPotAfterToday / (remainingDaysIncludingToday - 1),
-            ),
+            Math.floor(potForDistribution / remainingDaysIncludingToday),
           );
+
+          // Current available today is the dynamic budget minus today's spending.
+          availableTodayCents = dynamicBaseBudgetCents - spentTodayCents;
+
+          // Future days get the dynamic budget, but if today is negative, redistribute the deficit
+          availableFutureBaseCents = dynamicBaseBudgetCents;
+          if (availableTodayCents < 0 && remainingDaysIncludingToday > 1) {
+            const remainingPotAfterToday = remainingPeriodCents;
+            availableFutureBaseCents = Math.floor(
+              remainingPotAfterToday / (remainingDaysIncludingToday - 1),
+            );
+          }
         }
 
         // Calculate future income additions per day (each future income is spread across days starting from its scheduled date)
