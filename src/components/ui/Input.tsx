@@ -49,11 +49,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             disabled={disabled}
-            className={`w-full bg-[var(--surface-color)] focus:bg-[var(--surface-color)] border ${
-              error ? 'border-danger/60 focus:border-danger ring-2 ring-danger/20' : 'border-[var(--border-color)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/25'
-            } rounded-[18px] ${icon ? 'pl-11' : 'pl-4'} ${
-              iconRight ? 'pr-11' : 'pr-4'
-            } py-3.5 font-medium text-sm text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-secondary)]/50 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs h-[50px] font-sans ${className}`}
+            className={`w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border ${
+              error ? 'border-danger/60 focus:border-danger ring-1 ring-danger/20' : 'border-[var(--border-color)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20'
+            } rounded-[16px] ${icon ? 'pl-10' : 'pl-4'} ${
+              iconRight ? 'pr-10' : 'pr-4'
+            } py-3 font-medium text-xs sm:text-sm text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-secondary)]/50 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
             {...props}
           />
 

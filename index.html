@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="sv" class="dark">
+<html lang="sv" class="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#F8F9FA" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#141619" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#F8F9FA" id="theme-color-meta" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
     <!-- SEO Meta Tags -->
     <title>Dejz – Smart Budget & Ekonomiplanerare</title>
@@ -31,10 +31,10 @@
     <meta name="twitter:description" content="Få full kontroll över din personliga ekonomi med Dejz. Hantera utgifter, inkomster och sparande på ett enkelt sätt." />
     <meta name="twitter:image" content="/favicon.png" />
 
-    <!-- Fonts - Anybody & Manrope -->
+    <!-- Fonts - Plus Jakarta Sans & Manrope for Amounts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,400..900;1,400..900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
 
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
@@ -58,9 +58,16 @@
         color-scheme: light dark;
       }
       html, body {
+        background-color: #F8F9FA;
         min-height: 100%;
         margin: 0;
         padding: 0;
+      }
+      html.light, body.light {
+        background-color: #F8F9FA !important;
+      }
+      html.dark, body.dark {
+        background-color: #141619 !important;
       }
     </style>
   </head>

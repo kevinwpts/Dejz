@@ -186,20 +186,16 @@ export function PublicLegalPage({
         </div>
 
         {/* Footer info box */}
-        <div className="mt-8 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[24px] p-6 shadow-xs text-center text-xs text-[var(--text-secondary)] space-y-3">
-          <div className="flex items-center justify-center gap-2 font-medium">
-            <DejzLogo className="text-base font-bold" textColor="var(--logo-color)" />
-            <span className="opacity-40">•</span>
-            <span>© {new Date().getFullYear()} Dejz. Alla rättigheter förbehållna.</span>
-          </div>
-          <p className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-medium">
-            <button onClick={() => handleSelectDoc('privacy')} className="hover:text-[var(--accent-color)] transition-colors cursor-pointer">Integritetspolicy</button>
-            <span className="opacity-30">•</span>
-            <button onClick={() => handleSelectDoc('terms')} className="hover:text-[var(--accent-color)] transition-colors cursor-pointer">Användarvillkor</button>
-            <span className="opacity-30">•</span>
-            <button onClick={() => handleSelectDoc('cookies')} className="hover:text-[var(--accent-color)] transition-colors cursor-pointer">Cookiepolicy</button>
-            <span className="opacity-30">•</span>
-            <a href="mailto:hej@dejz.se" className="hover:text-[var(--accent-color)] transition-colors">Kontakt & Support</a>
+        <div className="mt-8 text-center text-xs text-[var(--text-secondary)] space-y-2">
+          <p>© {new Date().getFullYear()} Dejz. Alla rättigheter förbehållna.</p>
+          <p className="flex items-center justify-center gap-4">
+            <button onClick={() => handleSelectDoc('privacy')} className="hover:underline cursor-pointer">Integritetspolicy</button>
+            <span>•</span>
+            <button onClick={() => handleSelectDoc('terms')} className="hover:underline cursor-pointer">Användarvillkor</button>
+            <span>•</span>
+            <button onClick={() => handleSelectDoc('cookies')} className="hover:underline cursor-pointer">Cookiepolicy</button>
+            <span>•</span>
+            <a href="mailto:hej@dejz.se" className="hover:underline">Kontakt & Support</a>
           </p>
         </div>
       </main>

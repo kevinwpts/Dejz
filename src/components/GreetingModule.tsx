@@ -251,7 +251,7 @@ export function GreetingModule({
           <div className="w-full h-2 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
             <div 
               className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                isNegative || dayProgressPct < 10 ? 'bg-danger' : 'bg-[var(--gold-color)]'
+                isNegative || dayProgressPct < 10 ? 'bg-danger' : 'bg-[var(--accent-color)]'
               }`}
               style={{ width: `${dayProgressPct}%` }}
             />
