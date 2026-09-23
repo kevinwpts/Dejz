@@ -83,8 +83,15 @@ textarea {
   text-rendering: optimizeLegibility;
   font-feature-settings: "cv11", "ss01", "ss02", "ss03", "tnum";
 
-  /* Dejz Official Brand Logo Color (Solid Black / Soft Charcoal) */
-  --logo-color: #181a1f;
+  /* Dejz Brand Tokens */
+  --brand: #A0C5FD;
+  --brand-hover: #8BB6FB;
+  --brand-soft: rgba(160, 197, 253, 0.15);
+  --brand-foreground: #03070E;
+  --ink: #03070E;
+
+  /* Dejz Official Brand Logo Color */
+  --logo-color: #03070E;
 
   /* Premium Light Theme (Dejz Design System) */
   --bg-color: #F8F9FA;
@@ -96,40 +103,41 @@ textarea {
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: rgba(0, 0, 0, 0.04);
-  --surface-tint: rgba(0, 0, 0, 0.02);
+  --surface-secondary: #F1F3F5;
+  --surface-muted: rgba(3, 7, 14, 0.04);
+  --surface-tint: rgba(160, 197, 253, 0.06);
 
-  --text-primary: #181a1f;
-  --text-secondary: #636A75;
+  --text-primary: #03070E;
+  --text-secondary: #525866;
   --text-tertiary: #8C94A0;
   --text-inactive: #B8BFC9;
 
-  --border-color: rgba(0, 0, 0, 0.07);
-  --border-strong: rgba(0, 0, 0, 0.12);
+  --border-color: rgba(3, 7, 14, 0.07);
+  --border-strong: rgba(3, 7, 14, 0.12);
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: rgba(0, 0, 0, 0.05);
+  --chip-bg: rgba(3, 7, 14, 0.05);
   --transaction-bg: #FFFFFF;
   --card-nested-bg: #F4F5F7;
   --remaining-today-gradient: var(--surface-color);
 
   /* Custom Elevation Levels - Light Mode */
-  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
-  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-level-1: 0 1px 3px rgba(3, 7, 14, 0.04), 0 4px 12px rgba(3, 7, 14, 0.03);
+  --shadow-level-2: 0 4px 16px rgba(3, 7, 14, 0.06);
+  --shadow-level-3: 0 10px 30px rgba(3, 7, 14, 0.08);
 
-  /* Deep Navy Accent Color (#09315c) for Dejz Brand Identity */
-  --accent-color: #09315c;
-  --accent-hover: #062242;
-  --accent-gradient: linear-gradient(145deg, #0d427b 0%, #09315c 100%);
-  --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(9, 49, 92, 0.08);
-  --accent-glow: rgba(9, 49, 92, 0.20);
+  /* Primary Dejz Brand Accent (#A0C5FD) */
+  --accent-color: #A0C5FD;
+  --accent-hover: #8BB6FB;
+  --accent-gradient: #A0C5FD;
+  --text-on-accent: #03070E;
+  --accent-soft: rgba(160, 197, 253, 0.15);
+  --accent-glow: rgba(160, 197, 253, 0.22);
 
   --modal-bg: rgba(255, 255, 255, 0.96);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: rgba(0, 0, 0, 0.03);
+  --bg-hover: rgba(3, 7, 14, 0.03);
 
   --card-shadow: var(--shadow-level-2);
   --card-inner-stroke: none;
@@ -138,10 +146,10 @@ textarea {
   --danger-color: #e83e67;
   --warning-color: #f59e0b;
 
-  --nav-active-color: #1e2024;
-  --nav-inactive-color: #71717A;
-  --nav-plus-bg: #1e2024;
-  --nav-plus-shadow: 0 4px 14px rgba(24, 25, 30, 0.25);
+  --nav-active-color: #A0C5FD;
+  --nav-inactive-color: #8C94A0;
+  --nav-plus-bg: #A0C5FD;
+  --nav-plus-shadow: 0 4px 14px rgba(160, 197, 253, 0.35);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -150,12 +158,12 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #1e2024;
-  --date-active-color: #FFFFFF;
-  --date-active-shadow: 0 4px 14px rgba(24, 25, 30, 0.20);
+  --date-active-bg: #A0C5FD;
+  --date-active-color: #03070E;
+  --date-active-shadow: 0 4px 14px rgba(160, 197, 253, 0.30);
   --date-inactive-bg: rgba(255, 255, 255, 0.90);
-  --date-inactive-border: rgba(0, 0, 0, 0.06);
-  --date-inactive-color: #636A75;
+  --date-inactive-border: rgba(3, 7, 14, 0.06);
+  --date-inactive-color: #525866;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;
@@ -163,49 +171,57 @@ textarea {
 }
 
 .dark {
-  /* Premium Dark Theme Refinements (Dejz Design System) - Soft Near-Black Charcoal */
-  --bg-color: #141619;
-  --bg-secondary: #181a1e;
-  --bg-gradient: #141619;
+  /* Dejz Brand Tokens - Dark Mode */
+  --brand: #A0C5FD;
+  --brand-hover: #8BB6FB;
+  --brand-soft: rgba(160, 197, 253, 0.12);
+  --brand-foreground: #03070E;
+  --ink: #03070E;
 
-  --surface-color: #1c1f24;
-  --surface-gradient: #1c1f24;
-  --surface-elevated: #24282f;
-  --surface-elevated-gradient: #24282f;
-  --surface-solid: #1c1f24;
+  /* Premium Dark Theme Refinements (Dejz Design System) */
+  --bg-color: #03070E;
+  --bg-secondary: #0A0F19;
+  --bg-gradient: #03070E;
+
+  --surface-color: #0E1522;
+  --surface-gradient: #0E1522;
+  --surface-elevated: #151F30;
+  --surface-elevated-gradient: #151F30;
+  --surface-solid: #0E1522;
+  --surface-secondary: #141E2F;
   --surface-muted: rgba(255, 255, 255, 0.04);
-  --surface-tint: rgba(255, 255, 255, 0.02);
+  --surface-tint: rgba(160, 197, 253, 0.05);
 
-  --text-primary: #F4F5F6;
-  --text-secondary: #A3A8B0;
-  --text-tertiary: #717780;
-  --text-inactive: #4E525C;
+  --text-primary: #F4F6FC;
+  --text-secondary: #94A0B8;
+  --text-tertiary: #647085;
+  --text-inactive: #404A5C;
 
-  --border-color: rgba(255, 255, 255, 0.04);
-  --border-strong: rgba(255, 255, 255, 0.07);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.10);
   --inner-highlight: transparent;
 
   --chip-bg: rgba(255, 255, 255, 0.04);
   --transaction-bg: var(--surface-color);
   --card-nested-bg: rgba(255, 255, 255, 0.035);
-  --remaining-today-gradient: linear-gradient(145deg, #122820 0%, #10221c 55%, #141f1c 100%);
+  --remaining-today-gradient: var(--surface-color);
 
   /* Custom Elevation Levels - Dark Mode */
-  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.22);
-  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.3);
+  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.20);
+  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.30);
+  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.40);
 
   --logo-color: #FFFFFF;
 
-  /* Deep Navy Accent Color in Dark Mode (Luminous shade for dark background) */
-  --accent-color: #3b82f6;
-  --accent-hover: #2563eb;
-  --accent-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-  --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(59, 130, 246, 0.15);
-  --accent-glow: rgba(59, 130, 246, 0.30);
+  /* Dejz Brand Accent in Dark Mode */
+  --accent-color: #A0C5FD;
+  --accent-hover: #8BB6FB;
+  --accent-gradient: #A0C5FD;
+  --text-on-accent: #03070E;
+  --accent-soft: rgba(160, 197, 253, 0.12);
+  --accent-glow: rgba(160, 197, 253, 0.20);
 
-  --modal-bg: #1c1f24;
+  --modal-bg: #0E1522;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
   --bg-hover: rgba(255, 255, 255, 0.03);
@@ -217,10 +233,10 @@ textarea {
   --danger-color: #f43f5e;
   --warning-color: #f59e0b;
 
-  --nav-active-color: #FFFFFF;
-  --nav-inactive-color: #717780;
-  --nav-plus-bg: #FFFFFF;
-  --nav-plus-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
+  --nav-active-color: #A0C5FD;
+  --nav-inactive-color: #647085;
+  --nav-plus-bg: #A0C5FD;
+  --nav-plus-shadow: 0 4px 14px rgba(160, 197, 253, 0.25);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -229,11 +245,11 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #FFFFFF;
-  --date-active-color: #141619;
-  --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --date-active-bg: #A0C5FD;
+  --date-active-color: #03070E;
+  --date-active-shadow: 0 4px 14px rgba(160, 197, 253, 0.25);
   --date-inactive-bg: var(--surface-color);
-  --date-inactive-border: rgba(255, 255, 255, 0.03);
+  --date-inactive-border: rgba(255, 255, 255, 0.05);
   --date-inactive-color: var(--text-secondary);
 }
 
