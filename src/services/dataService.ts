@@ -164,18 +164,27 @@ export const dataService = {
       updated_at: new Date().toISOString()
     };
 
-    const { error } = await supabase
+    let { error } = await supabase
       .from('profiles')
       .upsert(payload);
     
-    if (error) {
-      if (error.message?.includes('show_fixed_expenses_in_calendar') || (error as any).code === '42703') {
-        delete payload.show_fixed_expenses_in_calendar;
-        const { error: retryError } = await supabase.from('profiles').upsert(payload);
-        if (retryError) throw retryError;
+    // Robust fallback if user's Supabase profiles table is missing newly added columns
+    let attempts = 0;
+    while (error && (error as any).code === '42703' && attempts < 5) {
+      attempts++;
+      const match = error.message?.match(/column "([^"]+)"/);
+      if (match && match[1] && match[1] in payload) {
+        delete payload[match[1]];
+        const retryResult = await supabase.from('profiles').upsert(payload);
+        error = retryResult.error;
       } else {
-        throw error;
+        break;
       }
+    }
+
+    if (error) {
+      console.error("Error saving settings to Supabase profiles:", error);
+      throw error;
     }
   },
 
