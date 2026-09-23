@@ -181,6 +181,20 @@ export default function App() {
     }
     return "today";
   });
+
+  // Dynamic Theme Color & Body Background for iOS Safari Status Bar / Dynamic Island
+  useEffect(() => {
+    const themeMetas = document.querySelectorAll('meta[name="theme-color"]');
+    if (activeTab === 'today') {
+      themeMetas.forEach(meta => meta.setAttribute('content', '#0EA5E9'));
+      document.documentElement.style.backgroundColor = '#0EA5E9';
+      document.body.style.backgroundColor = '#0EA5E9';
+    } else {
+      themeMetas.forEach(meta => meta.setAttribute('content', '#F8F9FA'));
+      document.documentElement.style.backgroundColor = '';
+      document.body.style.backgroundColor = '';
+    }
+  }, [activeTab]);
   const [profileSection, setProfileSection] = useState<
     | "main"
     | "salary"
