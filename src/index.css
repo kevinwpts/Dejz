@@ -118,13 +118,13 @@ textarea {
   --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.06);
   --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.08);
 
-  /* Clean Minimalist Accent Color for Buttons & CTA - Refined Near-Black */
-  --accent-color: #1e2024;
-  --accent-hover: #2c2f35;
-  --accent-gradient: linear-gradient(145deg, #2c2f35 0%, #1e2024 100%);
+  /* Premium Indigo Accent Color for Dejz Brand Identity */
+  --accent-color: #4F46E5;
+  --accent-hover: #4338CA;
+  --accent-gradient: linear-gradient(145deg, #6366F1 0%, #4F46E5 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(30, 32, 36, 0.08);
-  --accent-glow: rgba(30, 32, 36, 0.16);
+  --accent-soft: rgba(79, 70, 229, 0.08);
+  --accent-glow: rgba(79, 70, 229, 0.20);
 
   --modal-bg: rgba(255, 255, 255, 0.96);
   --bg-primary: var(--bg-color);
@@ -197,13 +197,13 @@ textarea {
 
   --logo-color: #FFFFFF;
 
-  /* Clean Minimalist Accent Color in Dark Mode */
-  --accent-color: #FFFFFF;
-  --accent-hover: #F4F4F5;
-  --accent-gradient: linear-gradient(135deg, #FFFFFF 0%, #E4E4E7 100%);
-  --text-on-accent: #141619;
-  --accent-soft: rgba(255, 255, 255, 0.08);
-  --accent-glow: rgba(255, 255, 255, 0.16);
+  /* Premium Indigo Accent Color in Dark Mode */
+  --accent-color: #6366F1;
+  --accent-hover: #4F46E5;
+  --accent-gradient: linear-gradient(135deg, #818CF8 0%, #6366F1 100%);
+  --text-on-accent: #FFFFFF;
+  --accent-soft: rgba(99, 102, 241, 0.12);
+  --accent-glow: rgba(99, 102, 241, 0.28);
 
   --modal-bg: #1c1f24;
   --bg-primary: var(--bg-color);

@@ -229,7 +229,7 @@ export function PeriodTimeline({
               whileTap={{ scale: 0.94 }}
               className={`flex flex-col items-center justify-center gap-1 min-w-[50px] sm:min-w-[54px] h-[58px] sm:h-[62px] py-1.5 px-1 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-2xs dark:bg-white dark:text-black font-semibold'
+                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs font-semibold'
                   : isRealToday
                   ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--text-primary)]/50 hover:border-[var(--text-primary)]/80'
                   : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
@@ -248,7 +248,7 @@ export function PeriodTimeline({
 
               {/* Day Number */}
               <span className={`text-[13px] sm:text-[14px] leading-none font-medium tabular-nums ${
-                isSelected ? 'text-[var(--text-on-accent)] dark:text-black font-semibold' : 'text-[var(--text-primary)]'
+                isSelected ? 'text-[var(--text-on-accent)] font-semibold' : 'text-[var(--text-primary)]'
               }`}>
                 {dayNumber}
               </span>
