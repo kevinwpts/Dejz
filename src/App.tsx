@@ -151,31 +151,8 @@ export default function App() {
 
   const [config, setConfig] = useState<Config | null>(null);
   const [landingLanguage, setLandingLanguage] = useState<Language>(() => {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlLang = urlParams.get('lang');
-      if (urlLang && ['sv', 'en', 'no', 'da', 'fi'].includes(urlLang)) {
-        localStorage.setItem('app_language', urlLang);
-        return urlLang as Language;
-      }
-    } catch (e) {
-      console.warn("Failed to parse language query parameter:", e);
-    }
-
     const saved = localStorage.getItem('app_language');
-    if (saved) return saved as Language;
-
-    try {
-      const browserLang = navigator.language.slice(0, 2);
-      if (['sv', 'en', 'no', 'da', 'fi'].includes(browserLang)) {
-        localStorage.setItem('app_language', browserLang);
-        return browserLang as Language;
-      }
-    } catch (_e) {
-      // ignore
-    }
-
-    return 'sv';
+    return (saved as Language) || 'sv';
   });
   const [currentPeriodDate, setCurrentPeriodDate] = useState(new Date());
 
@@ -1360,7 +1337,7 @@ export default function App() {
 
     const defaultConfig: Config = {
       currency: "kr",
-      language: landingLanguage,
+      language: "sv",
       payday: 25,
       paydayType: PaydayType.TWENTY_FIFTH,
       paydayBeforeWeekend: true,

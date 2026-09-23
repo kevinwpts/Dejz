@@ -3,8 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-black: #000000;
-  --color-gold: var(--gold-color);
+  --color-black: #18191e;
   --font-sans:
     "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display:
@@ -78,78 +77,71 @@ textarea {
 }
 
 :root {
+  font-size: 87.5%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-feature-settings: "cv11", "ss01", "ss02", "ss03", "tnum";
 
-  /* 11. LOGOTYP OCH BRAND ASSETS - LIGHT: mörk Dejz-logotyp (#05020E) */
-  --logo-color: #05020E;
+  /* Dejz Official Brand Logo Color (Solid Black / Soft Charcoal) */
+  --logo-color: #181a1f;
 
-  /* 1. LIGHT MODE: BASE / WHITE: #FFFFFF as primary background and surfaces */
-  --bg-color: #ffffff;
-  --bg-gradient: #ffffff;
-  --surface-color: #ffffff;
-  --surface-gradient: #ffffff;
-  --surface-elevated: #ffffff;
-  --surface-elevated-gradient: #ffffff;
-  --surface-solid: #ffffff;
+  /* Premium Light Theme (Dejz Design System) */
+  --bg-color: #F8F9FA;
+  --bg-secondary: #F1F3F5;
+  --bg-gradient: #F8F9FA;
 
-  /* Subtila off-white/grå toner för separation (FAFAFA, F7F7F8, F1F1F3, E7E7EA) */
-  --bg-secondary: #f7f7f8;
-  --surface-muted: #f1f1f3;
-  --surface-tint: rgba(5, 2, 14, 0.02);
-  --border-color: #e7e7ea;
-  --border-strong: rgba(5, 2, 14, 0.08);
-  --chip-bg: #f1f1f3;
-  --card-nested-bg: #fafafa;
-  --date-inactive-bg: #f1f1f3;
-  --date-inactive-border: #e7e7ea;
+  --surface-color: #FFFFFF;
+  --surface-gradient: #FFFFFF;
+  --surface-elevated: #FFFFFF;
+  --surface-elevated-gradient: #FFFFFF;
+  --surface-solid: #FFFFFF;
+  --surface-muted: rgba(0, 0, 0, 0.04);
+  --surface-tint: rgba(0, 0, 0, 0.02);
 
-  /* 2. TEXTFÄRGER - Tydlig typografisk hierarki */
-  --text-primary: #05020E; /* Primary text / headings / figures */
-  --text-secondary: #555261; /* Neutral dark grey subtitle/body */
-  --text-tertiary: #888594; /* Lighter neutral grå metadata/labels */
-  --text-inactive: #b8b6c4; /* Disabled state */
+  --text-primary: #181a1f;
+  --text-secondary: #636A75;
+  --text-tertiary: #8C94A0;
+  --text-inactive: #B8BFC9;
 
-  --inner-highlight: #ffffff;
-  --transaction-bg: #ffffff;
+  --border-color: rgba(0, 0, 0, 0.07);
+  --border-strong: rgba(0, 0, 0, 0.12);
+  --inner-highlight: #FFFFFF;
+
+  --chip-bg: rgba(0, 0, 0, 0.05);
+  --transaction-bg: #FFFFFF;
+  --card-nested-bg: #F4F5F7;
   --remaining-today-gradient: var(--surface-color);
 
   /* Custom Elevation Levels - Light Mode */
-  --shadow-level-1: 0 1px 3px rgba(5, 2, 14, 0.02), 0 4px 12px rgba(5, 2, 14, 0.02);
-  --shadow-level-2: 0 4px 16px rgba(5, 2, 14, 0.03);
-  --shadow-level-3: 0 10px 30px rgba(5, 2, 14, 0.04);
+  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.08);
 
-  /* Primary actions: normalt #05020E med vit text */
-  --accent-color: #05020E;
-  --accent-hover: #120d24;
-  --accent-gradient: linear-gradient(135deg, #05020E 0%, #120d24 100%);
-  --text-on-accent: #ffffff;
-  --accent-soft: rgba(5, 2, 14, 0.06);
-  --accent-glow: rgba(5, 2, 14, 0.12);
+  /* Clean Minimalist Accent Color for Buttons & CTA - Refined Near-Black */
+  --accent-color: #1e2024;
+  --accent-hover: #2c2f35;
+  --accent-gradient: linear-gradient(145deg, #2c2f35 0%, #1e2024 100%);
+  --text-on-accent: #FFFFFF;
+  --accent-soft: rgba(30, 32, 36, 0.08);
+  --accent-glow: rgba(30, 32, 36, 0.16);
 
-  /* 3. DEJZ ACCENT: #FCA311 (Selected states, progress, indicators, highlights) */
-  --gold-color: #fca311;
-  --gold-hover: #e08d05;
-
-  --modal-bg: rgba(255, 255, 255, 0.99);
+  --modal-bg: rgba(255, 255, 255, 0.96);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: rgba(5, 2, 14, 0.03);
+  --bg-hover: rgba(0, 0, 0, 0.03);
 
-  --card-shadow: var(--shadow-level-1);
+  --card-shadow: var(--shadow-level-2);
   --card-inner-stroke: none;
 
   --success-color: #10b981;
   --danger-color: #e83e67;
-  --warning-color: #fca311;
+  --warning-color: #f59e0b;
 
-  /* 7. NAVIGATION - Aktivt val tydligt */
-  --nav-active-color: #05020E;
-  --nav-inactive-color: #888594;
-  --nav-plus-bg: #05020E;
-  --nav-plus-shadow: 0 4px 14px rgba(5, 2, 14, 0.2);
+  --nav-active-color: #1e2024;
+  --nav-inactive-color: #71717A;
+  --nav-plus-bg: #1e2024;
+  --nav-plus-shadow: 0 4px 14px rgba(24, 25, 30, 0.25);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -158,10 +150,12 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #05020E;
-  --date-active-color: #ffffff;
-  --date-active-shadow: 0 4px 12px rgba(5, 2, 14, 0.15);
-  --date-inactive-color: #555261;
+  --date-active-bg: #1e2024;
+  --date-active-color: #FFFFFF;
+  --date-active-shadow: 0 4px 14px rgba(24, 25, 30, 0.20);
+  --date-inactive-bg: rgba(255, 255, 255, 0.90);
+  --date-inactive-border: rgba(0, 0, 0, 0.06);
+  --date-inactive-color: #636A75;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;
@@ -169,71 +163,64 @@ textarea {
 }
 
 .dark {
-  /* 4. DARK MODE - Samma Dejz-identitet med #05020E som huvudsaklig mörk grund */
-  --bg-color: #05020E;
-  --bg-gradient: linear-gradient(180deg, #05020E 0%, #110e1c 100%);
+  /* Premium Dark Theme Refinements (Dejz Design System) - Soft Near-Black Charcoal */
+  --bg-color: #141619;
+  --bg-secondary: #181a1e;
+  --bg-gradient: #141619;
 
-  /* Subtila mörka neutrala surfaces */
-  --bg-secondary: #110e1c;
-  --surface-color: #110e1c;
-  --surface-gradient: #110e1c;
-  --surface-elevated: #1a1629;
-  --surface-elevated-gradient: #1a1629;
-  --surface-solid: #110e1c;
-  --surface-muted: #1a1629;
+  --surface-color: #1c1f24;
+  --surface-gradient: #1c1f24;
+  --surface-elevated: #24282f;
+  --surface-elevated-gradient: #24282f;
+  --surface-solid: #1c1f24;
+  --surface-muted: rgba(255, 255, 255, 0.04);
   --surface-tint: rgba(255, 255, 255, 0.02);
 
-  --border-color: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.12);
+  --text-primary: #F4F5F6;
+  --text-secondary: #A3A8B0;
+  --text-tertiary: #717780;
+  --text-inactive: #4E525C;
+
+  --border-color: rgba(255, 255, 255, 0.04);
+  --border-strong: rgba(255, 255, 255, 0.07);
   --inner-highlight: transparent;
 
-  --chip-bg: #1a1629;
+  --chip-bg: rgba(255, 255, 255, 0.04);
   --transaction-bg: var(--surface-color);
-  --card-nested-bg: #1a1629;
-  --remaining-today-gradient: linear-gradient(145deg, #110e1c 0%, #05020E 100%);
-
-  /* Textfärg dark mode - Vitt / Nära vitt */
-  --text-primary: #ffffff;
-  --text-secondary: #a6a3b0; /* Neutral grey subtitle */
-  --text-tertiary: #767382; /* Muted metadata */
-  --text-inactive: #4c4a54;
+  --card-nested-bg: rgba(255, 255, 255, 0.035);
+  --remaining-today-gradient: linear-gradient(145deg, #122820 0%, #10221c 55%, #141f1c 100%);
 
   /* Custom Elevation Levels - Dark Mode */
-  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.45);
-  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.6);
+  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.22);
+  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.3);
 
-  /* 11. LOGOTYP - DARK: vit Dejz-logotyp */
-  --logo-color: #ffffff;
+  --logo-color: #FFFFFF;
 
-  /* Accent i mörkt läge (Primary button vit med mörk text) */
-  --accent-color: #ffffff;
-  --accent-hover: #f1f1f3;
-  --accent-gradient: linear-gradient(135deg, #ffffff 0%, #f1f1f3 100%);
-  --text-on-accent: #05020E;
+  /* Clean Minimalist Accent Color in Dark Mode */
+  --accent-color: #FFFFFF;
+  --accent-hover: #F4F4F5;
+  --accent-gradient: linear-gradient(135deg, #FFFFFF 0%, #E4E4E7 100%);
+  --text-on-accent: #141619;
   --accent-soft: rgba(255, 255, 255, 0.08);
-  --accent-glow: rgba(255, 255, 255, 0.15);
+  --accent-glow: rgba(255, 255, 255, 0.16);
 
-  /* Brand Accent: #FCA311 */
-  --gold-color: #fca311;
-  --gold-hover: #ffd066;
-
-  --modal-bg: #110e1c;
+  --modal-bg: #1c1f24;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: rgba(255, 255, 255, 0.04);
+  --bg-hover: rgba(255, 255, 255, 0.03);
 
   --card-shadow: var(--shadow-level-2);
   --card-inner-stroke: none;
 
   --success-color: #10b981;
   --danger-color: #f43f5e;
-  --warning-color: #fca311;
+  --warning-color: #f59e0b;
 
-  --nav-active-color: #fca311; /* Gold active tab */
-  --nav-inactive-color: rgba(229, 229, 229, 0.5);
-  --nav-plus-bg: #fca311;
-  --nav-plus-shadow: 0 4px 14px rgba(252, 163, 17, 0.3);
+  --nav-active-color: #FFFFFF;
+  --nav-inactive-color: #717780;
+  --nav-plus-bg: #FFFFFF;
+  --nav-plus-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -242,11 +229,11 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #fca311;
-  --date-active-color: #05020E;
-  --date-active-shadow: 0 4px 14px rgba(252, 163, 17, 0.3);
+  --date-active-bg: #FFFFFF;
+  --date-active-color: #141619;
+  --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   --date-inactive-bg: var(--surface-color);
-  --date-inactive-border: rgba(255, 255, 255, 0.04);
+  --date-inactive-border: rgba(255, 255, 255, 0.03);
   --date-inactive-color: var(--text-secondary);
 }
 

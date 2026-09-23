@@ -723,163 +723,57 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
           </div>
         </section>
 
-        {/* App-Matched Surface Footer */}
-        <footer className="w-full bg-[var(--surface-color)] border-t border-[var(--border-color)] pt-12 pb-20 transition-colors">
-          <div className="max-w-7xl mx-auto px-5 sm:px-8">
-            <div className="space-y-8">
-              {/* Main 4-Column Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {/* Column 1: Brand & Tagline */}
-                <div className="space-y-4 sm:col-span-2 lg:col-span-1">
-                  <DejzLogo className="text-2xl font-black" textColor="var(--logo-color)" />
-                  <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-medium">
-                    {getL10n(
-                      'Det enklaste sättet att få full kontroll över din ekonomi. Designad för medvetna människor som vill växa.',
-                      'The simplest way to gain full control over your finances. Designed for conscious people who want to grow.',
-                      'Den enkleste måten å få full kontroll over økonomien din. Designet for bevisste mennesker som ønsker å vokse.',
-                      'Den nemmeste måde at få fuld kontrol over din økonomi. Designet til bevidste mennesker, der ønsker at vokse.',
-                      'Helpoin tapa saada täysi hallinta kuluistasi. Suunniteltu tietoisille ihmisille, jotka haluavat kasvaa.'
-                    )}
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--surface-muted)] text-[var(--text-secondary)] border border-[var(--border-color)]">
-                    <ShieldCheck size={14} className="text-[var(--accent-color)]" />
-                    <span>{getL10n('100% Anonymt & Säkert', '100% Anonymous & Secure', '100% Anonymt & Sikkert', '100% Anonymt & Sikkert', '100% Anonyymi & Turvallinen')}</span>
-                  </div>
-                </div>
+        {/* Minimal Clean Footer */}
+        <footer className="w-full bg-[var(--bg-color)] border-t border-[var(--border-color)] py-7 transition-colors">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-[var(--text-secondary)]">
+            {/* Left: Brand & Copyright */}
+            <div className="flex items-center gap-2.5">
+              <DejzLogo className="text-lg font-bold" textColor="var(--logo-color)" />
+              <span className="opacity-40">•</span>
+              <span>© {new Date().getFullYear()} Dejz</span>
+            </div>
 
-                {/* Column 2: Navigation */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
-                    {getL10n('Navigering', 'Navigation', 'Navigering', 'Navigation', 'Navigointi')}
-                  </h4>
-                  <ul className="space-y-2 text-xs font-medium text-[var(--text-secondary)]">
-                    <li>
-                      <button 
-                        onClick={() => {
-                          const el = document.getElementById('features');
-                          if (el) el.scrollIntoView({ behavior: 'smooth' });
-                          else window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                        className="hover:text-[var(--accent-color)] transition-colors cursor-pointer"
-                      >
-                        {getL10n('Funktioner', 'Features', 'Funksjoner', 'Funktioner', 'Ominaisuudet')}
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => {
-                          const el = document.getElementById('pricing');
-                          if (el) el.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className="hover:text-[var(--accent-color)] transition-colors cursor-pointer"
-                      >
-                        {getL10n('Priser & Medlemskap', 'Pricing & Plans', 'Priser & Medlemskap', 'Priser & Medlemskab', 'Hinnat & Jäsenyys')}
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => {
-                          const el = document.getElementById('faq');
-                          if (el) el.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className="hover:text-[var(--accent-color)] transition-colors cursor-pointer"
-                      >
-                        {getL10n('Vanliga frågor', 'FAQ', 'Ofte stilte spørsmål', 'Ofte stillede spørgsmål', 'UKK')}
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={onGetStarted}
-                        className="hover:text-[var(--accent-color)] transition-colors cursor-pointer font-bold text-[var(--text-primary)]"
-                      >
-                        {getL10n('Kom igång gratis', 'Get started free', 'Kom i gang gratis', 'Kom i gang gratis', 'Aloita ilmaiseksi')}
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+            {/* Right: Inline Links */}
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs">
+              <button 
+                onClick={() => onLegalClick ? onLegalClick('privacy') : setActivePolicy('privacy')} 
+                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                {getL10n('Integritetspolicy', 'Privacy Policy', 'Personvernerklæring', 'Privatlivspolitik', 'Tietosuojaseloste')}
+              </button>
 
-                {/* Column 3: Legal */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
-                    {getL10n('Juridik', 'Legal', 'Juridisk', 'Juridisk', 'Lakitiedot')}
-                  </h4>
-                  <ul className="space-y-2 text-xs font-medium text-[var(--text-secondary)]">
-                    <li>
-                      <button 
-                        onClick={() => onLegalClick ? onLegalClick('privacy') : setActivePolicy('privacy')} 
-                        className="hover:text-[var(--accent-color)] transition-colors cursor-pointer"
-                      >
-                        {getL10n('Integritetspolicy', 'Privacy Policy', 'Personvernerklæring', 'Privatlivspolitik', 'Tietosuojaseloste')}
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => onLegalClick ? onLegalClick('terms') : setActivePolicy('terms')} 
-                        className="hover:text-[var(--accent-color)] transition-colors cursor-pointer"
-                      >
-                        {getL10n('Användarvillkor', 'Terms of Service', 'Brukervilkår', 'Brugervilkår', 'Käyttöehdot')}
-                      </button>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={() => onLegalClick ? onLegalClick('cookies') : setActivePolicy('cookies')} 
-                        className="hover:text-[var(--accent-color)] transition-colors cursor-pointer"
-                      >
-                        {getL10n('Cookiepolicy', 'Cookie Policy', 'Informsjonskapselpolicy', 'Cookiepolitik', 'Evästekäytäntö')}
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+              <button 
+                onClick={() => onLegalClick ? onLegalClick('terms') : setActivePolicy('terms')} 
+                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                {getL10n('Användarvillkor', 'Terms of Service', 'Brukervilkår', 'Brugervilkår', 'Käyttöehdot')}
+              </button>
 
-                {/* Column 4: Contact & Social */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
-                    {getL10n('Kontakt', 'Contact', 'Kontakt', 'Kontakt', 'Yhteystiedot')}
-                  </h4>
-                  <ul className="space-y-2.5 text-xs font-medium text-[var(--text-secondary)]">
-                    <li>
-                      <a 
-                        href="mailto:hej@dejz.se" 
-                        className="hover:text-[var(--accent-color)] transition-colors inline-flex items-center gap-1.5"
-                      >
-                        <span>hej@dejz.se</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a 
-                        href="https://instagram.com/dejz.se" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 hover:text-[var(--accent-color)] transition-colors"
-                      >
-                        <Instagram size={14} className="text-[#E1306C]" />
-                        <span>@dejz.se</span>
-                      </a>
-                    </li>
-                    <li className="text-[11px] text-[var(--text-tertiary)] pt-1">
-                      {getL10n('Svarar oftast inom 24 timmar', 'Usually responds within 24 hours', 'Svarer vanligvis innen 24 timer', 'Svarer normalt inden for 24 timer', 'Vastaa yleensä 24 tunnissa')}
-                    </li>
-                  </ul>
-                </div>
-              </div>
+              <button 
+                onClick={() => onLegalClick ? onLegalClick('cookies') : setActivePolicy('cookies')} 
+                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                {getL10n('Cookies', 'Cookies', 'Cookies', 'Cookies', 'Evästeet')}
+              </button>
 
-              {/* Bottom Divider & Copyright */}
-              <div className="pt-4 border-t border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-[var(--text-secondary)]">
-                <div className="flex items-center gap-2">
-                  <DejzLogo className="text-base font-bold" textColor="var(--logo-color)" />
-                  <span className="opacity-40">•</span>
-                  <span>© {new Date().getFullYear()} Dejz. {getL10n('Alla rättigheter förbehållna.', 'All rights reserved.', 'Med enerett.', 'Alle rettigheder forbeholdes.', 'Kaikki oikeudet pidätetään.')}</span>
-                </div>
+              <a 
+                href="https://instagram.com/dejz.se" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-[var(--text-primary)] transition-colors"
+              >
+                <Instagram size={13} className="text-[#E1306C]" />
+                <span>Instagram</span>
+              </a>
 
-                <button 
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-color)] transition-all cursor-pointer"
-                  title={getL10n('Till toppen', 'Top', 'Til toppen', 'Til toppen', 'Alkuun')}
-                >
-                  <ArrowUp size={13} />
-                  <span>{getL10n('Till toppen', 'Top', 'Til toppen', 'Til toppen', 'Alkuun')}</span>
-                </button>
-              </div>
+              <button 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="inline-flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors cursor-pointer ml-1"
+                title="Till toppen"
+              >
+                <ArrowUp size={12} />
+                <span>{getL10n('Till toppen', 'Top', 'Til toppen', 'Til toppen', 'Alkuun')}</span>
+              </button>
             </div>
           </div>
 
@@ -938,7 +832,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                       {getL10n(
                         'Enligt lagen om elektronisk kommunikation informeras om att vi endast använder nödvändiga cookies och lokal lagring (localStorage) för att upprätthålla din inloggningssession och dina personliga inställningar. Inga spårnings- eller marknadsföringscookies från tredje part används.',
                         'We only use necessary cookies and local storage (localStorage) to maintain your login session and your personal settings. No third-party tracking or marketing cookies are used.',
-                        'I henhold til lov om elektronisk kommunikasjon informeres det om at vi kun bruker nødvendige informasjonskapsler og lokal lagring (localStorage) for å oppretteholde innloggingssajonen din og dine personlige innstillinger. Ingen sporings- eller markedsføringskapsler fra tredjepart brukes.',
+                        'I henhold til lov om elektronisk kommunikasjon informeres det om at vi kun bruker nødvendige informasjonskapsler og lokal lagring (localStorage) for å opprettholde innloggingssajonen din og dine personlige innstillinger. Ingen sporings- eller markedsføringskapsler fra tredjepart brukes.',
                         'I henhold til loven om elektronisk kommunikation informeres der om, at vi kun bruger nødvendige cookies og lokal lagring (localStorage) til at opretholde din login-session og dine personlige indstillinger. Der bruges ingen sporings- eller marketingcookies fra tredjepart.',
                         'Sähköisen viestinnän palveluista annetun lain mukaisesti ilmoitamme, että käytämme vain välttämättömiä evästeitä ja paikallista tallennustilaa (localStorage) kirjautumisistuntosi ja henkilökohtaisten asetustesi ylläpitämiseen. Kolmannen osapuolen seuranta- tai markkinointievästeitä ei käytetä.'
                       )}

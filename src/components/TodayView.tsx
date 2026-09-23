@@ -57,8 +57,8 @@ export function TodayView({
   fixedExpenses,
   selectedDate,
   setSelectedDate,
-  onAddTransaction,
-  onAddIncome,
+  _onAddTransaction,
+  _onAddIncome,
   onViewTransaction,
   onDeleteTransaction,
   onNavigate,
@@ -161,10 +161,18 @@ export function TodayView({
   }, [incomes, fixedExpenses, config.monthlySavingsItems, normalizedSelectedDate, stats?.periodId]);
 
   return (
-    <div className="space-y-4 relative min-h-screen bg-[#080A10] text-[var(--text-primary)] pb-12 overflow-x-hidden">
-      {/* Top subtle ~10% lighter dark background gradient (smooth transition into bottom #080A10) */}
-      <div className="absolute -top-[env(safe-area-inset-top,44px)] sm:-top-12 left-0 right-0 h-[300px] sm:h-[320px] bg-gradient-to-b from-[#121626] to-transparent pointer-events-none z-0" />
-      <div className="relative">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-4 relative"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1 }}
+        className="relative"
+      >
         <GreetingModule
           userName={userName}
           availableForD={todayData?.availableForD || stats?.availableForD || 0}
@@ -189,20 +197,11 @@ export function TodayView({
           currentPeriodDate={currentPeriodDate}
           config={config}
           onUpdateConfig={onUpdateConfig}
-          onAddTransaction={(type) => {
-            if (type === 'income' && onAddIncome) {
-              onAddIncome(normalizedSelectedDate);
-            } else if (onAddTransaction) {
-              onAddTransaction(normalizedSelectedDate);
-            }
-          }}
         />
-      </div>
+      </motion.div>
 
-      {/* Lower sections wrapped in max-w-2xl mx-auto px-4 sm:px-6 */}
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 space-y-4">
-        {/* Attention Items / Budget Actions */}
-        {attentionItems.length > 0 && (
+      {/* Attention Items / Budget Actions */}
+      {attentionItems.length > 0 && (
         <div className="space-y-6 pt-1">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -366,7 +365,6 @@ export function TodayView({
           </AnimatePresence>
         </div>
       </div>
-      </div>
-    </div>
+    </motion.div>
   );
 }

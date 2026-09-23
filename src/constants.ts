@@ -1,4 +1,4 @@
-export const SUPPORT_EMAIL = 'hej@dejz.se';
+export const SUPPORT_EMAIL = '';
 export const LOGO_URL = '/favicon.svg';
 
 export const DEFAULT_EXPENSE_CATEGORIES = [

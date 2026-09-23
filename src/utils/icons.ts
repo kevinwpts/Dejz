@@ -1528,31 +1528,16 @@ export const POPULAR_EMOJIS = [
 export const suggestIcon = (name: string): string => {
   const n = name.toLowerCase().trim();
   
-  // Incomes & Salaries
-  if (n.includes('lön') || n.includes('salary') || n.includes('inkomst') || n.includes('insättning') || n.includes('utbetalning') || n.includes('pension') || n.includes('bidrag') || n.includes('swishat') || n.includes('såld') || n.includes('blocket')) return 'banknote';
+  if (n.includes('lön') || n.includes('salary') || n.includes('inkomst')) return 'banknote';
+  if (n.includes('hyra') || n.includes('hem') || n.includes('home') || n.includes('lägenhet') || n.includes('bostad')) return 'home';
+  if (n.includes('bil') || n.includes('car') || n.includes('fordon')) return 'car';
+  if (n.includes('el') || n.includes('elektr') || n.includes('ström')) return 'zap';
+  if (n.includes('mobil') || n.includes('telefon') || n.includes('telenor') || n.includes('telia')) return 'smartphone';
+  if (n.includes('internet') || n.includes('bredband') || n.includes('wifi')) return 'wifi';
+  if (n.includes('tv') || n.includes('netflix') || n.includes('hbo') || n.includes('disney')) return 'tv';
+  if (n.includes('mat') || n.includes('livsmedel') || n.includes('ica') || n.includes('coop') || n.includes('willys')) return 'shoppingcart';
   
-  // Rent & Housing
-  if (n.includes('hyra') || n.includes('hem') || n.includes('home') || n.includes('lägenhet') || n.includes('bostad') || n.includes('brf') || n.includes('bolån') || n.includes('avgift') || n.includes('hushåll') || n.includes('villa') || n.includes('fastighet')) return 'home';
-  
-  // Cars & Vehicles
-  if (n.includes('bil') || n.includes('car') || n.includes('fordon') || n.includes('autoplan') || n.includes('leasing') || n.includes('mekonomen') || n.includes('bilservice') || n.includes('däck') || n.includes('besiktning')) return 'car';
-  
-  // Electricity & Utilities
-  if (n.includes('el') || n.includes('elektr') || n.includes('ström') || n.includes('fortum') || n.includes('vattenfall') || n.includes('göteborg energi') || n.includes('e.on') || n.includes('kraft') || n.includes('nätavgift')) return 'zap';
-  
-  // Phone & Mobile
-  if (n.includes('mobil') || n.includes('telefon') || n.includes('telenor') || n.includes('telia') || n.includes('tele2') || n.includes('tre') || n.includes('vimla') || n.includes('hallon') || n.includes('comviq') || n.includes('halebop')) return 'smartphone';
-  
-  // Internet & Broadband
-  if (n.includes('internet') || n.includes('bredband') || n.includes('wifi') || n.includes('bahnhof') || n.includes('comhem') || n.includes('tele2 bredband')) return 'wifi';
-  
-  // TV & Streaming
-  if (n.includes('tv') || n.includes('netflix') || n.includes('hbo') || n.includes('disney') || n.includes('viaplay') || n.includes('prime video') || n.includes('discovery') || n.includes('youtube') || n.includes('tv4')) return 'tv';
-  
-  // Coffee & Cafes
-  if (n.includes('fika') || n.includes('kaffe') || n.includes('cafe') || n.includes('espresso') || n.includes('starbucks') || n.includes('bröd') || n.includes('konditori') || n.includes('bullar') || n.includes('bageri') || n.includes('te')) return 'coffee';
-  
-  // Gym, Sports & Training
+  // Gym & Träning
   if (
     n.includes('gym') || 
     n.includes('träning') || 
@@ -1572,85 +1557,29 @@ export const suggestIcon = (name: string): string => {
     n.includes('padel') || 
     n.includes('crossfit') || 
     n.includes('yoga') || 
-    n.includes('simhall') ||
-    n.includes('löpar') ||
-    n.includes('golf') ||
-    n.includes('tennis') ||
-    n.includes('sport') ||
-    n.includes('stadium') ||
-    n.includes('intersport') ||
-    n.includes('xxl')
+    n.includes('simhall')
   ) return 'dumbbell';
 
-  // Fuel & Charging
-  if (n.includes('bensin') || n.includes('diesel') || n.includes('tanka') || n.includes('drivmedel') || n.includes('circle k') || n.includes('okq8') || n.includes('preem') || n.includes('st1') || n.includes('ingo') || n.includes('shell') || n.includes('laddning') || n.includes('tesla supercharger')) return 'fuel';
-  
-  // Bikes
-  if (n.includes('cykel') || n.includes('cykla') || n.includes('bike')) return 'bike';
-  
-  // Insurance
-  if (n.includes('försäkring') || n.includes('insurance') || n.includes('trygg-hansa') || n.includes('folksam') || n.includes('if') || n.includes('hedvig') || n.includes('lansforsakringar') || n.includes('länsförsäkringar')) return 'shield';
-  
-  // Savings
-  if (n.includes('spar') || n.includes('buffert') || n.includes('savings') || n.includes('avanza') || n.includes('nordnet') || n.includes('aktier') || n.includes('fonder')) return 'savings';
-  
-  // Flights & Travel
-  if (n.includes('resa') || n.includes('flyg') || n.includes('semester') || n.includes('sas') || n.includes('norwegian') || n.includes('ryanair') || n.includes('charter') || n.includes('flygresa')) return 'plane';
-  
-  // Hotels
-  if (n.includes('hotell') || n.includes('airbnb') || n.includes('booking') || n.includes('hostel')) return 'hotel';
-  
-  // Restaurants & Food Delivery
-  if (n.includes('restaurang') || n.includes('äta') || n.includes('lunch') || n.includes('middag') || n.includes('krog') || n.includes('sushi') || n.includes('pizza') || n.includes('burgare') || n.includes('hamburgare') || n.includes('mcdonalds') || n.includes('max') || n.includes('burger king') || n.includes('subway') || n.includes('foodora') || n.includes('wolt') || n.includes('uber eats')) return 'utensils';
-  
-  // Pubs, Bars & Alcohol
-  if (n.includes('öl') || n.includes('pub') || n.includes('bar') || n.includes('nattklubb') || n.includes('systembolaget') || n.includes('alkohol') || n.includes('vin') || n.includes('skål')) return 'beer';
-  
-  // Groceries & Supermarkets
-  if (n.includes('mat') || n.includes('livsmedel') || n.includes('ica') || n.includes('coop') || n.includes('willys') || n.includes('lidl') || n.includes('hemköp') || n.includes('city gross') || n.includes('matbutik') || n.includes('handlat') || n.includes('supermarket') || n.includes('pressbyrån') || n.includes('7-eleven')) return 'shoppingcart';
-  
-  // Candy, Ice cream & Sweets
-  if (n.includes('godis') || n.includes('gods') || n.includes('snacks') || n.includes('chips') || n.includes('choklad') || n.includes('glass') || n.includes('sweets') || n.includes('läsk') || n.includes('cola') || n.includes('soda')) return 'candy';
-  
-  // Health & Pharmacy
-  if (n.includes('hälsa') || n.includes('apotek') || n.includes('medicin') || n.includes('apotea') || n.includes('kronans') || n.includes('kry') || n.includes('doktor') || n.includes('vård') || n.includes('tandläkare') || n.includes('folktandvården') || n.includes('stetoskop')) return 'health';
-  
-  // Pets
-  if (n.includes('djur') || n.includes('hund') || n.includes('katt') || n.includes('pet') || n.includes('veterinär') || n.includes('zoologiska') || n.includes('arken zoo')) return 'dog';
-  
-  // Gaming
-  if (n.includes('spel') || n.includes('gaming') || n.includes('steam') || n.includes('xbox') || n.includes('playstation') || n.includes('nintendo') || n.includes('game')) return 'gamepad';
-  
-  // Clothes & Shopping
-  if (n.includes('kläder') || n.includes('shopping') || n.includes('mode') || n.includes('h&m') || n.includes('zara') || n.includes('zalando') || n.includes('skor') || n.includes('jacka') || n.includes('tröja') || n.includes('jeans') || n.includes('asos')) return 'shirt';
-  
-  // Music & Subscriptions
-  if (n.includes('prenumeration') || n.includes('abonnemant') || n.includes('spotify') || n.includes('music') || n.includes('apple music') || n.includes('podd')) return 'music';
-  
-  // Parking & Public Transport
-  if (n.includes('sl') || n.includes('sj') || n.includes('skånetrafiken') || n.includes('västtrafik') || n.includes('mälartåg') || n.includes('tåg') || n.includes('buss') || n.includes('tunnelbana') || n.includes('pendel') || n.includes('biljett')) return 'bus';
-  if (n.includes('garage') || n.includes('parkering') || n.includes('parking') || n.includes('easypark') || n.includes('parkster') || n.includes('aimo')) return 'parkingsquare';
-  
-  // A-kassa
-  if (n.includes('a-kassa') || n.includes('unionen') || n.includes('fackavgift') || n.includes('fack')) return 'shield';
-  
-  // Cloud
-  if (n.includes('icloud') || n.includes('moln') || n.includes('cloud') || n.includes('dropbox') || n.includes('google drive')) return 'cloud';
-  
-  // Cinema & Theater
-  if (n.includes('bio') || n.includes('film') || n.includes('filmstaden') || n.includes('teater') || n.includes('konsert') || n.includes('biljetter')) return 'film';
-  
-  // Haircuts & Beauty
-  if (n.includes('frisör') || n.includes('klipp') || n.includes('hår') || n.includes('salong') || n.includes('naglar') || n.includes('makeup') || n.includes('smink') || n.includes('skönhet')) return 'scissors';
-
-  // Kids & Baby
-  if (n.includes('barn') || n.includes('baby') || n.includes('blöjor') || n.includes('leksaker') || n.includes('toys') || n.includes('förskola') || n.includes('dagis')) return 'baby';
-
-  // Gifts & Presents
-  if (n.includes('present') || n.includes('gåva') || n.includes('gift') || n.includes('blomma') || n.includes('blommor')) return 'gift';
-
-  // Home decor & DIY
-  if (n.includes('ikea') || n.includes('möbler') || n.includes('inredning') || n.includes('rusta') || n.includes('jula') || n.includes('biltema') || n.includes('clas ohlson') || n.includes('bauhaus') || n.includes('verktyg') || n.includes('bygg')) return 'home';
+  if (n.includes('bensin') || n.includes('diesel') || n.includes('tanka') || n.includes('drivmedel')) return 'fuel';
+  if (n.includes('cykel') || n.includes('cykla')) return 'bike';
+  if (n.includes('försäkring') || n.includes('insurance')) return 'shield';
+  if (n.includes('spar') || n.includes('buffert') || n.includes('savings')) return 'savings';
+  if (n.includes('resa') || n.includes('flyg') || n.includes('semester')) return 'plane';
+  if (n.includes('hotell') || n.includes('airbnb') || n.includes('booking')) return 'hotel';
+  if (n.includes('restaurang') || n.includes('äta') || n.includes('lunch') || n.includes('middag')) return 'utensils';
+  if (n.includes('fika') || n.includes('kaffe') || n.includes('cafe')) return 'coffee';
+  if (n.includes('öl') || n.includes('pub') || n.includes('bar')) return 'beer';
+  if (n.includes('vin') || n.includes('systembolaget')) return 'wine';
+  if (n.includes('hälsa') || n.includes('apotek') || n.includes('medicin')) return 'health';
+  if (n.includes('djur') || n.includes('hund') || n.includes('katt')) return 'dog';
+  if (n.includes('spel') || n.includes('gaming')) return 'gamepad';
+  if (n.includes('kläder') || n.includes('shopping') || n.includes('mode')) return 'shirt';
+  if (n.includes('prenumeration') || n.includes('youtube') || n.includes('spotify')) return 'music';
+  if (n.includes('garage') || n.includes('parkering')) return 'parkingsquare';
+  if (n.includes('a-kassa') || n.includes('unionen')) return 'shield';
+  if (n.includes('icloud') || n.includes('moln')) return 'cloud';
+  if (n.includes('bio') || n.includes('film')) return 'film';
+  if (n.includes('frisör') || n.includes('klipp')) return 'scissors';
   
   return 'receipt'; // Default
 };

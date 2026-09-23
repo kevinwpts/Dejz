@@ -174,15 +174,10 @@ export function TransactionModal({
         setIcon('receipt');
         setLogoError(false);
         return;
-      } else {
+      } else if (suggestedIcon && suggestedIcon !== '🧾') {
         const hasChanged = merchant !== originalMerchant.current || note !== originalNote.current;
-        if (hasChanged) {
-          setLogo(undefined);
-        }
-        if (suggestedIcon && suggestedIcon !== '🧾') {
-          if (hasChanged || !logo) {
-            setIcon(suggestedIcon);
-          }
+        if (hasChanged || !logo) {
+          setIcon(suggestedIcon);
         }
       }
     }

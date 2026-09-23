@@ -9,7 +9,6 @@ import { EmptyState } from './EmptyState';
 import { BudgetSummaryModule } from './BudgetSummaryModule';
 import { UniversalPeriodSelector } from './UniversalPeriodSelector';
 import { formatAmount } from '../utils/format';
-import { SegmentedControl } from './ui';
 
 import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
 import { getEmojiSolidColor } from '../utils/ui';
@@ -166,19 +165,47 @@ export function AnalysisView({
       />
 
       {/* Analysis Filter - Segmented Control */}
-      <SegmentedControl
-        options={[
-          { value: 'all', label: t('all' as TranslationKey) },
-          { value: 'variable', label: t('variableExpenses' as TranslationKey) },
-          { value: 'fixed', label: t('fixedExpenses' as TranslationKey) },
-        ]}
-        value={analysisFilter}
-        onChange={(val) => {
-          setAnalysisFilter(val as 'all' | 'variable' | 'fixed');
-          setExpandedCategory(null);
-        }}
-        size="md"
-      />
+      <div className="grid grid-cols-3 gap-1 p-1 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full shadow-xs">
+        <button
+          onClick={() => {
+            setAnalysisFilter('all');
+            setExpandedCategory(null);
+          }}
+          className={`h-9 px-1.5 rounded-full text-[12px] font-semibold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+            analysisFilter === 'all'
+              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
+          }`}
+        >
+          {t('all' as TranslationKey)}
+        </button>
+        <button
+          onClick={() => {
+            setAnalysisFilter('variable');
+            setExpandedCategory(null);
+          }}
+          className={`h-9 px-1.5 rounded-full text-[12px] font-semibold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+            analysisFilter === 'variable'
+              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
+          }`}
+        >
+          {t('variableExpenses' as TranslationKey)}
+        </button>
+        <button
+          onClick={() => {
+            setAnalysisFilter('fixed');
+            setExpandedCategory(null);
+          }}
+          className={`h-9 px-1.5 rounded-full text-[12px] font-semibold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+            analysisFilter === 'fixed'
+              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
+          }`}
+        >
+          {t('fixedExpenses' as TranslationKey)}
+        </button>
+      </div>
 
       <div className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center relative overflow-hidden">
         <h3 className="text-[15px] font-bold text-[var(--text-primary)] tracking-tight self-start mb-4 relative z-10">{t('distribution')}</h3>
