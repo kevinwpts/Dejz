@@ -116,8 +116,8 @@ function NavItem({
       <Icon 
         size={20} 
         strokeWidth={isActive ? (fillOnActive ? 1.5 : 2.2) : 1.8} 
-        fill={isActive && fillOnActive ? "currentColor" : "none"}
-        className="transition-transform duration-200 mb-0.5"
+        fill={isActive && fillOnActive ? "var(--gold-color)" : "none"}
+        className={`transition-transform duration-200 mb-0.5 ${isActive ? 'text-[var(--gold-color)]' : ''}`}
       />
       <span className={`text-[10px] sm:text-[11px] leading-tight text-center tracking-tight truncate max-w-[62px] sm:max-w-[70px] ${
         isActive ? 'font-bold text-[var(--text-primary)] dark:text-white' : 'font-medium text-[var(--text-tertiary)] dark:text-white/60'
