@@ -3322,6 +3322,10 @@ export default function App() {
                     onViewFixedExpense={(expense) => {
                       setViewingFixedExpense(expense);
                     }}
+                    periods={periods}
+                    currentPeriodDate={currentPeriodDate}
+                    onPeriodChange={setCurrentPeriodDate}
+                    onOpenCalendarPicker={() => setIsCalendarModalOpen(true)}
                   />
                 </TabWrapper>
               </motion.div>
@@ -3356,6 +3360,10 @@ export default function App() {
                     onDeleteTransaction={deleteTransaction}
                     t={t}
                     currentLang={config.language as Language}
+                    periods={periods}
+                    currentPeriodDate={currentPeriodDate}
+                    onPeriodChange={setCurrentPeriodDate}
+                    onOpenCalendarPicker={() => setIsCalendarModalOpen(true)}
                   />
                 </TabWrapper>
               </motion.div>

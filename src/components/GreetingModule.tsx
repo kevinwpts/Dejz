@@ -3,7 +3,6 @@ import { motion } from 'motion/react';
 
 import { X } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
-import { UniversalPeriodSelector } from './UniversalPeriodSelector';
 import { PeriodTimeline } from './PeriodTimeline';
 import { CalendarModal } from './CalendarModal';
 import { formatAmount } from '../utils/format';
@@ -56,7 +55,7 @@ export function GreetingModule({
   isPastPeriod: _isPastPeriod,
   periods,
   variant: _variant = 'default',
-  showPeriodSelector = false,
+  showPeriodSelector: _showPeriodSelector = false,
   avatarUrl: _avatarUrl,
   onNavigate: _onNavigate,
   showFixedInCalendar: _showFixedInCalendar,
@@ -92,6 +91,16 @@ export function GreetingModule({
   const selected = new Date(date || new Date());
   selected.setHours(0, 0, 0, 0);
   const diffDays = Math.round((selected.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+  const formattedDate = useMemo(() => {
+    const d = date || new Date();
+    const str = d.toLocaleDateString(language === 'en' ? 'en-US' : 'sv-SE', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }, [date, language]);
 
   const selectedDayData = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return null;
@@ -140,19 +149,19 @@ export function GreetingModule({
 
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
-      {/* 1. Period Selector */}
-      {showPeriodSelector && periods && setCurrentPeriodDate && currentPeriodDate && (
-        <UniversalPeriodSelector
-          periods={periods}
-          currentDate={currentPeriodDate}
-          onChange={setCurrentPeriodDate}
-          periodName={stats.periodName}
-          isCurrentPeriod={isCurrentPeriod}
-          onOpenPicker={() => setIsCalendarModalOpen(true)}
-        />
-      )}
+      {/* Date & Period Indicator */}
+      <div className="flex items-baseline justify-between px-1 pt-0.5 pb-0.5 select-none">
+        <h2 className="text-[15px] sm:text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
+          {formattedDate}
+        </h2>
+        {stats?.periodName && (
+          <span className="text-[12px] font-medium text-[var(--text-secondary)] opacity-70">
+            {stats.periodName.split('(')[0].trim()}
+          </span>
+        )}
+      </div>
 
-      {/* 2. Dagsbudget Hero Card - Identical aesthetic to "Kvar varje månad" in Budget */}
+      {/* 1. Dagsbudget Hero Card - Identical aesthetic to "Kvar varje månad" in Budget */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}

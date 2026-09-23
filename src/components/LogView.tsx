@@ -5,6 +5,7 @@ import { Transaction, Config } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
+import { UniversalPeriodSelector } from './UniversalPeriodSelector';
 
 interface LogViewProps {
   transactions: Transaction[];
@@ -16,6 +17,10 @@ interface LogViewProps {
   onDeleteTransaction: (id: string) => void;
   t: (key: TranslationKey) => string;
   currentLang: Language;
+  periods?: any[];
+  currentPeriodDate?: Date;
+  onPeriodChange?: (date: Date) => void;
+  onOpenCalendarPicker?: () => void;
 }
 
 export function LogView({ 
@@ -27,7 +32,11 @@ export function LogView({
   onViewTransaction, 
   onDeleteTransaction, 
   t, 
-  currentLang 
+  currentLang,
+  periods,
+  currentPeriodDate,
+  onPeriodChange,
+  onOpenCalendarPicker
 }: LogViewProps) {
   const getLocale = () => {
     const lang = currentLang || 'sv';
@@ -92,6 +101,20 @@ export function LogView({
 
   return (
     <div className="space-y-6">
+      {/* Period Selector on Page */}
+      {periods && onPeriodChange && currentPeriodDate && (
+        <UniversalPeriodSelector
+          periods={periods}
+          currentDate={currentPeriodDate}
+          onChange={onPeriodChange}
+          periodName={stats.periodName}
+          isCurrentPeriod={stats.isCurrentPeriod}
+          onOpenPicker={onOpenCalendarPicker}
+          variant="standalone"
+          allowFuture={false}
+        />
+      )}
+
       <div className="space-y-3 bg-transparent p-0">
         <div className="relative group bg-[var(--surface-color)] rounded-full border border-[var(--border-color)] shadow-xs h-11 flex items-center">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] opacity-50 w-4 h-4 transition-all group-focus-within:text-[var(--accent-color)] group-focus-within:opacity-100" />

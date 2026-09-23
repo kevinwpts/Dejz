@@ -7,6 +7,7 @@ import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
 import { BudgetSummaryModule } from './BudgetSummaryModule';
+import { UniversalPeriodSelector } from './UniversalPeriodSelector';
 import { formatAmount } from '../utils/format';
 
 import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
@@ -22,6 +23,10 @@ interface AnalysisViewProps {
   onViewTransaction?: (t: Transaction) => void;
   onDeleteTransaction?: (id: string) => void;
   onViewFixedExpense?: (expense: FixedExpense) => void;
+  periods?: any[];
+  currentPeriodDate?: Date;
+  onPeriodChange?: (date: Date) => void;
+  onOpenCalendarPicker?: () => void;
 }
 
 export function AnalysisView({ 
@@ -33,7 +38,11 @@ export function AnalysisView({
   _currentLang,
   onViewTransaction,
   onDeleteTransaction,
-  onViewFixedExpense
+  onViewFixedExpense,
+  periods,
+  currentPeriodDate,
+  onPeriodChange,
+  onOpenCalendarPicker
 }: AnalysisViewProps) {
   if (!stats) return null;
 
@@ -133,7 +142,21 @@ export function AnalysisView({
   const COLORS = ['#2A2A2A', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#333333', '#222222', '#555555', '#444444'];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
+      {/* Period Selector on Page */}
+      {periods && onPeriodChange && currentPeriodDate && (
+        <UniversalPeriodSelector
+          periods={periods}
+          currentDate={currentPeriodDate}
+          onChange={onPeriodChange}
+          periodName={stats.periodName}
+          isCurrentPeriod={stats.isCurrentPeriod}
+          onOpenPicker={onOpenCalendarPicker}
+          variant="standalone"
+          allowFuture={false}
+        />
+      )}
+
       <BudgetSummaryModule
         stats={stats}
         config={config}

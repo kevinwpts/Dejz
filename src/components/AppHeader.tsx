@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
-import { UniversalPeriodSelector } from "./UniversalPeriodSelector";
+import { DejzLogo } from "./DejzLogo";
 
 interface AppHeaderProps {
   userName?: string;
@@ -33,21 +33,17 @@ export function AppHeader({
   notificationCount = 0,
   onOpenNotifications,
   isDemoMode,
-  periods,
-  currentPeriodDate,
-  onPeriodChange,
-  periodName,
-  isCurrentPeriod,
-  onOpenCalendarPicker,
-  activeTab,
+  periods: _periods,
+  currentPeriodDate: _currentPeriodDate,
+  onPeriodChange: _onPeriodChange,
+  periodName: _periodName,
+  isCurrentPeriod: _isCurrentPeriod,
+  onOpenCalendarPicker: _onOpenCalendarPicker,
+  activeTab: _activeTab,
 }: AppHeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isAtTop, setIsAtTop] = useState(true);
   const lastScrollY = useRef(0);
-
-  const [month, dates] = periodName && periodName.includes('(')
-    ? periodName.split('(').map(s => s.replace(')', '').trim())
-    : [periodName || '', ''];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -109,7 +105,7 @@ export function AppHeader({
       }`}
     >
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2`}>
-        {/* Left: Back button + Title OR Period Selector OR Page Title */}
+        {/* Left: Back button + Title OR Dejz Logo */}
         <div className="flex items-center min-w-0">
           {onBack ? (
             <button
@@ -123,48 +119,15 @@ export function AppHeader({
                 </h1>
               )}
             </button>
-          ) : (activeTab === 'transactions' || activeTab === 'analysis') && periods && onPeriodChange && currentPeriodDate ? (
-            <UniversalPeriodSelector
-              periods={periods}
-              currentDate={currentPeriodDate}
-              onChange={onPeriodChange}
-              periodName={periodName}
-              isCurrentPeriod={isCurrentPeriod}
-              onOpenPicker={onOpenCalendarPicker}
-              variant="header"
-              allowFuture={false}
-            />
-          ) : activeTab === 'today' && periodName ? (
-            <div 
-              onClick={onOpenCalendarPicker}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-color)]/80 text-[var(--text-primary)] shadow-2xs select-none ${onOpenCalendarPicker ? 'cursor-pointer hover:bg-[var(--surface-muted)] transition-colors' : ''}`}
-              title={periodName}
+          ) : (
+            <button
+              onClick={() => onNavigate("today")}
+              className="flex items-center gap-2 group active:scale-95 transition-transform py-0.5 cursor-pointer"
+              aria-label="Dejz Hem"
             >
-              <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)]">
-                {month}
-              </span>
-              {dates && (
-                <span className="hidden sm:inline text-[11px] font-medium text-[var(--text-secondary)] opacity-60">
-                  ({dates})
-                </span>
-              )}
-            </div>
-          ) : activeTab === 'budget' ? (
-            <div className="flex items-center gap-2">
-              <h1 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
-                {title || 'Budget'}
-              </h1>
-              {month && (
-                <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] bg-[var(--surface-color)] px-2.5 py-0.5 rounded-full border border-[var(--border-color)]/80 shadow-2xs">
-                  {month}
-                </span>
-              )}
-            </div>
-          ) : title ? (
-            <h1 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
-              {title}
-            </h1>
-          ) : null}
+              <DejzLogo className="h-6 w-auto text-[var(--text-primary)]" />
+            </button>
+          )}
         </div>
 
         {/* Right Actions: Notifications, Search, Profile with solid filled styles */}
