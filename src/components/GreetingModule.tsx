@@ -229,8 +229,8 @@ export function GreetingModule({
 
   return (
     <div className="font-sans relative">
-      {/* Sticky Top Header Bar (Royal Electric Indigo Palette, seamless status bar) */}
-      <div className="sticky top-0 z-40 w-full bg-[#1E1A52]/90 backdrop-blur-md text-white pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 transition-all">
+      {/* Sticky Top Header Bar (Sits directly on page background) */}
+      <div className="sticky top-0 z-40 w-full bg-transparent text-white pt-[calc(0.85rem+env(safe-area-inset-top))] pb-3 transition-all">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 relative z-10">
           <div className="flex items-center gap-3">
             <button
