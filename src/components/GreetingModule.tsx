@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 
-import { X, Sparkles } from 'lucide-react';
+import { X } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
 import { PeriodTimeline } from './PeriodTimeline';
 import { CalendarModal } from './CalendarModal';
@@ -289,13 +289,9 @@ export function GreetingModule({
           </div>
 
           <div className="flex-1 min-w-0 pr-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-1.5">
+            <div className="mb-1">
+              <span className="text-xs font-bold tracking-tight text-[var(--text-primary)]">
                 Dejzi
-                <Sparkles size={12} className="text-[var(--accent-color)]" />
-              </span>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)]">
-                Maskot
               </span>
             </div>
 
