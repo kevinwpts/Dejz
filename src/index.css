@@ -298,6 +298,24 @@ textarea {
     font-family: var(--font-sans);
   }
 
+  /* Subtle top ambient accent gradient */
+  #root::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 260px;
+    background: linear-gradient(
+      180deg,
+      var(--accent-glow) 0%,
+      var(--accent-soft) 40%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
   #bg-gradient {
     display: none;
   }
