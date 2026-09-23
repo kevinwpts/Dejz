@@ -98,6 +98,19 @@ export function GreetingModule({
   selected.setHours(0, 0, 0, 0);
   const diffDays = Math.round((selected.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
+  const greetingPhrase = useMemo(() => {
+    const hour = new Date().getHours();
+    if (language === 'en') {
+      if (hour < 12) return 'Good morning';
+      if (hour < 18) return 'Good afternoon';
+      return 'Good evening';
+    } else {
+      if (hour < 10) return 'God morgon';
+      if (hour < 18) return 'God dag';
+      return 'God kväll';
+    }
+  }, [language]);
+
   const _formattedDate = useMemo(() => {
     const d = new Date();
     const str = d.toLocaleDateString(language === 'en' ? 'en-US' : 'sv-SE', {
@@ -238,7 +251,7 @@ export function GreetingModule({
               </button>
               <div className="flex flex-col text-left">
                 <span className="text-[11px] font-medium text-white/80 leading-none mb-1">
-                  {language === 'en' ? 'Hello' : 'Hej'} 👋
+                  {greetingPhrase} 👋
                 </span>
                 <span className="text-sm font-bold text-white tracking-tight leading-none">
                   {userName || 'Användare'}
@@ -354,22 +367,26 @@ export function GreetingModule({
       {/* Content below hero card centered in max-w-2xl */}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 space-y-4 sm:space-y-5 pt-4">
 
-      {/* Dejzi Mascot Card */}
+      {/* Dejzi Mascot Card (2026 Adaptive Personalization & Organic Shapes) */}
       {dejziInfo && (
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
+          whileHover={{ y: -2 }}
           transition={{ delay: 0.12 }}
-          className="rounded-[22px] border border-[var(--border-color)] p-4 sm:p-5 bg-[var(--surface-color)] shadow-sm relative overflow-hidden flex items-start gap-3.5"
+          className="rounded-[24px] border border-[var(--border-color)] p-4 sm:p-5 bg-[var(--surface-color)] shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden flex items-start gap-3.5 group cursor-pointer"
         >
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[var(--surface-secondary)] border border-[var(--border-color)] flex items-center justify-center text-xl shrink-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-950/40 dark:to-blue-950/40 border border-sky-200/50 dark:border-sky-800/40 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
             🌼
           </div>
 
           <div className="flex-1 min-w-0 pr-1">
-            <div className="mb-1">
+            <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-bold tracking-tight text-[var(--text-primary)]">
                 Dejzi
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                {language === 'en' ? 'Smart Insight' : 'Dagens Insikt'}
               </span>
             </div>
 
