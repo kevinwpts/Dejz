@@ -1057,6 +1057,9 @@ export default function App() {
   });
 
   const addToast = (message: string, type: ToastType = "info") => {
+    if (type === "success" || type === "info") {
+      return; // Quietly ignore success and info toasts to keep the app clean, quiet, and modern
+    }
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, type, message }]);
   };
