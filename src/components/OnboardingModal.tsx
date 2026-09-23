@@ -276,10 +276,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         <button 
                           onClick={handleNext}
                           disabled={!fullName.trim()}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs hover:opacity-95"
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs hover:opacity-95 font-sans"
                         >
                           <span>{t('next' as any)}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
+                          <ArrowRight size={18} strokeWidth={2.5} />
                         </button>
                       </div>
                     </motion.div>
@@ -352,10 +352,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       <div className="pt-2">
                         <button 
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95 font-sans"
                         >
                           <span>{t('next' as any)}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
+                          <ArrowRight size={18} strokeWidth={2.5} />
                         </button>
                       </div>
                     </motion.div>
@@ -404,7 +404,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             setEditingIncomeIndex(null);
                             setIsAddingIncome(true);
                           }}
-                          className="w-full py-3.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[18px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-2 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
+                          className="w-full h-[48px] border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-2 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
                           <Plus size={15} />
                           <span>{t('addIncome' as any)}</span>
@@ -414,10 +414,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       <div className="pt-2">
                         <button 
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95 font-sans"
                         >
                           <span>{t('next' as any)}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
+                          <ArrowRight size={18} strokeWidth={2.5} />
                         </button>
                       </div>
                     </motion.div>
@@ -466,7 +466,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             setEditingExpenseIndex(null);
                             setIsAddingExpense(true);
                           }}
-                          className="w-full py-3.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[18px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-2 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
+                          className="w-full h-[48px] border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-2 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
                           <Plus size={15} />
                           <span>{t('addExpense' as any)}</span>
@@ -476,10 +476,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       <div className="pt-2">
                         <button 
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95 font-sans"
                         >
                           <span>{t('next' as any)}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
+                          <ArrowRight size={18} strokeWidth={2.5} />
                         </button>
                       </div>
                     </motion.div>
@@ -555,7 +555,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             setEditingGoalIndex(null);
                             setIsAddingGoal(true);
                           }}
-                          className="w-full py-3.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[18px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-2 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
+                          className="w-full h-[48px] border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-2 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
                           <Plus size={15} />
                           <span>{t('addSavingsGoal' as any)}</span>
@@ -571,14 +571,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       <button 
                         onClick={handleSave}
                         disabled={isUpdating}
-                        className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-xs cursor-pointer hover:opacity-95"
+                        className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-xs cursor-pointer hover:opacity-95 font-sans"
                       >
                         {isUpdating ? (
-                          <Loader2 size={16} className="animate-spin" />
+                          <Loader2 size={18} className="animate-spin" />
                         ) : (
                           <>
                             <span>{t('finish' as any)}</span>
-                            <Check size={16} strokeWidth={2.5} />
+                            <Check size={18} strokeWidth={2.5} />
                           </>
                         )}
                       </button>

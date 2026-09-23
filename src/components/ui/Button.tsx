@@ -2,7 +2,7 @@ import React from 'react';
 import { Loader2 } from 'lucide-react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline' | 'subtle' | 'accent';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline' | 'subtle' | 'accent' | 'dark';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   icon?: React.ReactNode;
@@ -28,12 +28,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-bold transition-all duration-150 active:scale-[0.98] select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100';
+      'inline-flex items-center justify-center font-bold tracking-tight transition-all duration-150 active:scale-[0.98] select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 rounded-full font-sans';
 
     const sizeStyles = {
-      sm: 'text-xs py-2 px-3.5 rounded-[12px] gap-1.5 h-[36px]',
-      md: 'text-xs sm:text-sm py-3 px-4 rounded-[16px] gap-2 h-[46px]',
-      lg: 'text-sm sm:text-base py-3.5 px-6 rounded-[18px] gap-2.5 h-[52px]',
+      sm: 'text-xs py-2 px-4 gap-1.5 h-[38px]',
+      md: 'text-xs sm:text-sm py-2.5 px-5 gap-2 h-[46px]',
+      lg: 'text-sm sm:text-base py-3.5 px-7 gap-2.5 h-[52px]',
     }[size];
 
     const variantStyles = {
@@ -41,14 +41,16 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-95 shadow-xs',
       accent:
         'bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-95 shadow-xs',
+      dark:
+        'bg-[#03070E] text-[#FFFFFF] hover:bg-[#03070E]/90 dark:bg-[#FFFFFF] dark:text-[#03070E] dark:hover:bg-[#FFFFFF]/90 shadow-xs',
       secondary:
-        'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] shadow-2xs',
+        'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] shadow-2xs',
       outline:
         'bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]',
       ghost:
         'bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]',
       subtle:
-        'bg-[var(--accent-color)]/8 text-[var(--accent-color)] hover:bg-[var(--accent-color)]/15 border border-[var(--accent-color)]/20',
+        'bg-[var(--accent-color)]/10 text-[var(--accent-color)] hover:bg-[var(--accent-color)]/18 border border-[var(--accent-color)]/25',
       danger:
         'bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20 shadow-2xs',
     }[variant];
