@@ -12,6 +12,59 @@ import { useScrollLock } from '../hooks/useScrollLock';
 import { FixedExpense, Income, SavingsGoal } from '../types';
 import { BudgetItem } from './BudgetItem';
 
+const texts = {
+  sv: {
+    stepOf: (step: number, total: number) => `Steg ${step} av ${total}`,
+    welcome: 'Välkommen till Dejz',
+    paydayTitle: 'Din lönedag',
+    skip: 'Hoppa över',
+    nameQuestion: 'Vad heter du?',
+    nameDesc: 'Vi anpassar Dejz personligt efter dig och din ekonomi.',
+    firstNamePlaceholder: 'Ditt förnamn',
+    paydayQuestion: 'När får du lön?',
+    paydayDesc: 'Dejz använder detta för att automatiskt beräkna dina budgetperioder.',
+    customDate: 'Eller välj ett anpassat datum',
+    everyMonth: ':e varje månad',
+    next: 'Nästa',
+    finish: 'Slutför',
+    back: 'Tillbaka',
+    monthlyIncome: 'Månadsinkomst',
+    fixedExpenses: 'Fasta kostnader',
+    savingsGoals: 'Sparmål',
+    incomeDesc: 'Lägg till dina återkommande inkomster som lön, CSN, barnbidrag eller sidoinkomster.',
+    expensesDesc: 'Lägg till dina fasta kostnader som hyra, el, försäkring och abonnemang.',
+    goalsDesc: 'Sätt upp sparmål för framtiden så hjälper Dejz dig att spara smart.',
+    addIncome: 'Lägg till inkomst',
+    addExpense: 'Lägg till fast utgift',
+    addGoal: 'Lägg till sparmål'
+  },
+  en: {
+    stepOf: (step: number, total: number) => `Step ${step} of ${total}`,
+    welcome: 'Welcome to Dejz',
+    paydayTitle: 'Your Payday',
+    skip: 'Skip',
+    nameQuestion: 'What is your name?',
+    nameDesc: 'We customize Dejz personally for you and your finances.',
+    firstNamePlaceholder: 'Your first name',
+    paydayQuestion: 'When do you get paid?',
+    paydayDesc: 'Dejz uses this to automatically calculate your budget periods.',
+    customDate: 'Or choose a custom date',
+    everyMonth: 'th of every month',
+    next: 'Next',
+    finish: 'Finish',
+    back: 'Back',
+    monthlyIncome: 'Monthly Income',
+    fixedExpenses: 'Fixed Expenses',
+    savingsGoals: 'Savings Goals',
+    incomeDesc: 'Add your recurring income such as salary, student aid, child support or side hustles.',
+    expensesDesc: 'Add your fixed expenses like rent, utilities, insurance and subscriptions.',
+    goalsDesc: 'Set up savings goals for the future, and Dejz will help you save smart.',
+    addIncome: 'Add income',
+    addExpense: 'Add fixed expense',
+    addGoal: 'Add savings goal'
+  }
+};
+
 interface OnboardingModalProps {
   isOpen: boolean;
   config: Config;
@@ -33,6 +86,10 @@ type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals';
 
 export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, currentPeriodId }: OnboardingModalProps) {
   useScrollLock(isOpen);
+  const isEn = config.language === 'en' || t('today') === 'Today';
+  const lang = isEn ? 'en' : 'sv';
+  const s = texts[lang];
+
   const [step, setStep] = useState<Step>('name');
   const [fullName, setFullName] = useState('');
   const [payday, setPayday] = useState(25);
@@ -198,21 +255,21 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                     <button 
                       onClick={handleBack} 
                       className="w-9 h-9 flex items-center justify-center bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] rounded-[12px] transition-all text-[var(--text-secondary)] border border-[var(--border-color)] shadow-2xs cursor-pointer active:scale-95"
-                      aria-label="Tillbaka"
+                      aria-label={s.back}
                     >
                       <ChevronLeft size={18} />
                     </button>
                   )}
                   <div className="flex flex-col">
                     <span className="text-[11px] font-bold text-[var(--accent-color)] tracking-wide uppercase">
-                      Steg {stepNumber} av {totalSteps}
+                      {s.stepOf(stepNumber, totalSteps)}
                     </span>
                     <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
-                      {step === 'name' ? 'Välkommen till Dejz' : 
-                       step === 'payday' ? 'Din lönedag' :
-                       step === 'income' ? t('monthlyIncome' as any) : 
-                       step === 'expenses' ? t('fixedExpensesTitle' as any) : 
-                       t('savingsGoalsTitle' as any)}
+                      {step === 'name' ? s.welcome : 
+                       step === 'payday' ? s.paydayTitle :
+                       step === 'income' ? s.monthlyIncome : 
+                       step === 'expenses' ? s.fixedExpenses : 
+                       s.savingsGoals}
                     </h2>
                   </div>
                 </div>
@@ -229,7 +286,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                     disabled={isUpdating}
                     className="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-1.5 rounded-[12px] bg-[var(--surface-color)] border border-[var(--border-color)] transition-all active:scale-95 cursor-pointer flex items-center gap-1 shadow-2xs"
                   >
-                    <span>Hoppa över</span>
+                    <span>{s.skip}</span>
                   </button>
                 ) : <div />}
               </div>
@@ -252,9 +309,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           </div>
                         </div>
                         <div className="space-y-1 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">Vad heter du?</h3>
+                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.nameQuestion}</h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                            Vi anpassar Dejz personligt efter dig och din ekonomi.
+                            {s.nameDesc}
                           </p>
                         </div>
                       </div>
@@ -268,7 +325,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
                           className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[18px] px-4 py-3.5 pl-11 text-sm font-semibold text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/40"
-                          placeholder="Ditt förnamn"
+                          placeholder={s.firstNamePlaceholder}
                         />
                       </div>
 
@@ -278,7 +335,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           disabled={!fullName.trim()}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs hover:opacity-95"
                         >
-                          <span>{t('next' as any)}</span>
+                          <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
                         </button>
                       </div>
@@ -299,9 +356,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           <Banknote size={28} />
                         </div>
                         <div className="space-y-1 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">När får du lön?</h3>
+                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.paydayQuestion}</h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                            Dejz använder detta för att automatiskt beräkna dina budgetperioder.
+                            {s.paydayDesc}
                           </p>
                         </div>
                       </div>
@@ -317,13 +374,13 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                                 : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/30'
                             }`}
                           >
-                            {d}:e
+                            {isEn ? `${d}${d === 1 ? 'st' : d === 2 ? 'nd' : d === 3 ? 'rd' : 'th'}` : `${d}:e`}
                           </button>
                         ))}
                       </div>
                       
                       <div className="bg-[var(--surface-color)] p-5 rounded-[22px] border border-[var(--border-color)] shadow-xs text-center space-y-3">
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-60">Eller välj ett anpassat datum</p>
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-60">{s.customDate}</p>
                         
                         <div className="flex justify-center items-baseline gap-1">
                           <motion.span 
@@ -334,7 +391,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           >
                             {payday}
                           </motion.span>
-                          <span className="text-base font-bold text-[var(--accent-color)]/60">:e varje månad</span>
+                          <span className="text-base font-bold text-[var(--accent-color)]/60">
+                            {isEn ? (payday === 1 ? 'st of every month' : payday === 2 ? 'nd of every month' : payday === 3 ? 'rd of every month' : 'th of every month') : ':e varje månad'}
+                          </span>
                         </div>
 
                         <div className="px-2 pt-1">
@@ -354,7 +413,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                         >
-                          <span>{t('next' as any)}</span>
+                          <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
                         </button>
                       </div>
@@ -375,9 +434,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           <Wallet size={28} />
                         </div>
                         <div className="space-y-1 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{t('monthlyIncome' as any)}</h3>
+                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.monthlyIncome}</h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                            {t('onboardingIncomeDesc' as any)}
+                            {s.incomeDesc}
                           </p>
                         </div>
                       </div>
@@ -407,7 +466,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           className="w-full py-3.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[18px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-2 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
                           <Plus size={15} />
-                          <span>{t('addIncome' as any)}</span>
+                          <span>{s.addIncome}</span>
                         </button>
                       </div>
 
@@ -416,7 +475,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                         >
-                          <span>{t('next' as any)}</span>
+                          <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
                         </button>
                       </div>
@@ -437,9 +496,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           <CreditCard size={28} />
                         </div>
                         <div className="space-y-1 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{t('fixedExpensesTitle' as any)}</h3>
+                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.fixedExpenses}</h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                            {t('onboardingExpensesDesc' as any)}
+                            {s.expensesDesc}
                           </p>
                         </div>
                       </div>
@@ -469,7 +528,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           className="w-full py-3.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[18px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-2 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
                           <Plus size={15} />
-                          <span>{t('addExpense' as any)}</span>
+                          <span>{s.addExpense}</span>
                         </button>
                       </div>
 
@@ -478,7 +537,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                         >
-                          <span>{t('next' as any)}</span>
+                          <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
                         </button>
                       </div>
@@ -499,9 +558,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           <Target size={28} />
                         </div>
                         <div className="space-y-1 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{t('savingsGoalsTitle' as any)}</h3>
+                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.savingsGoals}</h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                            {t('onboardingGoalsDesc' as any)}
+                            {s.goalsDesc}
                           </p>
                         </div>
                       </div>
@@ -558,7 +617,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           className="w-full py-3.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[18px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-2 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
                         >
                           <Plus size={15} />
-                          <span>{t('addSavingsGoal' as any)}</span>
+                          <span>{s.addGoal}</span>
                         </button>
                       </div>
 
@@ -577,7 +636,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           <Loader2 size={16} className="animate-spin" />
                         ) : (
                           <>
-                            <span>{t('finish' as any)}</span>
+                            <span>{s.finish}</span>
                             <Check size={16} strokeWidth={2.5} />
                           </>
                         )}
