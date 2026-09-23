@@ -378,12 +378,12 @@ export function SettingsView({
           <button 
             onClick={() => handleUpdateWeekendHandling(!config.paydayBeforeWeekend)}
             className={`w-10 h-6 rounded-full relative transition-colors duration-200 flex-shrink-0 outline-none ${
-              config.paydayBeforeWeekend ? 'bg-[#356BFF]' : 'bg-[var(--border-color)]'
+              config.paydayBeforeWeekend ? 'bg-[var(--accent-color)] dark:bg-white' : 'bg-[var(--surface-muted)]'
             }`}
           >
             <motion.div 
               layout
-              className="w-4 h-4 bg-white rounded-full absolute top-1 left-1" 
+              className="w-4 h-4 bg-white dark:bg-black rounded-full absolute top-1 left-1" 
               animate={{ x: config.paydayBeforeWeekend ? 16 : 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             />

@@ -114,7 +114,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
       {/* Subtle Atmospheric Blur Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-40 dark:opacity-100">
         <div className="absolute top-0 left-[15%] w-[60%] h-[40%] bg-black/[0.015] dark:bg-white/[0.02] blur-[150px] rounded-full" />
-        <div className="absolute top-[20%] right-[-5%] w-[50%] h-[50%] bg-blue-500/[0.02] dark:bg-blue-500/[0.04] blur-[160px] rounded-full" />
+        <div className="absolute top-[20%] right-[-5%] w-[50%] h-[50%] bg-black/[0.01] dark:bg-white/[0.015] blur-[160px] rounded-full" />
       </div>
 
       <div className="relative z-10">
@@ -199,7 +199,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
         {/* Hero Section */}
         <section className="w-full border-b border-[var(--border-color)] relative overflow-hidden">
           {/* Subtle Hero Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-[75%] max-w-[650px] h-[300px] sm:h-[400px] bg-gradient-to-tr from-blue-500/15 via-indigo-500/10 to-sky-400/10 blur-[90px] sm:blur-[130px] rounded-full pointer-events-none z-0" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-[75%] max-w-[650px] h-[300px] sm:h-[400px] bg-gradient-to-tr from-black/[0.04] via-black/[0.02] to-transparent dark:from-white/[0.04] dark:via-white/[0.02] blur-[90px] sm:blur-[130px] rounded-full pointer-events-none z-0" />
 
            <div className="pt-[calc(9.5rem+env(safe-area-inset-top))] md:pt-[calc(11.5rem+env(safe-area-inset-top))] pb-20 md:pb-28 px-5 sm:px-8 max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-14 lg:gap-16 relative z-10">
               <div className="flex-1 space-y-7 text-center lg:text-left">
@@ -347,7 +347,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                       {/* Simulated Dejzi Greeting Module */}
                       <div className="p-3 bg-[var(--surface-color)] rounded-[20px] border border-[var(--border-color)] shadow-xs flex items-center gap-2.5">
                         <div className="relative shrink-0">
-                          <div className="w-8 h-8 rounded-[12px] bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-2xs">
+                          <div className="w-8 h-8 rounded-[12px] bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] text-xs font-bold shadow-2xs">
                             <Sparkles size={14} />
                           </div>
                         </div>

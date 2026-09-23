@@ -244,9 +244,7 @@ export function GreetingModule({
       <motion.div 
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`rounded-[28px] overflow-hidden border border-[var(--border-color)] shadow-sm transition-all duration-500 flex flex-col ${
-          diffDays === 0 ? 'bg-[#F4F7FF] dark:bg-[#161B26]' : 'bg-[var(--surface-color)]'
-        }`}
+        className="rounded-[28px] overflow-hidden border border-[var(--border-color)] shadow-sm transition-all duration-500 flex flex-col bg-[var(--surface-color)]"
       >
         <div className="relative overflow-hidden flex flex-col">
           <div className="pt-6 pb-5 sm:pt-7 sm:pb-6 px-6 sm:px-8 flex flex-col items-start text-left relative z-10">
@@ -280,7 +278,7 @@ export function GreetingModule({
                   initial={{ width: 0 }}
                   animate={{ width: `${dailyPercentage}%` }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
-                  className={`h-full rounded-full ${isNegative ? 'bg-danger' : 'bg-[#356BFF]'}`}
+                  className={`h-full rounded-full ${isNegative ? 'bg-danger' : 'bg-[var(--accent-color)]'}`}
                 />
               </div>
             </div>
@@ -329,7 +327,7 @@ export function GreetingModule({
           <div className="w-full h-2.5 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
             <div 
               className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'bg-danger' : 'bg-[#0B3DA5] dark:bg-[#5B82FF]'
+                ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'bg-danger' : 'bg-[var(--accent-color)]'
               }`}
               style={{ width: `${Math.max(0, Math.min(100, ((stats?.remainingPeriodCents || 0) / Math.max(1, (stats?.disposablePot || 1) + (stats?.totalExtraIncomeUpToToday || 0))) * 100))}%` }}
             />
