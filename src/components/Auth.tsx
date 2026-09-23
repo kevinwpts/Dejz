@@ -9,7 +9,7 @@ import { Button, Input, IconButton, SegmentedControl, Divider } from './ui';
 interface AuthProps {
   onShowToast: (message: string, type: 'success' | 'error') => void;
   onLegalClick: (type: 'privacy' | 'terms' | 'cookies' | 'contact') => void;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   initialIsRegistering?: boolean;
   onBack?: () => void;
 }
@@ -30,7 +30,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
     setLoading(true);
     setTimeout(() => {
       createFreshTestAccount();
-      onShowToast("Nytt testkonto initierat! Startar onboarding...", "success");
+      onShowToast(t('auth_test_account_success_reg' as any), "success");
       window.location.reload();
     }, 400);
   };
@@ -38,7 +38,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
-      setError('Ange din e-postadress');
+      setError(t('auth_enter_email' as any));
       return;
     }
 
@@ -53,12 +53,12 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
       if (error) throw error;
 
       setIsResetSent(true);
-      onShowToast('Återställningslänk har skickats!', 'success');
+      onShowToast(t('auth_link_sent' as any), 'success');
     } catch (err: any) {
       console.error('Password reset error:', err);
-      let message = err.message || 'Kunde inte skicka återställningslänk.';
+      let message = err.message || t('auth_link_send_failed' as any);
       if (message.includes('rate limit')) {
-        message = 'För många förfrågningar. Vänta en stund och försök igen.';
+        message = t('auth_rate_limit' as any);
       }
       setError(message);
       onShowToast(message, 'error');
@@ -82,7 +82,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
     if (isMockEmail) {
       setTimeout(() => {
         createFreshTestAccount();
-        onShowToast(isRegistering ? "Nytt testkonto skapat!" : "Inloggad med testkonto!", "success");
+        onShowToast(isRegistering ? t('auth_test_account_success_reg' as any) : t('auth_test_account_success_login' as any), "success");
         window.location.reload();
       }, 500);
       return;
@@ -123,9 +123,9 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
       } else if (message === 'User not found') {
         message = t('userNotFound' as any) || 'Ingen användare hittades med denna e-post.';
       } else if (message === 'User already registered') {
-        message = 'Ett konto med denna e-postadress finns redan. Välj "Logga in" istället.';
+        message = t('auth_user_already_registered' as any) || 'Ett konto med denna e-postadress finns redan. Välj "Logga in" istället.';
       } else if (message?.includes('Password should be at least')) {
-        message = 'Lösenordet måste vara minst 6 tecken långt.';
+        message = t('auth_password_min_length' as any) || 'Lösenordet måste vara minst 6 tecken långt.';
       } else if (!message) {
         message = t('authError' as any) || 'Ett fel uppstod vid inloggning.';
       }
@@ -162,17 +162,17 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
       if (inIframe && data?.url) {
         const popup = window.open(data.url, '_blank');
         if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-          onShowToast("Inloggningsfönstret blockerades. Tillåt popup-fönster i din webbläsare eller öppna appen i en ny flik.", 'error');
-          setError("Inloggningsfönstret blockerades av din webbläsare. Tillåt popup-fönster eller öppna appen i en ny flik.");
+          onShowToast(t('auth_popup_blocked' as any), 'error');
+          setError(t('auth_popup_blocked' as any));
         } else {
-          onShowToast("Öppnade inloggning i ett nytt fönster.", 'success');
+          onShowToast(t('auth_popup_opened' as any), 'success');
         }
       }
     } catch (err: any) {
       let msg = err.message || t('error');
       if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
         const pName = provider === 'facebook' ? 'Facebook' : 'Google';
-        msg = `${pName}-inloggning är inte aktiverad i din Supabase-instrumentpanel ännu.`;
+        msg = t('auth_provider_not_enabled' as any, { provider: pName }) || `${pName}-inloggning är inte aktiverad i din Supabase-instrumentpanel ännu.`;
       }
       setError(msg);
       onShowToast(msg, 'error');
@@ -214,7 +214,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               variant="primary"
               fullWidth
             >
-              {t('backToLogin' as any)}
+              {t('auth_back_to_login' as any)}
             </Button>
           </div>
         ) : isResetSent ? (
@@ -227,10 +227,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
 
             <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-                Kolla din inkorg
+                {t('auth_check_inbox' as any)}
               </h2>
               <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
-                Vi har skickat en återställningslänk till <strong className="text-[var(--text-primary)]">{email}</strong>. Följ instruktionerna i mailet för att välja ett nytt lösenord.
+                {t('auth_reset_sent_desc' as any, { email })}
               </p>
             </div>
 
@@ -242,7 +242,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               variant="primary"
               fullWidth
             >
-              Tillbaka till inloggning
+              {t('auth_back_to_login' as any)}
             </Button>
           </div>
         ) : isForgotPassword ? (
@@ -258,7 +258,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   }}
                   variant="muted"
                   size="sm"
-                  aria-label="Tillbaka till inloggning"
+                  aria-label={t('auth_back_to_login' as any)}
                 />
               </div>
               
@@ -271,10 +271,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               </div>
 
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1 text-center">
-                Glömt lösenord?
+                {t('auth_forgot_password_link' as any)}
               </h1>
               <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] text-center max-w-[300px]">
-                Ange din e-postadress så skickar vi en länk för att välja ett nytt lösenord.
+                {t('auth_forgot_password_desc' as any)}
               </p>
             </div>
 
@@ -284,7 +284,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Din e-postadress"
+                placeholder={t('auth_email_placeholder' as any)}
                 icon={<Mail size={16} />}
                 error={error}
               />
@@ -298,7 +298,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   size="lg"
                   icon={<KeyRound size={16} />}
                 >
-                  Skicka återställningslänk
+                  {t('auth_send_reset_link' as any)}
                 </Button>
 
                 <Button
@@ -311,7 +311,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   fullWidth
                   size="md"
                 >
-                  Avbryt och logga in
+                  {t('auth_cancel_and_login' as any)}
                 </Button>
               </div>
             </form>
@@ -327,7 +327,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                     onClick={onBack}
                     variant="muted"
                     size="sm"
-                    aria-label="Tillbaka"
+                    aria-label={t('backBtn' as any)}
                   />
                 </div>
               )}
@@ -340,7 +340,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 {isRegistering ? t('createAccount') : t('welcome')}
               </h1>
               <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                {isRegistering ? 'Skapa ditt konto på några sekunder' : 'Logga in för att fortsätta'}
+                {isRegistering ? t('auth_subtitle_register' as any) : t('auth_subtitle_login' as any)}
               </p>
             </div>
 
@@ -366,7 +366,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Din e-postadress"
+                  placeholder={t('auth_email_placeholder' as any)}
                   icon={<Mail size={16} />}
                 />
 
@@ -376,7 +376,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Ditt lösenord (minst 6 tecken)"
+                    placeholder={t('auth_password_placeholder' as any)}
                     icon={<Lock size={16} />}
                     error={error}
                   />
@@ -391,7 +391,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                         }}
                         className="text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                       >
-                        Glömt lösenord?
+                        {t('auth_forgot_password_link' as any)}
                       </button>
                     </div>
                   )}
@@ -416,7 +416,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   fullWidth
                   icon={<Sparkles size={13} />}
                 >
-                  Snabbtest: Logga in med testkonto
+                  {t('auth_quick_test_login' as any)}
                 </Button>
               </div>
             </form>
@@ -473,14 +473,14 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 onClick={() => onLegalClick('privacy')}
                 className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
-                {t('privacyPolicy' as any)}
+                {t('privacyPolicy')}
               </button>
               <span>•</span>
               <button 
                 onClick={() => onLegalClick('terms')}
                 className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
-                {t('termsOfService' as any)}
+                {t('termsOfService')}
               </button>
             </div>
           </div>

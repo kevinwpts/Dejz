@@ -49,30 +49,26 @@ export function AppHeader({
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // 1. Utgångsläget: Längst upp integreras headern sömlöst utan bakgrund
       if (currentScrollY <= 10) {
-        setIsAtTop(true);
-        setIsVisible(true);
+        setIsAtTop(prev => prev ? prev : true);
+        setIsVisible(prev => prev ? prev : true);
         lastScrollY.current = currentScrollY;
         return;
       }
 
-      setIsAtTop(false);
+      setIsAtTop(prev => prev ? false : prev);
 
-      // Skydd mot iOS bounce/rubber-banding
       if (currentScrollY < 0) {
-        setIsVisible(true);
+        setIsVisible(prev => prev ? prev : true);
         return;
       }
 
       const diff = currentScrollY - lastScrollY.current;
 
-      // Scrolla ner (> 8px) efter toppen -> göm headern
-      if (diff > 8 && currentScrollY > 50) {
-        setIsVisible(false);
-      } else if (diff < -8) {
-        // Scrolla upp -> visa headern
-        setIsVisible(true);
+      if (diff > 12 && currentScrollY > 50) {
+        setIsVisible(prev => !prev ? prev : false);
+      } else if (diff < -12) {
+        setIsVisible(prev => prev ? prev : true);
       }
 
       lastScrollY.current = currentScrollY;
@@ -90,6 +86,7 @@ export function AppHeader({
     setIsVisible(true);
   }, [_navTrigger, title]);
 
+  // Visa alltid AppHeader
   return (
     <header
       className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
@@ -100,7 +97,7 @@ export function AppHeader({
           : "-translate-y-full opacity-0 pointer-events-none"
       } ${
         !isAtTop
-          ? "bg-[var(--bg-color)]/85 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-xs"
+          ? "bg-[var(--bg-color)]/90 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-sm"
           : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >
@@ -125,7 +122,7 @@ export function AppHeader({
               className="flex items-center gap-2 group active:scale-95 transition-transform py-0.5 cursor-pointer"
               aria-label="Dejz Hem"
             >
-              <DejzLogo className="h-6 w-auto text-[var(--text-primary)]" />
+              <DejzLogo className="h-6 w-auto" textColor="var(--text-primary)" />
             </button>
           )}
         </div>

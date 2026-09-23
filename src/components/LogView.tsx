@@ -6,6 +6,7 @@ import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
 import { UniversalPeriodSelector } from './UniversalPeriodSelector';
+import { SegmentedControl } from './ui';
 
 interface LogViewProps {
   transactions: Transaction[];
@@ -135,28 +136,17 @@ export function LogView({
         </div>
 
         {/* Type Filters (Alla, Utgift, Inkomst, Kvitto) */}
-        <div className="grid grid-cols-4 gap-1 p-1 bg-[var(--surface-color)] rounded-full border border-[var(--border-color)] shadow-xs">
-          {(['all', 'expense', 'income', 'receipt'] as const).map(type => {
-            const isActive = typeFilter === type;
-            return (
-              <button
-                key={type}
-                onClick={() => setTypeFilter(type)}
-                className={`flex items-center justify-center gap-1.5 h-8 sm:h-8.5 px-1 rounded-full text-[12px] font-semibold transition-all cursor-pointer ${
-                  isActive 
-                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs' 
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
-                }`}
-              >
-                {type === 'all' && <LayoutGrid size={13} strokeWidth={2.2} className={isActive ? 'opacity-100' : 'opacity-70'} />}
-                {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={2.2} className={isActive ? 'opacity-100' : 'opacity-70'} />}
-                {type === 'income' && <ArrowUpRight size={13} strokeWidth={2.2} className={isActive ? 'opacity-100' : 'opacity-70'} />}
-                {type === 'receipt' && <FileText size={13} strokeWidth={2.2} className={isActive ? 'opacity-100' : 'opacity-70'} />}
-                <span className="truncate">{t(type as TranslationKey)}</span>
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedControl
+          options={[
+            { value: 'all', label: t('all' as TranslationKey), icon: <LayoutGrid size={13} strokeWidth={2.2} /> },
+            { value: 'expense', label: t('expense' as TranslationKey), icon: <ArrowDownLeft size={13} strokeWidth={2.2} /> },
+            { value: 'income', label: t('income' as TranslationKey), icon: <ArrowUpRight size={13} strokeWidth={2.2} /> },
+            { value: 'receipt', label: t('receipt' as TranslationKey), icon: <FileText size={13} strokeWidth={2.2} /> },
+          ]}
+          value={typeFilter}
+          onChange={(val) => setTypeFilter(val as 'all' | 'expense' | 'income' | 'receipt')}
+          size="sm"
+        />
       </div>
 
       <div className="space-y-6">

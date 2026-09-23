@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUp, Receipt, PiggyBank } from 'lucide-react';
 import { Transaction, Config } from '../types';
-import { getLogoUrl, findKnownBrandDomain } from '../utils/logo';
+import { getLogoUrl, findKnownBrandDomain, getInstantBrandLogo } from '../utils/logo';
 import { ICON_MAP, getCategoryIconName, resolveLucideIcon, suggestIcon, isEmojiString } from '../utils/icons';
 import { getEmojiSolidColor } from '../utils/ui';
 
@@ -42,22 +42,24 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
     );
   }
 
-  // 1. Resolve explicit logo (URL, data URI, or emoji)
+  // Explicit Logo variables
   const explicitLogo = transaction.logo && transaction.logo !== 'none' ? transaction.logo : null;
   const isExplicitLogoUrl = explicitLogo && (explicitLogo.startsWith('http') || explicitLogo.startsWith('data:image') || explicitLogo.startsWith('/'));
   const isExplicitLogoEmoji = explicitLogo && isEmojiString(explicitLogo);
 
-  // 1.5. Resolve known brand domain logo (e.g. Coop, ICA, Willys, SATS, Fitness 24/7)
+  // Premium Vector Brand Logo matching (Coop, ICA, Willys, SATS, SL, SJ, etc.)
+  const instantVectorLogo = getInstantBrandLogo(transaction.merchant || '') ||
+                            getInstantBrandLogo(transaction.note || '') ||
+                            getInstantBrandLogo(title || '');
+
+  // Brand Favicon (Fallback for other brand matches)
   const brandDomain = findKnownBrandDomain(transaction.merchant || '') ||
                       findKnownBrandDomain(transaction.note || '') ||
                       findKnownBrandDomain(title || '');
   const brandLogo = brandDomain ? `https://www.google.com/s2/favicons?domain=${brandDomain}&sz=128` : null;
 
-  // 2. Resolve explicit icon
+  // Explicit Icon variables
   const explicitIcon = transaction.icon && transaction.icon !== 'none' && transaction.icon !== 'receipt' ? transaction.icon : null;
-
-  // 3. Resolve auto logo URL as fallback for images
-  const autoLogoUrl = (!explicitLogo || explicitLogo === 'none' || imgError) ? getLogoUrl(title) : null;
 
   // Helper for rendering icons/emojis in unified Lucide vector style
   const renderIconView = (val: string) => {
@@ -89,7 +91,22 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
     );
   }
 
-  // Step 1.5: Known Brand Logo (Coop, ICA, Willys, Lidl, SATS, etc.)
+  // Step 2: Instant Premium Vector Brand Logo (high fidelity SVGs)
+  if (instantVectorLogo && !imgError) {
+    return (
+      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs`}>
+        <img 
+          src={instantVectorLogo} 
+          alt={title} 
+          className="w-full h-full object-cover rounded-full"
+          onError={() => setImgError(true)}
+          referrerPolicy="no-referrer"
+        />
+      </div>
+    );
+  }
+
+  // Step 3: Known Brand Logo Favicon fallback
   if (brandLogo && !imgError) {
     return (
       <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs`}>
@@ -104,17 +121,25 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
     );
   }
 
-  // Step 2: Explicit Logo Emoji
+  // Step 4: Explicit Logo Emoji
   if (isExplicitLogoEmoji) {
     return renderIconView(explicitLogo!);
   }
 
-  // Step 3: Explicit Icon
+  // Step 5: Explicit Icon
   if (explicitIcon) {
     return renderIconView(explicitIcon);
   }
 
-  // Step 4: Auto Logo URL (if no explicit logo/icon or if explicit failed)
+  // Step 6: Contextual Keyword-suggested Icon
+  const contextualIcon = suggestIcon(title);
+  if (contextualIcon && contextualIcon !== 'receipt') {
+    return renderIconView(contextualIcon);
+  }
+
+  // Step 7: Auto Logo URL (Only if title looks like an explicit domain, e.g. "openai.com" or "google.se")
+  const isExplicitDomain = title.includes('.') && !title.includes(' ');
+  const autoLogoUrl = (isExplicitDomain && !autoImgError) ? getLogoUrl(title) : null;
   if (autoLogoUrl && !autoImgError) {
     return (
       <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs`}>
@@ -129,13 +154,7 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
     );
   }
 
-  // Step 4.5: Contextual Brand / Keyword Icon (e.g. gym, food, transport)
-  const contextualIcon = suggestIcon(title);
-  if (contextualIcon && contextualIcon !== '🧾') {
-    return renderIconView(contextualIcon);
-  }
-
-  // Step 5: Category Icon/Emoji Fallback
+  // Step 8: Category Icon/Emoji Fallback
   if (config) {
     const categoryIconName = category?.icon || getCategoryIconName(transaction.category);
     if (categoryIconName) {
@@ -143,7 +162,7 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
     }
   }
 
-  // Step 6: Default Fallback
+  // Step 9: Default Fallback
   const DefaultIcon = transaction.type === 'income' ? ArrowUp : Receipt;
   const bgColor = category?.color || getEmojiSolidColor(title);
   
