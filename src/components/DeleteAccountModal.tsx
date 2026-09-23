@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 
-import { AlertCircle, X, Loader2 } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { Button, IconButton } from './ui';
 
 interface DeleteAccountModalProps {
   isOpen: boolean;
@@ -53,12 +54,15 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm, t, isSocialUser
         className="bg-[var(--surface-solid)] w-full max-w-sm rounded-xl p-8 relative border-[0.5px] border-[var(--border-color)] pt-[env(safe-area-inset-top)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <button 
-          onClick={onClose}
-          className="absolute right-4 top-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-        >
-          <X size={20} />
-        </button>
+        <div className="absolute right-4 top-4">
+          <IconButton 
+            icon={<X size={18} />}
+            onClick={onClose}
+            variant="ghost"
+            size="sm"
+            aria-label={t('close')}
+          />
+        </div>
 
         <div className="text-center">
           <div className="w-16 h-16 bg-danger/10 text-danger rounded-[12px] flex items-center justify-center mx-auto mb-6">
@@ -102,27 +106,25 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm, t, isSocialUser
             )}
 
             <div className="flex flex-col gap-2.5 pt-2">
-              <button 
+              <Button 
                 onClick={handleConfirm}
                 disabled={isDeleting}
-                className="w-full bg-danger text-[var(--text-primary)] py-3.5 rounded-xl font-semibold text-sm active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                loading={isDeleting}
+                variant="danger"
+                fullWidth
+                size="lg"
               >
-                {isDeleting ? (
-                  <>
-                    <Loader2 size={16} className="div-spin" />
-                    {t('deleting')}
-                  </>
-                ) : (
-                  t('deleteAccount')
-                )}
-              </button>
-              <button 
+                {t('deleteAccount')}
+              </Button>
+              <Button 
                 onClick={onClose}
                 disabled={isDeleting}
-                className="w-full py-3 rounded-xl font-semibold text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-color)] transition-all"
+                variant="ghost"
+                fullWidth
+                size="md"
               >
                 {t('cancel')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

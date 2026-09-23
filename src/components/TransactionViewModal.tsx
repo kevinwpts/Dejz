@@ -10,6 +10,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { getCategoryIconName } from '../utils/icons';
+import { IconButton } from './ui';
 
 interface TransactionViewModalProps {
   transaction: Transaction;
@@ -109,39 +110,45 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               {transaction.merchant || transaction.category}
             </h2>
           </div>
-          <button 
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 justify-self-end shrink-0 cursor-pointer"
-          >
-            <X size={17} />
-          </button>
+          <div className="flex justify-end">
+            <IconButton 
+              icon={<X size={17} />} 
+              onClick={onClose} 
+              variant="muted" 
+              size="sm" 
+              aria-label={t('close')}
+            />
+          </div>
         </div>
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
           {/* Actions Bar */}
           <div className="flex justify-end gap-2 pt-1">
-            <button 
+            <IconButton 
+              icon={<Repeat size={15} />} 
               onClick={() => onDuplicate(transaction)} 
-              className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 cursor-pointer"
+              variant="muted" 
+              size="sm" 
+              aria-label={t('duplicate')}
               title={t('duplicate')}
-            >
-              <Repeat size={15} />
-            </button>
-            <button 
+            />
+            <IconButton 
+              icon={<Pencil size={15} />} 
               onClick={() => onEdit(transaction)} 
-              className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 cursor-pointer"
+              variant="muted" 
+              size="sm" 
+              aria-label={t('edit')}
               title={t('edit')}
-            >
-              <Pencil size={15} />
-            </button>
-            <button 
+            />
+            <IconButton 
+              icon={<Trash2 size={15} />} 
               onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-danger/10 rounded-full transition-all text-danger active:scale-90 cursor-pointer"
+              variant="danger" 
+              size="sm" 
+              aria-label={t('delete')}
               title={t('delete')}
-            >
-              <Trash2 size={15} />
-            </button>
+            />
           </div>
           {/* Amount Box */}
           <div className="bg-[var(--surface-muted)]/50 p-5 rounded-[16px] border border-[var(--border-color)]">

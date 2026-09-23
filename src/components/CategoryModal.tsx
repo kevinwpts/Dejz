@@ -5,6 +5,7 @@ import { TranslationKey } from '../i18n';
 import { suggestIcon } from '../utils/icons';
 import { IconPickerModal } from './IconPickerModal';
 import { CategoryIcon } from './CategoryIcon';
+import { Button, IconButton } from './ui';
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -86,22 +87,24 @@ export function CategoryModal({
             </h2>
             <div className="flex items-center gap-2">
               {isEdit && onDelete && (
-                <button 
+                <IconButton 
+                  icon={<Trash2 size={16} />}
                   onClick={() => {
                     onDelete(initialData.index!);
                     onClose();
                   }}
-                  className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-danger/10 text-danger rounded-full transition-all cursor-pointer"
-                >
-                  <Trash2 size={16} />
-                </button>
+                  variant="danger"
+                  size="sm"
+                  aria-label={t('delete')}
+                />
               )}
-              <button 
+              <IconButton 
+                icon={<X size={18} strokeWidth={2} />}
                 onClick={onClose}
-                className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-full transition-all cursor-pointer"
-              >
-                <X size={18} strokeWidth={2} />
-              </button>
+                variant="muted"
+                size="sm"
+                aria-label={t('close')}
+              />
             </div>
           </div>
 
@@ -203,14 +206,16 @@ export function CategoryModal({
                 </div>
               </div>
 
-              <button
+              <Button
                 onClick={handleSave}
                 disabled={!name.trim()}
-                className="accent-button-full gap-2"
+                variant="primary"
+                fullWidth
+                size="lg"
+                icon={<Check size={18} strokeWidth={2.5} />}
               >
-                <Check size={20} className="stroke-[3px]" />
                 {t('save')}
-              </button>
+              </Button>
             </div>
           </div>
         </motion.div>

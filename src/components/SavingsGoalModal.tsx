@@ -7,6 +7,7 @@ import { IconSelector } from './IconSelector';
 import { fetchLogoForName } from '../utils/logo';
 import { suggestIcon, isEmojiString, ICON_MAP } from '../utils/icons';
 import { formatAmount, parseAmount } from '../utils/format';
+import { Button, IconButton } from './ui';
 
 interface SavingsGoalModalProps {
   isOpen: boolean;
@@ -153,12 +154,15 @@ export function SavingsGoalModal({
                   {editingGoal ? t('editSavingsGoal') : t('newSavingsGoal')}
                 </h2>
               </div>
-              <button 
-                onClick={onClose} 
-                className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all text-[var(--text-secondary)] active:scale-90 justify-self-end shrink-0 cursor-pointer"
-              >
-                <X size={18} strokeWidth={2} />
-              </button>
+              <div className="flex justify-end">
+                <IconButton 
+                  icon={<X size={18} strokeWidth={2} />} 
+                  onClick={onClose} 
+                  variant="muted" 
+                  size="sm" 
+                  aria-label={t('close')}
+                />
+              </div>
             </div>
 
             {/* Main Content Area */}
@@ -208,26 +212,30 @@ export function SavingsGoalModal({
 
             {/* Action Footer */}
             <div className="shrink-0 p-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom)+0.5rem)] sm:pb-5 border-t border-[var(--border-color)] bg-[var(--bg-color)] space-y-2.5">
-              <button 
+              <Button 
                 onClick={handleConfirm} 
                 disabled={!title || !targetAmount}
-                className="accent-button-full gap-2 group relative overflow-hidden active:scale-[0.98] shadow-xs rounded-[12px] py-3.5 w-full"
+                variant="primary"
+                fullWidth
+                size="lg"
+                icon={<Check size={18} strokeWidth={2.5} />}
               >
-                <Check size={18} className="group-hover:scale-105 transition-transform stroke-[2.5px]" />
-                <span className="relative z-10 font-semibold tracking-tight text-sm">{editingGoal ? t('saveChanges') : t('addSavingsGoal')}</span>
-              </button>
+                {editingGoal ? t('saveChanges') : t('addSavingsGoal')}
+              </Button>
 
               {editingGoal && onDelete && (
-                <button
+                <Button
                   onClick={() => {
                     onDelete(editingGoal.id);
                     onClose();
                   }}
-                  className="w-full bg-accent/10 text-accent py-3 rounded-[12px] font-semibold text-xs tracking-wide hover:bg-accent/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  variant="danger"
+                  fullWidth
+                  size="md"
+                  icon={<Trash2 size={16} />}
                 >
-                  <Trash2 size={16} />
                   {t('deleteSavingsGoal')}
-                </button>
+                </Button>
               )}
             </div>
 
@@ -254,12 +262,13 @@ export function SavingsGoalModal({
                         <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
                         <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">{t('chooseLogoOrIcon')}</p>
                       </div>
-                      <button 
+                      <IconButton 
+                        icon={<X size={18} strokeWidth={2} />}
                         onClick={() => setShowIconSelector(false)}
-                        className="w-9 h-9 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--border-color)] transition-colors cursor-pointer"
-                      >
-                        <X size={18} strokeWidth={2} />
-                      </button>
+                        variant="muted"
+                        size="sm"
+                        aria-label={t('close')}
+                      />
                     </div>
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-8 min-h-0">
                       <IconSelector

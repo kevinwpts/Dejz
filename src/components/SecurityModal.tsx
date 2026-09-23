@@ -6,6 +6,7 @@ import { TranslationKey } from '../i18n';
 import { hasPin, removePin, isBiometricsEnabled, setBiometricsEnabled } from '../utils/security';
 import { PinLockScreen } from './PinLockScreen';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { IconButton } from './ui';
 
 interface SecurityModalProps {
   isOpen: boolean;
@@ -82,12 +83,15 @@ export function SecurityModal({ isOpen, onClose, t, addToast, _userEmail }: Secu
             className="bg-[var(--surface-solid)] w-full max-w-sm rounded-xl p-8 relative border-[0.5px] border-[var(--border-color)]"
             onClick={(e) => e.stopPropagation()}
           >
-        <button 
-          onClick={onClose}
-          className="absolute right-4 top-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-        >
-          <X size={20} />
-        </button>
+          <div className="absolute right-4 top-4">
+            <IconButton 
+              icon={<X size={18} />}
+              onClick={onClose}
+              variant="ghost"
+              size="sm"
+              aria-label={t('close')}
+            />
+          </div>
 
         <div className="text-center">
           <div className="w-16 h-16 bg-accent/10 text-accent rounded-[12px] flex items-center justify-center mx-auto mb-6">

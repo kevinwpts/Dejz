@@ -7,6 +7,7 @@ import { TranslationKey } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
+import { Button, IconButton } from './ui';
 
 interface VariableAmountUpdateModalProps {
   isOpen: boolean;
@@ -89,13 +90,15 @@ export function VariableAmountUpdateModal({
                    {periodName ? `${periodName}` : t('fixedExpense')}
                  </span>
                </div>
-               <button 
-                 type="button"
-                 onClick={onClose}
-                 className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-all active:scale-90 justify-self-end shrink-0 cursor-pointer text-[var(--text-secondary)]"
-               >
-                 <X size={18} strokeWidth={2} />
-               </button>
+               <div className="flex justify-end">
+                 <IconButton 
+                   icon={<X size={18} strokeWidth={2} />}
+                   onClick={onClose}
+                   variant="muted"
+                   size="sm"
+                   aria-label={t('close')}
+                 />
+               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
@@ -142,14 +145,16 @@ export function VariableAmountUpdateModal({
 
             {/* Footer Action Button */}
             <div className="shrink-0 p-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom)+0.5rem)] sm:pb-5 border-t border-[var(--border-color)] bg-[var(--bg-color)]">
-              <button
+              <Button
                 type="button"
                 onClick={handleSave}
-                className="w-full py-3.5 rounded-[12px] bg-accent text-[var(--text-on-accent)] font-semibold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                variant="primary"
+                fullWidth
+                size="lg"
+                icon={<Check size={18} strokeWidth={2.5} />}
               >
-                <Check size={18} strokeWidth={2.5} />
                 {t('save')}
-              </button>
+              </Button>
             </div>
           </motion.div>
         </div>
