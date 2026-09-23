@@ -151,6 +151,14 @@ export default function App() {
 
   const [config, setConfig] = useState<Config | null>(null);
   const [landingLanguage, setLandingLanguage] = useState<Language>(() => {
+    const pathSegments = window.location.pathname.split('/').filter(Boolean);
+    if (pathSegments.length > 0) {
+      const firstSegment = pathSegments[0].toLowerCase();
+      if (['en', 'sv'].includes(firstSegment)) {
+        localStorage.setItem('app_language', firstSegment);
+        return firstSegment as Language;
+      }
+    }
     const saved = localStorage.getItem('app_language');
     return (saved as Language) || 'sv';
   });
@@ -175,9 +183,18 @@ export default function App() {
   const [fixedExpenses, setFixedExpenses] = useState<FixedExpense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>(() => {
-    const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
-    if (["today", "transactions", "analysis", "budget", "profile", "settings", "notifications"].includes(path)) {
-      return path as Tab;
+    const pathSegments = window.location.pathname.split('/').filter(Boolean);
+    let tabSegment = 'today';
+    if (pathSegments.length > 0) {
+      const firstSegment = pathSegments[0].toLowerCase();
+      if (['en', 'sv'].includes(firstSegment)) {
+        tabSegment = pathSegments[1] || 'today';
+      } else {
+        tabSegment = pathSegments[0];
+      }
+    }
+    if (["today", "transactions", "analysis", "budget", "profile", "settings", "notifications"].includes(tabSegment)) {
+      return tabSegment as Tab;
     }
     return "today";
   });
@@ -480,7 +497,13 @@ export default function App() {
         }
 
         let languageToUse = dbSettings.language;
-        if (!languageToUse && landingLanguage) {
+        const pathSegments = window.location.pathname.split('/').filter(Boolean);
+        const urlLang = pathSegments.length > 0 && ['en', 'sv'].includes(pathSegments[0].toLowerCase()) ? pathSegments[0].toLowerCase() : null;
+
+        if (urlLang && urlLang !== languageToUse) {
+          languageToUse = urlLang;
+          dataService.saveSettings(session.user.id, { ...dbSettings, language: urlLang });
+        } else if (!languageToUse && landingLanguage) {
           languageToUse = landingLanguage;
           dataService.saveSettings(session.user.id, { ...dbSettings, language: landingLanguage });
         } else if (languageToUse && languageToUse !== landingLanguage) {
@@ -1081,6 +1104,63 @@ export default function App() {
       statusBarMeta.setAttribute("content", shouldUseDarkMode ? "black-translucent" : "default");
     }
   }, [config?.darkMode, subscriptionStatus, config, session?.user?.email]);
+
+  // --- URL Routing & Language Subpath Sync ---
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const pathSegments = window.location.pathname.split('/').filter(Boolean);
+      let detectedLang: Language = 'sv';
+      let tabSegment = 'today';
+      
+      if (pathSegments.length > 0) {
+        const firstSegment = pathSegments[0].toLowerCase();
+        if (['en', 'sv'].includes(firstSegment)) {
+          detectedLang = firstSegment as Language;
+          tabSegment = pathSegments[1] || 'today';
+        } else {
+          tabSegment = pathSegments[0];
+        }
+      }
+      
+      if (detectedLang !== landingLanguage) {
+        setLandingLanguage(detectedLang);
+        localStorage.setItem('app_language', detectedLang);
+      }
+      
+      if (["today", "transactions", "analysis", "budget", "profile", "settings", "notifications"].includes(tabSegment)) {
+        if (tabSegment !== activeTab) {
+          setActiveTab(tabSegment as Tab);
+        }
+      } else if (activeTab !== 'today') {
+        setActiveTab('today');
+      }
+    };
+
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
+  }, [landingLanguage, activeTab]);
+
+  useEffect(() => {
+    const currentLang = config?.language || landingLanguage;
+    let newPath = '';
+    
+    if (showLanding) {
+      newPath = currentLang === 'en' ? '/en' : '/';
+    } else {
+      if (currentLang === 'en') {
+        newPath = '/en';
+        if (activeTab && activeTab !== 'today') {
+          newPath += `/${activeTab}`;
+        }
+      } else {
+        newPath = activeTab && activeTab !== 'today' ? `/${activeTab}` : '/';
+      }
+    }
+    
+    if (window.location.pathname !== newPath) {
+      window.history.pushState(null, '', newPath);
+    }
+  }, [config?.language, landingLanguage, activeTab, showLanding]);
 
   // --- Auth Logic ---
   useEffect(() => {
