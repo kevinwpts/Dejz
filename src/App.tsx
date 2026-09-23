@@ -3153,7 +3153,7 @@ export default function App() {
       <div
         className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
         style={{
-          height: 'max(env(safe-area-inset-top, 0px), 1px)',
+          height: activeTab === 'today' ? 'max(env(safe-area-inset-top, 0px), 54px)' : 'max(env(safe-area-inset-top, 0px), 1px)',
           backgroundColor: activeTab === 'today' ? '#0EA5E9' : 'var(--bg-color)',
         }}
         aria-hidden="true"
