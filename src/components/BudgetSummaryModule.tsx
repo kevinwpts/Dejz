@@ -139,7 +139,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
         </span>
         <div className="flex items-baseline justify-center gap-1.5">
           <span className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold font-amount tabular-nums tracking-tight ${stats.remainingPeriodCents < 0 ? 'text-danger' : 'text-[var(--text-primary)]'}`}>
-            {Math.round(stats.remainingPeriodCents).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
+            {Math.round(Math.abs(stats.remainingPeriodCents)).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
           </span>
           <span className="text-lg sm:text-xl font-light opacity-60 text-[var(--text-secondary)]">
             {config.currency}
@@ -172,7 +172,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
             {t('baseDailyBudget')}
           </span>
           <span className="text-[12px] sm:text-[14px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
-            {formatAmount(Math.round(stats.remainingPeriodCents / Math.max(1, stats.remainingDays)), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-65">{config.currency || 'kr'}</span>
+            {formatAmount(Math.round(Math.abs(stats.remainingPeriodCents / Math.max(1, stats.remainingDays))), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-65">{config.currency || 'kr'}</span>
           </span>
         </div>
       </div>

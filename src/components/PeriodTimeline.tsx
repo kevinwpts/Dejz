@@ -212,9 +212,6 @@ export function PeriodTimeline({
           const dayWeekday = dayDate.toLocaleDateString(locale, { weekday: 'short' });
           const dayWeekdayShort = dayWeekday.slice(0, 3);
 
-          const hasSpend = (day.daySpent || 0) > 0;
-          const hasTx = (day.hasTransactions || (day.transactions?.length || 0) > 0);
-
           return (
             <motion.button
               key={`${day.date}-${index}`}
@@ -230,7 +227,7 @@ export function PeriodTimeline({
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               whileTap={{ scale: 0.94 }}
-              className={`flex flex-col items-center justify-between min-w-[42px] sm:min-w-[46px] h-[52px] sm:h-[56px] py-1.5 px-1 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
+              className={`flex flex-col items-center justify-center gap-1 min-w-[42px] sm:min-w-[46px] h-[48px] sm:h-[52px] py-1.5 px-1 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
                   ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-2xs dark:bg-white dark:text-black font-semibold'
                   : isRealToday
@@ -255,19 +252,6 @@ export function PeriodTimeline({
               }`}>
                 {dayNumber}
               </span>
-
-              {/* Status / Transaction Dot */}
-              <div className="h-1.5 flex items-center justify-center">
-                {isSelected ? (
-                  <div className="w-1 h-1 rounded-full bg-[var(--text-on-accent)] dark:bg-black opacity-80" />
-                ) : hasTx || hasSpend ? (
-                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-primary)] opacity-70" />
-                ) : isRealToday ? (
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500/80 dark:bg-blue-400" />
-                ) : (
-                  <div className="w-1 h-1 rounded-full bg-transparent" />
-                )}
-              </div>
             </motion.button>
           );
         })}

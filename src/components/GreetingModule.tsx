@@ -102,10 +102,15 @@ export function GreetingModule({
     return str.charAt(0).toUpperCase() + str.slice(1);
   }, [language]);
 
-  const selectedDayData = useMemo(() => {
+  const _selectedDayData = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return null;
     return calendarDays.find((d: any) => d.date && d.date.getTime() === selected.getTime());
   }, [calendarDays, selected]);
+
+  const todayDayData = useMemo(() => {
+    if (!calendarDays || calendarDays.length === 0) return null;
+    return calendarDays.find((d: any) => d.isToday) || calendarDays[0];
+  }, [calendarDays]);
 
   let topLabel: React.ReactNode = '';
   let displayAmount = 0;
@@ -115,30 +120,14 @@ export function GreetingModule({
     topLabel = t('plannedDailyBudget');
     displayAmount = stats?.baseDailyBudgetCents || 0;
     isNegative = false;
-  } else if (diffDays === 0) {
+  } else {
     topLabel = t('leftToday');
     displayAmount = Math.round(availableForD || 0);
     isNegative = availableForD < 0;
-  } else if (diffDays === -1) {
-    topLabel = t('yesterdayYouSpent');
-    displayAmount = selectedDayData ? selectedDayData.daySpent : 0;
-    isNegative = false;
-  } else if (diffDays < -1) {
-    topLabel = t('onDateYouSpent', { date: selected.toLocaleDateString(language === 'en' ? 'en-US' : 'sv-SE', { month: 'short', day: 'numeric' }) });
-    displayAmount = selectedDayData ? selectedDayData.daySpent : 0;
-    isNegative = false;
-  } else if (diffDays === 1) {
-    topLabel = t('tomorrowYouCanSpend');
-    displayAmount = selectedDayData ? selectedDayData.availableForD : 0;
-    isNegative = displayAmount < 0;
-  } else {
-    topLabel = t('onDateYouCanSpend', { date: selected.toLocaleDateString(language === 'en' ? 'en-US' : 'sv-SE', { month: 'short', day: 'numeric' }) });
-    displayAmount = selectedDayData ? selectedDayData.availableForD : 0;
-    isNegative = displayAmount < 0;
   }
 
   // Calculate daily progress bar values
-  const spentToday = selectedDayData ? selectedDayData.daySpent : 0;
+  const spentToday = todayDayData ? todayDayData.daySpent : 0;
   const dayBudgetTotal = Math.max(1, spentToday + Math.max(0, displayAmount));
   const dayProgressPct = isNegative 
     ? 0 
@@ -148,19 +137,9 @@ export function GreetingModule({
   const dejziInfo = useMemo(() => {
     if (!stats) return null;
 
-    const baseDaily = Math.round(stats.baseDailyBudgetCents || 0);
-    const spentTodayRound = selectedDayData ? Math.round(selectedDayData.daySpent || 0) : 0;
+    const spentTodayRound = todayDayData ? Math.round(todayDayData.daySpent || 0) : 0;
     const remainingToday = Math.round(availableForD || 0);
     const daysLeft = Math.max(1, (stats.remainingDays || 1) - 1);
-
-    if (diffDays !== 0) {
-      return {
-        message: language === 'en' 
-          ? `You are viewing ${selected.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' })}.`
-          : `Du tittar på ${selected.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}.`,
-        detail: null
-      };
-    }
 
     if (remainingToday < 0) {
       const overAmount = Math.abs(remainingToday);
@@ -172,35 +151,30 @@ export function GreetingModule({
         detail: daysLeft > 0 
           ? (language === 'en'
               ? `This reduces your daily allowance by approx. ${formatAmount(perDayDecrease, language)} ${currency}/day over the next ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}.`
-              : `Det gör att ditt utrymme minskar med cirka ${formatAmount(perDayDecrease, language)} ${currency}/dag de kommande ${daysLeft} ${daysLeft === 1 ? 'dagen' : 'dagarna'}.`)
+              : `Det gör att ditt utrymme minskar med cirka ${formatAmount(perDayDecrease, language)} ${currency}/dag de kommande ${daysLeft} ${daysLeft === 1 ? 'dagarna' : 'dagarna'}.`)
           : null,
         type: 'warning'
       };
     }
 
-    const diffFromBase = baseDaily - spentTodayRound;
     const perDayBonus = Math.round(remainingToday / daysLeft);
 
     let msg = '';
     if (spentTodayRound === 0) {
       msg = language === 'en'
-        ? `You haven't spent anything yet today! You have ${formatAmount(remainingToday, language)} ${currency} left.`
+        ? `You haven't spent anything yet today! You have ${formatAmount(remainingToday, language)} ${currency} available.`
         : `Du har inte spenderat något än idag! Du har ${formatAmount(remainingToday, language)} ${currency} kvar.`;
-    } else if (diffFromBase > 0) {
-      msg = language === 'en'
-        ? `You are ${formatAmount(diffFromBase, language)} ${currency} under today's plan.`
-        : `Du ligger ${formatAmount(diffFromBase, language)} ${currency} under dagens plan.`;
     } else {
       msg = language === 'en'
-        ? `You are right on track with today's plan!`
-        : `Du håller dig precis inom dagens plan!`;
+        ? `You have spent ${formatAmount(spentTodayRound, language)} ${currency} today and have ${formatAmount(remainingToday, language)} ${currency} left.`
+        : `Du har spenderat ${formatAmount(spentTodayRound, language)} ${currency} idag och har ${formatAmount(remainingToday, language)} ${currency} kvar.`;
     }
 
     let detail = null;
     if (remainingToday > 0 && daysLeft > 0) {
       detail = language === 'en'
         ? `If you don't spend more today, you get approx. ${formatAmount(perDayBonus, language)} ${currency} more per day for the next ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}.`
-        : `Om du inte spenderar mer idag får du cirka ${formatAmount(perDayBonus, language)} ${currency} mer per dag de kommande ${daysLeft} ${daysLeft === 1 ? 'dagen' : 'dagarna'}.`;
+        : `Om du inte spenderar mer idag får du cirka ${formatAmount(perDayBonus, language)} ${currency} mer per dag de kommande ${daysLeft} ${daysLeft === 1 ? 'dagarna' : 'dagarna'}.`;
     }
 
     return {
@@ -208,7 +182,7 @@ export function GreetingModule({
       detail: detail,
       type: 'success'
     };
-  }, [stats, selectedDayData, availableForD, diffDays, selected, language, currency]);
+  }, [stats, todayDayData, availableForD, language, currency]);
 
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">

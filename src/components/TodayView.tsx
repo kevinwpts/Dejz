@@ -99,6 +99,11 @@ export function TodayView({
     if (setCurrentPeriodDate) setCurrentPeriodDate(now);
   };
 
+  const todayData = useMemo(() => {
+    if (!calendarDays || calendarDays.length === 0) return null;
+    return calendarDays.find((d: any) => d.isToday) || calendarDays[0];
+  }, [calendarDays]);
+
   const selectedDayData = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return null;
     return (
@@ -170,7 +175,7 @@ export function TodayView({
       >
         <GreetingModule
           userName={userName}
-          availableForD={selectedDayData?.availableForD || 0}
+          availableForD={todayData?.availableForD || stats?.availableForD || 0}
           currency={config.currency}
           isToday={!!selectedDayData?.isToday}
           date={normalizedSelectedDate}
