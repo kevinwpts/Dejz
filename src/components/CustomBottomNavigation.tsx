@@ -32,9 +32,9 @@ export function CustomBottomNavigation({
   const t = (key: TranslationKey) => translations[language]?.[key] || translations["sv"]?.[key] || key;
 
   return (
-    <div className="fixed bottom-[calc(3px+env(safe-area-inset-bottom,0px))] sm:bottom-[calc(6px+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 px-4 sm:px-6 pointer-events-none flex justify-center">
+    <div className="fixed bottom-[calc(6px+env(safe-area-inset-bottom,0px))] sm:bottom-[calc(10px+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 px-3 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
-        className="w-[84%] sm:w-[76%] max-w-[380px] sm:max-w-[400px] h-[56px] sm:h-[60px] rounded-full px-4 sm:px-5 bg-black/95 text-white backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)] flex items-center justify-between gap-2 pointer-events-auto border border-white/10"
+        className="w-[92%] sm:w-[84%] max-w-[410px] sm:max-w-[430px] h-[64px] sm:h-[68px] rounded-full px-2.5 sm:px-4 bg-black/95 text-white backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)] flex items-center justify-between gap-1 sm:gap-2 pointer-events-auto border border-white/10"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 28 }}
@@ -57,14 +57,14 @@ export function CustomBottomNavigation({
         />
 
         {/* 3. Plus Button (Center) */}
-        <div className="flex items-center justify-center shrink-0 px-0.5">
+        <div className="flex items-center justify-center shrink-0 px-1">
           <button
             onClick={() => onAddTransaction("expense")}
-            className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] rounded-full bg-white text-black flex items-center justify-center transition-all duration-200 active:scale-95 hover:bg-neutral-100 hover:scale-105 cursor-pointer shrink-0"
+            className="w-[42px] h-[42px] sm:w-[44px] sm:h-[44px] rounded-full bg-white text-black flex items-center justify-center transition-all duration-200 active:scale-95 hover:bg-neutral-100 hover:scale-105 shadow-md cursor-pointer shrink-0"
             aria-label={language === "sv" ? "Skapa ny utgift" : "New expense"}
           >
             <Plus 
-              size={20} 
+              size={22} 
               strokeWidth={2.4} 
               className="text-black"
             />
@@ -108,18 +108,23 @@ function NavItem({
     <button
       onClick={onClick}
       aria-label={label}
-      className={`flex-1 max-w-[52px] h-[44px] sm:h-[48px] flex items-center justify-center transition-all duration-200 active:scale-95 cursor-pointer select-none rounded-full ${
+      className={`flex-1 flex flex-col items-center justify-center py-1 px-0.5 transition-all duration-200 active:scale-95 cursor-pointer select-none rounded-2xl ${
         isActive
-          ? 'text-white font-semibold'
-          : 'text-white/40 hover:text-white/80'
+          ? 'text-white'
+          : 'text-white/45 hover:text-white/80'
       }`}
     >
       <Icon 
-        size={22} 
+        size={20} 
         strokeWidth={isActive ? (fillOnActive ? 1.5 : 2.2) : 1.8} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
-        className="transition-transform duration-200"
+        className="transition-transform duration-200 mb-0.5"
       />
+      <span className={`text-[10px] sm:text-[11px] leading-tight text-center tracking-tight truncate max-w-[62px] sm:max-w-[70px] ${
+        isActive ? 'text-white font-semibold' : 'text-white/60 font-medium'
+      }`}>
+        {label}
+      </span>
     </button>
   );
 }

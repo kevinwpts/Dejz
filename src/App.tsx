@@ -2078,7 +2078,7 @@ export default function App() {
 
 
   // --- Derived State for UI ---
-  const _calendarDays = useMemo(() => {
+  const calendarDays = useMemo(() => {
     return stats?.days || [];
   }, [stats]);
 
