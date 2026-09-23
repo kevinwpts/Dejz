@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 
-import { X, Sparkles, Bell, User, Search } from 'lucide-react';
+import { X, Bell, User, Search } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
 import { PeriodTimeline } from './PeriodTimeline';
 import { CalendarModal } from './CalendarModal';
@@ -280,8 +280,7 @@ export function GreetingModule({
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           {/* Center Balance Display (Kinetic Variable Typography) */}
           <div className="flex flex-col items-center text-center my-3 relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] font-bold tracking-wider text-white uppercase mb-2 shadow-2xs">
-              <Sparkles size={12} className="text-amber-300" />
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/12 backdrop-blur-md border border-white/15 text-[11px] font-bold tracking-wider text-white uppercase mb-2 shadow-2xs">
               <span>{topLabel}</span>
             </div>
 
@@ -366,24 +365,23 @@ export function GreetingModule({
           onClick={() => setIsCalculationModalOpen(true)}
           className="rounded-[26px] border border-[var(--border-color)]/80 p-5 sm:p-6 bg-[var(--surface-color)] shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer group relative overflow-hidden"
         >
-          <div className="flex justify-between items-center mb-1">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
-              <span>{t('totalRemaining' as any)}</span>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-end pt-2">
-            <div>
+          <div className="grid grid-cols-2 gap-4 items-end">
+            {/* Vänster: Totalt kvar */}
+            <div className="flex flex-col text-left">
+              <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
+                {t('totalRemaining' as any)}
+              </span>
               <div className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] font-amount tracking-tight leading-none">
                 {formatAmount(stats?.remainingPeriodCents || 0, language)}{' '}
-                <span className="text-base font-bold text-[var(--text-secondary)] opacity-70">{currency}</span>
+                <span className="text-sm sm:text-base font-bold text-[var(--text-secondary)] opacity-70 font-sans">{currency}</span>
               </div>
             </div>
-            
-            <div className="text-right">
-              <div className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
+
+            {/* Höger: Nästa lön */}
+            <div className="flex flex-col text-right">
+              <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
                 {t('daysToNextSalary' as any)}
-              </div>
+              </span>
               <div className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] font-amount tracking-tight leading-none">
                 {stats?.remainingDays || 1}{' '}
                 <span className="text-sm font-bold text-[var(--text-secondary)] opacity-70 font-sans">

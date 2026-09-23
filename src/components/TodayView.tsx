@@ -167,12 +167,12 @@ export function TodayView({
       transition={{ duration: 0.4 }}
       className="space-y-4 relative min-h-screen bg-[#080A10] text-[var(--text-primary)] pb-12 overflow-x-hidden"
     >
-      {/* Top 300px Indigo Aura Background (fades completely to dark before content below) */}
-      <div className="absolute top-0 left-0 right-0 h-[290px] sm:h-[310px] bg-gradient-to-b from-[#1E1A52] via-[#141038] to-transparent pointer-events-none z-0" />
+      {/* Top Deep Dark Indigo Aura Background (extends all the way past top safe area under Dynamic Island) */}
+      <div className="absolute -top-[env(safe-area-inset-top,44px)] sm:-top-12 left-0 right-0 h-[320px] sm:h-[340px] bg-gradient-to-b from-[#110E33] via-[#0B0922] via-65% to-transparent pointer-events-none z-0" />
 
-      {/* Top Ambient Light Spotlights (focused tightly behind header and balance) */}
-      <div className="absolute top-0 right-0 w-[360px] h-[250px] bg-gradient-to-br from-blue-500/35 via-sky-400/20 to-indigo-600/20 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="absolute top-[40px] -left-10 w-[260px] h-[200px] bg-purple-600/20 rounded-full blur-3xl pointer-events-none z-0" />
+      {/* Ultra-subtle, dark Ambient Light Spotlights */}
+      <div className="absolute -top-[env(safe-area-inset-top,44px)] right-0 w-[300px] h-[200px] bg-gradient-to-br from-blue-600/10 via-sky-500/5 to-indigo-600/5 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="absolute top-[20px] -left-10 w-[220px] h-[160px] bg-purple-600/08 rounded-full blur-3xl pointer-events-none z-0" />
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}

@@ -3203,25 +3203,23 @@ export default function App() {
       )}
 
       {isDemoMode && (
-        <div className="fixed top-0 left-0 right-0 z-[60] bg-[var(--bg-secondary)]/95 backdrop-blur-xl border-b border-[var(--border-color)] px-4 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 flex items-center justify-between text-xs font-semibold shadow-xs">
-          <div className="max-w-2xl mx-auto w-full flex items-center justify-between px-2 sm:px-4">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
-              </span>
-              <span className="text-xs font-bold text-accent">Demoläge aktivt</span>
-              <span className="hidden sm:inline text-[var(--text-secondary)] font-normal text-[11px]">— Du utforskar appen med exempeldata</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleExitDemo}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-sm"
-            >
-              <span>{t('exitDemo')}</span>
-              <LogOut size={12} strokeWidth={2.5} />
-            </button>
+        <div className="fixed top-[calc(0.4rem+env(safe-area-inset-top))] left-1/2 -translate-x-1/2 z-[60] bg-slate-900/80 dark:bg-slate-950/80 text-white backdrop-blur-xl border border-white/20 px-3.5 py-1.5 rounded-full flex items-center justify-between text-xs font-semibold shadow-lg max-w-[92%] sm:max-w-md w-auto gap-3">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+            </span>
+            <span className="text-xs font-bold text-accent">Demoläge</span>
+            <span className="hidden sm:inline text-slate-300 font-normal text-[11px]">— Exempeldata</span>
           </div>
+          <button
+            type="button"
+            onClick={handleExitDemo}
+            className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-[11px] font-bold shrink-0 cursor-pointer shadow-xs"
+          >
+            <span>{t('exitDemo')}</span>
+            <LogOut size={11} strokeWidth={2.5} />
+          </button>
         </div>
       )}
 
