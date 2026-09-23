@@ -352,12 +352,22 @@ export function LandingPage({
 
       <main>
         {/* 2. HERO */}
-        <section className="pt-12 sm:pt-20 lg:pt-28 pb-16 sm:pb-24 px-5 sm:px-8 max-w-7xl mx-auto">
+        <section className="relative pt-12 sm:pt-20 lg:pt-28 pb-16 sm:pb-28 px-5 sm:px-8 max-w-7xl mx-auto overflow-hidden">
+          {/* Subtle ambient background glow */}
+          <div 
+            className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[500px] rounded-full aura-blue pointer-events-none -z-10 blur-3xl opacity-60"
+            aria-hidden="true" 
+          />
+          <div 
+            className="absolute top-20 left-10 w-[350px] h-[350px] rounded-full bg-[#A0C5FD]/15 pointer-events-none -z-10 blur-3xl"
+            aria-hidden="true" 
+          />
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Vänster textinnehåll */}
-            <div className="lg:col-span-6 space-y-6 sm:space-y-8">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#A0C5FD]/25 border border-[#A0C5FD]/50 text-[#03070E] text-xs font-bold uppercase tracking-[0.16em]">
-                <span className="w-2 h-2 rounded-full bg-[#A0C5FD]" />
+            <div className="lg:col-span-6 space-y-6 sm:space-y-8 relative z-10">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#A0C5FD]/25 border border-[#A0C5FD]/60 text-[#03070E] text-xs font-bold uppercase tracking-[0.16em] shadow-2xs backdrop-blur-sm">
+                <span className="w-2 h-2 rounded-full bg-[#A0C5FD] animate-pulse" />
                 DIN EKONOMI. DAG FÖR DAG.
               </div>
 
@@ -374,34 +384,72 @@ export function LandingPage({
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
                   <button 
                     onClick={onGetStarted}
-                    className="px-8 py-4 rounded-full bg-[#03070E] text-[#FFFFFF] text-base font-bold hover:bg-[#03070E]/90 active:scale-98 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                    className="px-8 py-4 rounded-full bg-[#03070E] text-[#FFFFFF] text-base font-bold hover:bg-[#03070E]/90 active:scale-98 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer group"
                   >
-                    Kom igång gratis
-                    <ArrowRight size={18} />
+                    <span>Kom igång gratis</span>
+                    <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
                   </button>
                   {onStartDemo && (
                     <button 
                       onClick={onStartDemo}
-                      className="px-7 py-4 rounded-full bg-white border border-black/[0.1] text-[#03070E] text-base font-bold hover:bg-black/[0.02] hover:border-black/20 active:scale-98 transition-all flex items-center justify-center cursor-pointer shadow-2xs"
+                      className="px-7 py-4 rounded-full bg-white/90 backdrop-blur-md border border-black/[0.08] text-[#03070E] text-base font-bold hover:bg-white hover:border-black/20 active:scale-98 transition-all flex items-center justify-center cursor-pointer shadow-xs"
                     >
                       Testa demo
                     </button>
                   )}
                 </div>
 
-                <p className="text-xs sm:text-sm text-[#8C94A0] font-medium pt-1">
+                <p className="text-xs sm:text-sm text-[#8C94A0] font-medium pt-1 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
                   Ingen bankkoppling • Enkelt att komma igång
                 </p>
               </div>
             </div>
 
-            {/* Höger: Dejz Home Mockup */}
-            <div className="lg:col-span-6 w-full flex justify-center items-center py-2 sm:py-4">
-              <div className="relative mx-auto max-w-[280px] sm:max-w-[315px] lg:max-w-[350px] w-full flex justify-center">
+            {/* Höger: Dejz Home Mockup med djup och svävande micro-badges */}
+            <div className="lg:col-span-6 w-full flex justify-center items-center py-2 sm:py-4 relative">
+              {/* Bakomliggande ljusflare */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+                <div className="w-[320px] sm:w-[420px] h-[320px] sm:h-[420px] rounded-full bg-[#A0C5FD]/30 blur-3xl" />
+              </div>
+
+              {/* Svävande badge 1 - Lön inkommen (synlig desktop/tablet) */}
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: [0, -6, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="hidden sm:flex absolute -left-4 top-16 z-20 items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-md border border-black/[0.07] shadow-md select-none"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#10b981]/15 text-[#10b981] flex items-center justify-center text-xs font-black">
+                  +
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#8C94A0]">Lön inkommen</p>
+                  <p className="text-sm font-extrabold text-[#03070E] font-amount">+29 500 kr</p>
+                </div>
+              </motion.div>
+
+              {/* Svävande badge 2 - Dejzi dagsbudget */}
+              <motion.div 
+                initial={{ opacity: 0, y: -15 }}
+                animate={{ opacity: 1, y: [0, 6, 0] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="hidden sm:flex absolute -right-4 bottom-20 z-20 items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/95 backdrop-blur-md border border-black/[0.07] shadow-md select-none"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#A0C5FD]/25 text-[#03070E] flex items-center justify-center text-sm">
+                  🌼
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#8C94A0]">Kvar idag</p>
+                  <p className="text-sm font-extrabold text-[#03070E] font-amount">1 828 kr</p>
+                </div>
+              </motion.div>
+
+              <div className="relative mx-auto max-w-[280px] sm:max-w-[315px] lg:max-w-[350px] w-full flex justify-center z-10">
                 <img 
                   src="/hero_mockup.png" 
                   alt="Dejz app – Se exakt vad du kan spendera idag" 
-                  className="w-full h-auto object-contain select-none hover:scale-[1.015] transition-transform duration-300" 
+                  className="w-full h-auto object-contain select-none hover:scale-[1.015] transition-transform duration-300 drop-shadow-xl" 
                 />
               </div>
             </div>
@@ -514,14 +562,15 @@ export function LandingPage({
               </div>
             </div>
 
-            {/* Steg 04 */}
-            <div className="p-8 rounded-[28px] bg-white border border-black/[0.07] space-y-5">
-              <span className="text-3xl font-extrabold text-[#03070E] tracking-tight block">04</span>
-              <div className="space-y-2">
-                <h3 className="text-xl font-extrabold text-[#03070E] tracking-tight">
+            {/* Steg 04 (Hero highlight i obsidian #03070E) */}
+            <div className="p-8 rounded-[28px] bg-[#03070E] text-white border border-white/10 space-y-5 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#A0C5FD]/15 rounded-full blur-2xl pointer-events-none" />
+              <span className="text-3xl font-extrabold text-[#A0C5FD] tracking-tight block">04</span>
+              <div className="space-y-2 relative z-10">
+                <h3 className="text-xl font-extrabold text-[#FFFFFF] tracking-tight">
                   Se vad du kan spendera idag
                 </h3>
-                <p className="text-sm sm:text-base text-[#525866] font-normal leading-relaxed">
+                <p className="text-sm sm:text-base text-[#94A0B8] font-normal leading-relaxed">
                   Dejz räknar ut din dagsbudget och håller den uppdaterad.
                 </p>
               </div>

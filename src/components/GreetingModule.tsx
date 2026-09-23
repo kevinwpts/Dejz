@@ -222,42 +222,48 @@ export function GreetingModule({
       </div>
 
       {/* 1. Dagsbudget Hero Card */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1, duration: 0.5 }}
-        className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center"
-      >
-        <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2.5 block">
-          {topLabel}
-        </span>
-        <div className="flex items-baseline justify-center gap-1.5">
-          <AnimatedNumber 
-            value={displayAmount} 
-            className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
-              isNegative ? 'text-danger' : ''
-            }`}
-            formatter={(val) => formatAmount(val, language)}
-          />
-          <span className={`text-base sm:text-lg font-light opacity-60 ${
-            isNegative ? 'text-danger' : 'text-[var(--text-secondary)]'
-          }`}>
-            {currency}
+      <div className="relative">
+        <div 
+          className="absolute inset-0 bg-[#A0C5FD]/25 rounded-[32px] blur-2xl -z-10 pointer-events-none transform -translate-y-1 scale-95 opacity-70" 
+          aria-hidden="true" 
+        />
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center relative overflow-hidden"
+        >
+          <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2.5 block">
+            {topLabel}
           </span>
-        </div>
-
-        {/* Progress bar under Kvar idag */}
-        <div className="w-full mt-5">
-          <div className="w-full h-2 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
-            <div 
-              className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                isNegative || dayProgressPct < 10 ? 'bg-danger' : 'bg-[var(--accent-color)]'
+          <div className="flex items-baseline justify-center gap-1.5">
+            <AnimatedNumber 
+              value={displayAmount} 
+              className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
+                isNegative ? 'text-danger' : ''
               }`}
-              style={{ width: `${dayProgressPct}%` }}
+              formatter={(val) => formatAmount(val, language)}
             />
+            <span className={`text-base sm:text-lg font-light opacity-60 ${
+              isNegative ? 'text-danger' : 'text-[var(--text-secondary)]'
+            }`}>
+              {currency}
+            </span>
           </div>
-        </div>
-      </motion.div>
+
+          {/* Progress bar under Kvar idag */}
+          <div className="w-full mt-5">
+            <div className="w-full h-2 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
+              <div 
+                className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
+                  isNegative || dayProgressPct < 10 ? 'bg-danger' : 'bg-[var(--accent-color)]'
+                }`}
+                style={{ width: `${dayProgressPct}%` }}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Dejzi Mascot Card */}
       {dejziInfo && (

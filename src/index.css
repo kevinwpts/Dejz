@@ -86,6 +86,28 @@ h6 {
   }
 }
 
+@utility bg-grid-pattern {
+  background-image: radial-gradient(rgba(3, 7, 14, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@utility bg-grid-pattern-dark {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@utility aura-blue {
+  background: radial-gradient(circle, rgba(160, 197, 253, 0.35) 0%, rgba(160, 197, 253, 0.08) 50%, transparent 75%);
+}
+
+@utility card-tactile {
+  border: 1px solid rgba(3, 7, 14, 0.06);
+  box-shadow: 
+    0 1px 3px rgba(3, 7, 14, 0.02),
+    0 6px 16px rgba(3, 7, 14, 0.04),
+    0 16px 36px rgba(3, 7, 14, 0.04);
+}
+
 :root {
   font-size: 100%;
   -webkit-font-smoothing: antialiased;

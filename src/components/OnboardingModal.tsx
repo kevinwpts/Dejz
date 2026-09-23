@@ -276,7 +276,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         <button 
                           onClick={handleNext}
                           disabled={!fullName.trim()}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs hover:opacity-95 font-sans"
+                          className="w-full bg-[#03070E] text-[#FFFFFF] hover:bg-[#03070E]/90 dark:bg-[#FFFFFF] dark:text-[#03070E] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm font-sans"
                         >
                           <span>{t('next' as any)}</span>
                           <ArrowRight size={18} strokeWidth={2.5} />
@@ -352,7 +352,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       <div className="pt-2">
                         <button 
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95 font-sans"
+                          className="w-full bg-[#03070E] text-[#FFFFFF] hover:bg-[#03070E]/90 dark:bg-[#FFFFFF] dark:text-[#03070E] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm font-sans"
                         >
                           <span>{t('next' as any)}</span>
                           <ArrowRight size={18} strokeWidth={2.5} />
@@ -414,7 +414,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       <div className="pt-2">
                         <button 
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95 font-sans"
+                          className="w-full bg-[#03070E] text-[#FFFFFF] hover:bg-[#03070E]/90 dark:bg-[#FFFFFF] dark:text-[#03070E] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm font-sans"
                         >
                           <span>{t('next' as any)}</span>
                           <ArrowRight size={18} strokeWidth={2.5} />
@@ -476,7 +476,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       <div className="pt-2">
                         <button 
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95 font-sans"
+                          className="w-full bg-[#03070E] text-[#FFFFFF] hover:bg-[#03070E]/90 dark:bg-[#FFFFFF] dark:text-[#03070E] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm font-sans"
                         >
                           <span>{t('next' as any)}</span>
                           <ArrowRight size={18} strokeWidth={2.5} />
@@ -571,7 +571,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       <button 
                         onClick={handleSave}
                         disabled={isUpdating}
-                        className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-xs cursor-pointer hover:opacity-95 font-sans"
+                        className="w-full bg-[#03070E] text-[#FFFFFF] hover:bg-[#03070E]/90 dark:bg-[#FFFFFF] dark:text-[#03070E] h-[52px] rounded-full font-bold text-sm sm:text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm cursor-pointer font-sans"
                       >
                         {isUpdating ? (
                           <Loader2 size={18} className="animate-spin" />

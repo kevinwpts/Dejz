@@ -38,11 +38,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary:
-        'bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-95 shadow-xs',
+        'bg-[#03070E] text-[#FFFFFF] hover:bg-[#03070E]/90 dark:bg-[#FFFFFF] dark:text-[#03070E] dark:hover:bg-[#FFFFFF]/90 shadow-sm',
+      dark:
+        'bg-[#03070E] text-[#FFFFFF] hover:bg-[#03070E]/90 dark:bg-[#FFFFFF] dark:text-[#03070E] dark:hover:bg-[#FFFFFF]/90 shadow-sm',
       accent:
         'bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-95 shadow-xs',
-      dark:
-        'bg-[#03070E] text-[#FFFFFF] hover:bg-[#03070E]/90 dark:bg-[#FFFFFF] dark:text-[#03070E] dark:hover:bg-[#FFFFFF]/90 shadow-xs',
       secondary:
         'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] shadow-2xs',
       outline:
