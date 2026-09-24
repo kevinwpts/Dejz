@@ -17,7 +17,6 @@ export function NumberPad({
 }: NumberPadProps) {
   const livePreview = formatLiveMathPreview(value);
   const currentNum = parseMathAmount(value);
-  const isExpression = hasMathOperators(value);
 
   const handleDigit = (digit: string) => {
     const raw = (value || '').trim();
@@ -103,200 +102,198 @@ export function NumberPad({
   const isValueValid = Boolean(value && value.trim().length > 0 && value.trim() !== '0');
 
   return (
-    <div className={`w-full flex flex-col gap-1.5 select-none ${className}`}>
-      {/* Quick Splits / Math Actions & Live Result */}
-      <div className="flex items-center justify-between gap-1.5 px-0.5">
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => handleQuickDivide(2)}
-            disabled={!isValueValid}
-            className="px-2.5 py-1 rounded-[10px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[12px] font-bold text-[var(--text-primary)] border border-[var(--border-color)]/60 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-2xs cursor-pointer"
-            title="Dela på 2"
-          >
-            <span className="text-[var(--accent-color)]">÷</span>2
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickDivide(3)}
-            disabled={!isValueValid}
-            className="px-2.5 py-1 rounded-[10px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[12px] font-bold text-[var(--text-primary)] border border-[var(--border-color)]/60 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-2xs cursor-pointer"
-            title="Dela på 3"
-          >
-            <span className="text-[var(--accent-color)]">÷</span>3
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickDivide(4)}
-            disabled={!isValueValid}
-            className="px-2.5 py-1 rounded-[10px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[12px] font-bold text-[var(--text-primary)] border border-[var(--border-color)]/60 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-2xs cursor-pointer"
-            title="Dela på 4"
-          >
-            <span className="text-[var(--accent-color)]">÷</span>4
-          </button>
-        </div>
+    <div className={`w-full flex flex-col gap-2 select-none ${className}`}>
+      {/* Live calculation banner if expression active */}
+      {livePreview !== null && (
+        <button
+          type="button"
+          onClick={handleEvaluate}
+          className="w-full flex items-center justify-between px-3.5 py-2 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-bold shadow-xs transition-all active:scale-[0.99] cursor-pointer"
+          title="Klicka för att verkställa beräkningen"
+        >
+          <span className="opacity-90">Beräknat belopp:</span>
+          <span className="text-sm font-extrabold flex items-center gap-1">
+            = {livePreview} {currency}
+            <span className="text-[10px] font-normal bg-white/20 px-1.5 py-0.5 rounded-md ml-1.5">Verkställ</span>
+          </span>
+        </button>
+      )}
 
-        {livePreview !== null ? (
-          <button
-            type="button"
-            onClick={handleEvaluate}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-[10px] bg-[var(--accent-color)] text-[var(--text-on-accent)] text-[12px] font-bold shadow-2xs transition-all active:scale-95 cursor-pointer"
-            title="Verkställ beräkning"
-          >
-            <span>=</span>
-            <span>{livePreview} {currency}</span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleClear}
-            disabled={!value || value === '0'}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-[10px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-danger text-[11px] font-semibold border border-[var(--border-color)]/60 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
-            title="Rensa belopp"
-          >
-            <RotateCcw size={12} strokeWidth={2} />
-            <span>Rensa</span>
-          </button>
-        )}
-      </div>
+      {/* Operators & Splits Toolbar (Placed above the full-width number pad) */}
+      <div className="grid grid-cols-8 gap-1.5 w-full">
+        {/* Quick Splits */}
+        <button
+          type="button"
+          onClick={() => handleQuickDivide(2)}
+          disabled={!isValueValid}
+          className="h-9.5 flex items-center justify-center rounded-[12px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[11px] sm:text-xs font-bold text-[var(--text-primary)] border border-[var(--border-color)]/60 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          title="Dela på 2"
+        >
+          <span className="text-[var(--accent-color)]">÷</span>2
+        </button>
+        <button
+          type="button"
+          onClick={() => handleQuickDivide(3)}
+          disabled={!isValueValid}
+          className="h-9.5 flex items-center justify-center rounded-[12px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[11px] sm:text-xs font-bold text-[var(--text-primary)] border border-[var(--border-color)]/60 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          title="Dela på 3"
+        >
+          <span className="text-[var(--accent-color)]">÷</span>3
+        </button>
+        <button
+          type="button"
+          onClick={() => handleQuickDivide(4)}
+          disabled={!isValueValid}
+          className="h-9.5 flex items-center justify-center rounded-[12px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[11px] sm:text-xs font-bold text-[var(--text-primary)] border border-[var(--border-color)]/60 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          title="Dela på 4"
+        >
+          <span className="text-[var(--accent-color)]">÷</span>4
+        </button>
 
-      {/* 4-Column Number & Operator Pad */}
-      <div className="grid grid-cols-4 gap-1.5">
-        {/* Row 1 */}
-        <button
-          type="button"
-          onClick={() => handleDigit('7')}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
-        >
-          7
-        </button>
-        <button
-          type="button"
-          onClick={() => handleDigit('8')}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
-        >
-          8
-        </button>
-        <button
-          type="button"
-          onClick={() => handleDigit('9')}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
-        >
-          9
-        </button>
+        {/* Math Operators: ÷, ×, −, + */}
         <button
           type="button"
           onClick={() => handleOperator('÷')}
           disabled={!isValueValid}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-muted)]/70 text-[var(--accent-color)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--accent-color)]/10 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          className="h-9.5 flex items-center justify-center text-sm sm:text-base font-bold bg-[var(--surface-muted)]/70 text-[var(--accent-color)] rounded-[12px] border border-[var(--border-color)]/50 hover:bg-[var(--accent-color)]/10 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          title="Delat med (÷)"
         >
           ÷
-        </button>
-
-        {/* Row 2 */}
-        <button
-          type="button"
-          onClick={() => handleDigit('4')}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
-        >
-          4
-        </button>
-        <button
-          type="button"
-          onClick={() => handleDigit('5')}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
-        >
-          5
-        </button>
-        <button
-          type="button"
-          onClick={() => handleDigit('6')}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
-        >
-          6
         </button>
         <button
           type="button"
           onClick={() => handleOperator('×')}
           disabled={!isValueValid}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-muted)]/70 text-[var(--accent-color)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--accent-color)]/10 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          className="h-9.5 flex items-center justify-center text-sm sm:text-base font-bold bg-[var(--surface-muted)]/70 text-[var(--accent-color)] rounded-[12px] border border-[var(--border-color)]/50 hover:bg-[var(--accent-color)]/10 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          title="Gånger (×)"
         >
           ×
         </button>
+        <button
+          type="button"
+          onClick={() => handleOperator('−')}
+          disabled={!isValueValid}
+          className="h-9.5 flex items-center justify-center text-sm sm:text-base font-bold bg-[var(--surface-muted)]/70 text-[var(--accent-color)] rounded-[12px] border border-[var(--border-color)]/50 hover:bg-[var(--accent-color)]/10 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          title="Minus (−)"
+        >
+          −
+        </button>
+        <button
+          type="button"
+          onClick={() => handleOperator('+')}
+          disabled={!isValueValid}
+          className="h-9.5 flex items-center justify-center text-sm sm:text-base font-bold bg-[var(--surface-muted)]/70 text-[var(--accent-color)] rounded-[12px] border border-[var(--border-color)]/50 hover:bg-[var(--accent-color)]/10 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          title="Plus (+)"
+        >
+          +
+        </button>
 
-        {/* Row 3 */}
+        {/* Clear / Reset Action */}
+        <button
+          type="button"
+          onClick={handleClear}
+          disabled={!value || value === '0'}
+          className="h-9.5 flex items-center justify-center rounded-[12px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-danger text-xs font-semibold border border-[var(--border-color)]/60 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          title="Rensa belopp"
+        >
+          <RotateCcw size={13} strokeWidth={2} />
+        </button>
+      </div>
+
+      {/* Full-Width 3-Column Number Pad with Taller Buttons */}
+      <div className="grid grid-cols-3 gap-2 w-full">
+        {/* Row 1: 1, 2, 3 */}
         <button
           type="button"
           onClick={() => handleDigit('1')}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
         >
           1
         </button>
         <button
           type="button"
           onClick={() => handleDigit('2')}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
         >
           2
         </button>
         <button
           type="button"
           onClick={() => handleDigit('3')}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
         >
           3
         </button>
+
+        {/* Row 2: 4, 5, 6 */}
         <button
           type="button"
-          onClick={() => handleOperator('−')}
-          disabled={!isValueValid}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-muted)]/70 text-[var(--accent-color)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--accent-color)]/10 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
+          onClick={() => handleDigit('4')}
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
         >
-          −
+          4
+        </button>
+        <button
+          type="button"
+          onClick={() => handleDigit('5')}
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+        >
+          5
+        </button>
+        <button
+          type="button"
+          onClick={() => handleDigit('6')}
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+        >
+          6
         </button>
 
-        {/* Row 4 */}
+        {/* Row 3: 7, 8, 9 */}
+        <button
+          type="button"
+          onClick={() => handleDigit('7')}
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+        >
+          7
+        </button>
+        <button
+          type="button"
+          onClick={() => handleDigit('8')}
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+        >
+          8
+        </button>
+        <button
+          type="button"
+          onClick={() => handleDigit('9')}
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+        >
+          9
+        </button>
+
+        {/* Row 4: Comma, 0, Backspace */}
         <button
           type="button"
           onClick={handleComma}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
         >
           ,
         </button>
         <button
           type="button"
           onClick={() => handleDigit('0')}
-          className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-[var(--surface-color)] text-[var(--text-primary)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
         >
           0
         </button>
         <button
           type="button"
           onClick={handleBackspace}
-          className="h-11 sm:h-12 flex items-center justify-center text-[var(--text-secondary)] hover:text-danger bg-[var(--surface-color)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
+          className="h-[52px] sm:h-[58px] flex items-center justify-center text-[var(--text-secondary)] hover:text-danger bg-[var(--surface-color)] rounded-[16px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all active:scale-95 shadow-2xs cursor-pointer"
           title="Radera"
         >
-          <Delete size={19} strokeWidth={2} />
+          <Delete size={22} strokeWidth={2} />
         </button>
-        {isExpression ? (
-          <button
-            type="button"
-            onClick={handleEvaluate}
-            className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-extrabold bg-[var(--accent-color)] text-[var(--text-on-accent)] rounded-[14px] border border-transparent shadow-xs hover:opacity-95 transition-all active:scale-95 cursor-pointer"
-            title="Beräkna"
-          >
-            =
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => handleOperator('+')}
-            disabled={!isValueValid}
-            className="h-11 sm:h-12 flex items-center justify-center text-lg sm:text-xl font-bold bg-[var(--surface-muted)]/70 text-[var(--accent-color)] rounded-[14px] border border-[var(--border-color)]/50 hover:bg-[var(--accent-color)]/10 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shadow-2xs cursor-pointer"
-          >
-            +
-          </button>
-        )}
       </div>
     </div>
   );

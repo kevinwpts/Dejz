@@ -1097,26 +1097,68 @@ export default function App() {
     });
   };
 
-  // --- Theme Logic: Locked to Light Mode ---
+  // --- Theme Logic: System (default) / Light / Dark ---
   useEffect(() => {
-    document.documentElement.classList.remove("dark");
-    document.documentElement.classList.add("light");
-    document.body.classList.remove("dark");
-    document.body.classList.add("light");
+    const applyTheme = () => {
+      let isDark = false;
+      const themeMode = config?.themeMode || 'system';
 
-    document.documentElement.style.backgroundColor = "#FAFAF8";
-    document.body.style.backgroundColor = "#FAFAF8";
+      if (themeMode === 'dark') {
+        isDark = true;
+      } else if (themeMode === 'light') {
+        isDark = false;
+      } else {
+        // System preference
+        if (typeof window !== 'undefined' && window.matchMedia) {
+          isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+      }
 
-    const metaTags = document.querySelectorAll('meta[name="theme-color"]');
-    if (metaTags.length > 0) {
-      metaTags.forEach((tag) => tag.setAttribute("content", "#FAFAF8"));
-    } else {
-      const meta = document.createElement("meta");
-      meta.setAttribute("name", "theme-color");
-      meta.setAttribute("content", "#FAFAF8");
-      document.head.appendChild(meta);
+      document.documentElement.classList.remove("dark", "light");
+      document.body.classList.remove("dark", "light");
+
+      if (isDark) {
+        document.documentElement.classList.add("dark");
+        document.body.classList.add("dark");
+      } else {
+        document.documentElement.classList.add("light");
+        document.body.classList.add("light");
+      }
+
+      const themeColor = isDark ? "#0B0A12" : "#FAFAF8";
+      document.documentElement.style.backgroundColor = themeColor;
+      document.body.style.backgroundColor = themeColor;
+
+      const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+      if (metaTags.length > 0) {
+        metaTags.forEach((tag) => tag.setAttribute("content", themeColor));
+      } else {
+        const meta = document.createElement("meta");
+        meta.setAttribute("name", "theme-color");
+        meta.setAttribute("content", themeColor);
+        document.head.appendChild(meta);
+      }
+    };
+
+    applyTheme();
+
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleSystemThemeChange = () => {
+        if (!config?.themeMode || config.themeMode === 'system') {
+          applyTheme();
+        }
+      };
+
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+        return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+      } else if (mediaQuery.addListener) {
+        mediaQuery.addListener(handleSystemThemeChange);
+        return () => mediaQuery.removeListener(handleSystemThemeChange);
+      }
     }
-  }, []);
+  }, [config?.themeMode, config?.darkMode]);
 
   // --- URL Routing & Language Subpath Sync ---
   useEffect(() => {
@@ -1440,7 +1482,8 @@ export default function App() {
       initialSpent: 0,
       notifications: { salaryDayReminder: true, weeklySummary: true },
       securityLock: false,
-      darkMode: true,
+      darkMode: false,
+      themeMode: 'system',
       quickChoices: [],
       savingsPot: 0,
       savingsGoals: [],
@@ -1603,6 +1646,7 @@ export default function App() {
           notifications: dbProfile.notifications,
           securityLock: dbProfile.security_lock,
           darkMode: (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null) ? dbProfile.dark_mode : true,
+          themeMode: dbProfile.theme_mode || 'system',
           quickChoices: dbProfile.quick_choices || [],
           savingsPot: dbProfile.savings_pot || 0,
           paymentMethods: normalizePaymentMethods(dbProfile.payment_methods),

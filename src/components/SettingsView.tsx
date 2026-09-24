@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, CreditCard, Tag, Plus, Check, Globe, RotateCcw } from 'lucide-react';
+import { Calendar, CreditCard, Tag, Plus, Check, Globe, RotateCcw, Palette, Sun, Moon, Monitor } from 'lucide-react';
 import { Config, PaydayType, WeekendAdjustment } from '../types';
 import { getActualPayday } from '../utils/date';
 import { Language, TranslationKey, languageInfo } from '../i18n';
@@ -13,7 +13,7 @@ import { CategoryTile } from './CategoryTile';
 import { CategoryIcon } from './CategoryIcon';
 
 interface SettingsViewProps {
-  activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language';
+  activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance';
   onBack: () => void;
   config: Config;
   setConfig: (config: Config) => void;
@@ -38,6 +38,10 @@ interface SettingsViewProps {
 
 const sectionHeaders: Record<Language, Record<string, { title: string; subtitle?: string }>> = {
   sv: {
+    appearance: {
+      title: "Hur vill du att appen ska se ut?",
+      subtitle: "Välj mellan automatiskt systemläge, ljust eller mörkt tema"
+    },
     language: {
       title: "Vilket språk ska appen vara i?",
       subtitle: "Välj det språk du föredrar för gränssnitt och kategorier"
@@ -56,6 +60,10 @@ const sectionHeaders: Record<Language, Record<string, { title: string; subtitle?
     }
   },
   en: {
+    appearance: {
+      title: "How would you like the app to look?",
+      subtitle: "Choose between automatic system mode, light or dark theme"
+    },
     language: {
       title: "Which language should the app be in?",
       subtitle: "Choose your preferred language for interfaces and categories"
@@ -598,9 +606,104 @@ export function SettingsView({
     </div>
   );
 
+  const renderAppearanceSettings = () => {
+    const currentMode = config.themeMode || 'system';
+
+    const options: { id: 'system' | 'light' | 'dark'; label: string; desc: string; icon: any }[] = [
+      {
+        id: 'system',
+        label: t('themeSystem' as any) || 'System',
+        desc: t('themeSystemDesc' as any) || 'Följer enhetens automatiska läge',
+        icon: Monitor
+      },
+      {
+        id: 'light',
+        label: t('themeLight' as any) || 'Ljust läge',
+        desc: t('themeLightDesc' as any) || 'Klassiskt ljust utseende',
+        icon: Sun
+      },
+      {
+        id: 'dark',
+        label: t('themeDark' as any) || 'Mörkt läge',
+        desc: t('themeDarkDesc' as any) || 'Mörkt och behagligt för ögonen',
+        icon: Moon
+      }
+    ];
+
+    const handleSelectMode = (mode: 'system' | 'light' | 'dark') => {
+      const isDark = mode === 'dark' 
+        ? true 
+        : mode === 'light' 
+        ? false 
+        : (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      setConfig({
+        ...config,
+        themeMode: mode,
+        darkMode: isDark
+      });
+    };
+
+    return (
+      <div className="space-y-4 max-w-md mx-auto py-1">
+        <SectionHeading 
+          icon={Palette} 
+          title={(sectionHeaders[config.language || 'sv']?.appearance || sectionHeaders.sv.appearance).title} 
+          subtitle={(sectionHeaders[config.language || 'sv']?.appearance || sectionHeaders.sv.appearance).subtitle} 
+        />
+        <div className="flex flex-col gap-2.5">
+          {options.map((opt) => {
+            const isSelected = currentMode === opt.id;
+            const Icon = opt.icon;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => handleSelectMode(opt.id)}
+                className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all active:scale-[0.98] cursor-pointer relative text-left ${
+                  isSelected 
+                    ? 'bg-[var(--accent-color)]/10 border-[var(--accent-color)] text-[var(--text-primary)] shadow-xs' 
+                    : 'bg-[var(--surface-color)] border-[var(--border-color)]/50 text-[var(--text-primary)] hover:border-[var(--border-color)]'
+                }`}
+              >
+                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <div className={`w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 transition-colors ${
+                    isSelected ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)]' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
+                  }`}>
+                    <Icon size={20} strokeWidth={2} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold tracking-tight">{opt.label}</span>
+                      {opt.id === 'system' && (
+                        <span className="text-[10px] font-semibold bg-[var(--accent-color)]/15 text-[var(--accent-color)] px-2 py-0.5 rounded-full">
+                          Förvalt
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] opacity-80 mt-0.5 truncate">{opt.desc}</p>
+                  </div>
+                </div>
+                <div className="relative flex items-center justify-center flex-shrink-0 ml-3">
+                  {isSelected ? (
+                    <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
+                      <Check size={12} strokeWidth={3} />
+                    </div>
+                  ) : (
+                    <div className="w-5 h-5 rounded-full border border-[var(--border-color)]/70 opacity-60" />
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div key={activeSection}>
+          {activeSection === 'appearance' && renderAppearanceSettings()}
           {activeSection === 'salary' && renderSalarySettings()}
           {activeSection === 'categories' && renderCategoriesSettings()}
           {activeSection === 'paymentMethods' && renderPaymentMethodsSettings()}

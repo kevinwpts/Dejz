@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Moon, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal } from 'lucide-react';
+import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Moon, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -306,15 +306,18 @@ export function ProfileView({
             />
             <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <SettingsMenuItem 
-              icon={Moon} 
-              label={t('darkMode')} 
-              iconBgColor="bg-warning/10"
-              iconTextColor="text-warning"
+              icon={Palette} 
+              label={t('appearance' as any) || 'Utseende'} 
+              iconBgColor="bg-purple-500/10 dark:bg-purple-400/10"
+              iconTextColor="text-purple-600 dark:text-purple-400"
+              onClick={() => handleSectionClick('appearance')}
               rightNode={(
-                <ToggleSwitch 
-                  isOn={config.darkMode} 
-                  onToggle={() => setConfig({ ...config, darkMode: !config.darkMode })} 
-                />
+                <div className="flex items-center gap-1 text-[var(--text-secondary)]">
+                  <span className="text-xs font-semibold">
+                    {config.themeMode === 'light' ? 'Ljust' : config.themeMode === 'dark' ? 'Mörkt' : 'System'}
+                  </span>
+                  <ChevronRight size={14} strokeWidth={2} className="opacity-60 group-hover:translate-x-0.5 transition-transform" />
+                </div>
               )}
             />
             <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />

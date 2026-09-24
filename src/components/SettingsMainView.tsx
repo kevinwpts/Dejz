@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Tag, CreditCard, Globe } from 'lucide-react';
+import { Calendar, Tag, CreditCard, Globe, Palette } from 'lucide-react';
 import { Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -26,7 +26,7 @@ interface SettingsMainViewProps {
   onResetAll: () => void;
   onTriggerProUpgradeModal?: () => void;
   onNavigate: (tab: string, section?: string) => void;
-  initialSection?: 'main' | 'salary' | 'categories' | 'paymentMethods' | 'language';
+  initialSection?: 'main' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance';
 }
 
 export function SettingsMainView({
@@ -133,6 +133,12 @@ export function SettingsMainView({
           title={t('language')}
           subtitle={t('settings_language_desc')}
           onClick={() => handleSectionClick('language')}
+        />
+        <ListRow
+          icon={<Palette size={18} strokeWidth={1.5} />}
+          title={t('appearance' as any) || 'Utseende'}
+          subtitle={t('settings_appearance_desc' as any) || 'Välj ljust, mörkt eller systemläge'}
+          onClick={() => handleSectionClick('appearance')}
         />
       </Card>
     </motion.div>

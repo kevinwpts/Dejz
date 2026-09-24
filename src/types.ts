@@ -95,6 +95,7 @@ export interface Config {
   };
   securityLock: boolean;
   darkMode: boolean;
+  themeMode?: 'system' | 'light' | 'dark';
   quickChoices: QuickChoice[];
   savingsPot: number;
   savingsGoals: SavingsGoal[];
