@@ -20,7 +20,10 @@ import {
   Calendar,
   Clock,
   ArrowUp,
-  Star
+  Star,
+  Smartphone,
+  Tablet,
+  Laptop
 } from 'lucide-react';
 import { TranslationKey, Language, languageInfo } from '../i18n';
 import { PolicyModal } from './PolicyModal';
@@ -586,6 +589,138 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
           </div>
         </section>
 
+        {/* Device Sync Showcase Section */}
+        <section id="device-sync" className="w-full bg-[var(--bg-color)] border-b border-[var(--border-color)] py-20 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8">
+            <div className="text-center space-y-3 mb-16 max-w-2xl mx-auto">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-3 py-1 rounded-full">
+                {getL10n('Alltid synkat • Överallt', 'Always Synced • Everywhere', 'Alltid synkronisert • Overalt', 'Altid synkroniseret • Overalt', 'Aina synkronoitu • Kaikkialla')}
+              </span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-primary)] pt-1">
+                {getL10n('Mobil, padda eller dator – allt hänger ihop', 'Phone, tablet, or computer – it all syncs', 'Mobil, nettbrett eller PC – alt henger sammen', 'Mobil, tablet eller computer – det hele synkroniseres', 'Puhelin, tabletti tai tietokone – kaikki synkronoituu')}
+              </h2>
+              <p className="text-sm sm:text-base text-[var(--text-secondary)] font-medium">
+                {getL10n('Logga ett kaffe på språng i mobilen, kolla dagsbudgeten på surfplattan i soffan eller planera månaden på skärmen. Dejz synkar allt på en mikrosekund oavsett enhet.', 'Log a coffee on the go, check your daily budget on your tablet, or plan on your desktop. Dejz syncs everything in a split second on any device.', 'Registrer en kaffe på farten på mobilen, sjekk dagsbudsjettet på nettbrettet i sofaen, eller planlegg måneden på PC-en. Dejz synkroniserer alt på et mikrosekund uansett enhet.', 'Registrer en kaffe på farten på mobilen, tjek dagsbudgettet på din tablet i sofaen, eller planlæg måneden på pc\'en. Dejz synkroniserer alt på et mikrosekund uanset enhed.', 'Kirjaa kahvi lennosta puhelimella, tarkista päiväbudjetti tabletilta sohvalla tai suunnittele kuukausi tietokoneella. Dejz synkronoituu mikrosekunnissa laitteesta riippumatta.')}
+              </p>
+            </div>
+
+            {/* Layout showing 3 stylized devices with instant synchronization lines */}
+            <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch relative">
+              {/* Device 1: Mobile */}
+              <div className="flex flex-col rounded-[32px] bg-[var(--surface-color)] border border-[var(--border-color)] p-6 shadow-xs relative overflow-hidden flex-1 justify-between min-h-[320px] lg:min-h-0">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                      <Smartphone size={16} />
+                    </div>
+                    <div>
+                      <h3 className="text-[15px] font-bold text-[var(--text-primary)]">{getL10n('I mobilen', 'In your pocket', 'På mobilen', 'På mobilen', 'Puhelimessa')}</h3>
+                      <p className="text-[11px] text-[var(--text-secondary)] font-medium">{getL10n('Snabb inmatning i farten', 'Quick logging on the go', 'Hurtig registrering på farten', 'Hurtig indtastning på farten', 'Nopea kirjaus lennosta')}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Visual UI Preview */}
+                  <div className="bg-[var(--bg-color)] rounded-[20px] p-4.5 border border-[var(--border-color)] space-y-3 shadow-2xs relative">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-bold text-[var(--text-secondary)]">☕ Espresso House</span>
+                      <span className="text-[10px] font-bold text-rose-500">-45 kr</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-[var(--border-color)] rounded-full overflow-hidden">
+                      <div className="h-full bg-rose-500 w-[80%] rounded-full" />
+                    </div>
+                    <div className="text-[9px] text-[var(--text-secondary)] font-semibold flex justify-between items-center">
+                      <span>{getL10n('Dagsbudget kvar:', 'Remaining:', 'Dagsbudsjett igjen:', 'Dagsbudget tilbage:', 'Päiväbudjetti jäljellä:')}</span>
+                      <span className="font-amount font-bold text-emerald-500">288 kr</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-[var(--border-color)]/60 text-xs text-[var(--text-secondary)] font-medium flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {getL10n('Mobiloptimerad Web-app & PWA', 'Mobile optimized Web App & PWA', 'Mobiloptimalisert Web-app & PWA', 'Mobiloptimeret Web-app & PWA', 'Mobiilioptimoitu Web-appi & PWA')}
+                </div>
+              </div>
+
+              {/* Device 2: Tablet */}
+              <div className="flex flex-col rounded-[32px] bg-[var(--surface-color)] border border-[var(--border-color)] p-6 shadow-xs relative overflow-hidden flex-1 justify-between min-h-[320px] lg:min-h-0">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                      <Tablet size={16} />
+                    </div>
+                    <div>
+                      <h3 className="text-[15px] font-bold text-[var(--text-primary)]">{getL10n('På surfplattan', 'On your tablet', 'På nettbrettet', 'På din tablet', 'Tabletilla')}</h3>
+                      <p className="text-[11px] text-[var(--text-secondary)] font-medium">{getL10n('Perfekt överblick i soffan', 'Perfect overview from the couch', 'Perfekt oversikt i sofaen', 'Perfekt overblik i sofaen', 'Täydellinen yleiskuva sohvalla')}</p>
+                    </div>
+                  </div>
+
+                  {/* Visual UI Preview */}
+                  <div className="bg-[var(--bg-color)] rounded-[20px] p-4.5 border border-[var(--border-color)] space-y-3.5 shadow-2xs relative">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] font-bold text-[var(--text-primary)]">{getL10n('Septemberanalys', 'September Analysis', 'Septemberanalyse', 'Septemberanalyse', 'Syyskuun analyysi')}</span>
+                      <span className="text-[10px] font-bold text-emerald-500 px-2 py-0.5 rounded-full bg-emerald-500/10">{getL10n('Synkad', 'Synced', 'Synkronisert', 'Synkroniseret', 'Synkronoitu')}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-2 bg-[var(--surface-color)] rounded-[12px] border border-[var(--border-color)] text-center">
+                        <span className="text-[8px] text-[var(--text-secondary)] block font-semibold">{getL10n('Inkomst', 'Income', 'Inntekt', 'Indkomst', 'Tulot')}</span>
+                        <span className="text-xs font-bold text-emerald-500 font-amount">+34 700 kr</span>
+                      </div>
+                      <div className="p-2 bg-[var(--surface-color)] rounded-[12px] border border-[var(--border-color)] text-center">
+                        <span className="text-[8px] text-[var(--text-secondary)] block font-semibold">{getL10n('Fasta', 'Fixed', 'Faste', 'Faste', 'Kiinteät')}</span>
+                        <span className="text-xs font-bold text-rose-500 font-amount">-11 414 kr</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-[var(--border-color)]/60 text-xs text-[var(--text-secondary)] font-medium flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {getL10n('Responsiv design för alla skärmar', 'Responsive layout for all screens', 'Responsivt design for alle skjermer', 'Responsivt design til alle skærme', 'Responsiivinen asettelu kaikille ruuduille')}
+                </div>
+              </div>
+
+              {/* Device 3: Laptop/Desktop */}
+              <div className="flex flex-col rounded-[32px] bg-[var(--surface-color)] border border-[var(--border-color)] p-6 shadow-xs relative overflow-hidden flex-1 justify-between min-h-[320px] lg:min-h-0">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                      <Laptop size={16} />
+                    </div>
+                    <div>
+                      <h3 className="text-[15px] font-bold text-[var(--text-primary)]">{getL10n('På datorn', 'On your computer', 'På PC-en', 'På computeren', 'Tietokoneella')}</h3>
+                      <p className="text-[11px] text-[var(--text-secondary)] font-medium">{getL10n('Planera och analysera i lugn och ro', 'Plan and analyze comfortably', 'Planlegg og analyser i fred og ro', 'Planlæg og analysér i ro og mag', 'Suunnittele ja analysoi rauhassa')}</p>
+                    </div>
+                  </div>
+
+                  {/* Visual UI Preview */}
+                  <div className="bg-[var(--bg-color)] rounded-[20px] p-4.5 border border-[var(--border-color)] space-y-3 shadow-2xs relative">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between p-2 bg-[var(--surface-color)] rounded-[12px] border border-[var(--border-color)]">
+                        <span className="text-[9px] text-[var(--text-secondary)] font-semibold">{getL10n('Deltidslön', 'Salary', 'Lønn', 'Løn', 'Palkka')}</span>
+                        <span className="text-[10px] font-bold text-emerald-500 font-amount">+12 400 kr</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-[var(--surface-color)] rounded-[12px] border border-[var(--border-color)]">
+                        <span className="text-[9px] text-[var(--text-secondary)] font-semibold">{getL10n('Hyresrätt', 'Rent', 'Husleie', 'Husleje', 'Vuokra')}</span>
+                        <span className="text-[10px] font-bold text-rose-500 font-amount">-6 500 kr</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-[var(--border-color)]/60 text-xs text-[var(--text-secondary)] font-medium flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {getL10n('Molnsynkronisering i realtid', 'Real-time cloud database sync', 'Skysynkronisering i sanntid', 'Sky-synkronisering i realtid', 'Reaaliaikainen pilvisynkronointi')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Testimonials Section */}
         <section id="testimonials" className="w-full bg-[var(--bg-color)] border-b border-[var(--border-color)] py-20">
           <div className="max-w-7xl mx-auto px-5 sm:px-8">
@@ -676,7 +811,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
 
                       {/* Review Quote */}
                       <p className="text-sm sm:text-base font-semibold text-[var(--text-primary)] leading-relaxed italic">
-                        "{user.quote}"
+                        &ldquo;{user.quote}&rdquo;
                       </p>
                     </div>
 

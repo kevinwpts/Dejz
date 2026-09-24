@@ -3227,7 +3227,7 @@ export default function App() {
       {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop */}
       <div
         className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
-        style={{ height: 'max(env(safe-area-inset-top, 0px), 1px)', backgroundColor: 'var(--bg-color)' }}
+        style={{ height: 'max(env(safe-area-inset-top, 0px), 1px)', backgroundColor: 'transparent' }}
         aria-hidden="true"
       />
 

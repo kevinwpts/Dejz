@@ -115,8 +115,23 @@ export function AnalysisView({
       });
     }
 
+    if (includeVariable) {
+      (config.categories || []).forEach(c => {
+        if (c.budget && c.budget > 0) {
+          const nameTrimmed = c.name.trim();
+          if (!(nameTrimmed in breakdown)) {
+            breakdown[nameTrimmed] = 0;
+          }
+        }
+      });
+    }
+
     const data = Object.entries(breakdown)
-      .filter(([_, value]) => value > 0)
+      .filter(([name, value]) => {
+        if (value > 0) return true;
+        const cat = config.categories?.find(c => c.name.trim().toLowerCase() === name.trim().toLowerCase());
+        return !!(cat?.budget && cat.budget > 0);
+      })
       .map(([name, value]) => {
         // Robust matching: trim and lowercase both sides
         const searchName = name.trim().toLowerCase();
@@ -126,7 +141,7 @@ export function AnalysisView({
         
         // Use the icon from settings if found, otherwise fall back to default emoji
         const icon = cat?.icon || getCategoryIconName(name);
-        return { name, value, color: cat?.color, icon };
+        return { name, value, color: cat?.color, icon, budget: cat?.budget };
       })
       .sort((a, b) => b.value - a.value);
       
@@ -337,64 +352,85 @@ export function AnalysisView({
                 className={isExpanded ? "rounded-[16px] border border-[var(--border-color)] shadow-xs overflow-hidden bg-[var(--surface-color)] transition-all duration-200" : ""}
               >
                 <motion.div 
-                  whileHover={isExpanded ? undefined : { scale: 1.005 }}
+                  whileHover={isExpanded ? undefined : { scale: 1.002 }}
                   whileTap={isExpanded ? undefined : { scale: 0.99 }}
-                  className={`px-[16px] py-[12px] min-h-[72px] flex items-center justify-between gap-[12px] group transition-all duration-200 cursor-pointer ${
+                  className={`px-[16px] py-[12px] min-h-[72px] flex flex-col gap-2.5 group transition-all duration-200 cursor-pointer ${
                     isExpanded 
                       ? 'bg-[var(--surface-color)] border-b border-[var(--border-color)]/30' 
                       : 'bg-[var(--transaction-bg)] border border-[var(--border-color)] rounded-[16px] shadow-xs hover:bg-[var(--surface-muted)]'
                   }`}
                   onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
                 >
-                  <div className="flex items-center gap-[12px] min-w-0 flex-1">
-                    <div 
-                      className="w-[42px] h-[42px] rounded-full flex items-center justify-center shadow-xs shrink-0"
-                      style={{ 
-                        backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
-                        color: '#fff'
-                      }}
-                    >
-                      {isEmojiString(iconName) ? (
-                        <span className="text-[19px] leading-none">{iconName}</span>
-                      ) : Icon ? (
-                        <Icon size={20} strokeWidth={1.75} />
-                      ) : (
-                        <div className="w-2 h-2 rounded-full" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1 flex flex-col justify-center">
-                      <p className={`text-[13px] font-medium leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors ${
-                        isExpanded ? 'text-[var(--accent-color)] font-semibold' : 'text-[var(--text-primary)] group-hover:text-[var(--accent-color)]'
-                      }`}>
-                        {item.name}
-                      </p>
-                      <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
-                        <div className={`flex items-center gap-1 px-2 h-[22px] rounded-full shrink-0 border-none transition-colors ${
-                          isExpanded ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)]' : 'bg-[var(--chip-bg)]'
+                  <div className="flex items-center justify-between gap-[12px] w-full">
+                    <div className="flex items-center gap-[12px] min-w-0 flex-1">
+                      <div 
+                        className="w-[42px] h-[42px] rounded-full flex items-center justify-center shadow-xs shrink-0"
+                        style={{ 
+                          backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
+                          color: '#fff'
+                        }}
+                      >
+                        {isEmojiString(iconName) ? (
+                          <span className="text-[19px] leading-none">{iconName}</span>
+                        ) : Icon ? (
+                          <Icon size={20} strokeWidth={1.75} />
+                        ) : (
+                          <div className="w-2 h-2 rounded-full" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1 flex flex-col justify-center">
+                        <p className={`text-[13px] font-medium leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors ${
+                          isExpanded ? 'text-[var(--accent-color)] font-semibold' : 'text-[var(--text-primary)] group-hover:text-[var(--accent-color)]'
                         }`}>
-                          <span className={`text-[12px] font-medium tracking-tight whitespace-nowrap ${
-                            isExpanded ? 'text-[var(--accent-color)] font-semibold' : 'text-[var(--text-secondary)] opacity-90'
+                          {item.name}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
+                          <div className={`flex items-center gap-1 px-2 h-[22px] rounded-full shrink-0 border-none transition-colors ${
+                            isExpanded ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)]' : 'bg-[var(--chip-bg)]'
                           }`}>
-                            {Math.round((item.value / (totalSpent || 1)) * 100)}%
-                          </span>
+                            <span className={`text-[12px] font-medium tracking-tight whitespace-nowrap ${
+                              isExpanded ? 'text-[var(--accent-color)] font-semibold' : 'text-[var(--text-secondary)] opacity-90'
+                            }`}>
+                              {Math.round((item.value / (totalSpent || 1)) * 100)}%
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
-                    <div className="text-right flex flex-col items-end justify-center">
-                      <p className="text-[13px] font-medium text-[var(--text-primary)] leading-tight whitespace-nowrap tracking-tight">
-                        <span className="font-amount tabular-nums font-semibold">{formatAmount(Math.round(item.value), config.language)}</span>
-                        <span className="text-[10px] font-normal opacity-50 ml-1">{config.currency}</span>
-                      </p>
-                      <p className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5 tabular-nums">
-                        {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
-                      </p>
+                    <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
+                      <div className="text-right flex flex-col items-end justify-center">
+                        <p className="text-[13px] font-medium text-[var(--text-primary)] leading-tight whitespace-nowrap tracking-tight">
+                          <span className="font-amount tabular-nums font-semibold">{formatAmount(Math.round(item.value), config.language)}</span>
+                          <span className="text-[10px] font-normal opacity-50 ml-1">{config.currency}</span>
+                        </p>
+                        <p className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5 tabular-nums">
+                          {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
+                        </p>
+                      </div>
+                      <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[var(--accent-color)]' : 'text-[var(--text-tertiary)]'}`}>
+                        <ChevronDown size={18} strokeWidth={2.2} />
+                      </div>
                     </div>
-                    <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[var(--accent-color)]' : 'text-[var(--text-tertiary)]'}`}>
-                      <ChevronDown size={18} strokeWidth={2.2} />
-                    </div>
                   </div>
+
+                  {/* Elegant Category Budget Progress Bar */}
+                  {item.budget && item.budget > 0 ? (
+                    <div className="w-full pt-1 px-1 border-t border-[var(--border-color)]/20 mt-1">
+                      <div className="flex justify-between items-center text-[11px] font-semibold text-[var(--text-secondary)] mb-1.5">
+                        <span className="opacity-85">Spenderat: {formatAmount(Math.round(item.value), config.language)} {config.currency}</span>
+                        <span className="text-[var(--text-tertiary)] font-normal">Kategoribudget: {formatAmount(item.budget, config.language)} {config.currency}</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-[var(--border-color)]/50 rounded-full overflow-hidden relative">
+                        <div 
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ 
+                            width: `${Math.min((item.value / item.budget) * 100, 100)}%`,
+                            backgroundColor: item.value <= item.budget ? (item.color || 'var(--accent-color)') : '#f59e0b'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
                 </motion.div>
                 
                 <AnimatePresence>

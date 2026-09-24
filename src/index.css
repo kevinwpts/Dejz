@@ -89,7 +89,7 @@ textarea {
   /* Premium Light Theme (Dejz Design System) */
   --bg-color: #F8F9FA;
   --bg-secondary: #F1F3F5;
-  --bg-gradient: #F8F9FA;
+  --bg-gradient: linear-gradient(180deg, #EDEFF2 0%, #F8F9FA 220px, #F8F9FA 100%);
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
@@ -166,7 +166,7 @@ textarea {
   /* Premium Dark Theme Refinements (Dejz Design System) - Soft Near-Black Charcoal */
   --bg-color: #141619;
   --bg-secondary: #181a1e;
-  --bg-gradient: #141619;
+  --bg-gradient: linear-gradient(180deg, #0C0D0F 0%, #141619 220px, #141619 100%);
 
   --surface-color: #1c1f24;
   --surface-gradient: #1c1f24;

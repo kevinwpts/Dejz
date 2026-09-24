@@ -21,7 +21,7 @@ export const translations: Record<Language, any> = {
     log: 'Historik',
     transactions: 'Transaktioner',
     analysis: 'Analys',
-    budget: 'Budget',
+    budget: 'Ekonomi',
     profile: 'Profil',
     settings: 'Inställningar',
     upgrade: 'Uppgradera',
