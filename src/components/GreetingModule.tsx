@@ -40,7 +40,7 @@ interface GreetingModuleProps {
 }
 
 export function GreetingModule({
-  userName,
+  userName: _userName,
   availableForD,
   currency,
   isToday: _isToday,
@@ -211,23 +211,10 @@ export function GreetingModule({
         transition={{ duration: 0.5 }}
         className={`-mx-4 sm:-mx-6 ${negativeMarginClass} ${topPaddingClass} pb-4 px-4 sm:px-6 text-[var(--text-primary)] relative overflow-hidden flex flex-col`}
       >
-        {/* Large Elegant Greeting & Page Title OUTSIDE the Card, like in the Aqua screenshot */}
-        <div className="flex flex-col text-left px-1.5 mb-6 select-none">
-          <h1 className="text-[20px] sm:text-[22px] font-medium text-[var(--text-secondary)] opacity-85 tracking-tight leading-none">
-            {userName ? `Hej ${userName}! 👋` : 'Hej! 👋'}
-          </h1>
-          <h2 className="text-[28px] sm:text-[32px] font-extrabold text-[var(--text-primary)] leading-none mt-2 tracking-tight">
-            {language === 'en' ? 'Daily updates' : 'Dagsbudget-översikt'}
-          </h2>
-        </div>
-
         {/* The Aqua-Inspired Premium Main Rounded Card */}
-        <div className="w-full bg-white dark:bg-[#1C1C1E] border border-black/[0.04] dark:border-white/[0.04] rounded-[32px] p-6 shadow-xs relative overflow-hidden flex flex-col">
+        <div className="w-full bg-white dark:bg-[#1C1C1E] border border-black/[0.04] dark:border-white/[0.04] rounded-[32px] p-6 shadow-xs relative overflow-hidden flex flex-col mt-4">
           {/* Card Header */}
-          <div className="flex items-center justify-between mb-6">
-            <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 tracking-tight uppercase">
-              {language === 'en' ? 'Budget Insights' : 'Dagsbudget-insikter'}
-            </span>
+          <div className="flex items-center justify-end mb-4">
             <button 
               onClick={() => setIsCalculationModalOpen(true)}
               className="w-8 h-8 rounded-full border border-black/[0.08] dark:border-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-all cursor-pointer"
@@ -237,63 +224,34 @@ export function GreetingModule({
             </button>
           </div>
 
-          {/* Two-Column Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-start">
-            {/* Left Column: Big Amount */}
-            <div className="sm:col-span-6 flex flex-col text-left justify-center">
-              <span className="text-xs font-semibold text-[var(--text-secondary)] tracking-wide mb-1.5 block">
-                {topLabel}
+          {/* Clean Stats Row with Totalt kvar and Dagar till lön */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+            <div className="flex flex-col text-left justify-center">
+              <span className="text-xs font-bold text-[var(--text-secondary)] tracking-wider mb-1.5 block uppercase">
+                {t('totalRemaining')}
               </span>
               <div className="flex items-baseline gap-1">
                 <AnimatedNumber 
-                  value={displayAmount} 
+                  value={stats?.remainingPeriodCents || 0} 
                   className={`text-[40px] sm:text-[44px] md:text-[48px] leading-none font-black text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
-                    displayAmount < 0 ? 'text-rose-500' : ''
+                    (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : ''
                   }`}
                   formatter={(val) => formatAmount(val, language)}
                 />
                 <span className={`text-[18px] font-bold ${
-                  displayAmount < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
+                  (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
                 }`}>
                   {currency}
                 </span>
               </div>
             </div>
 
-            {/* Right Column: Mini Sub-metrics Stack */}
-            <div className="sm:col-span-6 flex flex-col gap-2.5 text-left border-t sm:border-t-0 sm:border-l border-black/[0.06] dark:border-white/[0.06] pt-4 sm:pt-0 sm:pl-5">
-              {/* Metric 1: Totalt kvar */}
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-400 shrink-0 shadow-2xs" />
-                <span className="text-xs font-medium text-[var(--text-secondary)]">
-                  {t('totalRemaining')}:
-                </span>
-                <span className="text-xs font-bold text-[var(--text-primary)] font-amount ml-auto">
-                  {formatAmount(stats?.remainingPeriodCents || 0, language)} {currency}
-                </span>
-              </div>
-
-              {/* Metric 2: Dagar till lön */}
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0 shadow-2xs" />
-                <span className="text-xs font-medium text-[var(--text-secondary)]">
-                  {t('daysToNextSalary')}:
-                </span>
-                <span className="text-xs font-bold text-[var(--text-primary)] font-amount ml-auto font-sans">
-                  {stats?.remainingDays || 1} { (stats?.remainingDays || 1) === 1 ? t('oneDay') : t('days') }
-                </span>
-              </div>
-
-              {/* Metric 3: Planerad dagsbudget */}
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-violet-400 shrink-0 shadow-2xs" />
-                <span className="text-xs font-medium text-[var(--text-secondary)]">
-                  {language === 'en' ? 'Base Budget' : 'Planerad dagsbudget'}:
-                </span>
-                <span className="text-xs font-bold text-[var(--text-primary)] font-amount ml-auto">
-                  {formatAmount(stats?.baseDailyBudgetCents || 0, language)} {currency}
-                </span>
-              </div>
+            {/* Elegant Right Side: Dagar till nästa lön Badge */}
+            <div className="flex items-center gap-2.5 bg-sky-50/50 dark:bg-sky-950/20 px-4 py-2.5 rounded-2xl border border-sky-100/30 dark:border-sky-950/10 self-start sm:self-center">
+              <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0 shadow-2xs" />
+              <span className="text-xs font-semibold text-sky-800 dark:text-sky-400">
+                {stats?.remainingDays || 1} { (stats?.remainingDays || 1) === 1 ? t('oneDay') : t('days') } {language === 'en' ? 'to salary' : 'till lön'}
+              </span>
             </div>
           </div>
 

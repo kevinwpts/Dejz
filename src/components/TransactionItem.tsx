@@ -68,9 +68,9 @@ export function TransactionItem({
 
   // Determine actual layout style classes based on variants & props
   let containerClasses = "";
-  let paddingClasses = "px-[16px] py-[12px] min-h-[72px]";
+  let paddingClasses = "px-[18px] py-[15px] min-h-[78px]";
   if (squared) {
-    containerClasses = "bg-transparent rounded-none shadow-none border-b border-[var(--border-color)]/20 last:border-none py-2 px-1";
+    containerClasses = "bg-transparent rounded-none shadow-none border-b border-[var(--border-color)]/20 last:border-none py-3.5 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-[var(--surface-muted)]/60 rounded-none first:rounded-t-[20px] last:rounded-b-[20px] shadow-none border-none";
