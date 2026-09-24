@@ -37,6 +37,53 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   const hasOverride = Boolean(item.isVariable && currentPeriodId && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined);
   const currentAmount = hasOverride ? item.periodOverrides[currentPeriodId] : (item.amount || 0);
 
+  // Format deduction day (e.g., 20e, 1a, 21a in Swedish, or 20th in English)
+  const formatDeductionDay = (day: number | string | undefined, lang: string) => {
+    if (day === undefined || day === null || day === '') return null;
+    const num = Number(day);
+    if (isNaN(num) || num < 1 || num > 31) return null;
+    
+    if (lang === 'en') {
+      const j = num % 10, k = num % 100;
+      if (j === 1 && k !== 11) return `${num}st`;
+      if (j === 2 && k !== 12) return `${num}nd`;
+      if (j === 3 && k !== 13) return `${num}rd`;
+      return `${num}th`;
+    }
+    
+    // Swedish convention: 1a, 2a, 3e, ... 20e, 21a, 22a, 31a
+    const lastDigit = num % 10;
+    const lastTwo = num % 100;
+    const suffix = (lastDigit === 1 || lastDigit === 2) && lastTwo !== 11 && lastTwo !== 12 ? 'a' : 'e';
+    return `${num}${suffix}`;
+  };
+
+  const currentLang = language || config?.language || 'sv';
+  const deductionDayStr = formatDeductionDay(item.deductionDay, currentLang);
+  const paymentMethod = item.paymentMethod ? String(item.paymentMethod).trim() : null;
+
+  let paymentInfo = '';
+  if (deductionDayStr && paymentMethod) {
+    paymentInfo = `${deductionDayStr} via ${paymentMethod}`;
+  } else if (deductionDayStr) {
+    if (type === 'income') {
+      paymentInfo = currentLang === 'en' ? `Arrives on the ${deductionDayStr}` : `Kommer den ${deductionDayStr}`;
+    } else {
+      paymentInfo = currentLang === 'en' ? `Charged on the ${deductionDayStr}` : `Dras den ${deductionDayStr}`;
+    }
+  } else if (paymentMethod) {
+    paymentInfo = `via ${paymentMethod}`;
+  }
+
+  const searchCategory = (item.category || '').trim().toLowerCase();
+  const categoryObj = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
+    c => c.name.trim().toLowerCase() === searchCategory
+  );
+  const iconKey = categoryObj?.icon;
+  const color = categoryObj?.color;
+  const categoryName = item.category ? capitalize(item.category) : '';
+  const shouldShowCategory = !isSaving && item.category && item.category.trim().toLowerCase() !== displayName.trim().toLowerCase();
+
   return (
     <motion.div 
       whileHover={{ scale: 1.005 }}
@@ -63,39 +110,47 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
             {displayName}
           </p>
           <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
-            {!isSaving && (
+            {paymentInfo ? (
+              <div className="flex items-center gap-1.5 min-w-0 overflow-hidden text-[12px] text-[var(--text-secondary)]">
+                <span className="font-medium text-[var(--text-secondary)] opacity-90 whitespace-nowrap shrink-0">
+                  {paymentInfo}
+                </span>
+                {shouldShowCategory && (
+                  <>
+                    <span className="opacity-35 shrink-0">•</span>
+                    <div className="flex items-center gap-1 min-w-0 truncate">
+                      {color && (
+                        <span 
+                          className="w-1.5 h-1.5 rounded-full shrink-0" 
+                          style={{ backgroundColor: color }} 
+                        />
+                      )}
+                      <span className="opacity-75 truncate">
+                        {categoryName}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : !isSaving && item.category ? (
               <div className="flex items-center gap-1 px-2 h-[22px] rounded-full bg-[var(--chip-bg)] shrink-0 max-w-[85%] border-none">
-                {(() => {
-                  const searchCategory = (item.category || '').trim().toLowerCase();
-                  const category = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
-                    c => c.name.trim().toLowerCase() === searchCategory
-                  );
-                  const iconKey = category?.icon;
-                  const color = category?.color;
-                  if (iconKey) {
-                    return (
-                      <CategoryIcon 
-                        icon={iconKey} 
-                        color={color} 
-                        size="xs" 
-                      />
-                    );
-                  }
-                  if (color) {
-                    return (
-                      <span 
-                        className="w-1.5 h-1.5 rounded-full shrink-0" 
-                        style={{ backgroundColor: color }} 
-                      />
-                    );
-                  }
-                  return null;
-                })()}
+                {iconKey ? (
+                  <CategoryIcon 
+                    icon={iconKey} 
+                    color={color} 
+                    size="xs" 
+                  />
+                ) : color ? (
+                  <span 
+                    className="w-1.5 h-1.5 rounded-full shrink-0" 
+                    style={{ backgroundColor: color }} 
+                  />
+                ) : null}
                 <span className="text-[12px] font-medium text-[var(--text-secondary)] opacity-90 tracking-tight whitespace-nowrap">
-                  {capitalize(item.category || '')}
+                  {categoryName}
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
