@@ -3284,17 +3284,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden" style={{ background: 'var(--bg-gradient)' }}>
-      {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop */}
-      <div
-        className="fixed top-0 left-0 right-0 z-[49] pointer-events-none transition-colors duration-200"
-        style={{ 
-          height: 'max(env(safe-area-inset-top, 0px), 0px)', 
-          backgroundColor: (activeTab === 'today' && isAtTop) ? 'transparent' : 'var(--bg-top-color, var(--bg-color))' 
-        }}
-        aria-hidden="true"
-      />
-
+    <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden bg-[var(--bg-color)]">
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 
       <ConfirmModal
