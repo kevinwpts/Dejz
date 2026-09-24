@@ -8,37 +8,19 @@ interface OnboardingCharacterArtProps {
   step: OnboardingStepType;
   days?: number;
   payday?: number;
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
 }
 
-export function OnboardingCharacterArt({ 
-  step, 
-  days = 12, 
-  payday = 25,
-  size = 'md',
-  className = ''
-}: OnboardingCharacterArtProps) {
-  const containerSize = 
-    size === 'sm' ? 'w-24 h-24 sm:w-28 sm:h-28' :
-    size === 'lg' ? 'w-36 h-36 sm:w-40 sm:h-40' :
-    'w-28 h-28 sm:w-32 sm:h-32';
-
-  const innerSize = 
-    size === 'sm' ? 'w-20 h-20 sm:w-24 sm:h-24' :
-    size === 'lg' ? 'w-32 h-32 sm:w-36 sm:h-36' :
-    'w-24 h-24 sm:w-28 sm:h-28';
-
+export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: OnboardingCharacterArtProps) {
   return (
-    <div className={`relative ${containerSize} mx-auto flex items-center justify-center select-none shrink-0 overflow-visible ${className}`}>
+    <div className="relative w-36 h-36 mx-auto flex items-center justify-center select-none py-1 overflow-visible">
       {/* Dynamic Ambient Background Glow */}
       <motion.div
         animate={{
-          scale: [0.95, 1.12, 0.95],
-          opacity: [0.5, 0.8, 0.5],
+          scale: [1, 1.22, 1],
+          opacity: [0.45, 0.75, 0.45],
         }}
         transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-        className={`absolute inset-1 sm:inset-2 rounded-full blur-xl sm:blur-2xl pointer-events-none ${
+        className={`absolute inset-0 rounded-full blur-2xl pointer-events-none ${
           step === 'name' ? 'bg-gradient-to-tr from-emerald-500/40 via-cyan-400/40 to-teal-400/30' :
           step === 'payday' ? 'bg-gradient-to-tr from-amber-500/45 via-yellow-400/40 to-orange-500/30' :
           step === 'income' ? 'bg-gradient-to-tr from-emerald-500/50 via-teal-400/40 to-green-500/30' :
@@ -52,11 +34,11 @@ export function OnboardingCharacterArt({
       {/* Floating Mascot Character Container */}
       <motion.div
         animate={{
-          y: [0, -5, 0],
+          y: [0, -7, 0],
           rotate: [0, 1.2, -1.2, 0],
         }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className={`relative ${innerSize} flex items-center justify-center overflow-visible`}
+        className="relative w-32 h-32 flex items-center justify-center overflow-visible"
       >
         {/* Render Step-Specific Character Artwork */}
         {step === 'name' && <CharacterWelcome />}
