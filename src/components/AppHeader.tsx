@@ -118,7 +118,7 @@ export function AppHeader({
               {/* Profile Avatar Trigger Button */}
               <button
                 onClick={() => onNavigate("profile")}
-                className={`w-[36px] h-[36px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 ${
+                className={`w-[32px] h-[32px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 ${
                   activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
                 } ${
                   useWhiteHeader 
@@ -135,7 +135,7 @@ export function AppHeader({
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <User size={18} strokeWidth={2.2} />
+                  <User size={16} strokeWidth={2.2} />
                 )}
               </button>
   
