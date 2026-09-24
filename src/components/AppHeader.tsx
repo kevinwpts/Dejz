@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { User, Search, ChevronLeft, Bell } from "lucide-react";
+import { User, Search, ChevronLeft, Bell, ChevronDown } from "lucide-react";
 import { DejzLogo } from "./DejzLogo";
+import { UniversalPeriodSelector } from "./UniversalPeriodSelector";
 
 interface AppHeaderProps {
   userName?: string;
@@ -33,12 +34,12 @@ export function AppHeader({
   notificationCount = 0,
   onOpenNotifications,
   isDemoMode,
-  periods: _periods,
-  currentPeriodDate: _currentPeriodDate,
-  onPeriodChange: _onPeriodChange,
-  periodName: _periodName,
-  isCurrentPeriod: _isCurrentPeriod,
-  onOpenCalendarPicker: _onOpenCalendarPicker,
+  periods,
+  currentPeriodDate,
+  onPeriodChange,
+  periodName,
+  isCurrentPeriod,
+  onOpenCalendarPicker,
   activeTab: _activeTab,
 }: AppHeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
@@ -105,7 +106,7 @@ export function AppHeader({
       }`}
     >
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2`}>
-        {/* Left: Back button + Title OR Dejz Logo */}
+        {/* Left: Back button + Title OR Active Period Selector */}
         <div className="flex items-center min-w-0">
           {onBack ? (
             <button
@@ -118,6 +119,25 @@ export function AppHeader({
                   {title}
                 </h1>
               )}
+            </button>
+          ) : periods && periods.length > 0 && currentPeriodDate && onPeriodChange ? (
+            <UniversalPeriodSelector
+              periods={periods}
+              currentDate={currentPeriodDate}
+              onChange={onPeriodChange}
+              periodName={periodName}
+              isCurrentPeriod={isCurrentPeriod}
+              onOpenPicker={onOpenCalendarPicker}
+              variant="header"
+            />
+          ) : periodName ? (
+            <button
+              type="button"
+              onClick={onOpenCalendarPicker}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-color)]/80 text-[var(--text-primary)] text-xs font-bold tracking-tight active:scale-95 transition-all cursor-pointer shadow-2xs"
+            >
+              <span>{periodName}</span>
+              <ChevronDown size={13} className="text-[var(--text-secondary)] opacity-60" />
             </button>
           ) : (
             <button

@@ -98,6 +98,9 @@ export function UniversalPeriodSelector({
             title={periodName || month}
           >
             <div className="flex items-baseline gap-1 min-w-0">
+              {isCurrentPeriod === false && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)] shrink-0 self-center mr-0.5" />
+              )}
               <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate">
                 {month}
               </span>
