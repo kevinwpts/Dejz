@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Moon, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText } from 'lucide-react';
+import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Moon, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -297,6 +297,14 @@ export function ProfileView({
             {t('appSettings')}
           </h4>
           <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-2xl bg-[var(--surface-color)] shadow-xs">
+            <SettingsMenuItem 
+              icon={SlidersHorizontal} 
+              label={config.language === 'en' ? 'Allocate Budget' : 'Fördela budget'} 
+              iconBgColor="bg-accent/10"
+              iconTextColor="text-[var(--accent-color)]"
+              onClick={() => onNavigate('budget', 'allocate')} 
+            />
+            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <SettingsMenuItem 
               icon={Moon} 
               label={t('darkMode')} 

@@ -411,28 +411,6 @@ export function BudgetView({
               {config.currency}
             </span>
           </div>
-
-          {/* Direct connection to Fördela din vardagsbudget */}
-          <div className="w-full pt-4 mt-4 border-t border-[var(--border-color)]/70 flex items-center justify-between gap-3">
-            <div className="text-left min-w-0">
-              <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block leading-tight">
-                {config.language === 'en' ? 'Category Allocation' : 'Fördelat på kategorier'}
-              </span>
-              <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate block mt-0.5">
-                <span className="font-amount tabular-nums font-bold">{totalAllocatedPercentage}%</span> {config.language === 'en' ? 'Done' : 'Klart'}
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleOpenCategoryBudgets}
-              className="h-8.5 px-3.5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 text-[11.5px] sm:text-xs font-bold shadow-2xs cursor-pointer shrink-0"
-            >
-              <SlidersHorizontal size={13} strokeWidth={2.2} />
-              <span>{config.language === 'en' ? 'Allocate' : 'Fördela budget'}</span>
-              <ChevronRight size={13} strokeWidth={2.5} />
-            </button>
-          </div>
         </motion.div>
 
         {/* Core Stats Modules - Standardized, Color-themed & Compact */}
