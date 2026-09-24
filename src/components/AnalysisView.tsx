@@ -339,6 +339,7 @@ export function AnalysisView({
             const budgetInKronor = item.budget ? Math.round((item.budget / 100) * totalIncome) : 0;
             const hasBudget = item.budget !== undefined && item.budget > 0 && budgetInKronor > 0;
             const remainingBudget = budgetInKronor - Math.round(item.value);
+            const showCircle = analysisFilter === 'all';
             
             return (
               <motion.div 
@@ -361,9 +362,9 @@ export function AnalysisView({
                 >
                   <div className="flex items-center justify-between gap-[12px] w-full">
                     <div className="flex items-center gap-[12px] min-w-0 flex-1">
-                      {/* Category Icon with Circular Progress Ring if budgeted */}
+                      {/* Category Icon with Circular Progress Ring if budgeted and in 'all' view */}
                       <div className="relative w-[48px] h-[48px] flex items-center justify-center shrink-0">
-                        {hasBudget && (
+                        {showCircle && (
                           <svg className="absolute top-0 left-0 w-full h-full -rotate-90" viewBox="0 0 48 48">
                             {/* Background Track Circle */}
                             <circle
@@ -381,10 +382,10 @@ export function AnalysisView({
                               cy="24"
                               r="21"
                               fill="none"
-                              stroke={item.value <= budgetInKronor ? (item.color || 'var(--accent-color)') : '#f59e0b'}
+                              stroke={(hasBudget && item.value > budgetInKronor) ? '#f59e0b' : (item.color || 'var(--accent-color)')}
                               strokeWidth="2.5"
                               strokeDasharray={131.95}
-                              strokeDashoffset={131.95 * (1 - Math.min((item.value / budgetInKronor), 1))}
+                              strokeDashoffset={hasBudget ? 131.95 * (1 - Math.min((item.value / budgetInKronor), 1)) : 131.95}
                               strokeLinecap="round"
                               className="transition-all duration-500"
                             />
