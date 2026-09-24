@@ -217,13 +217,13 @@ interface IncomeModalProps {
   categories: Category[];
 }
 
-export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, userId, isPro, categories, paymentMethods, _currentPeriodId }: IncomeModalProps & { paymentMethods: any[], _currentPeriodId?: string, currentPeriodId?: string }) {
+export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, userId, isPro, categories, paymentMethods, _currentPeriodId, initialDeductionDay }: IncomeModalProps & { paymentMethods: any[], _currentPeriodId?: string, currentPeriodId?: string, initialDeductionDay?: number }) {
   useScrollLock(true);
   const [name, setName] = useState(income?.name || '');
   const [note, setNote] = useState(income?.note || '');
   const [amount, setAmount] = useState(formatAmount(income?.amount || ''));
   
-  const [deductionDay, setDeductionDay] = useState(income?.deductionDay || 1);
+  const [deductionDay, setDeductionDay] = useState(income?.deductionDay || initialDeductionDay || 25);
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
   const paymentMethod = typeof income?.paymentMethod === 'string' ? income.paymentMethod : (income?.paymentMethod as any)?.name || firstPaymentMethod;
   const [isVariable, setIsVariable] = useState(income?.isVariable || false);

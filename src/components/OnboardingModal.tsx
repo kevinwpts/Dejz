@@ -289,21 +289,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                   </div>
                 </div>
                 
-                {step !== 'name' && step !== 'goals' && step !== 'midMonth' ? (
-                  <button
-                    onClick={() => {
-                      // Trigger PWA modal after 10 seconds delay as requested by user
-                      setTimeout(() => {
-                        window.dispatchEvent(new CustomEvent('trigger-pwa-modal'));
-                      }, 10000);
-                      handleSave(0);
-                    }}
-                    disabled={isUpdating}
-                    className="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-1.5 rounded-[12px] bg-[var(--surface-color)] border border-[var(--border-color)] transition-all active:scale-95 cursor-pointer flex items-center gap-1 shadow-2xs"
-                  >
-                    <span>{s.skip}</span>
-                  </button>
-                ) : <div />}
+                <div />
               </div>
 
               <div className="flex-1 flex flex-col justify-center">
@@ -730,6 +716,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                 userId={userId}
                 isPro={isPro}
                 paymentMethods={paymentMethods}
+                initialDeductionDay={payday}
               />
             )}
 
