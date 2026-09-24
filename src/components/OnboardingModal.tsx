@@ -36,7 +36,10 @@ const texts = {
     goalsDesc: 'Sätt upp sparmål för framtiden så hjälper Dejz dig att spara smart.',
     addIncome: 'Lägg till inkomst',
     addExpense: 'Lägg till fast utgift',
-    addGoal: 'Lägg till sparmål'
+    addGoal: 'Lägg till sparmål',
+    midMonthTitle: 'Starta mitt i perioden',
+    midMonthDesc: 'Om du börjar med appen mitt i månaden finns det risk att du redan har gjort av med pengar, och gör det lite svårare att få helt rätt på allt. Men var lugn, nästa månad eller period kommer det bli toppen. Men för att uppskatta så att vi kan fortsätta resterande period fram till nästa lön, hur mycket tror du att du har spenderat om du bortser från dina fasta utgifter?',
+    midMonthPlaceholder: 'T.ex. 6000'
   },
   en: {
     stepOf: (step: number, total: number) => `Step ${step} of ${total}`,
@@ -61,7 +64,10 @@ const texts = {
     goalsDesc: 'Set up savings goals for the future, and Dejz will help you save smart.',
     addIncome: 'Add income',
     addExpense: 'Add fixed expense',
-    addGoal: 'Add savings goal'
+    addGoal: 'Add savings goal',
+    midMonthTitle: 'Starting mid-period',
+    midMonthDesc: 'If you start using the app in the middle of the month, you may have already spent money, making it harder to get everything perfectly right. But don\'t worry, next month or period will be great. To estimate and continue the remaining period until your next payday, how much do you think you have already spent, excluding your fixed expenses?',
+    midMonthPlaceholder: 'E.g. 6000'
   }
 };
 
@@ -82,7 +88,7 @@ interface OnboardingModalProps {
   currentPeriodId: string;
 }
 
-type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals';
+type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth';
 
 export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, currentPeriodId }: OnboardingModalProps) {
   useScrollLock(isOpen);
@@ -93,6 +99,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
   const [step, setStep] = useState<Step>('name');
   const [fullName, setFullName] = useState('');
   const [payday, setPayday] = useState(25);
+  const [midMonthSpent, setMidMonthSpent] = useState<string>('');
   
   // Lists State
   const [incomes, setIncomes] = useState<Omit<Income, 'id'>[]>([]);
@@ -119,6 +126,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     else if (step === 'payday') setStep('income');
     else if (step === 'income') setStep('expenses');
     else if (step === 'expenses') setStep('goals');
+    else if (step === 'goals') setStep('midMonth');
   };
 
   const handleBack = () => {
@@ -126,9 +134,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     else if (step === 'income') setStep('payday');
     else if (step === 'expenses') setStep('income');
     else if (step === 'goals') setStep('expenses');
+    else if (step === 'midMonth') setStep('goals');
   };
 
-  const handleSave = async () => {
+  const handleSave = async (forceInitialSpent?: number) => {
     setIsUpdating(true);
     setError(null);
     try {
@@ -143,7 +152,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
         }
       }
 
-      const initialSpent = 0;
+      const initialSpent = forceInitialSpent !== undefined ? forceInitialSpent : (Number(midMonthSpent) || 0);
 
       await onComplete({
         fullName: trimmedName,
@@ -215,8 +224,13 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     setIsAddingGoal(false);
   };
 
-  const stepNumber = step === 'name' ? 1 : step === 'payday' ? 2 : step === 'income' ? 3 : step === 'expenses' ? 4 : 5;
-  const totalSteps = 5;
+  const stepNumber = 
+    step === 'name' ? 1 : 
+    step === 'payday' ? 2 : 
+    step === 'income' ? 3 : 
+    step === 'expenses' ? 4 : 
+    step === 'goals' ? 5 : 6;
+  const totalSteps = 6;
 
   return (
     <AnimatePresence>
@@ -238,7 +252,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
               
               {/* Step Progress Segmented Indicator */}
               <div className="flex items-center gap-1.5 mb-5 shrink-0">
-                {[1, 2, 3, 4, 5].map((s) => (
+                {[1, 2, 3, 4, 5, 6].map((s) => (
                   <div 
                     key={s} 
                     className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
@@ -269,19 +283,20 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                        step === 'payday' ? s.paydayTitle :
                        step === 'income' ? s.monthlyIncome : 
                        step === 'expenses' ? s.fixedExpenses : 
-                       s.savingsGoals}
+                       step === 'goals' ? s.savingsGoals :
+                       s.midMonthTitle}
                     </h2>
                   </div>
                 </div>
                 
-                {step !== 'name' && step !== 'goals' ? (
+                {step !== 'name' && step !== 'goals' && step !== 'midMonth' ? (
                   <button
                     onClick={() => {
                       // Trigger PWA modal after 10 seconds delay as requested by user
                       setTimeout(() => {
                         window.dispatchEvent(new CustomEvent('trigger-pwa-modal'));
                       }, 10000);
-                      handleSave();
+                      handleSave(0);
                     }}
                     disabled={isUpdating}
                     className="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-1.5 rounded-[12px] bg-[var(--surface-color)] border border-[var(--border-color)] transition-all active:scale-95 cursor-pointer flex items-center gap-1 shadow-2xs"
@@ -628,7 +643,57 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       )}
 
                       <button 
-                        onClick={handleSave}
+                        onClick={handleNext}
+                        className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
+                      >
+                        <span>{s.next}</span>
+                        <ArrowRight size={16} strokeWidth={2.5} />
+                      </button>
+                    </motion.div>
+                  )}
+
+                  {step === 'midMonth' && (
+                    <motion.div
+                      key="midMonth"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-6"
+                    >
+                      <div className="space-y-4">
+                        <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[22px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
+                          <Banknote size={28} />
+                        </div>
+                        <div className="space-y-1 text-center">
+                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.midMonthTitle}</h3>
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[340px] mx-auto leading-relaxed">
+                            {s.midMonthDesc}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={midMonthSpent}
+                          onChange={(e) => setMidMonthSpent(e.target.value)}
+                          className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[18px] px-4 py-3.5 pr-14 text-sm font-semibold text-[var(--text-primary)] text-center focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/40"
+                          placeholder={s.midMonthPlaceholder}
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
+                          {config.currency}
+                        </span>
+                      </div>
+
+                      {error && (
+                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-[14px] text-red-500 text-xs text-center font-bold">
+                          {error}
+                        </div>
+                      )}
+
+                      <button 
+                        onClick={() => handleSave()}
                         disabled={isUpdating}
                         className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-xs cursor-pointer hover:opacity-95"
                       >

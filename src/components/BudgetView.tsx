@@ -74,6 +74,41 @@ export function BudgetView({
     const remainingBuffer = Math.max(0, disposablePot - totalAllocated);
     const allocatedPercentage = Math.min((totalAllocated / (disposablePot || 1)) * 100, 100);
 
+    const getFixedSpentForCategory = (catName: string) => {
+      return (fixedExpenses || [])
+        .filter((e) => e.category?.trim().toLowerCase() === catName.trim().toLowerCase())
+        .reduce((sum, e) => {
+          const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
+            ? e.periodOverrides[currentPeriodId]
+            : (Number(e.amount) || 0);
+          switch (e.frequency) {
+            case 'quarterly': return sum + amount / 3;
+            case 'semi-annually': return sum + amount / 6;
+            case 'annually': return sum + amount / 12;
+            default: return sum + amount;
+          }
+        }, 0);
+    };
+
+    const getVariableSpentForCategory = (catName: string) => {
+      if (!stats || !stats.periodTransactions) return 0;
+      let sum = 0;
+      stats.periodTransactions.forEach((t: any) => {
+        if (t.category === 'Spargris') return;
+        const splits = t.splits;
+        if (splits && splits.length > 0) {
+          splits.forEach((s: any) => {
+            if (s.category?.trim().toLowerCase() === catName.trim().toLowerCase()) {
+              sum += (Number(s.amount) || 0);
+            }
+          });
+        } else if (t.category?.trim().toLowerCase() === catName.trim().toLowerCase()) {
+          sum += (Number(t.amount) || 0);
+        }
+      });
+      return sum;
+    };
+
     return (
       <motion.div
         initial={{ opacity: 0, x: 20 }}
@@ -138,53 +173,122 @@ export function BudgetView({
             Budget per rörlig kategori
           </h3>
           
-          <div className="space-y-2.5 max-h-[480px] overflow-y-auto pr-1">
+          <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
             {config.categories?.map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
 
+              const fixedSpent = getFixedSpentForCategory(cat.name);
+              const variableSpent = getVariableSpentForCategory(cat.name);
+              const totalUsed = fixedSpent + variableSpent;
+              const maxSliderVal = Math.max(15000, disposablePot, (cat.budget || 0) * 1.5);
+
               return (
                 <div 
                   key={cat.name}
-                  className="p-3.5 rounded-[20px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-2xs flex items-center justify-between gap-4"
+                  className="p-4 sm:p-5 rounded-[24px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-2xs flex flex-col gap-3.5"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0 shadow-3xs"
-                      style={{ backgroundColor: cat.color || '#94a3b8' }}
-                    >
-                      {isEmojiString(iconName) ? (
-                        <span className="text-[17px] leading-none">{iconName}</span>
-                      ) : Icon ? (
-                        <Icon size={18} strokeWidth={1.75} />
-                      ) : (
-                        <div className="w-1.5 h-1.5 rounded-full" />
-                      )}
+                  {/* Top Row: Icon, Name and Number Input */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div 
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0 shadow-3xs"
+                        style={{ backgroundColor: cat.color || '#94a3b8' }}
+                      >
+                        {isEmojiString(iconName) ? (
+                          <span className="text-[17px] leading-none">{iconName}</span>
+                        ) : Icon ? (
+                          <Icon size={18} strokeWidth={1.75} />
+                        ) : (
+                          <div className="w-1.5 h-1.5 rounded-full" />
+                        )}
+                      </div>
+                      <span className="text-[13.5px] font-bold text-[var(--text-primary)] tracking-tight truncate">
+                        {cat.name}
+                      </span>
                     </div>
-                    <span className="text-[13px] font-bold text-[var(--text-primary)] tracking-tight truncate">
-                      {cat.name}
-                    </span>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="relative">
+                        <input
+                          type="number"
+                          placeholder="Ingen budget"
+                          value={cat.budget || ''}
+                          onChange={(e) => {
+                            const val = e.target.value === '' ? undefined : Number(e.target.value);
+                            const updatedCategories = config.categories.map((c) => 
+                              c.name === cat.name ? { ...c, budget: val } : c
+                            );
+                            setConfig({ ...config, categories: updatedCategories });
+                          }}
+                          className="w-28 h-9 px-3 rounded-[12px] bg-[var(--surface-muted)]/50 border border-[var(--border-color)] text-[12.5px] font-bold text-[var(--text-primary)] text-right pr-7 focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] tabular-nums"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-[var(--text-secondary)]">
+                          {config.currency}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Input field with nice inline layout */}
-                  <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <input
-                        type="number"
-                        placeholder="Ingen budget"
-                        value={cat.budget || ''}
-                        onChange={(e) => {
-                          const val = e.target.value === '' ? undefined : Number(e.target.value);
-                          const updatedCategories = config.categories.map((c) => 
-                            c.name === cat.name ? { ...c, budget: val } : c
-                          );
-                          setConfig({ ...config, categories: updatedCategories });
-                        }}
-                        className="w-28 h-9 px-3 rounded-[12px] bg-[var(--surface-muted)]/50 border border-[var(--border-color)] text-[12.5px] font-bold text-[var(--text-primary)] text-right pr-7 focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] tabular-nums"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-[var(--text-secondary)]">
-                        {config.currency}
-                      </span>
+                  {/* Middle Row: Usage details and helper buttons */}
+                  <div className="flex flex-col gap-2 bg-[var(--surface-muted)]/40 p-3 rounded-[16px] border border-[var(--border-color)]/30">
+                    <div className="flex flex-wrap justify-between items-center gap-2 text-[11px] font-medium text-[var(--text-secondary)]">
+                      <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        {fixedSpent > 0 && (
+                          <span>Fasta utgifter: <strong className="text-[var(--text-primary)] font-semibold font-amount">{formatAmount(fixedSpent, config.language)} kr</strong></span>
+                        )}
+                        {variableSpent > 0 && (
+                          <span>Rörligt spenderat: <strong className="text-[var(--text-primary)] font-semibold font-amount">{formatAmount(variableSpent, config.language)} kr</strong></span>
+                        )}
+                        {totalUsed > 0 && (
+                          <span>Totalt använt: <strong className="text-[var(--text-primary)] font-bold font-amount">{formatAmount(totalUsed, config.language)} kr</strong></span>
+                        )}
+                        {totalUsed === 0 && (
+                          <span className="italic opacity-85">Inga fasta eller rörliga utgifter registrerade än.</span>
+                        )}
+                      </div>
+
+                      {/* Quick helper button to lock to totalUsed if budget is not already matching */}
+                      {totalUsed > 0 && cat.budget !== totalUsed && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updatedCategories = config.categories.map((c) => 
+                              c.name === cat.name ? { ...c, budget: totalUsed } : c
+                            );
+                            setConfig({ ...config, categories: updatedCategories });
+                          }}
+                          className="px-2.5 py-1 rounded-full bg-[var(--accent-color)]/10 hover:bg-[var(--accent-color)]/15 text-[var(--accent-color)] font-bold text-[10px] active:scale-95 transition-all cursor-pointer border border-[var(--accent-color)]/20 shadow-4xs"
+                        >
+                          Lås till nuvarande ({formatAmount(totalUsed, config.language)} kr)
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Slider Control */}
+                  <div className="space-y-1.5 px-1 pt-1">
+                    <input
+                      type="range"
+                      min="0"
+                      max={maxSliderVal}
+                      step="50"
+                      value={cat.budget || 0}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) === 0 ? undefined : Number(e.target.value);
+                        const updatedCategories = config.categories.map((c) => 
+                          c.name === cat.name ? { ...c, budget: val } : c
+                        );
+                        setConfig({ ...config, categories: updatedCategories });
+                      }}
+                      className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[var(--accent-color)] focus:outline-none bg-[var(--border-color)]/60"
+                      style={{
+                        backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${Math.min(((cat.budget || 0) / maxSliderVal) * 100, 100)}%, var(--border-color) ${Math.min(((cat.budget || 0) / maxSliderVal) * 100, 100)}%, var(--border-color) 100%)`
+                      }}
+                    />
+                    <div className="flex justify-between text-[10px] text-[var(--text-secondary)] font-semibold">
+                      <span>0 kr</span>
+                      <span>Max: {formatAmount(maxSliderVal, config.language)} kr</span>
                     </div>
                   </div>
                 </div>
