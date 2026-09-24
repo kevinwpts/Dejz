@@ -34,7 +34,7 @@ export function CustomBottomNavigation({
   return (
     <div className="fixed bottom-[calc(16px+env(safe-area-inset-bottom,0px))] sm:bottom-6 left-0 right-0 z-40 px-3 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
-        className="w-[92%] sm:w-[84%] max-w-[410px] sm:max-w-[430px] h-[64px] sm:h-[68px] rounded-full px-2.5 sm:px-4 bg-[var(--surface-color)] text-[var(--text-primary)] dark:bg-black/95 dark:text-white backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)] flex items-center justify-between gap-1 sm:gap-2 pointer-events-auto border border-[var(--border-color)] dark:border-white/10"
+        className="w-[92%] sm:w-[84%] max-w-[410px] sm:max-w-[430px] h-[64px] sm:h-[68px] rounded-full px-2.5 sm:px-4 bg-[var(--surface-color)]/95 text-[var(--text-primary)] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex items-center justify-between gap-1 sm:gap-2 pointer-events-auto border border-[var(--border-color)]"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 28 }}
@@ -60,7 +60,7 @@ export function CustomBottomNavigation({
         <div className="flex items-center justify-center shrink-0 px-1">
           <button
             onClick={() => onAddTransaction("expense")}
-            className="w-[42px] h-[42px] sm:w-[44px] sm:h-[44px] rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] dark:bg-white dark:text-black flex items-center justify-center transition-all duration-200 active:scale-95 hover:scale-105 shadow-md cursor-pointer shrink-0"
+            className="w-[42px] h-[42px] sm:w-[44px] sm:h-[44px] rounded-full bg-[var(--text-primary)] text-[var(--bg-color)] flex items-center justify-center transition-all duration-200 active:scale-95 hover:scale-105 shadow-md cursor-pointer shrink-0"
             aria-label={language === "sv" ? "Skapa ny utgift" : "New expense"}
           >
             <Plus 
@@ -109,8 +109,8 @@ function NavItem({
       aria-label={label}
       className={`flex-1 flex flex-col items-center justify-center py-1 px-0.5 transition-all duration-200 active:scale-95 cursor-pointer select-none rounded-2xl ${
         isActive
-          ? 'text-[var(--text-primary)] dark:text-white'
-          : 'text-[var(--text-secondary)] opacity-60 hover:opacity-100 dark:text-white/45 dark:hover:text-white/80'
+          ? 'text-[var(--text-primary)] font-semibold'
+          : 'text-[var(--text-secondary)] opacity-60 hover:opacity-100 font-medium'
       }`}
     >
       <Icon 
@@ -120,7 +120,7 @@ function NavItem({
         className="transition-transform duration-200 mb-0.5"
       />
       <span className={`text-[10px] sm:text-[11px] leading-tight text-center tracking-tight truncate max-w-[62px] sm:max-w-[70px] ${
-        isActive ? 'text-[var(--text-primary)] dark:text-white font-semibold' : 'text-[var(--text-secondary)] dark:text-white/60 font-medium'
+        isActive ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-secondary)] font-medium'
       }`}>
         {label}
       </span>

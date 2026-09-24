@@ -29,7 +29,7 @@ export function BudgetItemLogo({ item, type, config }: { item: any, type: 'incom
 }
 
 export function BudgetItem({ item, onClick, currency, type = 'expense', language, t, config, currentPeriodId, isGrouped }: BudgetItemProps) {
-  const isFixed = (type === 'expense' || type === 'income') && 'frequency' in item && item.frequency; 
+  const isFixed = Boolean(item.frequency || item.deductionDay); 
   const isSaving = !isFixed && type === 'expense' && !('category' in item);
   
   const displayName = item.name || (isFixed ? item.category : t('savings' as any));
@@ -37,12 +37,20 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   const hasOverride = Boolean(item.isVariable && currentPeriodId && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined);
   const currentAmount = hasOverride ? item.periodOverrides[currentPeriodId] : (item.amount || 0);
 
+  // Format deduction info for right side under amount
+  const isEn = language === 'en';
+  const daySuffix = isEn 
+    ? (item.deductionDay === 1 ? 'st' : item.deductionDay === 2 ? 'nd' : item.deductionDay === 3 ? 'rd' : 'th')
+    : ':e';
+  const dayString = item.deductionDay ? `${item.deductionDay}${daySuffix}` : '';
+  const paymentString = item.paymentMethod ? (typeof item.paymentMethod === 'string' ? item.paymentMethod : item.paymentMethod?.name) : '';
+
   return (
     <motion.div 
       whileHover={{ scale: 1.005 }}
       whileTap={{ scale: 0.99 }}
       onClick={onClick}
-      className={`px-[18px] py-[15px] min-h-[78px] rounded-[16px] flex items-center justify-between gap-[12px] group transition-all duration-200 ${
+      className={`px-[18px] py-[15px] min-h-[76px] rounded-[16px] flex items-center justify-between gap-[12px] group transition-all duration-200 ${
         isGrouped 
           ? 'bg-transparent' 
           : 'bg-[var(--transaction-bg)] shadow-xs border border-[var(--border-color)]'
@@ -62,9 +70,9 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
           <p className="text-[14px] sm:text-[14.5px] font-semibold text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors group-hover:text-[var(--accent-color)]">
             {displayName}
           </p>
-          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
-            {!isSaving && (
-              <div className="flex items-center gap-1 px-2 h-[22px] rounded-full bg-[var(--chip-bg)] shrink-0 max-w-[85%] border-none">
+          <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden">
+            {!isSaving && item.category && (
+              <div className="flex items-center gap-1.5 px-2.5 h-[22px] rounded-full bg-[var(--chip-bg)] shrink-0 max-w-[100%] border-none">
                 {(() => {
                   const searchCategory = (item.category || '').trim().toLowerCase();
                   const category = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
@@ -91,15 +99,8 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                   }
                   return null;
                 })()}
-                <span className="text-[12px] font-medium text-[var(--text-secondary)] opacity-90 tracking-tight whitespace-nowrap">
+                <span className="text-[11.5px] font-medium text-[var(--text-secondary)] opacity-90 tracking-tight whitespace-nowrap truncate">
                   {capitalize(item.category || '')}
-                </span>
-              </div>
-            )}
-            {isFixed && (
-              <div className="flex items-center gap-1 px-2 h-[22px] rounded-full bg-[var(--chip-bg)] shrink-0 max-w-[85%] border-none">
-                <span className="text-[10px] font-medium text-[var(--text-secondary)] opacity-70 tracking-tight whitespace-nowrap">
-                  {item.deductionDay ? `Dras ${item.deductionDay}e` : '-'} via {item.paymentMethod || '-'}
                 </span>
               </div>
             )}
@@ -107,17 +108,29 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         </div>
       </div>
       
-      <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
+      <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2 text-right">
         <p className={`text-[14.5px] sm:text-[15px] font-bold whitespace-nowrap tracking-tight ${type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
           <span className="opacity-70 mr-0.5 text-[13px] font-bold">{type === 'income' ? '+' : '-'}</span>
           <span className="font-amount tabular-nums font-bold tracking-tight">{formatAmount(currentAmount, language)}</span>
           <span className="text-[11px] font-semibold opacity-60 ml-1">{currency}</span>
         </p>
-        {(hasOverride || item.isVariable) && (
-          <span className="text-[10px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">
-            {hasOverride ? t('thisPeriod' as any) : t('variable' as any)}
-          </span>
-        )}
+
+        {/* Right-aligned deduction metadata badge under the amount */}
+        <div className="flex items-center gap-1 mt-1 justify-end">
+          {(dayString || paymentString) && (
+            <span className="inline-flex items-center gap-1 px-2 h-[20px] rounded-full bg-[var(--chip-bg)] text-[10.5px] font-medium text-[var(--text-secondary)] opacity-85 tracking-tight border border-[var(--border-color)]/20">
+              {dayString && <span className="font-semibold text-[var(--text-primary)]/90">{dayString}</span>}
+              {dayString && paymentString && <span className="opacity-60 text-[9.5px] font-normal">via</span>}
+              {paymentString && <span>{paymentString}</span>}
+            </span>
+          )}
+
+          {(hasOverride || item.isVariable) && (
+            <span className="text-[9.5px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2 h-[20px] inline-flex items-center rounded-full whitespace-nowrap">
+              {hasOverride ? t('thisPeriod' as any) : t('variable' as any)}
+            </span>
+          )}
+        </div>
       </div>
     </motion.div>
   );

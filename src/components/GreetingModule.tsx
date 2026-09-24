@@ -208,8 +208,8 @@ export function GreetingModule({
         transition={{ duration: 0.5 }}
         className={`-mx-4 sm:-mx-6 ${negativeMarginClass} ${topPaddingClass} pb-4 px-4 sm:px-6 text-[var(--text-primary)] relative overflow-hidden flex flex-col`}
       >
-        {/* The Aqua-Inspired Premium Main Rounded Card */}
-        <div className="w-full bg-white dark:bg-[#1C1C1E] border border-black/[0.04] dark:border-white/[0.04] rounded-[32px] p-7 sm:p-8 shadow-xs relative overflow-hidden flex flex-col mt-4">
+        {/* The Premium Main Rounded Card */}
+        <div className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[32px] p-7 sm:p-8 shadow-xs relative overflow-hidden flex flex-col mt-4">
           {/* Clean Stats Row with Totalt kvar and Dagar till lön */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
             <div className="flex flex-col text-left justify-center">
@@ -238,7 +238,7 @@ export function GreetingModule({
 
           {/* Integrated Category Budgets Carousel as the Bottom Section inside the Card */}
           {children && (
-            <div className="w-full pt-4 mt-6 text-left border-t border-black/[0.05] dark:border-white/[0.05]">
+            <div className="w-full pt-4 mt-6 text-left border-t border-[var(--border-color)]/60">
               {children}
             </div>
           )}

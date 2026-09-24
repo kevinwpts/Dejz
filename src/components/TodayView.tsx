@@ -320,9 +320,9 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.12 + index * 0.02 }}
                       onClick={() => onNavigate("analysis")}
-                      className="flex-shrink-0 flex flex-col justify-between p-3.5 rounded-[20px] bg-[var(--surface-muted)]/40 hover:bg-[var(--surface-muted)] dark:bg-white/5 dark:hover:bg-white/10 transition-all group text-left active:scale-[0.98] min-w-[124px] sm:min-w-[136px] max-w-[146px] cursor-pointer snap-start border border-black/[0.03] dark:border-white/[0.03]"
+                      className="flex-shrink-0 flex flex-col justify-between p-3.5 rounded-[20px] bg-[var(--surface-muted)]/50 hover:bg-[var(--surface-muted)] transition-all group text-left active:scale-[0.98] min-w-[124px] sm:min-w-[136px] max-w-[146px] cursor-pointer snap-start border border-[var(--border-color)]/60"
                     >
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--surface-color)] dark:bg-white/10 text-[var(--text-primary)] shrink-0 relative z-10 transition-transform group-hover:scale-105 duration-200 shadow-2xs">
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--surface-color)] text-[var(--text-primary)] shrink-0 relative z-10 transition-transform group-hover:scale-105 duration-200 shadow-2xs border border-[var(--border-color)]/40">
                         {isEmojiString(cat.iconName) ? (
                           <span className="text-[24px] leading-none">{cat.iconName}</span>
                         ) : Icon ? (
