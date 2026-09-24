@@ -30,6 +30,7 @@ interface BudgetViewProps {
   onResetSavingsPot: () => void;
   t: (key: TranslationKey) => string;
   currentPeriodId: string;
+  isDemoMode?: boolean;
 }
 
 export function BudgetView({ 
@@ -44,7 +45,8 @@ export function BudgetView({
   onAddMonthlySaving, _onEditMonthlySaving, onViewMonthlySaving,
   _onResetSavingsPot,
   t,
-  currentPeriodId
+  currentPeriodId,
+  isDemoMode
 }: BudgetViewProps) {
   if (!stats) return null;
 
@@ -190,7 +192,11 @@ export function BudgetView({
         </div>
 
         {/* Info card with progress meter */}
-        <div className="sticky top-3 z-20 p-5 sm:p-6 rounded-[24px] border border-[var(--border-color)] bg-[var(--surface-color)]/95 backdrop-blur-md shadow-sm space-y-4">
+        <div className={`sticky ${
+          isDemoMode 
+            ? 'top-[calc(7.2rem+env(safe-area-inset-top)+12px)]' 
+            : 'top-[calc(5rem+env(safe-area-inset-top)+12px)]'
+        } z-20 p-5 sm:p-6 rounded-[24px] border border-[var(--border-color)] bg-[var(--surface-color)]/95 backdrop-blur-md shadow-sm space-y-4`}>
           <div>
             <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
               Fördelat av budget

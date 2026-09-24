@@ -3534,6 +3534,7 @@ export default function App() {
                     onResetSavingsPot={handleResetSavingsPot}
                     t={t}
                     currentPeriodId={currentPeriodId}
+                    isDemoMode={isDemoMode}
                   />
                 </TabWrapper>
               </motion.div>
