@@ -60,13 +60,13 @@ export function CustomBottomNavigation({
         <div className="flex items-center justify-center shrink-0 px-1">
           <button
             onClick={() => onAddTransaction("expense")}
-            className="w-[42px] h-[42px] sm:w-[44px] sm:h-[44px] rounded-full bg-neutral-900 text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-neutral-100 flex items-center justify-center transition-all duration-200 active:scale-95 hover:scale-105 shadow-md cursor-pointer shrink-0"
+            className="w-[42px] h-[42px] sm:w-[44px] sm:h-[44px] rounded-full bg-gradient-to-tr from-[#ff3860] via-[#ff4c4c] to-[#ff7a45] text-white flex items-center justify-center transition-all duration-200 active:scale-95 hover:scale-105 shadow-[0_4px_14px_rgba(255,76,76,0.35)] hover:shadow-[0_6px_20px_rgba(255,76,76,0.45)] cursor-pointer shrink-0 border-none outline-none"
             aria-label={language === "sv" ? "Skapa ny utgift" : "New expense"}
           >
             <Plus 
               size={22} 
-              strokeWidth={2.4} 
-              className="text-white dark:text-black"
+              strokeWidth={2.6} 
+              className="text-white"
             />
           </button>
         </div>
