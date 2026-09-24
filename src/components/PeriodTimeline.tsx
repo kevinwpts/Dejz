@@ -242,7 +242,7 @@ export function PeriodTimeline({
           <button
             type="button"
             onClick={() => handleScrollBy(-220)}
-            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-md flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90"
+            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90"
             aria-label="Skrolla bakåt i tidslinjen"
             title="Föregående dagar"
           >
@@ -345,7 +345,7 @@ export function PeriodTimeline({
           <button
             type="button"
             onClick={() => handleScrollBy(220)}
-            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-md flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90"
+            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90"
             aria-label="Skrolla framåt i tidslinjen"
             title="Kommande dagar"
           >
