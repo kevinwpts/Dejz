@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, ArrowRight, Loader2, Wallet, CreditCard, Target, Plus, ChevronLeft, Banknote, Check } from 'lucide-react';
+import { User, ArrowRight, Loader2, Wallet, CreditCard, Target, Plus, ChevronLeft, Banknote, Check, Sparkles, TrendingUp, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { Config } from '../types';
@@ -11,6 +11,92 @@ import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { FixedExpense, Income, SavingsGoal } from '../types';
 import { BudgetItem } from './BudgetItem';
+
+function DejzyMascot({ mood = 'happy' }: { mood?: 'happy' | 'celebrating' | 'thinking' }) {
+  return (
+    <div className="relative w-28 h-28 mx-auto flex items-center justify-center">
+      {/* Glow aura */}
+      <motion.div 
+        animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.6, 0.35] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0 bg-gradient-to-tr from-[var(--accent-color)]/30 to-amber-400/30 rounded-full blur-xl pointer-events-none"
+      />
+
+      {/* Floating Mascot Body */}
+      <motion.div
+        animate={{ y: [0, -6, 0], rotate: [0, 1.5, -1.5, 0] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+        className="relative z-10 w-24 h-24"
+      >
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md overflow-visible">
+          {/* Ears / Antennas */}
+          <motion.ellipse 
+            cx="32" cy="22" rx="7" ry="12" 
+            transform="rotate(-20 32 22)" 
+            fill="var(--accent-color)" 
+            animate={{ rotate: [-20, -25, -20] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.ellipse 
+            cx="68" cy="22" rx="7" ry="12" 
+            transform="rotate(20 68 22)" 
+            fill="var(--accent-color)" 
+            animate={{ rotate: [20, 25, 20] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <ellipse cx="32" cy="23" rx="4" ry="7" transform="rotate(-20 32 23)" fill="#FDE047" />
+          <ellipse cx="68" cy="23" rx="4" ry="7" transform="rotate(20 68 23)" fill="#FDE047" />
+
+          {/* Body */}
+          <circle cx="50" cy="54" r="36" fill="var(--accent-color)" />
+          {/* Belly */}
+          <ellipse cx="50" cy="62" rx="24" ry="20" fill="white" fillOpacity="0.9" />
+
+          {/* Cheeks */}
+          <circle cx="33" cy="56" r="4.5" fill="#F43F5E" fillOpacity="0.4" />
+          <circle cx="67" cy="56" r="4.5" fill="#F43F5E" fillOpacity="0.4" />
+
+          {/* Eyes with sparkles */}
+          <motion.g animate={{ scaleY: [1, 1, 0.1, 1, 1] }} transition={{ duration: 4, repeat: Infinity, times: [0, 0.45, 0.48, 0.52, 1] }}>
+            <ellipse cx="38" cy="46" rx="4.5" ry="5.5" fill="#0F172A" />
+            <circle cx="36.5" cy="44" r="1.8" fill="white" />
+            <ellipse cx="62" cy="46" rx="4.5" ry="5.5" fill="#0F172A" />
+            <circle cx="60.5" cy="44" r="1.8" fill="white" />
+          </motion.g>
+
+          {/* Smile */}
+          <path d="M 44 56 Q 50 63 56 56" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+
+          {/* Golden Coin in hand */}
+          <motion.g 
+            animate={{ y: [0, -3, 0], rotate: [0, 8, 0] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <circle cx="78" cy="65" r="9" fill="#F59E0B" stroke="#B45309" strokeWidth="1" />
+            <circle cx="78" cy="65" r="7" fill="#FBBF24" />
+            <text x="78" y="68.5" fontSize="8" fontWeight="bold" fill="#78350F" textAnchor="middle">kr</text>
+          </motion.g>
+        </svg>
+
+        {/* Floating Sparkle Stars */}
+        <motion.div 
+          animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.6, 1, 0.6], rotate: [0, 45, 0] }}
+          transition={{ duration: 2.5, repeat: Infinity }}
+          className="absolute -top-1 -left-1 text-amber-400"
+        >
+          <Sparkles size={16} />
+        </motion.div>
+        <motion.div 
+          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.9, 0.5], rotate: [45, 0, 45] }}
+          transition={{ duration: 3, repeat: Infinity, delay: 0.8 }}
+          className="absolute top-2 -right-2 text-[var(--accent-color)]"
+        >
+          <Sparkles size={14} />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
 
 const texts = {
   sv: {
@@ -39,7 +125,14 @@ const texts = {
     addGoal: 'Lägg till sparmål',
     midMonthTitle: 'Starta mitt i perioden',
     midMonthDesc: 'Om du börjar med appen mitt i månaden finns det risk att du redan har gjort av med pengar, och gör det lite svårare att få helt rätt på allt. Men var lugn, nästa månad eller period kommer det bli toppen. Men för att uppskatta så att vi kan fortsätta resterande period fram till nästa lön, hur mycket tror du att du har spenderat om du bortser från dina fasta utgifter?',
-    midMonthPlaceholder: 'T.ex. 6000'
+    midMonthPlaceholder: 'T.ex. 6000',
+    summaryTitle: 'Din personliga plan',
+    summarySubtitle: 'Allt är redo! Här är din ekonomiska överblick fram till nästa lön.',
+    enterApp: 'Kliv in i Dejz ✨',
+    totalIncomeLabel: 'Total inkomst',
+    fixedCostsLabel: 'Fasta kostnader',
+    freeSpendLabel: 'Kvar att röra dig med',
+    activeGoalsLabel: 'Sparmål',
   },
   en: {
     stepOf: (step: number, total: number) => `Step ${step} of ${total}`,
@@ -67,7 +160,14 @@ const texts = {
     addGoal: 'Add savings goal',
     midMonthTitle: 'Starting mid-period',
     midMonthDesc: 'If you start using the app in the middle of the month, you may have already spent money, making it harder to get everything perfectly right. But don\'t worry, next month or period will be great. To estimate and continue the remaining period until your next payday, how much do you think you have already spent, excluding your fixed expenses?',
-    midMonthPlaceholder: 'E.g. 6000'
+    midMonthPlaceholder: 'E.g. 6000',
+    summaryTitle: 'Your Personal Plan',
+    summarySubtitle: 'All set! Here is your financial overview until your next payday.',
+    enterApp: 'Enter Dejz ✨',
+    totalIncomeLabel: 'Total Income',
+    fixedCostsLabel: 'Fixed Costs',
+    freeSpendLabel: 'Available to spend',
+    activeGoalsLabel: 'Savings Goals',
   }
 };
 
@@ -88,7 +188,7 @@ interface OnboardingModalProps {
   currentPeriodId: string;
 }
 
-type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth';
+type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
 
 export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, currentPeriodId }: OnboardingModalProps) {
   useScrollLock(isOpen);
@@ -127,6 +227,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     else if (step === 'income') setStep('expenses');
     else if (step === 'expenses') setStep('goals');
     else if (step === 'goals') setStep('midMonth');
+    else if (step === 'midMonth') setStep('summary');
   };
 
   const handleBack = () => {
@@ -135,6 +236,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     else if (step === 'expenses') setStep('income');
     else if (step === 'goals') setStep('expenses');
     else if (step === 'midMonth') setStep('goals');
+    else if (step === 'summary') setStep('midMonth');
   };
 
   const handleSave = async (forceInitialSpent?: number) => {
@@ -229,8 +331,15 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     step === 'payday' ? 2 : 
     step === 'income' ? 3 : 
     step === 'expenses' ? 4 : 
-    step === 'goals' ? 5 : 6;
-  const totalSteps = 6;
+    step === 'goals' ? 5 : 
+    step === 'midMonth' ? 6 : 7;
+  const totalSteps = 7;
+
+  // Summary Metrics
+  const totalIncome = incomes.reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
+  const totalFixed = fixedExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+  const spentEst = Number(midMonthSpent) || 0;
+  const freeSpend = Math.max(0, totalIncome - totalFixed - spentEst);
 
   return (
     <AnimatePresence>
@@ -240,7 +349,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: "100%" }}
           transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-          className="fixed inset-0 z-[100] bg-[var(--bg-color)] flex flex-col overflow-hidden selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]"
+          className="fixed inset-0 z-[100] bg-[var(--bg-color)] flex flex-col h-[100dvh] max-h-[100dvh] w-full overflow-hidden overscroll-contain selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]"
         >
           {/* Top Notch / Handle */}
           <div className="pt-[calc(0.75rem+env(safe-area-inset-top))] pb-1 flex justify-center shrink-0">
@@ -248,11 +357,11 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
           </div>
 
           <div className="p-5 sm:p-6 pb-8 flex-1 overflow-y-auto no-scrollbar flex flex-col">
-            <div className="max-w-md mx-auto w-full flex-1 flex flex-col">
+            <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-between">
               
               {/* Step Progress Segmented Indicator */}
               <div className="flex items-center gap-1.5 mb-5 shrink-0">
-                {[1, 2, 3, 4, 5, 6].map((s) => (
+                {[1, 2, 3, 4, 5, 6, 7].map((s) => (
                   <div 
                     key={s} 
                     className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
@@ -263,7 +372,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
               </div>
 
               {/* Navigation Header */}
-              <div className="flex items-center justify-between mb-6 shrink-0">
+              <div className="flex items-center justify-between mb-4 sm:mb-6 shrink-0">
                 <div className="flex items-center gap-3">
                   {step !== 'name' && (
                     <button 
@@ -284,7 +393,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                        step === 'income' ? s.monthlyIncome : 
                        step === 'expenses' ? s.fixedExpenses : 
                        step === 'goals' ? s.savingsGoals :
-                       s.midMonthTitle}
+                       step === 'midMonth' ? s.midMonthTitle :
+                       s.summaryTitle}
                     </h2>
                   </div>
                 </div>
@@ -292,7 +402,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                 <div />
               </div>
 
-              <div className="flex-1 flex flex-col justify-center">
+              <div className="flex-1 flex flex-col justify-start sm:justify-center py-2">
                 <AnimatePresence mode="wait">
                   {step === 'name' && (
                     <motion.div
@@ -301,7 +411,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.25 }}
-                      className="space-y-6"
+                      className="space-y-6 my-auto"
                     >
                       <div className="space-y-4">
                         <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
@@ -325,8 +435,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           type="text"
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
-                          className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[18px] px-4 py-3.5 pl-11 text-sm font-semibold text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/40"
+                          className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[18px] px-4 py-3.5 pl-11 text-[16px] sm:text-sm font-semibold text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/40"
                           placeholder={s.firstNamePlaceholder}
+                          autoComplete="given-name"
+                          autoCorrect="off"
                         />
                       </div>
 
@@ -664,7 +776,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           type="number"
                           value={midMonthSpent}
                           onChange={(e) => setMidMonthSpent(e.target.value)}
-                          className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[18px] px-4 py-3.5 pr-14 text-sm font-semibold text-[var(--text-primary)] text-center focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/40"
+                          className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[18px] px-4 py-3.5 pr-14 text-[16px] sm:text-sm font-semibold text-[var(--text-primary)] text-center focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/40"
                           placeholder={s.midMonthPlaceholder}
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
@@ -679,19 +791,99 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       )}
 
                       <button 
-                        onClick={() => handleSave()}
-                        disabled={isUpdating}
-                        className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-xs cursor-pointer hover:opacity-95"
+                        onClick={handleNext}
+                        className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
                       >
-                        {isUpdating ? (
-                          <Loader2 size={16} className="animate-spin" />
-                        ) : (
-                          <>
-                            <span>{s.finish}</span>
-                            <Check size={16} strokeWidth={2.5} />
-                          </>
-                        )}
+                        <span>{s.next}</span>
+                        <ArrowRight size={16} strokeWidth={2.5} />
                       </button>
+                    </motion.div>
+                  )}
+
+                  {step === 'summary' && (
+                    <motion.div
+                      key="summary"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-4 my-auto text-center"
+                    >
+                      {/* Animated Mascot */}
+                      <DejzyMascot mood="celebrating" />
+
+                      {/* Mascot Speech Bubble */}
+                      <div className="relative bg-[var(--surface-color)] p-4 rounded-[20px] border border-[var(--border-color)] shadow-xs text-left max-w-sm mx-auto">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--accent-color)] mb-1">
+                          <Sparkles size={14} />
+                          <span>Dejzy hälsar</span>
+                        </div>
+                        <p className="text-xs sm:text-sm font-medium text-[var(--text-primary)] leading-relaxed">
+                          {fullName.trim() ? `Snyggt jobbat, ${fullName.trim()}!` : 'Snyggt jobbat!'} Din personliga ekonomiska profil är nu klar. Jag har räknat ut din period fram till nästa lön den <strong className="text-[var(--accent-color)]">{payday}:e</strong>.
+                        </p>
+                      </div>
+
+                      {/* Financial Profile Summary Cards */}
+                      <div className="grid grid-cols-2 gap-2.5 max-w-sm mx-auto text-left">
+                        <div className="bg-[var(--surface-color)] p-3 rounded-[16px] border border-[var(--border-color)] shadow-2xs">
+                          <div className="flex items-center gap-1 text-[11px] font-medium text-[var(--text-secondary)] opacity-70">
+                            <Wallet size={12} className="text-success" />
+                            <span>{s.totalIncomeLabel}</span>
+                          </div>
+                          <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] font-amount mt-0.5">
+                            +{formatAmount(totalIncome, lang)} <span className="text-[10px] font-sans opacity-60">{config.currency}</span>
+                          </p>
+                        </div>
+
+                        <div className="bg-[var(--surface-color)] p-3 rounded-[16px] border border-[var(--border-color)] shadow-2xs">
+                          <div className="flex items-center gap-1 text-[11px] font-medium text-[var(--text-secondary)] opacity-70">
+                            <CreditCard size={12} className="text-[var(--accent-color)]" />
+                            <span>{s.fixedCostsLabel}</span>
+                          </div>
+                          <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] font-amount mt-0.5">
+                            -{formatAmount(totalFixed, lang)} <span className="text-[10px] font-sans opacity-60">{config.currency}</span>
+                          </p>
+                        </div>
+
+                        <div className="bg-[var(--surface-color)] p-3 rounded-[16px] border border-[var(--border-color)] shadow-2xs col-span-2 flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center gap-1 text-[11px] font-medium text-[var(--text-secondary)] opacity-70">
+                              <TrendingUp size={12} className="text-[var(--accent-color)]" />
+                              <span>{s.freeSpendLabel}</span>
+                            </div>
+                            <p className="text-base sm:text-lg font-bold text-[var(--accent-color)] font-amount mt-0.5">
+                              {formatAmount(freeSpend, lang)} <span className="text-xs font-sans opacity-70">{config.currency}</span>
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-[11px] font-bold">
+                            <ShieldCheck size={13} />
+                            <span>Klar</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {error && (
+                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-[14px] text-red-500 text-xs text-center font-bold">
+                          {error}
+                        </div>
+                      )}
+
+                      <div className="pt-2 max-w-sm mx-auto w-full">
+                        <button 
+                          onClick={() => handleSave()}
+                          disabled={isUpdating}
+                          className="w-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md cursor-pointer"
+                        >
+                          {isUpdating ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            <>
+                              <span>{s.enterApp}</span>
+                              <Sparkles size={16} strokeWidth={2} />
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
