@@ -105,12 +105,17 @@ export function PeriodTimeline({
       checkScrollability();
     };
 
-    // Horizontal wheel scroll handler for desktop mouse users
+    // Horizontal wheel scroll handler for desktop mouse users with shift key or horizontal tilt
     const handleWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        // Native horizontal wheel/trackpad motion, allow natural container scroll
+        return;
+      }
+      if (e.shiftKey) {
         e.preventDefault();
         container.scrollLeft += e.deltaY;
       }
+      // If regular vertical wheel scroll, let page scroll vertically naturally
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
@@ -197,8 +202,8 @@ export function PeriodTimeline({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-3 no-scrollbar touch-pan-x overscroll-contain cursor-grab active:cursor-grabbing"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-3 no-scrollbar cursor-grab active:cursor-grabbing"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', touchAction: 'pan-x pan-y' }}
       >
         {calendarDays.map((day: any, index: number) => {
           if (!day.date) return null;

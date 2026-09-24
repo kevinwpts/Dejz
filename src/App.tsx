@@ -1088,7 +1088,21 @@ export default function App() {
 
   // --- Theme Logic ---
   useEffect(() => {
-    const shouldUseDarkMode = config?.darkMode !== undefined ? config.darkMode : false;
+    let shouldUseDarkMode: boolean;
+    if (config?.darkMode !== undefined && config?.darkMode !== null) {
+      shouldUseDarkMode = config.darkMode;
+    } else {
+      try {
+        const saved = localStorage.getItem('dejz_dark_mode');
+        if (saved !== null) {
+          shouldUseDarkMode = saved === 'dark';
+        } else {
+          shouldUseDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+      } catch {
+        shouldUseDarkMode = false;
+      }
+    }
 
     if (shouldUseDarkMode) {
       document.documentElement.classList.add("dark");
@@ -1102,8 +1116,14 @@ export default function App() {
       document.body.classList.add("light");
     }
 
+    try {
+      localStorage.setItem('dejz_dark_mode', shouldUseDarkMode ? 'dark' : 'light');
+    } catch {
+      // Ignore storage errors in private browsing
+    }
+
     // Update theme-color meta tag and root background for iOS Safari status bar and browser toolbar
-    const themeColor = shouldUseDarkMode ? "#101214" : "#F8F9FA";
+    const themeColor = shouldUseDarkMode ? "#0C0D0F" : "#EDEFF2";
     
     // Explicitly set body & documentElement background colors so iOS root canvas matches
     document.documentElement.style.backgroundColor = themeColor;
@@ -3226,8 +3246,8 @@ export default function App() {
     <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden" style={{ background: 'var(--bg-gradient)' }}>
       {/* iOS Safari & PWA Top Safe Area Status Bar Backdrop */}
       <div
-        className="fixed top-0 left-0 right-0 z-[65] pointer-events-none transition-colors duration-200"
-        style={{ height: 'max(env(safe-area-inset-top, 0px), 1px)', backgroundColor: 'transparent' }}
+        className="fixed top-0 left-0 right-0 z-[49] pointer-events-none transition-colors duration-200"
+        style={{ height: 'max(env(safe-area-inset-top, 0px), 0px)', backgroundColor: 'var(--bg-top-color, var(--bg-color))' }}
         aria-hidden="true"
       />
 

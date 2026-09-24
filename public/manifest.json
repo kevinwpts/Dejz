@@ -4,8 +4,8 @@
   "description": "Ta kontroll över din ekonomi med Dejz",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F8F9FA",
-  "theme_color": "#F8F9FA",
+  "background_color": "#0C0D0F",
+  "theme_color": "#0C0D0F",
   "icons": [
     {
       "src": "/favicon.png",

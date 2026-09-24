@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv" class="light">
+<html lang="sv">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
@@ -7,11 +7,32 @@
     <link rel="apple-touch-icon" href="/favicon.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#F8F9FA" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#141619" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#F8F9FA" id="theme-color-meta" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Dejz" />
+    <meta name="theme-color" content="#EDEFF2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0C0D0F" media="(prefers-color-scheme: dark)" />
+
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('dejz_dark_mode');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = saved ? (saved === 'dark') : prefersDark;
+          var root = document.documentElement;
+          if (isDark) {
+            root.classList.add('dark');
+            root.classList.remove('light');
+            root.style.backgroundColor = '#0C0D0F';
+          } else {
+            root.classList.add('light');
+            root.classList.remove('dark');
+            root.style.backgroundColor = '#EDEFF2';
+          }
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- SEO Meta Tags -->
     <title>Dejz – Smart Budget & Ekonomiplanerare</title>
@@ -58,20 +79,21 @@
         color-scheme: light dark;
       }
       html, body {
-        background-color: #F8F9FA;
         min-height: 100%;
         margin: 0;
         padding: 0;
       }
-      html.light, body.light {
-        background-color: #F8F9FA !important;
-      }
       html.dark, body.dark {
-        background-color: #141619 !important;
+        background-color: #0C0D0F !important;
+        background: #0C0D0F;
+      }
+      html.light, body.light, html:not(.dark), body:not(.dark) {
+        background-color: #EDEFF2 !important;
+        background: #EDEFF2;
       }
     </style>
   </head>
-  <body class="light">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
