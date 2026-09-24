@@ -30,6 +30,10 @@ export function PeriodTimeline({
   const scrollLeftStart = useRef(0);
   const dragDistance = useRef(0);
 
+  // Programmatic scroll flag to prevent feedback loops
+  const isProgrammaticScroll = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const isEn = language === 'en';
   const locale = isEn ? 'en-US' : 'sv-SE';
 
@@ -67,13 +71,56 @@ export function PeriodTimeline({
 
     const targetScrollLeft = elementOffsetLeft - (container.clientWidth - el.offsetWidth) / 2;
 
-    if (Math.abs(container.scrollLeft - targetScrollLeft) > 1) {
+    if (Math.abs(container.scrollLeft - targetScrollLeft) > 1.5) {
+      isProgrammaticScroll.current = true;
       container.scrollTo({
         left: targetScrollLeft,
         behavior,
       });
+
+      // Clear programmatic scroll lock after smooth scroll completes
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => {
+        isProgrammaticScroll.current = false;
+      }, 400); // 400ms is standard smooth scroll transition duration
     }
   };
+
+  // Detect which day card is closest to the middle of the viewport and auto-select it
+  const handleScrollDetect = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // Maintain programmatic scroll lock timeout to clear once scrolling settles
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      isProgrammaticScroll.current = false;
+    }, 150);
+
+    if (isProgrammaticScroll.current) return;
+
+    const containerCenter = container.scrollLeft + container.clientWidth / 2;
+    let closestDay = null;
+    let minDistance = Infinity;
+
+    const dayButtons = container.querySelectorAll<HTMLButtonElement>('[data-time]');
+    dayButtons.forEach((btn) => {
+      const elementCenter = btn.offsetLeft + btn.offsetWidth / 2;
+      const distance = Math.abs(elementCenter - containerCenter);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestDay = btn;
+      }
+    });
+
+    if (closestDay) {
+      const dayTime = parseInt(closestDay.getAttribute('data-time') || '0', 10);
+      const dayDateStr = closestDay.getAttribute('data-date');
+      if (dayTime && dayTime !== selectedTime && dayDateStr) {
+        onSelectDate(new Date(dayDateStr));
+      }
+    }
+  }, [selectedTime, onSelectDate]);
 
   // Auto-scroll on mount and when selectedTime changes
   useEffect(() => {
@@ -94,7 +141,7 @@ export function PeriodTimeline({
     return () => clearTimeout(timer);
   }, [selectedTime, calendarDays, checkScrollability]);
 
-  // Track scroll position for showing/hiding arrow buttons
+  // Track scroll position, wheel event and setup resize listener
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -103,6 +150,7 @@ export function PeriodTimeline({
 
     const handleScroll = () => {
       checkScrollability();
+      handleScrollDetect();
     };
 
     // Horizontal wheel scroll handler for desktop mouse users with shift key or horizontal tilt
@@ -115,7 +163,6 @@ export function PeriodTimeline({
         e.preventDefault();
         container.scrollLeft += e.deltaY;
       }
-      // If regular vertical wheel scroll, let page scroll vertically naturally
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
@@ -126,15 +173,23 @@ export function PeriodTimeline({
       container.removeEventListener('scroll', handleScroll);
       container.removeEventListener('wheel', handleWheel);
       window.removeEventListener('resize', checkScrollability);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     };
-  }, [calendarDays, checkScrollability]);
+  }, [calendarDays, checkScrollability, handleScrollDetect]);
 
   const handleScrollBy = (amount: number) => {
     if (!scrollContainerRef.current) return;
+    isProgrammaticScroll.current = true;
     scrollContainerRef.current.scrollBy({
       left: amount,
       behavior: 'smooth',
     });
+
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      isProgrammaticScroll.current = false;
+      handleScrollDetect();
+    }, 400);
   };
 
   // Mouse drag handlers for desktop
@@ -174,23 +229,24 @@ export function PeriodTimeline({
     e.preventDefault();
     e.stopPropagation();
     const targetEl = e.currentTarget;
+    isProgrammaticScroll.current = true;
     onSelectDate(new Date(dayDate));
     centerElement(targetEl, 'smooth');
   };
 
   return (
-    <div className="relative group/timeline w-full my-1 font-sans">
+    <div className="relative group/timeline w-full my-3 font-sans">
       {/* Left Scroll Arrow Button */}
       {canScrollLeft && (
-        <div className="hidden md:flex absolute left-0 top-0 bottom-0 z-20 items-center pl-0.5 pr-5 bg-gradient-to-r from-[var(--bg-color)] via-[var(--bg-color)]/90 to-transparent pointer-events-none">
+        <div className="hidden md:flex absolute left-0 top-0 bottom-0 z-20 items-center pl-1 pr-8 bg-gradient-to-r from-[var(--bg-color)] via-[var(--bg-color)]/95 to-transparent pointer-events-none">
           <button
             type="button"
             onClick={() => handleScrollBy(-220)}
-            className="pointer-events-auto w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--surface-color)]/95 hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90"
+            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-md flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90"
             aria-label="Skrolla bakåt i tidslinjen"
             title="Föregående dagar"
           >
-            <ChevronLeft size={16} strokeWidth={2.5} />
+            <ChevronLeft size={18} strokeWidth={2.5} />
           </button>
         </div>
       )}
@@ -202,9 +258,12 @@ export function PeriodTimeline({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative flex items-center gap-1.5 sm:gap-2 overflow-x-auto py-1 px-3 no-scrollbar cursor-grab active:cursor-grabbing"
+        className="relative flex items-center gap-3 overflow-x-auto py-2.5 no-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', touchAction: 'pan-x pan-y' }}
       >
+        {/* Left Centering Spacer */}
+        <div className="shrink-0" style={{ width: 'calc(50% - 50px)' }} />
+
         {calendarDays.map((day: any, index: number) => {
           if (!day.date) return null;
           const dayDate = new Date(day.date);
@@ -228,62 +287,69 @@ export function PeriodTimeline({
                 }
               }}
               data-time={dayTime}
+              data-date={day.date}
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              whileTap={{ scale: 0.94 }}
-              className={`flex flex-col items-center justify-center gap-1 min-w-[50px] sm:min-w-[54px] h-[58px] sm:h-[62px] py-1.5 px-1 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
+              className={`snap-center flex flex-col items-center justify-center gap-1.5 w-[92px] sm:w-[100px] h-[92px] sm:h-[100px] p-3 rounded-2xl transition-all duration-300 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-2xs dark:bg-white dark:text-black font-semibold'
+                  ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_12px_24px_rgba(24,24,24,0.18)] dark:shadow-[0_12px_24px_rgba(255,255,255,0.12)] scale-105 font-bold z-10'
                   : isRealToday
-                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--text-primary)]/50 hover:border-[var(--text-primary)]/80'
+                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-dashed border-[var(--text-primary)]/50 hover:border-[var(--text-primary)]'
                   : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
               }`}
             >
               {/* Day of Week */}
-              <span className={`text-[9px] sm:text-[9.5px] tracking-tight uppercase ${
+              <span className={`text-[10px] sm:text-[11px] tracking-wider uppercase ${
                 isSelected 
                   ? 'opacity-90 font-semibold' 
                   : isRealToday 
                   ? 'text-[var(--text-primary)] font-semibold' 
                   : 'opacity-65 font-medium'
               }`}>
-                {/* Always display Today/Idag for the current date, regardless of selection */}
                 {isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}
               </span>
 
               {/* Day Number */}
-              <span className={`text-[13px] sm:text-[14px] leading-none font-medium tabular-nums ${
-                isSelected ? 'text-[var(--text-on-accent)] dark:text-black font-semibold' : 'text-[var(--text-primary)]'
-              }`}>
+              <span className={`text-[17px] sm:text-[19px] leading-none font-bold tabular-nums`}>
                 {dayNumber}
               </span>
+
+              {/* Miniature Today Dot Indicator */}
+              {isRealToday && (
+                <span className={`w-1.5 h-1.5 rounded-full absolute bottom-2.5 ${
+                  isSelected ? 'bg-white dark:bg-[#181818]' : 'bg-[#ff4c4c]'
+                }`} />
+              )}
             </motion.button>
           );
         })}
 
         {/* Lön / Payday Box in green at the end of timeline */}
         <div 
-          className="flex flex-col items-center justify-center gap-1 min-w-[50px] sm:min-w-[54px] h-[58px] sm:h-[62px] py-1.5 px-1 rounded-[14px] bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 select-none shrink-0 cursor-default pointer-events-none"
+          className="snap-center flex flex-col items-center justify-center gap-1.5 w-[92px] sm:w-[100px] h-[92px] sm:h-[100px] p-3 rounded-2xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 select-none shrink-0 cursor-default pointer-events-none"
         >
-          <span className="text-[12px] leading-none">💸</span>
-          <span className="text-[10px] sm:text-[10.5px] font-bold tracking-tight uppercase">
+          <span className="text-[16px] leading-none">💸</span>
+          <span className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase">
             {isEn ? 'Payday' : 'Lön'}
           </span>
         </div>
+
+        {/* Right Centering Spacer */}
+        <div className="shrink-0" style={{ width: 'calc(50% - 50px)' }} />
       </div>
 
       {/* Right Scroll Arrow Button */}
       {canScrollRight && (
-        <div className="hidden md:flex absolute right-0 top-0 bottom-0 z-20 items-center pr-0.5 pl-5 bg-gradient-to-l from-[var(--bg-color)] via-[var(--bg-color)]/90 to-transparent pointer-events-none">
+        <div className="hidden md:flex absolute right-0 top-0 bottom-0 z-20 items-center pr-1 pl-8 bg-gradient-to-l from-[var(--bg-color)] via-[var(--bg-color)]/95 to-transparent pointer-events-none">
           <button
             type="button"
             onClick={() => handleScrollBy(220)}
-            className="pointer-events-auto w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--surface-color)]/95 hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90"
+            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-md flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90"
             aria-label="Skrolla framåt i tidslinjen"
             title="Kommande dagar"
           >
-            <ChevronRight size={16} strokeWidth={2.5} />
+            <ChevronRight size={18} strokeWidth={2.5} />
           </button>
         </div>
       )}

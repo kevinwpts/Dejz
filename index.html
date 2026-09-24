@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Dejz" />
     <meta name="theme-color" content="#EDEFF2" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0C0D0F" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#181818" media="(prefers-color-scheme: dark)" />
 
     <script>
       (function() {
@@ -24,7 +24,7 @@
           if (isDark) {
             root.classList.add('dark');
             root.classList.remove('light');
-            root.style.backgroundColor = '#0C0D0F';
+            root.style.backgroundColor = '#181818';
           } else {
             root.classList.add('light');
             root.classList.remove('dark');
@@ -84,8 +84,8 @@
         padding: 0;
       }
       html.dark, body.dark {
-        background-color: #0C0D0F !important;
-        background: #0C0D0F;
+        background-color: #181818 !important;
+        background: #181818;
       }
       html.light, body.light, html:not(.dark), body:not(.dark) {
         background-color: #EDEFF2 !important;

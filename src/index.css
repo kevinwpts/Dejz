@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-black: #18191e;
+  --color-black: #181818;
   --font-sans:
     "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display:
@@ -84,7 +84,7 @@ textarea {
   font-feature-settings: "cv11", "ss01", "ss02", "ss03", "tnum";
 
   /* Dejz Official Brand Logo Color (Solid Black / Soft Charcoal) */
-  --logo-color: #181a1f;
+  --logo-color: #181818;
 
   /* Premium Light Theme (Dejz Design System) */
   --bg-top-color: #EDEFF2;
@@ -100,7 +100,7 @@ textarea {
   --surface-muted: rgba(0, 0, 0, 0.04);
   --surface-tint: rgba(0, 0, 0, 0.02);
 
-  --text-primary: #181a1f;
+  --text-primary: #181818;
   --text-secondary: #636A75;
   --text-tertiary: #8C94A0;
   --text-inactive: #B8BFC9;
@@ -120,12 +120,12 @@ textarea {
   --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.08);
 
   /* Clean Minimalist Accent Color for Buttons & CTA - Refined Near-Black */
-  --accent-color: #1e2024;
-  --accent-hover: #2c2f35;
-  --accent-gradient: linear-gradient(145deg, #2c2f35 0%, #1e2024 100%);
+  --accent-color: #181818;
+  --accent-hover: #242424;
+  --accent-gradient: linear-gradient(145deg, #242424 0%, #181818 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(30, 32, 36, 0.08);
-  --accent-glow: rgba(30, 32, 36, 0.16);
+  --accent-soft: rgba(24, 24, 24, 0.08);
+  --accent-glow: rgba(24, 24, 24, 0.16);
 
   --modal-bg: rgba(255, 255, 255, 0.96);
   --bg-primary: var(--bg-color);
@@ -139,10 +139,10 @@ textarea {
   --danger-color: #e83e67;
   --warning-color: #f59e0b;
 
-  --nav-active-color: #1e2024;
+  --nav-active-color: #181818;
   --nav-inactive-color: #71717A;
-  --nav-plus-bg: #1e2024;
-  --nav-plus-shadow: 0 4px 14px rgba(24, 25, 30, 0.25);
+  --nav-plus-bg: #181818;
+  --nav-plus-shadow: 0 4px 14px rgba(24, 24, 24, 0.25);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -151,9 +151,9 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #1e2024;
+  --date-active-bg: #181818;
   --date-active-color: #FFFFFF;
-  --date-active-shadow: 0 4px 14px rgba(24, 25, 30, 0.20);
+  --date-active-shadow: 0 4px 14px rgba(24, 24, 24, 0.20);
   --date-inactive-bg: rgba(255, 255, 255, 0.90);
   --date-inactive-border: rgba(0, 0, 0, 0.06);
   --date-inactive-color: #636A75;
@@ -165,16 +165,16 @@ textarea {
 
 .dark {
   /* Premium Dark Theme Refinements (Dejz Design System) - Soft Near-Black Charcoal */
-  --bg-top-color: #0C0D0F;
-  --bg-color: #141619;
-  --bg-secondary: #181a1e;
-  --bg-gradient: linear-gradient(180deg, #0C0D0F 0%, #141619 220px, #141619 100%);
+  --bg-top-color: #181818;
+  --bg-color: #181818;
+  --bg-secondary: #1f1f1f;
+  --bg-gradient: linear-gradient(180deg, #181818 0%, #181818 100%);
 
-  --surface-color: #1c1f24;
-  --surface-gradient: #1c1f24;
-  --surface-elevated: #24282f;
-  --surface-elevated-gradient: #24282f;
-  --surface-solid: #1c1f24;
+  --surface-color: #222222;
+  --surface-gradient: #222222;
+  --surface-elevated: #2a2a2a;
+  --surface-elevated-gradient: #2a2a2a;
+  --surface-solid: #222222;
   --surface-muted: rgba(255, 255, 255, 0.04);
   --surface-tint: rgba(255, 255, 255, 0.02);
 
@@ -203,11 +203,11 @@ textarea {
   --accent-color: #FFFFFF;
   --accent-hover: #F4F4F5;
   --accent-gradient: linear-gradient(135deg, #FFFFFF 0%, #E4E4E7 100%);
-  --text-on-accent: #141619;
+  --text-on-accent: #181818;
   --accent-soft: rgba(255, 255, 255, 0.08);
   --accent-glow: rgba(255, 255, 255, 0.16);
 
-  --modal-bg: #1c1f24;
+  --modal-bg: #222222;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
   --bg-hover: rgba(255, 255, 255, 0.03);
@@ -232,7 +232,7 @@ textarea {
   --savings-card-text: var(--text-primary);
 
   --date-active-bg: #FFFFFF;
-  --date-active-color: #141619;
+  --date-active-color: #181818;
   --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   --date-inactive-bg: var(--surface-color);
   --date-inactive-border: rgba(255, 255, 255, 0.03);

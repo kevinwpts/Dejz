@@ -1124,7 +1124,7 @@ export default function App() {
     }
 
     // Update theme-color meta tag and root background for iOS Safari status bar and browser toolbar
-    const themeColor = shouldUseDarkMode ? "#0C0D0F" : "#EDEFF2";
+    const themeColor = shouldUseDarkMode ? "#181818" : "#EDEFF2";
     
     // Explicitly set body & documentElement background colors so iOS root canvas matches
     document.documentElement.style.backgroundColor = themeColor;
