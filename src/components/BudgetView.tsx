@@ -217,10 +217,20 @@ export function BudgetView({
                           type="number"
                           placeholder={totalUsed > 0 ? String(totalUsed) : "Ingen budget"}
                           value={cat.budget !== undefined ? cat.budget : (totalUsed > 0 ? totalUsed : '')}
+                          min={totalUsed}
                           onChange={(e) => {
-                            const val = e.target.value === '' ? undefined : Number(e.target.value);
+                            if (e.target.value === '') {
+                              const updatedCategories = config.categories.map((c) => 
+                                c.name === cat.name ? { ...c, budget: undefined } : c
+                              );
+                              setConfig({ ...config, categories: updatedCategories });
+                              return;
+                            }
+                            let val = Number(e.target.value);
+                            if (val < totalUsed) val = totalUsed;
+                            const valToSave = val === totalUsed ? undefined : val;
                             const updatedCategories = config.categories.map((c) => 
-                              c.name === cat.name ? { ...c, budget: val } : c
+                              c.name === cat.name ? { ...c, budget: valToSave } : c
                             );
                             setConfig({ ...config, categories: updatedCategories });
                           }}
@@ -273,13 +283,12 @@ export function BudgetView({
                   <div className="space-y-1.5 px-1 pt-1">
                     <input
                       type="range"
-                      min="0"
+                      min={totalUsed}
                       max={maxSliderVal}
                       step="50"
                       value={displayedBudget}
                       onChange={(e) => {
                         const val = Number(e.target.value);
-                        // If they slide to exactly totalUsed, we can keep it as undefined (which defaults to totalUsed)
                         const valToSave = val === totalUsed ? undefined : val;
                         const updatedCategories = config.categories.map((c) => 
                           c.name === cat.name ? { ...c, budget: valToSave } : c
@@ -288,11 +297,11 @@ export function BudgetView({
                       }}
                       className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[var(--accent-color)] focus:outline-none bg-[var(--border-color)]/60"
                       style={{
-                        backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${Math.min((displayedBudget / maxSliderVal) * 100, 100)}%, var(--border-color) ${Math.min((displayedBudget / maxSliderVal) * 100, 100)}%, var(--border-color) 100%)`
+                        backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${maxSliderVal > totalUsed ? ((displayedBudget - totalUsed) / (maxSliderVal - totalUsed)) * 100 : 0}%, var(--border-color) ${maxSliderVal > totalUsed ? ((displayedBudget - totalUsed) / (maxSliderVal - totalUsed)) * 100 : 0}%, var(--border-color) 100%)`
                       }}
                     />
                     <div className="flex justify-between text-[10px] text-[var(--text-secondary)] font-semibold">
-                      <span>0 kr</span>
+                      <span>{formatAmount(totalUsed, config.language)} kr</span>
                       <span>Max: {formatAmount(maxSliderVal, config.language)} kr</span>
                     </div>
                   </div>
