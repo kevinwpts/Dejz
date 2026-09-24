@@ -82,7 +82,6 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   const iconKey = categoryObj?.icon;
   const color = categoryObj?.color;
   const categoryName = item.category ? capitalize(item.category) : '';
-  const shouldShowCategory = !isSaving && item.category && item.category.trim().toLowerCase() !== displayName.trim().toLowerCase();
 
   return (
     <motion.div 
@@ -109,31 +108,10 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
           <p className="text-[13px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors group-hover:text-[var(--accent-color)]">
             {displayName}
           </p>
-          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
-            {paymentInfo ? (
-              <div className="flex items-center gap-1.5 min-w-0 overflow-hidden text-[12px] text-[var(--text-secondary)]">
-                <span className="font-medium text-[var(--text-secondary)] opacity-90 whitespace-nowrap shrink-0">
-                  {paymentInfo}
-                </span>
-                {shouldShowCategory && (
-                  <>
-                    <span className="opacity-35 shrink-0">•</span>
-                    <div className="flex items-center gap-1 min-w-0 truncate">
-                      {color && (
-                        <span 
-                          className="w-1.5 h-1.5 rounded-full shrink-0" 
-                          style={{ backgroundColor: color }} 
-                        />
-                      )}
-                      <span className="opacity-75 truncate">
-                        {categoryName}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : !isSaving && item.category ? (
-              <div className="flex items-center gap-1 px-2 h-[22px] rounded-full bg-[var(--chip-bg)] shrink-0 max-w-[85%] border-none">
+          <div className="flex items-center gap-2 mt-0.5 min-w-0 overflow-hidden">
+            {/* Category badge with icon - exactly as before */}
+            {!isSaving && item.category && (
+              <div className="flex items-center gap-1 px-2 h-[22px] rounded-full bg-[var(--chip-bg)] shrink-0 border-none">
                 {iconKey ? (
                   <CategoryIcon 
                     icon={iconKey} 
@@ -150,7 +128,14 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                   {categoryName}
                 </span>
               </div>
-            ) : null}
+            )}
+
+            {/* Deduction day & payment method - placed after and styled small */}
+            {paymentInfo && (
+              <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-75 whitespace-nowrap truncate tracking-tight">
+                {paymentInfo}
+              </span>
+            )}
           </div>
         </div>
       </div>

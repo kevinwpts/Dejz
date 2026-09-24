@@ -418,17 +418,8 @@ export function BudgetView({
               <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block leading-tight">
                 {config.language === 'en' ? 'Category Allocation' : 'Fördelat på kategorier'}
               </span>
-              <span className="text-[12.5px] font-medium text-[var(--text-primary)] truncate block mt-0.5">
-                {totalAllocatedKronor > 0 ? (
-                  <>
-                    <strong className="font-bold font-amount tabular-nums">{formatAmount(totalAllocatedKronor, config.language)} {config.currency}</strong>
-                    <span className="text-[var(--text-secondary)] ml-1 text-xs font-medium">({totalAllocatedPercentage}%)</span>
-                  </>
-                ) : (
-                  <span className="text-[var(--text-secondary)] text-xs font-medium">
-                    {config.language === 'en' ? 'Not allocated yet' : 'Inte fördelad ännu'}
-                  </span>
-                )}
+              <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate block mt-0.5">
+                <span className="font-amount tabular-nums font-bold">{totalAllocatedPercentage}%</span> {config.language === 'en' ? 'Done' : 'Klart'}
               </span>
             </div>
 

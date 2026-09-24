@@ -87,7 +87,7 @@ export function VariableAmountUpdateModal({
                    {item.name}
                  </h2>
                  <span className="text-xs font-medium text-accent">
-                   {periodName ? `${periodName}` : t('fixedExpense')}
+                   {periodName ? `${periodName}` : (item.budgetType === 'income' ? (config.language === 'en' ? 'Income' : 'Inkomst') : t('fixedExpense'))}
                  </span>
                </div>
                <div className="flex justify-end">
