@@ -125,7 +125,6 @@ export function BudgetView({
     }, 0) || 0;
 
     const remainingPercentage = Math.max(0, 100 - totalAllocatedPercentage);
-    const remainingBufferKronor = Math.round((remainingPercentage / 100) * totalIncome);
 
     return (
       <motion.div
@@ -151,37 +150,21 @@ export function BudgetView({
 
         {/* Info card with progress meter */}
         <div className="p-5 sm:p-6 rounded-[24px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-xs space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
-                Total månadsinkomst
-              </span>
-              <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] font-amount tabular-nums">
-                {formatAmount(totalIncome, config.language)} {config.currency}
-              </span>
-            </div>
-            <div className="text-right">
-              <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
-                Oallokerat kvar
-              </span>
-              <span className="text-xl sm:text-2xl font-bold text-emerald-500 font-amount tabular-nums">
-                {remainingPercentage}% <span className="text-[11px] font-normal opacity-80 text-[var(--text-secondary)]">({formatAmount(remainingBufferKronor, config.language)} {config.currency})</span>
-              </span>
-            </div>
+          <div>
+            <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
+              Fördelat av budget
+            </span>
+            <span className="text-xl sm:text-2xl font-bold text-[var(--accent-color)] font-amount tabular-nums">
+              {totalAllocatedPercentage}% <span className="text-[13px] font-medium text-[var(--text-secondary)]">({formatAmount(Math.round((totalAllocatedPercentage / 100) * totalIncome), config.language)} {config.currency})</span>
+            </span>
           </div>
 
           {/* Allocation Progress Bar */}
-          <div className="space-y-1.5">
-            <div className="w-full h-2.5 bg-[var(--border-color)]/60 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-[var(--accent-color)] rounded-full transition-all duration-300"
-                style={{ width: `${totalAllocatedPercentage}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-[11px] font-medium text-[var(--text-secondary)]">
-              <span>{totalAllocatedPercentage}% fördelat ({formatAmount(Math.round((totalAllocatedPercentage / 100) * totalIncome), config.language)} kr)</span>
-              <span>{remainingPercentage}% kvar ({formatAmount(remainingBufferKronor, config.language)} kr)</span>
-            </div>
+          <div className="w-full h-2.5 bg-[var(--border-color)]/60 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-[var(--accent-color)] rounded-full transition-all duration-300"
+              style={{ width: `${totalAllocatedPercentage}%` }}
+            />
           </div>
         </div>
 
@@ -192,7 +175,9 @@ export function BudgetView({
           </h3>
           
           <div className="space-y-4 pr-1">
-            {config.categories?.map((cat) => {
+            {[...(config.categories || [])]
+              .sort((a, b) => getBudgetPercentage(b) - getBudgetPercentage(a))
+              .map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
 
@@ -266,7 +251,7 @@ export function BudgetView({
                     </div>
                   </div>
 
-                  {/* Middle Row: Usage details and helper buttons */}
+                  {/* Middle Row: Usage details */}
                   <div className="flex flex-col gap-2 bg-[var(--surface-muted)]/40 p-3 rounded-[16px] border border-[var(--border-color)]/30">
                     <div className="flex flex-wrap justify-between items-center gap-2 text-[11px] font-medium text-[var(--text-secondary)]">
                       <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -278,22 +263,6 @@ export function BudgetView({
                           <span>Rörligt spenderat hittills: <strong className="text-[var(--text-primary)] font-normal font-amount">{formatAmount(variableSpent, config.language)} kr</strong></span>
                         )}
                       </div>
-
-                      {/* Quick helper button to restore to pre-filled floor ONLY if custom budget has been set and differs */}
-                      {config.categories?.find(c => c.name === cat.name)?.budget !== undefined && displayedPercentage !== fixedSpentPercentage && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const updatedCategories = config.categories.map((c) => 
-                              c.name === cat.name ? { ...c, budget: undefined } : c
-                            );
-                            setConfig({ ...config, categories: updatedCategories });
-                          }}
-                          className="px-2.5 py-1 rounded-full bg-[var(--accent-color)]/10 hover:bg-[var(--accent-color)]/15 text-[var(--accent-color)] font-bold text-[10px] active:scale-95 transition-all cursor-pointer border border-[var(--accent-color)]/20 shadow-4xs"
-                        >
-                          Å... Återställ till fast nivå ({fixedSpentPercentage}%)
-                        </button>
-                      )}
                     </div>
                   </div>
 
@@ -317,10 +286,6 @@ export function BudgetView({
                         backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${maxPercentageVal > fixedSpentPercentage ? ((displayedPercentage - fixedSpentPercentage) / (maxPercentageVal - fixedSpentPercentage)) * 100 : 0}%, var(--border-color) ${maxPercentageVal > fixedSpentPercentage ? ((displayedPercentage - fixedSpentPercentage) / (maxPercentageVal - fixedSpentPercentage)) * 100 : 0}%, var(--border-color) 100%)`
                       }}
                     />
-                    <div className="flex justify-between text-[10px] text-[var(--text-secondary)] font-semibold">
-                      <span>Golv (Fasta utgifter): {fixedSpentPercentage}% ({formatAmount(fixedSpent, config.language)} kr)</span>
-                      <span>Max: {maxPercentageVal}% ({formatAmount(Math.round((maxPercentageVal / 100) * totalIncome), config.language)} kr)</span>
-                    </div>
                   </div>
                 </div>
               );
