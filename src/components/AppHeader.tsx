@@ -1,7 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { User, Search, ChevronLeft, Bell, ChevronDown } from "lucide-react";
-import { DejzLogo } from "./DejzLogo";
-import { UniversalPeriodSelector } from "./UniversalPeriodSelector";
+import React, { useEffect, useState, useRef, useMemo } from "react";
+import { User, Search, ChevronLeft, Bell } from "lucide-react";
 
 interface AppHeaderProps {
   userName?: string;
@@ -14,18 +12,13 @@ interface AppHeaderProps {
   notificationCount?: number;
   onOpenNotifications?: () => void;
   isDemoMode?: boolean;
-  periods?: any[];
-  currentPeriodDate?: Date;
-  onPeriodChange?: (date: Date) => void;
-  periodName?: string;
-  isCurrentPeriod?: boolean;
-  onOpenCalendarPicker?: () => void;
+  language?: string;
   activeTab?: string;
 }
 
 export function AppHeader({
   _userName,
-  _date,
+  date,
   avatarUrl,
   onNavigate,
   navTrigger: _navTrigger,
@@ -34,17 +27,22 @@ export function AppHeader({
   notificationCount = 0,
   onOpenNotifications,
   isDemoMode,
-  periods,
-  currentPeriodDate,
-  onPeriodChange,
-  periodName,
-  isCurrentPeriod,
-  onOpenCalendarPicker,
-  activeTab: _activeTab,
+  language = "sv",
+  activeTab,
 }: AppHeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isAtTop, setIsAtTop] = useState(true);
   const lastScrollY = useRef(0);
+
+  const formattedDate = useMemo(() => {
+    const d = date || new Date();
+    const isSwedish = !language || language.startsWith("sv");
+    const weekday = d.toLocaleDateString(isSwedish ? "sv-SE" : "en-US", { weekday: "long" });
+    const capitalizedWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+    const day = d.getDate();
+    const month = d.toLocaleDateString(isSwedish ? "sv-SE" : "en-US", { month: "short" }).replace(".", "");
+    return `${capitalizedWeekday} ${day} ${month}`;
+  }, [date, language]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -106,47 +104,32 @@ export function AppHeader({
       }`}
     >
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2`}>
-        {/* Left: Back button + Title OR Active Period Selector */}
+        {/* Left: Back button + Title OR Tab Title / Date */}
         <div className="flex items-center min-w-0">
           {onBack ? (
             <button
               onClick={onBack}
-              className="flex items-center gap-1.5 group active:scale-95 transition-all py-0.5 -ml-1 pr-2 cursor-pointer text-[var(--text-primary)]"
+              className="flex items-center gap-1.5 group active:scale-95 transition-all py-0.5 -ml-1 pr-2 cursor-pointer text-[var(--text-primary)] min-w-0"
             >
-              <ChevronLeft size={20} strokeWidth={2.2} />
+              <ChevronLeft size={20} strokeWidth={2.2} className="shrink-0" />
               {title && (
-                <h1 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight truncate">
+                <h1 className="text-[15px] sm:text-[16px] font-bold text-[var(--text-primary)] tracking-tight truncate">
                   {title}
                 </h1>
               )}
             </button>
-          ) : periods && periods.length > 0 && currentPeriodDate && onPeriodChange ? (
-            <UniversalPeriodSelector
-              periods={periods}
-              currentDate={currentPeriodDate}
-              onChange={onPeriodChange}
-              periodName={periodName}
-              isCurrentPeriod={isCurrentPeriod}
-              onOpenPicker={onOpenCalendarPicker}
-              variant="header"
-            />
-          ) : periodName ? (
-            <button
-              type="button"
-              onClick={onOpenCalendarPicker}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--surface-color)] border border-[var(--border-color)]/80 text-[var(--text-primary)] text-xs font-bold tracking-tight active:scale-95 transition-all cursor-pointer shadow-2xs"
-            >
-              <span>{periodName}</span>
-              <ChevronDown size={13} className="text-[var(--text-secondary)] opacity-60" />
-            </button>
+          ) : title ? (
+            <div className="flex items-center py-0.5 min-w-0">
+              <h1 className="text-[16px] sm:text-[17px] font-bold text-[var(--text-primary)] tracking-tight truncate">
+                {title}
+              </h1>
+            </div>
           ) : (
-            <button
-              onClick={() => onNavigate("today")}
-              className="flex items-center gap-2 group active:scale-95 transition-transform py-0.5 cursor-pointer"
-              aria-label="Dejz Hem"
-            >
-              <DejzLogo className="h-5 w-auto text-[var(--text-primary)]" />
-            </button>
+            <div className="flex items-center py-0.5 min-w-0">
+              <span className="text-[15px] sm:text-[16px] font-bold text-[var(--text-primary)] tracking-tight truncate">
+                {formattedDate}
+              </span>
+            </div>
           )}
         </div>
 
@@ -180,7 +163,9 @@ export function AppHeader({
 
           <button
             onClick={() => onNavigate("profile")}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer active:scale-95 overflow-hidden"
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer active:scale-95 overflow-hidden ${
+              activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
+            }`}
             aria-label="Profil"
           >
             {avatarUrl ? (

@@ -3294,8 +3294,8 @@ export default function App() {
           onBack={
             activeTab === 'notifications' ||
             (activeTab === 'budget' && !!budgetSection) ||
-            (activeTab === 'profile' && profileSection !== 'main') ||
-            (activeTab === 'settings' && settingsSection !== 'main')
+            activeTab === 'profile' ||
+            activeTab === 'settings'
               ? () => handleGoBack()
               : undefined
           }
@@ -3318,12 +3318,7 @@ export default function App() {
           notificationCount={notifications.length}
           onOpenNotifications={() => handleNavigate("notifications")}
           isDemoMode={isDemoMode}
-          periods={periods}
-          currentPeriodDate={currentPeriodDate}
-          onPeriodChange={setCurrentPeriodDate}
-          periodName={stats?.periodName}
-          isCurrentPeriod={isCurrentPeriod}
-          onOpenCalendarPicker={() => setIsCalendarModalOpen(true)}
+          language={(config?.language as string) || "sv"}
           activeTab={activeTab}
         />
       )}
