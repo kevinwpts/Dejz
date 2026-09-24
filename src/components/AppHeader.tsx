@@ -44,6 +44,9 @@ export function AppHeader({
     return `${capitalizedWeekday} ${day} ${month}`;
   }, [date, language]);
 
+  const isTodayTab = activeTab === "today";
+  const useWhiteHeader = isTodayTab && isAtTop;
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -109,24 +112,30 @@ export function AppHeader({
           {onBack ? (
             <button
               onClick={onBack}
-              className="flex items-center gap-1.5 group active:scale-95 transition-all py-0.5 -ml-1 pr-2 cursor-pointer text-[var(--text-primary)] min-w-0"
+              className={`flex items-center gap-1.5 group active:scale-95 transition-all py-0.5 -ml-1 pr-2 cursor-pointer min-w-0 ${
+                useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
+              }`}
             >
               <ChevronLeft size={20} strokeWidth={2.2} className="shrink-0" />
               {title && (
-                <h1 className="text-[15px] sm:text-[16px] font-bold text-[var(--text-primary)] tracking-tight truncate">
+                <h1 className="text-[15px] sm:text-[16px] font-bold tracking-tight truncate">
                   {title}
                 </h1>
               )}
             </button>
           ) : title ? (
             <div className="flex items-center py-0.5 min-w-0">
-              <h1 className="text-[16px] sm:text-[17px] font-bold text-[var(--text-primary)] tracking-tight truncate">
+              <h1 className={`text-[16px] sm:text-[17px] font-bold tracking-tight truncate ${
+                useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
+              }`}>
                 {title}
               </h1>
             </div>
           ) : (
             <div className="flex items-center py-0.5 min-w-0">
-              <span className="text-[15px] sm:text-[16px] font-bold text-[var(--text-primary)] tracking-tight truncate">
+              <span className={`text-[15px] sm:text-[16px] font-bold tracking-tight truncate transition-all duration-300 ${
+                useWhiteHeader ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 text-[var(--text-primary)]"
+              }`}>
                 {formattedDate}
               </span>
             </div>
@@ -138,7 +147,11 @@ export function AppHeader({
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors relative cursor-pointer active:scale-95"
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 ${
+                useWhiteHeader 
+                  ? "text-white/95 hover:bg-white/10" 
+                  : "text-[var(--text-primary)] hover:bg-[var(--surface-muted)]"
+              }`}
               aria-label="Notiser"
             >
               <Bell
@@ -155,7 +168,11 @@ export function AppHeader({
 
           <button
             onClick={() => onNavigate("search")}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer active:scale-95"
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+              useWhiteHeader 
+                ? "text-white/95 hover:bg-white/10" 
+                : "text-[var(--text-primary)] hover:bg-[var(--surface-muted)]"
+            }`}
             aria-label="Sök"
           >
             <Search size={19} strokeWidth={2} />
@@ -163,7 +180,11 @@ export function AppHeader({
 
           <button
             onClick={() => onNavigate("profile")}
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer active:scale-95 overflow-hidden ${
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden ${
+              useWhiteHeader 
+                ? "hover:bg-white/10" 
+                : "hover:bg-[var(--surface-muted)]"
+            } ${
               activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
             }`}
             aria-label="Profil"
@@ -176,7 +197,7 @@ export function AppHeader({
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <User size={19} strokeWidth={2} />
+              <User size={19} strokeWidth={2} className={useWhiteHeader ? "text-white/95" : "text-[var(--text-primary)]"} />
             )}
           </button>
         </div>

@@ -212,86 +212,94 @@ export function GreetingModule({
 
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
-      {/* Personal Greeting & Date Header */}
-      <div className="flex flex-col gap-0.5 px-1 pt-0.5 pb-0.5 select-none">
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
-          <span>{userName ? `Hej ${userName}` : 'Hej'}</span>
-          <span className="inline-block origin-bottom-right hover:rotate-12 transition-transform duration-200">👋</span>
-        </h1>
-        <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] opacity-70 capitalize">
-          {formattedDate}
-        </p>
-      </div>
-
-      {/* 1. Dagsbudget Hero Card with Integrated Totalt kvar & Nästa lön */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1, duration: 0.5 }}
-        className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center relative overflow-hidden"
+      {/* 1. Seamless Integrated Grand Hero Gradient Card (Edge-to-edge, full status-bar touching height) */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="-mx-4 sm:-mx-6 -mt-[calc(5rem+env(safe-area-inset-top))] pt-[calc(5.5rem+env(safe-area-inset-top))] pb-7 px-5 sm:px-7 rounded-b-[40px] bg-gradient-to-tr from-emerald-400 via-teal-500 to-sky-500 dark:from-teal-950/70 dark:via-cyan-950/60 dark:to-indigo-950/60 text-white shadow-[0_12px_40px_rgba(20,184,166,0.18)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] relative overflow-hidden flex flex-col"
       >
-        <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2.5 block">
-          {topLabel}
-        </span>
-        <div className="flex items-baseline justify-center gap-1.5">
-          <AnimatedNumber 
-            value={displayAmount} 
-            className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
-              isNegative ? 'text-danger' : ''
-            }`}
-            formatter={(val) => formatAmount(val, language)}
-          />
-          <span className={`text-base sm:text-lg font-light opacity-60 ${
-            isNegative ? 'text-danger' : 'text-[var(--text-secondary)]'
-          }`}>
-            {currency}
+        {/* Decorative premium light bubbles */}
+        <div className="absolute -top-20 -left-20 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-56 h-56 bg-white/15 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Unified greeting & date header inside the card, spaced perfectly below floating transparent header buttons */}
+        <div className="flex flex-col gap-1 select-none pt-4 pb-5 relative z-10 text-left border-b border-white/10 mb-5">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2 leading-none">
+            <span>{userName ? `Hej ${userName}` : 'Hej'}</span>
+            <span className="inline-block origin-bottom-right hover:rotate-12 transition-transform duration-200">👋</span>
+          </h1>
+          <p className="text-xs font-semibold text-white/70 tracking-wide uppercase leading-none mt-1">
+            {formattedDate}
+          </p>
+        </div>
+
+        {/* Content of the Hero card */}
+        <div className="flex flex-col items-center text-center relative z-10">
+          <span className="text-xs font-semibold text-white/80 tracking-wide uppercase mb-2 block">
+            {topLabel}
           </span>
-        </div>
-
-        {/* Progress bar under Kvar idag */}
-        <div className="w-full mt-5">
-          <div className="w-full h-2 bg-[var(--surface-muted)] rounded-full overflow-hidden relative">
-            <div 
-              className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                isNegative || dayProgressPct < 10 ? 'bg-danger' : 'bg-[var(--accent-color)]'
+          <div className="flex items-baseline justify-center gap-1.5">
+            <AnimatedNumber 
+              value={displayAmount} 
+              className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-white font-amount tabular-nums tracking-tight ${
+                isNegative ? 'text-rose-200' : ''
               }`}
-              style={{ width: `${dayProgressPct}%` }}
+              formatter={(val) => formatAmount(val, language)}
             />
+            <span className={`text-base sm:text-lg font-light ${
+              isNegative ? 'text-rose-200' : 'text-white/80'
+            }`}>
+              {currency}
+            </span>
           </div>
-        </div>
 
-        {/* Integrated Totalt kvar & Nästa lön */}
-        {effectiveRemainingDays !== undefined && (
-          <div className="w-full grid grid-cols-2 gap-4 pt-5 mt-5 border-t border-[var(--border-color)]/50">
-            <div className="text-left flex flex-col justify-center">
-              <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-80 mb-1 block">
-                {t('totalRemaining' as any)}
-              </span>
-              <div className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount leading-tight tabular-nums">
-                {formatAmount(stats?.remainingPeriodCents || 0, language)}{' '}
-                <span className="text-xs font-normal opacity-50 ml-0.5">{currency}</span>
-              </div>
+          {/* Progress bar under Kvar idag */}
+          <div className="w-full mt-4">
+            <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden relative backdrop-blur-xs">
+              <div 
+                className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
+                  isNegative || dayProgressPct < 10 ? 'bg-rose-300' : 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+                }`}
+                style={{ width: `${dayProgressPct}%` }}
+              />
             </div>
-            
-            <div className="text-right flex flex-col justify-center items-end">
-              <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-80 mb-1 block">
-                {t('daysToNextSalary' as any)}
-              </span>
-              <div className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount leading-tight tabular-nums">
-                {stats?.remainingDays || 1}{' '}
-                <span className="text-xs font-normal opacity-50 ml-0.5 font-sans">
-                  {(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}
+          </div>
+
+          {/* Integrated Totalt kvar & Nästa lön */}
+          {effectiveRemainingDays !== undefined && (
+            <div className="w-full grid grid-cols-2 gap-4 pt-4 mt-4 border-t border-white/15">
+              <div className="text-left flex flex-col justify-center">
+                <span className="text-[11px] font-medium text-white/70 uppercase tracking-wider mb-1 block">
+                  {t('totalRemaining' as any)}
                 </span>
+                <div className="text-base sm:text-lg font-bold text-white font-amount leading-tight tabular-nums">
+                  {formatAmount(stats?.remainingPeriodCents || 0, language)}{' '}
+                  <span className="text-xs font-normal opacity-70 ml-0.5">{currency}</span>
+                </div>
+              </div>
+              
+              <div className="text-right flex flex-col justify-center items-end">
+                <span className="text-[11px] font-medium text-white/70 uppercase tracking-wider mb-1 block">
+                  {t('daysToNextSalary' as any)}
+                </span>
+                <div className="text-base sm:text-lg font-bold text-white font-amount leading-tight tabular-nums">
+                  {stats?.remainingDays || 1}{' '}
+                  <span className="text-xs font-normal opacity-70 ml-0.5 font-sans">
+                    {(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-        {/* Integrated Category Budgets / Children */}
-        {children && (
-          <div className="w-full pt-4 sm:pt-5 mt-4 sm:mt-5 border-t border-[var(--border-color)]/50 text-left">
-            {children}
-          </div>
-        )}
+          )}
+          
+          {/* Integrated Category Budgets / Children */}
+          {children && (
+            <div className="w-full pt-4 mt-4 border-t border-white/15 text-left">
+              {children}
+            </div>
+          )}
+        </div>
       </motion.div>
 
       {/* Dejzi Mascot Card */}
