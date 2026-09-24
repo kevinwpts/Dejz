@@ -602,6 +602,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
               {[
                 {
                   initials: 'L',
+                  isVerified: true,
                   bg: 'from-pink-400/20 to-purple-400/20 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-800/40',
                   name: 'Linnéa, 28',
                   city: getL10n('Stockholm', 'Stockholm', 'Stockholm', 'Stockholm', 'Tukholma'),
@@ -614,20 +615,23 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                   )
                 },
                 {
-                  initials: 'M',
-                  bg: 'from-sky-400/20 to-indigo-400/20 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800/40',
-                  name: 'Marcus, 34',
-                  city: getL10n('Oslo', 'Oslo', 'Oslo', 'Oslo', 'Oslo'),
+                  initials: 'K',
+                  isVerified: false,
+                  image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80',
+                  bg: 'from-amber-400/20 to-orange-400/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800/40',
+                  name: 'Kevin, 31',
+                  city: getL10n('Helsingborg', 'Helsingborg', 'Helsingborg', 'Helsingborg', 'Helsingborg'),
                   quote: getL10n(
-                    'Inget krångel med bankID eller kopplingar som slutar fungera. Jag registrerar mina köp på två sekunder. Otroligt minimalistisk och snabb app!',
-                    'No hassle with bank connections that stop working. I log my purchases in two seconds. Incredibly minimalist and fast app!',
-                    'Ikke noe tull med bankID eller koblinger som slutter å fungere. Jag registrerer kjøpene mine på to sekunder. Utrolig minimalistisk og rask app!',
-                    'Intet besvær med bankforbindelser, der holder op med at fungere. Jeg registrerer mine køb på to sekunder. Utroligt minimalistisk og hurtig app!',
-                    'Ei säätöä pankkiyhteyksien kanssa, jotka lakkaavat toimimasta. Kirjaan ostokseni kahdessa sekunnissa. Uskomattoman minimalistinen ja nopea sovellus!'
+                    'Har äntligen fått koll på ekonomin. Det gäller bara att lägga in allt första gången och vara noga med att lägga in efter varje köp. Men så värt att ha full kontroll, och det är kul också.',
+                    'Finally got control of my finances. You just have to enter everything the first time and be diligent about entering after every purchase. But so worth having full control, and it\'s fun too.',
+                    'Har endelig fått kontroll på økonomien. Det gjelder bare å legge inn alt den første gangen og være nøye med å legge inn etter hvert kjøp. Men så verdt å ha full kontroll, og det er gøy også.',
+                    'Har endelig fået styr på økonomien. Det gælder bare om at lægge alt ind første gang og være omhyggelig med at lægge det ind efter hvert køb. Men så meget værd at have fuld kontrol, og det er også sjovt.',
+                    'Sain vihdoinkin talouteni hallintaan. Pitää vain syöttää kaikki ensimmäisellä kerralla ja muistaa kirjata jokaisen ostoksen jälkeen. Mutta on todella sen arvoista saada täysi hallinta, ja se on myös hauskaa.'
                   )
                 },
                 {
                   initials: 'S',
+                  isVerified: true,
                   bg: 'from-amber-400/20 to-emerald-400/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40',
                   name: 'Sofie, 23',
                   city: getL10n('Köpenhamn', 'Copenhagen', 'København', 'København', 'Kööpenhamina'),
@@ -639,39 +643,64 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                     'Opiskelijana oli aina vaikea tietää, kuinka paljon minulla oli jäljellä kuun lopussa. Dejzin päiväbudjetti pelasti opiskelijatalouteni.'
                   )
                 }
-              ].map((user, idx) => (
-                <div key={idx} className="flex flex-col justify-between p-6 rounded-[28px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs relative">
-                  <div className="space-y-4">
-                    {/* Stars Row */}
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={15} className="fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-
-                    {/* Review Quote */}
-                    <p className="text-sm sm:text-base font-semibold text-[var(--text-primary)] leading-relaxed italic">
-                      "{user.quote}"
-                    </p>
-                  </div>
-
-                  {/* Profile Info */}
-                  <div className="flex items-center gap-3.5 mt-6 pt-5 border-t border-[var(--border-color)]">
+              ].map((user, idx) => {
+                // Inline component definition or inline avatar render for clean scoping
+                const AvatarComponent = () => {
+                  const [imgError, setImgError] = React.useState(false);
+                  if (user.image && !imgError) {
+                    return (
+                      <img 
+                        src={user.image} 
+                        alt={user.name} 
+                        onError={() => setImgError(true)}
+                        className="w-10 h-10 rounded-full object-cover border border-[var(--border-color)] shrink-0 shadow-2xs"
+                      />
+                    );
+                  }
+                  return (
                     <div className={`w-10 h-10 rounded-full bg-gradient-to-tr ${user.bg} border flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs`}>
                       {user.initials}
                     </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">{user.name}</span>
-                        <div className="w-3.5 h-3.5 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0" title="Verifierad användare">
-                          <Check size={9} strokeWidth={3} />
-                        </div>
+                  );
+                };
+
+                return (
+                  <div key={idx} className="flex flex-col justify-between p-6 rounded-[28px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs relative">
+                    <div className="space-y-4">
+                      {/* Stars Row */}
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} size={15} className="fill-amber-400 text-amber-400" />
+                        ))}
                       </div>
-                      <span className="text-[10px] sm:text-xs text-[var(--text-secondary)] font-medium leading-none block mt-0.5">{user.city} • {getL10n('Verifierad köpare', 'Verified User', 'Verifisert bruker', 'Verificeret bruger', 'Vahvistettu käyttäjä')}</span>
+
+                      {/* Review Quote */}
+                      <p className="text-sm sm:text-base font-semibold text-[var(--text-primary)] leading-relaxed italic">
+                        "{user.quote}"
+                      </p>
+                    </div>
+
+                    {/* Profile Info */}
+                    <div className="flex items-center gap-3.5 mt-6 pt-5 border-t border-[var(--border-color)]">
+                      <AvatarComponent />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">{user.name}</span>
+                          {user.isVerified && (
+                            <div className="w-3.5 h-3.5 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0" title="Verifierad användare">
+                              <Check size={9} strokeWidth={3} />
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-[10px] sm:text-xs text-[var(--text-secondary)] font-medium leading-none block mt-0.5">
+                          {user.city}
+                          {user.isVerified ? ` • ${getL10n('Verifierad köpare', 'Verified User', 'Verifisert bruker', 'Verificeret bruger', 'Vahvistettu käyttäjä')}` : ''}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
