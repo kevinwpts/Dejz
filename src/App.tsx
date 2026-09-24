@@ -3487,7 +3487,13 @@ export default function App() {
                   <BudgetView
                     stats={stats}
                     config={config}
-                    setConfig={setConfig}
+                    setConfig={(newConfig) => {
+                      setConfig(newConfig);
+                      const activeUserId = session?.user?.id || "demo-user";
+                      dataService.saveSettings(activeUserId, newConfig).catch((err) => {
+                        console.error("Failed to save category budgets:", err);
+                      });
+                    }}
                     incomes={incomes}
                     setIncomes={setIncomes}
                     fixedExpenses={fixedExpenses}
