@@ -15,7 +15,7 @@ import { suggestIcon, suggestCategory } from '../utils/icons';
 import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
-import { QuickMathToolbar } from './QuickMathToolbar';
+import { NumberPad } from './NumberPad';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { Button, IconButton, SegmentedControl } from './ui';
 
@@ -316,10 +316,9 @@ export function TransactionModal({
         {/* Main Content Area */}
         <div className="shrink overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
               {/* Amount Input */}
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-2.5">
                 <div 
-                  onClick={() => amountInputRef.current?.focus()}
-                  className="bg-[var(--surface-muted)]/50 rounded-[16px] py-5 px-5 flex items-center justify-between transition-all cursor-text border border-[var(--border-color)] group"
+                  className="bg-[var(--surface-muted)]/50 rounded-[18px] py-3.5 px-4 sm:py-4 sm:px-5 flex items-center justify-between transition-all border border-[var(--border-color)] group"
                 >
                   <div className="shrink-0 flex items-center min-w-[72px]">
                     {type === 'expense' && (
@@ -347,7 +346,7 @@ export function TransactionModal({
                     <input
                       ref={amountInputRef}
                       type="text"
-                      inputMode="decimal"
+                      inputMode="none"
                       value={amount}
                       onChange={(e) => setAmount(formatAmount(e.target.value))}
                       onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
@@ -357,7 +356,7 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[44px] font-semibold text-center tracking-tighter leading-none placeholder-[var(--text-tertiary)]/30"
+                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[38px] sm:text-[44px] font-semibold text-center tracking-tighter leading-none placeholder-[var(--text-tertiary)]/30 cursor-default"
                     />
                   </div>
                   <div className="shrink-0 flex items-center justify-end min-w-[72px]">
@@ -367,7 +366,12 @@ export function TransactionModal({
                   </div>
                 </div>
 
-                <QuickMathToolbar value={amount} onChange={setAmount} inputRef={amountInputRef} currency={currency} />
+                {/* Built-in On-Screen Keypad with Math & Quick Splits */}
+                <NumberPad 
+                  value={amount} 
+                  onChange={setAmount} 
+                  currency={currency} 
+                />
               </div>
 
               {/* Merchant Input & Quick Icons */}
