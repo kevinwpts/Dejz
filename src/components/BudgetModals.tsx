@@ -700,6 +700,15 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               </div>
             </div>
 
+            {expense.note && (
+              <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
+                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('ownNote')}</p>
+                <p className="text-sm font-normal text-[var(--text-secondary)] leading-relaxed break-words">
+                  {expense.note}
+                </p>
+              </div>
+            )}
+
             <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('type')}</p>
               <p className="text-base font-medium text-[var(--text-primary)]">{expense.isVariable ? 'Varierande' : 'Fast belopp'}</p>
@@ -771,6 +780,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
   
   const [category, setCategory] = useState(typeof expense?.category === 'object' ? (expense.category as any)?.name : (expense?.category || (categories && categories.length > 0 ? categories[0].name : '')));
   const [name, setName] = useState(expense?.name || '');
+  const [note, setNote] = useState(expense?.note || '');
   const [deductionDay, setDeductionDay] = useState(expense?.deductionDay || 1);
   const [frequency, setFrequency] = useState(expense?.frequency || Frequency.MONTHLY);
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
@@ -821,7 +831,8 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
       logo, 
       deductionDay, 
       isVariable, 
-      periodOverrides: isVariable ? (expense?.periodOverrides || {}) : {} 
+      periodOverrides: isVariable ? (expense?.periodOverrides || {}) : {},
+      note: note.trim() || undefined
     });
   };
 
@@ -973,6 +984,31 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <button 
                   type="button"
                   onClick={() => setName('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1 cursor-pointer"
+                >
+                  <X size={18} strokeWidth={2} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Note Input */}
+          <div className="space-y-2">
+            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1">
+              {t('ownNote')}
+            </label>
+            <div className="relative group">
+              <input 
+                type="text" 
+                value={note} 
+                onChange={(e) => setNote(e.target.value)} 
+                placeholder={t('description')} 
+                className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40" 
+              />
+              {note && (
+                <button 
+                  type="button"
+                  onClick={() => setNote('')}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1 cursor-pointer"
                 >
                   <X size={18} strokeWidth={2} />

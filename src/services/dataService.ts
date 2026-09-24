@@ -446,7 +446,8 @@ export const dataService = {
       logo: e.logo,
       deductionDay: e.deduction_day,
       isVariable: e.is_variable,
-      periodOverrides: e.period_overrides || {}
+      periodOverrides: e.period_overrides || {},
+      note: e.note || undefined
     }));
   },
 
@@ -464,24 +465,36 @@ export const dataService = {
       localStorage.setItem('demo_fixed', JSON.stringify(list));
       return;
     }
+    const payload: any = {
+      id: expense.id,
+      user_id: userId,
+      name: expense.name,
+      amount: expense.amount,
+      payment_method: expense.paymentMethod,
+      frequency: expense.frequency,
+      icon: expense.icon,
+      category: expense.category,
+      logo: expense.logo,
+      deduction_day: expense.deductionDay,
+      is_variable: expense.isVariable,
+      period_overrides: expense.periodOverrides || {}
+    };
+    if (expense.note !== undefined) {
+      payload.note = expense.note || null;
+    }
     const { error } = await supabase
       .from('fixed_expenses')
-      .upsert({
-        id: expense.id,
-        user_id: userId,
-        name: expense.name,
-        amount: expense.amount,
-        payment_method: expense.paymentMethod,
-        frequency: expense.frequency,
-        icon: expense.icon,
-        category: expense.category,
-        logo: expense.logo,
-        deduction_day: expense.deductionDay,
-        is_variable: expense.isVariable,
-        period_overrides: expense.periodOverrides || {}
-      });
+      .upsert(payload);
     
-    if (error) throw error;
+    if (error) {
+      if (error.code === '42703' || error.message?.includes('note')) {
+        delete payload.note;
+        const retry = await supabase.from('fixed_expenses').upsert(payload);
+        if (retry.error) throw retry.error;
+      } else {
+        throw error;
+      }
+    }
   },
 
   async deleteFixedExpense(id: string) {    if (id.startsWith('demo-')) {

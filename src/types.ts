@@ -148,6 +148,7 @@ export interface FixedExpense {
   deductionDay?: number;
   isVariable?: boolean;
   periodOverrides?: Record<string, number>;
+  note?: string;
 }
 
 export interface SavingsPotTransaction {
