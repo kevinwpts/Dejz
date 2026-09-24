@@ -373,7 +373,8 @@ export const dataService = {
       logo: i.logo,
       deductionDay: i.deduction_day,
       isVariable: i.is_variable,
-      periodOverrides: i.period_overrides || {}
+      periodOverrides: i.period_overrides || {},
+      note: i.note || undefined
     }));
   },
 
@@ -391,22 +392,32 @@ export const dataService = {
       localStorage.setItem('demo_incomes', JSON.stringify(list));
       return;
     }
+    const payload: any = {
+      id: income.id.includes('-') ? income.id : undefined,
+      user_id: userId,
+      name: income.name,
+      amount: income.amount,
+      category: income.category,
+      icon: income.icon,
+      logo: income.logo,
+      deduction_day: income.deductionDay,
+      is_variable: income.isVariable,
+      period_overrides: income.periodOverrides || {},
+      note: income.note && income.note.trim() ? income.note.trim() : null
+    };
     const { error } = await supabase
       .from('income_sources')
-      .upsert({
-        id: income.id.includes('-') ? income.id : undefined,
-        user_id: userId,
-        name: income.name,
-        amount: income.amount,
-        category: income.category,
-        icon: income.icon,
-        logo: income.logo,
-        deduction_day: income.deductionDay,
-        is_variable: income.isVariable,
-        period_overrides: income.periodOverrides || {}
-      });
+      .upsert(payload);
     
-    if (error) throw error;
+    if (error) {
+      if (error.code === '42703' || error.message?.includes('note')) {
+        delete payload.note;
+        const retry = await supabase.from('income_sources').upsert(payload);
+        if (retry.error) throw retry.error;
+      } else {
+        throw error;
+      }
+    }
   },
 
   async deleteIncomeSource(id: string) {    if (id.startsWith('demo-')) {
@@ -477,11 +488,9 @@ export const dataService = {
       logo: expense.logo,
       deduction_day: expense.deductionDay,
       is_variable: expense.isVariable,
-      period_overrides: expense.periodOverrides || {}
+      period_overrides: expense.periodOverrides || {},
+      note: expense.note && expense.note.trim() ? expense.note.trim() : null
     };
-    if (expense.note !== undefined) {
-      payload.note = expense.note || null;
-    }
     const { error } = await supabase
       .from('fixed_expenses')
       .upsert(payload);

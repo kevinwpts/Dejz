@@ -107,8 +107,13 @@ CREATE TABLE public.income_sources (
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
     name TEXT NOT NULL,
     amount NUMERIC NOT NULL,
+    category TEXT,
     icon TEXT,
     logo TEXT,
+    deduction_day INTEGER,
+    is_variable BOOLEAN DEFAULT FALSE,
+    period_overrides JSONB DEFAULT '{}'::jsonb,
+    note TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -123,6 +128,10 @@ CREATE TABLE public.fixed_expenses (
     icon TEXT,
     category TEXT,
     logo TEXT,
+    deduction_day INTEGER,
+    is_variable BOOLEAN DEFAULT FALSE,
+    period_overrides JSONB DEFAULT '{}'::jsonb,
+    note TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

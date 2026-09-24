@@ -134,6 +134,7 @@ export interface Income {
   paymentMethod?: string;
   isVariable?: boolean;
   periodOverrides?: Record<string, number>;
+  note?: string;
 }
 
 export interface FixedExpense {
