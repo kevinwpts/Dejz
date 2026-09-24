@@ -199,9 +199,6 @@ export function GreetingModule({
     ? "pt-[calc(8.7rem+env(safe-area-inset-top))]"
     : "pt-[calc(6.5rem+env(safe-area-inset-top))]";
 
-  const spentToday = todayDayData ? Math.round(todayDayData.daySpent || 0) : 0;
-  const spentPct = Math.max(16, Math.min(85, (spentToday / Math.max(1, stats?.baseDailyBudgetCents || 450)) * 100));
-
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
       {/* 1. Seamless Integrated Grand Hero Area with negative margins */}
@@ -213,32 +210,21 @@ export function GreetingModule({
       >
         {/* The Aqua-Inspired Premium Main Rounded Card */}
         <div className="w-full bg-white dark:bg-[#1C1C1E] border border-black/[0.04] dark:border-white/[0.04] rounded-[32px] p-6 shadow-xs relative overflow-hidden flex flex-col mt-4">
-          {/* Card Header */}
-          <div className="flex items-center justify-end mb-4">
-            <button 
-              onClick={() => setIsCalculationModalOpen(true)}
-              className="w-8 h-8 rounded-full border border-black/[0.08] dark:border-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-all cursor-pointer"
-              title={t('periodBudget')}
-            >
-              <span className="text-xs font-semibold">⟨ ⟩</span>
-            </button>
-          </div>
-
           {/* Clean Stats Row with Totalt kvar and Dagar till lön */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
             <div className="flex flex-col text-left justify-center">
               <span className="text-xs font-bold text-[var(--text-secondary)] tracking-wider mb-1.5 block uppercase">
                 {t('totalRemaining')}
               </span>
-              <div className="flex items-baseline gap-1">
+              <div className="flex items-baseline gap-1.5">
                 <AnimatedNumber 
                   value={stats?.remainingPeriodCents || 0} 
-                  className={`text-[40px] sm:text-[44px] md:text-[48px] leading-none font-black text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
+                  className={`text-[48px] sm:text-[54px] md:text-[60px] leading-none font-black text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
                     (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : ''
                   }`}
                   formatter={(val) => formatAmount(val, language)}
                 />
-                <span className={`text-[18px] font-bold ${
+                <span className={`text-[22px] sm:text-[24px] font-bold ${
                   (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
                 }`}>
                   {currency}
@@ -254,37 +240,6 @@ export function GreetingModule({
               </span>
             </div>
           </div>
-
-          {/* High-Fidelity Aqua Style Segmented Progress Bar */}
-          <div className="w-full mt-6">
-            <div className="w-full flex items-center h-[34px] bg-black/[0.03] dark:bg-white/[0.03] rounded-full overflow-hidden p-1 relative">
-              {/* Left: Beautiful Sunset Gradient pill representing Spent Today */}
-              <div 
-                className="h-full rounded-full bg-gradient-to-r from-[#4E83FD] via-[#F43F5E] to-[#F59E0B] flex items-center justify-between px-3 text-[11px] font-bold text-white shadow-xs transition-all duration-500 whitespace-nowrap overflow-hidden"
-                style={{ width: `${spentPct}%` }}
-              >
-                <span>{formatAmount(spentToday, language)} {currency}</span>
-                <span className="text-[9px] opacity-90 font-medium font-sans uppercase tracking-wider ml-1.5 hidden xs:inline">
-                  {language === 'en' ? 'spent' : 'använt'}
-                </span>
-              </div>
-
-              {/* Right: Subtly textured pastel decorative remaining blocks */}
-              <div className="flex-1 flex items-center gap-1 h-full pl-1.5">
-                <div className="h-full w-1/4 bg-violet-400/15 dark:bg-violet-400/25 rounded-md border border-dashed border-violet-400/20" />
-                <div className="h-full w-1/5 bg-fuchsia-400/15 dark:bg-fuchsia-400/25 rounded-md border border-dashed border-fuchsia-400/20" />
-                <div className="h-full w-1/3 bg-sky-400/15 dark:bg-sky-400/25 rounded-md border border-dashed border-sky-400/20" />
-              </div>
-            </div>
-          </div>
-
-          {/* Outline Action Button */}
-          <button 
-            onClick={() => setIsCalculationModalOpen(true)}
-            className="w-full mt-6 py-2.5 px-4 border border-black/[0.08] dark:border-white/[0.08] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] rounded-2xl text-[10px] font-bold tracking-wider text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer flex items-center justify-center uppercase active:scale-[0.98]"
-          >
-            {language === 'en' ? 'See more insights' : 'Visa budgetdetaljer'}
-          </button>
 
           {/* Integrated Category Budgets Carousel as the Bottom Section inside the Card */}
           {children && (
