@@ -217,14 +217,14 @@ export function GreetingModule({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="-mx-4 sm:-mx-6 -mt-[calc(5rem+env(safe-area-inset-top))] pt-[calc(5.5rem+env(safe-area-inset-top))] pb-7 px-5 sm:px-7 rounded-b-[40px] bg-gradient-to-tr from-emerald-400 via-teal-500 to-sky-500 dark:from-teal-950/70 dark:via-cyan-950/60 dark:to-indigo-950/60 text-white shadow-[0_12px_40px_rgba(20,184,166,0.18)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] relative overflow-hidden flex flex-col"
+        className="-mx-4 sm:-mx-6 -mt-[calc(5rem+env(safe-area-inset-top))] pt-[calc(6.5rem+env(safe-area-inset-top))] pb-8 px-5 sm:px-7 rounded-b-[40px] bg-gradient-to-tr from-emerald-400 via-teal-500 to-sky-500 dark:from-teal-950/70 dark:via-cyan-950/60 dark:to-indigo-950/60 text-white shadow-[0_12px_40px_rgba(20,184,166,0.18)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] relative overflow-hidden flex flex-col"
       >
         {/* Decorative premium light bubbles */}
         <div className="absolute -top-20 -left-20 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-56 h-56 bg-white/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* Unified greeting & date header inside the card, spaced perfectly below floating transparent header buttons */}
-        <div className="flex flex-col gap-1 select-none pt-4 pb-5 relative z-10 text-left border-b border-white/10 mb-5">
+        <div className="hidden">
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2 leading-none">
             <span>{userName ? `Hej ${userName}` : 'Hej'}</span>
             <span className="inline-block origin-bottom-right hover:rotate-12 transition-transform duration-200">👋</span>

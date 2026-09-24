@@ -17,7 +17,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
-  _userName,
+  userName,
   date,
   avatarUrl,
   onNavigate,
@@ -107,8 +107,8 @@ export function AppHeader({
       }`}
     >
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2`}>
-        {/* Left: Back button + Title OR Tab Title / Date */}
-        <div className="flex items-center min-w-0">
+        {/* Left: Back button OR Profile Picture + (Greeting & Date OR Title) */}
+        <div className="flex items-center gap-2.5 min-w-0">
           {onBack ? (
             <button
               onClick={onBack}
@@ -123,27 +123,61 @@ export function AppHeader({
                 </h1>
               )}
             </button>
-          ) : title ? (
-            <div className="flex items-center py-0.5 min-w-0">
-              <h1 className={`text-[16px] sm:text-[17px] font-bold tracking-tight truncate ${
-                useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
-              }`}>
-                {title}
-              </h1>
-            </div>
           ) : (
-            <div className="flex items-center py-0.5 min-w-0">
-              <span className={`text-[15px] sm:text-[16px] font-bold tracking-tight truncate transition-all duration-300 ${
-                useWhiteHeader ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 text-[var(--text-primary)]"
-              }`}>
-                {formattedDate}
-              </span>
-            </div>
+            <>
+              {/* Profile Avatar Trigger Button */}
+              <button
+                onClick={() => onNavigate("profile")}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 ${
+                  activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
+                } ${
+                  useWhiteHeader 
+                    ? "bg-white/15 hover:bg-white/20 text-white" 
+                    : "bg-[var(--surface-muted)] hover:bg-[var(--surface-muted)]/80 text-[var(--text-primary)]"
+                }`}
+                aria-label="Profil"
+              >
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <User size={18} strokeWidth={2.2} />
+                )}
+              </button>
+
+              {/* Stacked Welcoming text or Tab title */}
+              <div className="flex flex-col min-w-0 text-left justify-center select-none">
+                {activeTab === "today" ? (
+                  <>
+                    <h2 className={`text-[13px] sm:text-[14px] font-bold tracking-tight truncate leading-tight ${
+                      useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
+                    }`}>
+                      {userName ? `Hej ${userName} 👋` : 'Hej 👋'}
+                    </h2>
+                    <span className={`text-[10px] sm:text-[11px] font-medium tracking-wide truncate leading-none mt-0.5 uppercase ${
+                      useWhiteHeader ? "text-white/70" : "text-[var(--text-secondary)] opacity-80"
+                    }`}>
+                      {formattedDate}
+                    </span>
+                  </>
+                ) : (
+                  <h1 className={`text-[15px] sm:text-[16px] font-bold tracking-tight truncate leading-none ${
+                    useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
+                  }`}>
+                    {title || "Dejz"}
+                  </h1>
+                )}
+              </div>
+            </>
           )}
         </div>
 
-        {/* Right Actions: Notifications, Search, Profile */}
-        <div className="flex items-center gap-1 sm:gap-1.5">
+        {/* Right Actions: Notifications, Search */}
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
@@ -176,29 +210,6 @@ export function AppHeader({
             aria-label="Sök"
           >
             <Search size={19} strokeWidth={2} />
-          </button>
-
-          <button
-            onClick={() => onNavigate("profile")}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden ${
-              useWhiteHeader 
-                ? "hover:bg-white/10" 
-                : "hover:bg-[var(--surface-muted)]"
-            } ${
-              activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
-            }`}
-            aria-label="Profil"
-          >
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt="Profile"
-                className="w-7 h-7 rounded-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <User size={19} strokeWidth={2} className={useWhiteHeader ? "text-white/95" : "text-[var(--text-primary)]"} />
-            )}
           </button>
         </div>
       </div>
