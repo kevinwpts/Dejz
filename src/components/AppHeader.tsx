@@ -110,9 +110,9 @@ export function AppHeader({
           {onBack ? (
             <button
               onClick={onBack}
-              className="flex items-center gap-2 group active:scale-95 transition-all py-0.5 -ml-1 pr-2 cursor-pointer text-[var(--text-primary)] dark:text-white"
+              className="flex items-center gap-1.5 group active:scale-95 transition-all py-0.5 -ml-1 pr-2 cursor-pointer text-[var(--text-primary)]"
             >
-              <ChevronLeft size={24} strokeWidth={3} />
+              <ChevronLeft size={20} strokeWidth={2.2} />
               {title && (
                 <h1 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight truncate">
                   {title}
@@ -125,26 +125,25 @@ export function AppHeader({
               className="flex items-center gap-2 group active:scale-95 transition-transform py-0.5 cursor-pointer"
               aria-label="Dejz Hem"
             >
-              <DejzLogo className="h-6 w-auto text-[var(--text-primary)]" />
+              <DejzLogo className="h-5 w-auto text-[var(--text-primary)]" />
             </button>
           )}
         </div>
 
-        {/* Right Actions: Notifications, Search, Profile with solid filled styles */}
-        <div className="flex items-center gap-4">
+        {/* Right Actions: Notifications, Search, Profile */}
+        <div className="flex items-center gap-1 sm:gap-1.5">
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className="text-[var(--text-primary)] dark:text-white hover:opacity-75 transition-opacity relative flex items-center justify-center cursor-pointer p-1"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors relative cursor-pointer active:scale-95"
               aria-label="Notiser"
             >
               <Bell
-                size={24}
-                strokeWidth={0}
-                fill="currentColor"
+                size={19}
+                strokeWidth={2}
               />
               {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] px-0.5 rounded-full bg-rose-500 text-white text-[8px] font-bold flex items-center justify-center leading-none shadow-sm">
+                <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-rose-500 text-white text-[8px] font-bold flex items-center justify-center leading-none shadow-xs">
                   {notificationCount}
                 </span>
               )}
@@ -153,26 +152,26 @@ export function AppHeader({
 
           <button
             onClick={() => onNavigate("search")}
-            className="text-[var(--text-primary)] dark:text-white hover:opacity-75 transition-opacity flex items-center justify-center cursor-pointer p-1"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer active:scale-95"
             aria-label="Sök"
           >
-            <Search size={24} strokeWidth={3} />
+            <Search size={19} strokeWidth={2} />
           </button>
 
           <button
             onClick={() => onNavigate("profile")}
-            className="text-[var(--text-primary)] dark:text-white hover:opacity-75 transition-opacity flex items-center justify-center cursor-pointer p-1"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-colors cursor-pointer active:scale-95 overflow-hidden"
             aria-label="Profil"
           >
             {avatarUrl ? (
               <img
                 src={avatarUrl}
                 alt="Profile"
-                className="w-8 h-8 rounded-full object-cover"
+                className="w-7 h-7 rounded-full object-cover"
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <User size={24} strokeWidth={0} fill="currentColor" />
+              <User size={19} strokeWidth={2} />
             )}
           </button>
         </div>

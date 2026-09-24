@@ -36,30 +36,30 @@ export const ListRow: React.FC<ListRowProps> = ({
   return (
     <div
       onClick={isClickable ? onClick : undefined}
-      className={`flex items-center justify-between py-3.5 px-4 rounded-[16px] transition-colors select-none ${
+      className={`flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[14px] transition-colors select-none ${
         isClickable
           ? 'cursor-pointer hover:bg-[var(--surface-muted)]/70 active:scale-[0.99]'
           : ''
       } ${disabled ? 'opacity-40 pointer-events-none' : ''} ${className}`}
     >
-      <div className="flex items-center gap-3.5 min-w-0 pr-2">
+      <div className="flex items-center gap-3 min-w-0 pr-2">
         {icon && (
           <div
-            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
+            className={`w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
           >
             {icon}
           </div>
         )}
         <div className="min-w-0 flex flex-col justify-center">
           <div
-            className={`text-xs sm:text-sm font-semibold truncate ${
+            className={`text-[13px] sm:text-sm font-semibold truncate ${
               destructive ? 'text-danger' : 'text-[var(--text-primary)]'
             }`}
           >
             {title}
           </div>
           {subtitle && (
-            <div className="text-[11px] sm:text-xs text-[var(--text-secondary)] font-medium truncate mt-0.5">
+            <div className="text-[11px] sm:text-[11.5px] text-[var(--text-secondary)] font-medium truncate mt-0.5">
               {subtitle}
             </div>
           )}
@@ -74,7 +74,7 @@ export const ListRow: React.FC<ListRowProps> = ({
         )}
         {rightElement}
         {showChevron && (
-          <ChevronRight size={18} className="text-[var(--text-secondary)] opacity-50" />
+          <ChevronRight size={14} strokeWidth={2} className="text-[var(--text-secondary)] opacity-50 shrink-0" />
         )}
       </div>
     </div>

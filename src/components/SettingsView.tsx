@@ -130,15 +130,15 @@ const sectionHeaders: Record<Language, Record<string, { title: string; subtitle?
 };
 
 const SectionHeading = ({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) => (
-  <div className="max-w-md mx-auto mb-3 text-center select-none pt-2 pb-1">
-    <div className="mx-auto w-12 h-12 rounded-2xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center border border-[var(--accent-color)]/20 mb-2 transition-transform duration-300 hover:rotate-6">
-      <Icon size={22} className="stroke-[2.2]" />
+  <div className="max-w-md mx-auto mb-2 text-center select-none pt-1 pb-0.5">
+    <div className="mx-auto w-9 h-9 rounded-xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center border border-[var(--accent-color)]/20 mb-1.5 transition-transform duration-300 hover:rotate-6">
+      <Icon size={18} strokeWidth={2} />
     </div>
-    <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-tight px-2 leading-tight">
+    <h3 className="text-[15px] font-bold text-[var(--text-primary)] tracking-tight px-2 leading-tight">
       {title}
     </h3>
     {subtitle && (
-      <p className="text-xs font-semibold text-[var(--text-secondary)] opacity-60 mt-1 max-w-[280px] mx-auto leading-relaxed">
+      <p className="text-[11px] font-medium text-[var(--text-secondary)] opacity-70 mt-1 max-w-[280px] mx-auto leading-relaxed">
         {subtitle}
       </p>
     )}
@@ -285,39 +285,39 @@ export function SettingsView({
     ];
 
     return (
-      <div className="space-y-6 max-w-md mx-auto py-2">
+      <div className="space-y-4 max-w-md mx-auto py-1">
         <SectionHeading icon={Calendar} title={header.title} subtitle={header.subtitle} />
         {/* Next Payday Status Line — Minimalist and subtle */}
-        <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] px-1">
-          <Calendar size={14} className="opacity-60" />
+        <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)] px-1">
+          <Calendar size={13} className="opacity-60" />
           <span>
             {config.language === 'en' ? 'Next planned payday: ' : 'Nästa planerade lönedag: '}
-            <strong className="text-[var(--text-primary)] font-medium">{capitalizedDate}</strong>
+            <strong className="text-[var(--text-primary)] font-semibold">{capitalizedDate}</strong>
           </span>
         </div>
 
         {/* Pure & Simple Modular list stacked vertically ("under varandra") */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           {paydayOptions.map((option) => {
             const isSelected = config.paydayType === option.type;
             return (
               <button
                 key={option.type}
                 onClick={() => handleUpdatePaydayType(option.type)}
-                className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all active:scale-[0.98] relative ${
+                className={`w-full flex items-center justify-between py-3 px-3.5 rounded-xl border transition-all active:scale-[0.98] cursor-pointer relative ${
                   isSelected 
-                    ? 'bg-accent/5 border-[var(--accent-color)] text-[var(--text-primary)] shadow-sm' 
+                    ? 'bg-accent/5 border-[var(--accent-color)] text-[var(--text-primary)] shadow-xs' 
                     : 'bg-[var(--surface-color)] border-[var(--border-color)]/30 text-[var(--text-primary)] hover:border-[var(--border-color)]/60'
                 }`}
               >
-                <span className="text-sm font-semibold tracking-tight leading-snug">{option.label}</span>
+                <span className="text-[13px] font-semibold tracking-tight leading-snug">{option.label}</span>
                 <div className="relative flex items-center justify-center flex-shrink-0">
                   {isSelected ? (
-                    <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-sm">
-                      <Check size={11} strokeWidth={3} />
+                    <div className="w-4 h-4 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
+                      <Check size={10} strokeWidth={3} />
                     </div>
                   ) : (
-                    <div className="w-5 h-5 rounded-full border border-[var(--border-color)]/60 opacity-60" />
+                    <div className="w-4 h-4 rounded-full border border-[var(--border-color)]/60 opacity-60" />
                   )}
                 </div>
               </button>
@@ -515,9 +515,9 @@ export function SettingsView({
     });
 
     return (
-      <div className="space-y-4 max-w-md mx-auto py-2">
+      <div className="space-y-4 max-w-md mx-auto py-1">
         <SectionHeading icon={CreditCard} title={header.title} subtitle={header.subtitle} />
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2.5">
           {methodsList.map((method, index) => (
             <button
               key={index}
@@ -525,12 +525,12 @@ export function SettingsView({
                 setPaymentMethodModalData({ index, name: method.name });
                 setIsPaymentMethodModalOpen(true);
               }}
-              className="relative bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] p-3 flex flex-col items-center gap-2 hover:bg-[var(--surface-muted)] transition-all"
+              className="relative bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[14px] p-2.5 flex flex-col items-center gap-1.5 hover:bg-[var(--surface-muted)] transition-all cursor-pointer active:scale-95"
             >
-              <div className="w-10 h-10 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center">
-                <CategoryIcon icon={method.icon} color={method.color} size="md" />
+              <div className="w-8.5 h-8.5 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center">
+                <CategoryIcon icon={method.icon} color={method.color} size="sm" />
               </div>
-              <span className="text-[11.5px] font-medium tracking-tight text-center line-clamp-2 leading-snug break-words hyphens-auto opacity-90 w-full px-0.5">
+              <span className="text-[11px] font-medium tracking-tight text-center line-clamp-2 leading-snug break-words hyphens-auto opacity-90 w-full px-0.5">
                 {method.name}
               </span>
             </button>
@@ -540,19 +540,19 @@ export function SettingsView({
               setPaymentMethodModalData({ name: '' });
               setIsPaymentMethodModalOpen(true);
             }}
-            className="border-2 border-dashed border-[var(--border-color)] rounded-[16px] p-3 flex flex-col items-center justify-center gap-2 hover:border-[var(--accent-color)] text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-all"
+            className="border-2 border-dashed border-[var(--border-color)] rounded-[14px] p-2.5 flex flex-col items-center justify-center gap-1.5 hover:border-[var(--accent-color)] text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-all cursor-pointer active:scale-95 min-h-[72px]"
           >
-            <Plus size={20} />
-            <span className="text-[11.5px] font-medium tracking-tight text-center">Ny</span>
+            <Plus size={16} />
+            <span className="text-[11px] font-medium tracking-tight text-center">Ny</span>
           </button>
         </div>
 
-        <div className="pt-2">
+        <div className="pt-1">
           <button 
             onClick={handleResetPaymentMethods}
-            className="w-full h-11 flex items-center justify-center gap-2 p-3 bg-[var(--surface-color)] border border-[var(--border-color)]/20 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-[0.98] group"
+            className="w-full h-10 flex items-center justify-center gap-2 p-2.5 bg-[var(--surface-color)] border border-[var(--border-color)]/20 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-[0.98] group cursor-pointer"
           >
-            <RotateCcw size={13} strokeWidth={2} className="opacity-75" />
+            <RotateCcw size={12} strokeWidth={2} className="opacity-75" />
             <span className="text-xs font-semibold tracking-wide">
               {config.language === 'en' ? "Reset to standard" : "Återställ till standard"}
             </span>
@@ -563,32 +563,32 @@ export function SettingsView({
   };
 
   const renderLanguageSettings = () => (
-    <div className="space-y-4 max-w-md mx-auto py-2">
+    <div className="space-y-4 max-w-md mx-auto py-1">
       <SectionHeading icon={Globe} title={(sectionHeaders[config.language || 'sv']?.language || sectionHeaders.sv.language).title} subtitle={(sectionHeaders[config.language || 'sv']?.language || sectionHeaders.sv.language).subtitle} />
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1.5">
         {Object.entries(languageInfo).map(([code, info]) => {
           const isSelected = config.language === code;
           return (
             <button
                key={code}
                onClick={() => setConfig({ ...config, language: code as Language })}
-               className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all active:scale-[0.98] relative ${
+               className={`w-full flex items-center justify-between py-3 px-3.5 rounded-xl border transition-all active:scale-[0.98] cursor-pointer relative ${
                  isSelected 
-                   ? 'bg-[var(--accent-color)]/10 border-[var(--accent-color)] text-[var(--text-primary)] shadow-sm' 
+                   ? 'bg-[var(--accent-color)]/10 border-[var(--accent-color)] text-[var(--text-primary)] shadow-xs' 
                    : 'bg-[var(--surface-color)] border-[var(--border-color)]/30 text-[var(--text-primary)] hover:border-[var(--border-color)]/60'
                }`}
              >
-               <div className="flex items-center gap-3">
-                 <LanguageFlag language={code as Language} size="lg" />
-                 <span className="text-sm font-semibold tracking-tight leading-snug">{info.label}</span>
+               <div className="flex items-center gap-2.5">
+                 <LanguageFlag language={code as Language} size="md" />
+                 <span className="text-[13px] font-semibold tracking-tight leading-snug">{info.label}</span>
                </div>
                <div className="relative flex items-center justify-center flex-shrink-0">
                  {isSelected ? (
-                   <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-sm">
-                     <Check size={11} strokeWidth={3} />
+                   <div className="w-4 h-4 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
+                     <Check size={10} strokeWidth={3} />
                    </div>
                  ) : (
-                   <div className="w-5 h-5 rounded-full border border-[var(--border-color)]/60 opacity-60" />
+                   <div className="w-4 h-4 rounded-full border border-[var(--border-color)]/60 opacity-60" />
                  )}
                </div>
              </button>
