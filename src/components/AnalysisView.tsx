@@ -179,7 +179,7 @@ export function AnalysisView({
             setAnalysisFilter('all');
             setExpandedCategory(null);
           }}
-          className={`h-9 px-1.5 rounded-full text-[12px] font-semibold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-10 sm:h-11 px-2 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
             analysisFilter === 'all'
               ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
@@ -192,7 +192,7 @@ export function AnalysisView({
             setAnalysisFilter('variable');
             setExpandedCategory(null);
           }}
-          className={`h-9 px-1.5 rounded-full text-[12px] font-semibold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-10 sm:h-11 px-2 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
             analysisFilter === 'variable'
               ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
@@ -205,7 +205,7 @@ export function AnalysisView({
             setAnalysisFilter('fixed');
             setExpandedCategory(null);
           }}
-          className={`h-9 px-1.5 rounded-full text-[12px] font-semibold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-10 sm:h-11 px-2 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
             analysisFilter === 'fixed'
               ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'

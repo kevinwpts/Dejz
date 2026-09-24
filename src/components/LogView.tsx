@@ -142,7 +142,7 @@ export function LogView({
               <button
                 key={type}
                 onClick={() => setTypeFilter(type)}
-                className={`flex items-center justify-center gap-1.5 h-8 sm:h-8.5 px-1 rounded-full text-[12px] font-semibold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 h-10 sm:h-11 px-1 rounded-full text-[13px] font-semibold transition-all cursor-pointer ${
                   isActive 
                     ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs' 
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'

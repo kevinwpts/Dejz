@@ -451,7 +451,7 @@ export function BudgetView({
       <div className="grid grid-cols-3 gap-1 p-1 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full shadow-xs">
         <button
           onClick={() => setBudgetFilter('fixed')}
-          className={`h-9 rounded-full text-[11px] sm:text-[12px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-10 sm:h-11 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
             budgetFilter === 'fixed'
               ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
@@ -461,7 +461,7 @@ export function BudgetView({
         </button>
         <button
           onClick={() => setBudgetFilter('income')}
-          className={`h-9 rounded-full text-[11px] sm:text-[12px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-10 sm:h-11 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
             budgetFilter === 'income'
               ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
@@ -471,7 +471,7 @@ export function BudgetView({
         </button>
         <button
           onClick={() => setBudgetFilter('savings')}
-          className={`h-9 rounded-full text-[11px] sm:text-[12px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-10 sm:h-11 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
             budgetFilter === 'savings'
               ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'

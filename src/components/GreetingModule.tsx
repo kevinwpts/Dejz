@@ -193,11 +193,11 @@ export function GreetingModule({
 
   const isDemo = isDemoMode();
   const negativeMarginClass = isDemo 
-    ? "-mt-[calc(7.2rem+env(safe-area-inset-top))]" 
-    : "-mt-[calc(5rem+env(safe-area-inset-top))]";
+    ? "-mt-[calc(8.2rem+env(safe-area-inset-top))]" 
+    : "-mt-[calc(6.2rem+env(safe-area-inset-top))]";
   const topPaddingClass = isDemo
-    ? "pt-[calc(8.7rem+env(safe-area-inset-top))]"
-    : "pt-[calc(6.5rem+env(safe-area-inset-top))]";
+    ? "pt-[calc(9.2rem+env(safe-area-inset-top))]"
+    : "pt-[calc(7.2rem+env(safe-area-inset-top))]";
 
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
@@ -209,7 +209,7 @@ export function GreetingModule({
         className={`-mx-4 sm:-mx-6 ${negativeMarginClass} ${topPaddingClass} pb-4 px-4 sm:px-6 text-[var(--text-primary)] relative overflow-hidden flex flex-col`}
       >
         {/* The Aqua-Inspired Premium Main Rounded Card */}
-        <div className="w-full bg-white dark:bg-[#1C1C1E] border border-black/[0.04] dark:border-white/[0.04] rounded-[32px] p-6 shadow-xs relative overflow-hidden flex flex-col mt-4">
+        <div className="w-full bg-white dark:bg-[#1C1C1E] border border-black/[0.04] dark:border-white/[0.04] rounded-[32px] p-7 sm:p-8 shadow-xs relative overflow-hidden flex flex-col mt-4">
           {/* Clean Stats Row with Totalt kvar and Dagar till lön */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
             <div className="flex flex-col text-left justify-center">
@@ -232,13 +232,8 @@ export function GreetingModule({
               </div>
             </div>
 
-            {/* Elegant Right Side: Dagar till nästa lön Badge with brand theme */}
-            <div className="flex items-center gap-2 bg-[var(--surface-muted)] px-3.5 py-2 rounded-2xl border border-[var(--border-color)] self-start sm:self-center shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-secondary)] shrink-0" />
-              <span className="text-xs font-bold text-[var(--text-primary)]">
-                {stats?.remainingDays || 1} { (stats?.remainingDays || 1) === 1 ? t('oneDay') : t('days') } {language === 'en' ? 'to salary' : 'till lön'}
-              </span>
-            </div>
+            {/* Elegant Right Side: Dagar till nästa lön Badge removed */}
+            <div className="hidden" />
           </div>
 
           {/* Integrated Category Budgets Carousel as the Bottom Section inside the Card */}
