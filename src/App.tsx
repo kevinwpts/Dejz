@@ -1119,10 +1119,10 @@ export default function App() {
       document.head.appendChild(meta);
     }
 
-    // Sync apple-mobile-web-app-status-bar-style for iOS PWA
+    // Sync apple-mobile-web-app-status-bar-style for iOS PWA to be fully transparent/immersive
     const statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
     if (statusBarMeta) {
-      statusBarMeta.setAttribute("content", shouldUseDarkMode ? "black-translucent" : "default");
+      statusBarMeta.setAttribute("content", "black-translucent");
     }
   }, [config?.darkMode, subscriptionStatus, config, session?.user?.email]);
 
