@@ -142,14 +142,14 @@ textarea {
   --shadow-level-2: 0 4px 16px rgba(11, 10, 18, 0.04);
   --shadow-level-3: 0 10px 30px rgba(11, 10, 18, 0.06);
 
-  /* Brand Accents */
-  --accent-color: #FF8A00; /* Dejz Brand Orange */
-  --accent-hover: #E87900;
-  --accent-gradient: linear-gradient(145deg, #FF8A00 0%, #E87900 100%);
+  /* Brand Accents (Neutral Monochrome) */
+  --accent-color: #0B0A12;
+  --accent-hover: #24222B;
+  --accent-gradient: linear-gradient(145deg, #0B0A12 0%, #24222B 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: #FFF1E2; /* Brand subtle */
-  --accent-glow: rgba(255, 138, 0, 0.15);
-  --accent-secondary-color: #FFECD9; /* Brand Light */
+  --accent-soft: #F4F3F0;
+  --accent-glow: rgba(11, 10, 18, 0.05);
+  --accent-secondary-color: #E5E3DE;
 
   /* Primary button states (Light mode) */
   --btn-primary-bg: #0B0A12;
@@ -228,16 +228,16 @@ textarea {
   --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.5);
 
-  --logo-color: #FF941A;
+  --logo-color: #F9F8F6;
 
-  /* Brand Accents */
-  --accent-color: #FF941A;
-  --accent-hover: #FFA43D;
-  --accent-gradient: linear-gradient(135deg, #FF941A 0%, #FFA43D 100%);
+  /* Brand Accents (Neutral Monochrome Dark) */
+  --accent-color: #F9F8F6;
+  --accent-hover: #EBEAE8;
+  --accent-gradient: linear-gradient(135deg, #F9F8F6 0%, #EBEAE8 100%);
   --text-on-accent: #0B0A12;
-  --accent-soft: #38230E; /* Brand subtle dark */
-  --accent-glow: rgba(255, 148, 26, 0.25);
-  --accent-secondary-color: #FFA43D;
+  --accent-soft: #292730;
+  --accent-glow: rgba(249, 248, 246, 0.05);
+  --accent-secondary-color: #222028;
 
   /* Primary button states (Dark mode) */
   --btn-primary-bg: #F9F8F6;

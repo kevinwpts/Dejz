@@ -233,8 +233,8 @@ export function GreetingModule({
             </div>
 
             {/* Elegant Right Side: Dagar till nästa lön Badge with brand theme */}
-            <div className="flex items-center gap-2 bg-[var(--accent-soft)] px-3.5 py-2 rounded-2xl border border-[var(--border-color)] self-start sm:self-center shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)] shrink-0" />
+            <div className="flex items-center gap-2 bg-[var(--surface-muted)] px-3.5 py-2 rounded-2xl border border-[var(--border-color)] self-start sm:self-center shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-secondary)] shrink-0" />
               <span className="text-xs font-bold text-[var(--text-primary)]">
                 {stats?.remainingDays || 1} { (stats?.remainingDays || 1) === 1 ? t('oneDay') : t('days') } {language === 'en' ? 'to salary' : 'till lön'}
               </span>

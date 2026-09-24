@@ -293,7 +293,7 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`snap-center flex flex-col items-center justify-center gap-1 w-[66px] sm:w-[74px] h-[72px] sm:h-[80px] p-2 rounded-xl transition-all duration-300 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_6px_14px_rgba(0,0,0,0.12)] dark:shadow-[0_6px_14px_rgba(255,255,255,0.1)] scale-108 font-bold z-10 opacity-100 ring-2 ring-[var(--accent-color)]/30'
+                  ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_6px_14px_rgba(0,0,0,0.12)] dark:shadow-[0_6px_14px_rgba(255,255,255,0.1)] scale-108 font-bold z-10 opacity-100 border border-white/20 dark:border-black/20'
                   : isRealToday
                   ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-dashed border-[var(--text-primary)]/50 hover:border-[var(--text-primary)] scale-95 opacity-80'
                   : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] scale-95 opacity-80'
@@ -335,8 +335,8 @@ export function PeriodTimeline({
           </span>
         </div>
 
-        {/* Right Centering Spacer */}
-        <div className="shrink-0 w-[calc(50%-33px)] sm:w-[calc(50%-37px)]" />
+        {/* Right Centering Spacer removed so end of month stays right-aligned */}
+        <div className="shrink-0 w-3 sm:w-4" />
       </div>
 
       {/* Right Scroll Arrow Button */}

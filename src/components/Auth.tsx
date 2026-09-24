@@ -180,14 +180,14 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
   };
 
   return (
-    <div className="min-h-dvh flex items-center justify-center p-4 sm:p-6 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))]">
+    <div className="light min-h-dvh flex items-center justify-center p-4 sm:p-6 bg-[#FAFAF8] text-[#0B0A12] selection:bg-[#0B0A12] selection:text-white relative overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))]">
       {/* Subtle Ambient Glow */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-40 dark:opacity-100">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[340px] sm:w-[480px] h-[340px] sm:h-[480px] bg-gradient-to-tr from-black/[0.03] via-black/[0.015] to-transparent dark:from-white/[0.04] dark:via-white/[0.02] blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-40">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[340px] sm:w-[480px] h-[340px] sm:h-[480px] bg-gradient-to-tr from-black/[0.03] via-black/[0.015] to-transparent blur-[120px] rounded-full pointer-events-none" />
       </div>
 
       <div
-        className="w-full max-w-[420px] bg-[var(--surface-color)] p-6 sm:p-8 rounded-[28px] border border-[var(--border-color)] shadow-xs relative z-10"
+        className="w-full max-w-[420px] bg-white p-6 sm:p-8 rounded-[28px] border border-[#E5E3DE] shadow-xs relative z-10 text-[#0B0A12]"
       >
         {isEmailSent ? (
           <div

@@ -204,7 +204,7 @@ export function ProfileView({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-5 max-w-lg mx-auto pb-8"
+      className="space-y-5 w-full pb-8"
     >
       {/* User Header */}
       <div className="flex items-center gap-4 py-1">
