@@ -217,7 +217,7 @@ export function GreetingModule({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="-mx-4 sm:-mx-6 -mt-[calc(5rem+env(safe-area-inset-top))] pt-[calc(6.5rem+env(safe-area-inset-top))] pb-8 px-5 sm:px-7 rounded-b-[40px] bg-gradient-to-tr from-emerald-400 via-teal-500 to-sky-500 dark:from-teal-950/70 dark:via-cyan-950/60 dark:to-indigo-950/60 text-white shadow-[0_12px_40px_rgba(20,184,166,0.18)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] relative overflow-hidden flex flex-col"
+        className="-mx-4 sm:-mx-6 -mt-[calc(5rem+env(safe-area-inset-top))] pt-[calc(6.5rem+env(safe-area-inset-top))] pb-8 px-5 sm:px-7 rounded-b-[40px] bg-gradient-to-tr from-[#ff3860] via-[#ff4c4c] to-[#ff7a45] dark:from-[#400e12]/85 dark:via-[#2b080a]/80 dark:to-[#1c0204]/80 text-white shadow-[0_12px_40px_rgba(255,76,76,0.18)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] relative overflow-hidden flex flex-col"
       >
         {/* Decorative premium light bubbles */}
         <div className="absolute -top-20 -left-20 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
