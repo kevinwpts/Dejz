@@ -246,18 +246,18 @@ export function GreetingModule({
         {/* Content of the Hero card */}
         <div className="flex flex-col items-center text-center relative z-10">
           <span className="text-xs font-semibold text-white/80 tracking-wide uppercase mb-2 block">
-            {topLabel}
+            {t('totalRemaining' as any)}
           </span>
           <div className="flex items-baseline justify-center gap-1.5">
             <AnimatedNumber 
-              value={displayAmount} 
+              value={stats?.remainingPeriodCents || 0} 
               className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-white font-amount tabular-nums tracking-tight ${
-                isNegative ? 'text-rose-200' : ''
+                (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-200' : ''
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
             <span className={`text-base sm:text-lg font-light ${
-              isNegative ? 'text-rose-200' : 'text-white/80'
+              (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-200' : 'text-white/80'
             }`}>
               {currency}
             </span>
@@ -280,10 +280,10 @@ export function GreetingModule({
             <div className="w-full grid grid-cols-2 gap-4 pt-4 mt-4 border-t border-white/15">
               <div className="text-left flex flex-col justify-center">
                 <span className="text-[11px] font-medium text-white/70 uppercase tracking-wider mb-1 block">
-                  {t('totalRemaining' as any)}
+                  {topLabel}
                 </span>
                 <div className="text-base sm:text-lg font-bold text-white font-amount leading-tight tabular-nums">
-                  {formatAmount(stats?.remainingPeriodCents || 0, language)}{' '}
+                  {formatAmount(displayAmount, language)}{' '}
                   <span className="text-xs font-normal opacity-70 ml-0.5">{currency}</span>
                 </div>
               </div>

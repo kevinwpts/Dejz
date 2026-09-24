@@ -258,11 +258,11 @@ export function PeriodTimeline({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative flex items-center gap-3 overflow-x-auto py-2.5 no-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory"
+        className="relative flex items-center gap-2.5 overflow-x-auto py-3 no-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', touchAction: 'pan-x pan-y' }}
       >
         {/* Left Centering Spacer */}
-        <div className="shrink-0" style={{ width: 'calc(50% - 50px)' }} />
+        <div className="shrink-0 w-[calc(50%-33px)] sm:w-[calc(50%-37px)]" />
 
         {calendarDays.map((day: any, index: number) => {
           if (!day.date) return null;
@@ -291,16 +291,16 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`snap-center flex flex-col items-center justify-center gap-1.5 w-[92px] sm:w-[100px] h-[92px] sm:h-[100px] p-3 rounded-2xl transition-all duration-300 cursor-pointer select-none shrink-0 relative ${
+              className={`snap-center flex flex-col items-center justify-center gap-1 w-[66px] sm:w-[74px] h-[72px] sm:h-[80px] p-2 rounded-xl transition-all duration-300 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_12px_24px_rgba(24,24,24,0.18)] dark:shadow-[0_12px_24px_rgba(255,255,255,0.12)] scale-105 font-bold z-10'
+                  ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_10px_20px_rgba(24,24,24,0.16)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.12)] scale-112 font-bold z-10 opacity-100'
                   : isRealToday
-                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-dashed border-[var(--text-primary)]/50 hover:border-[var(--text-primary)]'
-                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
+                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-dashed border-[var(--text-primary)]/50 hover:border-[var(--text-primary)] scale-92 opacity-65'
+                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] scale-92 opacity-65'
               }`}
             >
               {/* Day of Week */}
-              <span className={`text-[10px] sm:text-[11px] tracking-wider uppercase ${
+              <span className={`text-[9px] sm:text-[10px] tracking-wider uppercase leading-none ${
                 isSelected 
                   ? 'opacity-90 font-semibold' 
                   : isRealToday 
@@ -311,13 +311,13 @@ export function PeriodTimeline({
               </span>
 
               {/* Day Number */}
-              <span className={`text-[17px] sm:text-[19px] leading-none font-bold tabular-nums`}>
+              <span className={`text-[15px] sm:text-[17px] leading-none font-bold tabular-nums`}>
                 {dayNumber}
               </span>
 
               {/* Miniature Today Dot Indicator */}
               {isRealToday && (
-                <span className={`w-1.5 h-1.5 rounded-full absolute bottom-2.5 ${
+                <span className={`w-1 h-1 rounded-full absolute bottom-1.5 ${
                   isSelected ? 'bg-white dark:bg-[#181818]' : 'bg-[#ff4c4c]'
                 }`} />
               )}
@@ -327,16 +327,16 @@ export function PeriodTimeline({
 
         {/* Lön / Payday Box in green at the end of timeline */}
         <div 
-          className="snap-center flex flex-col items-center justify-center gap-1.5 w-[92px] sm:w-[100px] h-[92px] sm:h-[100px] p-3 rounded-2xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 select-none shrink-0 cursor-default pointer-events-none"
+          className="snap-center flex flex-col items-center justify-center gap-1 w-[66px] sm:w-[74px] h-[72px] sm:h-[80px] p-2 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 select-none shrink-0 cursor-default pointer-events-none scale-92 opacity-65"
         >
-          <span className="text-[16px] leading-none">💸</span>
-          <span className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase">
+          <span className="text-[14px] leading-none">💸</span>
+          <span className="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase">
             {isEn ? 'Payday' : 'Lön'}
           </span>
         </div>
 
         {/* Right Centering Spacer */}
-        <div className="shrink-0" style={{ width: 'calc(50% - 50px)' }} />
+        <div className="shrink-0 w-[calc(50%-33px)] sm:w-[calc(50%-37px)]" />
       </div>
 
       {/* Right Scroll Arrow Button */}

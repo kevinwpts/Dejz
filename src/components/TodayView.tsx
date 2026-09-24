@@ -312,23 +312,7 @@ export function TodayView({
         >
           {/* Category Budgets Carousel - Seamlessly integrated inside the top hero card */}
           {categoryBudgetData.length > 0 ? (
-            <div className="space-y-2">
-              {/* Header with direct shortcut to Budget view */}
-              <div className="flex items-center justify-between px-0.5">
-                <span className="text-[11px] font-semibold text-white/80 tracking-tight">
-                  {config.language === "en" ? "Category Budgets" : "Kategoribudget"}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onNavigate("budget", "category-budgets")}
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-white/90 hover:text-white hover:bg-white/10 transition-all cursor-pointer py-0.5 px-2 rounded-lg active:scale-95 group"
-                >
-                  <SlidersHorizontal size={11} className="transition-transform group-hover:rotate-45 text-white" />
-                  <span>{config.language === "en" ? "Allocate budget" : "Fördela budget"}</span>
-                  <ChevronRight size={11} className="text-white" />
-                </button>
-              </div>
-
+            <div className="space-y-2 mt-1">
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
                 {categoryBudgetData.map((cat, index) => {
                   const Icon = ICON_MAP[cat.iconName];
