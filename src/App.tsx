@@ -1580,7 +1580,7 @@ export default function App() {
           initial_spent: defaultConfig.initialSpent,
           notifications: defaultConfig.notifications,
           security_lock: defaultConfig.securityLock,
-          dark_mode: defaultConfig.darkMode,
+          dark_mode: true,
           quick_choices: defaultConfig.quickChoices,
           monthly_savings: defaultConfig.monthlySavings,
           include_fixed_expenses_in_analysis:

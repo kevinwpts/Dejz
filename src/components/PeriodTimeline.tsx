@@ -235,7 +235,7 @@ export function PeriodTimeline({
   };
 
   return (
-    <div className="relative group/timeline w-full my-3 font-sans">
+    <div className="relative group/timeline w-full my-3 font-sans overflow-visible">
       {/* Left Scroll Arrow Button */}
       {canScrollLeft && (
         <div className="hidden md:flex absolute left-0 top-0 bottom-0 z-20 items-center pl-1 pr-8 bg-gradient-to-r from-[var(--bg-color)] via-[var(--bg-color)]/95 to-transparent pointer-events-none">
@@ -258,11 +258,11 @@ export function PeriodTimeline({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative flex items-center gap-2.5 overflow-x-auto py-3 no-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory"
+        className="relative flex items-center gap-2.5 overflow-x-auto py-7 px-3 sm:px-4 no-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', touchAction: 'pan-x pan-y' }}
       >
         {/* Left Centering Spacer */}
-        <div className="shrink-0 w-[calc(50%-33px)] sm:w-[calc(50%-37px)]" />
+        <div className="shrink-0 w-0 sm:w-0" />
 
         {calendarDays.map((day: any, index: number) => {
           if (!day.date) return null;
@@ -293,10 +293,10 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`snap-center flex flex-col items-center justify-center gap-1 w-[66px] sm:w-[74px] h-[72px] sm:h-[80px] p-2 rounded-xl transition-all duration-300 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_10px_20px_rgba(24,24,24,0.16)] dark:shadow-[0_10px_20px_rgba(255,255,255,0.12)] scale-112 font-bold z-10 opacity-100'
+                  ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_6px_14px_rgba(0,0,0,0.12)] dark:shadow-[0_6px_14px_rgba(255,255,255,0.1)] scale-108 font-bold z-10 opacity-100 ring-2 ring-[var(--accent-color)]/30'
                   : isRealToday
-                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-dashed border-[var(--text-primary)]/50 hover:border-[var(--text-primary)] scale-92 opacity-65'
-                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] scale-92 opacity-65'
+                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-dashed border-[var(--text-primary)]/50 hover:border-[var(--text-primary)] scale-95 opacity-80'
+                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] scale-95 opacity-80'
               }`}
             >
               {/* Day of Week */}

@@ -59,7 +59,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         </div>
         
         <div className="min-w-0 flex-1 flex flex-col justify-center">
-          <p className="text-[13px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors group-hover:text-[var(--accent-color)]">
+          <p className="text-[14px] sm:text-[14.5px] font-semibold text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors group-hover:text-[var(--accent-color)]">
             {displayName}
           </p>
           <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">

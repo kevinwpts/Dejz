@@ -22,8 +22,8 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
     c => c.name.trim().toLowerCase() === searchCategory
   ) : null;
 
-  const containerSize = size === 'lg' ? 'w-16 h-16 rounded-full' : size === 'sm' ? 'w-10 h-10 rounded-full' : 'w-[46px] h-[46px] rounded-full';
-  const iconSize = size === 'lg' ? 28 : size === 'sm' ? 17 : 21;
+  const containerSize = size === 'lg' ? 'w-16 h-16 rounded-full' : size === 'sm' ? 'w-10 h-10 rounded-full' : 'w-[50px] h-[50px] rounded-full';
+  const iconSize = size === 'lg' ? 28 : size === 'sm' ? 17 : 23;
 
   const hasContent = !!(transaction.merchant || transaction.note || (transaction.logo && transaction.logo !== 'none') || (transaction.icon && transaction.icon !== 'none' && transaction.icon !== 'receipt'));
 

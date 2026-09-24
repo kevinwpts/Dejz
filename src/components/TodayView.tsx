@@ -320,23 +320,23 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.12 + index * 0.02 }}
                       onClick={() => onNavigate("analysis")}
-                      className="flex-shrink-0 flex flex-col justify-between p-2.5 rounded-[16px] hover:bg-[var(--surface-muted)] dark:hover:bg-white/5 transition-all group text-left active:scale-[0.98] min-w-[100px] sm:min-w-[106px] max-w-[114px] cursor-pointer snap-start"
+                      className="flex-shrink-0 flex flex-col justify-between p-3.5 rounded-[20px] bg-[var(--surface-muted)]/40 hover:bg-[var(--surface-muted)] dark:bg-white/5 dark:hover:bg-white/10 transition-all group text-left active:scale-[0.98] min-w-[124px] sm:min-w-[136px] max-w-[146px] cursor-pointer snap-start border border-black/[0.03] dark:border-white/[0.03]"
                     >
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-primary)] shrink-0 relative z-10 transition-transform group-hover:scale-105 duration-200">
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--surface-color)] dark:bg-white/10 text-[var(--text-primary)] shrink-0 relative z-10 transition-transform group-hover:scale-105 duration-200 shadow-2xs">
                         {isEmojiString(cat.iconName) ? (
-                          <span className="text-[20px] leading-none">{cat.iconName}</span>
+                          <span className="text-[24px] leading-none">{cat.iconName}</span>
                         ) : Icon ? (
-                          <Icon size={20} strokeWidth={2.2} style={{ color: cat.color || 'var(--text-primary)' }} />
+                          <Icon size={22} strokeWidth={2.2} style={{ color: cat.color || 'var(--text-primary)' }} />
                         ) : (
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color || 'var(--text-primary)' }} />
+                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color || 'var(--text-primary)' }} />
                         )}
                       </div>
 
-                      <div className="flex flex-col items-start w-full min-w-0 mt-3">
-                        <span className="text-[12px] font-bold text-[var(--text-primary)] tracking-tight leading-tight truncate w-full transition-colors">
+                      <div className="flex flex-col items-start w-full min-w-0 mt-3.5">
+                        <span className="text-[13px] sm:text-[14px] font-bold text-[var(--text-primary)] tracking-tight leading-tight truncate w-full transition-colors">
                           {cat.name}
                         </span>
-                        <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full">
+                        <span className="text-[11px] font-medium leading-tight mt-1 truncate w-full">
                           {cat.hasBudget ? (
                             cat.isOverBudget ? (
                               <span className="text-rose-500 dark:text-rose-400 font-semibold font-amount tabular-nums">
@@ -367,16 +367,16 @@ export function TodayView({
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   transition={{ delay: 0.12 + categoryBudgetData.length * 0.02 }}
                   onClick={() => onNavigate("budget", "category-budgets")}
-                  className="flex-shrink-0 flex flex-col justify-between p-2.5 rounded-[16px] hover:bg-[var(--surface-muted)] dark:hover:bg-white/5 transition-all group text-left active:scale-[0.98] min-w-[100px] sm:min-w-[106px] max-w-[114px] cursor-pointer snap-start"
+                  className="flex-shrink-0 flex flex-col justify-between p-3.5 rounded-[20px] bg-[var(--surface-muted)]/40 hover:bg-[var(--surface-muted)] dark:bg-white/5 dark:hover:bg-white/10 transition-all group text-left active:scale-[0.98] min-w-[124px] sm:min-w-[136px] max-w-[146px] cursor-pointer snap-start border border-black/[0.03] dark:border-white/[0.03]"
                 >
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-all shrink-0">
-                    <SlidersHorizontal size={18} strokeWidth={2.2} />
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[var(--surface-color)] dark:bg-white/10 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-all shrink-0 shadow-2xs">
+                    <SlidersHorizontal size={20} strokeWidth={2.2} />
                   </div>
-                  <div className="flex flex-col items-start w-full min-w-0 mt-3">
-                    <span className="text-[12px] font-bold text-[var(--text-primary)] tracking-tight leading-tight truncate w-full transition-colors">
+                  <div className="flex flex-col items-start w-full min-w-0 mt-3.5">
+                    <span className="text-[13px] sm:text-[14px] font-bold text-[var(--text-primary)] tracking-tight leading-tight truncate w-full transition-colors">
                       {config.language === "en" ? "Manage" : "Hantera"}
                     </span>
-                    <span className="text-[10px] font-medium text-[var(--text-secondary)] leading-tight mt-0.5 truncate w-full">
+                    <span className="text-[11px] font-medium text-[var(--text-secondary)] leading-tight mt-1 truncate w-full">
                       {config.language === "en" ? "Allocate budget" : "Fördela budget"}
                     </span>
                   </div>
