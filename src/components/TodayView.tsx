@@ -84,8 +84,6 @@ export function TodayView({
   onViewMonthlySaving,
   onUpdateConfig,
 }: TodayViewProps) {
-  if (!stats) return null;
-
   const normalizedSelectedDate = useMemo(() => {
     const d = new Date(selectedDate || new Date());
     d.setHours(0, 0, 0, 0);
@@ -268,6 +266,8 @@ export function TodayView({
       };
     });
   }, [stats, config.categories, allTransactions, _transactions, fixedExpenses]);
+
+  if (!stats) return null;
 
   return (
     <motion.div

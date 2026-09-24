@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, SlidersHorizontal, ArrowLeft, Check, Trash2, ChevronRight } from 'lucide-react';
+import { RefreshCw, ArrowLeft, Check, Trash2 } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -52,8 +52,6 @@ export function BudgetView({
   initialSection,
   onClearSection
 }: BudgetViewProps) {
-  if (!stats) return null;
-
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
@@ -61,7 +59,7 @@ export function BudgetView({
   const [initialCategoryNames, setInitialCategoryNames] = React.useState<string[]>([]);
 
   const handleOpenCategoryBudgets = () => {
-    const totalInc = stats.totalIncome || 1;
+    const totalInc = stats?.totalIncome || 1;
     
     const getFixedSpent = (catName: string) => {
       return (fixedExpenses || [])
@@ -111,10 +109,10 @@ export function BudgetView({
       : (Number(item.amount) || 0);
     return sum + amount;
   }, 0) || 0) + (Number(config.monthlySavings) || 0);
-  const _totalOut = stats.totalFixed + totalSavings;
-  const _retentionRate = stats.totalIncome > 0 ? (stats.remainingPeriodCents / stats.totalIncome) * 100 : 0;
-  const _expensesPercent = stats.totalIncome > 0 ? (stats.totalFixed / stats.totalIncome) * 100 : 0;
-  const _savingsPercent = stats.totalIncome > 0 ? (totalSavings / stats.totalIncome) * 100 : 0;
+  const _totalOut = (stats?.totalFixed || 0) + totalSavings;
+  const _retentionRate = (stats?.totalIncome || 0) > 0 ? ((stats?.remainingPeriodCents || 0) / stats!.totalIncome) * 100 : 0;
+  const _expensesPercent = (stats?.totalIncome || 0) > 0 ? ((stats?.totalFixed || 0) / stats!.totalIncome) * 100 : 0;
+  const _savingsPercent = (stats?.totalIncome || 0) > 0 ? (totalSavings / stats!.totalIncome) * 100 : 0;
 
   // sortItems removed
 
@@ -157,7 +155,7 @@ export function BudgetView({
     return sum;
   };
 
-  const totalIncome = stats.totalIncome || 1;
+  const totalIncome = stats?.totalIncome || 1;
 
   const getCategoryBudgetKr = (c: any) => {
     const catFixed = Math.round(getFixedSpentForCategory(c.name));
@@ -175,6 +173,8 @@ export function BudgetView({
   }, 0);
 
   const totalAllocatedPercentage = totalIncome > 0 ? Math.round((totalAllocatedKronor / totalIncome) * 100) : 0;
+
+  if (!stats) return null;
 
   if (showCategoryBudgets) {
     return (

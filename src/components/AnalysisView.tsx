@@ -44,26 +44,26 @@ export function AnalysisView({
   onPeriodChange,
   _onOpenCalendarPicker
 }: AnalysisViewProps) {
-  if (!stats) return null;
-
   const _paydaySetting = config.payday || 25;
   const _adjustment = config.paydayBeforeWeekend ? WeekendAdjustment.BEFORE : WeekendAdjustment.NONE;
   
   const _currentPeriod = useMemo(() => {
+    if (!stats) return { start: new Date(), end: new Date() };
     return { start: stats.periodStart, end: stats.periodEnd };
-  }, [stats.periodStart, stats.periodEnd]);
+  }, [stats?.periodStart, stats?.periodEnd]);
 
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('all');
 
   const filteredExpenses = useMemo(() => {
+    if (!stats || !transactions) return [];
     return transactions
       .filter(e => {
         const inPeriod = e.timestamp >= stats.periodStart.getTime() && e.timestamp <= stats.periodEnd.getTime() + 86399999;
         if (!inPeriod) return false;
         return e.type === 'expense' || e.type === 'savings';
       });
-  }, [transactions, stats.periodStart, stats.periodEnd]);
+  }, [transactions, stats?.periodStart, stats?.periodEnd]);
 
   const { categoryData, totalFixed, totalSpentInPeriod } = useMemo(() => {
     const breakdown: Record<string, number> = {};
@@ -148,6 +148,8 @@ export function AnalysisView({
   const totalSpent = (analysisFilter === 'fixed' ? 0 : totalSpentInPeriod) + 
     (analysisFilter !== 'variable' ? totalFixed : 0);
   const COLORS = ['#2A2A2A', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#333333', '#222222', '#555555', '#444444'];
+
+  if (!stats) return null;
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -360,7 +362,7 @@ export function AnalysisView({
             }
 
             const remainingBudget = budgetInKronor - Math.round(item.value);
-            const showCircle = analysisFilter === 'all';
+            const _showCircle = analysisFilter === 'all';
             
             return (
               <motion.div 

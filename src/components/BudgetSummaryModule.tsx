@@ -12,14 +12,13 @@ interface BudgetSummaryModuleProps {
 }
 
 export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses, t }: BudgetSummaryModuleProps) {
-  if (!stats) return null;
   const filteredExpenses = useMemo(() => {
-    if (!transactions) return [];
+    if (!stats || !transactions) return [];
     return transactions
       .filter(e => {
         return e.timestamp >= stats.periodStart.getTime() && e.timestamp <= stats.periodEnd.getTime() + 86399999;
       });
-  }, [transactions, stats.periodStart, stats.periodEnd]);
+  }, [transactions, stats?.periodStart, stats?.periodEnd]);
 
   const { totalFixed, totalSpentInPeriod } = useMemo(() => {
     let fixedSum = 0;
@@ -37,7 +36,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
 
     if (fixedExpenses) {
       fixedExpenses.forEach((fe: any) => {
-        const isPaid = fe.paidInPeriods?.[stats.periodId];
+        const isPaid = fe.paidInPeriods?.[stats?.periodId];
         if (isPaid || (!isPaid && fe.deductionDay < new Date().getDate())) {
           fixedSum += fe.amount;
         }
@@ -45,11 +44,12 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     }
 
     return { totalFixed: fixedSum, totalSpentInPeriod: spentSum };
-  }, [filteredExpenses, fixedExpenses, stats.periodId]);
+  }, [filteredExpenses, fixedExpenses, stats?.periodId]);
 
   const totalSpent = totalSpentInPeriod + totalFixed;
 
   const daysElapsed = useMemo(() => {
+    if (!stats) return 0;
     const now = new Date();
     const realToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startMidnight = new Date(stats.periodStart.getFullYear(), stats.periodStart.getMonth(), stats.periodStart.getDate()).getTime();
@@ -59,7 +59,9 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     if (realToday.getTime() > endMidnight) return Math.round((endMidnight - startMidnight) / oneDay) + 1;
     if (realToday.getTime() < startMidnight) return 0;
     return Math.round((realToday.getTime() - startMidnight) / oneDay);
-  }, [stats.periodStart, stats.periodEnd]);
+  }, [stats?.periodStart, stats?.periodEnd]);
+
+  if (!stats) return null;
 
   const disposablePot = stats.disposablePot;
 

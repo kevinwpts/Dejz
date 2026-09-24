@@ -1,6 +1,6 @@
 import React from 'react';
 import { Delete, RotateCcw } from 'lucide-react';
-import { parseMathAmount, hasMathOperators, formatLiveMathPreview } from '../utils/mathUtils';
+import { parseMathAmount, formatLiveMathPreview } from '../utils/mathUtils';
 
 interface NumberPadProps {
   value: string;
@@ -50,8 +50,8 @@ export function NumberPad({
       return;
     }
     // If ends with operator and space (e.g. "100 + "), remove operator
-    if (/[+×÷\-]\s*$/.test(raw)) {
-      onChange(raw.replace(/[+×÷\-]\s*$/, '').trim());
+    if (/[+×÷-]\s*$/.test(raw)) {
+      onChange(raw.replace(/[+×÷-]\s*$/, '').trim());
       return;
     }
     const nextVal = raw.slice(0, -1).trim();
@@ -66,8 +66,8 @@ export function NumberPad({
     const raw = (value || '').trim();
     if (!raw) return;
 
-    if (/[+×÷\-]\s*$/.test(raw)) {
-      onChange(raw.replace(/[+×÷\-]\s*$/, `${op} `));
+    if (/[+×÷-]\s*$/.test(raw)) {
+      onChange(raw.replace(/[+×÷-]\s*$/, `${op} `));
     } else {
       onChange(`${raw} ${op} `);
     }

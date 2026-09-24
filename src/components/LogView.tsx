@@ -59,12 +59,11 @@ export function LogView({
     return en;
   };
 
-  if (!stats) return null;
-
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'receipt'>('all');
 
   const filteredExpenses = useMemo(() => {
+    if (!stats || !transactions) return [];
     return transactions
       .filter(e => {
         const inPeriod = e.timestamp >= stats.periodStart.getTime() && e.timestamp <= stats.periodEnd.getTime();
@@ -87,7 +86,7 @@ export function LogView({
         return matchesSearch;
       })
       .sort((a, b) => b.timestamp - a.timestamp);
-  }, [transactions, stats.periodStart, stats.periodEnd, searchTerm, typeFilter]);
+  }, [transactions, stats?.periodStart, stats?.periodEnd, searchTerm, typeFilter]);
 
   const groupedExpenses = useMemo(() => {
     const groups: Record<string, Transaction[]> = {};
@@ -98,6 +97,8 @@ export function LogView({
     });
     return Object.entries(groups).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime());
   }, [filteredExpenses]);
+
+  if (!stats) return null;
 
   return (
     <div className="space-y-6">

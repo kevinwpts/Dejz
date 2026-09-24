@@ -206,7 +206,7 @@ export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [fixedExpenses, setFixedExpenses] = useState<FixedExpense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAtTop, setIsAtTop] = useState(true);
+  const [_isAtTop, setIsAtTop] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, ArrowRight, Loader2, Wallet, CreditCard, Target, Plus, ChevronLeft, Banknote, Check, Sparkles, TrendingUp, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { User, ArrowRight, Loader2, Wallet, CreditCard, Target, Plus, ChevronLeft, Check, Sparkles, TrendingUp, ShieldCheck, Search, X, Zap } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
-import { Config } from '../types';
+import { Config, Frequency } from '../types';
 import { formatAmount } from '../utils/format';
 import { FixedExpenseModal, IncomeModal } from './BudgetModals';
 import { SavingsGoalModal } from './SavingsGoalModal';
@@ -11,92 +11,11 @@ import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { FixedExpense, Income, SavingsGoal } from '../types';
 import { BudgetItem } from './BudgetItem';
+import { TransactionLogo } from './TransactionLogo';
+import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
+import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 
-function DejzyMascot({ mood = 'happy' }: { mood?: 'happy' | 'celebrating' | 'thinking' }) {
-  return (
-    <div className="relative w-28 h-28 mx-auto flex items-center justify-center">
-      {/* Glow aura */}
-      <motion.div 
-        animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.6, 0.35] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute inset-0 bg-gradient-to-tr from-[var(--accent-color)]/30 to-amber-400/30 rounded-full blur-xl pointer-events-none"
-      />
-
-      {/* Floating Mascot Body */}
-      <motion.div
-        animate={{ y: [0, -6, 0], rotate: [0, 1.5, -1.5, 0] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-        className="relative z-10 w-24 h-24"
-      >
-        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md overflow-visible">
-          {/* Ears / Antennas */}
-          <motion.ellipse 
-            cx="32" cy="22" rx="7" ry="12" 
-            transform="rotate(-20 32 22)" 
-            fill="var(--accent-color)" 
-            animate={{ rotate: [-20, -25, -20] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.ellipse 
-            cx="68" cy="22" rx="7" ry="12" 
-            transform="rotate(20 68 22)" 
-            fill="var(--accent-color)" 
-            animate={{ rotate: [20, 25, 20] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <ellipse cx="32" cy="23" rx="4" ry="7" transform="rotate(-20 32 23)" fill="#FDE047" />
-          <ellipse cx="68" cy="23" rx="4" ry="7" transform="rotate(20 68 23)" fill="#FDE047" />
-
-          {/* Body */}
-          <circle cx="50" cy="54" r="36" fill="var(--accent-color)" />
-          {/* Belly */}
-          <ellipse cx="50" cy="62" rx="24" ry="20" fill="white" fillOpacity="0.9" />
-
-          {/* Cheeks */}
-          <circle cx="33" cy="56" r="4.5" fill="#F43F5E" fillOpacity="0.4" />
-          <circle cx="67" cy="56" r="4.5" fill="#F43F5E" fillOpacity="0.4" />
-
-          {/* Eyes with sparkles */}
-          <motion.g animate={{ scaleY: [1, 1, 0.1, 1, 1] }} transition={{ duration: 4, repeat: Infinity, times: [0, 0.45, 0.48, 0.52, 1] }}>
-            <ellipse cx="38" cy="46" rx="4.5" ry="5.5" fill="#0F172A" />
-            <circle cx="36.5" cy="44" r="1.8" fill="white" />
-            <ellipse cx="62" cy="46" rx="4.5" ry="5.5" fill="#0F172A" />
-            <circle cx="60.5" cy="44" r="1.8" fill="white" />
-          </motion.g>
-
-          {/* Smile */}
-          <path d="M 44 56 Q 50 63 56 56" stroke="#0F172A" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-
-          {/* Golden Coin in hand */}
-          <motion.g 
-            animate={{ y: [0, -3, 0], rotate: [0, 8, 0] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <circle cx="78" cy="65" r="9" fill="#F59E0B" stroke="#B45309" strokeWidth="1" />
-            <circle cx="78" cy="65" r="7" fill="#FBBF24" />
-            <text x="78" y="68.5" fontSize="8" fontWeight="bold" fill="#78350F" textAnchor="middle">kr</text>
-          </motion.g>
-        </svg>
-
-        {/* Floating Sparkle Stars */}
-        <motion.div 
-          animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.6, 1, 0.6], rotate: [0, 45, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity }}
-          className="absolute -top-1 -left-1 text-amber-400"
-        >
-          <Sparkles size={16} />
-        </motion.div>
-        <motion.div 
-          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0.9, 0.5], rotate: [45, 0, 45] }}
-          transition={{ duration: 3, repeat: Infinity, delay: 0.8 }}
-          className="absolute top-2 -right-2 text-[var(--accent-color)]"
-        >
-          <Sparkles size={14} />
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-}
+type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
 
 const texts = {
   sv: {
@@ -123,9 +42,19 @@ const texts = {
     addIncome: 'Lägg till inkomst',
     addExpense: 'Lägg till fast utgift',
     addGoal: 'Lägg till sparmål',
-    midMonthTitle: 'Starta mitt i perioden',
-    midMonthDesc: 'Om du börjar med appen mitt i månaden finns det risk att du redan har gjort av med pengar, och gör det lite svårare att få helt rätt på allt. Men var lugn, nästa månad eller period kommer det bli toppen. Men för att uppskatta så att vi kan fortsätta resterande period fram till nästa lön, hur mycket tror du att du har spenderat om du bortser från dina fasta utgifter?',
-    midMonthPlaceholder: 'T.ex. 6000',
+    midMonthTitle: (days: number) => days === 1 ? 'Det är 1 dag kvar till lön! 🗓️' : `Det är ${days} dagar kvar till lön! 🗓️`,
+    midMonthQuestion: (payday: number) => `Hur mycket vill du ha att röra dig med fram till den ${payday}:e?`,
+    midMonthDesc: (days: number, payday: number) => days === 1 
+      ? `Eftersom lönen kommer redan imorgon den ${payday}:e sätter vi en pott för idag. Imorgon nollställs allt automatiskt med din nya månadslön!`
+      : `Eftersom det är ${days} dagar kvar till lön den ${payday}:e sätter vi en startpott för dessa dagar. På lönedagen nollställs allt automatiskt med din fulla månadspott.`,
+    midMonthPlaceholder: 'T.ex. 8000',
+    fullPotOption: 'Hela potten',
+    halfPotOption: 'Hälften',
+    thirdPotOption: 'En tredjedel',
+    dailyRatePreview: (daily: string, days: number) => days === 1
+      ? `👉 Ger dig ca ${daily} kr för idag fram till lönen imorgon`
+      : `👉 Ger dig ca ${daily} kr / dag fram till lön (${days} dagar kvar)`,
+    skipMidMonth: 'Hoppa över (Använd full månadspott)',
     summaryTitle: 'Din personliga plan',
     summarySubtitle: 'Allt är redo! Här är din ekonomiska överblick fram till nästa lön.',
     enterApp: 'Kliv in i Dejz ✨',
@@ -133,6 +62,12 @@ const texts = {
     fixedCostsLabel: 'Fasta kostnader',
     freeSpendLabel: 'Kvar att röra dig med',
     activeGoalsLabel: 'Sparmål',
+    popularPresets: 'Populära i Sverige',
+    searchPresetsPlaceholder: 'Sök bland 100+ utgifter (Spotify, Hyra, Gym...)',
+    quickAdd: 'Snabblägg',
+    skipStep: 'Hoppa över / Fyll i senare',
+    customExpense: 'Skapa egen utgift',
+    noPresetsFound: 'Ingen färdig mall hittades. Klicka nedan för att skapa en egen.',
   },
   en: {
     stepOf: (step: number, total: number) => `Step ${step} of ${total}`,
@@ -158,9 +93,19 @@ const texts = {
     addIncome: 'Add income',
     addExpense: 'Add fixed expense',
     addGoal: 'Add savings goal',
-    midMonthTitle: 'Starting mid-period',
-    midMonthDesc: 'If you start using the app in the middle of the month, you may have already spent money, making it harder to get everything perfectly right. But don\'t worry, next month or period will be great. To estimate and continue the remaining period until your next payday, how much do you think you have already spent, excluding your fixed expenses?',
-    midMonthPlaceholder: 'E.g. 6000',
+    midMonthTitle: (days: number) => days === 1 ? '1 day left until payday! 🗓️' : `${days} days left until payday! 🗓️`,
+    midMonthQuestion: (payday: number) => `How much do you want available to spend until the ${payday}th?`,
+    midMonthDesc: (days: number, payday: number) => days === 1
+      ? `Since payday is already tomorrow on the ${payday}th, we set a budget for today. Tomorrow everything resets automatically with your new monthly budget!`
+      : `Since there are ${days} days left until payday on the ${payday}th, we set a starting budget for these days. On payday, everything resets automatically with your full monthly budget.`,
+    midMonthPlaceholder: 'E.g. 8000',
+    fullPotOption: 'Full monthly pot',
+    halfPotOption: 'Half pot',
+    thirdPotOption: 'One third',
+    dailyRatePreview: (daily: string, days: number) => days === 1
+      ? `👉 Gives you approx ${daily} for today until payday tomorrow`
+      : `👉 Gives you approx ${daily} / day until payday (${days} days left)`,
+    skipMidMonth: 'Skip (Start with full monthly pot)',
     summaryTitle: 'Your Personal Plan',
     summarySubtitle: 'All set! Here is your financial overview until your next payday.',
     enterApp: 'Enter Dejz ✨',
@@ -168,6 +113,12 @@ const texts = {
     fixedCostsLabel: 'Fixed Costs',
     freeSpendLabel: 'Available to spend',
     activeGoalsLabel: 'Savings Goals',
+    popularPresets: 'Popular in Sweden',
+    searchPresetsPlaceholder: 'Search 100+ expenses (Spotify, Rent, Gym...)',
+    quickAdd: 'Quick Add',
+    skipStep: 'Skip / Fill in later',
+    customExpense: 'Create custom expense',
+    noPresetsFound: 'No template found. Click below to create a custom one.',
   }
 };
 
@@ -214,12 +165,46 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
   const [isAddingGoal, setIsAddingGoal] = useState(false);
   const [editingGoalIndex, setEditingGoalIndex] = useState<number | null>(null);
 
+  // Quick Preset Search State
+  const [presetSearch, setPresetSearch] = useState('');
+
   const paymentMethods = config.paymentMethods || [];
   
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!isOpen) return null;
+  const handleTogglePreset = (preset: SwedishExpensePreset) => {
+    const existingIndex = fixedExpenses.findIndex(
+      exp => exp.name.trim().toLowerCase() === preset.name.trim().toLowerCase()
+    );
+
+    if (existingIndex >= 0) {
+      setFixedExpenses(fixedExpenses.filter((_, i) => i !== existingIndex));
+    } else {
+      const newExpense: Omit<FixedExpense, 'id'> = {
+        name: preset.name,
+        amount: preset.defaultAmount,
+        category: preset.category,
+        frequency: Frequency.MONTHLY,
+        deductionDay: preset.deductionDay,
+        paymentMethod: preset.paymentMethod,
+      };
+      setFixedExpenses([...fixedExpenses, newExpense]);
+    }
+  };
+
+  const filteredPresets = useMemo(() => {
+    const term = presetSearch.trim().toLowerCase();
+    if (!term) return [];
+    return SWEDISH_EXPENSE_PRESETS.filter(p => 
+      p.name.toLowerCase().includes(term) || 
+      p.category.toLowerCase().includes(term)
+    );
+  }, [presetSearch]);
+
+  const popularPresets = useMemo(() => {
+    return SWEDISH_EXPENSE_PRESETS.filter(p => p.popular);
+  }, []);
 
   const handleNext = () => {
     if (step === 'name') setStep('payday');
@@ -254,7 +239,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
         }
       }
 
-      const initialSpent = forceInitialSpent !== undefined ? forceInitialSpent : (Number(midMonthSpent) || 0);
+      let initialSpent = 0;
+      if (forceInitialSpent !== undefined) {
+        initialSpent = forceInitialSpent;
+      } else if (midMonthSpent.trim() !== '') {
+        const targetAmount = Math.max(0, Number(midMonthSpent) || 0);
+        const pot = Math.max(0, totalIncome - totalFixed);
+        initialSpent = Math.max(0, pot - targetAmount);
+      }
 
       await onComplete({
         fullName: trimmedName,
@@ -335,11 +327,31 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     step === 'midMonth' ? 6 : 7;
   const totalSteps = 7;
 
-  // Summary Metrics
+  // Summary Metrics & Days Calculation
   const totalIncome = incomes.reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
   const totalFixed = fixedExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
-  const spentEst = Number(midMonthSpent) || 0;
-  const freeSpend = Math.max(0, totalIncome - totalFixed - spentEst);
+  const monthlyDisposablePot = Math.max(0, totalIncome - totalFixed);
+
+  const daysUntilPayday = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const currentDay = today.getDate();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+
+    let targetDate = new Date(currentYear, currentMonth, payday);
+    if (currentDay >= payday) {
+      targetDate = new Date(currentYear, currentMonth + 1, payday);
+    }
+    const diffMs = targetDate.getTime() - today.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    return Math.max(1, diffDays);
+  }, [payday]);
+
+  const userTargetNum = midMonthSpent.trim() !== '' ? Math.max(0, Number(midMonthSpent) || 0) : null;
+  const effectiveRemaining = userTargetNum !== null ? userTargetNum : monthlyDisposablePot;
+  const dailyRate = Math.round(effectiveRemaining / daysUntilPayday);
+  const freeSpend = effectiveRemaining;
 
   return (
     <AnimatePresence>
@@ -413,12 +425,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       transition={{ duration: 0.25 }}
                       className="space-y-6 my-auto"
                     >
-                      <div className="space-y-4">
-                        <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
-                          <div className="w-20 h-20 bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs rounded-[24px] flex items-center justify-center">
-                            <User size={32} className="text-[var(--accent-color)]" />
-                          </div>
-                        </div>
+                      <div className="space-y-3">
+                        <OnboardingCharacterArt step="name" />
                         <div className="space-y-1 text-center">
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.nameQuestion}</h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
@@ -464,10 +472,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       transition={{ duration: 0.25 }}
                       className="space-y-6"
                     >
-                      <div className="space-y-4">
-                        <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[22px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
-                          <Banknote size={28} />
-                        </div>
+                      <div className="space-y-3">
+                        <OnboardingCharacterArt step="payday" payday={payday} />
                         <div className="space-y-1 text-center">
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.paydayQuestion}</h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
@@ -542,10 +548,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       transition={{ duration: 0.25 }}
                       className="space-y-6"
                     >
-                      <div className="space-y-4">
-                        <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[22px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
-                          <Wallet size={28} />
-                        </div>
+                      <div className="space-y-3">
+                        <OnboardingCharacterArt step="income" />
                         <div className="space-y-1 text-center">
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.monthlyIncome}</h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
@@ -583,13 +587,21 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </button>
                       </div>
 
-                      <div className="pt-2">
+                      <div className="pt-2 space-y-2">
                         <button 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                         >
                           <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleNext}
+                          className="w-full text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1 transition-colors cursor-pointer"
+                        >
+                          {s.skipStep}
                         </button>
                       </div>
                     </motion.div>
@@ -602,56 +614,232 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.25 }}
-                      className="space-y-6"
+                      className="space-y-4"
                     >
-                      <div className="space-y-4">
-                        <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[22px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
-                          <CreditCard size={28} />
-                        </div>
-                        <div className="space-y-1 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.fixedExpenses}</h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
+                      <div className="space-y-2">
+                        <OnboardingCharacterArt step="expenses" />
+                        <div className="space-y-0.5 text-center">
+                          <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.fixedExpenses}</h3>
+                          <p className="text-xs text-[var(--text-secondary)] font-medium max-w-[320px] mx-auto leading-relaxed">
                             {s.expensesDesc}
                           </p>
                         </div>
                       </div>
 
-                      <div className="space-y-2.5 max-h-[36vh] overflow-y-auto pr-1 no-scrollbar">
-                        {fixedExpenses.map((exp, i) => (
-                          <BudgetItem
-                            key={i}
-                            item={exp}
-                            type="expense"
-                            onClick={() => {
-                              setEditingExpenseIndex(i);
-                              setIsAddingExpense(true);
-                            }}
-                            currency={config.currency}
-                            language={(config.language || 'sv') as any}
-                            t={t}
-                            config={config}
-                          />
-                        ))}
-
-                        <button 
-                          onClick={() => {
-                            setEditingExpenseIndex(null);
-                            setIsAddingExpense(true);
-                          }}
-                          className="w-full py-3.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[18px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-2 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
-                        >
-                          <Plus size={15} />
-                          <span>{s.addExpense}</span>
-                        </button>
+                      {/* Preset Search Bar */}
+                      <div className="relative">
+                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none">
+                          <Search size={16} />
+                        </div>
+                        <input
+                          type="text"
+                          value={presetSearch}
+                          onChange={(e) => setPresetSearch(e.target.value)}
+                          placeholder={s.searchPresetsPlaceholder}
+                          className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] px-3.5 py-2.5 pl-9 pr-9 text-[15px] sm:text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:border-[var(--accent-color)] outline-none shadow-2xs transition-all"
+                        />
+                        {presetSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setPresetSearch('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded-full cursor-pointer"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
                       </div>
 
-                      <div className="pt-2">
+                      {/* Search Results OR Popular Quick-Add Grid */}
+                      {presetSearch.trim() ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)] px-1">
+                            <span>Sökresultat ({filteredPresets.length})</span>
+                            <span className="text-[10px] opacity-70">Klicka för att välja</span>
+                          </div>
+                          <div className="max-h-[26vh] overflow-y-auto pr-1 no-scrollbar space-y-1.5">
+                            {filteredPresets.length > 0 ? (
+                              filteredPresets.map((preset) => {
+                                const isAdded = fixedExpenses.some(
+                                  e => e.name.trim().toLowerCase() === preset.name.trim().toLowerCase()
+                                );
+                                const mockTx = {
+                                  id: preset.id,
+                                  amount: preset.defaultAmount,
+                                  merchant: preset.name,
+                                  category: preset.category,
+                                  type: 'expense' as const,
+                                  timestamp: Date.now(),
+                                };
+                                return (
+                                  <button
+                                    key={preset.id}
+                                    type="button"
+                                    onClick={() => handleTogglePreset(preset)}
+                                    className={`w-full p-2.5 rounded-[16px] flex items-center justify-between gap-3 text-left transition-all cursor-pointer border ${
+                                      isAdded 
+                                        ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-xs ring-2 ring-[var(--accent-color)]/20' 
+                                        : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border-[var(--border-color)] shadow-2xs'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                      <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0">
+                                        <TransactionLogo transaction={mockTx} config={config} size="sm" />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-1.5">
+                                          <p className="text-[13px] font-bold truncate">{preset.name}</p>
+                                          <span className={`text-[9.5px] px-1.5 py-0.5 rounded-full font-medium ${
+                                            isAdded ? 'bg-white/20 text-white' : 'bg-[var(--chip-bg)] text-[var(--text-secondary)]'
+                                          }`}>
+                                            {preset.category}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <span className="text-[12px] font-bold font-amount tabular-nums">
+                                        {formatAmount(preset.defaultAmount, lang)} {config.currency}
+                                      </span>
+                                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                                        isAdded ? 'bg-white text-[var(--accent-color)]' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] border border-[var(--border-color)]/40'
+                                      }`}>
+                                        {isAdded ? <Check size={12} strokeWidth={3} /> : <Plus size={12} />}
+                                      </div>
+                                    </div>
+                                  </button>
+                                );
+                              })
+                            ) : (
+                              <div className="p-4 text-center bg-[var(--surface-color)] rounded-[16px] border border-[var(--border-color)]">
+                                <p className="text-xs text-[var(--text-secondary)] font-medium">
+                                  {s.noPresetsFound}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)] px-1">
+                            <div className="flex items-center gap-1.5">
+                              <Zap size={12} className="text-amber-500" />
+                              <span>{s.popularPresets} ({popularPresets.length} st)</span>
+                            </div>
+                            <span className="text-[10px] opacity-70 font-normal">Klicka för att välja</span>
+                          </div>
+
+                          {/* Quick Popular Presets Visual Box Grid */}
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[25vh] overflow-y-auto no-scrollbar pr-0.5 p-0.5">
+                            {popularPresets.map((preset) => {
+                              const isAdded = fixedExpenses.some(
+                                e => e.name.trim().toLowerCase() === preset.name.trim().toLowerCase()
+                              );
+                              const mockTx = {
+                                id: preset.id,
+                                amount: preset.defaultAmount,
+                                merchant: preset.name,
+                                category: preset.category,
+                                type: 'expense' as const,
+                                timestamp: Date.now(),
+                              };
+                              return (
+                                <motion.button
+                                  key={preset.id}
+                                  type="button"
+                                  whileTap={{ scale: 0.96 }}
+                                  onClick={() => handleTogglePreset(preset)}
+                                  className={`p-2.5 rounded-[18px] flex flex-col justify-between items-start text-left transition-all cursor-pointer border relative overflow-hidden group ${
+                                    isAdded 
+                                      ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-xs ring-2 ring-[var(--accent-color)]/20' 
+                                      : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border-[var(--border-color)] shadow-2xs'
+                                  }`}
+                                >
+                                  {/* Top bar with Logo & Checkmark/Plus */}
+                                  <div className="w-full flex items-center justify-between gap-1.5 mb-2">
+                                    <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0">
+                                      <TransactionLogo transaction={mockTx} config={config} size="sm" />
+                                    </div>
+                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
+                                      isAdded ? 'bg-white text-[var(--accent-color)] shadow-xs' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] border border-[var(--border-color)]/40'
+                                    }`}>
+                                      {isAdded ? <Check size={12} strokeWidth={3} /> : <Plus size={11} />}
+                                    </div>
+                                  </div>
+
+                                  {/* Title & Price */}
+                                  <div className="w-full min-w-0">
+                                    <p className="text-[12.5px] font-bold truncate leading-tight tracking-tight">
+                                      {preset.name}
+                                    </p>
+                                    <p className={`text-[11px] font-amount font-bold mt-0.5 ${
+                                      isAdded ? 'text-white/90' : 'text-[var(--text-secondary)]'
+                                    }`}>
+                                      {formatAmount(preset.defaultAmount, lang)} <span className="text-[9.5px] font-sans font-normal opacity-80">{config.currency}</span>
+                                    </p>
+                                  </div>
+                                </motion.button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Added Fixed Expenses List */}
+                      <div className="space-y-2 pt-1 border-t border-[var(--border-color)]/60">
+                        <div className="flex items-center justify-between px-1 text-[11px] font-bold text-[var(--text-secondary)]">
+                          <span>Dina valda utgifter ({fixedExpenses.length} st)</span>
+                          <span className="font-amount font-bold text-[var(--text-primary)]">
+                            {formatAmount(fixedExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0), lang)} {config.currency}/mån
+                          </span>
+                        </div>
+
+                        <div className="space-y-1.5 max-h-[22vh] overflow-y-auto pr-1 no-scrollbar">
+                          {fixedExpenses.map((exp, i) => (
+                            <BudgetItem
+                              key={i}
+                              item={exp}
+                              type="expense"
+                              onClick={() => {
+                                setEditingExpenseIndex(i);
+                                setIsAddingExpense(true);
+                              }}
+                              currency={config.currency}
+                              language={(config.language || 'sv') as any}
+                              t={t}
+                              config={config}
+                            />
+                          ))}
+
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              setEditingExpenseIndex(null);
+                              setIsAddingExpense(true);
+                            }}
+                            className="w-full py-2.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[14px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
+                          >
+                            <Plus size={14} />
+                            <span>{s.customExpense}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons: Next & Skip */}
+                      <div className="pt-2 space-y-2">
                         <button 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                         >
                           <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleNext}
+                          className="w-full text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1 transition-colors cursor-pointer"
+                        >
+                          {s.skipStep}
                         </button>
                       </div>
                     </motion.div>
@@ -666,10 +854,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       transition={{ duration: 0.25 }}
                       className="space-y-6"
                     >
-                      <div className="space-y-4">
-                        <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[22px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
-                          <Target size={28} />
-                        </div>
+                      <div className="space-y-3">
+                        <OnboardingCharacterArt step="goals" />
                         <div className="space-y-1 text-center">
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.savingsGoals}</h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
@@ -740,13 +926,23 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </div>
                       )}
 
-                      <button 
-                        onClick={handleNext}
-                        className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
-                      >
-                        <span>{s.next}</span>
-                        <ArrowRight size={16} strokeWidth={2.5} />
-                      </button>
+                      <div className="space-y-2">
+                        <button 
+                          onClick={handleNext}
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
+                        >
+                          <span>{s.next}</span>
+                          <ArrowRight size={16} strokeWidth={2.5} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleNext}
+                          className="w-full text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1 transition-colors cursor-pointer"
+                        >
+                          {s.skipStep}
+                        </button>
+                      </div>
                     </motion.div>
                   )}
 
@@ -757,31 +953,92 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.25 }}
-                      className="space-y-6"
+                      className="space-y-4"
                     >
-                      <div className="space-y-4">
-                        <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[22px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
-                          <Banknote size={28} />
-                        </div>
-                        <div className="space-y-1 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.midMonthTitle}</h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[340px] mx-auto leading-relaxed">
-                            {s.midMonthDesc}
+                      <div className="space-y-2 text-center">
+                        <OnboardingCharacterArt step="midMonth" days={daysUntilPayday} payday={payday} />
+                        <div className="space-y-1">
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold border border-amber-500/20">
+                            <span>{typeof s.midMonthTitle === 'function' ? s.midMonthTitle(daysUntilPayday) : s.midMonthTitle}</span>
+                          </div>
+                          <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                            {typeof s.midMonthQuestion === 'function' ? s.midMonthQuestion(payday) : s.midMonthQuestion}
+                          </h3>
+                          <p className="text-xs text-[var(--text-secondary)] font-medium max-w-[340px] mx-auto leading-relaxed">
+                            {typeof s.midMonthDesc === 'function' ? s.midMonthDesc(daysUntilPayday, payday) : s.midMonthDesc}
                           </p>
                         </div>
                       </div>
 
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={midMonthSpent}
-                          onChange={(e) => setMidMonthSpent(e.target.value)}
-                          className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[18px] px-4 py-3.5 pr-14 text-[16px] sm:text-sm font-semibold text-[var(--text-primary)] text-center focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/40"
-                          placeholder={s.midMonthPlaceholder}
-                        />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
-                          {config.currency}
-                        </span>
+                      {/* Main Target Amount Input */}
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={midMonthSpent}
+                            onChange={(e) => setMidMonthSpent(e.target.value)}
+                            className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[20px] px-4 py-3.5 pr-14 text-center text-xl sm:text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/30"
+                            placeholder={monthlyDisposablePot > 0 ? monthlyDisposablePot.toString() : s.midMonthPlaceholder}
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
+                            {config.currency}
+                          </span>
+                        </div>
+
+                        {/* Live Daily Budget Preview Pill */}
+                        {effectiveRemaining > 0 && (
+                          <div className="p-3 bg-[var(--surface-muted)] rounded-[16px] border border-[var(--border-color)]/50 text-center">
+                            <p className="text-xs font-bold text-[var(--text-primary)]">
+                              {typeof s.dailyRatePreview === 'function' 
+                                ? s.dailyRatePreview(formatAmount(dailyRate, lang), daysUntilPayday) 
+                                : `${dailyRate} kr/dag`}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* 1-Click Quick Preset Buttons */}
+                        {monthlyDisposablePot > 0 && (
+                          <div className="grid grid-cols-3 gap-1.5 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => setMidMonthSpent(monthlyDisposablePot.toString())}
+                              className={`p-2 rounded-[12px] text-center border transition-all cursor-pointer ${
+                                midMonthSpent === monthlyDisposablePot.toString()
+                                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] font-bold shadow-2xs'
+                                  : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border-[var(--border-color)] text-xs font-semibold'
+                              }`}
+                            >
+                              <span className="block text-[10px] opacity-75 font-normal">{s.fullPotOption}</span>
+                              <span className="text-[11px] font-bold font-amount">{formatAmount(monthlyDisposablePot, lang)}</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setMidMonthSpent(Math.round(monthlyDisposablePot * 0.5).toString())}
+                              className={`p-2 rounded-[12px] text-center border transition-all cursor-pointer ${
+                                midMonthSpent === Math.round(monthlyDisposablePot * 0.5).toString()
+                                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] font-bold shadow-2xs'
+                                  : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border-[var(--border-color)] text-xs font-semibold'
+                              }`}
+                            >
+                              <span className="block text-[10px] opacity-75 font-normal">{s.halfPotOption}</span>
+                              <span className="text-[11px] font-bold font-amount">{formatAmount(Math.round(monthlyDisposablePot * 0.5), lang)}</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setMidMonthSpent(Math.round(monthlyDisposablePot * 0.33).toString())}
+                              className={`p-2 rounded-[12px] text-center border transition-all cursor-pointer ${
+                                midMonthSpent === Math.round(monthlyDisposablePot * 0.33).toString()
+                                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] font-bold shadow-2xs'
+                                  : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border-[var(--border-color)] text-xs font-semibold'
+                              }`}
+                            >
+                              <span className="block text-[10px] opacity-75 font-normal">{s.thirdPotOption}</span>
+                              <span className="text-[11px] font-bold font-amount">{formatAmount(Math.round(monthlyDisposablePot * 0.33), lang)}</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {error && (
@@ -790,13 +1047,27 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </div>
                       )}
 
-                      <button 
-                        onClick={handleNext}
-                        className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
-                      >
-                        <span>{s.next}</span>
-                        <ArrowRight size={16} strokeWidth={2.5} />
-                      </button>
+                      {/* Navigation Buttons */}
+                      <div className="pt-2 space-y-2">
+                        <button 
+                          onClick={handleNext}
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
+                        >
+                          <span>{s.next}</span>
+                          <ArrowRight size={16} strokeWidth={2.5} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMidMonthSpent('');
+                            handleNext();
+                          }}
+                          className="w-full text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1 transition-colors cursor-pointer"
+                        >
+                          {s.skipMidMonth}
+                        </button>
+                      </div>
                     </motion.div>
                   )}
 
@@ -809,14 +1080,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       transition={{ duration: 0.3 }}
                       className="space-y-4 my-auto text-center"
                     >
-                      {/* Animated Mascot */}
-                      <DejzyMascot mood="celebrating" />
+                      {/* Premium Summary Badge */}
+                      <OnboardingCharacterArt step="summary" />
 
-                      {/* Mascot Speech Bubble */}
+                      {/* Summary Speech Intro Card */}
                       <div className="relative bg-[var(--surface-color)] p-4 rounded-[20px] border border-[var(--border-color)] shadow-xs text-left max-w-sm mx-auto">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--accent-color)] mb-1">
                           <Sparkles size={14} />
-                          <span>Dejzy hälsar</span>
+                          <span>{isEn ? 'Your Plan is Ready' : 'Din plan är klar'}</span>
                         </div>
                         <p className="text-xs sm:text-sm font-medium text-[var(--text-primary)] leading-relaxed">
                           {fullName.trim() ? `Snyggt jobbat, ${fullName.trim()}!` : 'Snyggt jobbat!'} Din personliga ekonomiska profil är nu klar. Jag har räknat ut din period fram till nästa lön den <strong className="text-[var(--accent-color)]">{payday}:e</strong>.

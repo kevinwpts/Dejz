@@ -5,7 +5,6 @@ import {
   ChevronRight,
   ArrowUp,
   Instagram,
-  Check,
   Shield,
   Trash2,
   Lock,
@@ -84,11 +83,11 @@ export function LandingPage({
   onGetStarted, 
   onLogin, 
   onStartDemo, 
-  onGoogleLogin, 
-  onFacebookLogin, 
+  onGoogleLogin: _onGoogleLogin, 
+  onFacebookLogin: _onFacebookLogin, 
   onLegalClick, 
-  currentLanguage, 
-  onLanguageChange, 
+  currentLanguage: _currentLanguage, 
+  onLanguageChange: _onLanguageChange, 
   t: _t 
 }: LandingPageProps) {
   const [activePolicy, setActivePolicy] = React.useState<string | null>(null);
