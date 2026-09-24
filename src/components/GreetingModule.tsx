@@ -1,14 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { isDemoMode } from '../utils/demoUtils';
 
-import { X } from 'lucide-react';
-import { TranslationKey, Language } from '../i18n';
-import { PeriodTimeline } from './PeriodTimeline';
-import { CalendarModal } from './CalendarModal';
+import { Sparkles } from 'lucide-react';
+import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
-import { AmountSelector } from './AmountSelector';
 
 interface GreetingModuleProps {
   userName?: string;
@@ -39,38 +35,54 @@ interface GreetingModuleProps {
   children?: React.ReactNode;
 }
 
+function DejziAvatar() {
+  return (
+    <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+      <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/30 via-emerald-400/30 to-cyan-400/30 rounded-full blur-md animate-pulse" />
+      <motion.div
+        animate={{ y: [0, -3, 0], rotate: [0, 2, -2, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        className="relative w-11 h-11 flex items-center justify-center"
+      >
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md overflow-visible">
+          <defs>
+            <radialGradient id="dejziBody" cx="40%" cy="35%" r="65%">
+              <stop offset="0%" stopColor="#FFFFFF" />
+              <stop offset="40%" stopColor="#FEF08A" />
+              <stop offset="100%" stopColor="#F59E0B" />
+            </radialGradient>
+            <radialGradient id="dejziCheek" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#FB7185" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#FB7185" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="38" fill="url(#dejziBody)" stroke="#FFFFFF" strokeWidth="2.5" />
+          <circle cx="35" cy="56" r="6" fill="url(#dejziCheek)" />
+          <circle cx="65" cy="56" r="6" fill="url(#dejziCheek)" />
+          <ellipse cx="40" cy="48" rx="4.5" ry="5.5" fill="#0F172A" />
+          <circle cx="38.5" cy="46" r="1.8" fill="#FFFFFF" />
+          <ellipse cx="60" cy="48" rx="4.5" ry="5.5" fill="#0F172A" />
+          <circle cx="58.5" cy="46" r="1.8" fill="#FFFFFF" />
+          <path d="M 45 58 Q 50 63 55 58" fill="none" stroke="#0F172A" strokeWidth="2.2" strokeLinecap="round" />
+        </svg>
+        <div className="absolute -top-1 -right-1 text-amber-400 drop-shadow">
+          <Sparkles size={12} />
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 export function GreetingModule({
-  userName: _userName,
   availableForD,
   currency,
-  isToday: _isToday,
   date,
   language,
   stats,
   t,
   calendarDays,
-  setSelectedDate,
-  setCurrentPeriodDate,
-  periodStart: _periodStart,
-  periodEnd: _periodEnd,
-  isFuturePeriod,
-  isPastPeriod: _isPastPeriod,
-  periods,
-  variant: _variant = 'default',
-  showPeriodSelector: _showPeriodSelector = false,
-  avatarUrl: _avatarUrl,
-  onNavigate: _onNavigate,
-  showFixedInCalendar: _showFixedInCalendar,
-  isCurrentPeriod,
-  currentPeriodDate,
-  config,
-  onUpdateConfig: _onUpdateConfig,
   children
 }: GreetingModuleProps) {
-  const [isCalculationModalOpen, setIsCalculationModalOpen] = useState(false);
-  const [isSaveToPotOpen, setIsSaveToPotOpen] = useState(false);
-  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
-
   const effectiveRemainingDays = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return stats.remainingDays || 1;
     const normDate = new Date(date || new Date());
@@ -88,33 +100,12 @@ export function GreetingModule({
 
   const futureDays = Math.max(1, effectiveRemainingDays - 1);
   const _impact = Math.round(Math.abs(availableForD) / futureDays);
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const selected = new Date(date || new Date());
-  selected.setHours(0, 0, 0, 0);
-  const diffDays = Math.round((selected.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  const _selectedDayData = useMemo(() => {
-    if (!calendarDays || calendarDays.length === 0) return null;
-    return calendarDays.find((d: any) => d.date && d.date.getTime() === selected.getTime());
-  }, [calendarDays, selected]);
+  void _impact;
 
   const todayDayData = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return null;
-    return calendarDays.find((d: any) => d.isToday) || calendarDays[0];
+    return calendarDays.find((d: any) => d.isToday) || null;
   }, [calendarDays]);
-
-  let topLabel: React.ReactNode = '';
-  let displayAmount = 0;
-
-  if (isFuturePeriod) {
-    topLabel = t('plannedDailyBudget');
-    displayAmount = stats?.baseDailyBudgetCents || 0;
-  } else {
-    topLabel = t('leftToday');
-    displayAmount = Math.round(availableForD || 0);
-  }
 
   // Dejzi mascot advice calculation
   const dejziInfo = useMemo(() => {
@@ -191,26 +182,18 @@ export function GreetingModule({
     };
   }, [stats, todayDayData, availableForD, language, currency]);
 
-  const isDemo = isDemoMode();
-  const negativeMarginClass = isDemo 
-    ? "-mt-[calc(8.2rem+env(safe-area-inset-top))]" 
-    : "-mt-[calc(6.2rem+env(safe-area-inset-top))]";
-  const topPaddingClass = isDemo
-    ? "pt-[calc(9.2rem+env(safe-area-inset-top))]"
-    : "pt-[calc(7.2rem+env(safe-area-inset-top))]";
-
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
-      {/* 1. Seamless Integrated Grand Hero Area with negative margins */}
+      {/* 1. Seamless Integrated Grand Hero Area aligned cleanly with other tabs */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className={`-mx-4 sm:-mx-6 ${negativeMarginClass} ${topPaddingClass} pb-4 px-4 sm:px-6 text-[var(--text-primary)] relative overflow-hidden flex flex-col`}
+        className="pb-2 text-[var(--text-primary)] relative overflow-hidden flex flex-col"
       >
         {/* The Premium Main Rounded Card */}
-        <div className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[32px] p-7 sm:p-8 shadow-xs relative overflow-hidden flex flex-col mt-4">
-          {/* Clean Stats Row with Totalt kvar and Dagar till lön */}
+        <div className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[32px] p-7 sm:p-8 shadow-xs relative overflow-hidden flex flex-col">
+          {/* Clean Stats Row with Totalt kvar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
             <div className="flex flex-col text-left justify-center">
               <span className="text-xs font-bold text-[var(--text-secondary)] tracking-wider mb-1.5 block uppercase">
@@ -231,9 +214,6 @@ export function GreetingModule({
                 </span>
               </div>
             </div>
-
-            {/* Elegant Right Side: Dagar till nästa lön Badge removed */}
-            <div className="hidden" />
           </div>
 
           {/* Integrated Category Budgets Carousel as the Bottom Section inside the Card */}
@@ -245,7 +225,7 @@ export function GreetingModule({
         </div>
       </motion.div>
 
-      {/* Dejzi Mascot Card */}
+      {/* Dejzi Mascot Card with Premium Animated Avatar */}
       {dejziInfo && (
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
@@ -254,10 +234,8 @@ export function GreetingModule({
           className="rounded-[22px] border border-[var(--border-color)] p-4 bg-gradient-to-br from-[var(--surface-color)] via-[var(--surface-color)] to-[var(--surface-muted)]/50 shadow-sm relative overflow-hidden flex items-center gap-4"
         >
           <div className="flex flex-col items-center gap-1 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[var(--accent-color)]/20 via-[var(--accent-color)]/5 to-emerald-400/5 border border-[var(--accent-color)]/20 flex items-center justify-center text-xl shadow-xs">
-              🌼
-            </div>
-            <span className="text-[10px] font-bold tracking-wider text-[var(--text-secondary)] opacity-80">
+            <DejziAvatar />
+            <span className="text-[10px] font-bold tracking-wider text-[var(--text-secondary)] opacity-90">
               Dejzi
             </span>
           </div>
@@ -275,152 +253,6 @@ export function GreetingModule({
           </div>
         </motion.div>
       )}
-
-      {/* Period Timeline */}
-      {calendarDays && calendarDays.length > 0 && (
-        <PeriodTimeline
-          calendarDays={calendarDays}
-          selectedDate={date}
-          onSelectDate={setSelectedDate}
-          stats={stats}
-          language={language}
-          isCurrentPeriod={isCurrentPeriod}
-        />
-      )}
-
-      {/* Calculation Modal */}
-      <div>
-        {isCalculationModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/50 backdrop-blur-sm">
-            <div
-              
-              className="bg-[var(--surface-color)] rounded-[28px] p-6 w-full max-w-sm relative border border-[var(--border-color)] shadow-xl"
-            >
-              <button
-                onClick={() => setIsCalculationModalOpen(false)}
-                className="absolute top-4 right-4 p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors bg-[var(--bg-color)] rounded-full"
-              >
-                <X size={20} strokeWidth={1.5} />
-              </button>
-              
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-6">{t('periodBudget')}</h3>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-[var(--text-secondary)]">{t('totalIncome')}</span>
-                    <span className="font-semibold text-[var(--text-primary)] font-amount">{formatAmount(stats.totalIncome, language)} <span className="font-sans">{currency}</span></span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-[var(--text-secondary)]">{t('fixedExpenses')}</span>
-                    <span className="font-semibold text-danger font-amount">-{formatAmount(stats.totalFixed, language)} <span className="font-sans">{currency}</span></span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-[var(--text-secondary)]">{t('savingsGoal')}</span>
-                    <span className="font-semibold text-danger font-amount">-{formatAmount(stats.totalSavings, language)} <span className="font-sans">{currency}</span></span>
-                  </div>
-                </div>
-
-                <div className="h-[0.5px] bg-[var(--border-color)]" />
-
-                <div className="space-y-2">
-                  {stats.totalExtraIncomeUpToToday > 0 && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-[var(--text-secondary)]">{t('extraIncomes')}</span>
-                      <span className="font-semibold text-success font-amount">+{formatAmount(stats.totalExtraIncomeUpToToday, language)} <span className="font-sans">{currency}</span></span>
-                    </div>
-                  )}
-
-                  {stats.totalFutureExtraIncome > 0 && (
-                    <div className="flex justify-between items-center text-sm opacity-70">
-                      <span className="text-[var(--text-secondary)]">{t('futureExtraIncomes')}</span>
-                      <span className="font-semibold text-success font-amount">+{formatAmount(stats.totalFutureExtraIncome, language)} <span className="font-sans">{currency}</span></span>
-                    </div>
-                  )}
-
-                  {stats.totalDistributedSurplusInPeriod > 0 && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-[var(--text-secondary)]">{t('distributedSurplus')}</span>
-                      <span className="font-semibold text-success font-amount">+{formatAmount(stats.totalDistributedSurplusInPeriod, language)} <span className="font-sans">{currency}</span></span>
-                    </div>
-                  )}
-                  
-                  {stats.totalSpentInPeriod > 0 && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-[var(--text-secondary)]">{t('variableExpenses')}</span>
-                      <span className="font-semibold text-danger font-amount">-{formatAmount(stats.totalSpentInPeriod - (stats.totalSavedInPot || 0), language)} <span className="font-sans">{currency}</span></span>
-                    </div>
-                  )}
-
-                  {stats.totalSavedInPot > 0 && (
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-[var(--text-secondary)]">{t('piggyBank')}</span>
-                      <span className="font-semibold text-accent font-amount">-{formatAmount(stats.totalSavedInPot, language)} <span className="font-sans">{currency}</span></span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="h-[0.5px] bg-[var(--border-color)] my-2" />
-                
-                <div className="flex justify-between items-center p-3 bg-accent/5 rounded-t-[16px]">
-                  <span className="font-semibold text-[var(--text-primary)]">{t('totalRemaining')}</span>
-                  <span className="font-semibold text-[var(--text-primary)] text-base font-amount">{formatAmount(stats.remainingPeriodCents, language)} <span className="font-sans">{currency}</span></span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-[var(--bg-color)]">
-                  <span className="text-[var(--text-secondary)] text-sm">{t('salaryIn')}</span>
-                  <span className="text-[var(--text-secondary)] text-sm">/ {effectiveRemainingDays} {effectiveRemainingDays === 1 ? t('oneDay') : t('days')}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-accent/10 rounded-b-[16px]">
-                  <span className="font-semibold text-[var(--text-primary)]">{diffDays === 0 ? t('leftToday') : topLabel}</span>
-                  <span className="font-semibold text-accent text-xl font-amount">{formatAmount(displayAmount, language)} <span className="font-sans">{currency}</span></span>
-                </div>
-              </div>
-              
-              <button
-                onClick={() => setIsCalculationModalOpen(false)}
-                className="w-full mt-8 py-3 rounded-full bg-[var(--bg-color)] text-[var(--text-primary)] font-semibold text-sm active:scale-[0.98] transition-all"
-              >
-                {t('closeBtn')}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <AmountSelector
-        isOpen={isSaveToPotOpen}
-        onClose={() => setIsSaveToPotOpen(false)}
-        onConfirm={(_amount) => {
-          setIsSaveToPotOpen(false);
-        }}
-        maxAmount={stats.remainingPeriodCents}
-        title={t('saveInPiggyBank')}
-        t={t}
-        currency={currency}
-        remainingDays={effectiveRemainingDays}
-        theme="default"
-      />
-
-      <CalendarModal
-        isOpen={isCalendarModalOpen}
-        onClose={() => setIsCalendarModalOpen(false)}
-        calendarDays={calendarDays}
-        selectedDate={date}
-        onSelectDate={(selected) => {
-          setSelectedDate(selected);
-          if (setCurrentPeriodDate) {
-            setCurrentPeriodDate(selected);
-          }
-        }}
-        periods={periods}
-        currentPeriodDate={currentPeriodDate}
-        onPeriodChange={setCurrentPeriodDate}
-        periodName={stats?.periodName}
-        isCurrentPeriod={isCurrentPeriod}
-        t={t}
-        language={language as Language}
-        showFixedInCalendar={config?.showFixedExpensesInCalendar}
-      />
     </div>
   );
 }

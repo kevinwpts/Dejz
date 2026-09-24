@@ -430,7 +430,6 @@ export const translations: Record<Language, any> = {
     theme_sunset: 'Sunset',
     theme_ocean: 'Ocean',
     theme_gold: 'Gold',
-    appearance: 'Utseende',
     darkMode: 'Mörkt läge',
     darkModeDesc: 'Mörkare färgschema för appen',
     lightMode: 'Ljust läge',
@@ -735,7 +734,6 @@ export const translations: Record<Language, any> = {
     cancelAndLogin: 'Avbryt och logga in',
     checkInboxTitle: 'Kolla din inkorg',
     checkInboxDesc: 'Vi har skickat en återställningslänk till {{email}}. Följ instruktionerna i mailet för att välja ett nytt lösenord.',
-    backToLogin: 'Tillbaka till inloggning',
   },
   en: {
     today: 'Today',

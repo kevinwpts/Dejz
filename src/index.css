@@ -633,3 +633,16 @@ textarea {
     box-shadow: none;
   }
 }
+
+/* Hide native scrollbars and scroll indicators on iOS PWA / mobile / desktop */
+html, body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
