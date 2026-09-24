@@ -35,6 +35,7 @@ interface GreetingModuleProps {
   currentPeriodDate?: Date;
   config: any;
   onUpdateConfig?: (newConfig: any) => void;
+  children?: React.ReactNode;
 }
 
 export function GreetingModule({
@@ -62,7 +63,8 @@ export function GreetingModule({
   isCurrentPeriod,
   currentPeriodDate,
   config,
-  onUpdateConfig: _onUpdateConfig
+  onUpdateConfig: _onUpdateConfig,
+  children
 }: GreetingModuleProps) {
   const [isCalculationModalOpen, setIsCalculationModalOpen] = useState(false);
   const [isSaveToPotOpen, setIsSaveToPotOpen] = useState(false);
@@ -221,12 +223,12 @@ export function GreetingModule({
         </p>
       </div>
 
-      {/* 1. Dagsbudget Hero Card */}
+      {/* 1. Dagsbudget Hero Card with Integrated Totalt kvar & Nästa lön */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1, duration: 0.5 }}
-        className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center"
+        className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center relative overflow-hidden"
       >
         <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2.5 block">
           {topLabel}
@@ -257,6 +259,39 @@ export function GreetingModule({
             />
           </div>
         </div>
+
+        {/* Integrated Totalt kvar & Nästa lön */}
+        {effectiveRemainingDays !== undefined && (
+          <div className="w-full grid grid-cols-2 gap-4 pt-5 mt-5 border-t border-[var(--border-color)]/50">
+            <div className="text-left flex flex-col justify-center">
+              <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-80 mb-1 block">
+                {t('totalRemaining' as any)}
+              </span>
+              <div className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount leading-tight tabular-nums">
+                {formatAmount(stats?.remainingPeriodCents || 0, language)}{' '}
+                <span className="text-xs font-normal opacity-50 ml-0.5">{currency}</span>
+              </div>
+            </div>
+            
+            <div className="text-right flex flex-col justify-center items-end">
+              <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-80 mb-1 block">
+                {t('daysToNextSalary' as any)}
+              </span>
+              <div className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount leading-tight tabular-nums">
+                {stats?.remainingDays || 1}{' '}
+                <span className="text-xs font-normal opacity-50 ml-0.5 font-sans">
+                  {(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Integrated Category Budgets / Children */}
+        {children && (
+          <div className="w-full pt-4 sm:pt-5 mt-4 sm:mt-5 border-t border-[var(--border-color)]/50 text-left">
+            {children}
+          </div>
+        )}
       </motion.div>
 
       {/* Dejzi Mascot Card */}
@@ -290,37 +325,7 @@ export function GreetingModule({
         </motion.div>
       )}
 
-      {/* 3. Egen Modul: Totalt kvar & Nästa lön */}
-      {effectiveRemainingDays !== undefined && (
-        <motion.div 
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="rounded-[24px] border border-[var(--border-color)] p-5 sm:p-6 bg-[var(--surface-color)] shadow-sm transition-all duration-500"
-        >
-          <div className="flex justify-between items-end">
-            <div>
-              <div className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
-                {t('totalRemaining' as any)}
-              </div>
-              <div className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] font-amount leading-none">
-                {formatAmount(stats?.remainingPeriodCents || 0, language)} <span className="opacity-40 text-lg font-normal">{currency}</span>
-              </div>
-            </div>
-            
-            <div className="text-right">
-              <div className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
-                {t('daysToNextSalary' as any)}
-              </div>
-              <div className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] font-amount leading-none">
-                {stats?.remainingDays || 1} <span className="opacity-40 text-sm font-normal font-sans">{(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* 4. Timeline of Period (Placed under Totalt kvar & Nästa lön) */}
+      {/* Period Timeline */}
       {calendarDays && calendarDays.length > 0 && (
         <PeriodTimeline
           calendarDays={calendarDays}

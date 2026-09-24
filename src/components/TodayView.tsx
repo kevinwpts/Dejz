@@ -5,7 +5,6 @@ import {
   Wallet,
   Sparkles,
   RotateCcw,
-  ChevronRight,
 } from "lucide-react";
 import {
   Transaction,
@@ -281,7 +280,117 @@ export function TodayView({
           currentPeriodDate={currentPeriodDate}
           config={config}
           onUpdateConfig={onUpdateConfig}
-        />
+        >
+          {/* Category Budgets Carousel - Seamlessly integrated inside the top hero card */}
+          {categoryBudgetData.length > 0 && (
+            <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
+              {categoryBudgetData.map((cat, index) => {
+                const Icon = ICON_MAP[cat.iconName];
+                return (
+                  <motion.button
+                    key={cat.name}
+                    initial={{ opacity: 0, scale: 0.95, x: 10 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    transition={{ delay: 0.12 + index * 0.02 }}
+                    onClick={() => onNavigate("analysis")}
+                    className="flex-shrink-0 flex flex-col justify-between p-3 rounded-[18px] bg-[var(--surface-muted)]/60 border border-[var(--border-color)]/50 hover:border-[var(--accent-color)]/40 hover:bg-[var(--surface-muted)] transition-all group text-left active:scale-[0.98] min-w-[130px] max-w-[145px] shadow-2xs cursor-pointer snap-start"
+                  >
+                    <div className="flex items-center justify-between w-full mb-2">
+                      {/* Circular Progress Ring with Icon */}
+                      <div className="relative w-[36px] h-[36px] flex items-center justify-center shrink-0">
+                        <svg className="absolute top-0 left-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                          <circle
+                            cx="18"
+                            cy="18"
+                            r="15"
+                            fill="none"
+                            stroke="var(--border-color)"
+                            strokeWidth="2.2"
+                            className="opacity-30"
+                          />
+                          <circle
+                            cx="18"
+                            cy="18"
+                            r="15"
+                            fill="none"
+                            stroke={cat.isOverBudget ? "#f59e0b" : (cat.color || "var(--accent-color)")}
+                            strokeWidth="2.2"
+                            strokeDasharray={94.25}
+                            strokeDashoffset={
+                              cat.hasBudget
+                                ? 94.25 * (1 - Math.min(cat.spent / cat.budgetInKronor, 1))
+                                : 94.25
+                            }
+                            strokeLinecap="round"
+                            className="transition-all duration-500"
+                          />
+                        </svg>
+                        <div
+                          className="w-[26px] h-[26px] rounded-full flex items-center justify-center shadow-2xs shrink-0 relative z-10"
+                          style={{
+                            backgroundColor:
+                              cat.color ||
+                              (isEmojiString(cat.iconName)
+                                ? getEmojiSolidColor(cat.iconName)
+                                : COLORS[index % COLORS.length]),
+                            color: "#fff",
+                          }}
+                        >
+                          {isEmojiString(cat.iconName) ? (
+                            <span className="text-[12px] leading-none">{cat.iconName}</span>
+                          ) : Icon ? (
+                            <Icon size={12} strokeWidth={1.75} />
+                          ) : (
+                            <div className="w-1 h-1 rounded-full" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Percentage badge if budgeted */}
+                      {cat.hasBudget && (
+                        <span
+                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full font-amount tabular-nums ${
+                            cat.isOverBudget
+                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                              : "bg-[var(--surface-color)] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
+                          }`}
+                        >
+                          {Math.round((cat.spent / cat.budgetInKronor) * 100)}%
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col items-start w-full min-w-0">
+                      <span className="text-[12px] font-semibold text-[var(--text-primary)] tracking-tight leading-snug truncate w-full group-hover:text-[var(--accent-color)] transition-colors">
+                        {cat.name}
+                      </span>
+                      <span className="text-[10.5px] font-medium leading-tight mt-0.5 truncate w-full">
+                        {cat.hasBudget ? (
+                          cat.isOverBudget ? (
+                            <span className="text-amber-500 font-semibold font-amount tabular-nums">
+                              +{formatAmount(Math.abs(cat.remaining), config.language)} kr över
+                            </span>
+                          ) : (
+                            <span className="text-[var(--text-secondary)]">
+                              <strong className="text-[var(--text-primary)] font-bold font-amount tabular-nums">
+                                {formatAmount(cat.remaining, config.language)} kr
+                              </strong>{" "}
+                              kvar
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-[var(--text-secondary)] opacity-75 font-amount tabular-nums">
+                            {formatAmount(cat.spent, config.language)} kr använt
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+          )}
+        </GreetingModule>
       </motion.div>
 
       {/* Attention Items / Budget Actions */}
@@ -346,138 +455,6 @@ export function TodayView({
         </div>
       )}
 
-      {/* Category Budgets Carousel */}
-      {categoryBudgetData.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.18 }}
-          className="space-y-3 pt-1"
-        >
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-2">
-              <h4 className="text-[13px] sm:text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-                {config.language === "en" ? "Category budgets" : "Kategoribudgetar"}
-              </h4>
-            </div>
-            <button
-              onClick={() => onNavigate("analysis")}
-              className="flex items-center gap-0.5 text-[11px] font-semibold text-[var(--accent-color)] hover:opacity-80 transition-opacity cursor-pointer"
-            >
-              <span>{t("seeAll") || (config.language === "en" ? "See all" : "Visa alla")}</span>
-              <ChevronRight size={13} strokeWidth={2.5} />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide px-2 snap-x snap-mandatory">
-            {categoryBudgetData.map((cat, index) => {
-              const Icon = ICON_MAP[cat.iconName];
-              return (
-                <motion.button
-                  key={cat.name}
-                  initial={{ opacity: 0, scale: 0.95, x: 15 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 0.2 + index * 0.03 }}
-                  onClick={() => onNavigate("analysis")}
-                  className="flex-shrink-0 flex flex-col justify-between p-3.5 rounded-[20px] bg-[var(--surface-color)] border border-[var(--border-color)] hover:border-[var(--accent-color)]/40 hover:bg-[var(--surface-muted)]/50 transition-all group text-left active:scale-[0.98] min-w-[140px] max-w-[155px] shadow-2xs cursor-pointer snap-start"
-                >
-                  <div className="flex items-center justify-between w-full mb-2.5">
-                    {/* Circular Progress Ring with Icon */}
-                    <div className="relative w-[40px] h-[40px] flex items-center justify-center shrink-0">
-                      <svg className="absolute top-0 left-0 w-full h-full -rotate-90" viewBox="0 0 40 40">
-                        <circle
-                          cx="20"
-                          cy="20"
-                          r="17"
-                          fill="none"
-                          stroke="var(--border-color)"
-                          strokeWidth="2.5"
-                          className="opacity-30"
-                        />
-                        <circle
-                          cx="20"
-                          cy="20"
-                          r="17"
-                          fill="none"
-                          stroke={cat.isOverBudget ? "#f59e0b" : (cat.color || "var(--accent-color)")}
-                          strokeWidth="2.5"
-                          strokeDasharray={106.81}
-                          strokeDashoffset={
-                            cat.hasBudget
-                              ? 106.81 * (1 - Math.min(cat.spent / cat.budgetInKronor, 1))
-                              : 106.81
-                          }
-                          strokeLinecap="round"
-                          className="transition-all duration-500"
-                        />
-                      </svg>
-                      <div
-                        className="w-[30px] h-[30px] rounded-full flex items-center justify-center shadow-2xs shrink-0 relative z-10"
-                        style={{
-                          backgroundColor:
-                            cat.color ||
-                            (isEmojiString(cat.iconName)
-                              ? getEmojiSolidColor(cat.iconName)
-                              : COLORS[index % COLORS.length]),
-                          color: "#fff",
-                        }}
-                      >
-                        {isEmojiString(cat.iconName) ? (
-                          <span className="text-[14px] leading-none">{cat.iconName}</span>
-                        ) : Icon ? (
-                          <Icon size={14} strokeWidth={1.75} />
-                        ) : (
-                          <div className="w-1.5 h-1.5 rounded-full" />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Percentage badge if budgeted */}
-                    {cat.hasBudget && (
-                      <span
-                        className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full font-amount tabular-nums ${
-                          cat.isOverBudget
-                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                            : "bg-[var(--surface-muted)] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
-                        }`}
-                      >
-                        {Math.round((cat.spent / cat.budgetInKronor) * 100)}%
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col items-start w-full min-w-0">
-                    <span className="text-[12.5px] font-semibold text-[var(--text-primary)] tracking-tight leading-snug truncate w-full group-hover:text-[var(--accent-color)] transition-colors">
-                      {cat.name}
-                    </span>
-                    <span className="text-[11px] font-medium leading-tight mt-0.5 truncate w-full">
-                      {cat.hasBudget ? (
-                        cat.isOverBudget ? (
-                          <span className="text-amber-500 font-semibold font-amount tabular-nums">
-                            +{formatAmount(Math.abs(cat.remaining), config.language)} kr över
-                          </span>
-                        ) : (
-                          <span className="text-[var(--text-secondary)]">
-                            <strong className="text-[var(--text-primary)] font-bold font-amount tabular-nums">
-                              {formatAmount(cat.remaining, config.language)} kr
-                            </strong>{" "}
-                            kvar
-                          </span>
-                        )
-                      ) : (
-                        <span className="text-[var(--text-secondary)] opacity-75 font-amount tabular-nums">
-                          {formatAmount(cat.spent, config.language)} kr använt
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
-
       <div className="space-y-3.5 pt-2">
         <div className="flex items-center justify-between px-2 mb-3.5">
           <div className="flex items-center gap-2">
@@ -501,12 +478,6 @@ export function TodayView({
               </button>
             )}
           </div>
-          <button
-            onClick={() => onNavigate("overview", "transactions")}
-            className="h-7 px-2.5 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)] text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all cursor-pointer flex items-center justify-center"
-          >
-            {t("seeAll")}
-          </button>
         </div>
 
         <div className="space-y-5">
