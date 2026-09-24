@@ -222,8 +222,35 @@ export function TodayView({
         }
       }
 
-      const budgetInKronor = cat.budget && totalIncome > 0 ? Math.round((cat.budget / 100) * totalIncome) : 0;
-      const hasBudget = cat.budget !== undefined && cat.budget > 0 && budgetInKronor > 0;
+      // Exact fixed expenses for this category
+      const periodId = stats?.periodId || '';
+      const catFixed = (fixedExpenses || [])
+        .filter((e: any) => e.category?.trim().toLowerCase() === searchName)
+        .reduce((sum: number, e: any) => {
+          const amount = (e.isVariable && e.periodOverrides && periodId && e.periodOverrides[periodId] !== undefined)
+            ? e.periodOverrides[periodId]
+            : (Number(e.amount) || 0);
+          switch (e.frequency) {
+            case 'quarterly': return sum + amount / 3;
+            case 'semi-annually': return sum + amount / 6;
+            case 'annually': return sum + amount / 12;
+            default: return sum + amount;
+          }
+        }, 0);
+
+      let budgetInKronor = 0;
+      let hasBudget = false;
+
+      if (cat.budget !== undefined && cat.budget > 0) {
+        budgetInKronor = cat.budget > 100 
+          ? Math.round(cat.budget) 
+          : (totalIncome > 0 ? Math.round((cat.budget / 100) * totalIncome) : 0);
+        hasBudget = budgetInKronor > 0;
+      } else if (catFixed > 0) {
+        budgetInKronor = Math.round(catFixed);
+        hasBudget = true;
+      }
+
       const remaining = budgetInKronor - Math.round(spent);
       const iconName = cat.icon || getCategoryIconName(name);
       const isOverBudget = hasBudget && remaining < 0;
@@ -283,7 +310,7 @@ export function TodayView({
         >
           {/* Category Budgets Carousel - Seamlessly integrated inside the top hero card */}
           {categoryBudgetData.length > 0 && (
-            <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
               {categoryBudgetData.map((cat, index) => {
                 const Icon = ICON_MAP[cat.iconName];
                 return (
@@ -293,40 +320,40 @@ export function TodayView({
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     transition={{ delay: 0.12 + index * 0.02 }}
                     onClick={() => onNavigate("analysis")}
-                    className="flex-shrink-0 flex flex-col justify-between p-3 rounded-[18px] bg-[var(--surface-muted)]/60 border border-[var(--border-color)]/50 hover:border-[var(--accent-color)]/40 hover:bg-[var(--surface-muted)] transition-all group text-left active:scale-[0.98] min-w-[130px] max-w-[145px] shadow-2xs cursor-pointer snap-start"
+                    className="flex-shrink-0 flex flex-col justify-between p-2.5 rounded-[16px] bg-[var(--surface-muted)]/60 border border-[var(--border-color)]/50 hover:border-[var(--accent-color)]/40 hover:bg-[var(--surface-muted)] transition-all group text-left active:scale-[0.98] min-w-[104px] max-w-[118px] shadow-2xs cursor-pointer snap-start"
                   >
-                    <div className="flex items-center justify-between w-full mb-2">
+                    <div className="flex items-center justify-start w-full mb-1.5">
                       {/* Circular Progress Ring with Icon */}
-                      <div className="relative w-[36px] h-[36px] flex items-center justify-center shrink-0">
-                        <svg className="absolute top-0 left-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                      <div className="relative w-[32px] h-[32px] flex items-center justify-center shrink-0">
+                        <svg className="absolute top-0 left-0 w-full h-full -rotate-90" viewBox="0 0 32 32">
                           <circle
-                            cx="18"
-                            cy="18"
-                            r="15"
+                            cx="16"
+                            cy="16"
+                            r="13.5"
                             fill="none"
                             stroke="var(--border-color)"
-                            strokeWidth="2.2"
+                            strokeWidth="2"
                             className="opacity-30"
                           />
                           <circle
-                            cx="18"
-                            cy="18"
-                            r="15"
+                            cx="16"
+                            cy="16"
+                            r="13.5"
                             fill="none"
                             stroke={cat.isOverBudget ? "#f59e0b" : (cat.color || "var(--accent-color)")}
-                            strokeWidth="2.2"
-                            strokeDasharray={94.25}
+                            strokeWidth="2"
+                            strokeDasharray={84.82}
                             strokeDashoffset={
                               cat.hasBudget
-                                ? 94.25 * (1 - Math.min(cat.spent / cat.budgetInKronor, 1))
-                                : 94.25
+                                ? 84.82 * (1 - Math.min(cat.spent / cat.budgetInKronor, 1))
+                                : 84.82
                             }
                             strokeLinecap="round"
                             className="transition-all duration-500"
                           />
                         </svg>
                         <div
-                          className="w-[26px] h-[26px] rounded-full flex items-center justify-center shadow-2xs shrink-0 relative z-10"
+                          className="w-[23px] h-[23px] rounded-full flex items-center justify-center shadow-2xs shrink-0 relative z-10"
                           style={{
                             backgroundColor:
                               cat.color ||
@@ -337,38 +364,25 @@ export function TodayView({
                           }}
                         >
                           {isEmojiString(cat.iconName) ? (
-                            <span className="text-[12px] leading-none">{cat.iconName}</span>
+                            <span className="text-[11px] leading-none">{cat.iconName}</span>
                           ) : Icon ? (
-                            <Icon size={12} strokeWidth={1.75} />
+                            <Icon size={11} strokeWidth={1.75} />
                           ) : (
                             <div className="w-1 h-1 rounded-full" />
                           )}
                         </div>
                       </div>
-
-                      {/* Percentage badge if budgeted */}
-                      {cat.hasBudget && (
-                        <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full font-amount tabular-nums ${
-                            cat.isOverBudget
-                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                              : "bg-[var(--surface-color)] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
-                          }`}
-                        >
-                          {Math.round((cat.spent / cat.budgetInKronor) * 100)}%
-                        </span>
-                      )}
                     </div>
 
                     <div className="flex flex-col items-start w-full min-w-0">
-                      <span className="text-[12px] font-semibold text-[var(--text-primary)] tracking-tight leading-snug truncate w-full group-hover:text-[var(--accent-color)] transition-colors">
+                      <span className="text-[11.5px] font-semibold text-[var(--text-primary)] tracking-tight leading-tight truncate w-full group-hover:text-[var(--accent-color)] transition-colors">
                         {cat.name}
                       </span>
-                      <span className="text-[10.5px] font-medium leading-tight mt-0.5 truncate w-full">
+                      <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full">
                         {cat.hasBudget ? (
                           cat.isOverBudget ? (
                             <span className="text-amber-500 font-semibold font-amount tabular-nums">
-                              +{formatAmount(Math.abs(cat.remaining), config.language)} kr över
+                              +{formatAmount(Math.abs(cat.remaining), config.language)} kr
                             </span>
                           ) : (
                             <span className="text-[var(--text-secondary)]">
@@ -380,7 +394,7 @@ export function TodayView({
                           )
                         ) : (
                           <span className="text-[var(--text-secondary)] opacity-75 font-amount tabular-nums">
-                            {formatAmount(cat.spent, config.language)} kr använt
+                            {formatAmount(cat.spent, config.language)} kr
                           </span>
                         )}
                       </span>

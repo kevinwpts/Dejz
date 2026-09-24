@@ -336,8 +336,29 @@ export function AnalysisView({
             const totalItemCount = categoryTransactions.length + categoryFixedExpenses.length;
 
             const totalIncome = stats?.totalIncome || 0;
-            const budgetInKronor = item.budget ? Math.round((item.budget / 100) * totalIncome) : 0;
-            const hasBudget = item.budget !== undefined && item.budget > 0 && budgetInKronor > 0;
+            const catFixedSum = categoryFixedExpenses.reduce((sum, e) => {
+              const amount = Number(e.amount) || 0;
+              switch (e.frequency) {
+                case 'quarterly': return sum + amount / 3;
+                case 'semi-annually': return sum + amount / 6;
+                case 'annually': return sum + amount / 12;
+                default: return sum + amount;
+              }
+            }, 0);
+
+            let budgetInKronor = 0;
+            let hasBudget = false;
+
+            if (item.budget !== undefined && item.budget > 0) {
+              budgetInKronor = item.budget > 100 
+                ? Math.round(item.budget) 
+                : (totalIncome > 0 ? Math.round((item.budget / 100) * totalIncome) : 0);
+              hasBudget = budgetInKronor > 0;
+            } else if (catFixedSum > 0) {
+              budgetInKronor = Math.round(catFixedSum);
+              hasBudget = true;
+            }
+
             const remainingBudget = budgetInKronor - Math.round(item.value);
             const showCircle = analysisFilter === 'all';
             
