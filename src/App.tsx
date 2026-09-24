@@ -1116,6 +1116,8 @@ export default function App() {
         shouldUseDarkMode = false;
       }
     }
+    
+    console.log("App theme logic - shouldUseDarkMode:", shouldUseDarkMode, "config.darkMode:", config?.darkMode, "showLanding:", showLanding);
 
     if (shouldUseDarkMode) {
       document.documentElement.classList.add("dark");
@@ -3178,7 +3180,7 @@ export default function App() {
   }
 
   if (!session) {
-    const isDark = !showLanding && (config?.darkMode ?? true);
+    const isDark = !showLanding && (config?.darkMode ?? false);
     return (
       <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-hidden ${isDark ? 'dark' : ''}`}>
         {showLanding ? (
