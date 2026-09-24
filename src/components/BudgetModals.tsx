@@ -166,15 +166,6 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               </div>
             </div>
 
-            {income.note && (
-              <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
-                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('ownNote')}</p>
-                <p className="text-sm font-normal text-[var(--text-secondary)] leading-relaxed break-words">
-                  {income.note}
-                </p>
-              </div>
-            )}
-
             <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('type')}</p>
               <p className="text-base font-medium text-[var(--text-primary)]">{income.isVariable ? 'Varierande' : 'Fast belopp'}</p>
@@ -184,6 +175,13 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('arrivalDay')}</p>
               <p className="text-base font-medium text-[var(--text-primary)]">{income.deductionDay ? `${income.deductionDay}e` : '-'}</p>
             </div>
+
+            {income.note && (
+              <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
+                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">Notering</p>
+                <p className="text-base font-medium text-[var(--text-primary)] break-words">{income.note}</p>
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
@@ -243,21 +241,6 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (income) {
-      setName(income.name || '');
-      setNote(income.note || '');
-      setAmount(formatAmount(income.amount || ''));
-      setDeductionDay(income.deductionDay || 1);
-      setIsVariable(income.isVariable || false);
-      setIcon(income.icon || '💰');
-      setLogo(income.logo);
-      if (income.category) {
-        setCategory(typeof income.category === 'object' ? (income.category as any)?.name : income.category);
-      }
-    }
-  }, [income]);
-
-  useEffect(() => {
     if (!name || name.length < 2) {
       if (!manualSelectionThisSession) setLogo(undefined);
       setAutoLogo(undefined);
@@ -282,6 +265,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
     onSave({ 
       name, 
+      note,
       amount: parsedAmount, 
       category, 
       icon, 
@@ -289,8 +273,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
       deductionDay, 
       paymentMethod, 
       isVariable, 
-      periodOverrides: isVariable ? (income?.periodOverrides || {}) : {},
-      note: note.trim() || undefined
+      periodOverrides: isVariable ? (income?.periodOverrides || {}) : {} 
     });
   };
 
@@ -450,29 +433,14 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             </div>
           </div>
 
-          {/* Note Input */}
           <div className="space-y-2">
-            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">
-              {t('ownNote')}
-            </label>
-            <div className="relative group">
-              <input 
-                type="text" 
-                value={note} 
-                onChange={(e) => setNote(e.target.value)} 
-                placeholder={t('description')} 
-                className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40" 
-              />
-              {note && (
-                <button 
-                  type="button"
-                  onClick={() => setNote('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1 cursor-pointer"
-                >
-                  <X size={18} strokeWidth={2} />
-                </button>
-              )}
-            </div>
+            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">Egen notering</label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Skriv en notering..."
+              className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40 min-h-[100px] resize-none"
+            />
           </div>
 
           {/* Arrival Day */}
@@ -751,15 +719,6 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               </div>
             </div>
 
-            {expense.note && (
-              <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
-                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('ownNote')}</p>
-                <p className="text-sm font-normal text-[var(--text-secondary)] leading-relaxed break-words">
-                  {expense.note}
-                </p>
-              </div>
-            )}
-
             <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('type')}</p>
               <p className="text-base font-medium text-[var(--text-primary)]">{expense.isVariable ? 'Varierande' : 'Fast belopp'}</p>
@@ -788,6 +747,13 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                 </p>
               </div>
             </div>
+
+            {expense.note && (
+              <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
+                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">Notering</p>
+                <p className="text-base font-medium text-[var(--text-primary)] break-words">{expense.note}</p>
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
@@ -828,10 +794,10 @@ interface FixedExpenseModalProps {
 export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, currency, categories, userId, isPro, paymentMethods, _currentPeriodId }: FixedExpenseModalProps & { categories: Category[], _currentPeriodId?: string, currentPeriodId?: string }) {
   useScrollLock(true);
   const [amount, setAmount] = useState(formatAmount(expense?.amount || ''));
+  const [note, setNote] = useState(expense?.note || '');
   
   const [category, setCategory] = useState(typeof expense?.category === 'object' ? (expense.category as any)?.name : (expense?.category || (categories && categories.length > 0 ? categories[0].name : '')));
   const [name, setName] = useState(expense?.name || '');
-  const [note, setNote] = useState(expense?.note || '');
   const [deductionDay, setDeductionDay] = useState(expense?.deductionDay || 1);
   const [frequency, setFrequency] = useState(expense?.frequency || Frequency.MONTHLY);
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
@@ -874,6 +840,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
     onSave({ 
       name, 
+      note,
       amount: parsedAmount, 
       frequency, 
       paymentMethod, 
@@ -882,8 +849,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
       logo, 
       deductionDay, 
       isVariable, 
-      periodOverrides: isVariable ? (expense?.periodOverrides || {}) : {},
-      note: note.trim() || undefined
+      periodOverrides: isVariable ? (expense?.periodOverrides || {}) : {} 
     });
   };
 
@@ -1043,29 +1009,14 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             </div>
           </div>
 
-          {/* Note Input */}
           <div className="space-y-2">
-            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1">
-              {t('ownNote')}
-            </label>
-            <div className="relative group">
-              <input 
-                type="text" 
-                value={note} 
-                onChange={(e) => setNote(e.target.value)} 
-                placeholder={t('description')} 
-                className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40" 
-              />
-              {note && (
-                <button 
-                  type="button"
-                  onClick={() => setNote('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1 cursor-pointer"
-                >
-                  <X size={18} strokeWidth={2} />
-                </button>
-              )}
-            </div>
+            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">Egen notering</label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Skriv en notering..."
+              className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40 min-h-[100px] resize-none"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">

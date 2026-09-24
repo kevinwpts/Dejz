@@ -1119,14 +1119,14 @@ export default function App() {
     
     console.log("App theme logic - shouldUseDarkMode:", shouldUseDarkMode, "config.darkMode:", config?.darkMode, "showLanding:", showLanding);
 
+    // Ensure we always clean up existing classes before adding the new ones
+    document.documentElement.classList.remove("dark", "light");
+    document.body.classList.remove("dark", "light");
+
     if (shouldUseDarkMode) {
       document.documentElement.classList.add("dark");
       document.body.classList.add("dark");
-      document.documentElement.classList.remove("light");
-      document.body.classList.remove("light");
     } else {
-      document.documentElement.classList.remove("dark");
-      document.body.classList.remove("dark");
       document.documentElement.classList.add("light");
       document.body.classList.add("light");
     }
