@@ -30,15 +30,15 @@ export function OnboardingCharacterArt({
     'w-24 h-24 sm:w-28 sm:h-28';
 
   return (
-    <div className={`relative ${containerSize} mx-auto flex items-center justify-center select-none py-0.5 shrink-0 ${className}`}>
+    <div className={`relative ${containerSize} mx-auto flex items-center justify-center select-none shrink-0 overflow-visible ${className}`}>
       {/* Dynamic Ambient Background Glow */}
       <motion.div
         animate={{
-          scale: [1, 1.22, 1],
-          opacity: [0.45, 0.75, 0.45],
+          scale: [0.95, 1.12, 0.95],
+          opacity: [0.5, 0.8, 0.5],
         }}
         transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-        className={`absolute inset-0 rounded-full blur-2xl pointer-events-none ${
+        className={`absolute inset-1 sm:inset-2 rounded-full blur-xl sm:blur-2xl pointer-events-none ${
           step === 'name' ? 'bg-gradient-to-tr from-emerald-500/40 via-cyan-400/40 to-teal-400/30' :
           step === 'payday' ? 'bg-gradient-to-tr from-amber-500/45 via-yellow-400/40 to-orange-500/30' :
           step === 'income' ? 'bg-gradient-to-tr from-emerald-500/50 via-teal-400/40 to-green-500/30' :
@@ -52,11 +52,11 @@ export function OnboardingCharacterArt({
       {/* Floating Mascot Character Container */}
       <motion.div
         animate={{
-          y: [0, -6, 0],
+          y: [0, -5, 0],
           rotate: [0, 1.2, -1.2, 0],
         }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className={`relative ${innerSize} flex items-center justify-center`}
+        className={`relative ${innerSize} flex items-center justify-center overflow-visible`}
       >
         {/* Render Step-Specific Character Artwork */}
         {step === 'name' && <CharacterWelcome />}

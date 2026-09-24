@@ -363,7 +363,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
           transition={{ type: 'spring', damping: 28, stiffness: 220 }}
           className="fixed inset-0 z-[100] bg-[var(--bg-color)] flex flex-col h-[100dvh] max-h-[100dvh] w-full overflow-hidden select-none overscroll-contain selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]"
         >
-          <div className="max-w-md mx-auto w-full h-full flex flex-col px-4 sm:px-6 pt-[calc(0.6rem+env(safe-area-inset-top))] pb-[calc(0.85rem+env(safe-area-inset-bottom))] overflow-hidden">
+          <div className="max-w-md mx-auto w-full h-full flex flex-col px-4 sm:px-6 pt-[calc(0.6rem+env(safe-area-inset-top))] pb-[calc(0.85rem+env(safe-area-inset-bottom))]">
             
             {/* Top Notch / Handle */}
             <div className="flex justify-center pb-2 shrink-0">
@@ -414,7 +414,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
             </div>
 
             {/* Step Content Area */}
-            <div className="flex-1 min-h-0 flex flex-col relative overflow-hidden">
+            <div className="flex-1 min-h-0 flex flex-col relative overflow-visible">
               <AnimatePresence mode="wait">
                 {step === 'name' && (
                   <motion.div

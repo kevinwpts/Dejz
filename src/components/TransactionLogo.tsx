@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUp, Receipt, PiggyBank } from 'lucide-react';
 import { Transaction, Config } from '../types';
-import { getLogoUrl, findKnownBrandDomain } from '../utils/logo';
+import { getLogoUrl, findKnownBrandDomain, getInstantBrandLogo } from '../utils/logo';
 import { ICON_MAP, getCategoryIconName, resolveLucideIcon, suggestIcon, isEmojiString } from '../utils/icons';
 import { getEmojiSolidColor } from '../utils/ui';
 
@@ -47,17 +47,24 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
   const isExplicitLogoUrl = explicitLogo && (explicitLogo.startsWith('http') || explicitLogo.startsWith('data:image') || explicitLogo.startsWith('/'));
   const isExplicitLogoEmoji = explicitLogo && isEmojiString(explicitLogo);
 
-  // 1.5. Resolve known brand domain logo (e.g. Coop, ICA, Willys, SATS, Fitness 24/7)
-  const brandDomain = findKnownBrandDomain(transaction.merchant || '') ||
-                      findKnownBrandDomain(transaction.note || '') ||
-                      findKnownBrandDomain(title || '');
+  // 1.2. Check instant vector logo (e.g. Max (HBO), Tinder, SATS, Coop, etc.)
+  const instantSvg = (!explicitLogo || explicitLogo === 'none') ? (
+    getInstantBrandLogo(transaction.merchant || '', transaction.category) ||
+    getInstantBrandLogo(transaction.note || '', transaction.category) ||
+    getInstantBrandLogo(title || '', transaction.category)
+  ) : null;
+
+  // 1.5. Resolve known brand domain logo (e.g. Tinder, SkyShowtime, Max/HBO, SATS, Spotify)
+  const brandDomain = findKnownBrandDomain(transaction.merchant || '', transaction.category) ||
+                      findKnownBrandDomain(transaction.note || '', transaction.category) ||
+                      findKnownBrandDomain(title || '', transaction.category);
   const brandLogo = brandDomain ? `https://www.google.com/s2/favicons?domain=${brandDomain}&sz=128` : null;
 
   // 2. Resolve explicit icon
   const explicitIcon = transaction.icon && transaction.icon !== 'none' && transaction.icon !== 'receipt' ? transaction.icon : null;
 
   // 3. Resolve auto logo URL as fallback for images
-  const autoLogoUrl = (!explicitLogo || explicitLogo === 'none' || imgError) ? getLogoUrl(title) : null;
+  const autoLogoUrl = (!explicitLogo || explicitLogo === 'none' || imgError) ? getLogoUrl(title, transaction.category) : null;
 
   // Helper for rendering icons/emojis in unified Lucide vector style
   const renderIconView = (val: string) => {
@@ -89,7 +96,22 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
     );
   }
 
-  // Step 1.5: Known Brand Logo (Coop, ICA, Willys, Lidl, SATS, etc.)
+  // Step 1.2: Instant Brand Vector Logo (Tinder, Max (HBO), SATS, Coop, ICA, etc.)
+  if (instantSvg && !imgError) {
+    return (
+      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs`}>
+        <img 
+          src={instantSvg} 
+          alt={title} 
+          className="w-full h-full object-cover rounded-full"
+          onError={() => setImgError(true)}
+          referrerPolicy="no-referrer"
+        />
+      </div>
+    );
+  }
+
+  // Step 1.5: Known Brand Logo (Tinder, SkyShowtime, HBO Max, etc.)
   if (brandLogo && !imgError) {
     return (
       <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs`}>
