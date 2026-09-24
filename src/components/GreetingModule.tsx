@@ -232,10 +232,10 @@ export function GreetingModule({
               </div>
             </div>
 
-            {/* Elegant Right Side: Dagar till nästa lön Badge */}
-            <div className="flex items-center gap-2.5 bg-sky-50/50 dark:bg-sky-950/20 px-4 py-2.5 rounded-2xl border border-sky-100/30 dark:border-sky-950/10 self-start sm:self-center">
-              <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0 shadow-2xs" />
-              <span className="text-xs font-semibold text-sky-800 dark:text-sky-400">
+            {/* Elegant Right Side: Dagar till nästa lön Badge with brand yellow */}
+            <div className="flex items-center gap-2 bg-[#FAF59D] px-3.5 py-2 rounded-2xl border border-[#FAF59D]/20 self-start sm:self-center shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#071020] shrink-0" />
+              <span className="text-xs font-bold text-[#071020]">
                 {stats?.remainingDays || 1} { (stats?.remainingDays || 1) === 1 ? t('oneDay') : t('days') } {language === 'en' ? 'to salary' : 'till lön'}
               </span>
             </div>
@@ -259,7 +259,7 @@ export function GreetingModule({
           className="rounded-[22px] border border-[var(--border-color)] p-4 bg-gradient-to-br from-[var(--surface-color)] via-[var(--surface-color)] to-[var(--surface-muted)]/50 shadow-sm relative overflow-hidden flex items-center gap-4"
         >
           <div className="flex flex-col items-center gap-1 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400/20 via-emerald-400/20 to-sky-400/20 border border-[var(--accent-color)]/20 flex items-center justify-center text-xl shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#FAF59D]/30 via-emerald-400/10 to-sky-400/10 border border-[#FAF59D]/40 flex items-center justify-center text-xl shadow-xs">
               🌼
             </div>
             <span className="text-[10px] font-bold tracking-wider text-[var(--text-secondary)] opacity-80">

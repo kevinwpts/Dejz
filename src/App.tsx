@@ -1100,7 +1100,9 @@ export default function App() {
   // --- Theme Logic ---
   useEffect(() => {
     let shouldUseDarkMode: boolean;
-    if (config?.darkMode !== undefined && config?.darkMode !== null) {
+    if (showLanding) {
+      shouldUseDarkMode = false;
+    } else if (config?.darkMode !== undefined && config?.darkMode !== null) {
       shouldUseDarkMode = config.darkMode;
     } else {
       try {
@@ -1127,14 +1129,16 @@ export default function App() {
       document.body.classList.add("light");
     }
 
-    try {
-      localStorage.setItem('dejz_dark_mode', shouldUseDarkMode ? 'dark' : 'light');
-    } catch {
-      // Ignore storage errors in private browsing
+    if (!showLanding) {
+      try {
+        localStorage.setItem('dejz_dark_mode', shouldUseDarkMode ? 'dark' : 'light');
+      } catch {
+        // Ignore storage errors in private browsing
+      }
     }
 
     // Update theme-color meta tag and root background for iOS Safari status bar and browser toolbar
-    const themeColor = shouldUseDarkMode ? "#181818" : "#EDEFF2";
+    const themeColor = shouldUseDarkMode ? "#181818" : "#ffffff";
     
     // Explicitly set body & documentElement background colors so iOS root canvas matches
     document.documentElement.style.backgroundColor = themeColor;
@@ -1155,7 +1159,7 @@ export default function App() {
     if (statusBarMeta) {
       statusBarMeta.setAttribute("content", "black-translucent");
     }
-  }, [config?.darkMode, subscriptionStatus, config, session?.user?.email]);
+  }, [config?.darkMode, subscriptionStatus, config, session?.user?.email, showLanding]);
 
   // --- URL Routing & Language Subpath Sync ---
   useEffect(() => {
@@ -3174,8 +3178,9 @@ export default function App() {
   }
 
   if (!session) {
+    const isDark = !showLanding && (config?.darkMode || false);
     return (
-      <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-hidden ${config?.darkMode ? 'dark' : ''}`}>
+      <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-hidden ${isDark ? 'dark' : ''}`}>
         {showLanding ? (
           <>
             <LandingPage

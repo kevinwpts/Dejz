@@ -201,8 +201,8 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
 
         {/* Hero Section */}
         <section className="w-full border-b border-[var(--border-color)] relative overflow-hidden">
-          {/* Subtle Hero Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-[75%] max-w-[650px] h-[300px] sm:h-[400px] bg-gradient-to-tr from-black/[0.04] via-black/[0.02] to-transparent dark:from-white/[0.04] dark:via-white/[0.02] blur-[90px] sm:blur-[130px] rounded-full pointer-events-none z-0" />
+          {/* Subtle Hero Glow with brand accent yellow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-[75%] max-w-[650px] h-[300px] sm:h-[400px] bg-gradient-to-tr from-[#FAF59D]/[0.15] via-transparent to-transparent dark:from-[#FAF59D]/[0.08] dark:via-transparent dark:to-transparent blur-[90px] sm:blur-[130px] rounded-full pointer-events-none z-0" />
 
            <div className="pt-[calc(9.5rem+env(safe-area-inset-top))] md:pt-[calc(11.5rem+env(safe-area-inset-top))] pb-20 md:pb-28 px-5 sm:px-8 max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-14 lg:gap-16 relative z-10">
               <div className="flex-1 space-y-7 text-center lg:text-left">
@@ -366,8 +366,8 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                       {/* Simulated Dejzi Greeting Module */}
                       <div className="p-3 bg-[var(--surface-color)] rounded-[20px] border border-[var(--border-color)] shadow-xs flex items-center gap-2.5">
                         <div className="relative shrink-0">
-                          <div className="w-8 h-8 rounded-[12px] bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] text-xs font-bold shadow-2xs">
-                            <Sparkles size={14} />
+                          <div className="w-8 h-8 rounded-[12px] bg-[#FAF59D] flex items-center justify-center text-[#071020] text-xs font-bold shadow-2xs">
+                            <Sparkles size={14} className="fill-[#071020]" />
                           </div>
                         </div>
                         <div className="min-w-0 flex-1">
@@ -908,8 +908,11 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
         {/* Final Call to Action */}
         <section id="pricing" className="w-full bg-[var(--bg-color)] py-16 sm:py-20 border-b border-[var(--border-color)] relative">
           <div className="max-w-3xl mx-auto px-5 sm:px-8 text-center">
-            <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-8 sm:p-12 rounded-[28px] space-y-6 shadow-xs">
-              <div className="space-y-2.5 max-w-xl mx-auto">
+            <div className="bg-[var(--surface-color)] border border-[var(--border-color)] p-8 sm:p-12 rounded-[28px] space-y-6 shadow-xs flex flex-col items-center">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FAF59D] text-[#071020] text-xs font-bold shadow-2xs mb-2 select-none shrink-0">
+                <span>⚡ {getL10n('100% Gratis & Reklamfritt', '100% Free & No Ads', '100% Gratis & Reklamfri', '100% Gratis & Reklamefri', '100% Ilmainen & Mainokseton')}</span>
+              </div>
+              <div className="space-y-2.5 max-w-xl mx-auto text-center">
                 <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
                   {getL10n('Kom igång med Dejz idag', 'Get started with Dejz today', 'Kom i gang med Dejz i dag', 'Kom i gang med Dejz i dag', 'Aloita Dejzin käyttö tänään')}
                 </h2>
