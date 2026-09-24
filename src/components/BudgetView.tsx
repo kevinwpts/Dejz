@@ -181,7 +181,10 @@ export function BudgetView({
               const fixedSpent = getFixedSpentForCategory(cat.name);
               const variableSpent = getVariableSpentForCategory(cat.name);
               const totalUsed = fixedSpent + variableSpent;
-              const maxSliderVal = Math.max(15000, disposablePot, (cat.budget || 0) * 1.5);
+
+              // Pre-fill logic: if budget is not set, default visually to totalUsed, otherwise use set budget
+              const displayedBudget = cat.budget !== undefined ? cat.budget : totalUsed;
+              const maxSliderVal = Math.max(15000, disposablePot, displayedBudget * 1.5);
 
               return (
                 <div 
@@ -212,8 +215,8 @@ export function BudgetView({
                       <div className="relative">
                         <input
                           type="number"
-                          placeholder="Ingen budget"
-                          value={cat.budget || ''}
+                          placeholder={totalUsed > 0 ? String(totalUsed) : "Ingen budget"}
+                          value={cat.budget !== undefined ? cat.budget : (totalUsed > 0 ? totalUsed : '')}
                           onChange={(e) => {
                             const val = e.target.value === '' ? undefined : Number(e.target.value);
                             const updatedCategories = config.categories.map((c) => 
@@ -248,19 +251,19 @@ export function BudgetView({
                         )}
                       </div>
 
-                      {/* Quick helper button to lock to totalUsed if budget is not already matching */}
-                      {totalUsed > 0 && cat.budget !== totalUsed && (
+                      {/* Quick helper button to restore to pre-filled totalUsed ONLY if custom budget has been set and differs */}
+                      {totalUsed > 0 && cat.budget !== undefined && cat.budget !== totalUsed && (
                         <button
                           type="button"
                           onClick={() => {
                             const updatedCategories = config.categories.map((c) => 
-                              c.name === cat.name ? { ...c, budget: totalUsed } : c
+                              c.name === cat.name ? { ...c, budget: undefined } : c
                             );
                             setConfig({ ...config, categories: updatedCategories });
                           }}
                           className="px-2.5 py-1 rounded-full bg-[var(--accent-color)]/10 hover:bg-[var(--accent-color)]/15 text-[var(--accent-color)] font-bold text-[10px] active:scale-95 transition-all cursor-pointer border border-[var(--accent-color)]/20 shadow-4xs"
                         >
-                          Lås till nuvarande ({formatAmount(totalUsed, config.language)} kr)
+                          Återställ till nuvarande ({formatAmount(totalUsed, config.language)} kr)
                         </button>
                       )}
                     </div>
@@ -273,17 +276,19 @@ export function BudgetView({
                       min="0"
                       max={maxSliderVal}
                       step="50"
-                      value={cat.budget || 0}
+                      value={displayedBudget}
                       onChange={(e) => {
-                        const val = Number(e.target.value) === 0 ? undefined : Number(e.target.value);
+                        const val = Number(e.target.value);
+                        // If they slide to exactly totalUsed, we can keep it as undefined (which defaults to totalUsed)
+                        const valToSave = val === totalUsed ? undefined : val;
                         const updatedCategories = config.categories.map((c) => 
-                          c.name === cat.name ? { ...c, budget: val } : c
+                          c.name === cat.name ? { ...c, budget: valToSave } : c
                         );
                         setConfig({ ...config, categories: updatedCategories });
                       }}
                       className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[var(--accent-color)] focus:outline-none bg-[var(--border-color)]/60"
                       style={{
-                        backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${Math.min(((cat.budget || 0) / maxSliderVal) * 100, 100)}%, var(--border-color) ${Math.min(((cat.budget || 0) / maxSliderVal) * 100, 100)}%, var(--border-color) 100%)`
+                        backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${Math.min((displayedBudget / maxSliderVal) * 100, 100)}%, var(--border-color) ${Math.min((displayedBudget / maxSliderVal) * 100, 100)}%, var(--border-color) 100%)`
                       }}
                     />
                     <div className="flex justify-between text-[10px] text-[var(--text-secondary)] font-semibold">
