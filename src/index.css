@@ -307,12 +307,6 @@ textarea {
 }
 
 @layer base {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: smooth;
-  }
-
   html, body {
     @apply antialiased;
     color: var(--text-primary);
