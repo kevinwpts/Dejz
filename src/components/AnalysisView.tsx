@@ -374,7 +374,7 @@ export function AnalysisView({
                 <motion.div 
                   whileHover={isExpanded ? undefined : { scale: 1.002 }}
                   whileTap={isExpanded ? undefined : { scale: 0.99 }}
-                  className={`px-[16px] py-[12px] min-h-[72px] flex flex-col gap-2.5 group transition-all duration-200 cursor-pointer ${
+                  className={`px-[18px] py-[15px] min-h-[78px] flex flex-col justify-center group transition-all duration-200 cursor-pointer ${
                     isExpanded 
                       ? 'bg-[var(--surface-color)] border-b border-[var(--border-color)]/30' 
                       : 'bg-[var(--transaction-bg)] border border-[var(--border-color)] rounded-[16px] shadow-xs hover:bg-[var(--surface-muted)]'
@@ -383,78 +383,54 @@ export function AnalysisView({
                 >
                   <div className="flex items-center justify-between gap-[12px] w-full">
                     <div className="flex items-center gap-[12px] min-w-0 flex-1">
-                      {/* Category Icon with Circular Progress Ring if budgeted and in 'all' view */}
-                      <div className="relative w-[48px] h-[48px] flex items-center justify-center shrink-0">
-                        {showCircle && (
-                          <svg className="absolute top-0 left-0 w-full h-full -rotate-90" viewBox="0 0 48 48">
-                            {/* Background Track Circle */}
-                            <circle
-                              cx="24"
-                              cy="24"
-                              r="21"
-                              fill="none"
-                              stroke="var(--border-color)"
-                              strokeWidth="2.5"
-                              className="opacity-30"
-                            />
-                            {/* Animated Progress Circle */}
-                            <circle
-                              cx="24"
-                              cy="24"
-                              r="21"
-                              fill="none"
-                              stroke={(hasBudget && item.value > budgetInKronor) ? '#f59e0b' : (item.color || 'var(--accent-color)')}
-                              strokeWidth="2.5"
-                              strokeDasharray={131.95}
-                              strokeDashoffset={hasBudget ? 131.95 * (1 - Math.min((item.value / budgetInKronor), 1)) : 131.95}
-                              strokeLinecap="round"
-                              className="transition-all duration-500"
-                            />
-                          </svg>
+                      {/* Standard Transaction Logo sizing */}
+                      <div className="w-[42px] h-[42px] rounded-full flex items-center justify-center shrink-0 shadow-xs relative z-10"
+                        style={{ 
+                          backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
+                          color: '#fff'
+                        }}
+                      >
+                        {isEmojiString(iconName) ? (
+                          <span className="text-[20px] leading-none">{iconName}</span>
+                        ) : Icon ? (
+                          <Icon size={20} strokeWidth={2.0} />
+                        ) : (
+                          <div className="w-2 h-2 rounded-full" />
                         )}
-                        <div 
-                          className="w-[36px] h-[36px] rounded-full flex items-center justify-center shadow-xs shrink-0 relative z-10"
-                          style={{ 
-                            backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
-                            color: '#fff'
-                          }}
-                        >
-                          {isEmojiString(iconName) ? (
-                            <span className="text-[17px] leading-none">{iconName}</span>
-                          ) : Icon ? (
-                            <Icon size={17} strokeWidth={1.75} />
-                          ) : (
-                            <div className="w-1.5 h-1.5 rounded-full" />
-                          )}
-                        </div>
                       </div>
 
                       <div className="min-w-0 flex-1 flex flex-col justify-center">
-                        <p className={`text-[13.5px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors ${
-                          isExpanded ? 'text-[var(--accent-color)] font-semibold' : 'text-[var(--text-primary)] group-hover:text-[var(--accent-color)]'
+                        <p className={`text-[14px] sm:text-[14.5px] font-semibold leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors ${
+                          isExpanded ? 'text-[var(--accent-color)] font-bold' : 'text-[var(--text-primary)] group-hover:text-[var(--accent-color)]'
                         }`}>
                           {item.name}
                         </p>
-                        {hasBudget && (
-                          <p className={`text-[11px] font-medium mt-1 truncate ${
-                            remainingBudget < 0 ? 'text-amber-500 font-semibold' : 'text-[var(--text-secondary)] opacity-85'
-                          }`}>
-                            {remainingBudget < 0 ? (
-                              <span>Över budget: {formatAmount(Math.abs(remainingBudget), config.language)} kr</span>
-                            ) : (
-                              <span>Kvar av budget: <strong className="text-[var(--text-primary)] font-bold">{formatAmount(remainingBudget, config.language)} kr</strong></span>
-                            )}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
+                          {hasBudget ? (
+                            <span className={`text-[12px] font-medium truncate ${
+                              remainingBudget < 0 ? 'text-amber-500 font-semibold' : 'text-[var(--text-secondary)] opacity-85'
+                            }`}>
+                              {remainingBudget < 0 ? (
+                                <span>Över budget: {formatAmount(Math.abs(remainingBudget), config.language)} kr</span>
+                              ) : (
+                                <span>Kvar: <strong className="text-[var(--text-primary)] font-bold">{formatAmount(remainingBudget, config.language)} kr</strong></span>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-85">
+                              {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
                       <div className="text-right flex flex-col items-end justify-center">
-                        <p className="text-[13px] font-medium text-[var(--text-primary)] leading-tight whitespace-nowrap tracking-tight">
-                          <span className="font-amount tabular-nums font-semibold">{formatAmount(Math.round(item.value), config.language)}</span>
-                          <span className="text-[10px] font-normal opacity-50 ml-1">{config.currency}</span>
+                        <p className="text-[14.5px] sm:text-[15px] font-bold text-[var(--text-primary)] leading-tight whitespace-nowrap tracking-tight">
+                          <span className="font-amount tabular-nums font-bold">{formatAmount(Math.round(item.value), config.language)}</span>
+                          <span className="text-[11px] font-semibold opacity-60 ml-1">{config.currency}</span>
                         </p>
-                        <p className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5 tabular-nums">
+                        <p className="text-[11px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5 tabular-nums">
                           {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
                         </p>
                       </div>

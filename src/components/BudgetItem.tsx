@@ -42,7 +42,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
       whileHover={{ scale: 1.005 }}
       whileTap={{ scale: 0.99 }}
       onClick={onClick}
-      className={`px-[14px] py-[10px] min-h-[64px] rounded-[16px] flex items-center justify-between gap-[12px] group transition-all duration-200 ${
+      className={`px-[18px] py-[15px] min-h-[78px] rounded-[16px] flex items-center justify-between gap-[12px] group transition-all duration-200 ${
         isGrouped 
           ? 'bg-transparent' 
           : 'bg-[var(--transaction-bg)] shadow-xs border border-[var(--border-color)]'
