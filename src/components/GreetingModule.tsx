@@ -226,12 +226,8 @@ export function GreetingModule({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className={`-mx-4 sm:-mx-6 ${negativeMarginClass} ${topPaddingClass} pb-8 px-5 sm:px-7 rounded-b-[40px] bg-gradient-to-tr from-[#ff3860] via-[#ff4c4c] to-[#ff7a45] dark:from-[#400e12]/85 dark:via-[#2b080a]/80 dark:to-[#1c0204]/80 text-white shadow-[0_12px_40px_rgba(255,76,76,0.18)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] relative overflow-hidden flex flex-col`}
+        className={`-mx-4 sm:-mx-6 ${negativeMarginClass} ${topPaddingClass} pb-8 px-5 sm:px-7 rounded-b-[40px] bg-[#181818] dark:bg-[#222222] text-white shadow-[0_12px_36px_rgba(24,24,24,0.12)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.4)] relative overflow-hidden flex flex-col`}
       >
-        {/* Decorative premium light bubbles */}
-        <div className="absolute -top-20 -left-20 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-56 h-56 bg-white/15 rounded-full blur-3xl pointer-events-none" />
-
         {/* Unified greeting & date header inside the card, spaced perfectly below floating transparent header buttons */}
         <div className="hidden">
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2 leading-none">
@@ -245,7 +241,7 @@ export function GreetingModule({
 
         {/* Content of the Hero card */}
         <div className="flex flex-col items-center text-center relative z-10">
-          <span className="text-xs font-semibold text-white/80 tracking-wide uppercase mb-2 block">
+          <span className="text-xs font-semibold text-white/80 tracking-wide mb-2 block">
             {t('totalRemaining' as any)}
           </span>
           <div className="flex items-baseline justify-center gap-1.5">
@@ -277,9 +273,9 @@ export function GreetingModule({
 
           {/* Integrated Totalt kvar & Nästa lön */}
           {effectiveRemainingDays !== undefined && (
-            <div className="w-full grid grid-cols-2 gap-4 pt-4 mt-4 border-t border-white/15">
+            <div className="w-full grid grid-cols-2 gap-4 pt-4 mt-4">
               <div className="text-left flex flex-col justify-center">
-                <span className="text-[11px] font-medium text-white/70 uppercase tracking-wider mb-1 block">
+                <span className="text-[11px] font-medium text-white/70 tracking-wider mb-1 block">
                   {topLabel}
                 </span>
                 <div className="text-base sm:text-lg font-bold text-white font-amount leading-tight tabular-nums">
@@ -289,7 +285,7 @@ export function GreetingModule({
               </div>
               
               <div className="text-right flex flex-col justify-center items-end">
-                <span className="text-[11px] font-medium text-white/70 uppercase tracking-wider mb-1 block">
+                <span className="text-[11px] font-medium text-white/70 tracking-wider mb-1 block">
                   {t('daysToNextSalary' as any)}
                 </span>
                 <div className="text-base sm:text-lg font-bold text-white font-amount leading-tight tabular-nums">
@@ -304,7 +300,7 @@ export function GreetingModule({
           
           {/* Integrated Category Budgets / Children */}
           {children && (
-            <div className="w-full pt-4 mt-4 border-t border-white/15 text-left">
+            <div className="w-full pt-4 mt-4 text-left">
               {children}
             </div>
           )}
@@ -323,7 +319,7 @@ export function GreetingModule({
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400/20 via-emerald-400/20 to-sky-400/20 border border-[var(--accent-color)]/20 flex items-center justify-center text-xl shadow-xs">
               🌼
             </div>
-            <span className="text-[10px] font-bold tracking-wider text-[var(--text-secondary)] opacity-80 uppercase">
+            <span className="text-[10px] font-bold tracking-wider text-[var(--text-secondary)] opacity-80">
               Dejzi
             </span>
           </div>

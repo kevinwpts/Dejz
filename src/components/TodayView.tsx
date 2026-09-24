@@ -21,10 +21,7 @@ import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { BudgetItemLogo } from "./BudgetItem";
 import { ICON_MAP, getCategoryIconName, isEmojiString } from "../utils/icons";
-import { getEmojiSolidColor } from "../utils/ui";
 import { formatAmount } from "../utils/format";
-
-const COLORS = ['#2A2A2A', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#333333', '#222222', '#555555', '#444444'];
 
 interface TodayViewProps {
   stats: any;
@@ -323,79 +320,38 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.12 + index * 0.02 }}
                       onClick={() => onNavigate("analysis")}
-                      className="flex-shrink-0 flex flex-col justify-between p-2.5 rounded-[16px] bg-white/10 dark:bg-black/25 border border-white/10 hover:border-white/30 hover:bg-white/15 transition-all group text-left active:scale-[0.98] min-w-[104px] max-w-[118px] shadow-2xs cursor-pointer snap-start"
+                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-[16px] bg-white/10 dark:bg-black/25 border border-white/10 hover:border-white/30 hover:bg-white/15 transition-all group text-left active:scale-[0.98] min-w-[104px] sm:min-w-[110px] max-w-[118px] shadow-2xs cursor-pointer snap-start"
                     >
-                      <div className="flex items-center justify-start w-full mb-1.5">
-                        {/* Circular Progress Ring with Icon */}
-                        <div className="relative w-[32px] h-[32px] flex items-center justify-center shrink-0">
-                          <svg className="absolute top-0 left-0 w-full h-full -rotate-90" viewBox="0 0 32 32">
-                            <circle
-                              cx="16"
-                              cy="16"
-                              r="13.5"
-                              fill="none"
-                              stroke="rgba(255, 255, 255, 0.2)"
-                              strokeWidth="2"
-                            />
-                            <circle
-                              cx="16"
-                              cy="16"
-                              r="13.5"
-                              fill="none"
-                              stroke={cat.isOverBudget ? "#f59e0b" : (cat.color || "rgba(255, 255, 255, 0.8)")}
-                              strokeWidth="2"
-                              strokeDasharray={84.82}
-                              strokeDashoffset={
-                                cat.hasBudget
-                                  ? 84.82 * (1 - Math.min(cat.spent / cat.budgetInKronor, 1))
-                                  : 84.82
-                              }
-                              strokeLinecap="round"
-                              className="transition-all duration-500"
-                            />
-                          </svg>
-                          <div
-                            className="w-[23px] h-[23px] rounded-full flex items-center justify-center shadow-2xs shrink-0 relative z-10"
-                            style={{
-                              backgroundColor:
-                                cat.color ||
-                                (isEmojiString(cat.iconName)
-                                  ? getEmojiSolidColor(cat.iconName)
-                                  : COLORS[index % COLORS.length]),
-                              color: "#fff",
-                            }}
-                          >
-                            {isEmojiString(cat.iconName) ? (
-                              <span className="text-[11px] leading-none">{cat.iconName}</span>
-                            ) : Icon ? (
-                              <Icon size={11} strokeWidth={1.75} />
-                            ) : (
-                              <div className="w-1 h-1 rounded-full" />
-                            )}
-                          </div>
-                        </div>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/15 dark:bg-black/30 text-white shrink-0 relative z-10">
+                        {isEmojiString(cat.iconName) ? (
+                          <span className="text-[20px] leading-none">{cat.iconName}</span>
+                        ) : Icon ? (
+                          <Icon size={20} strokeWidth={2} style={{ color: cat.color || '#fff' }} />
+                        ) : (
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color || '#fff' }} />
+                        )}
                       </div>
 
-                      <div className="flex flex-col items-start w-full min-w-0">
-                        <span className="text-[11.5px] font-semibold text-white tracking-tight leading-tight truncate w-full group-hover:text-white/90 transition-colors">
+                      <div className="flex flex-col items-start w-full min-w-0 mt-3">
+                        <span className="text-[12px] font-bold text-white tracking-tight leading-tight truncate w-full group-hover:text-white/90 transition-colors">
                           {cat.name}
                         </span>
-                        <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full text-white/85">
+                        <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full">
                           {cat.hasBudget ? (
                             cat.isOverBudget ? (
                               <span className="text-amber-300 font-semibold font-amount tabular-nums">
                                 +{formatAmount(Math.abs(cat.remaining), config.language)} kr
                               </span>
                             ) : (
-                              <span className="text-white/60">
+                              <span className="text-white/80">
                                 <strong className="text-white font-bold font-amount tabular-nums">
                                   {formatAmount(cat.remaining, config.language)} kr
                                 </strong>{" "}
-                                kvar
+                                {config.language === 'en' ? 'left' : 'kvar'}
                               </span>
                             )
                           ) : (
-                            <span className="text-white/60 font-amount tabular-nums">
+                            <span className="text-white/70 font-amount tabular-nums">
                               {formatAmount(cat.spent, config.language)} kr
                             </span>
                           )}
@@ -411,20 +367,17 @@ export function TodayView({
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   transition={{ delay: 0.12 + categoryBudgetData.length * 0.02 }}
                   onClick={() => onNavigate("budget", "category-budgets")}
-                  className="flex-shrink-0 flex flex-col justify-between p-2.5 rounded-[16px] bg-white/5 border border-dashed border-white/20 hover:border-white/40 hover:bg-white/10 transition-all group text-left active:scale-[0.98] min-w-[104px] max-w-[118px] shadow-2xs cursor-pointer snap-start"
+                  className="flex-shrink-0 flex flex-col justify-between p-3 rounded-[16px] bg-white/5 border border-dashed border-white/20 hover:border-white/40 hover:bg-white/10 transition-all group text-left active:scale-[0.98] min-w-[104px] sm:min-w-[110px] max-w-[118px] shadow-2xs cursor-pointer snap-start"
                 >
-                  <div className="flex items-center justify-start w-full mb-1.5">
-                    <div className="w-[32px] h-[32px] rounded-full flex items-center justify-center bg-white/10 border border-white/10 text-white/80 group-hover:text-white group-hover:border-white/30 transition-colors">
-                      <SlidersHorizontal size={13} strokeWidth={2} />
-                    </div>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/10 border border-white/10 text-white/80 group-hover:text-white group-hover:border-white/30 transition-colors shrink-0">
+                    <SlidersHorizontal size={18} strokeWidth={2.2} />
                   </div>
-                  <div className="flex flex-col items-start w-full min-w-0">
-                    <span className="text-[11.5px] font-semibold text-white tracking-tight leading-tight truncate w-full">
-                      {config.language === "en" ? "Allocate" : "Fördela"}
+                  <div className="flex flex-col items-start w-full min-w-0 mt-3">
+                    <span className="text-[12px] font-bold text-white tracking-tight leading-tight truncate w-full group-hover:text-white/90 transition-colors">
+                      {config.language === "en" ? "Manage" : "Hantera"}
                     </span>
-                    <span className="text-[10px] text-white/60 leading-tight mt-0.5 flex items-center gap-0.5 truncate w-full">
-                      <span>{config.language === "en" ? "Adjust" : "Justera budget"}</span>
-                      <ChevronRight size={10} />
+                    <span className="text-[10px] font-medium text-white/60 leading-tight mt-0.5 truncate w-full">
+                      {config.language === "en" ? "Allocate budget" : "Fördela budget"}
                     </span>
                   </div>
                 </motion.button>

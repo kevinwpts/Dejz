@@ -1,21 +1,21 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Manrope:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-black: #181818;
   --font-sans:
-    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display:
-    "Plus Jakarta Sans", sans-serif;
+    "DM Sans", sans-serif;
   --font-amount:
     "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-logo:
-    "Plus Jakarta Sans", sans-serif;
+    "DM Sans", sans-serif;
   --font-serif:
-    "Plus Jakarta Sans", sans-serif;
+    "DM Sans", sans-serif;
   --font-mono:
-    "Plus Jakarta Sans", monospace;
+    "DM Sans", monospace;
 
   --color-accent: var(--accent-color);
   --color-accent-hover: var(--accent-hover);
@@ -47,15 +47,15 @@ button,
 input,
 select,
 textarea {
-  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 @utility font-serif {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 @utility font-logo {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 @utility font-amount {
@@ -65,7 +65,7 @@ textarea {
 }
 
 @utility font-display {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 @utility no-scrollbar {

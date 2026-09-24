@@ -158,7 +158,7 @@ export function AppHeader({
                     }`}>
                       {userName ? `Hej ${userName} 👋` : 'Hej 👋'}
                     </h2>
-                    <span className={`text-[11px] sm:text-[12px] font-semibold tracking-wide truncate leading-none mt-1 uppercase ${
+                    <span className={`text-[11px] sm:text-[12px] font-semibold tracking-wide truncate leading-none mt-1 ${
                       useWhiteHeader ? "text-white/70" : "text-[var(--text-secondary)] opacity-80"
                     }`}>
                       {formattedDate}
