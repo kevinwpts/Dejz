@@ -117,21 +117,14 @@ export function AnalysisView({
 
     if (includeVariable) {
       (config.categories || []).forEach(c => {
-        if (c.budget && c.budget > 0) {
-          const nameTrimmed = c.name.trim();
-          if (!(nameTrimmed in breakdown)) {
-            breakdown[nameTrimmed] = 0;
-          }
+        const nameTrimmed = c.name.trim();
+        if (!(nameTrimmed in breakdown)) {
+          breakdown[nameTrimmed] = 0;
         }
       });
     }
 
     const data = Object.entries(breakdown)
-      .filter(([name, value]) => {
-        if (value > 0) return true;
-        const cat = config.categories?.find(c => c.name.trim().toLowerCase() === name.trim().toLowerCase());
-        return !!(cat?.budget && cat.budget > 0);
-      })
       .map(([name, value]) => {
         // Robust matching: trim and lowercase both sides
         const searchName = name.trim().toLowerCase();

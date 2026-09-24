@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, SlidersHorizontal, ArrowLeft, Check } from 'lucide-react';
+import { RefreshCw, SlidersHorizontal, ArrowLeft, Check, Trash2 } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -322,14 +322,29 @@ export function BudgetView({
           </div>
         </div>
 
-        {/* Back and Save Button */}
-        <button
-          onClick={() => setShowCategoryBudgets(false)}
-          className="w-full h-11 rounded-full bg-[var(--accent-color)] text-[13px] font-bold text-[var(--text-on-accent)] shadow-sm hover:opacity-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-4"
-        >
-          <Check size={16} />
-          Spara och gå tillbaka
-        </button>
+        {/* Actions Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+          <button
+            onClick={() => {
+              if (confirm("Är du säker på att du vill nollställa all kategoribudgetering? Alla kategorier kommer att återgå till sina förinställda värden.")) {
+                const updatedCategories = config.categories.map((c) => ({ ...c, budget: undefined }));
+                setConfig({ ...config, categories: updatedCategories });
+              }
+            }}
+            className="w-full h-11 rounded-full border border-red-500/10 bg-red-500/5 hover:bg-red-500/10 text-red-500 text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <Trash2 size={16} />
+            Nollställ all budgetering
+          </button>
+          
+          <button
+            onClick={() => setShowCategoryBudgets(false)}
+            className="w-full h-11 rounded-full bg-[var(--accent-color)] text-[13px] font-bold text-[var(--text-on-accent)] shadow-sm hover:opacity-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <Check size={16} />
+            Spara och gå tillbaka
+          </button>
+        </div>
       </motion.div>
     );
   }
