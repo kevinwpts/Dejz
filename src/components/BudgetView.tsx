@@ -104,19 +104,30 @@ export function BudgetView({
       return sum;
     };
 
-    const totalAllocated = config.categories?.reduce((sum, c) => {
+    const disposablePot = stats.disposablePot || 0;
+
+    const getBudgetPercentage = (c: any, totalPot: number) => {
+      if (c.budget === undefined) return undefined;
+      if (c.budget > 100) {
+        // Safe migration for old absolute budget values (e.g. 2000 kr -> 24%)
+        return totalPot > 0 ? Math.min(100, Math.round((c.budget / totalPot) * 100)) : 0;
+      }
+      return c.budget;
+    };
+
+    const totalAllocatedPercentage = config.categories?.reduce((sum, c) => {
+      const pct = getBudgetPercentage(c, disposablePot);
+      if (pct !== undefined) return sum + pct;
+      
       const catFixed = getFixedSpentForCategory(c.name);
       const catVariable = getVariableSpentForCategory(c.name);
       const catTotalUsed = catFixed + catVariable;
-      const budgetVal = c.budget !== undefined ? c.budget : catTotalUsed;
-      // Only count the variable portion against the disposablePot, since fixed costs are already subtracted from it
-      const variableBudgetVal = Math.max(0, budgetVal - catFixed);
-      return sum + variableBudgetVal;
+      const defaultPct = disposablePot > 0 ? Math.min(100, Math.round((catTotalUsed / disposablePot) * 100)) : 0;
+      return sum + defaultPct;
     }, 0) || 0;
 
-    const disposablePot = stats.disposablePot || 0;
-    const remainingBuffer = Math.max(0, disposablePot - totalAllocated);
-    const allocatedPercentage = Math.min((totalAllocated / (disposablePot || 1)) * 100, 100);
+    const remainingPercentage = Math.max(0, 100 - totalAllocatedPercentage);
+    const remainingBufferKronor = Math.round((remainingPercentage / 100) * disposablePot);
 
     return (
       <motion.div
@@ -153,10 +164,10 @@ export function BudgetView({
             </div>
             <div className="text-right">
               <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
-                Allmän dagsbuffert kvar
+                Oallokerat kvar
               </span>
               <span className="text-xl sm:text-2xl font-bold text-emerald-500 font-amount tabular-nums">
-                {formatAmount(remainingBuffer, config.language)} {config.currency}
+                {remainingPercentage}% <span className="text-[11px] font-normal opacity-80 text-[var(--text-secondary)]">({formatAmount(remainingBufferKronor, config.language)} {config.currency})</span>
               </span>
             </div>
           </div>
@@ -166,12 +177,12 @@ export function BudgetView({
             <div className="w-full h-2.5 bg-[var(--border-color)]/60 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-[var(--accent-color)] rounded-full transition-all duration-300"
-                style={{ width: `${allocatedPercentage}%` }}
+                style={{ width: `${totalAllocatedPercentage}%` }}
               />
             </div>
             <div className="flex justify-between text-[11px] font-medium text-[var(--text-secondary)]">
-              <span>{formatAmount(totalAllocated, config.language)} kr fördelat ({Math.round(allocatedPercentage)}%)</span>
-              <span>{formatAmount(remainingBuffer, config.language)} kr kvar</span>
+              <span>{totalAllocatedPercentage}% fördelat ({formatAmount(Math.round((totalAllocatedPercentage / 100) * disposablePot), config.language)} kr)</span>
+              <span>{remainingPercentage}% kvar ({formatAmount(remainingBufferKronor, config.language)} kr)</span>
             </div>
           </div>
         </div>
@@ -191,18 +202,20 @@ export function BudgetView({
               const variableSpent = getVariableSpentForCategory(cat.name);
               const totalUsed = fixedSpent + variableSpent;
 
-              // Pre-fill logic: if budget is not set, default visually to totalUsed, otherwise use set budget
-              const displayedBudget = cat.budget !== undefined ? cat.budget : totalUsed;
-              
-              // Max slider is strictly capped to what's currently allocated here plus the remaining buffer, preventing over-drafting
-              const maxSliderVal = displayedBudget + remainingBuffer;
+              const currentUsedPercentage = totalUsed > 0 && disposablePot > 0 ? Math.min(100, Math.round((totalUsed / disposablePot) * 100)) : 0;
+              const displayedPercentage = getBudgetPercentage(cat, disposablePot) !== undefined 
+                ? getBudgetPercentage(cat, disposablePot)! 
+                : currentUsedPercentage;
+
+              const displayedBudget = Math.round((displayedPercentage / 100) * disposablePot);
+              const maxPercentageVal = Math.min(100, displayedPercentage + remainingPercentage);
 
               return (
                 <div 
                   key={cat.name}
                   className="p-4 sm:p-5 rounded-[24px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-2xs flex flex-col gap-3.5"
                 >
-                  {/* Top Row: Icon, Name and Number Input */}
+                  {/* Top Row: Icon, Name and Percentage Input */}
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3 min-w-0">
                       <div 
@@ -217,8 +230,11 @@ export function BudgetView({
                           <div className="w-1.5 h-1.5 rounded-full" />
                         )}
                       </div>
-                      <span className="text-[13.5px] font-bold text-[var(--text-primary)] tracking-tight truncate">
+                      <span className="text-[13.5px] font-bold text-[var(--text-primary)] tracking-tight truncate flex items-center gap-1.5">
                         {cat.name}
+                        <span className="px-1.5 py-0.5 rounded-md bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-[10px] font-semibold tabular-nums shrink-0">
+                          {displayedPercentage}%
+                        </span>
                       </span>
                     </div>
 
@@ -226,10 +242,10 @@ export function BudgetView({
                       <div className="relative">
                         <input
                           type="number"
-                          placeholder={totalUsed > 0 ? String(totalUsed) : "Ingen budget"}
-                          value={cat.budget !== undefined ? cat.budget : (totalUsed > 0 ? totalUsed : '')}
-                          min={totalUsed}
-                          max={maxSliderVal}
+                          placeholder={`${currentUsedPercentage}%`}
+                          value={getBudgetPercentage(cat, disposablePot) !== undefined ? getBudgetPercentage(cat, disposablePot) : ''}
+                          min={0}
+                          max={maxPercentageVal}
                           onChange={(e) => {
                             if (e.target.value === '') {
                               const updatedCategories = config.categories.map((c) => 
@@ -239,18 +255,17 @@ export function BudgetView({
                               return;
                             }
                             let val = Number(e.target.value);
-                            if (val < totalUsed) val = totalUsed;
-                            if (val > maxSliderVal) val = maxSliderVal;
-                            const valToSave = val === totalUsed ? undefined : val;
+                            if (val < 0) val = 0;
+                            if (val > maxPercentageVal) val = maxPercentageVal;
                             const updatedCategories = config.categories.map((c) => 
-                              c.name === cat.name ? { ...c, budget: valToSave } : c
+                              c.name === cat.name ? { ...c, budget: val } : c
                             );
                             setConfig({ ...config, categories: updatedCategories });
                           }}
-                          className="w-28 h-9 px-3 rounded-[12px] bg-[var(--surface-muted)]/50 border border-[var(--border-color)] text-[12.5px] font-bold text-[var(--text-primary)] text-right pr-7 focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] tabular-nums"
+                          className="w-20 h-9 px-3 rounded-[12px] bg-[var(--surface-muted)]/50 border border-[var(--border-color)] text-[12.5px] font-bold text-[var(--text-primary)] text-right pr-6 focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] tabular-nums"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-[var(--text-secondary)]">
-                          {config.currency}
+                          %
                         </span>
                       </div>
                     </div>
@@ -260,22 +275,14 @@ export function BudgetView({
                   <div className="flex flex-col gap-2 bg-[var(--surface-muted)]/40 p-3 rounded-[16px] border border-[var(--border-color)]/30">
                     <div className="flex flex-wrap justify-between items-center gap-2 text-[11px] font-medium text-[var(--text-secondary)]">
                       <div className="flex flex-wrap gap-x-3 gap-y-1">
-                        {fixedSpent > 0 && (
-                          <span>Fasta utgifter: <strong className="text-[var(--text-primary)] font-semibold font-amount">{formatAmount(fixedSpent, config.language)} kr</strong></span>
-                        )}
-                        {variableSpent > 0 && (
-                          <span>Rörligt spenderat: <strong className="text-[var(--text-primary)] font-semibold font-amount">{formatAmount(variableSpent, config.language)} kr</strong></span>
-                        )}
+                        <span>Motsvarar kostnad: <strong className="text-[var(--text-primary)] font-bold font-amount">{formatAmount(displayedBudget, config.language)} kr</strong></span>
                         {totalUsed > 0 && (
-                          <span>Totalt använt: <strong className="text-[var(--text-primary)] font-bold font-amount">{formatAmount(totalUsed, config.language)} kr</strong></span>
-                        )}
-                        {totalUsed === 0 && (
-                          <span className="italic opacity-85">Inga fasta eller rörliga utgifter registrerade än.</span>
+                          <span>Spenderat hittills: <strong className="text-[var(--text-primary)] font-semibold font-amount">{formatAmount(totalUsed, config.language)} kr ({currentUsedPercentage}%)</strong></span>
                         )}
                       </div>
 
                       {/* Quick helper button to restore to pre-filled totalUsed ONLY if custom budget has been set and differs */}
-                      {totalUsed > 0 && cat.budget !== undefined && cat.budget !== totalUsed && (
+                      {getBudgetPercentage(cat, disposablePot) !== undefined && getBudgetPercentage(cat, disposablePot) !== currentUsedPercentage && (
                         <button
                           type="button"
                           onClick={() => {
@@ -286,7 +293,7 @@ export function BudgetView({
                           }}
                           className="px-2.5 py-1 rounded-full bg-[var(--accent-color)]/10 hover:bg-[var(--accent-color)]/15 text-[var(--accent-color)] font-bold text-[10px] active:scale-95 transition-all cursor-pointer border border-[var(--accent-color)]/20 shadow-4xs"
                         >
-                          Återställ till nuvarande ({formatAmount(totalUsed, config.language)} kr)
+                          Återställ till nuvarande ({currentUsedPercentage}%)
                         </button>
                       )}
                     </div>
@@ -296,26 +303,25 @@ export function BudgetView({
                   <div className="space-y-1.5 px-1 pt-1">
                     <input
                       type="range"
-                      min={totalUsed}
-                      max={maxSliderVal}
-                      step="50"
-                      value={displayedBudget}
+                      min={0}
+                      max={maxPercentageVal}
+                      step="1"
+                      value={displayedPercentage}
                       onChange={(e) => {
                         const val = Number(e.target.value);
-                        const valToSave = val === totalUsed ? undefined : val;
                         const updatedCategories = config.categories.map((c) => 
-                          c.name === cat.name ? { ...c, budget: valToSave } : c
+                          c.name === cat.name ? { ...c, budget: val } : c
                         );
                         setConfig({ ...config, categories: updatedCategories });
                       }}
                       className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[var(--accent-color)] focus:outline-none bg-[var(--border-color)]/60"
                       style={{
-                        backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${maxSliderVal > totalUsed ? ((displayedBudget - totalUsed) / (maxSliderVal - totalUsed)) * 100 : 0}%, var(--border-color) ${maxSliderVal > totalUsed ? ((displayedBudget - totalUsed) / (maxSliderVal - totalUsed)) * 100 : 0}%, var(--border-color) 100%)`
+                        backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${maxPercentageVal > 0 ? (displayedPercentage / maxPercentageVal) * 100 : 0}%, var(--border-color) ${maxPercentageVal > 0 ? (displayedPercentage / maxPercentageVal) * 100 : 0}%, var(--border-color) 100%)`
                       }}
                     />
                     <div className="flex justify-between text-[10px] text-[var(--text-secondary)] font-semibold">
-                      <span>{formatAmount(totalUsed, config.language)} kr</span>
-                      <span>Max: {formatAmount(maxSliderVal, config.language)} kr</span>
+                      <span>0% ({formatAmount(0, config.language)} kr)</span>
+                      <span>Max: {maxPercentageVal}% ({formatAmount(Math.round((maxPercentageVal / 100) * disposablePot), config.language)} kr)</span>
                     </div>
                   </div>
                 </div>

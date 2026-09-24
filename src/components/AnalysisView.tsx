@@ -372,22 +372,11 @@ export function AnalysisView({
                         )}
                       </div>
                       <div className="min-w-0 flex-1 flex flex-col justify-center">
-                        <p className={`text-[13px] font-medium leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors ${
+                        <p className={`text-[13.5px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors ${
                           isExpanded ? 'text-[var(--accent-color)] font-semibold' : 'text-[var(--text-primary)] group-hover:text-[var(--accent-color)]'
                         }`}>
                           {item.name}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
-                          <div className={`flex items-center gap-1 px-2 h-[22px] rounded-full shrink-0 border-none transition-colors ${
-                            isExpanded ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)]' : 'bg-[var(--chip-bg)]'
-                          }`}>
-                            <span className={`text-[12px] font-medium tracking-tight whitespace-nowrap ${
-                              isExpanded ? 'text-[var(--accent-color)] font-semibold' : 'text-[var(--text-secondary)] opacity-90'
-                            }`}>
-                              {Math.round((item.value / (totalSpent || 1)) * 100)}%
-                            </span>
-                          </div>
-                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
@@ -407,23 +396,30 @@ export function AnalysisView({
                   </div>
 
                   {/* Elegant Category Budget Progress Bar */}
-                  {item.budget && item.budget > 0 ? (
-                    <div className="w-full pt-1 px-1 border-t border-[var(--border-color)]/20 mt-1">
-                      <div className="flex justify-between items-center text-[11px] font-semibold text-[var(--text-secondary)] mb-1.5">
-                        <span className="opacity-85">Spenderat: {formatAmount(Math.round(item.value), config.language)} {config.currency}</span>
-                        <span className="text-[var(--text-tertiary)] font-normal">Kategoribudget: {formatAmount(item.budget, config.language)} {config.currency}</span>
+                  {(() => {
+                    if (!item.budget || item.budget <= 0) return null;
+                    const disposablePot = stats.disposablePot || 0;
+                    const budgetInKronor = Math.round((item.budget / 100) * disposablePot);
+                    if (budgetInKronor <= 0) return null;
+                    
+                    return (
+                      <div className="w-full pt-1 px-1 border-t border-[var(--border-color)]/20 mt-1">
+                        <div className="flex justify-between items-center text-[11px] font-semibold text-[var(--text-secondary)] mb-1.5">
+                          <span className="opacity-85">Spenderat: {formatAmount(Math.round(item.value), config.language)} {config.currency}</span>
+                          <span className="text-[var(--text-tertiary)] font-normal">Kategoribudget: {formatAmount(budgetInKronor, config.language)} {config.currency} ({item.budget}%)</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-[var(--border-color)]/50 rounded-full overflow-hidden relative">
+                          <div 
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{ 
+                              width: `${Math.min((item.value / budgetInKronor) * 100, 100)}%`,
+                              backgroundColor: item.value <= budgetInKronor ? (item.color || 'var(--accent-color)') : '#f59e0b'
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="w-full h-1.5 bg-[var(--border-color)]/50 rounded-full overflow-hidden relative">
-                        <div 
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{ 
-                            width: `${Math.min((item.value / item.budget) * 100, 100)}%`,
-                            backgroundColor: item.value <= item.budget ? (item.color || 'var(--accent-color)') : '#f59e0b'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ) : null}
+                    );
+                  })()}
                 </motion.div>
                 
                 <AnimatePresence>
