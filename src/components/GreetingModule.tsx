@@ -95,16 +95,6 @@ export function GreetingModule({
   selected.setHours(0, 0, 0, 0);
   const diffDays = Math.round((selected.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-  const formattedDate = useMemo(() => {
-    const d = new Date();
-    const str = d.toLocaleDateString(language === 'en' ? 'en-US' : 'sv-SE', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    });
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }, [language]);
-
   const _selectedDayData = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return null;
     return calendarDays.find((d: any) => d.date && d.date.getTime() === selected.getTime());
@@ -209,76 +199,138 @@ export function GreetingModule({
     ? "pt-[calc(8.7rem+env(safe-area-inset-top))]"
     : "pt-[calc(6.5rem+env(safe-area-inset-top))]";
 
+  const spentToday = todayDayData ? Math.round(todayDayData.daySpent || 0) : 0;
+  const spentPct = Math.max(16, Math.min(85, (spentToday / Math.max(1, stats?.baseDailyBudgetCents || 450)) * 100));
+
   return (
     <div className="space-y-4 sm:space-y-5 font-sans relative">
-      {/* 1. Seamless Integrated Grand Hero Gradient Card (Edge-to-edge, full status-bar touching height) */}
+      {/* 1. Seamless Integrated Grand Hero Area with negative margins */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className={`-mx-4 sm:-mx-6 ${negativeMarginClass} ${topPaddingClass} pb-8 px-5 sm:px-7 text-[var(--text-primary)] relative overflow-hidden flex flex-col`}
+        className={`-mx-4 sm:-mx-6 ${negativeMarginClass} ${topPaddingClass} pb-4 px-4 sm:px-6 text-[var(--text-primary)] relative overflow-hidden flex flex-col`}
       >
-        {/* Unified greeting & date header inside the card, spaced perfectly below floating transparent header buttons */}
-        <div className="hidden">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2 leading-none">
-            <span>{userName ? `Hej ${userName}` : 'Hej'}</span>
-            <span className="inline-block origin-bottom-right hover:rotate-12 transition-transform duration-200">👋</span>
+        {/* Large Elegant Greeting & Page Title OUTSIDE the Card, like in the Aqua screenshot */}
+        <div className="flex flex-col text-left px-1.5 mb-6 select-none">
+          <h1 className="text-[20px] sm:text-[22px] font-medium text-[var(--text-secondary)] opacity-85 tracking-tight leading-none">
+            {userName ? `Hej ${userName}! 👋` : 'Hej! 👋'}
           </h1>
-          <p className="text-xs font-semibold text-[var(--text-secondary)] tracking-wide uppercase leading-none mt-1">
-            {formattedDate}
-          </p>
+          <h2 className="text-[28px] sm:text-[32px] font-extrabold text-[var(--text-primary)] leading-none mt-2 tracking-tight">
+            {language === 'en' ? 'Daily updates' : 'Dagsbudget-översikt'}
+          </h2>
         </div>
 
-        {/* Content of the Hero card */}
-        <div className="flex flex-col items-center text-center relative z-10">
-          <span className="text-sm sm:text-base font-bold text-[var(--text-secondary)] tracking-tight mb-2.5 block">
-            {t('totalRemaining' as any)}
-          </span>
-          <div className="flex items-baseline justify-center gap-1.5 mb-2">
-            <AnimatedNumber 
-              value={stats?.remainingPeriodCents || 0} 
-              className={`text-4xl sm:text-5xl md:text-6xl leading-none font-extrabold text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
-                (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : ''
-              }`}
-              formatter={(val) => formatAmount(val, language)}
-            />
-            <span className={`text-xl sm:text-2xl font-medium ${
-              (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
-            }`}>
-              {currency}
+        {/* The Aqua-Inspired Premium Main Rounded Card */}
+        <div className="w-full bg-white dark:bg-[#1C1C1E] border border-black/[0.04] dark:border-white/[0.04] rounded-[32px] p-6 shadow-xs relative overflow-hidden flex flex-col">
+          {/* Card Header */}
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 tracking-tight uppercase">
+              {language === 'en' ? 'Budget Insights' : 'Dagsbudget-insikter'}
             </span>
+            <button 
+              onClick={() => setIsCalculationModalOpen(true)}
+              className="w-8 h-8 rounded-full border border-black/[0.08] dark:border-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-all cursor-pointer"
+              title={t('periodBudget')}
+            >
+              <span className="text-xs font-semibold">⟨ ⟩</span>
+            </button>
           </div>
 
-          {/* Integrated Totalt kvar & Nästa lön */}
-          {effectiveRemainingDays !== undefined && (
-            <div className="w-full grid grid-cols-2 gap-4 pt-4 mt-6">
-              <div className="text-left flex flex-col justify-center">
-                <span className="text-[11px] font-medium text-[var(--text-secondary)] tracking-wider mb-1 block">
-                  {topLabel}
+          {/* Two-Column Stats Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-start">
+            {/* Left Column: Big Amount */}
+            <div className="sm:col-span-6 flex flex-col text-left justify-center">
+              <span className="text-xs font-semibold text-[var(--text-secondary)] tracking-wide mb-1.5 block">
+                {topLabel}
+              </span>
+              <div className="flex items-baseline gap-1">
+                <AnimatedNumber 
+                  value={displayAmount} 
+                  className={`text-[40px] sm:text-[44px] md:text-[48px] leading-none font-black text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
+                    displayAmount < 0 ? 'text-rose-500' : ''
+                  }`}
+                  formatter={(val) => formatAmount(val, language)}
+                />
+                <span className={`text-[18px] font-bold ${
+                  displayAmount < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
+                }`}>
+                  {currency}
                 </span>
-                <div className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount leading-tight tabular-nums">
-                  {formatAmount(displayAmount, language)}{' '}
-                  <span className="text-xs font-normal text-[var(--text-secondary)] opacity-70 ml-0.5">{currency}</span>
-                </div>
-              </div>
-              
-              <div className="text-right flex flex-col justify-center items-end">
-                <span className="text-[11px] font-medium text-[var(--text-secondary)] tracking-wider mb-1 block">
-                  {t('daysToNextSalary' as any)}
-                </span>
-                <div className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount leading-tight tabular-nums">
-                  {stats?.remainingDays || 1}{' '}
-                  <span className="text-xs font-normal text-[var(--text-secondary)] opacity-70 ml-0.5 font-sans">
-                    {(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}
-                  </span>
-                </div>
               </div>
             </div>
-          )}
-          
-          {/* Integrated Category Budgets / Children */}
+
+            {/* Right Column: Mini Sub-metrics Stack */}
+            <div className="sm:col-span-6 flex flex-col gap-2.5 text-left border-t sm:border-t-0 sm:border-l border-black/[0.06] dark:border-white/[0.06] pt-4 sm:pt-0 sm:pl-5">
+              {/* Metric 1: Totalt kvar */}
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-400 shrink-0 shadow-2xs" />
+                <span className="text-xs font-medium text-[var(--text-secondary)]">
+                  {t('totalRemaining')}:
+                </span>
+                <span className="text-xs font-bold text-[var(--text-primary)] font-amount ml-auto">
+                  {formatAmount(stats?.remainingPeriodCents || 0, language)} {currency}
+                </span>
+              </div>
+
+              {/* Metric 2: Dagar till lön */}
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0 shadow-2xs" />
+                <span className="text-xs font-medium text-[var(--text-secondary)]">
+                  {t('daysToNextSalary')}:
+                </span>
+                <span className="text-xs font-bold text-[var(--text-primary)] font-amount ml-auto font-sans">
+                  {stats?.remainingDays || 1} { (stats?.remainingDays || 1) === 1 ? t('oneDay') : t('days') }
+                </span>
+              </div>
+
+              {/* Metric 3: Planerad dagsbudget */}
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-violet-400 shrink-0 shadow-2xs" />
+                <span className="text-xs font-medium text-[var(--text-secondary)]">
+                  {language === 'en' ? 'Base Budget' : 'Planerad dagsbudget'}:
+                </span>
+                <span className="text-xs font-bold text-[var(--text-primary)] font-amount ml-auto">
+                  {formatAmount(stats?.baseDailyBudgetCents || 0, language)} {currency}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* High-Fidelity Aqua Style Segmented Progress Bar */}
+          <div className="w-full mt-6">
+            <div className="w-full flex items-center h-[34px] bg-black/[0.03] dark:bg-white/[0.03] rounded-full overflow-hidden p-1 relative">
+              {/* Left: Beautiful Sunset Gradient pill representing Spent Today */}
+              <div 
+                className="h-full rounded-full bg-gradient-to-r from-[#4E83FD] via-[#F43F5E] to-[#F59E0B] flex items-center justify-between px-3 text-[11px] font-bold text-white shadow-xs transition-all duration-500 whitespace-nowrap overflow-hidden"
+                style={{ width: `${spentPct}%` }}
+              >
+                <span>{formatAmount(spentToday, language)} {currency}</span>
+                <span className="text-[9px] opacity-90 font-medium font-sans uppercase tracking-wider ml-1.5 hidden xs:inline">
+                  {language === 'en' ? 'spent' : 'använt'}
+                </span>
+              </div>
+
+              {/* Right: Subtly textured pastel decorative remaining blocks */}
+              <div className="flex-1 flex items-center gap-1 h-full pl-1.5">
+                <div className="h-full w-1/4 bg-violet-400/15 dark:bg-violet-400/25 rounded-md border border-dashed border-violet-400/20" />
+                <div className="h-full w-1/5 bg-fuchsia-400/15 dark:bg-fuchsia-400/25 rounded-md border border-dashed border-fuchsia-400/20" />
+                <div className="h-full w-1/3 bg-sky-400/15 dark:bg-sky-400/25 rounded-md border border-dashed border-sky-400/20" />
+              </div>
+            </div>
+          </div>
+
+          {/* Outline Action Button */}
+          <button 
+            onClick={() => setIsCalculationModalOpen(true)}
+            className="w-full mt-6 py-2.5 px-4 border border-black/[0.08] dark:border-white/[0.08] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] rounded-2xl text-[10px] font-bold tracking-wider text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer flex items-center justify-center uppercase active:scale-[0.98]"
+          >
+            {language === 'en' ? 'See more insights' : 'Visa budgetdetaljer'}
+          </button>
+
+          {/* Integrated Category Budgets Carousel as the Bottom Section inside the Card */}
           {children && (
-            <div className="w-full pt-4 mt-4 text-left">
+            <div className="w-full pt-4 mt-6 text-left border-t border-black/[0.05] dark:border-white/[0.05]">
               {children}
             </div>
           )}
