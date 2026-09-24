@@ -237,6 +237,7 @@ export default function App() {
     | "paymentMethods"
     | "language"
   >("main");
+  const [budgetSection, setBudgetSection] = useState<string | null>(null);
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
   const [transactionPrefill, setTransactionPrefill] = useState<any>(null);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -2686,15 +2687,20 @@ export default function App() {
       targetTab = section === "log" || section === "transactions" ? "transactions" : "analysis";
     }
 
-    const isDifferent = targetTab !== activeTab || (targetTab === "profile" && targetSection !== profileSection) || (targetTab === "settings" && targetSection !== settingsSection);
+    const isDifferent =
+      targetTab !== activeTab ||
+      (targetTab === "profile" && targetSection !== profileSection) ||
+      (targetTab === "settings" && targetSection !== settingsSection) ||
+      (targetTab === "budget" && targetSection !== budgetSection);
     if (isDifferent) {
       setNavHistory((prev) => {
         // Limit history size to 30 to prevent unlimited growth
         const last = prev[prev.length - 1];
-        if (last && last.tab === activeTab && last.section === (activeTab === "profile" ? profileSection : activeTab === "settings" ? settingsSection : undefined)) {
+        const currentSection = activeTab === "profile" ? profileSection : activeTab === "settings" ? settingsSection : activeTab === "budget" ? budgetSection : undefined;
+        if (last && last.tab === activeTab && last.section === currentSection) {
           return prev;
         }
-        return [...prev.slice(-29), { tab: activeTab, section: activeTab === "profile" ? profileSection : activeTab === "settings" ? settingsSection : undefined }];
+        return [...prev.slice(-29), { tab: activeTab, section: currentSection }];
       });
     }
 
@@ -2704,6 +2710,9 @@ export default function App() {
       now.setHours(0, 0, 0, 0);
       setCurrentPeriodDate(now);
       setTargetDate(now);
+    }
+    if (targetTab === "budget") {
+      setBudgetSection(targetSection || null);
     }
     if (targetTab === "profile" && targetSection) {
       setProfileSection(targetSection as any);
@@ -2743,7 +2752,14 @@ export default function App() {
       return true;
     }
 
-    // 2. If profile section is not main, go back to main section
+    // 2. If subview is active in budget, profile or settings, go back to main section
+    if (activeTab === 'budget' && budgetSection) {
+      feedback.tap();
+      setNavTrigger((prev) => prev + 1);
+      setBudgetSection(null);
+      return true;
+    }
+
     if (activeTab === 'profile' && profileSection !== 'main') {
       feedback.tap();
       setNavTrigger((prev) => prev + 1);
@@ -2769,7 +2785,13 @@ export default function App() {
       setNavHistory(nextStack);
       if (previous) {
         setActiveTab(previous.tab);
-        setProfileSection(previous.section || "main");
+        if (previous.tab === "profile") {
+          setProfileSection(previous.section || "main");
+        } else if (previous.tab === "settings") {
+          setSettingsSection(previous.section || "main");
+        } else if (previous.tab === "budget") {
+          setBudgetSection(previous.section || null);
+        }
         return true;
       }
     }
@@ -2817,6 +2839,7 @@ export default function App() {
       !!viewingMonthlySaving ||
       !!editingMonthlySaving ||
       activeTab === 'notifications' ||
+      (activeTab === 'budget' && !!budgetSection) ||
       (activeTab === 'profile' && profileSection !== 'main') || (activeTab === 'settings' && settingsSection !== 'main');
 
     const handleTouchStart = (e: TouchEvent) => {
@@ -3031,7 +3054,9 @@ export default function App() {
     if (activeTab === "notifications") return t("notificationsTitle");
     if (activeTab === "transactions") return t("log");
     if (activeTab === "analysis") return t("analysis");
-    if (activeTab === "budget") return t("budget");
+    if (activeTab === "budget") {
+      return budgetSection ? (config?.language === 'en' ? 'Allocate Budget' : 'Fördela vardagsbudget') : t("budget");
+    }
     if (activeTab === "settings") {
       switch (settingsSection) {
         case "salary": return t("salary");
@@ -3268,6 +3293,7 @@ export default function App() {
           title={headerTitle}
           onBack={
             activeTab === 'notifications' ||
+            (activeTab === 'budget' && !!budgetSection) ||
             (activeTab === 'profile' && profileSection !== 'main') ||
             (activeTab === 'settings' && settingsSection !== 'main')
               ? () => handleGoBack()
@@ -3514,6 +3540,8 @@ export default function App() {
                         console.error("Failed to save category budgets:", err);
                       });
                     }}
+                    initialSection={budgetSection}
+                    onClearSection={() => setBudgetSection(null)}
                     incomes={incomes}
                     setIncomes={setIncomes}
                     fixedExpenses={fixedExpenses}

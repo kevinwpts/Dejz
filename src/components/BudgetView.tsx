@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, SlidersHorizontal, ArrowLeft, Check, Trash2 } from 'lucide-react';
+import { RefreshCw, SlidersHorizontal, ArrowLeft, Check, Trash2, ChevronRight } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -31,6 +31,8 @@ interface BudgetViewProps {
   t: (key: TranslationKey) => string;
   currentPeriodId: string;
   isDemoMode?: boolean;
+  initialSection?: string | null;
+  onClearSection?: () => void;
 }
 
 export function BudgetView({ 
@@ -46,12 +48,16 @@ export function BudgetView({
   _onResetSavingsPot,
   t,
   currentPeriodId,
-  isDemoMode
+  isDemoMode,
+  initialSection,
+  onClearSection
 }: BudgetViewProps) {
   if (!stats) return null;
 
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
-  const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(false);
+  const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
+    return initialSection === 'category-budgets' || initialSection === 'allocate';
+  });
   const [initialCategoryNames, setInitialCategoryNames] = React.useState<string[]>([]);
 
   const handleOpenCategoryBudgets = () => {
@@ -88,6 +94,17 @@ export function BudgetView({
     setShowCategoryBudgets(true);
   };
 
+  React.useEffect(() => {
+    if (initialSection === 'category-budgets' || initialSection === 'allocate') {
+      handleOpenCategoryBudgets();
+    }
+  }, [initialSection]);
+
+  const handleCloseCategoryBudgets = () => {
+    setShowCategoryBudgets(false);
+    onClearSection?.();
+  };
+
   const totalSavings = (config.monthlySavingsItems?.reduce((sum, item) => {
     const amount = (item.isVariable && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined)
       ? item.periodOverrides[currentPeriodId]
@@ -105,61 +122,61 @@ export function BudgetView({
   const sortedFixedExpenses = fixedExpenses || [];
   const sortedSavings = config?.monthlySavingsItems || [];
 
-  if (showCategoryBudgets) {
-    const getFixedSpentForCategory = (catName: string) => {
-      return (fixedExpenses || [])
-        .filter((e) => e.category?.trim().toLowerCase() === catName.trim().toLowerCase())
-        .reduce((sum, e) => {
-          const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
-            ? e.periodOverrides[currentPeriodId]
-            : (Number(e.amount) || 0);
-          switch (e.frequency) {
-            case 'quarterly': return sum + amount / 3;
-            case 'semi-annually': return sum + amount / 6;
-            case 'annually': return sum + amount / 12;
-            default: return sum + amount;
-          }
-        }, 0);
-    };
-
-    const getVariableSpentForCategory = (catName: string) => {
-      if (!stats || !stats.periodTransactions) return 0;
-      let sum = 0;
-      stats.periodTransactions.forEach((t: any) => {
-        if (t.category === 'Spargris') return;
-        const splits = t.splits;
-        if (splits && splits.length > 0) {
-          splits.forEach((s: any) => {
-            if (s.category?.trim().toLowerCase() === catName.trim().toLowerCase()) {
-              sum += (Number(s.amount) || 0);
-            }
-          });
-        } else if (t.category?.trim().toLowerCase() === catName.trim().toLowerCase()) {
-          sum += (Number(t.amount) || 0);
+  const getFixedSpentForCategory = (catName: string) => {
+    return (fixedExpenses || [])
+      .filter((e) => e.category?.trim().toLowerCase() === catName.trim().toLowerCase())
+      .reduce((sum, e) => {
+        const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
+          ? e.periodOverrides[currentPeriodId]
+          : (Number(e.amount) || 0);
+        switch (e.frequency) {
+          case 'quarterly': return sum + amount / 3;
+          case 'semi-annually': return sum + amount / 6;
+          case 'annually': return sum + amount / 12;
+          default: return sum + amount;
         }
-      });
-      return sum;
-    };
+      }, 0);
+  };
 
-    const totalIncome = stats.totalIncome || 1;
-
-    const getCategoryBudgetKr = (c: any) => {
-      const catFixed = Math.round(getFixedSpentForCategory(c.name));
-      if (c.budget === undefined) return catFixed;
-      
-      if (c.budget > 100) {
-        return Math.max(catFixed, Math.round(c.budget));
+  const getVariableSpentForCategory = (catName: string) => {
+    if (!stats || !stats.periodTransactions) return 0;
+    let sum = 0;
+    stats.periodTransactions.forEach((t: any) => {
+      if (t.category === 'Spargris') return;
+      const splits = t.splits;
+      if (splits && splits.length > 0) {
+        splits.forEach((s: any) => {
+          if (s.category?.trim().toLowerCase() === catName.trim().toLowerCase()) {
+            sum += (Number(s.amount) || 0);
+          }
+        });
+      } else if (t.category?.trim().toLowerCase() === catName.trim().toLowerCase()) {
+        sum += (Number(t.amount) || 0);
       }
-      const pctAmount = totalIncome > 0 ? Math.round((c.budget / 100) * totalIncome) : 0;
-      return Math.max(catFixed, pctAmount);
-    };
+    });
+    return sum;
+  };
 
-    const totalAllocatedKronor = (config.categories || []).reduce((sum, c) => {
-      return sum + getCategoryBudgetKr(c);
-    }, 0);
+  const totalIncome = stats.totalIncome || 1;
 
-    const totalAllocatedPercentage = totalIncome > 0 ? Math.round((totalAllocatedKronor / totalIncome) * 100) : 0;
+  const getCategoryBudgetKr = (c: any) => {
+    const catFixed = Math.round(getFixedSpentForCategory(c.name));
+    if (c.budget === undefined) return catFixed;
+    
+    if (c.budget > 100) {
+      return Math.max(catFixed, Math.round(c.budget));
+    }
+    const pctAmount = totalIncome > 0 ? Math.round((c.budget / 100) * totalIncome) : 0;
+    return Math.max(catFixed, pctAmount);
+  };
 
+  const totalAllocatedKronor = (config.categories || []).reduce((sum, c) => {
+    return sum + getCategoryBudgetKr(c);
+  }, 0);
+
+  const totalAllocatedPercentage = totalIncome > 0 ? Math.round((totalAllocatedKronor / totalIncome) * 100) : 0;
+
+  if (showCategoryBudgets) {
     return (
       <motion.div
         initial={{ opacity: 0, x: 20 }}
@@ -170,7 +187,7 @@ export function BudgetView({
         {/* Header with back button */}
         <div className="flex items-center justify-between">
           <button
-            onClick={() => setShowCategoryBudgets(false)}
+            onClick={handleCloseCategoryBudgets}
             className="h-9 px-3.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-color)] text-[12px] font-bold text-[var(--text-primary)] hover:bg-[var(--surface-muted)] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
           >
             <ArrowLeft size={14} />
@@ -379,9 +396,9 @@ export function BudgetView({
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center"
+          className="p-5 sm:p-6 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center"
         >
-          <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2.5 block">
+          <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2 block">
             {t('monthlyDisposable')}
           </span>
           <div className="flex items-baseline justify-center gap-1.5">
@@ -395,6 +412,36 @@ export function BudgetView({
             </span>
           </div>
 
+          {/* Direct connection to Fördela din vardagsbudget */}
+          <div className="w-full pt-4 mt-4 border-t border-[var(--border-color)]/70 flex items-center justify-between gap-3">
+            <div className="text-left min-w-0">
+              <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block leading-tight">
+                {config.language === 'en' ? 'Category Allocation' : 'Fördelat på kategorier'}
+              </span>
+              <span className="text-[12.5px] font-medium text-[var(--text-primary)] truncate block mt-0.5">
+                {totalAllocatedKronor > 0 ? (
+                  <>
+                    <strong className="font-bold font-amount tabular-nums">{formatAmount(totalAllocatedKronor, config.language)} {config.currency}</strong>
+                    <span className="text-[var(--text-secondary)] ml-1 text-xs font-medium">({totalAllocatedPercentage}%)</span>
+                  </>
+                ) : (
+                  <span className="text-[var(--text-secondary)] text-xs font-medium">
+                    {config.language === 'en' ? 'Not allocated yet' : 'Inte fördelad ännu'}
+                  </span>
+                )}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleOpenCategoryBudgets}
+              className="h-8.5 px-3.5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all flex items-center gap-1.5 text-[11.5px] sm:text-xs font-bold shadow-2xs cursor-pointer shrink-0"
+            >
+              <SlidersHorizontal size={13} strokeWidth={2.2} />
+              <span>{config.language === 'en' ? 'Allocate' : 'Fördela budget'}</span>
+              <ChevronRight size={13} strokeWidth={2.5} />
+            </button>
+          </div>
         </motion.div>
 
         {/* Core Stats Modules - Standardized, Color-themed & Compact */}
@@ -429,18 +476,6 @@ export function BudgetView({
             <span className="text-[15px] sm:text-[17px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(Math.abs(totalSavings || 0), config.language)} {config.currency || 'kr'}</span>
           </motion.div>
         </div>
-
-        {/* Category Budget Allocation Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          onClick={handleOpenCategoryBudgets}
-          className="w-full h-11 rounded-[16px] bg-[var(--surface-color)] border border-[var(--border-color)] text-[12.5px] sm:text-[13px] font-bold text-[var(--accent-color)] hover:bg-[var(--surface-muted)]/70 transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer"
-        >
-          <SlidersHorizontal size={15} />
-          Fördela din vardagsbudget
-        </motion.button>
       </div>
 
       {/* Budget Filter Segmented Control */}
