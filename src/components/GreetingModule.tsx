@@ -265,25 +265,24 @@ export function GreetingModule({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
-          className="rounded-[22px] border border-[var(--border-color)] p-4 sm:p-5 bg-gradient-to-br from-[var(--surface-color)] via-[var(--surface-color)] to-[var(--surface-muted)]/50 shadow-sm relative overflow-hidden flex items-start gap-3.5"
+          className="rounded-[22px] border border-[var(--border-color)] p-4 bg-gradient-to-br from-[var(--surface-color)] via-[var(--surface-color)] to-[var(--surface-muted)]/50 shadow-sm relative overflow-hidden flex items-center gap-4"
         >
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-amber-400/25 via-emerald-400/25 to-sky-400/25 border border-[var(--accent-color)]/30 flex items-center justify-center text-xl shrink-0 shadow-inner">
-            🌼
+          <div className="flex flex-col items-center gap-1 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400/20 via-emerald-400/20 to-sky-400/20 border border-[var(--accent-color)]/20 flex items-center justify-center text-xl shadow-xs">
+              🌼
+            </div>
+            <span className="text-[10px] font-bold tracking-wider text-[var(--text-secondary)] opacity-80 uppercase">
+              Dejzi
+            </span>
           </div>
 
           <div className="flex-1 min-w-0 pr-1">
-            <div className="mb-1">
-              <span className="text-xs font-bold tracking-tight text-[var(--text-primary)]">
-                Dejzi
-              </span>
-            </div>
-
             <p className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
               {dejziInfo.message}
             </p>
 
             {dejziInfo.detail && (
-              <p className="text-xs text-[var(--text-secondary)] opacity-85 mt-1 leading-relaxed">
+              <p className="text-xs text-[var(--text-secondary)] opacity-85 mt-0.5 leading-normal">
                 {dejziInfo.detail}
               </p>
             )}
