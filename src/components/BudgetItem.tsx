@@ -50,13 +50,14 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
       whileHover={{ scale: 1.005 }}
       whileTap={{ scale: 0.99 }}
       onClick={onClick}
-      className={`px-[18px] py-[15px] min-h-[76px] rounded-[16px] flex items-center justify-between gap-[12px] group transition-all duration-200 ${
+      className={`px-3.5 sm:px-4.5 py-3 sm:py-3.5 min-h-[72px] rounded-[16px] flex items-center justify-between gap-2.5 sm:gap-3 group transition-all duration-200 ${
         isGrouped 
           ? 'bg-transparent' 
           : 'bg-[var(--transaction-bg)] shadow-xs border border-[var(--border-color)]'
       } hover:bg-[var(--surface-muted)] cursor-pointer active:scale-[0.99]`}
     >
-      <div className="flex items-center gap-[12px] min-w-0 flex-1">
+      {/* Left side: Logo + Name + Category badge */}
+      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 overflow-hidden">
         <div className="relative flex-shrink-0">
           <BudgetItemLogo item={item} type={type} config={config} />
           {item.isVariable && (
@@ -67,12 +68,15 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         </div>
         
         <div className="min-w-0 flex-1 flex flex-col justify-center">
-          <p className="text-[14px] sm:text-[14.5px] font-semibold text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors group-hover:text-[var(--accent-color)]">
+          <p 
+            className="text-[14px] sm:text-[14.5px] font-semibold text-[var(--text-primary)] leading-tight truncate tracking-tight transition-colors group-hover:text-[var(--accent-color)]"
+            title={displayName}
+          >
             {displayName}
           </p>
           <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden">
             {!isSaving && item.category && (
-              <div className="flex items-center gap-1.5 px-2.5 h-[22px] rounded-full bg-[var(--chip-bg)] shrink-0 max-w-[100%] border-none">
+              <div className="inline-flex items-center gap-1 px-2 h-[20px] rounded-full bg-[var(--chip-bg)] shrink-0 max-w-full border-none">
                 {(() => {
                   const searchCategory = (item.category || '').trim().toLowerCase();
                   const category = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
@@ -99,7 +103,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                   }
                   return null;
                 })()}
-                <span className="text-[11.5px] font-medium text-[var(--text-secondary)] opacity-90 tracking-tight whitespace-nowrap truncate">
+                <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-90 tracking-tight whitespace-nowrap truncate max-w-[130px] sm:max-w-[180px]">
                   {capitalize(item.category || '')}
                 </span>
               </div>
@@ -108,7 +112,8 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         </div>
       </div>
       
-      <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2 text-right">
+      {/* Right side: Amount + Deduction metadata badge */}
+      <div className="flex flex-col items-end justify-center shrink-0 max-w-[46%] sm:max-w-[42%] text-right pl-1">
         <p className={`text-[14.5px] sm:text-[15px] font-bold whitespace-nowrap tracking-tight ${type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
           <span className="opacity-70 mr-0.5 text-[13px] font-bold">{type === 'income' ? '+' : '-'}</span>
           <span className="font-amount tabular-nums font-bold tracking-tight">{formatAmount(currentAmount, language)}</span>
@@ -116,17 +121,17 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         </p>
 
         {/* Right-aligned deduction metadata badge under the amount */}
-        <div className="flex items-center gap-1 mt-1 justify-end">
+        <div className="flex items-center gap-1 mt-0.5 justify-end max-w-full overflow-hidden">
           {(dayString || paymentString) && (
-            <span className="inline-flex items-center gap-1 px-2 h-[20px] rounded-full bg-[var(--chip-bg)] text-[10.5px] font-medium text-[var(--text-secondary)] opacity-85 tracking-tight border border-[var(--border-color)]/20">
-              {dayString && <span className="font-semibold text-[var(--text-primary)]/90">{dayString}</span>}
-              {dayString && paymentString && <span className="opacity-60 text-[9.5px] font-normal">via</span>}
-              {paymentString && <span>{paymentString}</span>}
+            <span className="inline-flex items-center gap-1 px-2 h-[19px] rounded-full bg-[var(--chip-bg)] text-[10px] sm:text-[10.5px] font-medium text-[var(--text-secondary)] opacity-85 tracking-tight border border-[var(--border-color)]/20 max-w-full truncate">
+              {dayString && <span className="font-semibold text-[var(--text-primary)]/90 shrink-0">{dayString}</span>}
+              {dayString && paymentString && <span className="opacity-60 text-[9px] font-normal shrink-0">via</span>}
+              {paymentString && <span className="truncate max-w-[70px] sm:max-w-[100px]">{paymentString}</span>}
             </span>
           )}
 
           {(hasOverride || item.isVariable) && (
-            <span className="text-[9.5px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2 h-[20px] inline-flex items-center rounded-full whitespace-nowrap">
+            <span className="text-[9px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-1.5 h-[19px] inline-flex items-center rounded-full whitespace-nowrap shrink-0">
               {hasOverride ? t('thisPeriod' as any) : t('variable' as any)}
             </span>
           )}

@@ -421,8 +421,8 @@ export function BudgetView({
             transition={{ delay: 0.2 }}
             className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden"
           >
-            <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">{t('incomes') || 'Inkomster'}</span>
-            <span className="text-[15px] sm:text-[17px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">+{formatAmount(Math.abs(stats.totalIncome || 0), config.language)} {config.currency || 'kr'}</span>
+            <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">{t('fixedExpenses') || 'Fasta utgifter'}</span>
+            <span className="text-[15px] sm:text-[17px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(Math.abs(stats.totalFixed || 0), config.language)} {config.currency || 'kr'}</span>
           </motion.div>
 
           <motion.div 
@@ -431,8 +431,8 @@ export function BudgetView({
             transition={{ delay: 0.3 }}
             className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden"
           >
-            <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">{t('fixedExpenses') || 'Fasta utgifter'}</span>
-            <span className="text-[15px] sm:text-[17px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(Math.abs(stats.totalFixed || 0), config.language)} {config.currency || 'kr'}</span>
+            <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">{t('incomes') || 'Inkomster'}</span>
+            <span className="text-[15px] sm:text-[17px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">+{formatAmount(Math.abs(stats.totalIncome || 0), config.language)} {config.currency || 'kr'}</span>
           </motion.div>
 
           <motion.div 
