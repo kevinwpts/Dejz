@@ -226,34 +226,34 @@ export function GreetingModule({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className={`-mx-4 sm:-mx-6 ${negativeMarginClass} ${topPaddingClass} pb-8 px-5 sm:px-7 rounded-b-[40px] bg-[#181818] dark:bg-[#222222] text-white shadow-[0_12px_36px_rgba(24,24,24,0.12)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.4)] relative overflow-hidden flex flex-col`}
+        className={`-mx-4 sm:-mx-6 ${negativeMarginClass} ${topPaddingClass} pb-8 px-5 sm:px-7 text-[var(--text-primary)] relative overflow-hidden flex flex-col`}
       >
         {/* Unified greeting & date header inside the card, spaced perfectly below floating transparent header buttons */}
         <div className="hidden">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2 leading-none">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2 leading-none">
             <span>{userName ? `Hej ${userName}` : 'Hej'}</span>
             <span className="inline-block origin-bottom-right hover:rotate-12 transition-transform duration-200">👋</span>
           </h1>
-          <p className="text-xs font-semibold text-white/70 tracking-wide uppercase leading-none mt-1">
+          <p className="text-xs font-semibold text-[var(--text-secondary)] tracking-wide uppercase leading-none mt-1">
             {formattedDate}
           </p>
         </div>
 
         {/* Content of the Hero card */}
         <div className="flex flex-col items-center text-center relative z-10">
-          <span className="text-xs font-semibold text-white/80 tracking-wide mb-2 block">
+          <span className="text-xs font-semibold text-[var(--text-secondary)] tracking-wide mb-2 block">
             {t('totalRemaining' as any)}
           </span>
           <div className="flex items-baseline justify-center gap-1.5">
             <AnimatedNumber 
               value={stats?.remainingPeriodCents || 0} 
-              className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-white font-amount tabular-nums tracking-tight ${
-                (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-200' : ''
+              className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
+                (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : ''
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
             <span className={`text-base sm:text-lg font-light ${
-              (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-200' : 'text-white/80'
+              (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
             }`}>
               {currency}
             </span>
@@ -261,10 +261,10 @@ export function GreetingModule({
 
           {/* Progress bar under Kvar idag */}
           <div className="w-full mt-4">
-            <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden relative backdrop-blur-xs">
+            <div className="w-full h-2 bg-[var(--surface-muted)] dark:bg-white/10 rounded-full overflow-hidden relative">
               <div 
                 className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                  isNegative || dayProgressPct < 10 ? 'bg-rose-300' : 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+                  isNegative || dayProgressPct < 10 ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
                 }`}
                 style={{ width: `${dayProgressPct}%` }}
               />
@@ -275,22 +275,22 @@ export function GreetingModule({
           {effectiveRemainingDays !== undefined && (
             <div className="w-full grid grid-cols-2 gap-4 pt-4 mt-4">
               <div className="text-left flex flex-col justify-center">
-                <span className="text-[11px] font-medium text-white/70 tracking-wider mb-1 block">
+                <span className="text-[11px] font-medium text-[var(--text-secondary)] tracking-wider mb-1 block">
                   {topLabel}
                 </span>
-                <div className="text-base sm:text-lg font-bold text-white font-amount leading-tight tabular-nums">
+                <div className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount leading-tight tabular-nums">
                   {formatAmount(displayAmount, language)}{' '}
-                  <span className="text-xs font-normal opacity-70 ml-0.5">{currency}</span>
+                  <span className="text-xs font-normal text-[var(--text-secondary)] opacity-70 ml-0.5">{currency}</span>
                 </div>
               </div>
               
               <div className="text-right flex flex-col justify-center items-end">
-                <span className="text-[11px] font-medium text-white/70 tracking-wider mb-1 block">
+                <span className="text-[11px] font-medium text-[var(--text-secondary)] tracking-wider mb-1 block">
                   {t('daysToNextSalary' as any)}
                 </span>
-                <div className="text-base sm:text-lg font-bold text-white font-amount leading-tight tabular-nums">
+                <div className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount leading-tight tabular-nums">
                   {stats?.remainingDays || 1}{' '}
-                  <span className="text-xs font-normal opacity-70 ml-0.5 font-sans">
+                  <span className="text-xs font-normal text-[var(--text-secondary)] opacity-70 ml-0.5 font-sans">
                     {(stats?.remainingDays || 1) === 1 ? t('oneDay' as any) : t('days' as any)}
                   </span>
                 </div>

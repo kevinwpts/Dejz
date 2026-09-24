@@ -320,38 +320,38 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.12 + index * 0.02 }}
                       onClick={() => onNavigate("analysis")}
-                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-[16px] bg-white/10 dark:bg-black/25 border border-white/10 hover:border-white/30 hover:bg-white/15 transition-all group text-left active:scale-[0.98] min-w-[104px] sm:min-w-[110px] max-w-[118px] shadow-2xs cursor-pointer snap-start"
+                      className="flex-shrink-0 flex flex-col justify-between p-2.5 rounded-[16px] hover:bg-[var(--surface-muted)] dark:hover:bg-white/5 transition-all group text-left active:scale-[0.98] min-w-[100px] sm:min-w-[106px] max-w-[114px] cursor-pointer snap-start"
                     >
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/15 dark:bg-black/30 text-white shrink-0 relative z-10">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-primary)] shrink-0 relative z-10 transition-transform group-hover:scale-105 duration-200">
                         {isEmojiString(cat.iconName) ? (
                           <span className="text-[20px] leading-none">{cat.iconName}</span>
                         ) : Icon ? (
-                          <Icon size={20} strokeWidth={2} style={{ color: cat.color || '#fff' }} />
+                          <Icon size={20} strokeWidth={2.2} style={{ color: cat.color || 'var(--text-primary)' }} />
                         ) : (
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color || '#fff' }} />
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color || 'var(--text-primary)' }} />
                         )}
                       </div>
 
                       <div className="flex flex-col items-start w-full min-w-0 mt-3">
-                        <span className="text-[12px] font-bold text-white tracking-tight leading-tight truncate w-full group-hover:text-white/90 transition-colors">
+                        <span className="text-[12px] font-bold text-[var(--text-primary)] tracking-tight leading-tight truncate w-full transition-colors">
                           {cat.name}
                         </span>
                         <span className="text-[10px] font-medium leading-tight mt-0.5 truncate w-full">
                           {cat.hasBudget ? (
                             cat.isOverBudget ? (
-                              <span className="text-amber-300 font-semibold font-amount tabular-nums">
+                              <span className="text-rose-500 dark:text-rose-400 font-semibold font-amount tabular-nums">
                                 +{formatAmount(Math.abs(cat.remaining), config.language)} kr
                               </span>
                             ) : (
-                              <span className="text-white/80">
-                                <strong className="text-white font-bold font-amount tabular-nums">
+                              <span className="text-[var(--text-secondary)]">
+                                <strong className="text-[var(--text-primary)] font-bold font-amount tabular-nums">
                                   {formatAmount(cat.remaining, config.language)} kr
                                 </strong>{" "}
                                 {config.language === 'en' ? 'left' : 'kvar'}
                               </span>
                             )
                           ) : (
-                            <span className="text-white/70 font-amount tabular-nums">
+                            <span className="text-[var(--text-secondary)] font-amount tabular-nums">
                               {formatAmount(cat.spent, config.language)} kr
                             </span>
                           )}
@@ -367,16 +367,16 @@ export function TodayView({
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   transition={{ delay: 0.12 + categoryBudgetData.length * 0.02 }}
                   onClick={() => onNavigate("budget", "category-budgets")}
-                  className="flex-shrink-0 flex flex-col justify-between p-3 rounded-[16px] bg-white/5 border border-dashed border-white/20 hover:border-white/40 hover:bg-white/10 transition-all group text-left active:scale-[0.98] min-w-[104px] sm:min-w-[110px] max-w-[118px] shadow-2xs cursor-pointer snap-start"
+                  className="flex-shrink-0 flex flex-col justify-between p-2.5 rounded-[16px] hover:bg-[var(--surface-muted)] dark:hover:bg-white/5 transition-all group text-left active:scale-[0.98] min-w-[100px] sm:min-w-[106px] max-w-[114px] cursor-pointer snap-start"
                 >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/10 border border-white/10 text-white/80 group-hover:text-white group-hover:border-white/30 transition-colors shrink-0">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-all shrink-0">
                     <SlidersHorizontal size={18} strokeWidth={2.2} />
                   </div>
                   <div className="flex flex-col items-start w-full min-w-0 mt-3">
-                    <span className="text-[12px] font-bold text-white tracking-tight leading-tight truncate w-full group-hover:text-white/90 transition-colors">
+                    <span className="text-[12px] font-bold text-[var(--text-primary)] tracking-tight leading-tight truncate w-full transition-colors">
                       {config.language === "en" ? "Manage" : "Hantera"}
                     </span>
-                    <span className="text-[10px] font-medium text-white/60 leading-tight mt-0.5 truncate w-full">
+                    <span className="text-[10px] font-medium text-[var(--text-secondary)] leading-tight mt-0.5 truncate w-full">
                       {config.language === "en" ? "Allocate budget" : "Fördela budget"}
                     </span>
                   </div>

@@ -35,7 +35,7 @@ export function AppHeader({
   const lastScrollY = useRef(0);
 
   const isTodayTab = activeTab === "today";
-  const useWhiteHeader = isTodayTab && isAtTop;
+  const useWhiteHeader = false;
 
   useEffect(() => {
     const handleScroll = () => {
