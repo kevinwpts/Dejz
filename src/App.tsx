@@ -1138,7 +1138,7 @@ export default function App() {
     }
 
     // Update theme-color meta tag and root background for iOS Safari status bar and browser toolbar
-    const themeColor = shouldUseDarkMode ? "#181818" : "#ffffff";
+    const themeColor = shouldUseDarkMode ? "#071020" : "#ffffff";
     
     // Explicitly set body & documentElement background colors so iOS root canvas matches
     document.documentElement.style.backgroundColor = themeColor;
@@ -1483,7 +1483,7 @@ export default function App() {
       initialSpent: 0,
       notifications: { salaryDayReminder: true, weeklySummary: true },
       securityLock: false,
-      darkMode: false,
+      darkMode: true,
       quickChoices: [],
       savingsPot: 0,
       savingsGoals: [],
@@ -1645,7 +1645,7 @@ export default function App() {
           initialSpent: Number(dbProfile.initial_spent || 0),
           notifications: dbProfile.notifications,
           securityLock: dbProfile.security_lock,
-          darkMode: (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null) ? dbProfile.dark_mode : false,
+          darkMode: (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null) ? dbProfile.dark_mode : true,
           quickChoices: dbProfile.quick_choices || [],
           savingsPot: dbProfile.savings_pot || 0,
           paymentMethods: normalizePaymentMethods(dbProfile.payment_methods),
@@ -1672,7 +1672,7 @@ export default function App() {
       } else {
         const newConfig = {
           ...defaultConfig,
-          darkMode: false,
+          darkMode: true,
         };
         setConfig(newConfig);
         // Save default settings for new user
@@ -3026,7 +3026,7 @@ export default function App() {
           initialSpent: 0,
           notifications: { dailySpend: true, overLimit: true },
           securityLock: false,
-          darkMode: false,
+          darkMode: true,
           quickChoices: [],
           savingsPot: 0,
           surplusIncome: 0,
@@ -3146,7 +3146,7 @@ export default function App() {
 
   if (publicLegalDoc) {
     return (
-      <div className={config?.darkMode ? 'dark' : ''}>
+      <div className={config?.darkMode ?? true ? 'dark' : ''}>
         <PublicLegalPage
           initialDoc={publicLegalDoc}
           onNavigateHome={() => {
@@ -3164,7 +3164,7 @@ export default function App() {
 
   if (isAuthLoading) {
     return (
-      <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative pt-[env(safe-area-inset-top)] bg-[var(--bg-color)] ${config?.darkMode ? 'dark' : ''}`}>
+      <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative pt-[env(safe-area-inset-top)] bg-[var(--bg-color)] ${config?.darkMode ?? true ? 'dark' : ''}`}>
         <div className="min-h-dvh flex items-center justify-center relative z-10">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="w-8 h-8 text-[var(--text-secondary)] animate-spin" />
@@ -3178,7 +3178,7 @@ export default function App() {
   }
 
   if (!session) {
-    const isDark = !showLanding && (config?.darkMode || false);
+    const isDark = !showLanding && (config?.darkMode ?? true);
     return (
       <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-hidden ${isDark ? 'dark' : ''}`}>
         {showLanding ? (
@@ -3897,7 +3897,7 @@ export default function App() {
               // 3. Update config with income, initialSpent, payday, and savings goals
               const newConfig: Config = {
                 ...config,
-                darkMode: (config?.darkMode !== undefined && config?.darkMode !== null) ? config.darkMode : false,
+                darkMode: (config?.darkMode !== undefined && config?.darkMode !== null) ? config.darkMode : true,
                 payday: data.payday || 25,
                 initialSpent: data.initialSpent,
                 savingsGoals: mappedSavingsGoals,

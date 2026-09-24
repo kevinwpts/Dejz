@@ -37,7 +37,7 @@ export function seedDemoData() {
       weeklySummary: true,
     },
     securityLock: false,
-    darkMode: false,
+    darkMode: true,
     quickChoices: [
       { id: 'demo-qc-1', merchant: 'ICA Kvantum', note: 'Middagshandel', amount: 385, category: 'Mat & Livsmedel', icon: 'ShoppingCart' },
       { id: 'demo-qc-2', merchant: 'Espresso House', note: 'Kaffe & Smörgås', amount: 79, category: 'Restaurang & Fika', icon: 'Coffee' },
@@ -888,7 +888,7 @@ export function createFreshTestAccount() {
       weeklySummary: true,
     },
     securityLock: false,
-    darkMode: false,
+    darkMode: true,
     quickChoices: [],
     savingsPot: 0,
     savingsGoals: [],

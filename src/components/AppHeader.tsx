@@ -108,7 +108,7 @@ export function AppHeader({
             >
               <ChevronLeft size={22} strokeWidth={2.2} className="shrink-0" />
               {title && (
-                <h1 className="text-[16px] sm:text-[18px] font-bold tracking-tight truncate">
+                <h1 className="text-[16px] sm:text-[18px] font-bold font-exo tracking-tight truncate">
                   {title}
                 </h1>
               )}
@@ -141,7 +141,7 @@ export function AppHeader({
   
               {/* Stacked Tab title */}
               <div className="flex flex-col min-w-0 text-left justify-center select-none">
-                <h1 className={`text-[16px] sm:text-[18px] font-bold tracking-tight truncate leading-none ${
+                <h1 className={`text-[16px] sm:text-[18px] font-bold font-exo tracking-tight truncate leading-none ${
                   useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
                 }`}>
                   {!isTodayTab ? title : ""}

@@ -72,7 +72,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
         {/* Period Closing Hero */}
         <div className="p-7 sm:p-8 rounded-[28px] overflow-hidden border border-[var(--border-color)] shadow-sm flex flex-col items-center text-center bg-[var(--surface-color)] relative">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-80 uppercase tracking-wider">
+            <span className="text-xs font-semibold font-exo text-[var(--text-secondary)] opacity-80 uppercase tracking-wider">
               {t('periodClosing' as any) || 'Periodavslut'}
             </span>
             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-tight ${
@@ -134,7 +134,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     <div className="space-y-4">
       {/* Primary Hero Metric: Total Remaining */}
       <div className="p-6 sm:p-7 rounded-[28px] overflow-hidden border border-[var(--border-color)] shadow-sm flex flex-col items-center text-center bg-[var(--surface-color)] relative group">
-        <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2.5 block">
+        <span className="text-xs font-semibold font-exo text-[var(--text-secondary)] opacity-85 mb-2.5 block">
           {t('totalRemaining' as any)}
         </span>
         <div className="flex items-baseline justify-center gap-1.5">

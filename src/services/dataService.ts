@@ -47,7 +47,7 @@ export const dataService = {
       initialSpent: profileData.initial_spent,
       notifications: profileData.notifications,
       securityLock: profileData.security_lock,
-      darkMode: (profileData.dark_mode !== undefined && profileData.dark_mode !== null) ? profileData.dark_mode : false,
+      darkMode: (profileData.dark_mode !== undefined && profileData.dark_mode !== null) ? profileData.dark_mode : true,
       quickChoices: profileData.quick_choices || [],
       savingsPot: profileData.savings_pot || 0,
       savingsGoals: profileData.savings_goals || [],
@@ -234,8 +234,8 @@ export const dataService = {
     
     if (!profile) {
       console.warn('[Data] Profile missing during transaction add, attempting repair...');
-      // Minimal profile insert with default light mode
-      await supabase.from('profiles').upsert({ id: userId, dark_mode: false });
+      // Minimal profile insert with default dark mode
+      await supabase.from('profiles').upsert({ id: userId, dark_mode: true });
     }
 
     const { data, error } = await supabase

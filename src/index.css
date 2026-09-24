@@ -10,6 +10,8 @@
     "Changa One", "Chango", sans-serif;
   --font-amount:
     "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-exo:
+    "Exo", "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-logo:
     "Changa One", "Chango", sans-serif;
   --font-serif:
@@ -67,6 +69,14 @@ textarea {
 
 @utility font-display {
   font-family: "DM Sans", sans-serif;
+}
+
+@utility font-exo {
+  font-family: "Exo", "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.font-exo {
+  font-family: "Exo", "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 
 @utility no-scrollbar {
@@ -166,17 +176,17 @@ textarea {
 }
 
 .dark {
-  /* Premium Dark Theme Refinements (Dejz Design System) - Soft Near-Black Charcoal */
-  --bg-top-color: #181818;
-  --bg-color: #181818;
-  --bg-secondary: #1f1f1f;
-  --bg-gradient: linear-gradient(180deg, #181818 0%, #181818 100%);
+  /* Premium Dark Theme (Dejz Design System) - Deep Midnight Navy #071020 */
+  --bg-top-color: #071020;
+  --bg-color: #071020;
+  --bg-secondary: #0b1426;
+  --bg-gradient: radial-gradient(120% 120% at 50% 0%, #0e1d3a 0%, #071020 100%);
 
-  --surface-color: #222222;
-  --surface-gradient: #222222;
-  --surface-elevated: #2a2a2a;
-  --surface-elevated-gradient: #2a2a2a;
-  --surface-solid: #222222;
+  --surface-color: #0c1424;
+  --surface-gradient: #0c1424;
+  --surface-elevated: #16223b;
+  --surface-elevated-gradient: #16223b;
+  --surface-solid: #0c1424;
   --surface-muted: rgba(255, 255, 255, 0.04);
   --surface-tint: rgba(255, 255, 255, 0.02);
 

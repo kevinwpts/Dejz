@@ -51,7 +51,7 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
         onClick={() => setIsOpen(!isOpen)}
         className="w-full py-5 flex items-center justify-between text-left group cursor-pointer"
       >
-        <span className={`text-base sm:text-lg font-bold tracking-tight transition-colors duration-200 ${isOpen ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'}`}>
+        <span className={`text-base sm:text-lg font-bold font-exo tracking-tight transition-colors duration-200 ${isOpen ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'}`}>
           {question}
         </span>
         <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center transition-all duration-200 border ${
@@ -212,7 +212,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                     transition={{ duration: 0.45, ease: 'easeOut' }}
                     className="space-y-4"
                   >
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[70px] font-bold tracking-tight text-[var(--text-primary)] leading-[1.05]">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[70px] font-bold font-exo tracking-tight text-[var(--text-primary)] leading-[1.05]" style={{ fontFamily: '"Exo", sans-serif' }}>
                       {getL10n('Se vad du kan spendera idag.', 'See what you can spend today.', 'Se hva du kan bruke i dag.', 'Se hvad du kan bruge i dag.', 'Katso mitä voit käyttää tänään.')}
                     </h1>
                     <p className="text-base sm:text-lg md:text-xl text-[var(--text-secondary)] font-medium max-w-md mx-auto lg:mx-0 leading-relaxed font-sans">
@@ -304,181 +304,20 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                   )}
               </div>
 
-              {/* Modern Live App Interactive Mockup */}
-              <div className="flex-1 w-full max-w-md relative mx-auto flex items-center justify-center">
-                 <motion.div 
-                   initial={{ opacity: 0, scale: 0.96 }}
-                   animate={{ opacity: 1, scale: 1 }} 
-                   transition={{ duration: 0.5, delay: 0.2 }}
-                   className="relative w-full flex items-center justify-center cursor-pointer group"
-                   onClick={onStartDemo || onGetStarted}
-                 >
-                    {/* Shadow bloom */}
-                    <div className="absolute top-[5%] bottom-[5%] left-[8%] right-[8%] bg-black/8 dark:bg-white/8 blur-3xl rounded-full pointer-events-none" />
-                    
-                    {/* Phone Frame container matching real app */}
-                    <div className="relative w-full max-w-[350px] sm:max-w-[370px] bg-[var(--bg-color)] border-[6px] sm:border-[7px] border-[var(--border-strong)]/40 rounded-[36px] p-3.5 sm:p-4 shadow-xl text-left space-y-3 overflow-hidden z-10 transition-transform duration-300 group-hover:scale-[1.01]">
-                      
-                      {/* Phone Notch */}
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-3.5 bg-[var(--border-strong)]/40 rounded-b-[12px] z-30" />
-
-                      {/* Simulated App Header */}
-                      <div className="flex items-center justify-between pt-1 px-1">
-                        <DejzLogo className="text-lg font-black" textColor="var(--logo-color)" />
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-7 h-7 rounded-[10px] bg-[var(--surface-color)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] shadow-2xs">
-                            <Search size={13} />
-                          </div>
-                          <div className="w-7 h-7 rounded-[10px] bg-[var(--surface-color)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] shadow-2xs">
-                            <Bell size={13} />
-                          </div>
-                          <div className="w-7 h-7 rounded-[10px] overflow-hidden border border-[var(--border-color)] shadow-2xs">
-                            <img 
-                              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80" 
-                              alt="Anders" 
-                              className="w-full h-full object-cover"
-                              referrerPolicy="no-referrer" 
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Simulated Universal Period Selector */}
-                      <div className="flex items-center justify-between bg-[var(--surface-color)] p-1.5 rounded-[16px] border border-[var(--border-color)] shadow-2xs">
-                        <div className="flex items-center gap-1">
-                          <span className="px-2.5 py-1 rounded-[10px] bg-[var(--accent-color)] text-[var(--text-on-accent)] text-[10px] font-bold tracking-wider">
-                            IDAG
-                          </span>
-                          <span className="text-[11px] font-bold text-[var(--text-primary)] pl-1">
-                            {getL10n('25 maj – 24 jun', 'May 25 – Jun 24', '25. mai – 24. jun', '25. maj – 24. jun', '25. toukokuuta – 24. kesäkuuta')}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 bg-[var(--surface-muted)] p-0.5 rounded-[10px] border border-[var(--border-color)]">
-                          <div className="p-1 rounded-[7px] bg-[var(--surface-color)] text-[var(--text-primary)] shadow-2xs">
-                            <Clock size={11} />
-                          </div>
-                          <div className="p-1 rounded-[7px] text-[var(--text-secondary)]">
-                            <Calendar size={11} />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Simulated Dejzi Greeting Module */}
-                      <div className="p-3 bg-[var(--surface-color)] rounded-[20px] border border-[var(--border-color)] shadow-xs flex items-center gap-2.5">
-                        <div className="relative shrink-0">
-                          <div className="w-8 h-8 rounded-[12px] bg-[#FAF59D] flex items-center justify-center text-[#071020] text-xs font-bold shadow-2xs">
-                            <Sparkles size={14} className="fill-[#071020]" />
-                          </div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[11px] font-bold text-[var(--text-primary)] leading-tight">
-                            {getL10n('God morgon Anders! 👋', 'Good morning Anders! 👋', 'God morgen Anders! 👋', 'Godmorgen Anders! 👋', 'Huomenta Anders! 👋')}
-                          </p>
-                          <p className="text-[10px] font-medium text-[var(--text-secondary)] truncate mt-0.5">
-                            {getL10n('Du har 320 kr kvar att spendera idag', 'You have 320 kr left to spend today', 'Du har 320 kr igjen å bruke i dag', 'Du har 320 kr tilbage at bruge i dag', 'Sinulla on 320 kr jäljellä käytettäväksi tänään')}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Main Hero Card: Total Remaining Today */}
-                      <div className="bg-[var(--surface-color)] border border-[var(--border-color)] py-3.5 px-4 rounded-[22px] shadow-xs text-center relative overflow-hidden">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-60 mb-0.5 block">
-                          {getL10n('Kvar att spendera idag', 'Left to spend today', 'Igjen å bruke i dag', 'Tilbage at bruge i dag', 'Jäljellä käytettäväksi tänään')}
-                        </span>
-                        <div className="flex items-baseline justify-center gap-1">
-                          <span className="text-4xl font-bold font-amount tracking-tight text-[var(--text-primary)]">320</span>
-                          <span className="text-sm font-bold text-[var(--text-secondary)] opacity-50">kr</span>
-                        </div>
-                        <div className="mt-2.5 w-full bg-[var(--surface-muted)] h-1.5 rounded-full overflow-hidden border border-[var(--border-color)]">
-                          <div className="bg-[var(--accent-color)] h-full w-[65%] rounded-full" />
-                        </div>
-                      </div>
-
-                      {/* Simulated Transactions Today */}
-                      <div className="space-y-1.5 pt-0.5">
-                        <div className="flex items-center justify-between px-1">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
-                            {getL10n('Idag', 'Today', 'I dag', 'I dag', 'Tänään')}
-                          </span>
-                          <span className="text-[10px] font-bold text-[var(--accent-color)]">
-                            3 {getL10n('st', 'items', 'stk', 'stk', 'kpl')}
-                          </span>
-                        </div>
-
-                        {/* Transaction Card 1 */}
-                        <div className="p-2.5 rounded-[16px] border border-[var(--border-color)] flex items-center justify-between gap-2.5 bg-[var(--surface-color)] shadow-2xs">
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            <div className="w-7 h-7 rounded-[9px] flex items-center justify-center overflow-hidden shrink-0 bg-white border border-[var(--border-color)] shadow-2xs">
-                              <img 
-                                src="https://www.google.com/s2/favicons?domain=espressohouse.com&sz=128" 
-                                alt="Espresso House" 
-                                className="w-4 h-4 object-contain"
-                                referrerPolicy="no-referrer" 
-                              />
-                            </div>
-                            <div className="min-w-0 flex-1 flex flex-col">
-                              <p className="text-[11px] font-bold text-[var(--text-primary)] leading-tight truncate">
-                                Espresso House
-                              </p>
-                              <span className="text-[9px] font-medium text-[var(--text-secondary)]">
-                                Café
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end shrink-0">
-                            <p className="text-xs font-bold font-amount text-[var(--text-primary)]">
-                              -45 kr
-                            </p>
-                            <span className="text-[9px] font-semibold text-[var(--text-secondary)] opacity-40">
-                              14:22
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Transaction Card 2 */}
-                        <div className="p-2.5 rounded-[16px] border border-[var(--border-color)] flex items-center justify-between gap-2.5 bg-[var(--surface-color)] shadow-2xs">
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            <div className="w-7 h-7 rounded-[9px] flex items-center justify-center overflow-hidden shrink-0 bg-white border border-[var(--border-color)] shadow-2xs">
-                              <img 
-                                src="https://www.google.com/s2/favicons?domain=hemkop.se&sz=128" 
-                                alt="Hemköp" 
-                                className="w-4 h-4 object-contain"
-                                referrerPolicy="no-referrer" 
-                              />
-                            </div>
-                            <div className="min-w-0 flex-1 flex flex-col">
-                              <p className="text-[11px] font-bold text-[var(--text-primary)] leading-tight truncate">
-                                Hemköp
-                              </p>
-                              <span className="text-[9px] font-medium text-[var(--text-secondary)]">
-                                Livsmedel
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end shrink-0">
-                            <p className="text-xs font-bold font-amount text-[var(--text-primary)]">
-                              -124 kr
-                            </p>
-                            <span className="text-[9px] font-semibold text-[var(--text-secondary)] opacity-40">
-                              12:15
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Simulated Floating Bottom Navigation */}
-                      <div className="bg-[var(--surface-color)] rounded-full py-1.5 px-4 shadow-sm border border-[var(--border-color)] flex items-center justify-around text-[var(--text-secondary)] mt-2">
-                        <div className="p-1 rounded-full text-[var(--accent-color)]"><Home size={15} /></div>
-                        <div className="p-1 hover:text-[var(--text-primary)]"><History size={15} /></div>
-                        <div className="h-7 w-7 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] flex items-center justify-center shadow-xs"><Plus size={15} strokeWidth={2.5} /></div>
-                        <div className="p-1 hover:text-[var(--text-primary)]"><BarChart3 size={15} /></div>
-                        <div className="p-1 hover:text-[var(--text-primary)]"><WalletCards size={15} /></div>
-                      </div>
-
-                      {/* Home Indicator */}
-                      <div className="w-24 h-1 bg-[var(--border-strong)]/30 rounded-full mx-auto mt-1" />
-                    </div>
-                 </motion.div>
+              {/* Modern Live App Image Mockup */}
+              <div className="flex-1 w-full max-w-xl relative mx-auto flex items-center justify-center">
+                {/* Shadow bloom */}
+                <div className="absolute top-[10%] bottom-[10%] left-[10%] right-[10%] bg-[#071020]/10 dark:bg-white/5 blur-3xl rounded-full pointer-events-none" />
+                
+                <motion.img 
+                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  src="/hero.png" 
+                  alt="Dejz App Mockup" 
+                  className="w-full max-w-[480px] sm:max-w-[540px] h-auto object-contain relative z-10 select-none drop-shadow-2xl"
+                  referrerPolicy="no-referrer"
+                />
               </div>
            </div>
         </section>
@@ -487,7 +326,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
         <section id="how-it-works" className="w-full bg-[var(--bg-color)] border-b border-[var(--border-color)] py-20 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-5 sm:px-8 text-center">
             <div className="space-y-3 mb-16">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-primary)]">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-exo tracking-tight text-[var(--text-primary)]" style={{ fontFamily: '"Exo", sans-serif' }}>
                 {getL10n('Så fungerar Dejz', 'How Dejz works', 'Slik fungerer Dejz', 'Sådan fungerer Dejz', 'Miten Dejz toimii')}
               </h2>
               <p className="text-sm sm:text-base text-[var(--text-secondary)] font-medium max-w-md mx-auto">
@@ -580,7 +419,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                   </div>
 
                   <div className="space-y-1.5">
-                    <h3 className="text-lg font-bold tracking-tight text-[var(--text-primary)]">{step.title}</h3>
+                    <h3 className="text-lg font-bold font-exo tracking-tight text-[var(--text-primary)]" style={{ fontFamily: '"Exo", sans-serif' }}>{step.title}</h3>
                     <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium leading-relaxed">{step.desc}</p>
                   </div>
                 </div>
@@ -596,7 +435,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
               <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-3 py-1 rounded-full">
                 {getL10n('Alltid synkat • Överallt', 'Always Synced • Everywhere', 'Alltid synkronisert • Overalt', 'Altid synkroniseret • Overalt', 'Aina synkronoitu • Kaikkialla')}
               </span>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-primary)] pt-1">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-exo tracking-tight text-[var(--text-primary)] pt-1" style={{ fontFamily: '"Exo", sans-serif' }}>
                 {getL10n('Mobil, padda eller dator – allt hänger ihop', 'Phone, tablet, or computer – it all syncs', 'Mobil, nettbrett eller PC – alt henger sammen', 'Mobil, tablet eller computer – det hele synkroniseres', 'Puhelin, tabletti tai tietokone – kaikki synkronoituu')}
               </h2>
               <p className="text-sm sm:text-base text-[var(--text-secondary)] font-medium">
@@ -614,7 +453,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                       <Smartphone size={16} />
                     </div>
                     <div>
-                      <h3 className="text-[15px] font-bold text-[var(--text-primary)]">{getL10n('I mobilen', 'In your pocket', 'På mobilen', 'På mobilen', 'Puhelimessa')}</h3>
+                      <h3 className="text-[15px] font-bold font-exo text-[var(--text-primary)]" style={{ fontFamily: '"Exo", sans-serif' }}>{getL10n('I mobilen', 'In your pocket', 'På mobilen', 'På mobilen', 'Puhelimessa')}</h3>
                       <p className="text-[11px] text-[var(--text-secondary)] font-medium">{getL10n('Snabb inmatning i farten', 'Quick logging on the go', 'Hurtig registrering på farten', 'Hurtig indtastning på farten', 'Nopea kirjaus lennosta')}</p>
                     </div>
                   </div>
@@ -649,7 +488,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                       <Tablet size={16} />
                     </div>
                     <div>
-                      <h3 className="text-[15px] font-bold text-[var(--text-primary)]">{getL10n('På surfplattan', 'On your tablet', 'På nettbrettet', 'På din tablet', 'Tabletilla')}</h3>
+                      <h3 className="text-[15px] font-bold font-exo text-[var(--text-primary)]" style={{ fontFamily: '"Exo", sans-serif' }}>{getL10n('På surfplattan', 'On your tablet', 'På nettbrettet', 'På din tablet', 'Tabletilla')}</h3>
                       <p className="text-[11px] text-[var(--text-secondary)] font-medium">{getL10n('Perfekt överblick i soffan', 'Perfect overview from the couch', 'Perfekt oversikt i sofaen', 'Perfekt overblik i sofaen', 'Täydellinen yleiskuva sohvalla')}</p>
                     </div>
                   </div>
@@ -687,7 +526,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                       <Laptop size={16} />
                     </div>
                     <div>
-                      <h3 className="text-[15px] font-bold text-[var(--text-primary)]">{getL10n('På datorn', 'On your computer', 'På PC-en', 'På computeren', 'Tietokoneella')}</h3>
+                      <h3 className="text-[15px] font-bold font-exo text-[var(--text-primary)]" style={{ fontFamily: '"Exo", sans-serif' }}>{getL10n('På datorn', 'On your computer', 'På PC-en', 'På computeren', 'Tietokoneella')}</h3>
                       <p className="text-[11px] text-[var(--text-secondary)] font-medium">{getL10n('Planera och analysera i lugn och ro', 'Plan and analyze comfortably', 'Planlegg og analyser i fred og ro', 'Planlæg og analysér i ro og mag', 'Suunnittele ja analysoi rauhassa')}</p>
                     </div>
                   </div>
@@ -725,7 +564,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
         <section id="testimonials" className="w-full bg-[var(--bg-color)] border-b border-[var(--border-color)] py-20">
           <div className="max-w-7xl mx-auto px-5 sm:px-8">
             <div className="text-center space-y-3 mb-16">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[var(--text-primary)]">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-exo tracking-tight text-[var(--text-primary)]" style={{ fontFamily: '"Exo", sans-serif' }}>
                 {getL10n('Vad våra användare säger', 'What our users say', 'Hva brukerne våre sier', 'Hvad vores brugere siger', 'Mitä käyttäjämme sanovat')}
               </h2>
               <p className="text-sm sm:text-base text-[var(--text-secondary)] font-medium max-w-md mx-auto">
@@ -848,7 +687,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                 <div className="w-14 h-14 rounded-[20px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] border border-[var(--accent-color)]/20 flex items-center justify-center mx-auto md:mx-0 shadow-2xs">
                   <ShieldCheck size={28} />
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
+                <h2 className="text-3xl sm:text-4xl font-bold font-exo tracking-tight text-[var(--text-primary)]" style={{ fontFamily: '"Exo", sans-serif' }}>
                   {getL10n('Din ekonomi är 100% din.', 'Your finances are 100% yours.', 'Din økonomi er 100 % din.', 'Din økonomi er 100 % din.', 'Taloutesi on 100-prosenttisesti sinun.')}
                 </h2>
                 <p className="text-sm sm:text-base text-[var(--text-secondary)] font-medium leading-relaxed">
@@ -895,7 +734,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                       <item.icon size={20} />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-base font-bold tracking-tight text-[var(--text-primary)]">{item.title}</h3>
+                      <h3 className="text-base font-bold font-exo tracking-tight text-[var(--text-primary)]" style={{ fontFamily: '"Exo", sans-serif' }}>{item.title}</h3>
                       <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
@@ -913,7 +752,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                 <span>⚡ {getL10n('100% Gratis & Reklamfritt', '100% Free & No Ads', '100% Gratis & Reklamfri', '100% Gratis & Reklamefri', '100% Ilmainen & Mainokseton')}</span>
               </div>
               <div className="space-y-2.5 max-w-xl mx-auto text-center">
-                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
+                <h2 className="text-3xl sm:text-4xl font-bold font-exo tracking-tight text-[var(--text-primary)]" style={{ fontFamily: '"Exo", sans-serif' }}>
                   {getL10n('Kom igång med Dejz idag', 'Get started with Dejz today', 'Kom i gang med Dejz i dag', 'Kom i gang med Dejz i dag', 'Aloita Dejzin käyttö tänään')}
                 </h2>
                 <p className="text-sm sm:text-base text-[var(--text-secondary)] font-medium leading-relaxed">
@@ -944,7 +783,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
         <section id="faq" className="w-full bg-[var(--bg-color)] py-16 sm:py-20 border-b border-[var(--border-color)]">
           <div className="max-w-3xl mx-auto px-5 sm:px-8">
             <div className="text-center mb-12 space-y-2.5">
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)]">
+              <h2 className="text-3xl sm:text-4xl font-bold font-exo tracking-tight text-[var(--text-primary)]" style={{ fontFamily: '"Exo", sans-serif' }}>
                 {getL10n('Vanliga frågor', 'Frequently Asked Questions', 'Ofte stilte spørsmål', 'Ofte stillede spørgsmål', 'Usein kysytyt kysymykset')}
               </h2>
               <p className="text-sm sm:text-base text-[var(--text-secondary)] font-medium">
@@ -1046,7 +885,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
               activePolicy === 'terms' ? (
                 <div className="space-y-6 text-sm text-[var(--text-primary)]">
                   <section className="space-y-2 text-left">
-                    <h3 className="text-base font-bold">1. {getL10n('Godkännande av villkor', 'Acceptance of Terms', 'Godkjenning av vilkår', 'Accept af vilkår', 'Ehtojen hyväksyminen')}</h3>
+                    <h3 className="text-base font-bold font-exo">1. {getL10n('Godkännande av villkor', 'Acceptance of Terms', 'Godkjenning av vilkår', 'Accept af vilkår', 'Ehtojen hyväksyminen')}</h3>
                     <p className="text-[var(--text-secondary)] font-medium">
                       {getL10n(
                         'Genom att registrera ett konto eller använda Dejz godkänner du dessa användarvillkor.',
@@ -1058,7 +897,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                     </p>
                   </section>
                   <section className="space-y-2 text-left">
-                    <h3 className="text-base font-bold">2. {getL10n('Tjänstens omfattning', 'Scope of Service', 'Tjenestens omfang', 'Tjenestens omfang', 'Palvelun laajuus')}</h3>
+                    <h3 className="text-base font-bold font-exo">2. {getL10n('Tjänstens omfattning', 'Scope of Service', 'Tjenestens omfang', 'Tjenestens omfang', 'Palvelun laajuus')}</h3>
                     <p className="text-[var(--text-secondary)] font-medium">
                       {getL10n(
                         'Dejz är ett digitalt verktyg för personlig budgetering och ekonomisk överblick. Beräkningar och prognoser är vägledande och utgör inte professionell finansiell rådgivning.',
@@ -1070,7 +909,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
                     </p>
                   </section>
                   <section className="space-y-2 text-left">
-                    <h3 className="text-base font-bold">3. {getL10n('Ansvarsbegränsning', 'Limitation of Liability', 'Ansvarsbegrensning', 'Ansvarsbegrænsning', 'Vastuunrajoitus')}</h3>
+                    <h3 className="text-base font-bold font-exo">3. {getL10n('Ansvarsbegränsning', 'Limitation of Liability', 'Ansvarsbegrensning', 'Ansvarsbegrænsning', 'Vastuunrajoitus')}</h3>
                     <p className="text-[var(--text-secondary)] font-medium">
                       {getL10n(
                         'Användaren ansvarar själv för sina ekonomiska beslut. Vi tar inget ansvar för eventuella ekonomiska förluster till följd av användning av appen.',
@@ -1085,7 +924,7 @@ export function LandingPage({ onGetStarted, onLogin, onStartDemo, onGoogleLogin,
               ) : (
                 <div className="space-y-6 text-sm text-left text-[var(--text-primary)]">
                   <section className="space-y-2">
-                    <h3 className="text-base font-bold">{getL10n('Cookiepolicy', 'Cookie Policy', 'Informsjonskapselpolicy', 'Cookiepolitik', 'Evästekäytäntö')}</h3>
+                    <h3 className="text-base font-bold font-exo">{getL10n('Cookiepolicy', 'Cookie Policy', 'Informsjonskapselpolicy', 'Cookiepolitik', 'Evästekäytäntö')}</h3>
                     <p className="text-[var(--text-secondary)] font-medium">
                       {getL10n(
                         'Enligt lagen om elektronisk kommunikation informeras om att vi endast använder nödvändiga cookies och lokal lagring (localStorage) för att upprätthålla din inloggningssession och dina personliga inställningar. Inga spårnings- eller marknadsföringscookies från tredje part används.',
