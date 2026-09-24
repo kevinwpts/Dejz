@@ -334,6 +334,11 @@ export function AnalysisView({
                 });
 
             const totalItemCount = categoryTransactions.length + categoryFixedExpenses.length;
+
+            const totalIncome = stats?.totalIncome || 0;
+            const budgetInKronor = item.budget ? Math.round((item.budget / 100) * totalIncome) : 0;
+            const hasBudget = item.budget !== undefined && item.budget > 0 && budgetInKronor > 0;
+            const remainingBudget = budgetInKronor - Math.round(item.value);
             
             return (
               <motion.div 
@@ -356,27 +361,69 @@ export function AnalysisView({
                 >
                   <div className="flex items-center justify-between gap-[12px] w-full">
                     <div className="flex items-center gap-[12px] min-w-0 flex-1">
-                      <div 
-                        className="w-[42px] h-[42px] rounded-full flex items-center justify-center shadow-xs shrink-0"
-                        style={{ 
-                          backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
-                          color: '#fff'
-                        }}
-                      >
-                        {isEmojiString(iconName) ? (
-                          <span className="text-[19px] leading-none">{iconName}</span>
-                        ) : Icon ? (
-                          <Icon size={20} strokeWidth={1.75} />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full" />
+                      {/* Category Icon with Circular Progress Ring if budgeted */}
+                      <div className="relative w-[48px] h-[48px] flex items-center justify-center shrink-0">
+                        {hasBudget && (
+                          <svg className="absolute top-0 left-0 w-full h-full -rotate-90" viewBox="0 0 48 48">
+                            {/* Background Track Circle */}
+                            <circle
+                              cx="24"
+                              cy="24"
+                              r="21"
+                              fill="none"
+                              stroke="var(--border-color)"
+                              strokeWidth="2.5"
+                              className="opacity-30"
+                            />
+                            {/* Animated Progress Circle */}
+                            <circle
+                              cx="24"
+                              cy="24"
+                              r="21"
+                              fill="none"
+                              stroke={item.value <= budgetInKronor ? (item.color || 'var(--accent-color)') : '#f59e0b'}
+                              strokeWidth="2.5"
+                              strokeDasharray={131.95}
+                              strokeDashoffset={131.95 * (1 - Math.min((item.value / budgetInKronor), 1))}
+                              strokeLinecap="round"
+                              className="transition-all duration-500"
+                            />
+                          </svg>
                         )}
+                        <div 
+                          className="w-[36px] h-[36px] rounded-full flex items-center justify-center shadow-xs shrink-0 relative z-10"
+                          style={{ 
+                            backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
+                            color: '#fff'
+                          }}
+                        >
+                          {isEmojiString(iconName) ? (
+                            <span className="text-[17px] leading-none">{iconName}</span>
+                          ) : Icon ? (
+                            <Icon size={17} strokeWidth={1.75} />
+                          ) : (
+                            <div className="w-1.5 h-1.5 rounded-full" />
+                          )}
+                        </div>
                       </div>
+
                       <div className="min-w-0 flex-1 flex flex-col justify-center">
                         <p className={`text-[13.5px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors ${
                           isExpanded ? 'text-[var(--accent-color)] font-semibold' : 'text-[var(--text-primary)] group-hover:text-[var(--accent-color)]'
                         }`}>
                           {item.name}
                         </p>
+                        {hasBudget && (
+                          <p className={`text-[11px] font-medium mt-1 truncate ${
+                            remainingBudget < 0 ? 'text-amber-500 font-semibold' : 'text-[var(--text-secondary)] opacity-85'
+                          }`}>
+                            {remainingBudget < 0 ? (
+                              <span>Över budget: {formatAmount(Math.abs(remainingBudget), config.language)} kr</span>
+                            ) : (
+                              <span>Kvar av budget: <strong className="text-[var(--text-primary)] font-bold">{formatAmount(remainingBudget, config.language)} kr</strong></span>
+                            )}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
@@ -394,32 +441,6 @@ export function AnalysisView({
                       </div>
                     </div>
                   </div>
-
-                  {/* Elegant Category Budget Progress Bar */}
-                  {(() => {
-                    if (!item.budget || item.budget <= 0) return null;
-                    const totalIncome = stats?.totalIncome || 0;
-                    const budgetInKronor = Math.round((item.budget / 100) * totalIncome);
-                    if (budgetInKronor <= 0) return null;
-                    
-                    return (
-                      <div className="w-full pt-1 px-1 border-t border-[var(--border-color)]/20 mt-1">
-                        <div className="flex justify-between items-center text-[11px] font-semibold text-[var(--text-secondary)] mb-1.5">
-                          <span className="opacity-85">Spenderat: {formatAmount(Math.round(item.value), config.language)} {config.currency}</span>
-                          <span className="text-[var(--text-tertiary)] font-normal">Kategoribudget: {formatAmount(budgetInKronor, config.language)} {config.currency} ({item.budget}%)</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-[var(--border-color)]/50 rounded-full overflow-hidden relative">
-                          <div 
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{ 
-                              width: `${Math.min((item.value / budgetInKronor) * 100, 100)}%`,
-                              backgroundColor: item.value <= budgetInKronor ? (item.color || 'var(--accent-color)') : '#f59e0b'
-                            }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })()}
                 </motion.div>
                 
                 <AnimatePresence>

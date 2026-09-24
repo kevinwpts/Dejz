@@ -50,6 +50,47 @@ export function BudgetView({
 
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(false);
+  const [initialCategoryNames, setInitialCategoryNames] = React.useState<string[]>([]);
+
+  const handleOpenCategoryBudgets = () => {
+    const totalInc = stats.totalIncome || 1;
+    
+    const getFixedSpent = (catName: string) => {
+      return (fixedExpenses || [])
+        .filter((e) => e.category?.trim().toLowerCase() === catName.trim().toLowerCase())
+        .reduce((sum, e) => {
+          const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
+            ? e.periodOverrides[currentPeriodId]
+            : (Number(e.amount) || 0);
+          switch (e.frequency) {
+            case 'quarterly': return sum + amount / 3;
+            case 'semi-annually': return sum + amount / 6;
+            case 'annually': return sum + amount / 12;
+            default: return sum + amount;
+          }
+        }, 0);
+    };
+
+    const getBudgetPct = (c: any) => {
+      const catFixed = getFixedSpent(c.name);
+      const fixedPct = totalInc > 0 ? Math.round((catFixed / totalInc) * 100) : 0;
+      
+      if (c.budget === undefined) return fixedPct;
+      
+      let pctVal = c.budget;
+      if (c.budget > 100) {
+        pctVal = totalInc > 0 ? Math.min(100, Math.round((c.budget / totalInc) * 100)) : 0;
+      }
+      return Math.max(fixedPct, pctVal);
+    };
+
+    const sortedNames = [...(config.categories || [])]
+      .sort((a, b) => getBudgetPct(b) - getBudgetPct(a))
+      .map(c => c.name);
+
+    setInitialCategoryNames(sortedNames);
+    setShowCategoryBudgets(true);
+  };
 
   const totalSavings = (config.monthlySavingsItems?.reduce((sum, item) => {
     const amount = (item.isVariable && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined)
@@ -149,7 +190,7 @@ export function BudgetView({
         </div>
 
         {/* Info card with progress meter */}
-        <div className="p-5 sm:p-6 rounded-[24px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-xs space-y-4">
+        <div className="sticky top-3 z-20 p-5 sm:p-6 rounded-[24px] border border-[var(--border-color)] bg-[var(--surface-color)]/95 backdrop-blur-md shadow-sm space-y-4">
           <div>
             <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
               Fördelat av budget
@@ -176,7 +217,14 @@ export function BudgetView({
           
           <div className="space-y-4 pr-1">
             {[...(config.categories || [])]
-              .sort((a, b) => getBudgetPercentage(b) - getBudgetPercentage(a))
+              .sort((a, b) => {
+                const indexA = initialCategoryNames.indexOf(a.name);
+                const indexB = initialCategoryNames.indexOf(b.name);
+                if (indexA !== -1 && indexB !== -1) {
+                  return indexA - indexB;
+                }
+                return getBudgetPercentage(b) - getBudgetPercentage(a);
+              })
               .map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
@@ -256,9 +304,6 @@ export function BudgetView({
                     <div className="flex flex-wrap justify-between items-center gap-2 text-[11px] font-medium text-[var(--text-secondary)]">
                       <div className="flex flex-wrap gap-x-3 gap-y-1">
                         <span>Motsvarar kostnad: <strong className="text-[var(--text-primary)] font-bold font-amount">{formatAmount(displayedBudget, config.language)} kr</strong></span>
-                        {fixedSpent > 0 && (
-                          <span>Fasta utgifter (golv): <strong className="text-[var(--text-primary)] font-semibold font-amount">{formatAmount(fixedSpent, config.language)} kr ({fixedSpentPercentage}%)</strong></span>
-                        )}
                         {variableSpent > 0 && (
                           <span>Rörligt spenderat hittills: <strong className="text-[var(--text-primary)] font-normal font-amount">{formatAmount(variableSpent, config.language)} kr</strong></span>
                         )}
@@ -389,7 +434,7 @@ export function BudgetView({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45 }}
-          onClick={() => setShowCategoryBudgets(true)}
+          onClick={handleOpenCategoryBudgets}
           className="w-full h-11 rounded-[16px] bg-[var(--surface-color)] border border-[var(--border-color)] text-[12.5px] sm:text-[13px] font-bold text-[var(--accent-color)] hover:bg-[var(--surface-muted)]/70 transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer"
         >
           <SlidersHorizontal size={15} />
