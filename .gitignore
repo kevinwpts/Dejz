@@ -32,3 +32,4 @@ yarn-error.log*
 # Temporary patch / script artifacts
 *.cjs.bak
 patch*
+*.zip
