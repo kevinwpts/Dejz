@@ -3916,6 +3916,7 @@ export default function App() {
                     amount: Number(inc.amount) || 0,
                     icon: inc.icon || "Wallet",
                     logo: inc.logo,
+                    deductionDay: inc.deductionDay || data.payday || 25,
                   };
                   await dataService.saveIncomeSource(
                     activeUserId,

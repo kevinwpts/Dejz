@@ -78,7 +78,7 @@ interface OnboardingModalProps {
   isPro: boolean;
   onComplete: (data: {
     fullName: string;
-    incomes: { amount: number; name: string; icon?: string; logo?: string }[];
+    incomes: { amount: number; name: string; icon?: string; logo?: string; deductionDay?: number }[];
     fixedExpenses: Omit<FixedExpense, 'id'>[];
     savingsGoals: { title: string; targetAmount: number; icon?: string; logo?: string; deadline?: string }[];
     initialSpent: number;

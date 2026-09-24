@@ -238,11 +238,11 @@ export function PeriodTimeline({
     <div className="relative group/timeline w-full my-3 font-sans overflow-visible">
       {/* Left Scroll Arrow Button */}
       {canScrollLeft && (
-        <div className="hidden md:flex absolute left-0 top-0 bottom-0 z-20 items-center pl-1 pr-8 bg-gradient-to-r from-[var(--bg-color)] via-[var(--bg-color)]/95 to-transparent pointer-events-none">
+        <div className="hidden md:flex absolute left-1 top-0 bottom-0 z-20 items-center pointer-events-none">
           <button
             type="button"
             onClick={() => handleScrollBy(-220)}
-            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90"
+            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-sm"
             aria-label="Skrolla bakåt i tidslinjen"
             title="Föregående dagar"
           >
@@ -341,11 +341,11 @@ export function PeriodTimeline({
 
       {/* Right Scroll Arrow Button */}
       {canScrollRight && (
-        <div className="hidden md:flex absolute right-0 top-0 bottom-0 z-20 items-center pr-1 pl-8 bg-gradient-to-l from-[var(--bg-color)] via-[var(--bg-color)]/95 to-transparent pointer-events-none">
+        <div className="hidden md:flex absolute right-1 top-0 bottom-0 z-20 items-center pointer-events-none">
           <button
             type="button"
             onClick={() => handleScrollBy(220)}
-            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90"
+            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-sm"
             aria-label="Skrolla framåt i tidslinjen"
             title="Kommande dagar"
           >
