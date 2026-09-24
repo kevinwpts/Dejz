@@ -117,24 +117,14 @@ export function GreetingModule({
 
   let topLabel: React.ReactNode = '';
   let displayAmount = 0;
-  let isNegative = false;
 
   if (isFuturePeriod) {
     topLabel = t('plannedDailyBudget');
     displayAmount = stats?.baseDailyBudgetCents || 0;
-    isNegative = false;
   } else {
     topLabel = t('leftToday');
     displayAmount = Math.round(availableForD || 0);
-    isNegative = availableForD < 0;
   }
-
-  // Calculate daily progress bar values
-  const spentToday = todayDayData ? todayDayData.daySpent : 0;
-  const dayBudgetTotal = Math.max(1, spentToday + Math.max(0, displayAmount));
-  const dayProgressPct = isNegative 
-    ? 0 
-    : Math.max(0, Math.min(100, (Math.max(0, displayAmount) / dayBudgetTotal) * 100));
 
   // Dejzi mascot advice calculation
   const dejziInfo = useMemo(() => {
@@ -241,39 +231,27 @@ export function GreetingModule({
 
         {/* Content of the Hero card */}
         <div className="flex flex-col items-center text-center relative z-10">
-          <span className="text-xs font-semibold text-[var(--text-secondary)] tracking-wide mb-2 block">
+          <span className="text-sm sm:text-base font-bold text-[var(--text-secondary)] tracking-tight mb-2.5 block">
             {t('totalRemaining' as any)}
           </span>
-          <div className="flex items-baseline justify-center gap-1.5">
+          <div className="flex items-baseline justify-center gap-1.5 mb-2">
             <AnimatedNumber 
               value={stats?.remainingPeriodCents || 0} 
-              className={`text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
+              className={`text-4xl sm:text-5xl md:text-6xl leading-none font-extrabold text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
                 (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : ''
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
-            <span className={`text-base sm:text-lg font-light ${
+            <span className={`text-xl sm:text-2xl font-medium ${
               (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
             }`}>
               {currency}
             </span>
           </div>
 
-          {/* Progress bar under Kvar idag */}
-          <div className="w-full mt-4">
-            <div className="w-full h-2 bg-[var(--surface-muted)] dark:bg-white/10 rounded-full overflow-hidden relative">
-              <div 
-                className={`absolute left-0 top-0 bottom-0 rounded-full transition-all duration-1000 ease-out ${
-                  isNegative || dayProgressPct < 10 ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
-                }`}
-                style={{ width: `${dayProgressPct}%` }}
-              />
-            </div>
-          </div>
-
           {/* Integrated Totalt kvar & Nästa lön */}
           {effectiveRemainingDays !== undefined && (
-            <div className="w-full grid grid-cols-2 gap-4 pt-4 mt-4">
+            <div className="w-full grid grid-cols-2 gap-4 pt-4 mt-6">
               <div className="text-left flex flex-col justify-center">
                 <span className="text-[11px] font-medium text-[var(--text-secondary)] tracking-wider mb-1 block">
                   {topLabel}
