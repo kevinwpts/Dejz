@@ -69,11 +69,6 @@ export function BudgetView({
   const sortedSavings = config?.monthlySavingsItems || [];
 
   if (showCategoryBudgets) {
-    const totalAllocated = config.categories?.reduce((sum, c) => sum + (c.budget || 0), 0) || 0;
-    const disposablePot = stats.disposablePot || 0;
-    const remainingBuffer = Math.max(0, disposablePot - totalAllocated);
-    const allocatedPercentage = Math.min((totalAllocated / (disposablePot || 1)) * 100, 100);
-
     const getFixedSpentForCategory = (catName: string) => {
       return (fixedExpenses || [])
         .filter((e) => e.category?.trim().toLowerCase() === catName.trim().toLowerCase())
@@ -108,6 +103,18 @@ export function BudgetView({
       });
       return sum;
     };
+
+    const totalAllocated = config.categories?.reduce((sum, c) => {
+      const catFixed = getFixedSpentForCategory(c.name);
+      const catVariable = getVariableSpentForCategory(c.name);
+      const catTotalUsed = catFixed + catVariable;
+      const budgetVal = c.budget !== undefined ? c.budget : catTotalUsed;
+      return sum + budgetVal;
+    }, 0) || 0;
+
+    const disposablePot = stats.disposablePot || 0;
+    const remainingBuffer = Math.max(0, disposablePot - totalAllocated);
+    const allocatedPercentage = Math.min((totalAllocated / (disposablePot || 1)) * 100, 100);
 
     return (
       <motion.div
@@ -173,7 +180,7 @@ export function BudgetView({
             Budget per rörlig kategori
           </h3>
           
-          <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
+          <div className="space-y-4 pr-1">
             {config.categories?.map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
@@ -184,7 +191,9 @@ export function BudgetView({
 
               // Pre-fill logic: if budget is not set, default visually to totalUsed, otherwise use set budget
               const displayedBudget = cat.budget !== undefined ? cat.budget : totalUsed;
-              const maxSliderVal = Math.max(15000, disposablePot, displayedBudget * 1.5);
+              
+              // Max slider is strictly capped to what's currently allocated here plus the remaining buffer, preventing over-drafting
+              const maxSliderVal = displayedBudget + remainingBuffer;
 
               return (
                 <div 
@@ -218,6 +227,7 @@ export function BudgetView({
                           placeholder={totalUsed > 0 ? String(totalUsed) : "Ingen budget"}
                           value={cat.budget !== undefined ? cat.budget : (totalUsed > 0 ? totalUsed : '')}
                           min={totalUsed}
+                          max={maxSliderVal}
                           onChange={(e) => {
                             if (e.target.value === '') {
                               const updatedCategories = config.categories.map((c) => 
@@ -228,6 +238,7 @@ export function BudgetView({
                             }
                             let val = Number(e.target.value);
                             if (val < totalUsed) val = totalUsed;
+                            if (val > maxSliderVal) val = maxSliderVal;
                             const valToSave = val === totalUsed ? undefined : val;
                             const updatedCategories = config.categories.map((c) => 
                               c.name === cat.name ? { ...c, budget: valToSave } : c
