@@ -5,18 +5,25 @@ import {
   Wallet,
   Sparkles,
   RotateCcw,
+  ChevronRight,
 } from "lucide-react";
 import {
   Transaction,
   Config,
   Income,
   FixedExpense,
+  Frequency,
 } from "../types";
 import { TranslationKey } from "../i18n";
 import { TransactionItem } from "./TransactionItem";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { BudgetItemLogo } from "./BudgetItem";
+import { ICON_MAP, getCategoryIconName, isEmojiString } from "../utils/icons";
+import { getEmojiSolidColor } from "../utils/ui";
+import { formatAmount } from "../utils/format";
+
+const COLORS = ['#2A2A2A', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#333333', '#222222', '#555555', '#444444'];
 
 interface TodayViewProps {
   stats: any;
@@ -160,6 +167,83 @@ export function TodayView({
     return transactions;
   }, [incomes, fixedExpenses, config.monthlySavingsItems, normalizedSelectedDate, stats?.periodId]);
 
+  const categoryBudgetData = useMemo(() => {
+    if (!stats || !config.categories || config.categories.length === 0) return [];
+
+    const periodStart = stats.periodStart ? new Date(stats.periodStart).getTime() : 0;
+    const periodEnd = stats.periodEnd ? new Date(stats.periodEnd).getTime() + 86399999 : Infinity;
+    const totalIncome = stats.totalIncome || 0;
+
+    const periodExpenses = (allTransactions || _transactions || []).filter((e: Transaction) => {
+      const inPeriod = e.timestamp >= periodStart && e.timestamp <= periodEnd;
+      if (!inPeriod) return false;
+      return e.type === "expense" || e.type === "savings";
+    });
+
+    const breakdown: Record<string, number> = {};
+
+    periodExpenses.forEach((e: Transaction) => {
+      if (e.type === "income") return;
+      if (e.category === "Spargris") {
+        breakdown["Spargris"] = (breakdown["Spargris"] || 0) + e.amount;
+      } else {
+        const transactionSplits = (e as any).splits;
+        if (transactionSplits && transactionSplits.length > 0) {
+          transactionSplits.forEach((split: any) => {
+            const splitCat = (split.category || "").trim();
+            breakdown[splitCat] = (breakdown[splitCat] || 0) + split.amount;
+          });
+        } else {
+          const cat = (e.category || "").trim();
+          breakdown[cat] = (breakdown[cat] || 0) + e.amount;
+        }
+      }
+    });
+
+    (fixedExpenses || []).forEach((e: FixedExpense) => {
+      const category = (e.category || "").trim();
+      if (!category) return;
+      let amount = Number(e.amount) || 0;
+      switch (e.frequency) {
+        case Frequency.QUARTERLY: amount = amount / 3; break;
+        case Frequency.SEMI_ANNUALLY: amount = amount / 6; break;
+        case Frequency.ANNUALLY: amount = amount / 12; break;
+        default: break;
+      }
+      breakdown[category] = (breakdown[category] || 0) + amount;
+    });
+
+    return (config.categories || []).map((cat, index) => {
+      const name = cat.name;
+      const searchName = name.trim().toLowerCase();
+      let spent = 0;
+      for (const [key, val] of Object.entries(breakdown)) {
+        if (key.trim().toLowerCase() === searchName) {
+          spent += val;
+        }
+      }
+
+      const budgetInKronor = cat.budget && totalIncome > 0 ? Math.round((cat.budget / 100) * totalIncome) : 0;
+      const hasBudget = cat.budget !== undefined && cat.budget > 0 && budgetInKronor > 0;
+      const remaining = budgetInKronor - Math.round(spent);
+      const iconName = cat.icon || getCategoryIconName(name);
+      const isOverBudget = hasBudget && remaining < 0;
+
+      return {
+        name,
+        spent: Math.round(spent),
+        budget: cat.budget,
+        budgetInKronor,
+        hasBudget,
+        remaining,
+        isOverBudget,
+        color: cat.color,
+        iconName,
+        index,
+      };
+    });
+  }, [stats, config.categories, allTransactions, _transactions, fixedExpenses]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -260,6 +344,138 @@ export function TodayView({
             </div>
           </motion.div>
         </div>
+      )}
+
+      {/* Category Budgets Carousel */}
+      {categoryBudgetData.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="space-y-3 pt-1"
+        >
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-2">
+              <h4 className="text-[13px] sm:text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                {config.language === "en" ? "Category budgets" : "Kategoribudgetar"}
+              </h4>
+            </div>
+            <button
+              onClick={() => onNavigate("analysis")}
+              className="flex items-center gap-0.5 text-[11px] font-semibold text-[var(--accent-color)] hover:opacity-80 transition-opacity cursor-pointer"
+            >
+              <span>{t("seeAll") || (config.language === "en" ? "See all" : "Visa alla")}</span>
+              <ChevronRight size={13} strokeWidth={2.5} />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide px-2 snap-x snap-mandatory">
+            {categoryBudgetData.map((cat, index) => {
+              const Icon = ICON_MAP[cat.iconName];
+              return (
+                <motion.button
+                  key={cat.name}
+                  initial={{ opacity: 0, scale: 0.95, x: 15 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  transition={{ delay: 0.2 + index * 0.03 }}
+                  onClick={() => onNavigate("analysis")}
+                  className="flex-shrink-0 flex flex-col justify-between p-3.5 rounded-[20px] bg-[var(--surface-color)] border border-[var(--border-color)] hover:border-[var(--accent-color)]/40 hover:bg-[var(--surface-muted)]/50 transition-all group text-left active:scale-[0.98] min-w-[140px] max-w-[155px] shadow-2xs cursor-pointer snap-start"
+                >
+                  <div className="flex items-center justify-between w-full mb-2.5">
+                    {/* Circular Progress Ring with Icon */}
+                    <div className="relative w-[40px] h-[40px] flex items-center justify-center shrink-0">
+                      <svg className="absolute top-0 left-0 w-full h-full -rotate-90" viewBox="0 0 40 40">
+                        <circle
+                          cx="20"
+                          cy="20"
+                          r="17"
+                          fill="none"
+                          stroke="var(--border-color)"
+                          strokeWidth="2.5"
+                          className="opacity-30"
+                        />
+                        <circle
+                          cx="20"
+                          cy="20"
+                          r="17"
+                          fill="none"
+                          stroke={cat.isOverBudget ? "#f59e0b" : (cat.color || "var(--accent-color)")}
+                          strokeWidth="2.5"
+                          strokeDasharray={106.81}
+                          strokeDashoffset={
+                            cat.hasBudget
+                              ? 106.81 * (1 - Math.min(cat.spent / cat.budgetInKronor, 1))
+                              : 106.81
+                          }
+                          strokeLinecap="round"
+                          className="transition-all duration-500"
+                        />
+                      </svg>
+                      <div
+                        className="w-[30px] h-[30px] rounded-full flex items-center justify-center shadow-2xs shrink-0 relative z-10"
+                        style={{
+                          backgroundColor:
+                            cat.color ||
+                            (isEmojiString(cat.iconName)
+                              ? getEmojiSolidColor(cat.iconName)
+                              : COLORS[index % COLORS.length]),
+                          color: "#fff",
+                        }}
+                      >
+                        {isEmojiString(cat.iconName) ? (
+                          <span className="text-[14px] leading-none">{cat.iconName}</span>
+                        ) : Icon ? (
+                          <Icon size={14} strokeWidth={1.75} />
+                        ) : (
+                          <div className="w-1.5 h-1.5 rounded-full" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Percentage badge if budgeted */}
+                    {cat.hasBudget && (
+                      <span
+                        className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full font-amount tabular-nums ${
+                          cat.isOverBudget
+                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                            : "bg-[var(--surface-muted)] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
+                        }`}
+                      >
+                        {Math.round((cat.spent / cat.budgetInKronor) * 100)}%
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col items-start w-full min-w-0">
+                    <span className="text-[12.5px] font-semibold text-[var(--text-primary)] tracking-tight leading-snug truncate w-full group-hover:text-[var(--accent-color)] transition-colors">
+                      {cat.name}
+                    </span>
+                    <span className="text-[11px] font-medium leading-tight mt-0.5 truncate w-full">
+                      {cat.hasBudget ? (
+                        cat.isOverBudget ? (
+                          <span className="text-amber-500 font-semibold font-amount tabular-nums">
+                            +{formatAmount(Math.abs(cat.remaining), config.language)} kr över
+                          </span>
+                        ) : (
+                          <span className="text-[var(--text-secondary)]">
+                            <strong className="text-[var(--text-primary)] font-bold font-amount tabular-nums">
+                              {formatAmount(cat.remaining, config.language)} kr
+                            </strong>{" "}
+                            kvar
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-[var(--text-secondary)] opacity-75 font-amount tabular-nums">
+                          {formatAmount(cat.spent, config.language)} kr använt
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.div>
       )}
 
       <div className="space-y-3.5 pt-2">
