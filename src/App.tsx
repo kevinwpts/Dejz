@@ -1100,7 +1100,7 @@ export default function App() {
   // --- Theme Logic ---
   useEffect(() => {
     let shouldUseDarkMode: boolean;
-    if (showLanding) {
+    if (showLanding || !session) {
       shouldUseDarkMode = false;
     } else if (config?.darkMode !== undefined && config?.darkMode !== null) {
       shouldUseDarkMode = config.darkMode;
