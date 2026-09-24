@@ -108,7 +108,7 @@ export function AppHeader({
     >
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2`}>
         {/* Left: Back button OR Profile Picture + (Greeting & Date OR Title) */}
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
           {onBack ? (
             <button
               onClick={onBack}
@@ -116,9 +116,9 @@ export function AppHeader({
                 useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
               }`}
             >
-              <ChevronLeft size={20} strokeWidth={2.2} className="shrink-0" />
+              <ChevronLeft size={22} strokeWidth={2.2} className="shrink-0" />
               {title && (
-                <h1 className="text-[15px] sm:text-[16px] font-bold tracking-tight truncate">
+                <h1 className="text-[16px] sm:text-[18px] font-bold tracking-tight truncate">
                   {title}
                 </h1>
               )}
@@ -128,7 +128,7 @@ export function AppHeader({
               {/* Profile Avatar Trigger Button */}
               <button
                 onClick={() => onNavigate("profile")}
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 ${
+                className={`w-[44px] h-[44px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 ${
                   activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
                 } ${
                   useWhiteHeader 
@@ -145,27 +145,27 @@ export function AppHeader({
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <User size={18} strokeWidth={2.2} />
+                  <User size={22} strokeWidth={2.2} />
                 )}
               </button>
-
+  
               {/* Stacked Welcoming text or Tab title */}
               <div className="flex flex-col min-w-0 text-left justify-center select-none">
                 {activeTab === "today" ? (
                   <>
-                    <h2 className={`text-[13px] sm:text-[14px] font-bold tracking-tight truncate leading-tight ${
+                    <h2 className={`text-[15px] sm:text-[17px] font-extrabold tracking-tight truncate leading-tight ${
                       useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
                     }`}>
                       {userName ? `Hej ${userName} 👋` : 'Hej 👋'}
                     </h2>
-                    <span className={`text-[10px] sm:text-[11px] font-medium tracking-wide truncate leading-none mt-0.5 uppercase ${
+                    <span className={`text-[11px] sm:text-[12px] font-semibold tracking-wide truncate leading-none mt-1 uppercase ${
                       useWhiteHeader ? "text-white/70" : "text-[var(--text-secondary)] opacity-80"
                     }`}>
                       {formattedDate}
                     </span>
                   </>
                 ) : (
-                  <h1 className={`text-[15px] sm:text-[16px] font-bold tracking-tight truncate leading-none ${
+                  <h1 className={`text-[16px] sm:text-[18px] font-bold tracking-tight truncate leading-none ${
                     useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
                   }`}>
                     {title || "Dejz"}
@@ -175,13 +175,13 @@ export function AppHeader({
             </>
           )}
         </div>
-
+  
         {/* Right Actions: Notifications, Search */}
-        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 ${
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 ${
                 useWhiteHeader 
                   ? "text-white/95 hover:bg-white/10" 
                   : "text-[var(--text-primary)] hover:bg-[var(--surface-muted)]"
@@ -189,27 +189,27 @@ export function AppHeader({
               aria-label="Notiser"
             >
               <Bell
-                size={19}
-                strokeWidth={2}
+                size={22}
+                strokeWidth={2.2}
               />
               {notificationCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-rose-500 text-white text-[8px] font-bold flex items-center justify-center leading-none shadow-xs">
+                <span className="absolute top-1 right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center leading-none shadow-xs">
                   {notificationCount}
                 </span>
               )}
             </button>
           )}
-
+  
           <button
             onClick={() => onNavigate("search")}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
               useWhiteHeader 
                 ? "text-white/95 hover:bg-white/10" 
                 : "text-[var(--text-primary)] hover:bg-[var(--surface-muted)]"
             }`}
             aria-label="Sök"
           >
-            <Search size={19} strokeWidth={2} />
+            <Search size={22} strokeWidth={2.2} />
           </button>
         </div>
       </div>
