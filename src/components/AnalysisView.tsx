@@ -398,8 +398,8 @@ export function AnalysisView({
                   {/* Elegant Category Budget Progress Bar */}
                   {(() => {
                     if (!item.budget || item.budget <= 0) return null;
-                    const disposablePot = stats.disposablePot || 0;
-                    const budgetInKronor = Math.round((item.budget / 100) * disposablePot);
+                    const totalIncome = stats?.totalIncome || 0;
+                    const budgetInKronor = Math.round((item.budget / 100) * totalIncome);
                     if (budgetInKronor <= 0) return null;
                     
                     return (
