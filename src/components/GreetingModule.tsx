@@ -232,10 +232,10 @@ export function GreetingModule({
               </div>
             </div>
 
-            {/* Elegant Right Side: Dagar till nästa lön Badge with brand yellow */}
-            <div className="flex items-center gap-2 bg-[#FAF59D] px-3.5 py-2 rounded-2xl border border-[#FAF59D]/20 self-start sm:self-center shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#071020] shrink-0" />
-              <span className="text-xs font-bold text-[#071020]">
+            {/* Elegant Right Side: Dagar till nästa lön Badge with brand theme */}
+            <div className="flex items-center gap-2 bg-[var(--accent-soft)] px-3.5 py-2 rounded-2xl border border-[var(--border-color)] self-start sm:self-center shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)] shrink-0" />
+              <span className="text-xs font-bold text-[var(--text-primary)]">
                 {stats?.remainingDays || 1} { (stats?.remainingDays || 1) === 1 ? t('oneDay') : t('days') } {language === 'en' ? 'to salary' : 'till lön'}
               </span>
             </div>
@@ -259,7 +259,7 @@ export function GreetingModule({
           className="rounded-[22px] border border-[var(--border-color)] p-4 bg-gradient-to-br from-[var(--surface-color)] via-[var(--surface-color)] to-[var(--surface-muted)]/50 shadow-sm relative overflow-hidden flex items-center gap-4"
         >
           <div className="flex flex-col items-center gap-1 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#FAF59D]/30 via-emerald-400/10 to-sky-400/10 border border-[#FAF59D]/40 flex items-center justify-center text-xl shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[var(--accent-color)]/20 via-[var(--accent-color)]/5 to-emerald-400/5 border border-[var(--accent-color)]/20 flex items-center justify-center text-xl shadow-xs">
               🌼
             </div>
             <span className="text-[10px] font-bold tracking-wider text-[var(--text-secondary)] opacity-80">

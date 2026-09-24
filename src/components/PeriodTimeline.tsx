@@ -318,7 +318,7 @@ export function PeriodTimeline({
               {/* Miniature Today Dot Indicator */}
               {isRealToday && (
                 <span className={`w-1 h-1 rounded-full absolute bottom-1.5 ${
-                  isSelected ? 'bg-white dark:bg-[#181818]' : 'bg-[#ff4c4c]'
+                  isSelected ? 'bg-[var(--text-primary)]' : 'bg-[var(--accent-color)]'
                 }`} />
               )}
             </motion.button>

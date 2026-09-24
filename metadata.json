@@ -1,6 +1,6 @@
 {
   "name": "Dejz",
-  "description": "Dejz är en modern och kraftfull budgetapp för att hantera din personliga ekonomi, inkomster, fasta utgifter och sparande.",
+  "description": "Dejz hjälper dig se hur mycket du faktiskt har att spendera efter räkningar och sparande – och få pengarna att räcka hela vägen till nästa lön.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

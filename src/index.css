@@ -94,67 +94,86 @@ textarea {
   text-rendering: optimizeLegibility;
   font-feature-settings: "cv11", "ss01", "ss02", "ss03", "tnum";
 
-  /* Dejz Official Brand Logo Color (Matches Accent Navy) */
-  --logo-color: #071020;
+  /* Primitive Brand Orange Scale (Brand Tokens) */
+  --orange-50: #FFF7ED;
+  --orange-100: #FFEDD5;
+  --orange-200: #FED7AA;
+  --orange-300: #FDBA74;
+  --orange-400: #FB923C;
+  --orange-500: #FF8A00; /* Dejz official brand color */
+  --orange-600: #E87900;
+  --orange-700: #C96500;
+  --orange-800: #9A4D00;
+  --orange-900: #713800;
+
+  /* Dejz Official Brand Logo Color (Matches Accent / Ink) */
+  --logo-color: #0B0A12;
 
   /* Premium Light Theme (Dejz Design System) */
-  --bg-top-color: #FFFFFF;
-  --bg-color: #FFFFFF;
-  --bg-secondary: #FFFFFF;
-  --bg-gradient: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%);
+  --bg-top-color: #FAFAF8;
+  --bg-color: #FAFAF8;
+  --bg-secondary: #FAFAF8;
+  --bg-gradient: linear-gradient(180deg, #FAFAF8 0%, #FAFAF8 100%);
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: rgba(0, 0, 0, 0.04);
-  --surface-tint: rgba(0, 0, 0, 0.02);
+  --surface-muted: #F4F3F0; /* Surface secondary */
+  --surface-tint: rgba(11, 10, 18, 0.01);
 
-  --text-primary: #181818;
-  --text-secondary: #636A75;
-  --text-tertiary: #8C94A0;
-  --text-inactive: #B8BFC9;
+  --text-primary: #0B0A12;
+  --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
+  --text-inactive: #D1D5DB; /* Disabled */
 
-  --border-color: rgba(0, 0, 0, 0.07);
-  --border-strong: rgba(0, 0, 0, 0.12);
+  --border-color: #E5E3DE;
+  --border-strong: #E5E3DE;
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: rgba(0, 0, 0, 0.05);
+  --chip-bg: #F4F3F0;
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #F4F5F7;
-  --remaining-today-gradient: var(--surface-color);
+  --card-nested-bg: #F4F3F0;
+  --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
-  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
-  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-level-1: 0 1px 3px rgba(11, 10, 18, 0.02), 0 4px 12px rgba(11, 10, 18, 0.02);
+  --shadow-level-2: 0 4px 16px rgba(11, 10, 18, 0.04);
+  --shadow-level-3: 0 10px 30px rgba(11, 10, 18, 0.06);
 
-  /* Clean Premium Accent Color for Buttons & CTA - Deep Navy Background & White Text */
-  --accent-color: #071020;
-  --accent-hover: #121f35;
-  --accent-gradient: linear-gradient(145deg, #071020 0%, #121f35 100%);
+  /* Brand Accents */
+  --accent-color: #FF8A00; /* Dejz Brand Orange */
+  --accent-hover: #E87900;
+  --accent-gradient: linear-gradient(145deg, #FF8A00 0%, #E87900 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(7, 16, 32, 0.08);
-  --accent-glow: rgba(7, 16, 32, 0.15);
-  --accent-secondary-color: #FAF59D;
+  --accent-soft: #FFF1E2; /* Brand subtle */
+  --accent-glow: rgba(255, 138, 0, 0.15);
+  --accent-secondary-color: #FFECD9; /* Brand Light */
 
-  --modal-bg: rgba(255, 255, 255, 0.96);
+  /* Primary button states (Light mode) */
+  --btn-primary-bg: #0B0A12;
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-hover: #24222B;
+  --btn-primary-pressed: #35323C;
+
+  --modal-bg: rgba(255, 255, 255, 0.98);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: rgba(0, 0, 0, 0.03);
+  --bg-hover: #FFF7ED; /* Active hover is subtle orange */
 
-  --card-shadow: var(--shadow-level-2);
+  --card-shadow: var(--shadow-level-1);
   --card-inner-stroke: none;
 
-  --success-color: #10b981;
-  --danger-color: #e83e67;
-  --warning-color: #f59e0b;
+  --success-color: #16A34A;
+  --danger-color: #EF4444;
+  --warning-color: #F59E0B;
+  --info-color: #3B82F6;
 
-  --nav-active-color: #181818;
-  --nav-inactive-color: #71717A;
-  --nav-plus-bg: #181818;
-  --nav-plus-shadow: 0 4px 14px rgba(24, 24, 24, 0.25);
+  --nav-active-color: #FF8A00;
+  --nav-inactive-color: #6B7280;
+  --nav-plus-bg: #0B0A12;
+  --nav-plus-shadow: 0 4px 14px rgba(11, 10, 18, 0.15);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -163,12 +182,12 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #181818;
-  --date-active-color: #FFFFFF;
-  --date-active-shadow: 0 4px 14px rgba(24, 24, 24, 0.20);
-  --date-inactive-bg: rgba(255, 255, 255, 0.90);
-  --date-inactive-border: rgba(0, 0, 0, 0.06);
-  --date-inactive-color: #636A75;
+  --date-active-bg: #FFF1E2;
+  --date-active-color: #0B0A12;
+  --date-active-shadow: 0 2px 8px rgba(255, 138, 0, 0.1);
+  --date-inactive-bg: #FFFFFF;
+  --date-inactive-border: #E5E3DE;
+  --date-inactive-color: #6B7280;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;
@@ -176,66 +195,73 @@ textarea {
 }
 
 .dark {
-  /* Premium Dark Theme (Dejz Design System) - Deep Midnight Navy #071020 */
-  --bg-top-color: #071020;
-  --bg-color: #071020;
-  --bg-secondary: #0b1426;
-  --bg-gradient: radial-gradient(120% 120% at 50% 0%, #0e1d3a 0%, #071020 100%);
+  /* Premium Dark Theme (Dejz Design System) */
+  --bg-top-color: #0B0A12;
+  --bg-color: #0B0A12;
+  --bg-secondary: #0B0A12;
+  --bg-gradient: radial-gradient(120% 120% at 50% 0%, #17161D 0%, #0B0A12 100%);
 
-  --surface-color: #0c1424;
-  --surface-gradient: #0c1424;
-  --surface-elevated: #16223b;
-  --surface-elevated-gradient: #16223b;
-  --surface-solid: #0c1424;
-  --surface-muted: rgba(255, 255, 255, 0.04);
-  --surface-tint: rgba(255, 255, 255, 0.02);
+  --surface-color: #17161D;
+  --surface-gradient: #17161D;
+  --surface-elevated: #211F27;
+  --surface-elevated-gradient: #211F27;
+  --surface-solid: #17161D;
+  --surface-muted: #292730; /* Surface hover */
+  --surface-tint: rgba(255, 255, 255, 0.01);
 
-  --text-primary: #F4F5F6;
-  --text-secondary: #A3A8B0;
-  --text-tertiary: #717780;
+  --text-primary: #F9F8F6;
+  --text-secondary: #B5B2BC;
+  --text-tertiary: #85818C;
   --text-inactive: #4E525C;
 
-  --border-color: rgba(255, 255, 255, 0.04);
-  --border-strong: rgba(255, 255, 255, 0.07);
+  --border-color: #302E37;
+  --border-strong: #302E37;
   --inner-highlight: transparent;
 
-  --chip-bg: rgba(255, 255, 255, 0.04);
+  --chip-bg: #211F27;
   --transaction-bg: var(--surface-color);
-  --card-nested-bg: rgba(255, 255, 255, 0.035);
-  --remaining-today-gradient: linear-gradient(145deg, #122820 0%, #10221c 55%, #141f1c 100%);
+  --card-nested-bg: #211F27;
+  --remaining-today-gradient: #17161D;
 
   /* Custom Elevation Levels - Dark Mode */
-  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.22);
-  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.3);
+  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.5);
 
-  --logo-color: #FAF59D;
+  --logo-color: #FF941A;
 
-  /* Clean Premium Accent Color in Dark Mode - Deep Navy Background & White Text */
-  --accent-color: #071020;
-  --accent-hover: #121f35;
-  --accent-gradient: linear-gradient(135deg, #071020 0%, #121f35 100%);
-  --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(7, 16, 32, 0.12);
-  --accent-glow: rgba(7, 16, 32, 0.25);
-  --accent-secondary-color: #FAF59D;
+  /* Brand Accents */
+  --accent-color: #FF941A;
+  --accent-hover: #FFA43D;
+  --accent-gradient: linear-gradient(135deg, #FF941A 0%, #FFA43D 100%);
+  --text-on-accent: #0B0A12;
+  --accent-soft: #38230E; /* Brand subtle dark */
+  --accent-glow: rgba(255, 148, 26, 0.25);
+  --accent-secondary-color: #FFA43D;
 
-  --modal-bg: #222222;
+  /* Primary button states (Dark mode) */
+  --btn-primary-bg: #F9F8F6;
+  --btn-primary-text: #0B0A12;
+  --btn-primary-hover: #EBEAE8;
+  --btn-primary-pressed: #D7D6D4;
+
+  --modal-bg: #17161D;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: rgba(255, 255, 255, 0.03);
+  --bg-hover: #38230E; /* active brand subtle in dark mode */
 
   --card-shadow: var(--shadow-level-2);
   --card-inner-stroke: none;
 
-  --success-color: #10b981;
-  --danger-color: #f43f5e;
-  --warning-color: #f59e0b;
+  --success-color: #16A34A;
+  --danger-color: #EF4444;
+  --warning-color: #F59E0B;
+  --info-color: #3B82F6;
 
-  --nav-active-color: #FFFFFF;
-  --nav-inactive-color: #717780;
-  --nav-plus-bg: #FFFFFF;
-  --nav-plus-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
+  --nav-active-color: #FF941A;
+  --nav-inactive-color: #B5B2BC;
+  --nav-plus-bg: #F9F8F6;
+  --nav-plus-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -244,11 +270,11 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #FFFFFF;
-  --date-active-color: #181818;
+  --date-active-bg: #38230E;
+  --date-active-color: #FF941A;
   --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   --date-inactive-bg: var(--surface-color);
-  --date-inactive-border: rgba(255, 255, 255, 0.03);
+  --date-inactive-border: var(--border-color);
   --date-inactive-color: var(--text-secondary);
 }
 
@@ -477,34 +503,35 @@ textarea {
 
   .accent-button {
     @apply inline-flex items-center justify-center font-semibold px-5 py-2.5 rounded-[14px] transition-all;
-    background: var(--accent-gradient);
-    color: var(--text-on-accent);
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
     border: none;
     font-size: 0.875rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   .accent-button-full {
     @apply inline-flex items-center justify-center font-semibold px-5 py-3.5 rounded-[14px] transition-all w-full;
-    background: var(--accent-gradient);
-    color: var(--text-on-accent);
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
     border: none;
     font-size: 0.875rem;
     letter-spacing: -0.01em;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   .accent-button:hover,
   .accent-button-full:hover {
-    background: var(--accent-hover);
+    background: var(--btn-primary-hover);
     transform: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
   .accent-button:active,
   .accent-button-full:active {
+    background: var(--btn-primary-pressed);
     scale: 0.96;
-    opacity: 0.9;
+    opacity: 0.95;
     transition: all 0.1s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
