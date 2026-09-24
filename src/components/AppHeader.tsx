@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
 
 interface AppHeaderProps {
@@ -17,8 +17,8 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
-  userName,
-  date,
+  userName: _userName,
+  date: _date,
   avatarUrl,
   onNavigate,
   navTrigger: _navTrigger,
@@ -27,22 +27,12 @@ export function AppHeader({
   notificationCount = 0,
   onOpenNotifications,
   isDemoMode,
-  language = "sv",
+  language: _language = "sv",
   activeTab,
 }: AppHeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isAtTop, setIsAtTop] = useState(true);
   const lastScrollY = useRef(0);
-
-  const formattedDate = useMemo(() => {
-    const d = date || new Date();
-    const isSwedish = !language || language.startsWith("sv");
-    const weekday = d.toLocaleDateString(isSwedish ? "sv-SE" : "en-US", { weekday: "long" });
-    const capitalizedWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
-    const day = d.getDate();
-    const month = d.toLocaleDateString(isSwedish ? "sv-SE" : "en-US", { month: "short" }).replace(".", "");
-    return `${capitalizedWeekday} ${day} ${month}`;
-  }, [date, language]);
 
   const isTodayTab = activeTab === "today";
   const useWhiteHeader = isTodayTab && isAtTop;
@@ -149,28 +139,13 @@ export function AppHeader({
                 )}
               </button>
   
-              {/* Stacked Welcoming text or Tab title */}
+              {/* Stacked Tab title */}
               <div className="flex flex-col min-w-0 text-left justify-center select-none">
-                {activeTab === "today" ? (
-                  <>
-                    <h2 className={`text-[15px] sm:text-[17px] font-extrabold tracking-tight truncate leading-tight ${
-                      useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
-                    }`}>
-                      {userName ? `Hej ${userName} 👋` : 'Hej 👋'}
-                    </h2>
-                    <span className={`text-[11px] sm:text-[12px] font-semibold tracking-wide truncate leading-none mt-1 ${
-                      useWhiteHeader ? "text-white/70" : "text-[var(--text-secondary)] opacity-80"
-                    }`}>
-                      {formattedDate}
-                    </span>
-                  </>
-                ) : (
-                  <h1 className={`text-[16px] sm:text-[18px] font-bold tracking-tight truncate leading-none ${
-                    useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
-                  }`}>
-                    {title || "Dejz"}
-                  </h1>
-                )}
+                <h1 className={`text-[16px] sm:text-[18px] font-bold tracking-tight truncate leading-none ${
+                  useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
+                }`}>
+                  {!isTodayTab ? title : ""}
+                </h1>
               </div>
             </>
           )}
