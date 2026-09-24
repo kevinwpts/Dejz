@@ -109,7 +109,9 @@ export function BudgetView({
       const catVariable = getVariableSpentForCategory(c.name);
       const catTotalUsed = catFixed + catVariable;
       const budgetVal = c.budget !== undefined ? c.budget : catTotalUsed;
-      return sum + budgetVal;
+      // Only count the variable portion against the disposablePot, since fixed costs are already subtracted from it
+      const variableBudgetVal = Math.max(0, budgetVal - catFixed);
+      return sum + variableBudgetVal;
     }, 0) || 0;
 
     const disposablePot = stats.disposablePot || 0;
