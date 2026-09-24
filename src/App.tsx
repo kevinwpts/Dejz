@@ -1097,71 +1097,26 @@ export default function App() {
     });
   };
 
-  // --- Theme Logic ---
+  // --- Theme Logic: Locked to Light Mode ---
   useEffect(() => {
-    let shouldUseDarkMode: boolean;
-    if (showLanding || !session) {
-      shouldUseDarkMode = false;
-    } else if (config?.darkMode !== undefined && config?.darkMode !== null) {
-      shouldUseDarkMode = config.darkMode;
-    } else {
-      try {
-        const saved = localStorage.getItem('dejz_dark_mode');
-        if (saved !== null) {
-          shouldUseDarkMode = saved === 'dark';
-        } else {
-          shouldUseDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-      } catch {
-        shouldUseDarkMode = false;
-      }
-    }
-    
-    console.log("App theme logic - shouldUseDarkMode:", shouldUseDarkMode, "config.darkMode:", config?.darkMode, "showLanding:", showLanding);
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
+    document.body.classList.remove("dark");
+    document.body.classList.add("light");
 
-    // Ensure we always clean up existing classes before adding the new ones
-    document.documentElement.classList.remove("dark", "light");
-    document.body.classList.remove("dark", "light");
-
-    if (shouldUseDarkMode) {
-      document.documentElement.classList.add("dark");
-      document.body.classList.add("dark");
-    } else {
-      document.documentElement.classList.add("light");
-      document.body.classList.add("light");
-    }
-
-    if (!showLanding) {
-      try {
-        localStorage.setItem('dejz_dark_mode', shouldUseDarkMode ? 'dark' : 'light');
-      } catch {
-        // Ignore storage errors in private browsing
-      }
-    }
-
-    // Update theme-color meta tag and root background for iOS Safari status bar and browser toolbar
-    const themeColor = shouldUseDarkMode ? "#0B0A12" : "#FAFAF8";
-    
-    // Explicitly set body & documentElement background colors so iOS root canvas matches
-    document.documentElement.style.backgroundColor = themeColor;
-    document.body.style.backgroundColor = themeColor;
+    document.documentElement.style.backgroundColor = "#FAFAF8";
+    document.body.style.backgroundColor = "#FAFAF8";
 
     const metaTags = document.querySelectorAll('meta[name="theme-color"]');
     if (metaTags.length > 0) {
-      metaTags.forEach((tag) => tag.setAttribute("content", themeColor));
+      metaTags.forEach((tag) => tag.setAttribute("content", "#FAFAF8"));
     } else {
       const meta = document.createElement("meta");
       meta.setAttribute("name", "theme-color");
-      meta.setAttribute("content", themeColor);
+      meta.setAttribute("content", "#FAFAF8");
       document.head.appendChild(meta);
     }
-
-    // Sync apple-mobile-web-app-status-bar-style for iOS PWA to be fully transparent/immersive
-    const statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-    if (statusBarMeta) {
-      statusBarMeta.setAttribute("content", "black-translucent");
-    }
-  }, [config?.darkMode, subscriptionStatus, config, session?.user?.email, showLanding]);
+  }, []);
 
   // --- URL Routing & Language Subpath Sync ---
   useEffect(() => {
