@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, ArrowLeft, Check, Trash2, SlidersHorizontal, ChevronRight } from 'lucide-react';
+import { RefreshCw, ArrowLeft, Check, Trash2, SlidersHorizontal, ChevronRight, Sparkles, RotateCcw } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -157,7 +157,9 @@ export function BudgetView({
     return sum;
   };
 
-  const totalIncome = stats?.totalIncome || 1;
+  const totalBudgetPot = (stats?.disposablePot && stats.disposablePot > 0)
+    ? stats.disposablePot
+    : (stats?.totalIncome || 1);
 
   const getCategoryBudgetKr = (c: any) => {
     const catFixed = Math.round(getFixedSpentForCategory(c.name));
@@ -166,7 +168,7 @@ export function BudgetView({
     if (c.budget > 100) {
       return Math.max(catFixed, Math.round(c.budget));
     }
-    const pctAmount = totalIncome > 0 ? Math.round((c.budget / 100) * totalIncome) : 0;
+    const pctAmount = totalBudgetPot > 0 ? Math.round((c.budget / 100) * totalBudgetPot) : 0;
     return Math.max(catFixed, pctAmount);
   };
 
@@ -174,7 +176,27 @@ export function BudgetView({
     return sum + getCategoryBudgetKr(c);
   }, 0);
 
-  const totalAllocatedPercentage = totalIncome > 0 ? Math.round((totalAllocatedKronor / totalIncome) * 100) : 0;
+  const remainingToAllocate = totalBudgetPot - totalAllocatedKronor;
+  const totalAllocatedPercentage = totalBudgetPot > 0 ? Math.round((totalAllocatedKronor / totalBudgetPot) * 100) : 0;
+
+  const handleDistributeEvenly = () => {
+    const categories = config.categories || [];
+    if (categories.length === 0 || totalBudgetPot <= 0) return;
+
+    // Distribute budget pot evenly across categories (rounded to 50 kr)
+    const perCategory = Math.max(0, Math.floor((totalBudgetPot / categories.length) / 50) * 50);
+
+    const updatedCategories = categories.map((c) => {
+      const fixedSpent = Math.round(getFixedSpentForCategory(c.name));
+      const targetBudget = Math.max(fixedSpent, perCategory);
+      return {
+        ...c,
+        budget: targetBudget
+      };
+    });
+
+    setConfig({ ...config, categories: updatedCategories });
+  };
 
   if (!stats) return null;
 
@@ -184,7 +206,7 @@ export function BudgetView({
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
-        className="space-y-6"
+        className="space-y-4"
       >
         {/* Header with back button */}
         <div className="flex items-center justify-between">
@@ -201,37 +223,114 @@ export function BudgetView({
           <div className="w-[85px]" /> {/* Spacer for visual balance */}
         </div>
 
-        {/* Info card with progress meter */}
+        {/* Sticky Budget Distribution Hub */}
         <div className={`sticky ${
           isDemoMode 
             ? 'top-[calc(7.2rem+env(safe-area-inset-top)+12px)]' 
             : 'top-[calc(5rem+env(safe-area-inset-top)+12px)]'
-        } z-20 p-5 sm:p-6 rounded-[24px] border border-[var(--border-color)] bg-[var(--surface-color)]/95 backdrop-blur-md shadow-sm space-y-4`}>
-          <div>
-            <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
-              Fördelat av budget
-            </span>
-            <span className="text-xl sm:text-2xl font-bold text-[var(--accent-color)] font-amount tabular-nums">
-              {totalAllocatedPercentage}% <span className="text-[13px] font-medium text-[var(--text-secondary)]">({formatAmount(totalAllocatedKronor, config.language)} {config.currency})</span>
-            </span>
+        } z-20 p-4 sm:p-5 rounded-[22px] border border-[var(--border-color)] bg-[var(--surface-color)]/95 backdrop-blur-md shadow-sm space-y-3`}>
+          {/* Main Key Figures */}
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-0.5">
+                Kvar att fördela
+              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className={`text-2xl sm:text-3xl font-extrabold font-amount tabular-nums tracking-tight ${
+                  remainingToAllocate < 0 
+                    ? 'text-rose-500' 
+                    : remainingToAllocate === 0 
+                    ? 'text-emerald-500' 
+                    : 'text-[var(--accent-color)]'
+                }`}>
+                  {formatAmount(Math.abs(remainingToAllocate), config.language)} {config.currency}
+                </span>
+                {remainingToAllocate < 0 && (
+                  <span className="text-[10px] font-bold text-rose-500 uppercase tracking-tight bg-rose-500/10 px-1.5 py-0.5 rounded-md">
+                    överfördelat
+                  </span>
+                )}
+                {remainingToAllocate === 0 && (
+                  <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-tight bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
+                    100% klart
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="text-right flex flex-col items-end">
+              <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-0.5">
+                Vardagsbudget
+              </span>
+              <span className="text-[14px] sm:text-[15px] font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                {formatAmount(totalBudgetPot, config.language)} {config.currency}
+              </span>
+              <span className="text-[11px] text-[var(--text-secondary)] font-medium">
+                Fördelat: <strong className="text-[var(--text-primary)] font-bold">{formatAmount(totalAllocatedKronor, config.language)}</strong> ({totalAllocatedPercentage}%)
+              </span>
+            </div>
           </div>
 
-          {/* Allocation Progress Bar */}
-          <div className="w-full h-2.5 bg-[var(--border-color)]/60 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-[var(--accent-color)] rounded-full transition-all duration-300"
-              style={{ width: `${Math.min(100, totalAllocatedPercentage)}%` }}
-            />
+          {/* Multi-colored Category Segment Bar */}
+          <div className="space-y-1">
+            <div className="w-full h-2.5 bg-[var(--border-color)]/50 rounded-full overflow-hidden flex shadow-inner">
+              {(config.categories || [])
+                .filter((c) => getCategoryBudgetKr(c) > 0)
+                .map((c) => {
+                  const amount = getCategoryBudgetKr(c);
+                  const pct = totalBudgetPot > 0 ? (amount / totalBudgetPot) * 100 : 0;
+                  return (
+                    <div
+                      key={c.name}
+                      title={`${c.name}: ${formatAmount(amount, config.language)} kr (${Math.round(pct)}%)`}
+                      style={{
+                        width: `${Math.min(100, pct)}%`,
+                        backgroundColor: c.color || '#94a3b8',
+                      }}
+                      className="h-full transition-all duration-200 border-r border-black/10 last:border-r-0"
+                    />
+                  );
+                })}
+            </div>
+          </div>
+
+          {/* Smart Quick Actions */}
+          <div className="flex items-center justify-between pt-0.5 gap-2 border-t border-[var(--border-color)]/40">
+            <button
+              type="button"
+              onClick={handleDistributeEvenly}
+              className="text-[11.5px] font-semibold text-[var(--accent-color)] hover:opacity-85 flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-[var(--accent-color)]/10 transition-all cursor-pointer"
+            >
+              <Sparkles size={13} />
+              Fördela potten jämnt
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const updatedCategories = (config.categories || []).map((c) => ({ ...c, budget: undefined }));
+                setConfig({ ...config, categories: updatedCategories });
+              }}
+              className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-rose-500 flex items-center gap-1 py-1 px-2 transition-colors cursor-pointer"
+            >
+              <RotateCcw size={12} />
+              Nollställ
+            </button>
           </div>
         </div>
 
-        {/* Scrollable list of categories and their budgets */}
-        <div className="space-y-3">
-          <h3 className="text-[13px] font-bold text-[var(--text-primary)] tracking-tight px-1">
-            Budget per rörlig kategori
-          </h3>
+        {/* Compact list of categories */}
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-[12.5px] font-bold text-[var(--text-primary)] tracking-tight">
+              Kategorier ({config.categories?.length || 0})
+            </h3>
+            <span className="text-[11px] text-[var(--text-secondary)]">
+              Justera med reglagen
+            </span>
+          </div>
           
-          <div className="space-y-4 pr-1">
+          <div className="space-y-2.5">
             {[...(config.categories || [])]
               .sort((a, b) => {
                 const indexA = initialCategoryNames.indexOf(a.name);
@@ -249,40 +348,40 @@ export function BudgetView({
               const variableSpent = Math.round(getVariableSpentForCategory(cat.name));
 
               const displayedBudget = getCategoryBudgetKr(cat);
-              const displayedPercentage = totalIncome > 0 ? (displayedBudget / totalIncome) * 100 : 0;
-
-              const otherAllocatedKr = totalAllocatedKronor - displayedBudget;
-              const maxBudgetKr = Math.max(displayedBudget, totalIncome - otherAllocatedKr);
+              const displayedPercentage = totalBudgetPot > 0 ? (displayedBudget / totalBudgetPot) * 100 : 0;
+              const maxBudgetKr = Math.max(displayedBudget, totalBudgetPot);
 
               return (
                 <div 
                   key={cat.name}
-                  className="p-4 sm:p-5 rounded-[24px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-2xs flex flex-col gap-3.5"
+                  className="p-3 sm:p-3.5 rounded-[18px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-3xs flex flex-col gap-2 transition-all hover:border-[var(--border-color)]/80"
                 >
-                  {/* Top Row: Icon, Name and Kronor Input */}
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3 min-w-0">
+                  {/* Top Row: Icon, Name + % and Kronor Input */}
+                  <div className="flex items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div 
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0 shadow-3xs"
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 shadow-3xs text-[15px]"
                         style={{ backgroundColor: cat.color || '#94a3b8' }}
                       >
                         {isEmojiString(iconName) ? (
-                          <span className="text-[17px] leading-none">{iconName}</span>
+                          <span className="leading-none">{iconName}</span>
                         ) : Icon ? (
-                          <Icon size={18} strokeWidth={1.75} />
+                          <Icon size={16} strokeWidth={2} />
                         ) : (
                           <div className="w-1.5 h-1.5 rounded-full" />
                         )}
                       </div>
-                      <span className="text-[13.5px] font-bold text-[var(--text-primary)] tracking-tight truncate flex items-center gap-1.5">
-                        {cat.name}
-                        <span className="px-1.5 py-0.5 rounded-md bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-[10px] font-semibold tabular-nums shrink-0">
+                      <div className="min-w-0 flex items-baseline gap-1.5">
+                        <span className="text-[13px] sm:text-[13.5px] font-bold text-[var(--text-primary)] tracking-tight truncate">
+                          {cat.name}
+                        </span>
+                        <span className="text-[10.5px] font-semibold text-[var(--text-secondary)] opacity-70 tabular-nums shrink-0">
                           {Math.round(displayedPercentage)}%
                         </span>
-                      </span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <div className="relative">
                         <input
                           type="number"
@@ -307,32 +406,17 @@ export function BudgetView({
                             );
                             setConfig({ ...config, categories: updatedCategories });
                           }}
-                          className="w-24 h-9 px-3 rounded-[12px] bg-[var(--surface-muted)]/50 border border-[var(--border-color)] text-[12.5px] font-bold text-[var(--text-primary)] text-right pr-7 focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] tabular-nums"
+                          className="w-24 h-8 px-2.5 rounded-[10px] bg-[var(--surface-muted)]/70 border border-[var(--border-color)] text-[12.5px] font-bold text-[var(--text-primary)] text-right pr-6 focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] tabular-nums"
                         />
-                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-[var(--text-secondary)]">
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-[var(--text-secondary)]">
                           kr
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Middle Row: Usage details */}
-                  <div className="flex flex-col gap-2 bg-[var(--surface-muted)]/40 p-3 rounded-[16px] border border-[var(--border-color)]/30">
-                    <div className="flex flex-wrap justify-between items-center gap-2 text-[11px] font-medium text-[var(--text-secondary)]">
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <span>Motsvarar kostnad: <strong className="text-[var(--text-primary)] font-bold font-amount">{formatAmount(displayedBudget, config.language)} kr</strong></span>
-                        {fixedSpent > 0 && (
-                          <span className="text-[var(--text-secondary)] opacity-80">(varav fast: {formatAmount(fixedSpent, config.language)} kr)</span>
-                        )}
-                        {variableSpent > 0 && (
-                          <span>Rörligt spenderat hittills: <strong className="text-[var(--text-primary)] font-normal font-amount">{formatAmount(variableSpent, config.language)} kr</strong></span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom Row: Slider Control */}
-                  <div className="space-y-1.5 px-1 pt-1">
+                  {/* Middle Row: Slider Control */}
+                  <div className="px-0.5">
                     <input
                       type="range"
                       min={fixedSpent}
@@ -352,6 +436,18 @@ export function BudgetView({
                       }}
                     />
                   </div>
+
+                  {/* Context note: only if fixed expenses or already spent */}
+                  {(fixedSpent > 0 || variableSpent > 0) && (
+                    <div className="flex items-center justify-between text-[10px] text-[var(--text-secondary)] px-0.5 opacity-75">
+                      {fixedSpent > 0 ? (
+                        <span>Varav fast: {formatAmount(fixedSpent, config.language)} kr</span>
+                      ) : <span />}
+                      {variableSpent > 0 && (
+                        <span>Spenderat: <strong className="text-[var(--text-primary)] font-semibold">{formatAmount(variableSpent, config.language)} kr</strong></span>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

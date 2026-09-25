@@ -3101,7 +3101,7 @@ export default function App() {
     if (activeTab === "transactions") return t("log");
     if (activeTab === "analysis") return t("analysis");
     if (activeTab === "budget") {
-      return budgetSection ? (config?.language === 'en' ? 'Allocate Budget' : 'Fördela vardagsbudget') : t("budget");
+      return budgetSection ? (config?.language === 'en' ? 'Budget' : 'Budget') : (config?.language === 'en' ? 'Finances' : 'Ekonomi');
     }
     if (activeTab === "settings") {
       if (settingsSection === "main") return undefined;

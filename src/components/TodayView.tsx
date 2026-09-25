@@ -7,6 +7,7 @@ import {
   RotateCcw,
   SlidersHorizontal,
   ChevronRight,
+  Plus,
 } from "lucide-react";
 import {
   Transaction,
@@ -64,9 +65,9 @@ export function TodayView({
   fixedExpenses,
   selectedDate,
   setSelectedDate,
-  onAddTransaction: _onAddTransaction,
+  onAddTransaction,
   onQuickAddExpense,
-  onAddIncome: _onAddIncome,
+  onAddIncome,
   onViewTransaction,
   onDeleteTransaction,
   onNavigate,
@@ -409,6 +410,40 @@ export function TodayView({
             </button>
           )}
         </GreetingModule>
+      </motion.div>
+
+      {/* Quick Action Buttons: Lägg till utgift & Lägg till inkomst */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.11 }}
+        className="grid grid-cols-2 gap-2.5 sm:gap-3"
+      >
+        <button
+          type="button"
+          onClick={() => onAddTransaction(selectedDate)}
+          className="flex items-center justify-center gap-2 py-3 px-3.5 sm:py-3.5 sm:px-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-xs transition-all active:scale-[0.98] cursor-pointer group"
+        >
+          <div className="w-7 h-7 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center transition-transform group-hover:scale-105">
+            <Plus size={16} strokeWidth={2.5} />
+          </div>
+          <span className="text-[13px] sm:text-[13.5px] font-bold tracking-tight">
+            {config.language === "en" ? "Add expense" : "Lägg till utgift"}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onAddIncome(selectedDate)}
+          className="flex items-center justify-center gap-2 py-3 px-3.5 sm:py-3.5 sm:px-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-xs transition-all active:scale-[0.98] cursor-pointer group"
+        >
+          <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center transition-transform group-hover:scale-105">
+            <Plus size={16} strokeWidth={2.5} />
+          </div>
+          <span className="text-[13px] sm:text-[13.5px] font-bold tracking-tight">
+            {config.language === "en" ? "Add income" : "Lägg till inkomst"}
+          </span>
+        </button>
       </motion.div>
 
       {/* One-Tap Quick Expense Box */}

@@ -1453,7 +1453,6 @@ export const translations: Record<Language, any> = {
     cancelAndLogin: 'Cancel and log in',
     checkInboxTitle: 'Check your inbox',
     checkInboxDesc: 'We\'ve sent a reset link to {{email}}. Follow the instructions in the email to choose a new password.',
-    backToLogin: 'Back to login',
   },
   no: {
     today: 'I dag',
