@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { X, ChevronDown, Calendar, Plus, Camera, Trash2, Check } from 'lucide-react';
+import { X, ChevronDown, Calendar, Plus, Camera, Trash2, Check, Loader2 } from 'lucide-react';
 import { Transaction, Category, TransactionSplit } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
 import { fetchLogoForName, getLogoUrl, findKnownBrandDomain } from '../utils/logo';
 import { uploadLogo } from '../services/storageService';
+import { supabase } from '../supabaseClient';
 import { CalendarWidget } from './CalendarWidget';
 import { IconSelector } from './IconSelector';
 import { CategoryModal } from './CategoryModal';
@@ -46,6 +47,89 @@ interface TransactionModalProps {
 }
 
 const COLORS = ['#2A2A2A', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#333333', '#222222', '#555555', '#444444'];
+
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = reader.result as string;
+      const base64 = res.includes(',') ? res.split(',')[1] : res;
+      resolve(base64);
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+};
+
+const prepareReceiptImage = async (file: File): Promise<{ base64: string; mimeType: string }> => {
+  try {
+    return await new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const maxDimension = 1920;
+        let { width, height } = img;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          throw new Error('Canvas context unavailable');
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        const base64 = dataUrl.split(',')[1];
+        resolve({ base64, mimeType: 'image/jpeg' });
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Image load failed'));
+      };
+      img.src = objectUrl;
+    });
+  } catch (_e) {
+    const base64 = await fileToBase64(file);
+    return { base64, mimeType: file.type || 'image/jpeg' };
+  }
+};
+
+const parseReceiptDate = (dateStr: any): Date | null => {
+  if (!dateStr) return null;
+  if (dateStr instanceof Date && !isNaN(dateStr.getTime())) return dateStr;
+  if (typeof dateStr !== 'string') return null;
+
+  const trimmed = dateStr.trim();
+  const ymdMatch = trimmed.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (ymdMatch) {
+    const y = parseInt(ymdMatch[1], 10);
+    const m = parseInt(ymdMatch[2], 10) - 1;
+    const d = parseInt(ymdMatch[3], 10);
+    const dateObj = new Date(y, m, d, 12, 0, 0);
+    if (!isNaN(dateObj.getTime())) return dateObj;
+  }
+
+  const dmyMatch = trimmed.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
+  if (dmyMatch) {
+    const d = parseInt(dmyMatch[1], 10);
+    const m = parseInt(dmyMatch[2], 10) - 1;
+    const y = parseInt(dmyMatch[3], 10);
+    const dateObj = new Date(y, m, d, 12, 0, 0);
+    if (!isNaN(dateObj.getTime())) return dateObj;
+  }
+
+  const parsed = new Date(trimmed);
+  return isNaN(parsed.getTime()) ? null : parsed;
+};
 
 export function TransactionModal({ 
   transaction, 
@@ -92,6 +176,105 @@ export function TransactionModal({
   const [_logoError, setLogoError] = useState(false);
   const [receiptUrl, setReceiptUrl] = useState<string | undefined>(transaction?.receiptUrl);
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
+  const [isScanningReceipt, setIsScanningReceipt] = useState(false);
+  const [scanFeedback, setScanFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    if (transaction?.timestamp) {
+      return new Date(transaction.timestamp);
+    }
+    return _date || new Date();
+  });
+
+  const handleReceiptFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Immediately display preview image to give instant feedback
+    const localUrl = URL.createObjectURL(file);
+    setReceiptUrl(localUrl);
+
+    setIsUploadingReceipt(true);
+    setIsScanningReceipt(true);
+    setScanFeedback(null);
+
+    try {
+      // 1. Process image to base64
+      const { base64, mimeType } = await prepareReceiptImage(file);
+
+      // 2. Invoke Supabase Edge Function 'scan-receipt'
+      const scanPromise = supabase.functions.invoke('scan-receipt', {
+        body: {
+          image: base64,
+          mimeType: mimeType || file.type || 'image/jpeg',
+        },
+      });
+
+      // 3. Upload to Supabase Storage if user is signed in
+      let uploadPromise: Promise<string | undefined> = Promise.resolve(undefined);
+      if (userId && userId !== 'demo-user') {
+        uploadPromise = uploadLogo(file, userId).catch((err) => {
+          console.warn('Storage upload warning:', err);
+          return undefined;
+        });
+      }
+
+      const [scanResult, uploadedUrl] = await Promise.allSettled([scanPromise, uploadPromise]);
+
+      if (uploadedUrl.status === 'fulfilled' && uploadedUrl.value) {
+        setReceiptUrl(uploadedUrl.value);
+      }
+
+      if (scanResult.status === 'fulfilled') {
+        const { data, error } = scanResult.value;
+        if (error) {
+          console.warn('scan-receipt returned error:', error);
+          setScanFeedback({ type: 'error', message: 'Kunde inte läsa alla uppgifter automatiskt.' });
+        } else if (data) {
+          let hasPrefilled = false;
+
+          // Företag / beskrivning = merchant
+          if (data.merchant && typeof data.merchant === 'string' && data.merchant.trim()) {
+            const cleanMerchant = data.merchant.trim();
+            setMerchant(cleanMerchant);
+            hasPrefilled = true;
+          }
+
+          // Belopp = amount
+          if (data.amount !== undefined && data.amount !== null && !isNaN(Number(data.amount))) {
+            const numAmount = Number(data.amount);
+            setAmount(formatAmount(numAmount.toString()));
+            hasPrefilled = true;
+          }
+
+          // Datum = date
+          if (data.date) {
+            const parsedDate = parseReceiptDate(data.date);
+            if (parsedDate) {
+              setSelectedDate(parsedDate);
+              hasPrefilled = true;
+            }
+          }
+
+          if (hasPrefilled) {
+            setScanFeedback({ type: 'success', message: 'Uppgifter förifyllda från kvittot!' });
+          }
+        }
+      } else {
+        console.warn('scan-receipt promise rejected:', scanResult.reason);
+        setScanFeedback({ type: 'error', message: 'Analysen misslyckades. Fyll i utgiften manuellt.' });
+      }
+    } catch (err) {
+      console.error('Receipt scanning failed:', err);
+      setScanFeedback({ type: 'error', message: 'Ett fel uppstod. Fyll i utgiften manuellt.' });
+    } finally {
+      setIsUploadingReceipt(false);
+      setIsScanningReceipt(false);
+      if (e.target) {
+        e.target.value = '';
+      }
+    }
+  };
   const originalMerchant = useRef(transaction?.merchant || '');
   const originalNote = useRef(transaction?.note || '');
   const [manualSelectionThisSession, setManualSelectionThisSession] = useState(false);
@@ -204,12 +387,7 @@ export function TransactionModal({
     return () => clearTimeout(timer);
   }, [merchant, note, category, manualSelectionThisSession]);
 
-  const [selectedDate, setSelectedDate] = useState<Date>(() => {
-    if (transaction?.timestamp) {
-      return new Date(transaction.timestamp);
-    }
-    return new Date();
-  });
+
 
   const previewTransaction = useMemo(() => ({
     ...transaction,
@@ -315,15 +493,43 @@ export function TransactionModal({
 
         {/* Main Content Area */}
         <div className="shrink overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
+              {/* Hidden file input for camera/photo library */}
+              <input 
+                ref={receiptInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleReceiptFileChange}
+              />
+
               {/* Skanna kvitto options for new expenses */}
               {!transaction && type === 'expense' && (
                 <div className="space-y-4">
-                  {!receiptUrl ? (
-                    <div className="relative overflow-hidden bg-[var(--surface-muted)]/40 hover:bg-[var(--surface-muted)]/60 rounded-[20px] border border-[var(--border-color)] p-4 flex items-center justify-between transition-all group">
+                  {isScanningReceipt ? (
+                    <div className="relative overflow-hidden bg-accent/5 rounded-[20px] border border-accent/25 p-4 flex items-center justify-between transition-all">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-11 h-11 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                          <Loader2 size={22} className="animate-spin text-accent" />
+                        </div>
+                        <div>
+                          <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">Läser kvittot…</h4>
+                          <p className="text-[11px] font-medium text-accent mt-0.5">Analyserar belopp, företag och datum</p>
+                        </div>
+                      </div>
+                      <div className="px-3.5 py-1.5 bg-accent/10 text-accent text-xs font-semibold rounded-full flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                        <span>Vänta…</span>
+                      </div>
+                    </div>
+                  ) : !receiptUrl ? (
+                    <div 
+                      onClick={() => !isScanningReceipt && !isUploadingReceipt && receiptInputRef.current?.click()}
+                      className="relative overflow-hidden bg-[var(--surface-muted)]/40 hover:bg-[var(--surface-muted)]/60 rounded-[20px] border border-[var(--border-color)] p-4 flex items-center justify-between transition-all group cursor-pointer active:scale-[0.99]"
+                    >
                       <div className="flex items-center gap-3.5">
                         <div className="w-11 h-11 rounded-full bg-accent/10 flex items-center justify-center text-accent group-hover:scale-105 transition-transform duration-300">
                           {isUploadingReceipt ? (
-                            <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                            <Loader2 size={22} className="animate-spin text-accent" />
                           ) : (
                             <Camera size={22} strokeWidth={2} />
                           )}
@@ -335,7 +541,10 @@ export function TransactionModal({
                       </div>
                       <button
                         type="button"
-                        onClick={() => receiptInputRef.current?.click()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          receiptInputRef.current?.click();
+                        }}
                         disabled={isUploadingReceipt}
                         className="relative px-4 py-2 bg-[var(--text-primary)] hover:opacity-90 text-[var(--bg-color)] text-xs font-bold rounded-full shadow-sm active:scale-95 transition-all cursor-pointer select-none disabled:opacity-50"
                       >
@@ -344,19 +553,24 @@ export function TransactionModal({
                     </div>
                   ) : (
                     <div className="relative overflow-hidden bg-success/5 rounded-[20px] border border-success/20 p-4 flex items-center justify-between transition-all">
-                      <div className="flex items-center gap-3.5">
-                        <div className="relative w-11 h-11 rounded-[12px] overflow-hidden border border-success/20 shadow-xs">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="relative w-11 h-11 rounded-[12px] overflow-hidden border border-success/20 shadow-xs shrink-0">
                           <img src={receiptUrl} alt="Bifogat kvitto" className="w-full h-full object-cover" />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">Kvitto bifogat</h4>
-                          <p className="text-[11px] font-medium text-success mt-0.5">Din kvittobild har lagts till i utgiften</p>
+                          <p className="text-[11px] font-medium text-success mt-0.5 truncate">
+                            {scanFeedback?.message || 'Kontrollera uppgifterna nedan innan du sparar'}
+                          </p>
                         </div>
                       </div>
                       <button
                         type="button"
-                        onClick={() => setReceiptUrl(undefined)}
-                        className="px-3.5 py-1.5 bg-danger/10 text-danger text-xs font-bold rounded-full hover:bg-danger/20 transition-all cursor-pointer"
+                        onClick={() => {
+                          setReceiptUrl(undefined);
+                          setScanFeedback(null);
+                        }}
+                        className="px-3.5 py-1.5 bg-danger/10 text-danger text-xs font-bold rounded-full hover:bg-danger/20 transition-all cursor-pointer shrink-0 ml-2"
                       >
                         Ta bort
                       </button>
@@ -789,36 +1003,7 @@ export function TransactionModal({
                         </div>
                         
                         <div className="flex items-center gap-4">
-                          <input 
-                            ref={receiptInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              
-                              setIsUploadingReceipt(true);
-                              try {
-                                if (userId && userId !== 'demo-user') {
-                                  const url = await uploadLogo(file, userId);
-                                  if (url) {
-                                    setReceiptUrl(url);
-                                    return;
-                                  }
-                                }
-                                // Local preview fallback for demo mode, guest users or if upload failed/offline
-                                const localUrl = URL.createObjectURL(file);
-                                setReceiptUrl(localUrl);
-                              } catch (_error) {
-                                console.error('Error uploading receipt:', _error);
-                                const localUrl = URL.createObjectURL(file);
-                                setReceiptUrl(localUrl);
-                              } finally {
-                                setIsUploadingReceipt(false);
-                              }
-                            }}
-                          />
+
                           {receiptUrl ? (
                             <div className="relative w-24 h-24 rounded-[16px] overflow-hidden group shadow-sm border border-[var(--border-color)]">
                               <img src={receiptUrl} alt="Receipt" className="w-full h-full object-cover" />
@@ -831,15 +1016,20 @@ export function TransactionModal({
                             </div>
                           ) : (
                             <button
-                              onClick={() => isPro && receiptInputRef.current?.click()}
-                              disabled={!isPro || isUploadingReceipt}
+                              onClick={() => isPro && !isScanningReceipt && !isUploadingReceipt && receiptInputRef.current?.click()}
+                              disabled={!isPro || isUploadingReceipt || isScanningReceipt}
                               className={`w-24 h-24 rounded-[16px] flex flex-col items-center justify-center gap-2 transition-all border ${
                                 !isPro 
                                   ? 'bg-[var(--surface-muted)]/50 border-[var(--border-color)] opacity-50 cursor-not-allowed text-[var(--text-tertiary)]'
                                   : 'bg-[var(--surface-muted)]/50 text-[var(--text-tertiary)] border-[var(--border-color)] hover:border-accent/40 hover:text-accent shadow-xs'
                               }`}
                             >
-                              {isUploadingReceipt ? (
+                              {isScanningReceipt ? (
+                                <div className="flex flex-col items-center gap-1.5 px-1 text-center">
+                                  <Loader2 size={20} className="animate-spin text-accent" />
+                                  <span className="text-[10px] font-semibold text-accent leading-tight">Läser kvittot…</span>
+                                </div>
+                              ) : isUploadingReceipt ? (
                                 <div className="flex flex-col items-center gap-2">
                                   <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                                   <span className="text-[10px] font-medium text-accent">{t('uploading')}</span>

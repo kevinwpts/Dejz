@@ -47,4 +47,7 @@ export const supabase = isSupabaseConfigured
           getPublicUrl: () => ({ data: { publicUrl: '' } }),
         }),
       },
+      functions: {
+        invoke: async () => ({ data: null, error: new Error('Supabase not configured') }),
+      },
     } as any;
