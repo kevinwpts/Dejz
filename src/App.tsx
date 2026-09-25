@@ -16,12 +16,19 @@ function TabWrapper({
 }) {
   useLayoutEffect(() => {
     const targetY = scrollPositionsRef.current[tabKey] ?? 0;
-
-    const raf1 = requestAnimationFrame(() => {
+    
+    window.scrollTo({ top: targetY, behavior: "instant" as any });
+    const timer = setTimeout(() => {
       window.scrollTo({ top: targetY, behavior: "instant" as any });
-    });
+    }, 50);
+
+    let isRestoring = true;
+    const restoreTimer = setTimeout(() => {
+      isRestoring = false;
+    }, 150);
 
     const handleScroll = () => {
+      if (isRestoring) return;
       if (document.body.style.overflow === "hidden") return;
       scrollPositionsRef.current[tabKey] = window.scrollY;
     };
@@ -29,7 +36,8 @@ function TabWrapper({
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      cancelAnimationFrame(raf1);
+      clearTimeout(timer);
+      clearTimeout(restoreTimer);
       window.removeEventListener("scroll", handleScroll);
     };
   }, [tabKey, scrollPositionsRef]);
