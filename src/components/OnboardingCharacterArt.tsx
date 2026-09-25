@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, Star } from 'lucide-react';
 
-export type OnboardingStepType = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
+export type OnboardingStepType = 'name' | 'age' | 'gender' | 'payday' | 'income' | 'expenses' | 'budget' | 'goals' | 'midMonth' | 'summary';
 
 interface OnboardingCharacterArtProps {
   step: OnboardingStepType;
@@ -21,10 +21,11 @@ export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: Onboard
         }}
         transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
         className={`absolute inset-0 rounded-full blur-2xl pointer-events-none ${
-          step === 'name' ? 'bg-gradient-to-tr from-emerald-500/40 via-cyan-400/40 to-teal-400/30' :
+          step === 'name' || step === 'age' || step === 'gender' ? 'bg-gradient-to-tr from-emerald-500/40 via-cyan-400/40 to-teal-400/30' :
           step === 'payday' ? 'bg-gradient-to-tr from-amber-500/45 via-yellow-400/40 to-orange-500/30' :
           step === 'income' ? 'bg-gradient-to-tr from-emerald-500/50 via-teal-400/40 to-green-500/30' :
           step === 'expenses' ? 'bg-gradient-to-tr from-rose-500/45 via-purple-400/35 to-indigo-500/30' :
+          step === 'budget' ? 'bg-gradient-to-tr from-emerald-500/45 via-amber-400/35 to-cyan-500/30' :
           step === 'goals' ? 'bg-gradient-to-tr from-sky-500/45 via-cyan-400/40 to-blue-500/30' :
           step === 'midMonth' ? 'bg-gradient-to-tr from-amber-500/45 via-emerald-400/40 to-teal-400/30' :
           'bg-gradient-to-tr from-emerald-500/50 via-amber-400/40 to-cyan-400/40'
@@ -41,10 +42,11 @@ export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: Onboard
         className="relative w-32 h-32 flex items-center justify-center overflow-visible"
       >
         {/* Render Step-Specific Character Artwork */}
-        {step === 'name' && <CharacterWelcome />}
+        {(step === 'name' || step === 'age' || step === 'gender') && <CharacterWelcome />}
         {step === 'payday' && <CharacterPayday payday={payday} />}
         {step === 'income' && <CharacterIncome />}
         {step === 'expenses' && <CharacterExpenses />}
+        {step === 'budget' && <CharacterIncome />}
         {step === 'goals' && <CharacterGoals />}
         {step === 'midMonth' && <CharacterMidMonth days={days} />}
         {step === 'summary' && <CharacterCelebration />}

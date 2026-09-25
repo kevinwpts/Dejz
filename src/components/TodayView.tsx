@@ -14,7 +14,6 @@ import {
   Config,
   Income,
   FixedExpense,
-  Frequency,
 } from "../types";
 import { TranslationKey } from "../i18n";
 import { TransactionItem } from "./TransactionItem";
@@ -172,7 +171,6 @@ export function TodayView({
 
     const periodStart = stats.periodStart ? new Date(stats.periodStart).getTime() : 0;
     const periodEnd = stats.periodEnd ? new Date(stats.periodEnd).getTime() + 86399999 : Infinity;
-    const totalIncome = stats.totalIncome || 0;
 
     const periodExpenses = (allTransactions || _transactions || []).filter((e: Transaction) => {
       const inPeriod = e.timestamp >= periodStart && e.timestamp <= periodEnd;
@@ -200,18 +198,12 @@ export function TodayView({
       }
     });
 
-    (fixedExpenses || []).forEach((e: FixedExpense) => {
-      const category = (e.category || "").trim();
-      if (!category) return;
-      let amount = Number(e.amount) || 0;
-      switch (e.frequency) {
-        case Frequency.QUARTERLY: amount = amount / 3; break;
-        case Frequency.SEMI_ANNUALLY: amount = amount / 6; break;
-        case Frequency.ANNUALLY: amount = amount / 12; break;
-        default: break;
-      }
-      breakdown[category] = (breakdown[category] || 0) + amount;
-    });
+    const disposablePot = Math.max(
+      0,
+      (stats?.disposablePot !== undefined && stats?.disposablePot !== null)
+        ? stats.disposablePot
+        : ((stats?.totalIncome || 0) - (stats?.totalFixed || 0))
+    );
 
     return (config.categories || []).map((cat, index) => {
       const name = cat.name;
@@ -223,33 +215,15 @@ export function TodayView({
         }
       }
 
-      // Exact fixed expenses for this category
-      const periodId = stats?.periodId || '';
-      const catFixed = (fixedExpenses || [])
-        .filter((e: any) => e.category?.trim().toLowerCase() === searchName)
-        .reduce((sum: number, e: any) => {
-          const amount = (e.isVariable && e.periodOverrides && periodId && e.periodOverrides[periodId] !== undefined)
-            ? e.periodOverrides[periodId]
-            : (Number(e.amount) || 0);
-          switch (e.frequency) {
-            case 'quarterly': return sum + amount / 3;
-            case 'semi-annually': return sum + amount / 6;
-            case 'annually': return sum + amount / 12;
-            default: return sum + amount;
-          }
-        }, 0);
-
       let budgetInKronor = 0;
       let hasBudget = false;
 
       if (cat.budget !== undefined && cat.budget > 0) {
-        budgetInKronor = cat.budget > 100 
-          ? Math.round(cat.budget) 
-          : (totalIncome > 0 ? Math.round((cat.budget / 100) * totalIncome) : 0);
+        const pct = cat.budget > 100 && disposablePot > 0 
+          ? (cat.budget / disposablePot) * 100 
+          : cat.budget;
+        budgetInKronor = disposablePot > 0 ? Math.round((pct / 100) * disposablePot) : 0;
         hasBudget = budgetInKronor > 0;
-      } else if (catFixed > 0) {
-        budgetInKronor = Math.round(catFixed);
-        hasBudget = true;
       }
 
       const remaining = budgetInKronor - Math.round(spent);

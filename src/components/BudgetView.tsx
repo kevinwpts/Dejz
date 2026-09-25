@@ -59,33 +59,14 @@ export function BudgetView({
   const [initialCategoryNames, setInitialCategoryNames] = React.useState<string[]>([]);
 
   const handleOpenCategoryBudgets = () => {
-    const totalInc = stats?.totalIncome || 1;
-    
-    const getFixedSpent = (catName: string) => {
-      return (fixedExpenses || [])
-        .filter((e) => e.category?.trim().toLowerCase() === catName.trim().toLowerCase())
-        .reduce((sum, e) => {
-          const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
-            ? e.periodOverrides[currentPeriodId]
-            : (Number(e.amount) || 0);
-          switch (e.frequency) {
-            case 'quarterly': return sum + amount / 3;
-            case 'semi-annually': return sum + amount / 6;
-            case 'annually': return sum + amount / 12;
-            default: return sum + amount;
-          }
-        }, 0);
-    };
 
-    const getCatBudgetKr = (c: any) => {
-      const catFixed = Math.round(getFixedSpent(c.name));
-      if (c.budget === undefined) return catFixed;
-      if (c.budget > 100) return Math.max(catFixed, Math.round(c.budget));
-      return Math.max(catFixed, Math.round((c.budget / 100) * totalInc));
+    const getCatBudgetPct = (c: any) => {
+      if (c.budget === undefined || c.budget === null) return 0;
+      return Number(c.budget) || 0;
     };
 
     const sortedNames = [...(config.categories || [])]
-      .sort((a, b) => getCatBudgetKr(b) - getCatBudgetKr(a))
+      .sort((a, b) => getCatBudgetPct(b) - getCatBudgetPct(a))
       .map(c => c.name);
 
     setInitialCategoryNames(sortedNames);
@@ -157,43 +138,50 @@ export function BudgetView({
     return sum;
   };
 
-  const totalBudgetPot = (stats?.disposablePot && stats.disposablePot > 0)
-    ? stats.disposablePot
-    : (stats?.totalIncome || 1);
+  const totalBudgetPot = Math.max(
+    0,
+    (stats?.disposablePot !== undefined && stats?.disposablePot !== null)
+      ? stats.disposablePot
+      : ((stats?.totalIncome || 0) - (stats?.totalFixed || 0) - totalSavings)
+  );
 
-  const getCategoryBudgetKr = (c: any) => {
-    const catFixed = Math.round(getFixedSpentForCategory(c.name));
-    if (c.budget === undefined) return catFixed;
-    
+  const getCategoryBudgetPct = (c: any): number => {
+    if (c.budget === undefined || c.budget === null) return 0;
     if (c.budget > 100) {
-      return Math.max(catFixed, Math.round(c.budget));
+      return totalBudgetPot > 0 ? Math.round((c.budget / totalBudgetPot) * 100) : 0;
     }
-    const pctAmount = totalBudgetPot > 0 ? Math.round((c.budget / 100) * totalBudgetPot) : 0;
-    return Math.max(catFixed, pctAmount);
+    return Math.max(0, Math.min(100, Math.round(Number(c.budget) || 0)));
   };
 
-  const totalAllocatedKronor = (config.categories || []).reduce((sum, c) => {
-    return sum + getCategoryBudgetKr(c);
+  const getCategoryBudgetKr = (c: any): number => {
+    const pct = getCategoryBudgetPct(c);
+    return totalBudgetPot > 0 ? Math.round((pct / 100) * totalBudgetPot) : 0;
+  };
+
+  const totalAllocatedPercentage = (config.categories || []).reduce((sum, c) => {
+    return sum + getCategoryBudgetPct(c);
   }, 0);
 
+  const totalAllocatedKronor = totalBudgetPot > 0 
+    ? Math.round((totalAllocatedPercentage / 100) * totalBudgetPot) 
+    : 0;
+
+  const remainingPercentage = 100 - totalAllocatedPercentage;
   const remainingToAllocate = totalBudgetPot - totalAllocatedKronor;
-  const totalAllocatedPercentage = totalBudgetPot > 0 ? Math.round((totalAllocatedKronor / totalBudgetPot) * 100) : 0;
 
   const handleDistributeEvenly = () => {
     const categories = config.categories || [];
-    if (categories.length === 0 || totalBudgetPot <= 0) return;
+    if (categories.length === 0) return;
 
-    // Distribute budget pot evenly across categories (rounded to 50 kr)
-    const perCategory = Math.max(0, Math.floor((totalBudgetPot / categories.length) / 50) * 50);
+    // Distribute 100% evenly across categories
+    const count = categories.length;
+    const basePct = Math.floor(100 / count);
+    const remainder = 100 - (basePct * count);
 
-    const updatedCategories = categories.map((c) => {
-      const fixedSpent = Math.round(getFixedSpentForCategory(c.name));
-      const targetBudget = Math.max(fixedSpent, perCategory);
-      return {
-        ...c,
-        budget: targetBudget
-      };
-    });
+    const updatedCategories = categories.map((c, idx) => ({
+      ...c,
+      budget: basePct + (idx === 0 ? remainder : 0),
+    }));
 
     setConfig({ ...config, categories: updatedCategories });
   };
@@ -237,20 +225,23 @@ export function BudgetView({
               </span>
               <div className="flex items-baseline gap-1.5">
                 <span className={`text-2xl sm:text-3xl font-extrabold font-amount tabular-nums tracking-tight ${
-                  remainingToAllocate < 0 
+                  remainingPercentage < 0 
                     ? 'text-rose-500' 
-                    : remainingToAllocate === 0 
+                    : remainingPercentage === 0 
                     ? 'text-emerald-500' 
                     : 'text-[var(--accent-color)]'
                 }`}>
-                  {formatAmount(Math.abs(remainingToAllocate), config.language)} {config.currency}
+                  {remainingPercentage < 0 ? `+${Math.abs(remainingPercentage)}%` : `${remainingPercentage}%`}
                 </span>
-                {remainingToAllocate < 0 && (
+                <span className="text-[12px] font-semibold text-[var(--text-secondary)] tabular-nums">
+                  ({formatAmount(Math.abs(remainingToAllocate), config.language)} {config.currency})
+                </span>
+                {remainingPercentage < 0 && (
                   <span className="text-[10px] font-bold text-rose-500 uppercase tracking-tight bg-rose-500/10 px-1.5 py-0.5 rounded-md">
                     överfördelat
                   </span>
                 )}
-                {remainingToAllocate === 0 && (
+                {remainingPercentage === 0 && (
                   <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-tight bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
                     100% klart
                   </span>
@@ -266,7 +257,7 @@ export function BudgetView({
                 {formatAmount(totalBudgetPot, config.language)} {config.currency}
               </span>
               <span className="text-[11px] text-[var(--text-secondary)] font-medium">
-                Fördelat: <strong className="text-[var(--text-primary)] font-bold">{formatAmount(totalAllocatedKronor, config.language)}</strong> ({totalAllocatedPercentage}%)
+                Fördelat: <strong className="text-[var(--text-primary)] font-bold">{totalAllocatedPercentage}%</strong> ({formatAmount(totalAllocatedKronor, config.language)} kr)
               </span>
             </div>
           </div>
@@ -275,14 +266,14 @@ export function BudgetView({
           <div className="space-y-1">
             <div className="w-full h-2.5 bg-[var(--border-color)]/50 rounded-full overflow-hidden flex shadow-inner">
               {(config.categories || [])
-                .filter((c) => getCategoryBudgetKr(c) > 0)
+                .filter((c) => getCategoryBudgetPct(c) > 0)
                 .map((c) => {
+                  const pct = getCategoryBudgetPct(c);
                   const amount = getCategoryBudgetKr(c);
-                  const pct = totalBudgetPot > 0 ? (amount / totalBudgetPot) * 100 : 0;
                   return (
                     <div
                       key={c.name}
-                      title={`${c.name}: ${formatAmount(amount, config.language)} kr (${Math.round(pct)}%)`}
+                      title={`${c.name}: ${pct}% (${formatAmount(amount, config.language)} kr)`}
                       style={{
                         width: `${Math.min(100, pct)}%`,
                         backgroundColor: c.color || '#94a3b8',
@@ -326,7 +317,7 @@ export function BudgetView({
               Kategorier ({config.categories?.length || 0})
             </h3>
             <span className="text-[11px] text-[var(--text-secondary)]">
-              Justera med reglagen
+              Anpassas automatiskt efter inkomst och fasta utgifter
             </span>
           </div>
           
@@ -338,7 +329,7 @@ export function BudgetView({
                 if (indexA !== -1 && indexB !== -1) {
                   return indexA - indexB;
                 }
-                return getCategoryBudgetKr(b) - getCategoryBudgetKr(a);
+                return getCategoryBudgetPct(b) - getCategoryBudgetPct(a);
               })
               .map((cat) => {
               const iconName = cat.icon;
@@ -347,16 +338,15 @@ export function BudgetView({
               const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
               const variableSpent = Math.round(getVariableSpentForCategory(cat.name));
 
-              const displayedBudget = getCategoryBudgetKr(cat);
-              const displayedPercentage = totalBudgetPot > 0 ? (displayedBudget / totalBudgetPot) * 100 : 0;
-              const maxBudgetKr = Math.max(displayedBudget, totalBudgetPot);
+              const catPct = getCategoryBudgetPct(cat);
+              const catKr = getCategoryBudgetKr(cat);
 
               return (
                 <div 
                   key={cat.name}
                   className="p-3 sm:p-3.5 rounded-[18px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-3xs flex flex-col gap-2 transition-all hover:border-[var(--border-color)]/80"
                 >
-                  {/* Top Row: Icon, Name + % and Kronor Input */}
+                  {/* Top Row: Icon, Name, Calculated Kronor and % Input */}
                   <div className="flex items-center justify-between gap-2.5">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div 
@@ -371,80 +361,80 @@ export function BudgetView({
                           <div className="w-1.5 h-1.5 rounded-full" />
                         )}
                       </div>
-                      <div className="min-w-0 flex items-baseline gap-1.5">
-                        <span className="text-[13px] sm:text-[13.5px] font-bold text-[var(--text-primary)] tracking-tight truncate">
+                      <div className="min-w-0">
+                        <span className="text-[13px] sm:text-[13.5px] font-bold text-[var(--text-primary)] tracking-tight truncate block">
                           {cat.name}
-                        </span>
-                        <span className="text-[10.5px] font-semibold text-[var(--text-secondary)] opacity-70 tabular-nums shrink-0">
-                          {Math.round(displayedPercentage)}%
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <div className="relative">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[13px] font-bold font-amount tabular-nums text-[var(--text-primary)]">
+                        {formatAmount(catKr, config.language)} kr
+                      </span>
+                      <div className="relative w-16">
                         <input
                           type="number"
-                          placeholder={`${formatAmount(fixedSpent, config.language)}`}
-                          value={config.categories?.find(c => c.name === cat.name)?.budget !== undefined ? displayedBudget : ''}
-                          min={fixedSpent}
-                          max={maxBudgetKr}
-                          step={50}
+                          min={0}
+                          max={100}
+                          step={1}
+                          placeholder="0"
+                          value={catPct > 0 ? catPct : ''}
                           onChange={(e) => {
                             if (e.target.value === '') {
-                              const updatedCategories = config.categories.map((c) => 
+                              const updatedCategories = (config.categories || []).map((c) => 
                                 c.name === cat.name ? { ...c, budget: undefined } : c
                               );
                               setConfig({ ...config, categories: updatedCategories });
                               return;
                             }
-                            let val = Number(e.target.value);
-                            if (val < fixedSpent) val = fixedSpent;
-                            if (val > maxBudgetKr) val = maxBudgetKr;
-                            const updatedCategories = config.categories.map((c) => 
+                            let val = Math.round(Number(e.target.value));
+                            if (val < 0) val = 0;
+                            if (val > 100) val = 100;
+                            const updatedCategories = (config.categories || []).map((c) => 
                               c.name === cat.name ? { ...c, budget: val } : c
                             );
                             setConfig({ ...config, categories: updatedCategories });
                           }}
-                          className="w-24 h-8 px-2.5 rounded-[10px] bg-[var(--surface-muted)]/70 border border-[var(--border-color)] text-[12.5px] font-bold text-[var(--text-primary)] text-right pr-6 focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] tabular-nums"
+                          className="w-full h-8 px-2 rounded-[10px] bg-[var(--surface-muted)]/70 border border-[var(--border-color)] text-[12.5px] font-bold text-[var(--text-primary)] text-right pr-5 focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] tabular-nums"
                         />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-[var(--text-secondary)]">
-                          kr
+                        <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[var(--text-secondary)] pointer-events-none">
+                          %
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Middle Row: Slider Control */}
+                  {/* Middle Row: Percentage Slider Control */}
                   <div className="px-0.5">
                     <input
                       type="range"
-                      min={fixedSpent}
-                      max={Math.max(fixedSpent, maxBudgetKr)}
-                      step={fixedSpent % 50 === 0 ? 50 : 1}
-                      value={displayedBudget}
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={catPct}
                       onChange={(e) => {
-                        const val = Number(e.target.value);
-                        const updatedCategories = config.categories.map((c) => 
+                        const val = Math.round(Number(e.target.value));
+                        const updatedCategories = (config.categories || []).map((c) => 
                           c.name === cat.name ? { ...c, budget: val } : c
                         );
                         setConfig({ ...config, categories: updatedCategories });
                       }}
                       className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[var(--accent-color)] focus:outline-none bg-[var(--border-color)]/60"
                       style={{
-                        backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${maxBudgetKr > fixedSpent ? ((displayedBudget - fixedSpent) / (maxBudgetKr - fixedSpent)) * 100 : 0}%, var(--border-color) ${maxBudgetKr > fixedSpent ? ((displayedBudget - fixedSpent) / (maxBudgetKr - fixedSpent)) * 100 : 0}%, var(--border-color) 100%)`
+                        backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${catPct}%, var(--border-color) ${catPct}%, var(--border-color) 100%)`
                       }}
                     />
                   </div>
 
-                  {/* Context note: only if fixed expenses or already spent */}
+                  {/* Context note: variable spent or fixed bills */}
                   {(fixedSpent > 0 || variableSpent > 0) && (
-                    <div className="flex items-center justify-between text-[10px] text-[var(--text-secondary)] px-0.5 opacity-75">
-                      {fixedSpent > 0 ? (
-                        <span>Varav fast: {formatAmount(fixedSpent, config.language)} kr</span>
-                      ) : <span />}
-                      {variableSpent > 0 && (
+                    <div className="flex items-center justify-between text-[10.5px] text-[var(--text-secondary)] px-0.5 opacity-75">
+                      {variableSpent > 0 ? (
                         <span>Spenderat: <strong className="text-[var(--text-primary)] font-semibold">{formatAmount(variableSpent, config.language)} kr</strong></span>
+                      ) : <span />}
+                      {fixedSpent > 0 && (
+                        <span>(Fasta räkningar: {formatAmount(fixedSpent, config.language)} kr)</span>
                       )}
                     </div>
                   )}

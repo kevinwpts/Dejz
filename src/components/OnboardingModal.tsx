@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { User, ArrowRight, Loader2, Wallet, CreditCard, Target, Plus, ChevronLeft, Check, Sparkles, TrendingUp, ShieldCheck, Search, X, Zap } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
-import { Config, Frequency } from '../types';
+import { Config, Frequency, Category } from '../types';
 import { formatAmount } from '../utils/format';
 import { FixedExpenseModal, IncomeModal } from './BudgetModals';
 import { SavingsGoalModal } from './SavingsGoalModal';
@@ -15,7 +15,15 @@ import { TransactionLogo } from './TransactionLogo';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
 import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 
-type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
+export type Step = 'name' | 'age' | 'gender' | 'payday' | 'income' | 'expenses' | 'budget' | 'goals' | 'midMonth' | 'summary';
+
+export const AGE_OPTIONS = [
+  { id: '<18', labelSv: 'Under 18 år', labelEn: 'Under 18', isYoung: true, badge: 'Ungdom' },
+  { id: '18-25', labelSv: '18–25 år', labelEn: '18–25', isYoung: true, badge: 'Ung vuxen' },
+  { id: '26-35', labelSv: '26–35 år', labelEn: '26–35', isYoung: false, badge: 'Etablerad' },
+  { id: '36-50', labelSv: '36–50 år', labelEn: '36–50', isYoung: false, badge: 'Mitt i livet' },
+  { id: '51+', labelSv: '51+ år', labelEn: '51+', isYoung: false, badge: 'Erfaren' },
+];
 
 const texts = {
   sv: {
@@ -26,6 +34,24 @@ const texts = {
     nameQuestion: 'Vad heter du?',
     nameDesc: 'Vi anpassar Dejz personligt efter dig och din ekonomi.',
     firstNamePlaceholder: 'Ditt förnamn',
+    ageTitle: 'Din ålder',
+    ageQuestion: 'Hur gammal är du?',
+    ageDesc: 'Vi frågar för att bättre förstå din vardag och kunna anpassa upplevelsen efter dig.',
+    genderTitle: 'Om dig',
+    genderQuestionYoung: 'Är du tjej eller kille?',
+    genderQuestionAdult: 'Är du kvinna eller man?',
+    genderDesc: 'Hjälper oss att skräddarsy tilltal, insikter och rekommendationer.',
+    girl: 'Tjej',
+    boy: 'Kille',
+    woman: 'Kvinna',
+    man: 'Man',
+    otherOrPreferNot: 'Annat / Vill inte ange',
+    budgetTitle: 'Fördela budget',
+    budgetQuestion: 'Fördela din vardagsbudget',
+    budgetDesc: 'Hur vill du fördela dina fria vardagspengar mellan olika kategorier?',
+    budgetTip: '💡 Du kan alltid justera detta när som helst under Budget i footern!',
+    distributeEvenly: 'Fördela potten jämnt',
+    leftToAllocate: 'Kvar att fördela',
     paydayQuestion: 'När får du lön?',
     paydayDesc: 'Dejz använder detta för att automatiskt beräkna dina budgetperioder.',
     customDate: 'Eller välj ett anpassat datum',
@@ -77,6 +103,24 @@ const texts = {
     nameQuestion: 'What is your name?',
     nameDesc: 'We customize Dejz personally for you and your finances.',
     firstNamePlaceholder: 'Your first name',
+    ageTitle: 'Your Age',
+    ageQuestion: 'How old are you?',
+    ageDesc: 'We ask so we can provide insights and tips tailored to your stage of life.',
+    genderTitle: 'About you',
+    genderQuestionYoung: 'Are you a girl or a boy?',
+    genderQuestionAdult: 'Are you a woman or a man?',
+    genderDesc: 'This helps us personalize Dejz and offer relevant recommendations.',
+    girl: 'Girl',
+    boy: 'Boy',
+    woman: 'Woman',
+    man: 'Man',
+    otherOrPreferNot: 'Other / Prefer not to say',
+    budgetTitle: 'Allocate Budget',
+    budgetQuestion: 'Allocate your everyday budget',
+    budgetDesc: 'How do you want to divide your disposable spending across categories?',
+    budgetTip: '💡 You can always adjust this anytime in the Budget tab in the footer!',
+    distributeEvenly: 'Distribute evenly',
+    leftToAllocate: 'Left to allocate',
     paydayQuestion: 'When do you get paid?',
     paydayDesc: 'Dejz uses this to automatically calculate your budget periods.',
     customDate: 'Or choose a custom date',
@@ -134,12 +178,13 @@ interface OnboardingModalProps {
     savingsGoals: { title: string; targetAmount: number; icon?: string; logo?: string; deadline?: string }[];
     initialSpent: number;
     payday: number;
+    userAgeGroup?: string;
+    userGender?: string;
+    categories?: Category[];
   }) => Promise<void> | void;
   t: (key: TranslationKey) => string;
   currentPeriodId: string;
 }
-
-type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
 
 export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, currentPeriodId }: OnboardingModalProps) {
   useScrollLock(isOpen);
@@ -149,13 +194,18 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
 
   const [step, setStep] = useState<Step>('name');
   const [fullName, setFullName] = useState('');
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState<string>(config?.userAgeGroup || '');
+  const [selectedGender, setSelectedGender] = useState<string>(config?.userGender || '');
   const [payday, setPayday] = useState(25);
   const [midMonthSpent, setMidMonthSpent] = useState<string>('');
   
   // Lists State
   const [incomes, setIncomes] = useState<Omit<Income, 'id'>[]>([]);
   const [fixedExpenses, setFixedExpenses] = useState<Omit<FixedExpense, 'id'>[]>([]);
+  const [onboardingCategories, setOnboardingCategories] = useState<Category[]>(config.categories || []);
   const [savingsGoals, setSavingsGoals] = useState<Omit<SavingsGoal, 'id' | 'currentAmount' | 'createdAt' | 'priority'>[]>([]);
+
+  const isYoung = selectedAgeGroup === '<18' || selectedAgeGroup === '18-25';
 
   // Modal State
   const [isAddingIncome, setIsAddingIncome] = useState(false);
@@ -217,19 +267,25 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
   }, []);
 
   const handleNext = () => {
-    if (step === 'name') setStep('payday');
+    if (step === 'name') setStep('age');
+    else if (step === 'age') setStep('gender');
+    else if (step === 'gender') setStep('payday');
     else if (step === 'payday') setStep('income');
     else if (step === 'income') setStep('expenses');
-    else if (step === 'expenses') setStep('goals');
+    else if (step === 'expenses') setStep('budget');
+    else if (step === 'budget') setStep('goals');
     else if (step === 'goals') setStep('midMonth');
     else if (step === 'midMonth') setStep('summary');
   };
 
   const handleBack = () => {
-    if (step === 'payday') setStep('name');
+    if (step === 'age') setStep('name');
+    else if (step === 'gender') setStep('age');
+    else if (step === 'payday') setStep('gender');
     else if (step === 'income') setStep('payday');
     else if (step === 'expenses') setStep('income');
-    else if (step === 'goals') setStep('expenses');
+    else if (step === 'budget') setStep('expenses');
+    else if (step === 'goals') setStep('budget');
     else if (step === 'midMonth') setStep('goals');
     else if (step === 'summary') setStep('midMonth');
   };
@@ -264,7 +320,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
         fixedExpenses: fixedExpenses || [],
         savingsGoals: savingsGoals || [],
         initialSpent,
-        payday
+        payday,
+        userAgeGroup: selectedAgeGroup || undefined,
+        userGender: selectedGender || undefined,
+        categories: onboardingCategories,
       });
     } catch (err: any) {
       console.error('Error during onboarding:', err);
@@ -330,17 +389,47 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
 
   const stepNumber = 
     step === 'name' ? 1 : 
-    step === 'payday' ? 2 : 
-    step === 'income' ? 3 : 
-    step === 'expenses' ? 4 : 
-    step === 'goals' ? 5 : 
-    step === 'midMonth' ? 6 : 7;
-  const totalSteps = 7;
+    step === 'age' ? 2 :
+    step === 'gender' ? 3 :
+    step === 'payday' ? 4 : 
+    step === 'income' ? 5 : 
+    step === 'expenses' ? 6 : 
+    step === 'budget' ? 7 :
+    step === 'goals' ? 8 : 
+    step === 'midMonth' ? 9 : 10;
+  const totalSteps = 10;
 
   // Summary Metrics & Days Calculation
   const totalIncome = incomes.reduce((sum, inc) => sum + (Number(inc.amount) || 0), 0);
   const totalFixed = fixedExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
   const monthlyDisposablePot = Math.max(0, totalIncome - totalFixed);
+
+  // Category Budget Helpers for Onboarding
+  const getCatBudgetPct = (c: Category) => {
+    if (c.budget === undefined || c.budget === null) return 0;
+    if (c.budget > 100) return monthlyDisposablePot > 0 ? Math.round((c.budget / monthlyDisposablePot) * 100) : 0;
+    return Math.max(0, Math.min(100, Math.round(Number(c.budget) || 0)));
+  };
+
+  const getCatBudgetKr = (c: Category) => {
+    const pct = getCatBudgetPct(c);
+    return monthlyDisposablePot > 0 ? Math.round((pct / 100) * monthlyDisposablePot) : 0;
+  };
+
+  const totalAllocatedPct = onboardingCategories.reduce((sum, c) => sum + getCatBudgetPct(c), 0);
+  const remainingPct = 100 - totalAllocatedPct;
+  const remainingKr = monthlyDisposablePot > 0 ? Math.round((remainingPct / 100) * monthlyDisposablePot) : 0;
+
+  const handleDistributeEvenly = () => {
+    const count = onboardingCategories.length;
+    if (count === 0) return;
+    const basePct = Math.floor(100 / count);
+    const remainder = 100 - (basePct * count);
+    setOnboardingCategories(onboardingCategories.map((c, idx) => ({
+      ...c,
+      budget: basePct + (idx === 0 ? remainder : 0)
+    })));
+  };
 
   const daysUntilPayday = useMemo(() => {
     const today = new Date();
@@ -383,7 +472,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
               
               {/* Step Progress Segmented Indicator */}
               <div className="flex items-center gap-1.5 mb-5 shrink-0">
-                {[1, 2, 3, 4, 5, 6, 7].map((s) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((s) => (
                   <div 
                     key={s} 
                     className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
@@ -398,7 +487,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                 <div className="flex items-center gap-3">
                   {step !== 'name' && (
                     <button 
-                      onClick={handleBack} 
+                       onClick={handleBack} 
                       className="w-9 h-9 flex items-center justify-center bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] rounded-[12px] transition-all text-[var(--text-secondary)] border border-[var(--border-color)] shadow-2xs cursor-pointer active:scale-95"
                       aria-label={s.back}
                     >
@@ -411,11 +500,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                     </span>
                     <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
                       {step === 'name' ? s.welcome : 
+                       step === 'age' ? s.ageTitle :
+                       step === 'gender' ? s.genderTitle :
                        step === 'payday' ? s.paydayTitle :
                        step === 'income' ? s.monthlyIncome : 
                        step === 'expenses' ? s.fixedExpenses : 
+                       step === 'budget' ? s.budgetTitle :
                        step === 'goals' ? s.savingsGoals :
-                       step === 'midMonth' ? s.midMonthTitle :
+                       step === 'midMonth' ? (typeof s.midMonthTitle === 'function' ? s.midMonthTitle(daysUntilPayday) : s.midMonthTitle) :
                        s.summaryTitle}
                     </h2>
                   </div>
@@ -465,6 +557,161 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         <button 
                           onClick={handleNext}
                           disabled={!fullName.trim()}
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs hover:opacity-95"
+                        >
+                          <span>{s.next}</span>
+                          <ArrowRight size={16} strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {step === 'age' && (
+                    <motion.div
+                      key="age"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-6 my-auto"
+                    >
+                      <div className="space-y-3">
+                        <OnboardingCharacterArt step="age" />
+                        <div className="space-y-1 text-center">
+                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.ageQuestion}</h3>
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[290px] mx-auto leading-relaxed">
+                            {s.ageDesc}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2.5 max-w-[320px] mx-auto w-full">
+                        {AGE_OPTIONS.map((opt) => {
+                          const isSelected = selectedAgeGroup === opt.id;
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              onClick={() => setSelectedAgeGroup(opt.id)}
+                              className={`w-full p-3.5 rounded-[18px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${
+                                isSelected
+                                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-sm'
+                                  : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/40 hover:bg-[var(--surface-muted)]'
+                              }`}
+                            >
+                              <span className="text-[14px] sm:text-[15px] font-bold tracking-tight">
+                                {isEn ? opt.labelEn : opt.labelSv}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                                  isSelected ? 'bg-white/20 text-white' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
+                                }`}>
+                                  {opt.badge}
+                                </span>
+                                {isSelected && <Check size={16} strokeWidth={2.5} />}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="pt-2">
+                        <button 
+                          onClick={handleNext}
+                          disabled={!selectedAgeGroup}
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs hover:opacity-95"
+                        >
+                          <span>{s.next}</span>
+                          <ArrowRight size={16} strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {step === 'gender' && (
+                    <motion.div
+                      key="gender"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-6 my-auto"
+                    >
+                      <div className="space-y-3">
+                        <OnboardingCharacterArt step="gender" />
+                        <div className="space-y-1 text-center">
+                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                            {isYoung ? s.genderQuestionYoung : s.genderQuestionAdult}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[290px] mx-auto leading-relaxed">
+                            {s.genderDesc}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2.5 max-w-[320px] mx-auto w-full">
+                        {/* Option 1: Tjej / Kvinna */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGender(isYoung ? 'tjej' : 'kvinna')}
+                          className={`w-full p-4 rounded-[20px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${
+                            selectedGender === (isYoung ? 'tjej' : 'kvinna')
+                              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-sm'
+                              : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/40 hover:bg-[var(--surface-muted)]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{isYoung ? '👧' : '👩'}</span>
+                            <span className="text-[15px] font-bold tracking-tight">
+                              {isYoung ? s.girl : s.woman}
+                            </span>
+                          </div>
+                          {selectedGender === (isYoung ? 'tjej' : 'kvinna') && <Check size={18} strokeWidth={2.5} />}
+                        </button>
+
+                        {/* Option 2: Kille / Man */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGender(isYoung ? 'kille' : 'man')}
+                          className={`w-full p-4 rounded-[20px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${
+                            selectedGender === (isYoung ? 'kille' : 'man')
+                              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-sm'
+                              : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/40 hover:bg-[var(--surface-muted)]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{isYoung ? '👦' : '👨'}</span>
+                            <span className="text-[15px] font-bold tracking-tight">
+                              {isYoung ? s.boy : s.man}
+                            </span>
+                          </div>
+                          {selectedGender === (isYoung ? 'kille' : 'man') && <Check size={18} strokeWidth={2.5} />}
+                        </button>
+
+                        {/* Option 3: Annat / Vill inte ange */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGender('annat')}
+                          className={`w-full p-3.5 rounded-[20px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${
+                            selectedGender === 'annat'
+                              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-sm'
+                              : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/40 hover:bg-[var(--surface-muted)]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-xl">✨</span>
+                            <span className="text-[13.5px] font-medium tracking-tight text-[var(--text-secondary)]">
+                              {s.otherOrPreferNot}
+                            </span>
+                          </div>
+                          {selectedGender === 'annat' && <Check size={16} strokeWidth={2.5} />}
+                        </button>
+                      </div>
+
+                      <div className="pt-2">
+                        <button 
+                          onClick={handleNext}
+                          disabled={!selectedGender}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs hover:opacity-95"
                         >
                           <span>{s.next}</span>
@@ -838,6 +1085,174 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           </button>
                         </div>
                       </div>
+
+                      {/* Action Buttons: Next & Skip */}
+                      <div className="pt-2 space-y-2">
+                        <button 
+                          onClick={handleNext}
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
+                        >
+                          <span>{s.next}</span>
+                          <ArrowRight size={16} strokeWidth={2.5} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleNext}
+                          className="w-full text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1 transition-colors cursor-pointer"
+                        >
+                          {s.skipStep}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {step === 'budget' && (
+                    <motion.div
+                      key="budget"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.25 }}
+                      className="space-y-4"
+                    >
+                      <div className="space-y-2 text-center">
+                        <OnboardingCharacterArt step="budget" />
+                        <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                          {s.budgetQuestion}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[320px] mx-auto leading-relaxed">
+                          {monthlyDisposablePot > 0 
+                            ? (isEn 
+                                ? `After bills, you have approx ${formatAmount(monthlyDisposablePot, config.language)} ${config.currency || 'kr'} to spend. How do you want to divide the cake?`
+                                : `Efter fasta kostnader har du ca ${formatAmount(monthlyDisposablePot, config.language)} kr kvar att leva på. Hur vill du fördela kakan?`)
+                            : s.budgetDesc
+                          }
+                        </p>
+                      </div>
+
+                      {/* Distribution Summary Card */}
+                      <div className="p-3.5 sm:p-4 rounded-[20px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-xs space-y-2.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-0.5">
+                              {s.leftToAllocate}
+                            </span>
+                            <div className="flex items-baseline gap-1.5">
+                              <span className={`text-xl sm:text-2xl font-extrabold font-amount tabular-nums ${
+                                remainingPct < 0 ? 'text-rose-500' : remainingPct === 0 ? 'text-emerald-500' : 'text-[var(--accent-color)]'
+                              }`}>
+                                {remainingPct < 0 ? `+${Math.abs(remainingPct)}%` : `${remainingPct}%`}
+                              </span>
+                              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tabular-nums">
+                                ({formatAmount(Math.abs(remainingKr), config.language)} {config.currency || 'kr'})
+                              </span>
+                              {remainingPct === 0 && (
+                                <span className="text-[9.5px] font-bold text-emerald-500 uppercase tracking-tight bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
+                                  100% klart
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleDistributeEvenly}
+                            className="text-[11px] font-bold text-[var(--accent-color)] hover:opacity-85 flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[var(--accent-color)]/10 transition-all cursor-pointer shrink-0"
+                          >
+                            <Sparkles size={13} />
+                            {s.distributeEvenly}
+                          </button>
+                        </div>
+
+                        {/* Multi-colored Category Segment Bar */}
+                        <div className="w-full h-2 bg-[var(--border-color)]/60 rounded-full overflow-hidden flex">
+                          {onboardingCategories
+                            .filter((c) => getCatBudgetPct(c) > 0)
+                            .map((c) => {
+                              const pct = getCatBudgetPct(c);
+                              return (
+                                <div
+                                  key={c.name}
+                                  style={{
+                                    width: `${Math.min(100, pct)}%`,
+                                    backgroundColor: c.color || '#94a3b8',
+                                  }}
+                                  className="h-full transition-all duration-200 border-r border-black/10 last:border-r-0"
+                                />
+                              );
+                            })}
+                        </div>
+                      </div>
+
+                      {/* Categories List */}
+                      <div className="space-y-2 max-h-[34vh] overflow-y-auto pr-1 no-scrollbar">
+                        {onboardingCategories.map((cat) => {
+                          const iconName = cat.icon;
+                          const Icon = ICON_MAP[iconName];
+                          const catPct = getCatBudgetPct(cat);
+                          const catKr = getCatBudgetKr(cat);
+
+                          return (
+                            <div
+                              key={cat.name}
+                              className="p-2.5 sm:p-3 rounded-[16px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-3xs flex flex-col gap-1.5"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <div 
+                                    className="w-7 h-7 rounded-full flex items-center justify-center text-white shrink-0 text-[13px]"
+                                    style={{ backgroundColor: cat.color || '#94a3b8' }}
+                                  >
+                                    {isEmojiString(iconName) ? (
+                                      <span className="leading-none">{iconName}</span>
+                                    ) : Icon ? (
+                                      <Icon size={14} strokeWidth={2} />
+                                    ) : (
+                                      <div className="w-1.5 h-1.5 rounded-full" />
+                                    )}
+                                  </div>
+                                  <span className="text-[13px] font-bold text-[var(--text-primary)] truncate">
+                                    {cat.name}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="text-[12px] font-bold font-amount tabular-nums text-[var(--text-primary)]">
+                                    {formatAmount(catKr, config.language)} kr
+                                  </span>
+                                  <span className="text-[11px] font-bold text-[var(--accent-color)] tabular-nums w-9 text-right">
+                                    {catPct}%
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Slider */}
+                              <input
+                                type="range"
+                                min={0}
+                                max={100}
+                                step={1}
+                                value={catPct}
+                                onChange={(e) => {
+                                  const val = Math.round(Number(e.target.value));
+                                  setOnboardingCategories(onboardingCategories.map(c => 
+                                    c.name === cat.name ? { ...c, budget: val } : c
+                                  ));
+                                }}
+                                className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[var(--accent-color)] focus:outline-none bg-[var(--border-color)]/60"
+                                style={{
+                                  backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${catPct}%, var(--border-color) ${catPct}%, var(--border-color) 100%)`
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <p className="text-[11px] text-[var(--text-secondary)] text-center">
+                        {s.budgetTip}
+                      </p>
 
                       {/* Action Buttons: Next & Skip */}
                       <div className="pt-2 space-y-2">

@@ -3955,13 +3955,16 @@ export default function App() {
                 }),
               );
 
-              // 3. Update config with income, initialSpent, payday, and savings goals
+              // 3. Update config with income, initialSpent, payday, savings goals, age, gender, and categories
               const newConfig: Config = {
                 ...config,
                 darkMode: (config?.darkMode !== undefined && config?.darkMode !== null) ? config.darkMode : true,
                 payday: data.payday || 25,
                 initialSpent: data.initialSpent,
                 savingsGoals: mappedSavingsGoals,
+                userAgeGroup: data.userAgeGroup || config?.userAgeGroup,
+                userGender: data.userGender || config?.userGender,
+                categories: (data.categories && data.categories.length > 0) ? data.categories : config.categories,
               };
               await dataService.saveSettings(activeUserId, newConfig);
               setConfig(newConfig);

@@ -108,6 +108,8 @@ export interface Config {
   showFixedExpensesInTodayView: boolean;
   showFixedExpensesInCalendar: boolean;
   heroBackgroundImage?: string;
+  userAgeGroup?: string;
+  userGender?: string;
 }
 
 export interface SavingsGoal {
