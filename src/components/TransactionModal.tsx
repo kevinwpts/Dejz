@@ -315,6 +315,56 @@ export function TransactionModal({
 
         {/* Main Content Area */}
         <div className="shrink overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
+              {/* Skanna kvitto options for new expenses */}
+              {!transaction && type === 'expense' && (
+                <div className="space-y-4">
+                  {!receiptUrl ? (
+                    <div className="relative overflow-hidden bg-[var(--surface-muted)]/40 hover:bg-[var(--surface-muted)]/60 rounded-[20px] border border-[var(--border-color)] p-4 flex items-center justify-between transition-all group">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-11 h-11 rounded-full bg-accent/10 flex items-center justify-center text-accent group-hover:scale-105 transition-transform duration-300">
+                          {isUploadingReceipt ? (
+                            <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Camera size={22} strokeWidth={2} />
+                          )}
+                        </div>
+                        <div>
+                          <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">Skanna kvitto</h4>
+                          <p className="text-[11px] font-medium text-[var(--text-tertiary)] opacity-85 mt-0.5">Fotografera eller välj bild</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => receiptInputRef.current?.click()}
+                        disabled={isUploadingReceipt}
+                        className="relative px-4 py-2 bg-[var(--text-primary)] hover:opacity-90 text-[var(--bg-color)] text-xs font-bold rounded-full shadow-sm active:scale-95 transition-all cursor-pointer select-none disabled:opacity-50"
+                      >
+                        Välj kvitto
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="relative overflow-hidden bg-success/5 rounded-[20px] border border-success/20 p-4 flex items-center justify-between transition-all">
+                      <div className="flex items-center gap-3.5">
+                        <div className="relative w-11 h-11 rounded-[12px] overflow-hidden border border-success/20 shadow-xs">
+                          <img src={receiptUrl} alt="Bifogat kvitto" className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">Kvitto bifogat</h4>
+                          <p className="text-[11px] font-medium text-success mt-0.5">Din kvittobild har lagts till i utgiften</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setReceiptUrl(undefined)}
+                        className="px-3.5 py-1.5 bg-danger/10 text-danger text-xs font-bold rounded-full hover:bg-danger/20 transition-all cursor-pointer"
+                      >
+                        Ta bort
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Amount Input */}
               <div className="flex flex-col gap-2.5">
                 <div 
@@ -746,14 +796,24 @@ export function TransactionModal({
                             className="hidden"
                             onChange={async (e) => {
                               const file = e.target.files?.[0];
-                              if (!file || !userId) return;
+                              if (!file) return;
                               
                               setIsUploadingReceipt(true);
                               try {
-                                const url = await uploadLogo(file, userId);
-                                setReceiptUrl(url);
+                                if (userId && userId !== 'demo-user') {
+                                  const url = await uploadLogo(file, userId);
+                                  if (url) {
+                                    setReceiptUrl(url);
+                                    return;
+                                  }
+                                }
+                                // Local preview fallback for demo mode, guest users or if upload failed/offline
+                                const localUrl = URL.createObjectURL(file);
+                                setReceiptUrl(localUrl);
                               } catch (_error) {
                                 console.error('Error uploading receipt:', _error);
+                                const localUrl = URL.createObjectURL(file);
+                                setReceiptUrl(localUrl);
                               } finally {
                                 setIsUploadingReceipt(false);
                               }
