@@ -34,10 +34,15 @@ export function AppHeader({
   const [isAtTop, setIsAtTop] = useState(true);
   const lastScrollY = useRef(0);
 
-  const isTodayTab = activeTab === "today";
+  const isProfileOrSettings = activeTab === "profile" || activeTab === "settings";
   const useWhiteHeader = false;
 
   useEffect(() => {
+    if (isProfileOrSettings) {
+      setIsVisible(true);
+      setIsAtTop(false);
+      return;
+    }
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
@@ -75,43 +80,39 @@ export function AppHeader({
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isProfileOrSettings]);
 
   // Visa alltid headern vid sidbyte eller titeländring
   useEffect(() => {
     setIsVisible(true);
-  }, [_navTrigger, title]);
+  }, [_navTrigger, title, isProfileOrSettings]);
 
   return (
     <header
       className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
-        isVisible
+        isProfileOrSettings || isVisible
           ? "translate-y-0 opacity-100"
           : isDemoMode
           ? "-translate-y-[200%] opacity-0 pointer-events-none"
           : "-translate-y-full opacity-0 pointer-events-none"
       } ${
-        !isAtTop
+        !isAtTop || isProfileOrSettings
           ? "bg-[var(--bg-color)]/85 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-xs"
           : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >
-      <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2`}>
-        {/* Left: Back button OR Profile Picture + (Greeting & Date OR Title) */}
-        <div className="flex items-center gap-3 min-w-0">
+      <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2 relative`}>
+        {/* Left: Back button OR Profile Picture */}
+        <div className="flex items-center gap-3 min-w-0 z-10">
           {onBack ? (
             <button
               onClick={onBack}
-              className={`flex items-center gap-1.5 group active:scale-95 transition-all py-0.5 -ml-1 pr-2 cursor-pointer min-w-0 ${
+              className={`flex items-center gap-1 group active:scale-95 transition-all py-0.5 -ml-1 pr-2 cursor-pointer ${
                 useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
               }`}
+              aria-label="Tillbaka"
             >
-              <ChevronLeft size={22} strokeWidth={2.2} className="shrink-0" />
-              {title && (
-                <h1 className="text-[16px] sm:text-[18px] font-bold font-exo tracking-tight truncate">
-                  {title}
-                </h1>
-              )}
+              <ChevronLeft size={24} strokeWidth={2.4} className="shrink-0" />
             </button>
           ) : (
             <>
@@ -138,18 +139,18 @@ export function AppHeader({
                   <User size={16} strokeWidth={2.2} />
                 )}
               </button>
-  
-              {/* Stacked Tab title */}
-              <div className="flex flex-col min-w-0 text-left justify-center select-none">
-                <h1 className={`text-[16px] sm:text-[18px] font-bold font-exo tracking-tight truncate leading-none ${
-                  useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
-                }`}>
-                  {!isTodayTab ? title : ""}
-                </h1>
-              </div>
             </>
           )}
         </div>
+
+        {/* Center Title when onBack is present */}
+        {onBack && title && (
+          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none max-w-[60%] text-center">
+            <h1 className="text-[16px] sm:text-[18px] font-bold font-exo tracking-tight truncate text-[var(--text-primary)]">
+              {title}
+            </h1>
+          </div>
+        )}
   
         {/* Right Actions: Notifications, Search */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">

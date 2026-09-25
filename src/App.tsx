@@ -3073,6 +3073,7 @@ export default function App() {
       return budgetSection ? (config?.language === 'en' ? 'Allocate Budget' : 'Fördela vardagsbudget') : t("budget");
     }
     if (activeTab === "settings") {
+      if (settingsSection === "main") return undefined;
       switch (settingsSection) {
         case "salary": return t("salary");
         case "categories": return t("categories");
@@ -3082,6 +3083,7 @@ export default function App() {
       }
     }
     if (activeTab === "profile") {
+      if (profileSection === "main") return undefined;
       switch (profileSection) {
         case "salary": return t("salary");
         case "categories": return t("categories");

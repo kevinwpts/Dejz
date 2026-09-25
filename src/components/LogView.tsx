@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Search, Plus, ArrowUpRight, ArrowDownLeft, FileText, LayoutGrid, Wallet } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, FileText, LayoutGrid } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
@@ -59,7 +59,6 @@ export function LogView({
     return en;
   };
 
-  const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'receipt'>('all');
 
   const filteredExpenses = useMemo(() => {
@@ -74,19 +73,10 @@ export function LogView({
         else if (typeFilter === 'receipt') matchesType = !!e.receiptUrl;
         else matchesType = e.type === typeFilter;
         
-        if (!matchesType) return false;
-
-        if (!searchTerm.trim()) return true;
-
-        const searchLower = searchTerm.toLowerCase();
-        const matchesSearch = (e.category && e.category.toLowerCase().includes(searchLower)) || 
-                             (e.note && e.note.toLowerCase().includes(searchLower)) ||
-                             (e.merchant && e.merchant.toLowerCase().includes(searchLower)) ||
-                             (e.tags && e.tags.some(t => t.toLowerCase().includes(searchLower)));
-        return matchesSearch;
+        return matchesType;
       })
       .sort((a, b) => b.timestamp - a.timestamp);
-  }, [transactions, stats?.periodStart, stats?.periodEnd, searchTerm, typeFilter]);
+  }, [transactions, stats?.periodStart, stats?.periodEnd, typeFilter]);
 
   const groupedExpenses = useMemo(() => {
     const groups: Record<string, Transaction[]> = {};
@@ -116,25 +106,6 @@ export function LogView({
       )}
 
       <div className="space-y-3 bg-transparent p-0">
-        <div className="relative group bg-[var(--surface-color)] rounded-full border border-[var(--border-color)] shadow-xs h-11 flex items-center">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] opacity-50 w-4 h-4 transition-all group-focus-within:text-[var(--accent-color)] group-focus-within:opacity-100" />
-          <input 
-            type="text" 
-            placeholder={t('searchTransactions')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-full bg-transparent pl-11 pr-11 text-[13px] sm:text-[14px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]"
-          />
-          {searchTerm && (
-            <button 
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-            >
-              <Plus className="rotate-45" size={14} />
-            </button>
-          )}
-        </div>
-
         {/* Type Filters (Alla, Utgift, Inkomst, Kvitto) */}
         <div className="grid grid-cols-4 gap-1 p-1 bg-[var(--surface-color)] rounded-full border border-[var(--border-color)] shadow-xs">
           {(['all', 'expense', 'income', 'receipt'] as const).map(type => {

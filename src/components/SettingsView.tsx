@@ -138,18 +138,22 @@ const sectionHeaders: Record<Language, Record<string, { title: string; subtitle?
 };
 
 const SectionHeading = ({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) => (
-  <div className="max-w-md mx-auto mb-2 text-center select-none pt-1 pb-0.5">
-    <div className="mx-auto w-9 h-9 rounded-xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center border border-[var(--accent-color)]/20 mb-1.5 transition-transform duration-300 hover:rotate-6">
-      <Icon size={18} strokeWidth={2} />
+  <div className="max-w-md mx-auto mb-3 text-left select-none pt-1 pb-0.5 px-1">
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center border border-[var(--accent-color)]/25 shrink-0 transition-transform duration-300 hover:rotate-6">
+        <Icon size={18} strokeWidth={2} />
+      </div>
+      <div>
+        <h3 className="text-[15px] font-bold text-[var(--text-primary)] tracking-tight leading-tight">
+          {title}
+        </h3>
+        {subtitle && (
+          <p className="text-[11px] font-medium text-[var(--text-secondary)] opacity-75 mt-0.5 leading-relaxed">
+            {subtitle}
+          </p>
+        )}
+      </div>
     </div>
-    <h3 className="text-[15px] font-bold text-[var(--text-primary)] tracking-tight px-2 leading-tight">
-      {title}
-    </h3>
-    {subtitle && (
-      <p className="text-[11px] font-medium text-[var(--text-secondary)] opacity-70 mt-1 max-w-[280px] mx-auto leading-relaxed">
-        {subtitle}
-      </p>
-    )}
   </div>
 );
 

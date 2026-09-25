@@ -38,9 +38,13 @@ export function SearchModal({
   useEffect(() => {
     if (isOpen) {
       setQuery('');
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         inputRef.current?.focus();
-      }, 100);
+      });
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 40);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
@@ -102,6 +106,7 @@ export function SearchModal({
                 <Search size={18} className="text-[var(--text-secondary)] opacity-60 shrink-0 mr-2.5" />
                 <input 
                   ref={inputRef}
+                  autoFocus
                   type="text" 
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
