@@ -7,6 +7,7 @@ import { TranslationKey, Language } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
 import { fetchLogoForName, getLogoUrl, findKnownBrandDomain } from '../utils/logo';
 import { uploadLogo } from '../services/storageService';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { CalendarWidget } from './CalendarWidget';
 import { IconSelector } from './IconSelector';
 import { CategoryModal } from './CategoryModal';
@@ -55,50 +56,84 @@ const fileToBase64 = (file: File): Promise<string> => {
       const base64 = res.includes(',') ? res.split(',')[1] : res;
       resolve(base64);
     };
-    reader.onerror = (err) => reject(err);
+    reader.onerror = (err) => {
+      console.error('[Receipt Scan] FileReader error:', err);
+      reject(err);
+    };
     reader.readAsDataURL(file);
   });
 };
 
 const prepareReceiptImage = async (file: File): Promise<{ base64: string; mimeType: string }> => {
+  console.log('[Receipt Scan] Starting image preparation:', {
+    name: file.name,
+    type: file.type,
+    size: file.size,
+  });
+
   try {
-    return await new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
+    const resized = await new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
       img.onload = () => {
-        URL.revokeObjectURL(objectUrl);
-        const maxDimension = 1920;
-        let { width, height } = img;
-        if (width > maxDimension || height > maxDimension) {
-          if (width > height) {
-            height = Math.round((height * maxDimension) / width);
-            width = maxDimension;
-          } else {
-            width = Math.round((width * maxDimension) / height);
-            height = maxDimension;
+        try {
+          URL.revokeObjectURL(objectUrl);
+          const maxDimension = 1920;
+          let { width, height } = img;
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
           }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            throw new Error('Canvas context unavailable');
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+          const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+          if (!base64) {
+            throw new Error('Canvas generated empty base64 string');
+          }
+          resolve({ base64, mimeType: 'image/jpeg' });
+        } catch (canvasErr) {
+          URL.revokeObjectURL(objectUrl);
+          reject(canvasErr);
         }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          throw new Error('Canvas context unavailable');
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-        const base64 = dataUrl.split(',')[1];
-        resolve({ base64, mimeType: 'image/jpeg' });
       };
-      img.onerror = () => {
+      img.onerror = (imgErr) => {
         URL.revokeObjectURL(objectUrl);
-        reject(new Error('Image load failed'));
+        reject(imgErr || new Error('Image element failed to load object URL'));
       };
       img.src = objectUrl;
     });
-  } catch (_e) {
-    const base64 = await fileToBase64(file);
-    return { base64, mimeType: file.type || 'image/jpeg' };
+
+    console.log('[Receipt Scan] Image successfully prepared via canvas resize:', {
+      mimeType: resized.mimeType,
+      base64Length: resized.base64.length,
+    });
+    return resized;
+  } catch (canvasError) {
+    console.warn('[Receipt Scan] Canvas resize failed, falling back to direct FileReader:', canvasError);
+    try {
+      const base64 = await fileToBase64(file);
+      const mimeType = file.type || 'image/jpeg';
+      console.log('[Receipt Scan] Image successfully prepared via FileReader fallback:', {
+        mimeType,
+        base64Length: base64.length,
+      });
+      return { base64, mimeType };
+    } catch (readErr) {
+      console.error('[Receipt Scan] Both canvas and FileReader failed to prepare image:', readErr);
+      throw readErr;
+    }
   }
 };
 
@@ -189,6 +224,12 @@ export function TransactionModal({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    console.log('[Receipt Scan] File selected by user:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
+
     // Immediately display preview image to give instant feedback
     const localUrl = URL.createObjectURL(file);
     setReceiptUrl(localUrl);
@@ -198,35 +239,35 @@ export function TransactionModal({
     setScanFeedback(null);
 
     try {
-      // 1. Process image to base64
-      const { base64, mimeType } = await prepareReceiptImage(file);
+      if (!isSupabaseConfigured) {
+        console.error('[Receipt Scan] Supabase is not configured! isSupabaseConfigured is false.');
+      }
 
-      // 2. Invoke our backend proxy route '/api/scan-receipt' to avoid browser CORS preflight blocks
-      const scanPromise = fetch('/api/scan-receipt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // 1. Process image to base64
+      console.log('[Receipt Scan] Step 1: Processing image with prepareReceiptImage...');
+      const { base64, mimeType } = await prepareReceiptImage(file);
+      console.log('[Receipt Scan] Step 1 completed. Base64 length:', base64?.length, 'mimeType:', mimeType);
+
+      if (!base64 || typeof base64 !== 'string' || base64.trim().length === 0) {
+        throw new Error('Kunde inte extrahera bilddata (tom base64).');
+      }
+
+      const finalMimeType = mimeType || file.type || 'image/jpeg';
+      console.log('[Receipt Scan] Step 2: Calling supabase.functions.invoke("scan-receipt", ...) with mimeType:', finalMimeType);
+
+      // 2. Invoke Supabase Edge Function 'scan-receipt' using existing Supabase client
+      const scanPromise = supabase.functions.invoke('scan-receipt', {
+        body: {
           image: base64,
-          mimeType: mimeType || file.type || 'image/jpeg',
-        }),
-      }).then(async (res) => {
-        const isJson = res.headers.get('content-type')?.includes('application/json');
-        const data = isJson ? await res.json() : null;
-        if (!res.ok) {
-          throw new Error(data?.error || `HTTP error! status: ${res.status}`);
-        }
-        return { data, error: null };
-      }).catch((err) => {
-        return { data: null, error: err };
+          mimeType: finalMimeType,
+        },
       });
 
       // 3. Upload to Supabase Storage if user is signed in
       let uploadPromise: Promise<string | undefined> = Promise.resolve(undefined);
       if (userId && userId !== 'demo-user') {
         uploadPromise = uploadLogo(file, userId).catch((err) => {
-          console.warn('Storage upload warning:', err);
+          console.warn('[Receipt Scan] Storage upload warning:', err);
           return undefined;
         });
       }
@@ -240,10 +281,20 @@ export function TransactionModal({
       if (scanResult.status === 'fulfilled') {
         const { data, error } = scanResult.value;
         if (error) {
-          console.warn('scan-receipt returned error:', error);
-          const errMsg = error.message || (typeof error === 'string' ? error : JSON.stringify(error));
+          console.error('[Receipt Scan] supabase.functions.invoke error returned:', error);
+          let errMsg = error.message || (typeof error === 'string' ? error : JSON.stringify(error));
+          if ('context' in error && (error as any).context) {
+            try {
+              const errBody = await (error as any).context.json();
+              console.error('[Receipt Scan] Error body from edge function:', errBody);
+              if (errBody?.error) errMsg = errBody.error;
+            } catch {
+              // ignore
+            }
+          }
           setScanFeedback({ type: 'error', message: `Kunde inte läsa alla uppgifter automatiskt: ${errMsg}` });
         } else if (data) {
+          console.log('[Receipt Scan] scan-receipt data received successfully:', data);
           let hasPrefilled = false;
 
           // Företag / beskrivning = merchant
@@ -276,12 +327,12 @@ export function TransactionModal({
           }
         }
       } else {
-        console.warn('scan-receipt promise rejected:', scanResult.reason);
+        console.error('[Receipt Scan] scan-receipt promise was rejected:', scanResult.reason);
         const reasonMsg = scanResult.reason?.message || (typeof scanResult.reason === 'string' ? scanResult.reason : JSON.stringify(scanResult.reason));
         setScanFeedback({ type: 'error', message: `Analysen misslyckades: ${reasonMsg}` });
       }
     } catch (err: any) {
-      console.error('Receipt scanning failed:', err);
+      console.error('[Receipt Scan] Receipt scanning failed with error:', err);
       const errMsg = err?.message || (typeof err === 'string' ? err : JSON.stringify(err));
       setScanFeedback({ type: 'error', message: `Ett fel uppstod: ${errMsg}` });
     } finally {
