@@ -20,6 +20,7 @@ import { TransactionItem } from "./TransactionItem";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { BudgetItemLogo } from "./BudgetItem";
+import { QuickExpenseWidget } from "./QuickExpenseWidget";
 import { ICON_MAP, getCategoryIconName, isEmojiString } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 
@@ -32,6 +33,7 @@ interface TodayViewProps {
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
   onAddTransaction: (date?: Date) => void;
+  onQuickAddExpense?: (amount: number, note?: string) => Promise<void> | void;
   onAddIncome: (date?: Date) => void;
   onViewTransaction: (t: Transaction) => void;
   onDeleteTransaction: (id: string) => void;
@@ -62,8 +64,9 @@ export function TodayView({
   fixedExpenses,
   selectedDate,
   setSelectedDate,
-  _onAddTransaction,
-  _onAddIncome,
+  onAddTransaction: _onAddTransaction,
+  onQuickAddExpense,
+  onAddIncome: _onAddIncome,
   onViewTransaction,
   onDeleteTransaction,
   onNavigate,
@@ -407,6 +410,21 @@ export function TodayView({
           )}
         </GreetingModule>
       </motion.div>
+
+      {/* One-Tap Quick Expense Box */}
+      {onQuickAddExpense && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+        >
+          <QuickExpenseWidget
+            config={config}
+            selectedDate={selectedDate}
+            onAddExpense={onQuickAddExpense}
+          />
+        </motion.div>
+      )}
 
       {/* Attention Items / Budget Actions */}
       {attentionItems.length > 0 && (

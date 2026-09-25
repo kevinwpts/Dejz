@@ -948,6 +948,7 @@ export const getCategoryIconName = (categoryName: string): string => {
   if (name.includes('investering') || name.includes('aktier') || name.includes('överskott')) return 'trending';
   if (name.includes('bidrag') || name.includes('gåva') || name.includes('present')) return 'gift';
   if (name.includes('swish') || name.includes('överföring')) return 'arrowdownup';
+  if (name.includes('okategoriserat') || name.includes('uncategorized')) return 'tag';
   return 'tag';
 };
 

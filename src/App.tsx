@@ -3430,6 +3430,38 @@ export default function App() {
                       setTargetDate(new Date());
                       setIsAddTransactionOpen(true);
                     }}
+                    onQuickAddExpense={async (amount: number, note?: string) => {
+                      const isEn = config.language === 'en';
+                      const defaultName = isEn ? 'Quick expense' : 'Snabb utgift';
+                      const categoryName = isEn ? 'Uncategorized' : 'Okategoriserat';
+                      const merchantName = note?.trim() || defaultName;
+
+                      const now = new Date();
+                      let timestamp = Date.now();
+
+                      if (targetDate) {
+                        const d = new Date(targetDate);
+                        if (d.toDateString() === now.toDateString()) {
+                          timestamp = Date.now();
+                        } else {
+                          d.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+                          timestamp = d.getTime();
+                        }
+                      }
+
+                      await addTransaction(
+                        {
+                          amount,
+                          type: "expense",
+                          category: categoryName,
+                          merchant: merchantName,
+                          note: note?.trim() || "",
+                          tags: [],
+                          isBackdated: timestamp < Date.now() - 60000,
+                        },
+                        timestamp,
+                      );
+                    }}
                     onAddIncome={() => {
                       setTransactionType("income");
                       setTargetDate(new Date());
