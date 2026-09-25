@@ -261,6 +261,15 @@ export default function App() {
     useState<Transaction | null>(null);
   const [viewingTransaction, setViewingTransaction] =
     useState<Transaction | null>(null);
+  const [searchModalOpenBeforeViewing, setSearchModalOpenBeforeViewing] = useState(false);
+
+  const handleCloseTransactionView = () => {
+    setViewingTransaction(null);
+    if (searchModalOpenBeforeViewing) {
+      setIsSearchModalOpen(true);
+      setSearchModalOpenBeforeViewing(false);
+    }
+  };
   const [targetDate, setTargetDate] = useState<Date>(new Date());
 
   // Reset to today on mount
@@ -2748,7 +2757,7 @@ export default function App() {
     if (isAddTransactionOpen) { setIsAddTransactionOpen(false); modalClosed = true; }
     if (isAddIncomeOpen) { setIsAddIncomeOpen(false); modalClosed = true; }
     if (editingTransaction) { setEditingTransaction(null); modalClosed = true; }
-    if (viewingTransaction) { setViewingTransaction(null); modalClosed = true; }
+    if (viewingTransaction) { handleCloseTransactionView(); modalClosed = true; }
     if (isCalculatorOpen) { setIsCalculatorOpen(false); modalClosed = true; }
         if (isFeedbackModalOpen) { setIsFeedbackModalOpen(false); modalClosed = true; }
     if (isDeleteAccountModalOpen) { setIsDeleteAccountModalOpen(false); modalClosed = true; }
@@ -4100,7 +4109,7 @@ export default function App() {
         {viewingTransaction && (
           <TransactionViewModal
             transaction={viewingTransaction}
-            onClose={() => setViewingTransaction(null)}
+            onClose={() => handleCloseTransactionView()}
             onEdit={(t) => {
               setViewingTransaction(null);
               setEditingTransaction(t);
@@ -4110,7 +4119,7 @@ export default function App() {
             }}
             onDelete={(id) => {
               deleteTransaction(id);
-              setViewingTransaction(null);
+              handleCloseTransactionView();
             }}
             onDuplicate={async (expense) => {
               if (!session) return;
@@ -4132,7 +4141,7 @@ export default function App() {
                   },
                 );
                 setTransactions((prev) => [newExpense, ...prev]);
-                setViewingTransaction(null);
+                handleCloseTransactionView();
                 addToast(t("transactionDuplicated"), "success");
               } catch (_error) {
                 addToast(t("error"), "error");
@@ -4376,7 +4385,11 @@ export default function App() {
             transactions={transactions}
             config={config}
             onNavigate={handleNavigate}
-            onViewTransaction={setViewingTransaction}
+            onViewTransaction={(trans) => {
+              setSearchModalOpenBeforeViewing(true);
+              setIsSearchModalOpen(false);
+              setViewingTransaction(trans);
+            }}
           />
         )}
         {isLocked && (

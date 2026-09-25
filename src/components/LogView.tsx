@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { ArrowUpRight, ArrowDownLeft, FileText, LayoutGrid } from 'lucide-react';
+import { Wallet, ArrowUpRight, ArrowDownLeft, FileText, LayoutGrid } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
