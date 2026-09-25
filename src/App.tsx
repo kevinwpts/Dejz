@@ -16,14 +16,12 @@ function TabWrapper({
 }) {
   useLayoutEffect(() => {
     const targetY = scrollPositionsRef.current[tabKey] ?? 0;
-    
-    let attempts = 0;
+    if (targetY > 0) {
+      document.body.style.minHeight = `${targetY + window.innerHeight + 200}px`;
+    }
+
     const restore = () => {
       window.scrollTo({ top: targetY, behavior: "instant" as any });
-      if (window.scrollY < targetY && attempts < 15) {
-        attempts++;
-        requestAnimationFrame(restore);
-      }
     };
 
     restore();
@@ -33,7 +31,8 @@ function TabWrapper({
     let isRestoring = true;
     const restoreTimer = setTimeout(() => {
       isRestoring = false;
-    }, 300);
+      document.body.style.minHeight = "";
+    }, 350);
 
     const handleScroll = () => {
       if (isRestoring) return;
@@ -47,6 +46,7 @@ function TabWrapper({
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(restoreTimer);
+      document.body.style.minHeight = "";
       window.removeEventListener("scroll", handleScroll);
     };
   }, [tabKey, scrollPositionsRef]);
