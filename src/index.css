@@ -639,7 +639,7 @@ html, body {
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: auto;
   -webkit-tap-highlight-color: transparent;
 }
 html::-webkit-scrollbar, body::-webkit-scrollbar {
