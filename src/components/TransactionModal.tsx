@@ -229,7 +229,8 @@ export function TransactionModal({
         const { data, error } = scanResult.value;
         if (error) {
           console.warn('scan-receipt returned error:', error);
-          setScanFeedback({ type: 'error', message: 'Kunde inte läsa alla uppgifter automatiskt.' });
+          const errMsg = error.message || (typeof error === 'string' ? error : JSON.stringify(error));
+          setScanFeedback({ type: 'error', message: `Kunde inte läsa alla uppgifter automatiskt: ${errMsg}` });
         } else if (data) {
           let hasPrefilled = false;
 
@@ -258,15 +259,19 @@ export function TransactionModal({
 
           if (hasPrefilled) {
             setScanFeedback({ type: 'success', message: 'Uppgifter förifyllda från kvittot!' });
+          } else {
+            setScanFeedback({ type: 'error', message: 'Kunde inte läsa några giltiga uppgifter från kvittot.' });
           }
         }
       } else {
         console.warn('scan-receipt promise rejected:', scanResult.reason);
-        setScanFeedback({ type: 'error', message: 'Analysen misslyckades. Fyll i utgiften manuellt.' });
+        const reasonMsg = scanResult.reason?.message || (typeof scanResult.reason === 'string' ? scanResult.reason : JSON.stringify(scanResult.reason));
+        setScanFeedback({ type: 'error', message: `Analysen misslyckades: ${reasonMsg}` });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Receipt scanning failed:', err);
-      setScanFeedback({ type: 'error', message: 'Ett fel uppstod. Fyll i utgiften manuellt.' });
+      const errMsg = err?.message || (typeof err === 'string' ? err : JSON.stringify(err));
+      setScanFeedback({ type: 'error', message: `Ett fel uppstod: ${errMsg}` });
     } finally {
       setIsUploadingReceipt(false);
       setIsScanningReceipt(false);
