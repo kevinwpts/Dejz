@@ -3,17 +3,19 @@ import { motion } from "motion/react";
 import {
   Home,
   History,
-  BarChart3,
+  SlidersHorizontal,
   Plus,
   WalletCards,
 } from "lucide-react";
 import { Language, translations, TranslationKey } from "../i18n";
 
-type Tab = "today" | "transactions" | "analysis" | "budget" | "profile";
+type Tab = "today" | "transactions" | "analysis" | "budget" | "profile" | "allocate";
 
 interface CustomBottomNavigationProps {
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
+  budgetSection?: string | null;
+  onNavigateSection?: (tab: Tab, section?: string) => void;
   language: Language;
   onAddTransaction: (type: "income" | "expense", prefill?: any) => void;
   logoUrl?: string;
@@ -26,10 +28,15 @@ interface CustomBottomNavigationProps {
 export function CustomBottomNavigation({
   activeTab,
   setActiveTab,
+  budgetSection,
+  onNavigateSection,
   language,
   onAddTransaction,
 }: CustomBottomNavigationProps) {
   const t = (key: TranslationKey) => translations[language]?.[key] || translations["sv"]?.[key] || key;
+
+  const isAllocateActive = activeTab === "budget" && (budgetSection === "allocate" || budgetSection === "category-budgets");
+  const isBudgetActive = activeTab === "budget" && !isAllocateActive;
 
   return (
     <div className="fixed bottom-[calc(6px+env(safe-area-inset-bottom,0px))] sm:bottom-3.5 left-0 right-0 z-40 px-3 sm:px-6 pointer-events-none flex justify-center">
@@ -70,20 +77,32 @@ export function CustomBottomNavigation({
           </button>
         </div>
 
-        {/* 4. Analys */}
+        {/* 4. Fördela */}
         <NavItem
-          icon={BarChart3}
-          label={t("analysis")}
-          isActive={activeTab === "analysis"}
-          onClick={() => setActiveTab("analysis")}
+          icon={SlidersHorizontal}
+          label={language === "en" ? "Allocate" : "Fördela"}
+          isActive={isAllocateActive}
+          onClick={() => {
+            if (onNavigateSection) {
+              onNavigateSection("budget", "allocate");
+            } else {
+              setActiveTab("budget");
+            }
+          }}
         />
 
         {/* 5. Budget */}
         <NavItem
           icon={WalletCards}
           label="Budget"
-          isActive={activeTab === "budget"}
-          onClick={() => setActiveTab("budget")}
+          isActive={isBudgetActive}
+          onClick={() => {
+            if (onNavigateSection) {
+              onNavigateSection("budget");
+            } else {
+              setActiveTab("budget");
+            }
+          }}
         />
       </motion.div>
     </div>

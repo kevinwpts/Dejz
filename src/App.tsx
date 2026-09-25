@@ -3850,6 +3850,10 @@ export default function App() {
           <div className="fixed bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[var(--bg-color)] via-[var(--bg-color)]/80 to-transparent pointer-events-none z-30" />
           <CustomBottomNavigation
             activeTab={activeTab}
+            budgetSection={budgetSection}
+            onNavigateSection={(tab, section) => {
+              handleNavigate(tab, section);
+            }}
             setActiveTab={(tab) => {
               if (tab === activeTab) {
                 tabScrollPositions.current[tab] = 0;

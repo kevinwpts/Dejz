@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, ArrowLeft, Check, Trash2 } from 'lucide-react';
+import { RefreshCw, ArrowLeft, Check, Trash2, SlidersHorizontal, ChevronRight } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -95,6 +95,8 @@ export function BudgetView({
   React.useEffect(() => {
     if (initialSection === 'category-budgets' || initialSection === 'allocate') {
       handleOpenCategoryBudgets();
+    } else if (!initialSection) {
+      setShowCategoryBudgets(false);
     }
   }, [initialSection]);
 
@@ -442,9 +444,30 @@ export function BudgetView({
             className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden"
           >
             <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">{t('monthlySavings') || 'Månadssparande'}</span>
-            <span className="text-[15px] sm:text-[17px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(Math.abs(totalSavings || 0), config.language)} {config.currency || 'kr'}</span>
           </motion.div>
         </div>
+
+        {/* Quick Action to Allocate Everyday Budget */}
+        <button
+          type="button"
+          onClick={handleOpenCategoryBudgets}
+          className="w-full p-3.5 sm:p-4 rounded-[22px] border border-[var(--border-color)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)]/50 transition-all flex items-center justify-between group cursor-pointer shadow-2xs"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center transition-transform group-hover:scale-105">
+              <SlidersHorizontal size={20} strokeWidth={2} />
+            </div>
+            <div className="text-left">
+              <span className="text-[13.5px] font-bold text-[var(--text-primary)] block">
+                {config.language === 'en' ? 'Allocate everyday budget' : 'Fördela din vardagsbudget'}
+              </span>
+              <span className="text-[11.5px] text-[var(--text-secondary)] font-medium">
+                {config.language === 'en' ? 'Set percentage or amount per category' : 'Sätt gränser och fördela per kategori'}
+              </span>
+            </div>
+          </div>
+          <ChevronRight size={18} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+        </button>
       </div>
 
       {/* Budget Filter Segmented Control */}
