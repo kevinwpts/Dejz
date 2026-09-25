@@ -14,15 +14,16 @@ import { BudgetItem } from './BudgetItem';
 import { TransactionLogo } from './TransactionLogo';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
 import { OnboardingCharacterArt } from './OnboardingCharacterArt';
+import { parseIncomePrompt } from '../utils/incomeAiParser';
 
 export type Step = 'name' | 'age' | 'gender' | 'payday' | 'income' | 'expenses' | 'budget' | 'goals' | 'midMonth' | 'summary';
 
 export const AGE_OPTIONS = [
-  { id: '<18', labelSv: 'Under 18 år', labelEn: 'Under 18', isYoung: true, badge: 'Ungdom' },
-  { id: '18-25', labelSv: '18–25 år', labelEn: '18–25', isYoung: true, badge: 'Ung vuxen' },
-  { id: '26-35', labelSv: '26–35 år', labelEn: '26–35', isYoung: false, badge: 'Etablerad' },
-  { id: '36-50', labelSv: '36–50 år', labelEn: '36–50', isYoung: false, badge: 'Mitt i livet' },
-  { id: '51+', labelSv: '51+ år', labelEn: '51+', isYoung: false, badge: 'Erfaren' },
+  { id: '<18', labelSv: 'Under 18 år', labelEn: 'Under 18', isYoung: true },
+  { id: '18-25', labelSv: '18–25 år', labelEn: '18–25', isYoung: true },
+  { id: '26-35', labelSv: '26–35 år', labelEn: '26–35', isYoung: false },
+  { id: '36-50', labelSv: '36–50 år', labelEn: '36–50', isYoung: false },
+  { id: '51+', labelSv: '51+ år', labelEn: '51+', isYoung: false },
 ];
 
 const texts = {
@@ -218,6 +219,11 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
   // Quick Preset Search State
   const [presetSearch, setPresetSearch] = useState('');
 
+  // AI Smart Income Input State
+  const [aiIncomePrompt, setAiIncomePrompt] = useState('');
+  const [isAiParsing, setIsAiParsing] = useState(false);
+  const [aiFeedback, setAiFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
   const paymentMethods = config.paymentMethods || [];
   
   const [isUpdating, setIsUpdating] = useState(false);
@@ -367,6 +373,61 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     setIncomes(incomes.filter((_, i) => i !== index));
     setEditingIncomeIndex(null);
     setIsAddingIncome(false);
+  };
+
+  const handleAiAddIncome = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const text = aiIncomePrompt.trim();
+    if (!text || isAiParsing) return;
+
+    setIsAiParsing(true);
+    setAiFeedback(null);
+
+    try {
+      const availableCategories = config.incomeCategories?.map(c => c.name) || ['Lön', 'CSN', 'Barnbidrag', 'Pension', 'Sidoinkomst', 'Övrigt'];
+      const parsed = await parseIncomePrompt(text, availableCategories, payday);
+
+      if (parsed.amount <= 0) {
+        setAiFeedback({
+          message: isEn 
+            ? 'Could not detect an amount. E.g. "25000 from Ur & Penn".' 
+            : 'Kunde inte hitta något belopp. Skriv t.ex. "25000 från Ur & Penn".',
+          type: 'error',
+        });
+        return;
+      }
+
+      const newIncome: Omit<Income, 'id'> = {
+        name: parsed.name,
+        amount: parsed.amount,
+        category: parsed.category,
+        deductionDay: parsed.deductionDay,
+        icon: parsed.icon,
+        logo: parsed.logo,
+        note: parsed.note,
+      };
+
+      setIncomes((prev) => [...prev, newIncome]);
+      setAiIncomePrompt('');
+      setAiFeedback({
+        message: isEn
+          ? `Added ${formatAmount(parsed.amount, config.language)} ${config.currency || 'kr'} from ${parsed.name} under ${parsed.category}! ✨`
+          : `Lade till ${formatAmount(parsed.amount, config.language)} kr från ${parsed.name} under ${parsed.category}! ✨`,
+        type: 'success',
+      });
+
+      setTimeout(() => {
+        setAiFeedback(null);
+      }, 4000);
+    } catch (err: any) {
+      console.error('AI parsing error:', err);
+      setAiFeedback({
+        message: err.message || (isEn ? 'Failed to parse income. Try again.' : 'Kunde inte tolka inkomsten. Försök igen.'),
+        type: 'error',
+      });
+    } finally {
+      setIsAiParsing(false);
+    }
   };
 
   const handleSaveGoal = (goal: Omit<SavingsGoal, 'id' | 'currentAmount' | 'createdAt' | 'priority'>) => {
@@ -592,7 +653,12 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             <button
                               key={opt.id}
                               type="button"
-                              onClick={() => setSelectedAgeGroup(opt.id)}
+                              onClick={() => {
+                                setSelectedAgeGroup(opt.id);
+                                setTimeout(() => {
+                                  setStep('gender');
+                                }, 180);
+                              }}
                               className={`w-full p-3.5 rounded-[18px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${
                                 isSelected
                                   ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-sm'
@@ -602,28 +668,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                               <span className="text-[14px] sm:text-[15px] font-bold tracking-tight">
                                 {isEn ? opt.labelEn : opt.labelSv}
                               </span>
-                              <div className="flex items-center gap-2">
-                                <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                                  isSelected ? 'bg-white/20 text-white' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
-                                }`}>
-                                  {opt.badge}
-                                </span>
-                                {isSelected && <Check size={16} strokeWidth={2.5} />}
-                              </div>
+                              {isSelected && <Check size={18} strokeWidth={2.5} />}
                             </button>
                           );
                         })}
-                      </div>
-
-                      <div className="pt-2">
-                        <button 
-                          onClick={handleNext}
-                          disabled={!selectedAgeGroup}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs hover:opacity-95"
-                        >
-                          <span>{s.next}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
-                        </button>
                       </div>
                     </motion.div>
                   )}
@@ -653,7 +701,12 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         {/* Option 1: Tjej / Kvinna */}
                         <button
                           type="button"
-                          onClick={() => setSelectedGender(isYoung ? 'tjej' : 'kvinna')}
+                          onClick={() => {
+                            setSelectedGender(isYoung ? 'tjej' : 'kvinna');
+                            setTimeout(() => {
+                              setStep('payday');
+                            }, 180);
+                          }}
                           className={`w-full p-4 rounded-[20px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${
                             selectedGender === (isYoung ? 'tjej' : 'kvinna')
                               ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-sm'
@@ -672,7 +725,12 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         {/* Option 2: Kille / Man */}
                         <button
                           type="button"
-                          onClick={() => setSelectedGender(isYoung ? 'kille' : 'man')}
+                          onClick={() => {
+                            setSelectedGender(isYoung ? 'kille' : 'man');
+                            setTimeout(() => {
+                              setStep('payday');
+                            }, 180);
+                          }}
                           className={`w-full p-4 rounded-[20px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${
                             selectedGender === (isYoung ? 'kille' : 'man')
                               ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-sm'
@@ -691,7 +749,12 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         {/* Option 3: Annat / Vill inte ange */}
                         <button
                           type="button"
-                          onClick={() => setSelectedGender('annat')}
+                          onClick={() => {
+                            setSelectedGender('annat');
+                            setTimeout(() => {
+                              setStep('payday');
+                            }, 180);
+                          }}
                           className={`w-full p-3.5 rounded-[20px] border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${
                             selectedGender === 'annat'
                               ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-sm'
@@ -705,17 +768,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             </span>
                           </div>
                           {selectedGender === 'annat' && <Check size={16} strokeWidth={2.5} />}
-                        </button>
-                      </div>
-
-                      <div className="pt-2">
-                        <button 
-                          onClick={handleNext}
-                          disabled={!selectedGender}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs hover:opacity-95"
-                        >
-                          <span>{s.next}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
                         </button>
                       </div>
                     </motion.div>
@@ -843,6 +895,65 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           <Plus size={15} />
                           <span>{s.addIncome}</span>
                         </button>
+
+                        {/* AI Smart Income Input Box */}
+                        <div className="p-3 sm:p-3.5 rounded-[20px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-3xs space-y-2 mt-1">
+                          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--accent-color)]">
+                            <div className="flex items-center gap-1.5">
+                              <Sparkles size={13} className="text-amber-400" />
+                              <span>{isEn ? 'Smart add with AI' : 'Snabb-lägg till med AI'}</span>
+                            </div>
+                            <span className="text-[10px] text-[var(--text-secondary)] font-medium opacity-75">
+                              {isEn ? 'Free text' : 'Skriv fritt'}
+                            </span>
+                          </div>
+
+                          <form onSubmit={handleAiAddIncome} className="flex items-center gap-1.5">
+                            <div className="relative flex-1">
+                              <input
+                                type="text"
+                                value={aiIncomePrompt}
+                                onChange={(e) => setAiIncomePrompt(e.target.value)}
+                                placeholder={isEn ? 'E.g. "25000 from Ur & Penn", "CSN 13200"' : 'T.ex. "25000 från ur & penn", "CSN 13200"'}
+                                disabled={isAiParsing}
+                                className="w-full bg-[var(--surface-muted)]/70 border border-[var(--border-color)] rounded-[14px] px-3.5 py-2 text-[12.5px] font-medium text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:border-[var(--accent-color)] focus:bg-[var(--surface-color)] outline-none transition-all pr-8"
+                              />
+                              {aiIncomePrompt && !isAiParsing && (
+                                <button
+                                  type="button"
+                                  onClick={() => setAiIncomePrompt('')}
+                                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer"
+                                >
+                                  <X size={13} />
+                                </button>
+                              )}
+                            </div>
+
+                            <button
+                              type="submit"
+                              disabled={!aiIncomePrompt.trim() || isAiParsing}
+                              className="h-[36px] px-3.5 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-[11.5px] flex items-center gap-1.5 transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
+                            >
+                              {isAiParsing ? (
+                                <Loader2 size={14} className="animate-spin" />
+                              ) : (
+                                <>
+                                  <Sparkles size={12} />
+                                  <span>{isEn ? 'Add' : 'Tolka'}</span>
+                                </>
+                              )}
+                            </button>
+                          </form>
+
+                          {aiFeedback && (
+                            <p className={`text-[11px] font-medium px-1 flex items-center gap-1 transition-all ${
+                              aiFeedback.type === 'success' ? 'text-emerald-500' : 'text-rose-500'
+                            }`}>
+                              {aiFeedback.type === 'success' ? <Check size={12} strokeWidth={2.5} /> : null}
+                              <span>{aiFeedback.message}</span>
+                            </p>
+                          )}
+                        </div>
                       </div>
 
                       <div className="pt-2 space-y-2">
