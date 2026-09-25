@@ -17,15 +17,23 @@ function TabWrapper({
   useLayoutEffect(() => {
     const targetY = scrollPositionsRef.current[tabKey] ?? 0;
     
-    window.scrollTo({ top: targetY, behavior: "instant" as any });
-    const timer = setTimeout(() => {
+    let attempts = 0;
+    const restore = () => {
       window.scrollTo({ top: targetY, behavior: "instant" as any });
-    }, 50);
+      if (window.scrollY < targetY && attempts < 15) {
+        attempts++;
+        requestAnimationFrame(restore);
+      }
+    };
+
+    restore();
+    const t1 = setTimeout(restore, 50);
+    const t2 = setTimeout(restore, 150);
 
     let isRestoring = true;
     const restoreTimer = setTimeout(() => {
       isRestoring = false;
-    }, 150);
+    }, 300);
 
     const handleScroll = () => {
       if (isRestoring) return;
@@ -36,7 +44,8 @@ function TabWrapper({
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(t1);
+      clearTimeout(t2);
       clearTimeout(restoreTimer);
       window.removeEventListener("scroll", handleScroll);
     };
@@ -2701,6 +2710,10 @@ export default function App() {
   const handleNavigate = (tab: string, section?: string) => {
     feedback.tap();
     setNavTrigger((prev) => prev + 1);
+
+    if (activeTab) {
+      tabScrollPositions.current[activeTab] = window.scrollY;
+    }
 
     if (tab === "search") {
       setIsSearchModalOpen(true);
