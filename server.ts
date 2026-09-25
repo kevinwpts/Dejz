@@ -5,6 +5,7 @@ import path from "path";
 import { createClient } from "@supabase/supabase-js";
 import Stripe from 'stripe';
 import { GoogleGenAI, Type } from "@google/genai";
+import axios from "axios";
 
 const __dirname = path.resolve();
 
@@ -281,6 +282,45 @@ async function startServer() {
     } catch (error) {
       console.error('[Gemini] error, falling back to local parse:', error);
       res.json(localParse(text));
+    }
+  });
+
+  // Proxy endpoint to invoke Supabase Edge Function 'scan-receipt' server-side
+  // to avoid CORS and browser preflight blocks
+  app.post('/api/scan-receipt', async (req, res) => {
+    const { image, mimeType } = req.body;
+    if (!image) {
+      return res.status(400).json({ error: 'Ingen bild skickades' });
+    }
+
+    const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[Scan Receipt Proxy] Missing Supabase configuration:', { supabaseUrl: !!supabaseUrl, supabaseKey: !!supabaseKey });
+      return res.status(500).json({ error: 'Supabase-konfiguration saknas på servern' });
+    }
+
+    try {
+      console.log(`[Scan Receipt Proxy] Relaying image (${image.length} chars, mime: ${mimeType}) to Supabase Edge Function...`);
+      const response = await axios.post(`${supabaseUrl}/functions/v1/scan-receipt`, {
+        image,
+        mimeType
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseKey}`
+        },
+        timeout: 15000 // 15 seconds timeout
+      });
+
+      console.log('[Scan Receipt Proxy] Edge Function returned success:', response.data);
+      return res.json(response.data);
+    } catch (error: any) {
+      console.error('[Scan Receipt Proxy] Error invoking Edge Function:', error.response?.data || error.message);
+      const status = error.response?.status || 500;
+      const errorData = error.response?.data || { error: error.message || 'Internt serverfel i proxyn' };
+      return res.status(status).json(errorData);
     }
   });
 

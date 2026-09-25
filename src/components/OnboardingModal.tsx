@@ -203,7 +203,17 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
   }, [presetSearch]);
 
   const popularPresets = useMemo(() => {
-    return SWEDISH_EXPENSE_PRESETS.filter(p => p.popular);
+    const topIds = [
+      'hyra-bostad',
+      'spotify-individual',
+      'netflix-standard',
+      'elavtal',
+      'mobilabonnemang',
+      'sl-manadskort'
+    ];
+    return topIds
+      .map(id => SWEDISH_EXPENSE_PRESETS.find(p => p.id === id))
+      .filter((p): p is SwedishExpensePreset => p !== undefined);
   }, []);
 
   const handleNext = () => {
@@ -618,10 +628,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       className="space-y-4"
                     >
                       <div className="space-y-2">
-                        <OnboardingCharacterArt step="expenses" />
+                        {fixedExpenses.length === 0 && !presetSearch.trim() && (
+                          <div className="transform scale-85 origin-center -my-3">
+                            <OnboardingCharacterArt step="expenses" />
+                          </div>
+                        )}
                         <div className="space-y-0.5 text-center">
                           <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">{s.fixedExpenses}</h3>
-                          <p className="text-xs text-[var(--text-secondary)] font-medium max-w-[320px] mx-auto leading-relaxed">
+                          <p className="text-[11px] text-[var(--text-secondary)] font-medium max-w-[320px] mx-auto leading-relaxed opacity-85">
                             {s.expensesDesc}
                           </p>
                         </div>

@@ -7,7 +7,6 @@ import { TranslationKey, Language } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
 import { fetchLogoForName, getLogoUrl, findKnownBrandDomain } from '../utils/logo';
 import { uploadLogo } from '../services/storageService';
-import { supabase } from '../supabaseClient';
 import { CalendarWidget } from './CalendarWidget';
 import { IconSelector } from './IconSelector';
 import { CategoryModal } from './CategoryModal';
@@ -202,12 +201,25 @@ export function TransactionModal({
       // 1. Process image to base64
       const { base64, mimeType } = await prepareReceiptImage(file);
 
-      // 2. Invoke Supabase Edge Function 'scan-receipt'
-      const scanPromise = supabase.functions.invoke('scan-receipt', {
-        body: {
+      // 2. Invoke our backend proxy route '/api/scan-receipt' to avoid browser CORS preflight blocks
+      const scanPromise = fetch('/api/scan-receipt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           image: base64,
           mimeType: mimeType || file.type || 'image/jpeg',
-        },
+        }),
+      }).then(async (res) => {
+        const isJson = res.headers.get('content-type')?.includes('application/json');
+        const data = isJson ? await res.json() : null;
+        if (!res.ok) {
+          throw new Error(data?.error || `HTTP error! status: ${res.status}`);
+        }
+        return { data, error: null };
+      }).catch((err) => {
+        return { data: null, error: err };
       });
 
       // 3. Upload to Supabase Storage if user is signed in
