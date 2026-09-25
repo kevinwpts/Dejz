@@ -33,7 +33,7 @@ interface TodayViewProps {
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
   onAddTransaction: (date?: Date) => void;
-  onQuickAddExpense?: (amount: number, note?: string) => Promise<void> | void;
+  onQuickAddExpense?: (amount: number, note?: string, category?: string) => Promise<void> | void;
   onAddIncome: (date?: Date) => void;
   onViewTransaction: (t: Transaction) => void;
   onDeleteTransaction: (id: string) => void;
@@ -421,6 +421,7 @@ export function TodayView({
           <QuickExpenseWidget
             config={config}
             selectedDate={selectedDate}
+            allTransactions={allTransactions || transactions}
             onAddExpense={onQuickAddExpense}
           />
         </motion.div>

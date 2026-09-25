@@ -3430,10 +3430,11 @@ export default function App() {
                       setTargetDate(new Date());
                       setIsAddTransactionOpen(true);
                     }}
-                    onQuickAddExpense={async (amount: number, note?: string) => {
+                    onQuickAddExpense={async (amount: number, note?: string, category?: string) => {
                       const isEn = config.language === 'en';
                       const defaultName = isEn ? 'Quick expense' : 'Snabb utgift';
-                      const categoryName = isEn ? 'Uncategorized' : 'Okategoriserat';
+                      const defaultCategory = isEn ? 'Uncategorized' : 'Okategoriserat';
+                      const categoryName = category?.trim() || defaultCategory;
                       const merchantName = note?.trim() || defaultName;
 
                       const now = new Date();
