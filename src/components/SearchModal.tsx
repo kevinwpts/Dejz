@@ -12,6 +12,8 @@ interface SearchModalProps {
   config: Config;
   onNavigate: (tab: string, section?: string) => void;
   onViewTransaction: (transaction: Transaction) => void;
+  searchQuery?: string;
+  setSearchQuery?: (q: string) => void;
 }
 
 export function SearchModal({ 
@@ -19,10 +21,20 @@ export function SearchModal({
   onClose, 
   transactions, 
   config, 
-  onViewTransaction 
+  onViewTransaction,
+  searchQuery = '',
+  setSearchQuery
 }: SearchModalProps) {
   useScrollLock(isOpen);
-  const [query, setQuery] = useState('');
+  const [internalQuery, setInternalQuery] = useState(searchQuery);
+
+  useEffect(() => {
+    setInternalQuery(searchQuery);
+  }, [searchQuery]);
+
+  const query = searchQuery !== undefined && setSearchQuery ? searchQuery : internalQuery;
+  const setQuery = setSearchQuery || setInternalQuery;
+
   const inputRef = useRef<HTMLInputElement>(null);
   const getL10n = (sv: string, en: string, no?: string, da?: string, fi?: string) => {
     const lang = config.language || 'sv';
@@ -37,7 +49,6 @@ export function SearchModal({
 
   useEffect(() => {
     if (isOpen) {
-      setQuery('');
       requestAnimationFrame(() => {
         inputRef.current?.focus();
       });

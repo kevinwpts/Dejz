@@ -251,6 +251,7 @@ export default function App() {
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
   const [transactionPrefill, setTransactionPrefill] = useState<any>(null);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [transactionType, setTransactionType] = useState<
     "income" | "expense" | "savings"
   >("expense");
@@ -4385,6 +4386,8 @@ export default function App() {
             transactions={transactions}
             config={config}
             onNavigate={handleNavigate}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
             onViewTransaction={(trans) => {
               setSearchModalOpenBeforeViewing(true);
               setIsSearchModalOpen(false);
