@@ -370,30 +370,161 @@ export function TransactionModal({
 
 
 
+  // Reset manual category choice if both inputs are cleared
+  useEffect(() => {
+    if (!merchant.trim() && !note.trim() && !transaction && !prefill?.category) {
+      setHasManuallySelectedCategory(false);
+    }
+  }, [merchant, note, transaction, prefill]);
+
+  // Keep a ref to hasManuallySelectedCategory to guard async AI response
+  const hasManuallySelectedCategoryRef = useRef(hasManuallySelectedCategory);
+  useEffect(() => {
+    hasManuallySelectedCategoryRef.current = hasManuallySelectedCategory;
+  }, [hasManuallySelectedCategory]);
+
+  // Auto-categorize based on:
+  // 1. User's previous transactions first (no AI)
+  // 2. Debounced AI Edge Function (categorize-transaction) only if no prior match
   useEffect(() => {
     if (transaction || hasManuallySelectedCategory) return;
-    
-    // Auto-categorize based on merchant or note
-    const query = merchant.trim().toLowerCase() || note.trim().toLowerCase();
-    if (query.length >= 2) {
-      // 1. Check user's previous transaction history
-      const match = transactions?.find(t => 
-        (t.merchant && t.merchant.trim().toLowerCase() === query) ||
-        (t.note && t.note.trim().toLowerCase() === query)
+    if (type !== 'expense') return;
+
+    const normalize = (text?: string | null): string => {
+      if (!text) return '';
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, ' ');
+    };
+
+    const normMerchant = normalize(merchant);
+    const normNote = normalize(note);
+
+    if (normMerchant.length < 2 && normNote.length < 2) return;
+
+    // Helper to find matching previous transactions for a search term
+    const findMatchesForTerm = (searchTerm: string) => {
+      if (!transactions || searchTerm.length < 2) return [];
+
+      return transactions.filter(t => {
+        if (!t.category) return false;
+        const catNorm = normalize(t.category);
+        if (catNorm === 'okategoriserat' || catNorm === 'uncategorized') return false;
+
+        // Ensure category exists in current categories list (case-insensitive)
+        const categoryExists = categories?.some(c => normalize(c.name) === catNorm);
+        if (!categoryExists) return false;
+
+        const tMerchant = normalize(t.merchant);
+        const tNote = normalize(t.note);
+
+        return tMerchant === searchTerm || tNote === searchTerm;
+      });
+    };
+
+    // 1. Try to find match in previous transactions first
+    let candidates: Transaction[] = [];
+
+    if (normMerchant.length >= 2) {
+      candidates = findMatchesForTerm(normMerchant);
+    }
+
+    if (candidates.length === 0 && normNote.length >= 2) {
+      candidates = findMatchesForTerm(normNote);
+    }
+
+    if (candidates.length > 0) {
+      // Prior match found -> use latest relevant match and DO NOT call AI
+      candidates.sort((a, b) => {
+        const aTypeScore = a.type === type ? 1 : 0;
+        const bTypeScore = b.type === type ? 1 : 0;
+        if (aTypeScore !== bTypeScore) {
+          return bTypeScore - aTypeScore;
+        }
+        return (b.timestamp || 0) - (a.timestamp || 0);
+      });
+
+      const latestMatch = candidates[0];
+      const matchedCategory = categories?.find(
+        c => normalize(c.name) === normalize(latestMatch.category)
       );
-      
-      if (match && match.category && categories && categories.some(c => c.name === match.category)) {
-        setCategory(match.category);
+
+      if (matchedCategory) {
+        setCategory(matchedCategory.name);
         return;
       }
-
-      // 2. Fall back to smart category suggestion (e.g. Fitness 24/7 -> Hälsa)
-      const suggested = suggestCategory(query, categories);
-      if (suggested) {
-        setCategory(suggested);
-      }
     }
-  }, [merchant, note, transaction, transactions, categories, hasManuallySelectedCategory]);
+
+    // 2. If NO previous match found: Call AI Edge Function "categorize-transaction" with debounce
+    const targetQuery = merchant.trim() || note.trim();
+    if (!targetQuery || targetQuery.length < 2) return;
+    if (!categories || categories.length === 0) return;
+
+    let isCancelled = false;
+
+    const timer = setTimeout(async () => {
+      if (isCancelled || hasManuallySelectedCategoryRef.current) return;
+
+      try {
+        if (!supabase) return;
+
+        const categoryNames = categories.map(c => c.name);
+        console.log('[AI Categorize] Calling categorize-transaction with:', {
+          merchant: targetQuery,
+          categories: categoryNames,
+        });
+
+        const { data, error } = await supabase.functions.invoke('categorize-transaction', {
+          body: {
+            merchant: targetQuery,
+            categories: categoryNames,
+          },
+        });
+
+        if (isCancelled || hasManuallySelectedCategoryRef.current) return;
+
+        if (error) {
+          console.warn('[AI Categorize] Edge Function error:', error);
+          const fallback = suggestCategory(targetQuery, categories);
+          if (fallback && !hasManuallySelectedCategoryRef.current) {
+            setCategory(fallback);
+          }
+          return;
+        }
+
+        if (data && typeof data.category === 'string' && data.category.trim()) {
+          const suggestedCatName = data.category.trim();
+          const matchedCategory = categories.find(
+            c => normalize(c.name) === normalize(suggestedCatName)
+          );
+
+          if (matchedCategory && !hasManuallySelectedCategoryRef.current) {
+            console.log('[AI Categorize] AI suggested category:', matchedCategory.name);
+            setCategory(matchedCategory.name);
+            return;
+          }
+        }
+
+        // If AI returns null, fallback to local rule-based category if available
+        const fallback = suggestCategory(targetQuery, categories);
+        if (fallback && !hasManuallySelectedCategoryRef.current) {
+          setCategory(fallback);
+        }
+      } catch (err) {
+        console.warn('[AI Categorize] Edge function invocation failed silently:', err);
+        const fallback = suggestCategory(targetQuery, categories);
+        if (fallback && !hasManuallySelectedCategoryRef.current) {
+          setCategory(fallback);
+        }
+      }
+    }, 600);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
+  }, [merchant, note, transaction, transactions, categories, hasManuallySelectedCategory, type]);
 
   useEffect(() => {
     if (categories && categories.length > 0 && !categories.find(c => c.name === category)) {
@@ -1229,6 +1360,7 @@ export function TransactionModal({
               const newCat = await onCreateCategory(data.name, data.icon, type === 'income' ? 'income' : 'expense');
               if (newCat) {
                 setCategory(newCat.name);
+                setHasManuallySelectedCategory(true);
               }
             }
             setIsAddingCategory(false);
