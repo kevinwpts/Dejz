@@ -255,7 +255,22 @@ export function TodayView({
           ? Number(String(cat.budget).replace(/[^0-9.]/g, "")) 
           : 0;
         
-        const budgetInKronor = !isNaN(budgetValue) && budgetValue > 0 ? Math.round(budgetValue) : 0;
+        const fixedSpent = (fixedExpenses || [])
+          .filter((e) => e.category?.trim().toLowerCase() === name.trim().toLowerCase())
+          .reduce((sum, e) => {
+            const amount = (e.isVariable && e.periodOverrides && stats?.periodId && e.periodOverrides[stats.periodId] !== undefined)
+              ? e.periodOverrides[stats.periodId]
+              : (Number(e.amount) || 0);
+            switch (e.frequency) {
+              case "quarterly": return sum + amount / 3;
+              case "semi-annually": return sum + amount / 6;
+              case "annually": return sum + amount / 12;
+              default: return sum + amount;
+            }
+          }, 0);
+
+        const rawBudgetInKronor = !isNaN(budgetValue) && budgetValue > 0 ? Math.round(budgetValue) : 0;
+        const budgetInKronor = Math.max(rawBudgetInKronor, Math.round(fixedSpent));
         const hasBudget = budgetInKronor > 0;
         const remaining = budgetInKronor - Math.round(spent);
         const iconName = cat.icon || getCategoryIconName(name);
@@ -302,7 +317,7 @@ export function TodayView({
         // 3. HIGHEST PERCENT SPENT DESCENDING (e.g. 93% before 10%)
         return bPct - aPct;
       });
-  }, [stats, config?.categories]);
+  }, [stats, config?.categories, fixedExpenses]);
 
   if (!stats) return null;
 

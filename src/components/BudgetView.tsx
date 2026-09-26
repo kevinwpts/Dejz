@@ -37,7 +37,7 @@ interface BudgetViewProps {
 }
 
 export function BudgetView({ 
-  allTransactions = [],
+  _allTransactions = [],
   stats,
   config,
   setConfig, 
@@ -85,6 +85,14 @@ export function BudgetView({
   }, 0) || 0) + (Number(config.monthlySavings) || 0);
 
   const [fixedSortBy, setFixedSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
+  const [confirmReset, setConfirmReset] = React.useState(false);
+
+  React.useEffect(() => {
+    if (confirmReset) {
+      const timer = setTimeout(() => setConfirmReset(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [confirmReset]);
 
   const sortedIncomes = incomes || [];
   const sortedFixedExpenses = React.useMemo(() => {
@@ -177,11 +185,12 @@ export function BudgetView({
   }, [showCategoryBudgets, everydayBudget]);
 
   const totalAllocated = (config.categories || []).reduce((sum, c) => {
-    const val = Number(c.budget) || 0;
+    const fixedSpent = Math.round(getFixedSpentForCategory(c.name));
+    const val = Math.max(Number(c.budget) || 0, fixedSpent);
     return sum + (val > 0 ? val : 0);
   }, 0);
 
-  const remainingToAllocate = everydayBudget - totalAllocated;
+  const remainingToAllocate = totalIncomeSum - totalAllocated;
   const isOverAllocated = remainingToAllocate < 0;
 
   // Automatic Distribution (Secondary choice requested by user)
@@ -207,8 +216,8 @@ export function BudgetView({
 
   // Auto-adapt down if over-allocated
   const handleAutoAdaptDown = () => {
-    if (!isOverAllocated || totalAllocated <= 0 || everydayBudget <= 0) return;
-    const ratio = everydayBudget / totalAllocated;
+    if (!isOverAllocated || totalAllocated <= 0 || totalIncomeSum <= 0) return;
+    const ratio = totalIncomeSum / totalAllocated;
 
     const updated = (config.categories || []).map((c) => {
       if (!c.budget || Number(c.budget) <= 0) return c;
@@ -285,7 +294,14 @@ export function BudgetView({
     if (a.pinned && b.pinned) {
       return (a.pinOrder || 0) - (b.pinOrder || 0);
     }
-    return 0;
+
+    const aFixed = Math.round(getFixedSpentForCategory(a.name));
+    const bFixed = Math.round(getFixedSpentForCategory(b.name));
+    if (bFixed !== aFixed) {
+      return bFixed - aFixed;
+    }
+
+    return (a.name || "").localeCompare(b.name || "");
   });
 
   if (showCategoryBudgets) {
@@ -314,40 +330,34 @@ export function BudgetView({
 
         {/* Open Top Header - No card slop, directly on background */}
         <div className="px-1 py-3 space-y-5">
-          {/* Vardagsbudget label & amount */}
-          <div className="space-y-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] opacity-60">
-              VARDAGSBUDGET
-            </span>
-            <div className="text-2xl font-bold font-amount tabular-nums text-white">
-              {formatAmount(everydayBudget, config.language)} kr
-            </div>
-          </div>
 
-          {/* Large dynamic status amount focused on "KVAR ATT FÖRDELA" */}
+
+          {/* Large dynamic status amount focused on "[spent] av [income] fördelat" */}
           <div className="space-y-1">
-            <div className={`text-[46px] sm:text-[54px] leading-none font-bold font-amount tabular-nums tracking-tight ${
-              isOverAllocated ? "text-rose-400" : "text-white"
-            }`}>
-              {formatAmount(Math.abs(remainingToAllocate), config.language)} kr
-            </div>
-            <span className={`text-xs font-bold uppercase tracking-wider block ${
-              isOverAllocated ? "text-rose-400" : "text-[var(--text-secondary)] opacity-80"
-            }`}>
-              {isOverAllocated ? "för mycket fördelat" : "kvar att fördela"}
-            </span>
-            
-            <p className="text-xs font-medium text-[var(--text-secondary)] opacity-75">
+            <div className="text-[26px] sm:text-[32px] leading-tight font-bold tracking-tight text-white tabular-nums">
               {isOverAllocated ? (
                 <>
-                  <span className="font-semibold text-rose-400 font-amount tabular-nums">{formatAmount(totalAllocated, config.language)} kr</span> fördelat av {formatAmount(everydayBudget, config.language)} kr
+                  <span className="text-rose-400">{formatAmount(totalAllocated, config.language)} kr</span>
+                  <span className="text-white/60 text-lg sm:text-xl font-medium"> fördelat av </span>
+                  <span>{formatAmount(totalIncomeSum, config.language)} kr</span>
                 </>
               ) : (
                 <>
-                  <span className="font-semibold text-emerald-400 font-amount tabular-nums">{formatAmount(totalAllocated, config.language)} kr</span> fördelat av {formatAmount(everydayBudget, config.language)} kr
+                  <span className="text-emerald-400">{formatAmount(totalAllocated, config.language)} kr</span>
+                  <span className="text-white/60 text-lg sm:text-xl font-medium"> fördelat av </span>
+                  <span>{formatAmount(totalIncomeSum, config.language)} kr</span>
                 </>
               )}
-            </p>
+            </div>
+            {isOverAllocated ? (
+              <span className="text-xs font-semibold tracking-wide text-rose-400 block mt-1">
+                ⚠️ Du har fördelat {formatAmount(Math.abs(remainingToAllocate), config.language)} kr mer än din inkomst ({formatAmount(totalIncomeSum, config.language)} kr)
+              </span>
+            ) : (
+              <span className="text-xs font-semibold tracking-wide text-emerald-400 block mt-1">
+                ✓ {formatAmount(remainingToAllocate, config.language)} kr kvar att fördela av din inkomst ({formatAmount(totalIncomeSum, config.language)} kr)
+              </span>
+            )}
           </div>
 
           {/* Simple progress bar */}
@@ -356,7 +366,7 @@ export function BudgetView({
               className={`h-full rounded-full transition-all duration-300 ${
                 isOverAllocated ? "bg-rose-500" : "bg-indigo-400"
               }`}
-              style={{ width: `${Math.min(100, Math.round((totalAllocated / (everydayBudget || 1)) * 100))}%` }}
+              style={{ width: `${Math.min(100, Math.round((totalAllocated / (totalIncomeSum || 1)) * 100))}%` }}
             />
           </div>
 
@@ -385,15 +395,22 @@ export function BudgetView({
             <button
               type="button"
               onClick={() => {
-                if (confirm("Är du säker på att du vill nollställa all kategoribudgetering?")) {
+                if (!confirmReset) {
+                  setConfirmReset(true);
+                } else {
                   const updatedCategories = (config.categories || []).map((c) => ({ ...c, budget: undefined }));
                   setConfig({ ...config, categories: updatedCategories });
+                  setConfirmReset(false);
                 }
               }}
-              className="text-[11px] font-bold text-[var(--text-secondary)] hover:text-rose-400 flex items-center gap-1.5 py-1 px-3 rounded-full bg-white/[0.03] border border-white/[0.05] transition-all cursor-pointer active:scale-95"
+              className={`text-[11px] font-bold flex items-center gap-1.5 py-1 px-3 rounded-full border transition-all cursor-pointer active:scale-95 ${
+                confirmReset 
+                  ? "bg-rose-500/20 border-rose-500/30 text-rose-400 animate-pulse" 
+                  : "bg-white/[0.03] border-white/[0.05] text-[var(--text-secondary)] hover:text-rose-400"
+              }`}
             >
               <RotateCcw size={11} />
-              Nollställ
+              {confirmReset ? "Klicka igen för att nollställa" : "Nollställ"}
             </button>
           </div>
         </div>
@@ -409,24 +426,10 @@ export function BudgetView({
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
               const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
-              const catBudget = Number(cat.budget) || 0;
+              const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
               const isEditingThis = editingCategoryName === cat.name;
 
-              // Calculate spent & remaining info if there is a budget
-              const spent = allTransactions
-                .filter((t) => {
-                  if (!t.timestamp || t.type === "income") return false;
-                  if (stats?.periodStart && stats?.periodEnd) {
-                    const tDate = new Date(t.timestamp);
-                    if (tDate < stats.periodStart || tDate > stats.periodEnd) return false;
-                  }
-                  return t.category?.toLowerCase() === cat.name.toLowerCase();
-                })
-                .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-              
-              const remaining = Math.max(0, catBudget - spent);
-              const progressPercentage = catBudget > 0 ? Math.min(100, Math.round((spent / catBudget) * 100)) : 0;
-              const isOverspent = spent > catBudget;
+
 
               return (
                 <div 
@@ -497,7 +500,7 @@ export function BudgetView({
                         </span>
                         {fixedSpent > 0 && (
                           <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-70 block truncate mt-0.5">
-                            {formatAmount(fixedSpent, config.language)} kr fast · redan avräknat
+                            {formatAmount(fixedSpent, config.language)} kr fast
                           </span>
                         )}
                       </div>
@@ -510,8 +513,8 @@ export function BudgetView({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const currentAmount = Number(cat.budget) || 0;
-                          const newAmount = Math.max(0, currentAmount - 100);
+                          const currentAmount = Math.max(Number(cat.budget) || 0, fixedSpent);
+                          const newAmount = Math.max(fixedSpent, currentAmount - 100);
                           const updatedCategories = (config.categories || []).map((c) => {
                             if (c.name === cat.name) {
                               return { ...c, budget: newAmount > 0 ? newAmount : undefined };
@@ -535,7 +538,7 @@ export function BudgetView({
                             autoFocus
                             value={inlineInputValue}
                             onBlur={() => {
-                              const finalVal = Number(inlineInputValue) || 0;
+                              const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
                               const updatedCategories = (config.categories || []).map((c) => {
                                 if (c.name === cat.name) {
                                   return { ...c, budget: finalVal > 0 ? finalVal : undefined };
@@ -605,25 +608,7 @@ export function BudgetView({
                     </div>
                   </div>
 
-                  {/* Spent info progress bar if budget is set and user spent money */}
-                  {catBudget > 0 && spent > 0 && (
-                    <div className="space-y-1.5 pt-1 pl-1">
-                      <div className="flex justify-between items-center text-[10.5px] font-medium text-[var(--text-secondary)] opacity-75">
-                        <span>
-                          {formatAmount(spent, config.language)} kr spenderat · {formatAmount(remaining, config.language)} kr kvar
-                        </span>
-                        {isOverspent && <span className="text-rose-400 font-semibold">Över budget</span>}
-                      </div>
-                      <div className="w-full h-1 bg-white/[0.03] rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full transition-all duration-300 ${
-                            isOverspent ? "bg-rose-500" : "bg-amber-400"
-                          }`}
-                          style={{ width: `${progressPercentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
+
                 </div>
               );
             })}
