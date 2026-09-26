@@ -147,13 +147,15 @@ export function PeriodTimeline({
   };
 
   // Handle direct click on a day card
-  const handleSelect = (dayDate: any, dayTime: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const handleSelect = (dayDate: any, _dayTime: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
     const targetEl = e.currentTarget;
     feedback.selection();
-    onSelectDate(new Date(dayDate));
+
+    const d = new Date(dayDate);
+    const target = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0, 0);
+    onSelectDate(target);
     scrollToElement(targetEl, 'smooth');
   };
 
@@ -177,7 +179,7 @@ export function PeriodTimeline({
       {/* Horizontal Scrollable Day Strip - Clean natural alignment */}
       <div
         ref={scrollContainerRef}
-        className="relative flex items-center gap-1.5 overflow-x-auto py-1 px-1 no-scrollbar select-none"
+        className="relative flex items-center gap-2 overflow-x-auto py-1 px-1 no-scrollbar select-none"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -212,22 +214,22 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[52px] h-[52px] sm:h-[56px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
+              className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-2xl transition-all duration-200 cursor-pointer select-none shrink-0 relative backdrop-blur-md ${
                 isSelected
-                  ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_4px_14px_rgba(0,0,0,0.18)] dark:shadow-[0_4px_14px_rgba(255,255,255,0.12)] scale-105 font-bold z-10 opacity-100 ring-2 ring-accent/50'
+                  ? 'bg-white text-slate-950 shadow-[0_6px_20px_rgba(255,255,255,0.15)] scale-105 font-bold z-10 opacity-100 ring-2 ring-white/30'
                   : isRealToday
-                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-dashed border-[var(--text-primary)]/50 hover:border-[var(--text-primary)] scale-95 opacity-85'
-                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 scale-95 opacity-70'
+                  ? 'bg-white/[0.06] text-white border border-white/25 hover:bg-white/[0.1] scale-95 opacity-95'
+                  : 'bg-white/[0.025] text-slate-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.06] scale-95 opacity-75'
               }`}
             >
               {/* Day of Week */}
               <span
                 className={`text-[8.5px] sm:text-[9px] tracking-wider uppercase leading-none ${
                   isSelected
-                    ? 'opacity-90 font-bold'
+                    ? 'font-bold opacity-90'
                     : isRealToday
-                    ? 'text-[var(--text-primary)] font-bold'
-                    : 'opacity-65 font-medium'
+                    ? 'text-white font-bold'
+                    : 'opacity-70 font-medium'
                 }`}
               >
                 {isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}
@@ -241,7 +243,7 @@ export function PeriodTimeline({
               {/* Today Dot Indicator */}
               {isRealToday && (
                 <span
-                  className="w-1 h-1 rounded-full absolute bottom-1 bg-accent"
+                  className="w-1 h-1 rounded-full absolute bottom-1.5 bg-indigo-400 shadow-[0_0_6px_rgba(129,140,248,0.8)]"
                 />
               )}
             </motion.button>
@@ -250,9 +252,9 @@ export function PeriodTimeline({
 
         {/* Lön / Payday Box at the end of the timeline */}
         <div
-          className="flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[52px] h-[52px] sm:h-[56px] p-1.5 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-75 ml-0.5"
+          className="flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 backdrop-blur-md select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5"
         >
-          <span className="text-[12px] leading-none">💸</span>
+          <span className="text-[12px] leading-none">💰</span>
           <span className="text-[8px] sm:text-[8.5px] font-bold tracking-wider uppercase">
             {isEn ? 'Payday' : 'Lön'}
           </span>

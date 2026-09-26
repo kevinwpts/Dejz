@@ -2,7 +2,7 @@ import {
   Zap,
   BellRing,
   Activity,
-  Target,
+  PiggyBank,
   SunMedium,
   PieChart,
   Receipt,
@@ -49,7 +49,7 @@ export const AVAILABLE_WIDGETS: WidgetDefinition[] = [
     description: 'Snabbvy över periodens budgettakt, sparkvot och återstående pott.',
     descriptionEn: 'Quick snapshot of period budget pace, savings rate and remaining pot.',
     icon: Activity,
-    color: '#0ea5e9',
+    color: '#6366f1',
     defaultEnabled: true,
   },
   {
@@ -58,8 +58,8 @@ export const AVAILABLE_WIDGETS: WidgetDefinition[] = [
     titleEn: 'Savings goals',
     description: 'Dina aktiva sparmål med framstegsmätare och insättningsknapp.',
     descriptionEn: 'Active savings goals with visual progress bars and quick deposits.',
-    icon: Target,
-    color: '#10b981',
+    icon: PiggyBank,
+    color: '#f59e0b',
     defaultEnabled: true,
   },
   {

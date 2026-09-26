@@ -315,10 +315,13 @@ export function WidgetManagerModal({
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3">
                           <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
-                            style={{ backgroundColor: `${def.color}18`, color: def.color }}
+                            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_2px_6px_rgba(0,0,0,0.1)] border border-white/20"
+                            style={{ 
+                              background: `linear-gradient(135deg, ${def.color}, ${def.color}dd)`, 
+                              color: '#ffffff' 
+                            }}
                           >
-                            <Icon size={18} strokeWidth={2.2} />
+                            <Icon size={17} strokeWidth={2.4} className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]" />
                           </div>
                           <div>
                             <h4 className="text-sm font-extrabold text-[var(--text-primary)] leading-tight">
@@ -424,10 +427,13 @@ export function WidgetManagerModal({
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
-                            style={{ backgroundColor: `${def.color}18`, color: def.color }}
+                            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_2px_6px_rgba(0,0,0,0.1)] border border-white/20"
+                            style={{ 
+                              background: `linear-gradient(135deg, ${def.color}, ${def.color}dd)`, 
+                              color: '#ffffff' 
+                            }}
                           >
-                            <Icon size={19} strokeWidth={2.2} />
+                            <Icon size={18} strokeWidth={2.4} className="drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]" />
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-bold text-[var(--text-primary)] truncate">

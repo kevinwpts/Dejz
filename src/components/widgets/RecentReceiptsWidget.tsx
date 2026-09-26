@@ -28,14 +28,14 @@ export function RecentReceiptsWidget({
     .slice(0, 3);
 
   return (
-    <div className="bg-[var(--surface-color)] border border-[var(--border-color)]/80 rounded-[20px] p-4 shadow-2xs relative group transition-all">
+    <div className="bg-white/[0.035] backdrop-blur-xl border border-white/[0.08] rounded-[24px] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.15)] relative group transition-all">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
-            <Receipt size={14} strokeWidth={2.2} />
+      <div className="flex items-center justify-between mb-3.5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-xl bg-white/[0.06] border border-white/[0.08] text-slate-300 flex items-center justify-center shrink-0">
+            <Receipt size={14} strokeWidth={1.75} />
           </div>
-          <h4 className="text-[13px] sm:text-[14px] font-bold text-[var(--text-primary)] tracking-tight">
+          <h4 className="text-sm font-semibold text-slate-200 tracking-tight">
             {isEn ? 'Recent receipts' : 'Senaste kvitton'}
           </h4>
         </div>
@@ -45,7 +45,7 @@ export function RecentReceiptsWidget({
             <button
               type="button"
               onClick={onRemove}
-              className="px-2 py-0.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] font-semibold transition-all cursor-pointer"
+              className="px-2.5 py-1 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-semibold transition-all cursor-pointer"
             >
               {isEn ? 'Remove' : 'Ta bort'}
             </button>
@@ -53,10 +53,10 @@ export function RecentReceiptsWidget({
             <button
               type="button"
               onClick={() => onNavigate('receipts')}
-              className="text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--accent-color)] flex items-center gap-0.5 transition-colors cursor-pointer"
+              className="text-xs font-medium text-slate-400 hover:text-white flex items-center gap-0.5 transition-colors cursor-pointer"
             >
               <span>{isEn ? 'All receipts' : 'Alla kvitton'}</span>
-              <ChevronRight size={12} />
+              <ChevronRight size={13} />
             </button>
           )}
         </div>

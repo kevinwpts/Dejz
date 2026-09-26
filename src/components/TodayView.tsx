@@ -166,10 +166,21 @@ export function TodayView({
           i.periodOverrides &&
           i.periodOverrides[periodId] !== undefined
             ? i.periodOverrides[periodId]
-            : i.amount;
-        transactions.push({ ...i, amount, type: "income", isFixed: true, originalItem: i });
+            : Number(i.amount) || 0;
+
+        transactions.push({
+          id: `fixed-inc-${i.id}`,
+          amount,
+          type: "income",
+          category: i.category || (config.language === "en" ? "Fixed Income" : "Fast inkomst"),
+          merchant: i.name,
+          timestamp: normalizedSelectedDate.getTime(),
+          isFixed: true,
+          originalItem: i,
+        });
       }
     });
+
     fixedExpenses.forEach((e) => {
       if (e.deductionDay === day) {
         const amount =
@@ -178,73 +189,64 @@ export function TodayView({
           e.periodOverrides &&
           e.periodOverrides[periodId] !== undefined
             ? e.periodOverrides[periodId]
-            : e.amount;
-        transactions.push({ ...e, amount, type: "expense", isFixed: true, originalItem: e });
+            : Number(e.amount) || 0;
+
+        transactions.push({
+          id: `fixed-exp-${e.id}`,
+          amount,
+          type: "expense",
+          category: e.category || (config.language === "en" ? "Fixed Expense" : "Fast utgift"),
+          merchant: e.name,
+          timestamp: normalizedSelectedDate.getTime(),
+          isFixed: true,
+          originalItem: e,
+        });
       }
     });
-    (config.monthlySavingsItems || []).forEach((s) => {
-      if (s.deductionDay === day) {
-        const amount =
-          s.isVariable &&
-          periodId &&
-          s.periodOverrides &&
-          s.periodOverrides[periodId] !== undefined
-            ? s.periodOverrides[periodId]
-            : s.amount;
-        transactions.push({ ...s, amount, type: "saving", isFixed: true, originalItem: s });
-      }
-    });
+
+    if (config.monthlySavingsItems) {
+      config.monthlySavingsItems.forEach((s: any) => {
+        if (s.deductionDay === day) {
+          const amount =
+            s.isVariable &&
+            periodId &&
+            s.periodOverrides &&
+            s.periodOverrides[periodId] !== undefined
+              ? s.periodOverrides[periodId]
+              : Number(s.amount) || 0;
+
+          transactions.push({
+            id: `fixed-sav-${s.id}`,
+            amount,
+            type: "saving",
+            category: s.category || (config.language === "en" ? "Monthly Saving" : "Månadssparande"),
+            merchant: s.name,
+            timestamp: normalizedSelectedDate.getTime(),
+            isFixed: true,
+            originalItem: s,
+          });
+        }
+      });
+    }
+
     return transactions;
-  }, [incomes, fixedExpenses, config.monthlySavingsItems, normalizedSelectedDate, stats?.periodId]);
+  }, [normalizedSelectedDate, incomes, fixedExpenses, config.monthlySavingsItems, config.language, stats?.periodId]);
 
   const categoryBudgetData = useMemo(() => {
     if (!stats || !config.categories || config.categories.length === 0) return [];
 
-    const periodStart = stats.periodStart ? new Date(stats.periodStart).getTime() : 0;
-    const periodEnd = stats.periodEnd ? new Date(stats.periodEnd).getTime() + 86399999 : Infinity;
-
-    const periodExpenses = (allTransactions || _transactions || []).filter((e: Transaction) => {
-      const inPeriod = e.timestamp >= periodStart && e.timestamp <= periodEnd;
-      if (!inPeriod) return false;
-      return e.type === "expense" || e.type === "savings";
-    });
-
-    const breakdown: Record<string, number> = {};
-
-    periodExpenses.forEach((e: Transaction) => {
-      if (e.type === "income") return;
-      if (e.category === "Spargris") {
-        breakdown["Spargris"] = (breakdown["Spargris"] || 0) + e.amount;
-      } else {
-        const transactionSplits = (e as any).splits;
-        if (transactionSplits && transactionSplits.length > 0) {
-          transactionSplits.forEach((split: any) => {
-            const splitCat = (split.category || "").trim();
-            breakdown[splitCat] = (breakdown[splitCat] || 0) + split.amount;
-          });
-        } else {
-          const cat = (e.category || "").trim();
-          breakdown[cat] = (breakdown[cat] || 0) + e.amount;
-        }
-      }
-    });
-
-    const disposablePot = Math.max(
-      0,
-      (stats?.disposablePot !== undefined && stats?.disposablePot !== null)
-        ? stats.disposablePot
-        : ((stats?.totalIncome || 0) - (stats?.totalFixed || 0))
+    const periodTransactions = stats.periodTransactions || [];
+    const spendingTransactions = periodTransactions.filter(
+      (t: any) => t.type !== 'income' && t.category !== 'Spargris'
     );
 
-    return (config.categories || []).map((cat, index) => {
+    const disposablePot = stats.disposablePot || 0;
+
+    return config.categories.map((cat, index) => {
       const name = cat.name;
-      const searchName = name.trim().toLowerCase();
-      let spent = 0;
-      for (const [key, val] of Object.entries(breakdown)) {
-        if (key.trim().toLowerCase() === searchName) {
-          spent += val;
-        }
-      }
+      const spent = spendingTransactions
+        .filter((t: any) => t.category === name)
+        .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
 
       let budgetInKronor = 0;
       let hasBudget = false;
@@ -274,23 +276,23 @@ export function TodayView({
         index,
       };
     });
-  }, [stats, config.categories, allTransactions, _transactions, fixedExpenses]);
+  }, [stats, config.categories]);
 
   if (!stats) return null;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-4 relative"
+      transition={{ duration: 0.35 }}
+      className="space-y-6 relative font-sans"
     >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1 }}
-        className="relative"
-      >
+      {/* Subtle atmospheric ambient glow effects behind Hem content */}
+      <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-full max-w-lg h-96 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.08),transparent_70%)] pointer-events-none -z-10" />
+      <div className="absolute top-96 -right-20 w-80 h-80 bg-[radial-gradient(circle_at_50%_50%,rgba(56,189,248,0.03),transparent_70%)] pointer-events-none -z-10" />
+
+      {/* 1. HERO GREETING MODULE (Totalt kvar, Dagar till lön, Snabba actions, Budgetkategorier) */}
+      <div className="relative">
         <GreetingModule
           userName={userName}
           availableForD={todayData?.availableForD || stats?.availableForD || 0}
@@ -321,10 +323,24 @@ export function TodayView({
           onOpenCalculator={onOpenCalculator}
           allTransactions={allTransactions}
         >
-          {/* Category Budgets Carousel - Seamlessly integrated inside the top hero card */}
+          {/* Category Budgets - Seamlessly integrated with generous breathing room and clean monochromatic aesthetic */}
           {categoryBudgetData.length > 0 ? (
-            <div className="space-y-2 mt-0.5">
-              <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between px-0.5">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                  {config.language === 'en' ? 'Category Budgets' : 'Kategoribudgetar'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onNavigate("budget", "category-budgets")}
+                  className="text-[11px] font-medium text-slate-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  <span>{config.language === 'en' ? 'Manage' : 'Hantera'}</span>
+                  <ChevronRight size={12} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
                 {categoryBudgetData.map((cat, index) => {
                   const Icon = ICON_MAP[cat.iconName];
                   const spentPct = cat.budgetInKronor > 0 
@@ -334,55 +350,49 @@ export function TodayView({
                   return (
                     <motion.button
                       key={cat.name}
-                      initial={{ opacity: 0, scale: 0.95, x: 10 }}
+                      initial={{ opacity: 0, scale: 0.96, x: 8 }}
                       animate={{ opacity: 1, scale: 1, x: 0 }}
-                      transition={{ delay: 0.12 + index * 0.02 }}
+                      transition={{ delay: 0.1 + index * 0.02 }}
                       onClick={() => onNavigate("analysis")}
-                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-2xl bg-[var(--surface-muted)]/35 hover:bg-[var(--surface-muted)]/70 transition-all group text-left active:scale-[0.98] min-w-[136px] sm:min-w-[148px] max-w-[160px] cursor-pointer snap-start border border-[var(--border-color)]/50 shadow-2xs"
+                      className="flex-shrink-0 flex flex-col justify-between p-3.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] backdrop-blur-md transition-all group text-left active:scale-[0.98] min-w-[144px] sm:min-w-[156px] max-w-[170px] cursor-pointer snap-start border border-white/[0.07] shadow-2xs"
                     >
-                      {/* Top Row: Icon Badge + Category Name */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <div 
-                          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-2xs transition-transform group-hover:scale-105"
-                          style={{ 
-                            backgroundColor: cat.color ? `${cat.color}15` : 'var(--surface-color)',
-                            border: `1px solid ${cat.color ? `${cat.color}30` : 'var(--border-color)'}`
-                          }}
-                        >
+                      {/* Top Row: Monochrome Minimalist Icon + Category Name */}
+                      <div className="flex items-center gap-2.5 mb-2.5">
+                        <div className="w-7 h-7 rounded-xl bg-white/[0.05] border border-white/[0.08] text-slate-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                           {isEmojiString(cat.iconName) ? (
-                            <span className="text-[14px] leading-none">{cat.iconName}</span>
+                            <span className="text-[13px] leading-none">{cat.iconName}</span>
                           ) : Icon ? (
-                            <Icon size={14} strokeWidth={2.3} style={{ color: cat.color || 'var(--text-primary)' }} />
+                            <Icon size={14} strokeWidth={1.75} className="text-slate-300" />
                           ) : (
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color || 'var(--text-primary)' }} />
+                            <div className="w-2 h-2 rounded-full bg-slate-400" />
                           )}
                         </div>
 
-                        <span className="text-xs font-bold text-[var(--text-primary)] tracking-tight truncate flex-1">
+                        <span className="text-xs font-semibold text-slate-200 tracking-tight truncate flex-1">
                           {cat.name}
                         </span>
                       </div>
 
                       {/* Bottom Row: Amount Remaining & Progress Bar */}
-                      <div className="flex flex-col w-full">
+                      <div className="flex flex-col w-full space-y-1">
                         <div className="flex items-baseline justify-between gap-1">
                           {cat.hasBudget ? (
                             cat.isOverBudget ? (
-                              <span className="text-[13px] sm:text-[14px] font-bold text-rose-500 dark:text-rose-400 font-amount tabular-nums">
+                              <span className="text-[13px] sm:text-[14px] font-bold text-rose-400 font-amount tabular-nums">
                                 +{formatAmount(Math.abs(cat.remaining), config.language)} kr
                               </span>
                             ) : (
-                              <span className="text-[13px] sm:text-[14px] font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                              <span className="text-[13px] sm:text-[14px] font-bold text-white font-amount tabular-nums">
                                 {formatAmount(cat.remaining, config.language)} kr
                               </span>
                             )
                           ) : (
-                            <span className="text-[13px] sm:text-[14px] font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                            <span className="text-[13px] sm:text-[14px] font-bold text-slate-300 font-amount tabular-nums">
                               {formatAmount(cat.spent, config.language)} kr
                             </span>
                           )}
 
-                          <span className="text-[10px] font-medium text-[var(--text-secondary)] opacity-75 shrink-0">
+                          <span className="text-[10px] font-medium text-slate-400 shrink-0">
                             {cat.hasBudget 
                               ? (cat.isOverBudget 
                                   ? (config.language === 'en' ? 'over' : 'över') 
@@ -393,13 +403,12 @@ export function TodayView({
 
                         {/* Sleek 2px budget progress bar */}
                         {cat.hasBudget && (
-                          <div className="w-full h-1 bg-[var(--border-color)]/60 rounded-full overflow-hidden mt-1.5">
+                          <div className="w-full h-1 bg-white/[0.06] rounded-full overflow-hidden mt-1">
                             <div 
-                              className="h-full rounded-full transition-all duration-500" 
-                              style={{ 
-                                width: `${spentPct}%`, 
-                                backgroundColor: cat.isOverBudget ? '#f43f5e' : (cat.color || 'var(--accent-color)') 
-                              }} 
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                cat.isOverBudget ? 'bg-rose-500' : 'bg-white/70'
+                              }`}
+                              style={{ width: `${spentPct}%` }} 
                             />
                           </div>
                         )}
@@ -410,22 +419,22 @@ export function TodayView({
 
                 {/* Direct shortcut card at the end of carousel */}
                 <motion.button
-                  initial={{ opacity: 0, scale: 0.95, x: 10 }}
+                  initial={{ opacity: 0, scale: 0.96, x: 8 }}
                   animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 0.12 + categoryBudgetData.length * 0.02 }}
+                  transition={{ delay: 0.1 + categoryBudgetData.length * 0.02 }}
                   onClick={() => onNavigate("budget", "category-budgets")}
-                  className="flex-shrink-0 flex flex-col justify-between p-3 rounded-2xl bg-[var(--surface-muted)]/25 hover:bg-[var(--surface-muted)]/50 transition-all group text-left active:scale-[0.98] min-w-[124px] max-w-[136px] cursor-pointer snap-start border border-dashed border-[var(--border-color)]/80"
+                  className="flex-shrink-0 flex flex-col justify-between p-3.5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[130px] max-w-[140px] cursor-pointer snap-start border border-dashed border-white/[0.1]"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-[var(--surface-color)] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] border border-[var(--border-color)]/60 shrink-0">
-                      <SlidersHorizontal size={13} strokeWidth={2.2} />
+                    <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-white/[0.04] text-slate-400 group-hover:text-white border border-white/[0.07] shrink-0">
+                      <SlidersHorizontal size={13} strokeWidth={1.75} />
                     </div>
-                    <span className="text-xs font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors truncate">
+                    <span className="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors truncate">
                       {config.language === "en" ? "Manage" : "Hantera"}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[10px] font-semibold text-[var(--text-secondary)] opacity-70">
-                    <span>{config.language === "en" ? "Edit budget" : "Justera"}</span>
+                  <div className="flex items-center justify-between text-[10px] font-medium text-slate-400">
+                    <span>{config.language === "en" ? "Edit limits" : "Justera"}</span>
                     <span>→</span>
                   </div>
                 </motion.button>
@@ -435,44 +444,44 @@ export function TodayView({
             <button
               type="button"
               onClick={() => onNavigate("budget", "category-budgets")}
-              className="w-full p-3 rounded-[16px] border border-dashed border-white/20 hover:border-white/40 bg-white/5 hover:bg-white/10 transition-all flex items-center justify-between text-left group cursor-pointer text-white"
+              className="w-full p-3.5 rounded-2xl border border-dashed border-white/[0.12] hover:border-white/25 bg-white/[0.02] hover:bg-white/[0.05] transition-all flex items-center justify-between text-left group cursor-pointer text-white"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/80 group-hover:text-white transition-colors">
-                  <SlidersHorizontal size={14} />
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-slate-300 group-hover:text-white transition-colors">
+                  <SlidersHorizontal size={14} strokeWidth={1.75} />
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-white leading-snug">
                     {config.language === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
                   </p>
-                  <p className="text-[11px] text-white/60">
+                  <p className="text-[11px] text-slate-400">
                     {config.language === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
                   </p>
                 </div>
               </div>
-              <ChevronRight size={14} className="text-white/60 group-hover:text-white transition-colors" />
+              <ChevronRight size={14} className="text-slate-400 group-hover:text-white transition-colors" />
             </button>
           )}
         </GreetingModule>
-      </motion.div>
+      </div>
 
       {/* 2. CUSTOMIZABLE WIDGETS SECTION */}
-      <div className="space-y-3.5">
+      <div className="space-y-4">
         {/* Customization Bar if active */}
         {isCustomizing && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="flex items-center justify-between p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--accent-color)]/40 shadow-xs"
+            className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.04] border border-indigo-400/30 backdrop-blur-md shadow-xs"
           >
             <div className="flex items-center gap-2">
               <span className="text-[14px]">🛠️</span>
               <div>
-                <p className="text-xs font-bold text-[var(--text-primary)]">
+                <p className="text-xs font-bold text-white">
                   {config.language === 'en' ? 'Edit widgets mode' : 'Redigeringsläge aktivt'}
                 </p>
-                <p className="text-[11px] text-[var(--text-secondary)]">
+                <p className="text-[11px] text-slate-400">
                   {config.language === 'en' ? 'Click Remove on cards or Add to manage.' : 'Klicka på Ta bort på korten eller Lägg till fler.'}
                 </p>
               </div>
@@ -482,14 +491,14 @@ export function TodayView({
               <button
                 type="button"
                 onClick={() => setIsWidgetManagerOpen(true)}
-                className="px-2.5 py-1 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-semibold shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+                className="px-3 py-1 rounded-xl bg-white text-slate-950 text-xs font-bold shadow-xs hover:bg-slate-200 active:scale-95 transition-all cursor-pointer"
               >
                 {config.language === 'en' ? '+ Add' : '+ Lägg till'}
               </button>
               <button
                 type="button"
                 onClick={() => setIsCustomizing(false)}
-                className="px-2.5 py-1 rounded-xl bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/80 text-xs font-semibold border border-[var(--border-color)] active:scale-95 transition-all cursor-pointer"
+                className="px-3 py-1 rounded-xl bg-white/[0.08] text-white hover:bg-white/[0.14] text-xs font-medium border border-white/[0.1] active:scale-95 transition-all cursor-pointer"
               >
                 {config.language === 'en' ? 'Done' : 'Klar'}
               </button>
@@ -511,12 +520,12 @@ export function TodayView({
                   transition={{ duration: 0.2 }}
                   className="space-y-3 pt-1"
                 >
-                  <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">
+                      <h4 className="text-sm font-semibold text-slate-200 tracking-tight">
                         {t("actionRequired")}
                       </h4>
-                      <div className="w-5 h-5 rounded-full bg-[#FFF3E3] text-[#E58A17] dark:bg-[#E58A17]/20 dark:text-[#FFA947] text-[10px] font-bold flex items-center justify-center">
+                      <div className="w-5 h-5 rounded-full bg-amber-500/15 text-amber-400 text-[10px] font-bold flex items-center justify-center border border-amber-500/20">
                         {attentionItems.length}
                       </div>
                     </div>
@@ -525,26 +534,26 @@ export function TodayView({
                       <button
                         type="button"
                         onClick={() => handleRemoveWidget('attention_items')}
-                        className="px-2 py-0.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] font-semibold transition-all cursor-pointer"
+                        className="px-2.5 py-0.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-semibold transition-all cursor-pointer"
                       >
                         {config.language === 'en' ? 'Remove' : 'Ta bort'}
                       </button>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-hide px-2">
+                  <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide px-1">
                     {attentionItems.map((item, index) => {
                       const isPast = item.deductionDay < new Date().getDate();
                       return (
                         <motion.button
                           key={item.id}
-                          initial={{ opacity: 0, scale: 0.9, x: 20 }}
+                          initial={{ opacity: 0, scale: 0.9, x: 15 }}
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.1 + index * 0.04 }}
                           onClick={() => onEditAttentionItem?.(item)}
-                          className="flex-shrink-0 flex flex-col gap-3 bg-[#FFF3E3]/35 dark:bg-[#161A22] border border-[#E58A17]/20 dark:border-[#E58A17]/30 p-5 rounded-[16px] hover:bg-[#FFF3E3]/65 dark:hover:bg-[#1D222C] transition-all group relative overflow-hidden active:scale-[0.98] min-w-[160px] shadow-xs cursor-pointer text-left"
+                          className="flex-shrink-0 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08] backdrop-blur-md p-4 rounded-2xl hover:bg-white/[0.06] transition-all group relative overflow-hidden active:scale-[0.98] min-w-[160px] shadow-2xs cursor-pointer text-left"
                         >
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="w-10 h-10 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0 [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full [&_span]:text-lg">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
                               <BudgetItemLogo
                                 item={item}
                                 type={
@@ -554,16 +563,16 @@ export function TodayView({
                               />
                             </div>
                             {isPast && (
-                              <div className="px-2.5 py-0.5 rounded-full bg-danger/10 text-[10px] font-semibold text-danger">
+                              <div className="px-2 py-0.5 rounded-full bg-rose-500/15 text-[10px] font-medium text-rose-400 border border-rose-500/20">
                                 {t("delayed")}
                               </div>
                             )}
                           </div>
                           <div className="flex flex-col items-start">
-                            <span className="text-[13px] font-medium text-[var(--text-primary)] tracking-tight leading-tight mb-1 truncate w-full text-left">
+                            <span className="text-xs font-semibold text-slate-200 tracking-tight leading-tight mb-1 truncate w-full text-left">
                               {item.name}
                             </span>
-                            <span className="text-[11px] font-normal text-[var(--text-secondary)] text-left">
+                            <span className="text-[11px] font-medium text-slate-400 text-left">
                               {t("fillInAmount")}
                             </span>
                           </div>
@@ -685,9 +694,9 @@ export function TodayView({
           <button
             type="button"
             onClick={() => setIsWidgetManagerOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]/70 text-xs font-semibold transition-all shadow-2xs active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] hover:bg-white/[0.07] text-slate-300 hover:text-white border border-white/[0.08] backdrop-blur-md text-xs font-semibold transition-all shadow-2xs active:scale-95 cursor-pointer"
           >
-            <LayoutGrid size={13} className="text-[var(--accent-color)]" />
+            <LayoutGrid size={13} strokeWidth={1.75} className="text-slate-400" />
             <span>{config.language === 'en' ? 'Manage widgets' : 'Hantera widgets'}</span>
           </button>
 
@@ -695,7 +704,7 @@ export function TodayView({
             <button
               type="button"
               onClick={() => setIsCustomizing(true)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]/50 text-xs font-medium transition-all active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1 px-3 py-2 rounded-full bg-white/[0.02] hover:bg-white/[0.05] text-slate-400 hover:text-slate-200 border border-white/[0.06] text-xs font-medium transition-all active:scale-95 cursor-pointer"
             >
               <span>{config.language === 'en' ? 'Quick edit' : 'Snabbredigera'}</span>
             </button>
@@ -703,7 +712,7 @@ export function TodayView({
             <button
               type="button"
               onClick={() => setIsCustomizing(false)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1 px-3.5 py-2 rounded-full bg-white text-slate-950 text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
             >
               <span>{config.language === 'en' ? 'Done' : 'Klar'}</span>
             </button>
@@ -711,7 +720,7 @@ export function TodayView({
         </div>
       </div>
 
-      {/* 3. PERIOD TIMELINE - Strictly fixed */}
+      {/* 3. PERIOD TIMELINE */}
       {calendarDays && calendarDays.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 15 }}
@@ -729,10 +738,10 @@ export function TodayView({
         </motion.div>
       )}
 
-      {/* 4. TRANSACTIONS FOR SELECTED DAY - Strictly fixed */}
-      <div className="space-y-3.5 pt-2">
-        <div className="flex items-center justify-between px-2 mb-3.5">
-          <h3 className="text-[13px] sm:text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+      {/* 4. TRANSACTIONS FOR SELECTED DAY */}
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-sm font-semibold text-slate-200 tracking-tight">
             {stats.isPastPeriod
               ? "Periodens transaktioner"
               : selectedDate.toDateString() === new Date().toDateString()
@@ -745,15 +754,15 @@ export function TodayView({
           {!isTodaySelected && (
             <button
               onClick={handleGoToToday}
-              className="flex items-center gap-1 px-2.5 h-6 rounded-full bg-[var(--surface-muted)] border border-[var(--border-color)] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all active:scale-95 shadow-2xs cursor-pointer ml-auto"
+              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] backdrop-blur-md text-xs font-medium text-slate-300 hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs ml-auto"
             >
-              <RotateCcw size={10} strokeWidth={2} />
+              <RotateCcw size={11} strokeWidth={1.75} />
               <span>{config.language === "en" ? "Today" : "Idag"}</span>
             </button>
           )}
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <AnimatePresence mode="popLayout">
             {(stats.isPastPeriod
               ? stats.periodTransactions
@@ -766,10 +775,10 @@ export function TodayView({
                 ).map((transaction: Transaction, index: number) => (
                   <motion.div
                     key={transaction.id}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -15 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ delay: index * 0.05 }}
+                    exit={{ opacity: 0, x: 15 }}
+                    transition={{ delay: index * 0.04 }}
                   >
                     <TransactionItem
                       transaction={transaction}
@@ -800,9 +809,9 @@ export function TodayView({
               fixedTransactions.length > 0 && (
                 <motion.div
                   key="fixed-budget"
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -15 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
+                  exit={{ opacity: 0, x: 15 }}
                   className="space-y-2.5"
                 >
                   {fixedTransactions.map((t: any, index: number) => (

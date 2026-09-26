@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, MinusCircle, PlusCircle, Zap } from 'lucide-react';
+import { Calendar, ArrowDownLeft, ArrowUpRight, Zap } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
@@ -45,7 +45,6 @@ interface GreetingModuleProps {
 }
 
 export function GreetingModule({
-  availableForD: _availableForD,
   currency,
   date,
   language,
@@ -56,7 +55,6 @@ export function GreetingModule({
   onAddExpense,
   onAddIncome,
   onQuickAddExpense,
-  _onOpenCalculator,
   allTransactions = [],
   children
 }: GreetingModuleProps) {
@@ -99,7 +97,6 @@ export function GreetingModule({
         await onQuickAddExpense(parsed.amount, parsed.merchant, parsed.category);
         feedback.success();
         setQuickText('');
-        setIsQuickExpenseOpen(false);
       }
     } catch (_err) {
       console.error('Quick expense failed', _err);
@@ -108,114 +105,121 @@ export function GreetingModule({
     }
   };
 
+  const isNegative = (stats?.remainingPeriodCents || 0) < 0;
+
   return (
-    <div className="space-y-4 sm:space-y-5 font-sans relative">
-      {/* The Premium Main Rounded Card */}
+    <div className="space-y-5 font-sans relative">
+      {/* The Premium Frosted Hero Glass Card */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className="pb-1 text-[var(--text-primary)] relative flex flex-col"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="relative rounded-[28px] p-5 sm:p-6 bg-white/[0.035] dark:bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-[0_12px_36px_rgba(0,0,0,0.25)] flex flex-col space-y-5 overflow-hidden"
       >
-        <div className="w-full relative flex flex-col pt-1 pb-1">
-          {/* Header Top Row: Left Stats & Right Dagar till nästa lön Badge */}
-          <div className="flex items-start justify-between gap-4">
-            {/* Left Side: Totalt kvar */}
-            <div className="flex flex-col text-left justify-center min-w-0">
-              <span className="text-xs font-bold text-[var(--text-secondary)] tracking-wider mb-1.5 block uppercase">
-                {t('totalRemaining')}
+        {/* Subtle interior ambient specular highlight */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+
+        {/* 1. Header Hero: Totalt kvar + Dagar till lön */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          {/* Left: TOTALT KVAR */}
+          <div className="flex flex-col text-left justify-center min-w-0">
+            <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-400 mb-1.5 block">
+              {t('totalRemaining')}
+            </span>
+            <div className="flex items-baseline gap-1.5">
+              <AnimatedNumber 
+                value={stats?.remainingPeriodCents || 0} 
+                className={`text-[44px] sm:text-[52px] md:text-[58px] leading-none font-extrabold font-amount tabular-nums tracking-tight ${
+                  isNegative ? 'text-rose-400' : 'text-white'
+                }`}
+                formatter={(val) => formatAmount(val, language)}
+              />
+              <span className={`text-[20px] sm:text-[22px] font-semibold ${
+                isNegative ? 'text-rose-400/80' : 'text-slate-400'
+              }`}>
+                {currency}
               </span>
-              <div className="flex items-baseline gap-1.5">
-                <AnimatedNumber 
-                  value={stats?.remainingPeriodCents || 0} 
-                  className={`text-[42px] sm:text-[48px] md:text-[54px] leading-none font-black text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
-                    (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : ''
-                  }`}
-                  formatter={(val) => formatAmount(val, language)}
-                />
-                <span className={`text-[20px] sm:text-[22px] font-bold ${
-                  (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
-                }`}>
-                  {currency}
-                </span>
-              </div>
-            </div>
-
-            {/* Right Side: Dagar till nästa lön */}
-            <div className="flex items-center gap-2 sm:gap-2.5 p-2 px-3 sm:px-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-color)]/70 shrink-0 shadow-2xs">
-              <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--accent-color)] shrink-0">
-                <Calendar size={16} strokeWidth={2.2} />
-              </div>
-              <div className="flex flex-col items-start min-w-0 text-left">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-80 leading-none">
-                  {isEn ? 'Days to payday' : 'Dagar till nästa lön'}
-                </span>
-                <span className="text-[13px] sm:text-[14px] font-extrabold text-[var(--text-primary)] font-amount tabular-nums leading-tight mt-0.5">
-                  {effectiveRemainingDays} {isEn ? (effectiveRemainingDays === 1 ? 'day' : 'days') : (effectiveRemainingDays === 1 ? 'dag' : 'dagar')}
-                </span>
-              </div>
             </div>
           </div>
 
-          {/* Middle Row: Single Horizontal Row with Utgift button, Inkomst button, and Snabbutgift input field */}
-          <div className="flex items-center gap-1.5 sm:gap-2 pt-3.5">
-            {/* 1. Utgift Button */}
-            <button
-              type="button"
-              onClick={() => {
-                feedback.tap();
-                onAddExpense?.();
-              }}
-              className="h-11 px-3 sm:px-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 flex items-center justify-center gap-1.5 shrink-0 active:scale-95 shadow-2xs group cursor-pointer text-xs font-bold text-[var(--text-primary)]"
-            >
-              <MinusCircle size={16} strokeWidth={2.2} className="text-rose-500 dark:text-rose-400 group-hover:scale-105 transition-transform" />
-              <span>{isEn ? 'Expense' : 'Utgift'}</span>
-            </button>
-
-            {/* 2. Inkomst Button */}
-            <button
-              type="button"
-              onClick={() => {
-                feedback.tap();
-                onAddIncome?.();
-              }}
-              className="h-11 px-3 sm:px-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 flex items-center justify-center gap-1.5 shrink-0 active:scale-95 shadow-2xs group cursor-pointer text-xs font-bold text-[var(--text-primary)]"
-            >
-              <PlusCircle size={16} strokeWidth={2.2} className="text-emerald-500 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
-              <span>{isEn ? 'Income' : 'Inkomst'}</span>
-            </button>
-
-            {/* 3. Snabbutgift-rutan */}
-            <form onSubmit={handleQuickExpenseSubmit} className="flex-1 flex items-center gap-1.5 min-w-0">
-              <div className="relative flex-1 min-w-0">
-                <input
-                  ref={quickInputRef}
-                  type="text"
-                  value={quickText}
-                  onChange={(e) => setQuickText(e.target.value)}
-                  placeholder={isEn ? "Quick: 45kr Coop" : "Snabbutgift: t.ex. 45kr ICA"}
-                  className="w-full h-11 px-3 sm:px-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-color)]/70 text-xs sm:text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-secondary)]/55 focus:border-amber-500 outline-none transition-all shadow-2xs"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={!quickText.trim() || isSubmittingQuick}
-                className="h-11 px-3 sm:px-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs disabled:opacity-40 active:scale-95 transition-all shrink-0 cursor-pointer flex items-center gap-1 shadow-2xs"
-                title={isEn ? "Save quick expense" : "Spara snabbutgift"}
-              >
-                <Zap size={14} strokeWidth={2.5} />
-                <span className="hidden sm:inline">{isEn ? 'Save' : 'Spara'}</span>
-              </button>
-            </form>
-          </div>
-
-          {/* Category Budgets Carousel in the bottom of the module */}
-          {children && (
-            <div className="w-full pt-3 mt-3 text-left">
-              {children}
+          {/* Right: Dagar till nästa lön (Clean Minimalist Frosted Capsule) */}
+          <div className="self-start flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.07] backdrop-blur-md shrink-0 shadow-2xs">
+            <div className="w-7 h-7 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-slate-300 shrink-0">
+              <Calendar size={14} strokeWidth={1.6} />
             </div>
-          )}
+            <div className="flex flex-col items-start min-w-0 text-left">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 leading-none">
+                {isEn ? 'Days to payday' : 'Dagar till lön'}
+              </span>
+              <span className="text-[13px] sm:text-[14px] font-bold text-slate-200 font-amount tabular-nums leading-tight mt-0.5">
+                {effectiveRemainingDays} {isEn ? (effectiveRemainingDays === 1 ? 'day' : 'days') : (effectiveRemainingDays === 1 ? 'dag' : 'dagar')}
+              </span>
+            </div>
+          </div>
         </div>
+
+        {/* 2. Quick Action Bar: – Utgift, + Inkomst, Snabb-inmatning (Clean Unified Monochrome System) */}
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          {/* Utgift Button */}
+          <button
+            type="button"
+            onClick={() => {
+              feedback.tap();
+              onAddExpense?.();
+            }}
+            className="h-11 px-3.5 sm:px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 border border-white/[0.08] backdrop-blur-md flex items-center justify-center gap-2 shrink-0 group cursor-pointer text-xs font-semibold text-slate-200 transition-all shadow-2xs"
+          >
+            <div className="w-6 h-6 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <ArrowDownLeft size={14} strokeWidth={1.75} />
+            </div>
+            <span>{isEn ? 'Expense' : 'Utgift'}</span>
+          </button>
+
+          {/* Inkomst Button */}
+          <button
+            type="button"
+            onClick={() => {
+              feedback.tap();
+              onAddIncome?.();
+            }}
+            className="h-11 px-3.5 sm:px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-95 border border-white/[0.08] backdrop-blur-md flex items-center justify-center gap-2 shrink-0 group cursor-pointer text-xs font-semibold text-slate-200 transition-all shadow-2xs"
+          >
+            <div className="w-6 h-6 rounded-lg bg-white/[0.06] border border-white/[0.08] text-slate-300 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <ArrowUpRight size={14} strokeWidth={1.75} />
+            </div>
+            <span>{isEn ? 'Income' : 'Inkomst'}</span>
+          </button>
+
+          {/* Snabbutgift-inmatning */}
+          <form onSubmit={handleQuickExpenseSubmit} className="flex-1 flex items-center gap-2 min-w-[200px]">
+            <div className="relative flex-1 min-w-0">
+              <input
+                ref={quickInputRef}
+                type="text"
+                value={quickText}
+                onChange={(e) => setQuickText(e.target.value)}
+                placeholder={isEn ? "Quick: 45kr Coop" : "Snabb: t.ex. 45kr ICA"}
+                className="w-full h-11 px-3.5 rounded-2xl bg-white/[0.03] focus:bg-white/[0.06] border border-white/[0.08] focus:border-indigo-400/40 backdrop-blur-md text-xs sm:text-sm font-medium text-white placeholder-slate-500 outline-none transition-all shadow-2xs"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={!quickText.trim() || isSubmittingQuick}
+              className="h-11 px-3.5 sm:px-4 rounded-2xl bg-white/[0.07] hover:bg-white/[0.12] disabled:opacity-30 active:scale-95 border border-white/[0.1] text-slate-200 font-semibold text-xs transition-all shrink-0 cursor-pointer flex items-center gap-1.5 shadow-2xs"
+              title={isEn ? "Save quick expense" : "Spara snabbutgift"}
+            >
+              <Zap size={13} strokeWidth={1.75} className="text-slate-300" />
+              <span className="hidden sm:inline">{isEn ? 'Save' : 'Spara'}</span>
+            </button>
+          </form>
+        </div>
+
+        {/* 3. Budget Categories Section Integrated with Generous Breathing Room */}
+        {children && (
+          <div className="w-full pt-2 border-t border-white/[0.06]">
+            {children}
+          </div>
+        )}
       </motion.div>
     </div>
   );
