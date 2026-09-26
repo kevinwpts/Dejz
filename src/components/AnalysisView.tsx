@@ -179,19 +179,6 @@ export function AnalysisView({
 
   return (
     <div className="space-y-6 sm:space-y-7 font-sans">
-      {/* Period Selector on Page */}
-      {periods && onPeriodChange && currentPeriodDate && (
-        <UniversalPeriodSelector
-          periods={periods}
-          currentDate={currentPeriodDate}
-          onChange={onPeriodChange}
-          periodName={stats.periodName}
-          isCurrentPeriod={stats.isCurrentPeriod}
-          variant="standalone"
-          allowFuture={false}
-        />
-      )}
-
       {/* Analysis Filter - Clean horizontal row directly on background */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
         <button
@@ -234,6 +221,19 @@ export function AnalysisView({
           {t('fixedExpenses' as TranslationKey)}
         </button>
       </div>
+
+      {/* Period Selector on Page */}
+      {periods && onPeriodChange && currentPeriodDate && (
+        <UniversalPeriodSelector
+          periods={periods}
+          currentDate={currentPeriodDate}
+          onChange={onPeriodChange}
+          periodName={stats.periodName}
+          isCurrentPeriod={stats.isCurrentPeriod}
+          variant="standalone"
+          allowFuture={false}
+        />
+      )}
 
       {/* Budget Summary Metrics */}
       <BudgetSummaryModule

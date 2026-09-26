@@ -92,19 +92,6 @@ export function LogView({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Period Selector on Page */}
-      {periods && onPeriodChange && currentPeriodDate && (
-        <UniversalPeriodSelector
-          periods={periods}
-          currentDate={currentPeriodDate}
-          onChange={onPeriodChange}
-          periodName={stats.periodName}
-          isCurrentPeriod={stats.isCurrentPeriod}
-          variant="standalone"
-          allowFuture={false}
-        />
-      )}
-
       {/* Type Filters (Alla, Utgift, Inkomst, Kvitto) */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
         {(['all', 'expense', 'income', 'receipt'] as const).map(type => {
@@ -128,6 +115,19 @@ export function LogView({
           );
         })}
       </div>
+
+      {/* Period Selector on Page */}
+      {periods && onPeriodChange && currentPeriodDate && (
+        <UniversalPeriodSelector
+          periods={periods}
+          currentDate={currentPeriodDate}
+          onChange={onPeriodChange}
+          periodName={stats.periodName}
+          isCurrentPeriod={stats.isCurrentPeriod}
+          variant="standalone"
+          allowFuture={false}
+        />
+      )}
 
       {/* Transactions List */}
       <div className="space-y-6">
