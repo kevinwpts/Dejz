@@ -84,7 +84,7 @@ const texts = {
     skipMidMonth: 'Hoppa över (Använd full månadspott)',
     summaryTitle: 'Din personliga plan',
     summarySubtitle: 'Allt är redo! Här är din ekonomiska överblick fram till nästa lön.',
-    enterApp: 'Kliv in i Dejz ✨',
+    enterApp: 'Kliv in i Dejz',
     totalIncomeLabel: 'Total inkomst',
     fixedCostsLabel: 'Fasta kostnader',
     freeSpendLabel: 'Kvar att röra dig med',
@@ -153,7 +153,7 @@ const texts = {
     skipMidMonth: 'Skip (Start with full monthly pot)',
     summaryTitle: 'Your Personal Plan',
     summarySubtitle: 'All set! Here is your financial overview until your next payday.',
-    enterApp: 'Enter Dejz ✨',
+    enterApp: 'Enter Dejz',
     totalIncomeLabel: 'Total Income',
     fixedCostsLabel: 'Fixed Costs',
     freeSpendLabel: 'Available to spend',
@@ -1455,9 +1455,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       <div className="space-y-2 text-center">
                         <OnboardingCharacterArt step="midMonth" days={daysUntilPayday} payday={payday} />
                         <div className="space-y-1">
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold border border-amber-500/20">
-                            <span>{typeof s.midMonthTitle === 'function' ? s.midMonthTitle(daysUntilPayday) : s.midMonthTitle}</span>
-                          </div>
                           <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
                             {typeof s.midMonthQuestion === 'function' ? s.midMonthQuestion(payday) : s.midMonthQuestion}
                           </h3>
@@ -1645,10 +1642,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           {isUpdating ? (
                             <Loader2 size={16} className="animate-spin" />
                           ) : (
-                            <>
-                              <span>{s.enterApp}</span>
-                              <Sparkles size={16} strokeWidth={2} />
-                            </>
+                            <span>{s.enterApp}</span>
                           )}
                         </button>
                       </div>
