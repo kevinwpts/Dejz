@@ -284,6 +284,97 @@ async function startServer() {
     }
   });
 
+  app.post('/api/parse-audio-expense', async (req, res) => {
+    const { audioBase64, mimeType } = req.body;
+    if (!audioBase64) return res.status(400).json({ error: 'Missing audio content' });
+
+    console.log(`[Gemini Audio] Processing audio input (mimeType: ${mimeType || 'audio/webm'})...`);
+
+    const ai = getGenAI();
+    if (!ai) {
+      console.log('[Gemini Audio] Gemini client not configured');
+      return res.status(500).json({ error: 'Gemini AI Client not initialized' });
+    }
+
+    try {
+      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+      let lastError = null;
+
+      for (const modelName of modelsToTry) {
+        try {
+          console.log(`[Gemini Audio] Trying model ${modelName}...`);
+          const result = await ai.models.generateContent({
+            model: modelName,
+            contents: [
+              {
+                inlineData: {
+                  mimeType: mimeType || 'audio/webm',
+                  data: audioBase64
+                }
+              },
+              `Lyssna mycket noga på ljudklippet. En person pratar in ett köp eller utgift/inkomst (på svenska eller engelska).
+              Även om personen mumlar, pratar snabbt, otydligt eller i bakgrundsbuller: förstå vad personen köpt och för hur mycket.
+
+              Exempel på vad personen kan säga:
+              - "300 kronor på coop" -> transcript: "300 kronor på Coop", amount: 300, name: "Coop", category: "Mat", type: "expense"
+              - "köpt fika för fyrtiofem spänn" -> transcript: "köpt fika för 45 spänn", amount: 45, name: "Fika", category: "Mat", type: "expense"
+              - "tankat femhundra kronor circle k" -> transcript: "tankat 500 kronor Circle K", amount: 500, name: "Circle K", category: "Transport", type: "expense"
+              - "swish från mikael femtiokronor" -> transcript: "swish från Mikael 50kr", amount: 50, name: "Swish Mikael", category: "Inkomst", type: "income"
+
+              Returnera ETT JSON-objekt med:
+              - transcript: string (exakt vad personen sa eller den tolkade meningen)
+              - amount: number (beloppet i sifferform, t.ex. 150)
+              - name: string (butik, ställe eller beskrivning av köpet)
+              - category: string (lämplig kategori som: Mat, Transport, Shopping, Nöje, Hälsa, Boende, Övrigt)
+              - type: "expense" eller "income"
+              `
+            ],
+            config: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  transcript: { type: Type.STRING },
+                  amount: { type: Type.NUMBER },
+                  name: { type: Type.STRING },
+                  category: { type: Type.STRING },
+                  type: { type: Type.STRING, enum: ["expense", "income"] }
+                },
+                required: ["transcript", "amount", "name", "type"]
+              }
+            }
+          });
+
+          const responseText = result.text?.trim() || '';
+          console.log(`[Gemini Audio] Raw AI response: "${responseText}"`);
+          
+          const cleanJson = responseText.replace(/```json\n?|\n?```/g, '').trim();
+          const data = JSON.parse(cleanJson);
+
+          if (typeof data.amount !== 'number' || isNaN(data.amount)) {
+            if (typeof data.amount === 'string') {
+              data.amount = parseFloat(data.amount.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+            } else {
+              data.amount = 0;
+            }
+          }
+
+          return res.json(data);
+        } catch (err: any) {
+          console.warn(`[Gemini Audio] Model ${modelName} failed:`, err.message);
+          lastError = err;
+        }
+      }
+
+      throw lastError || new Error('Failed to parse audio with Gemini models');
+    } catch (error: any) {
+      console.error('[Gemini Audio] Error processing audio:', error);
+      res.status(500).json({ error: error.message || 'Kunde inte tolka ljudet' });
+    }
+  });
+
+
+
   // API Health Check
   app.get("/api/ping", (req, res) => {
     res.json({ 

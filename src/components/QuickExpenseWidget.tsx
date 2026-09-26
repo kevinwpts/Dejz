@@ -1,6 +1,6 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Check, Plus, Sparkles, AlertCircle } from 'lucide-react';
+import { Zap, Check, Plus, Sparkles, AlertCircle, Mic, Square, Loader2, Volume2 } from 'lucide-react';
 import { Config, Transaction } from '../types';
 import { parseQuickExpense } from '../utils/expenseAiParser';
 import { feedback } from '../utils/feedback';
@@ -28,9 +28,18 @@ export function QuickExpenseWidget({
 }: QuickExpenseWidgetProps) {
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [successInfo, setSuccessInfo] = useState<{ amount: number; merchant: string; category: string } | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isAudioTranscribing, setIsAudioTranscribing] = useState(false);
+  const [recordingStatusText, setRecordingStatusText] = useState<string | null>(null);
+  const [successInfo, setSuccessInfo] = useState<{ amount: number; merchant: string; category: string; transcript?: string } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const inputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const mimeTypeRef = useRef<string>('audio/webm');
 
   const lang = config.language || 'sv';
   const isEn = lang === 'en';
@@ -48,10 +57,221 @@ export function QuickExpenseWidget({
     });
   }, [isToday, selectedDate, isEn]);
 
+  // Cleanup media streams on unmount
+  useEffect(() => {
+    return () => {
+      stopMediaTracks();
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore
+        }
+      }
+    };
+  }, []);
+
+  const stopMediaTracks = () => {
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+  };
+
+  const handleStartRecording = async () => {
+    setErrorMessage(null);
+    setRecordingStatusText(isEn ? 'Listening... Speak now' : 'Lyssnar... Prata in köpet');
+    audioChunksRef.current = [];
+    let startedAny = false;
+
+    // 1. Try WebSpeech API for real-time live visual transcript
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = isEn ? 'en-US' : 'sv-SE';
+
+        recognition.onresult = (event: any) => {
+          let currentText = '';
+          for (let i = 0; i < event.results.length; i++) {
+            currentText += event.results[i][0].transcript;
+          }
+          if (currentText.trim()) {
+            setInputText(currentText);
+          }
+        };
+
+        recognition.onerror = (event: any) => {
+          console.warn('SpeechRecognition error:', event.error);
+        };
+
+        recognition.start();
+        recognitionRef.current = recognition;
+        startedAny = true;
+      } catch (err) {
+        console.warn('SpeechRecognition init error:', err);
+      }
+    }
+
+    // 2. Try MediaRecorder for high-fidelity audio AI processing
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+
+      const supportedMime = MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : MediaRecorder.isTypeSupported('audio/mp4')
+          ? 'audio/mp4'
+          : MediaRecorder.isTypeSupported('audio/ogg')
+            ? 'audio/ogg'
+            : 'audio/wav';
+
+      mimeTypeRef.current = supportedMime;
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: supportedMime });
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.start(250);
+      mediaRecorderRef.current = mediaRecorder;
+      setIsRecording(true);
+      startedAny = true;
+      feedback.tap();
+    } catch (err: any) {
+      console.warn('MediaRecorder error / permission:', err);
+      if (!startedAny) {
+        setRecordingStatusText(null);
+        setErrorMessage(
+          isEn
+            ? 'Microphone access denied or not supported in browser.'
+            : 'Kunde inte starta mikrofonen. Tillåt mikrofonen i din webbläsare.'
+        );
+        return;
+      } else {
+        setIsRecording(true);
+        feedback.tap();
+      }
+    }
+  };
+
+  const handleStopRecordingAndProcess = async () => {
+    feedback.tap();
+    setIsRecording(false);
+    setRecordingStatusText(isEn ? 'Analyzing voice with AI...' : 'Analyserar röst med AI...');
+    setIsAudioTranscribing(true);
+
+    // Stop WebSpeech Recognition
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        // ignore
+      }
+      recognitionRef.current = null;
+    }
+
+    // Stop MediaRecorder
+    const recorder = mediaRecorderRef.current;
+    mediaRecorderRef.current = null;
+
+    let audioBlob: Blob | null = null;
+    if (recorder && recorder.state !== 'inactive') {
+      await new Promise<void>((resolve) => {
+        recorder.onstop = () => resolve();
+        recorder.stop();
+      });
+      if (audioChunksRef.current.length > 0) {
+        audioBlob = new Blob(audioChunksRef.current, { type: mimeTypeRef.current });
+      }
+    }
+
+    stopMediaTracks();
+
+    // 3. Process with backend AI audio parser if audio blob exists
+    if (audioBlob && audioBlob.size > 500) {
+      try {
+        const base64Audio = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            const base64 = result.split(',')[1];
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(audioBlob!);
+        });
+
+        const res = await fetch('/api/parse-audio-expense', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            audioBase64: base64Audio,
+            mimeType: mimeTypeRef.current,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.amount > 0) {
+            // Auto add expense
+            await onAddExpense(data.amount, data.name || 'Röstinlägg', data.category || defaultCategory);
+            feedback.success();
+
+            setSuccessInfo({
+              amount: data.amount,
+              merchant: data.name || 'Röstinlägg',
+              category: data.category || defaultCategory,
+              transcript: data.transcript,
+            });
+
+            setInputText('');
+            setRecordingStatusText(null);
+            setIsAudioTranscribing(false);
+
+            setTimeout(() => {
+              setSuccessInfo(null);
+            }, 3500);
+
+            return;
+          } else if (data && data.transcript) {
+            setInputText(data.transcript);
+          }
+        }
+      } catch (err) {
+        console.warn('Backend audio AI processing failed, falling back to text parser:', err);
+      }
+    }
+
+    // Fallback: If text was populated via WebSpeech or user input
+    setIsAudioTranscribing(false);
+    setRecordingStatusText(null);
+
+    const currentText = inputText.trim();
+    if (currentText) {
+      // Auto submit text parser
+      handleSubmit();
+    } else {
+      setErrorMessage(isEn ? 'Could not hear anything clearly. Try again.' : 'Hörde inget ljud. Försök igen!');
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      handleStopRecordingAndProcess();
+    } else {
+      handleStartRecording();
+    }
+  };
+
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const clean = inputText.trim();
-    if (!clean || isProcessing) return;
+    if (!clean || isProcessing || isAudioTranscribing) return;
 
     setIsProcessing(true);
     setErrorMessage(null);
@@ -163,45 +383,118 @@ export function QuickExpenseWidget({
         </div>
       </div>
 
-      {/* Single Input Field Bar */}
+      {/* Single Input Field Bar with Microphone Integration */}
       <form onSubmit={handleSubmit} className="relative">
-        <div className="relative flex items-center bg-[var(--surface-muted)]/70 dark:bg-white/5 border border-[var(--border-color)]/70 hover:border-[var(--border-color)] focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15 rounded-xl transition-all pl-3.5 pr-1.5 py-1.5 min-h-[44px]">
+        <div
+          className={`relative flex items-center bg-[var(--surface-muted)]/70 dark:bg-white/5 border rounded-xl transition-all pl-3.5 pr-1.5 py-1.5 min-h-[46px] ${
+            isRecording
+              ? 'border-rose-500/80 ring-2 ring-rose-500/25 bg-rose-500/5'
+              : 'border-[var(--border-color)]/70 hover:border-[var(--border-color)] focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15'
+          }`}
+        >
           <input
             ref={inputRef}
             type="text"
-            placeholder={isEn ? 'e.g. 300kr Coop, 45 Coffee, SL 42...' : 't.ex. 300kr Coop, 45 kaffe, SL 42...'}
+            placeholder={
+              isRecording
+                ? isEn
+                  ? 'Speak now, e.g. "300 kr Coop"...'
+                  : 'Prata nu, t.ex. "300 kr Coop"...'
+                : isEn
+                  ? 'e.g. 300kr Coop, or press mic to speak...'
+                  : 't.ex. 300kr Coop, eller tryck på micken...'
+            }
             value={inputText}
             onChange={(e) => {
               setInputText(e.target.value);
               if (errorMessage) setErrorMessage(null);
             }}
             onKeyDown={handleKeyDown}
-            className="w-full bg-transparent text-[var(--text-primary)] text-sm sm:text-[14.5px] font-medium outline-none placeholder:text-[var(--text-secondary)]/40 pr-2"
+            className="w-full bg-transparent text-[var(--text-primary)] text-sm sm:text-[14.5px] font-medium outline-none placeholder:text-[var(--text-secondary)]/45 pr-2"
             id="quick_expense_smart_input"
             autoComplete="off"
-            disabled={isProcessing}
+            disabled={isProcessing || isAudioTranscribing}
           />
 
-          {/* Submit Action Button */}
-          <button
-            type="submit"
-            disabled={!inputText.trim() || isProcessing}
-            aria-label={isEn ? 'Add' : 'Lägg till'}
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-bold flex items-center justify-center shrink-0 transition-all select-none ${
-              inputText.trim() && !isProcessing
-                ? 'bg-accent text-white shadow-xs hover:opacity-90 active:scale-95 cursor-pointer'
-                : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]/30 cursor-not-allowed border border-[var(--border-color)]/40'
-            }`}
-            id="quick_expense_submit_btn"
-          >
-            {isProcessing ? (
-              <Sparkles size={15} className="animate-spin text-white" />
-            ) : (
-              <Plus size={18} strokeWidth={2.5} />
-            )}
-          </button>
+          {/* Action Buttons: Microphone + Submit */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Microphone Button */}
+            <button
+              type="button"
+              onClick={toggleRecording}
+              disabled={isProcessing || isAudioTranscribing}
+              aria-label={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
+              title={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
+              className={`relative w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-bold flex items-center justify-center transition-all select-none cursor-pointer ${
+                isRecording
+                  ? 'bg-rose-500 text-white shadow-md shadow-rose-500/30 scale-105 animate-pulse'
+                  : isAudioTranscribing
+                    ? 'bg-rose-500/15 text-rose-500 border border-rose-500/30'
+                    : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 active:scale-95'
+              }`}
+              id="quick_expense_mic_btn"
+            >
+              {isAudioTranscribing ? (
+                <Loader2 size={16} className="animate-spin text-rose-500" />
+              ) : isRecording ? (
+                <Square size={14} className="fill-current" />
+              ) : (
+                <Mic size={17} strokeWidth={2.3} />
+              )}
+            </button>
+
+            {/* Submit Action Button */}
+            <button
+              type="submit"
+              disabled={!inputText.trim() || isProcessing || isAudioTranscribing || isRecording}
+              aria-label={isEn ? 'Add' : 'Lägg till'}
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-bold flex items-center justify-center shrink-0 transition-all select-none ${
+                inputText.trim() && !isProcessing && !isAudioTranscribing && !isRecording
+                  ? 'bg-accent text-white shadow-xs hover:opacity-90 active:scale-95 cursor-pointer'
+                  : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]/30 cursor-not-allowed border border-[var(--border-color)]/40'
+              }`}
+              id="quick_expense_submit_btn"
+            >
+              {isProcessing ? (
+                <Sparkles size={15} className="animate-spin text-white" />
+              ) : (
+                <Plus size={18} strokeWidth={2.5} />
+              )}
+            </button>
+          </div>
         </div>
       </form>
+
+      {/* Live Voice Status Indicator */}
+      <AnimatePresence>
+        {(recordingStatusText || isRecording || isAudioTranscribing) && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+            animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
+            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-semibold"
+          >
+            {isRecording ? (
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+              </span>
+            ) : (
+              <Volume2 size={14} className="shrink-0 animate-pulse text-rose-500" />
+            )}
+            <span className="truncate flex-1">{recordingStatusText}</span>
+            {isRecording && (
+              <button
+                type="button"
+                onClick={handleStopRecordingAndProcess}
+                className="text-[11px] underline font-bold hover:text-rose-700 cursor-pointer"
+              >
+                {isEn ? 'Done' : 'Klar'}
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Instant Success Feedback Toast */}
       <AnimatePresence>
@@ -214,12 +507,21 @@ export function QuickExpenseWidget({
             className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 text-xs font-semibold"
           >
             <Check size={14} strokeWidth={2.5} className="shrink-0" />
-            <span className="truncate">
-              {isEn ? 'Added' : 'Lade till'}{' '}
-              <strong className="font-bold">{successInfo.amount} {config.currency || 'kr'}</strong>{' '}
-              {successInfo.merchant !== 'Snabb utgift' && <>({successInfo.merchant}) </>}
-              {successInfo.category && <span className="opacity-80 font-normal">under {successInfo.category}</span>} ✨
-            </span>
+            <div className="truncate flex-1">
+              <span>
+                {isEn ? 'Added' : 'Lade till'}{' '}
+                <strong className="font-bold">
+                  {successInfo.amount} {config.currency || 'kr'}
+                </strong>{' '}
+                {successInfo.merchant !== 'Snabb utgift' && <>({successInfo.merchant}) </>}
+                {successInfo.category && <span className="opacity-80 font-normal">under {successInfo.category}</span>} ✨
+              </span>
+              {successInfo.transcript && (
+                <p className="text-[11px] opacity-75 italic mt-0.5 truncate">
+                  ”{successInfo.transcript}”
+                </p>
+              )}
+            </div>
           </motion.div>
         )}
 
