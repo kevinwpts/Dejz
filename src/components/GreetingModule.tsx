@@ -229,9 +229,9 @@ export function GreetingModule({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="pb-1 text-[var(--text-primary)] relative overflow-hidden flex flex-col"
+          className="pb-1 text-[var(--text-primary)] relative flex flex-col"
         >
-          <div className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[32px] p-6 sm:p-7 shadow-xs relative overflow-hidden flex flex-col">
+          <div className="w-full relative flex flex-col pt-1 pb-1">
             {/* Header Top Row: Left Stats & Right Dejzi Interactive Badge */}
             <div className="flex items-start justify-between gap-4">
               {/* Left Side: Totalt kvar */}
@@ -263,7 +263,7 @@ export function GreetingModule({
                     feedback.tap();
                     setIsDejziModalOpen(true);
                   }}
-                  className="group flex items-center gap-2 p-1.5 pr-2.5 sm:pr-3 rounded-2xl bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 transition-all cursor-pointer active:scale-95 shrink-0 max-w-[155px] sm:max-w-[185px] shadow-2xs"
+                  className="group flex items-center gap-2 p-1.5 pr-2.5 sm:pr-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 transition-all cursor-pointer active:scale-95 shrink-0 max-w-[155px] sm:max-w-[185px] shadow-2xs"
                   title={isEn ? 'Click to see advice from Dejzi' : 'Klicka för råd från Dejzi'}
                 >
                   <DejziAvatar size="md" />
@@ -280,9 +280,9 @@ export function GreetingModule({
               )}
             </div>
 
-            {/* Category Budgets Carousel in the bottom of the card */}
+            {/* Category Budgets Carousel in the bottom of the module */}
             {children && (
-              <div className="w-full pt-4 mt-5 text-left border-t border-[var(--border-color)]/60">
+              <div className="w-full pt-3 mt-4 text-left">
                 {children}
               </div>
             )}

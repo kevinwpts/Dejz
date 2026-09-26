@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
 
 interface AppHeaderProps {
@@ -32,57 +32,22 @@ export function AppHeader({
 }: AppHeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isAtTop, setIsAtTop] = useState(true);
-  const lastScrollY = useRef(0);
 
   const isProfileOrSettings = activeTab === "profile" || activeTab === "settings";
   const useWhiteHeader = false;
 
   useEffect(() => {
-    if (isProfileOrSettings) {
-      setIsVisible(true);
-      setIsAtTop(false);
-      return;
-    }
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
-      // 1. Utgångsläget: Längst upp integreras headern sömlöst utan bakgrund
-      if (currentScrollY <= 10) {
-        setIsAtTop(true);
-        setIsVisible(true);
-        lastScrollY.current = currentScrollY;
-        return;
-      }
-
-      setIsAtTop(false);
-
-      // Skydd mot iOS bounce/rubber-banding
-      if (currentScrollY < 0) {
-        setIsVisible(true);
-        return;
-      }
-
-      const diff = currentScrollY - lastScrollY.current;
-
-      // Scrolla ner (> 8px) efter toppen -> göm headern
-      if (diff > 8 && currentScrollY > 50) {
-        setIsVisible(false);
-      } else if (diff < -8) {
-        // Scrolla upp -> visa headern
-        setIsVisible(true);
-      }
-
-      lastScrollY.current = currentScrollY;
+      setIsAtTop(currentScrollY <= 10);
     };
 
     setIsAtTop(window.scrollY <= 10);
-    lastScrollY.current = window.scrollY;
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isProfileOrSettings]);
+  }, []);
 
-  // Visa alltid headern vid sidbyte eller titeländring
+  // Visa alltid headern
   useEffect(() => {
     setIsVisible(true);
   }, [_navTrigger, title, isProfileOrSettings]);

@@ -139,11 +139,14 @@ export function TodayView({
 
   const selectedDayData = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return null;
+    const selectedTime = normalizedSelectedDate.getTime();
     return (
-      calendarDays.find(
-        (d: any) =>
-          d.date && d.date.getTime() === normalizedSelectedDate.getTime(),
-      ) ||
+      calendarDays.find((d: any) => {
+        if (!d.date) return false;
+        const dDate = new Date(d.date);
+        dDate.setHours(0, 0, 0, 0);
+        return dDate.getTime() === selectedTime;
+      }) ||
       calendarDays.find((d: any) => d.isToday) ||
       calendarDays[0]
     );

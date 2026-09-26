@@ -499,7 +499,7 @@ export function BudgetView({
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="p-5 sm:p-6 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center text-center"
+          className="py-2 px-1 flex flex-col items-center text-center"
         >
           <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2 block">
             {t('monthlyDisposable')}

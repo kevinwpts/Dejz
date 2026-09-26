@@ -57,7 +57,7 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
               <span className={`text-[13px] sm:text-[14px] font-medium tabular-nums leading-none text-center ${
                 isSelected ? 'text-white font-medium' : isToday ? 'text-[var(--accent-color)] font-medium' : 'text-[var(--text-primary)] font-normal'
               }`}>
-                {day.date.getDate()}
+                {dayDate.getDate()}
               </span>
               
               {/* Activity Indicators */}
