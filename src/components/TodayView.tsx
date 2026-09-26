@@ -472,7 +472,7 @@ export function TodayView({
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
-          className="pt-2"
+          className="pt-1 overflow-visible"
         >
           <PeriodTimeline
             calendarDays={calendarDays}

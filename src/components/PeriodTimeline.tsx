@@ -167,7 +167,7 @@ export function PeriodTimeline({
           <button
             type="button"
             onClick={() => handleStep('prev')}
-            className="pointer-events-auto w-6 h-6 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-sm"
+            className="pointer-events-auto w-6 h-6 rounded-full bg-white/[0.035] hover:bg-white/[0.07] text-[#C7CDDC] border border-white/[0.035] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-none"
             aria-label="Föregående dag"
             title="Föregående dag"
           >
@@ -176,10 +176,10 @@ export function PeriodTimeline({
         </div>
       )}
 
-      {/* Horizontal Scrollable Day Strip - Clean natural alignment */}
+      {/* Horizontal Scrollable Day Strip - with generous vertical padding so shadows are never clipped */}
       <div
         ref={scrollContainerRef}
-        className="relative flex items-center gap-2 overflow-x-auto py-1 px-1 no-scrollbar select-none"
+        className="relative flex items-center gap-2 overflow-x-auto py-3 sm:py-3.5 px-1.5 no-scrollbar select-none -my-2"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -216,7 +216,7 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-2xl transition-all duration-200 cursor-pointer select-none shrink-0 relative backdrop-blur-md ${
                 isSelected
-                  ? 'bg-[#818cf8]/[0.14] text-white border border-[#8B9CFF]/35 shadow-[0_0_16px_rgba(139,156,255,0.18)] scale-105 font-bold z-10 opacity-100'
+                  ? 'bg-[#818cf8]/[0.14] text-white border border-[#8B9CFF]/35 shadow-[0_0_12px_rgba(139,156,255,0.22)] scale-105 font-bold z-10 opacity-100'
                   : isRealToday
                   ? 'bg-white/[0.035] text-[#C7CDDC] border border-white/[0.06] hover:bg-white/[0.06] scale-95 opacity-90'
                   : 'bg-white/[0.02] text-[#9CA6BC]/70 hover:text-[#C7CDDC] hover:bg-white/[0.045] border border-white/[0.025] scale-95 opacity-75'
