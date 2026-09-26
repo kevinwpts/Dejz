@@ -5,6 +5,7 @@ import {
   History,
   BarChart3,
   WalletCards,
+  Plus,
 } from "lucide-react";
 import { Language, translations, TranslationKey } from "../i18n";
 
@@ -16,7 +17,7 @@ interface CustomBottomNavigationProps {
   budgetSection?: string | null;
   onNavigateSection?: (tab: Tab, section?: string) => void;
   language: Language;
-  onAddTransaction?: (type: "income" | "expense", prefill?: any) => void;
+  onPlusClick?: () => void;
   logoUrl?: string;
   avatarUrl?: string | null;
   currency?: string;
@@ -30,6 +31,7 @@ export function CustomBottomNavigation({
   budgetSection,
   onNavigateSection,
   language,
+  onPlusClick,
 }: CustomBottomNavigationProps) {
   const t = (key: TranslationKey) => translations[language]?.[key] || translations["sv"]?.[key] || key;
 
@@ -61,7 +63,18 @@ export function CustomBottomNavigation({
           onClick={() => setActiveTab("transactions")}
         />
 
-
+        {/* 3. Central Plus Button */}
+        <div className="flex-1 flex flex-col items-center justify-center -mt-0.5">
+          <button
+            onClick={() => {
+              if (onPlusClick) onPlusClick();
+            }}
+            className="w-11 h-11 sm:w-[46px] sm:h-[46px] rounded-full bg-[#8B9CFF] hover:bg-[#7a8be6] active:scale-90 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-lg shadow-[#8B9CFF]/20"
+            aria-label="Add transaction"
+          >
+            <Plus size={20} strokeWidth={2.5} />
+          </button>
+        </div>
 
         {/* 4. Analys */}
         <NavItem

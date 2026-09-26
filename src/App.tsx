@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from "react";
-import { AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   PaymentMethod,
   Frequency,
@@ -21,7 +21,17 @@ import {
   AlertCircle,
   Loader2,
   LogOut,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Camera,
+  Mic,
+  Square,
+  Plus,
+  X,
+  Check,
 } from "lucide-react";
+import { useVoiceExpense } from "./hooks/useVoiceExpense";
+import { parseQuickExpense } from "./utils/expenseAiParser";
 
 
 import { CalendarModal } from './components/CalendarModal';
@@ -218,6 +228,224 @@ export default function App() {
   >("main");
   const [budgetSection, setBudgetSection] = useState<string | null>(null);
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
+  const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
+  const [plusQuickText, setPlusQuickText] = useState("");
+  const [isSubmittingQuick, setIsSubmittingQuick] = useState(false);
+  const [plusSuccessMsg, setPlusSuccessMsg] = useState<{ text: string; transcript?: string } | null>(null);
+  const plusQuickInputRef = useRef<HTMLInputElement>(null);
+  const plusCameraInputRef = useRef<HTMLInputElement>(null);
+  const [isScanningReceipt, setIsScanningReceipt] = useState(false);
+
+  const prepareReceiptImage = async (file: File): Promise<{ base64: string; mimeType: string }> => {
+    try {
+      const resized = await new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxDim = 1024;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("Canvas context not available"));
+            return;
+          }
+          ctx.drawImage(img, 0, 0, w, h);
+          const base64 = canvas.toDataURL("image/jpeg", 0.85);
+          resolve({
+            base64: base64.includes(",") ? base64.split(",")[1] : base64,
+            mimeType: "image/jpeg"
+          });
+          URL.revokeObjectURL(objectUrl);
+        };
+        img.onerror = () => {
+          reject(new Error("Failed to load image"));
+          URL.revokeObjectURL(objectUrl);
+        };
+        img.src = objectUrl;
+      });
+      return resized;
+    } catch {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const res = reader.result as string;
+          resolve(res.includes(",") ? res.split(",")[1] : res);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      return { base64, mimeType: file.type || "image/jpeg" };
+    }
+  };
+
+  const {
+    isRecording,
+    isAudioTranscribing,
+    error: plusVoiceError,
+    toggleRecording,
+    stopRecordingAndProcess
+  } = useVoiceExpense({
+    isEn: config?.language === "en",
+    onTextUpdate: (text) => setPlusQuickText(text),
+    onSuccess: async (result) => {
+      if (result.items && result.items.length > 0) {
+        for (const item of result.items) {
+          if (item.amount > 0) {
+            const defaultCategory = config?.language === "en" ? "Uncategorized" : "Okategoriserat";
+            await addTransaction({
+              amount: item.amount,
+              type: "expense",
+              category: item.category?.trim() || defaultCategory,
+              merchant: item.merchant?.trim() || (config?.language === "en" ? "Voice expense" : "Röstutgift"),
+              timestamp: Date.now(),
+              tags: []
+            });
+          }
+        }
+        feedback.success();
+        setPlusSuccessMsg({
+          text: config?.language === "en" ? "Add complete ✨" : "Lagt till ✨"
+        });
+        setPlusQuickText("");
+        setTimeout(() => {
+          setPlusSuccessMsg(null);
+          setIsPlusMenuOpen(false);
+        }, 2500);
+      }
+    }
+  });
+
+  const handlePlusKvittoClick = () => {
+    feedback.tap();
+    if (plusCameraInputRef.current) {
+      plusCameraInputRef.current.click();
+    }
+  };
+
+  const handlePlusCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsScanningReceipt(true);
+    setPlusSuccessMsg({ text: config?.language === "en" ? "📷 Scanning receipt..." : "📷 Läser av kvitto..." });
+    feedback.tap();
+
+    try {
+      const { base64, mimeType } = await prepareReceiptImage(file);
+      const { data, error } = await supabase.functions.invoke("scan-receipt", {
+        body: { image: base64, mimeType },
+      });
+
+      if (error || !data || !data.amount || Number(data.amount) <= 0) {
+        setIsScanningReceipt(false);
+        setPlusSuccessMsg(null);
+        setTransactionType("expense");
+        setTargetDate(new Date());
+        setIsAddTransactionOpen(true);
+        setIsPlusMenuOpen(false);
+        return;
+      }
+
+      const amount = Number(data.amount);
+      const merchant = data.merchant || (config?.language === "en" ? "Receipt" : "Kvitto");
+      const category = data.category || (config?.language === "en" ? "Uncategorized" : "Okategoriserat");
+
+      await addTransaction({
+        amount,
+        type: "expense",
+        category: category.trim(),
+        merchant: merchant.trim(),
+        timestamp: Date.now(),
+        tags: []
+      });
+
+      feedback.success();
+      setPlusSuccessMsg({
+        text: config?.language === "en" 
+          ? `Saved ${amount} ${config?.currency || "kr"} from ${merchant} ✨` 
+          : `Sparade ${amount} ${config?.currency || "kr"} från ${merchant} ✨`
+      });
+      setTimeout(() => {
+        setPlusSuccessMsg(null);
+        setIsPlusMenuOpen(false);
+      }, 3500);
+    } catch (err) {
+      console.error("Auto receipt scan error:", err);
+      setTransactionType("expense");
+      setTargetDate(new Date());
+      setIsAddTransactionOpen(true);
+      setIsPlusMenuOpen(false);
+    } finally {
+      setIsScanningReceipt(false);
+      if (e.target) e.target.value = "";
+    }
+  };
+
+  const handlePlusQuickExpenseSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const clean = plusQuickText.trim();
+    if (!clean || isSubmittingQuick) return;
+
+    setIsSubmittingQuick(true);
+    try {
+      const defaultCategory = config?.language === "en" ? "Uncategorized" : "Okategoriserat";
+      const parsed = await parseQuickExpense(
+        clean,
+        config?.categories || [],
+        transactions,
+        defaultCategory
+      );
+
+      if (parsed.amount && parsed.amount > 0) {
+        await addTransaction({
+          amount: parsed.amount,
+          type: "expense",
+          category: parsed.category || defaultCategory,
+          merchant: parsed.merchant || (config?.language === "en" ? "Quick Add" : "Snabbköp"),
+          timestamp: Date.now(),
+          tags: []
+        });
+
+        feedback.success();
+        setPlusSuccessMsg({
+          text: `${config?.language === "en" ? "Added" : "Lade till"} ${parsed.amount} ${config?.currency || "kr"} (${parsed.merchant}) ✨`
+        });
+        setPlusQuickText("");
+        setTimeout(() => {
+          setPlusSuccessMsg(null);
+          setIsPlusMenuOpen(false);
+        }, 2500);
+      }
+    } catch (_err) {
+      console.error("Quick expense failed", _err);
+    } finally {
+      setIsSubmittingQuick(false);
+    }
+  };
+
+  const handlePlusMicClick = async () => {
+    if (isRecording) {
+      const res = await stopRecordingAndProcess(plusQuickText);
+      if (res && !res.handled && plusQuickText.trim()) {
+        handlePlusQuickExpenseSubmit();
+      }
+    } else {
+      toggleRecording(plusQuickText);
+    }
+  };
   const [transactionPrefill, setTransactionPrefill] = useState<any>(null);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -3814,6 +4042,10 @@ export default function App() {
             onNavigateSection={(tab, section) => {
               handleNavigate(tab, section);
             }}
+            onPlusClick={() => {
+              feedback.tap();
+              setIsPlusMenuOpen(true);
+            }}
             setActiveTab={(tab) => {
               if (tab === activeTab) {
                 tabScrollPositions.current[tab] = 0;
@@ -4481,6 +4713,207 @@ export default function App() {
             language={(config?.language as Language) || 'sv'}
             showFixedInCalendar={config?.showFixedExpensesInCalendar}
           />
+        )}
+
+        {/* Central Plus Button Overlay Menu */}
+        {isPlusMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-end justify-center px-4 pb-24"
+          >
+            {/* Click outside to close */}
+            <div 
+              className="absolute inset-0 cursor-pointer" 
+              onClick={() => {
+                feedback.tap();
+                setIsPlusMenuOpen(false);
+              }}
+            />
+
+            <motion.div
+              initial={{ y: 80, scale: 0.96 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 80, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="w-full max-w-[420px] rounded-3xl bg-[#14141E]/95 border border-white/[0.06] shadow-2xl p-5 relative z-10 space-y-5"
+            >
+              {/* Header with X Close Button */}
+              <div className="flex items-center justify-between pb-1">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9CA6BC] select-none">
+                  {config?.language === "en" ? "ADD TRANSACTION" : "NY TRANSAKTION"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    feedback.tap();
+                    setIsPlusMenuOpen(false);
+                  }}
+                  className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] text-[#9CA6BC] hover:text-white flex items-center justify-center cursor-pointer transition-all border border-white/[0.02]"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+
+              {/* The 3 Action Buttons */}
+              <div className="grid grid-cols-3 gap-3 justify-items-center py-1">
+                {/* Utgift */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    feedback.tap();
+                    setIsPlusMenuOpen(false);
+                    setTransactionType("expense");
+                    setTargetDate(new Date());
+                    setIsAddTransactionOpen(true);
+                  }}
+                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
+                >
+                  <div className="w-14 h-14 rounded-full bg-white/[0.045] group-hover:bg-white/[0.08] border border-white/[0.035] backdrop-blur-[16px] flex items-center justify-center transition-colors">
+                    <ArrowDownLeft size={20} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
+                  </div>
+                  <span className="text-xs font-medium text-[#C7CDDC]/90 group-hover:text-white transition-colors text-center">
+                    {config?.language === "en" ? "Expense" : "Utgift"}
+                  </span>
+                </button>
+
+                {/* Inkomst */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    feedback.tap();
+                    setIsPlusMenuOpen(false);
+                    setTransactionType("income");
+                    setTargetDate(new Date());
+                    setIsAddTransactionOpen(true);
+                  }}
+                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
+                >
+                  <div className="w-14 h-14 rounded-full bg-white/[0.045] group-hover:bg-white/[0.08] border border-white/[0.035] backdrop-blur-[16px] flex items-center justify-center transition-colors">
+                    <ArrowUpRight size={20} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
+                  </div>
+                  <span className="text-xs font-medium text-[#C7CDDC]/90 group-hover:text-white transition-colors text-center">
+                    {config?.language === "en" ? "Income" : "Inkomst"}
+                  </span>
+                </button>
+
+                {/* Kvitto */}
+                <button
+                  type="button"
+                  onClick={handlePlusKvittoClick}
+                  disabled={isScanningReceipt}
+                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
+                >
+                  <div className="w-14 h-14 rounded-full bg-white/[0.045] group-hover:bg-white/[0.08] border border-white/[0.035] backdrop-blur-[16px] flex items-center justify-center transition-colors">
+                    {isScanningReceipt ? (
+                      <Loader2 size={20} className="animate-spin text-white" />
+                    ) : (
+                      <Camera size={20} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
+                    )}
+                  </div>
+                  <span className="text-xs font-medium text-[#C7CDDC]/90 group-hover:text-white transition-colors text-center">
+                    {isScanningReceipt ? (config?.language === "en" ? "Scanning..." : "Scannar...") : (config?.language === "en" ? "Receipt" : "Kvitto")}
+                  </span>
+                </button>
+
+                <input
+                  ref={plusCameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={handlePlusCameraCapture}
+                />
+              </div>
+
+              {/* Snabbutgift Form with Mic */}
+              <div className="space-y-2 pt-1 border-t border-white/[0.04]">
+                <form onSubmit={handlePlusQuickExpenseSubmit} className="relative flex items-center">
+                  {/* Mic Button */}
+                  <button
+                    type="button"
+                    onClick={handlePlusMicClick}
+                    disabled={isSubmittingQuick || isAudioTranscribing}
+                    className={`absolute left-1.5 z-10 w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all cursor-pointer border select-none ${
+                      isRecording
+                        ? "bg-rose-500 text-white border-rose-400 animate-pulse shadow-md shadow-rose-500/30 scale-105"
+                        : isAudioTranscribing
+                          ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
+                          : "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20 active:scale-95"
+                    }`}
+                  >
+                    {isAudioTranscribing ? (
+                      <Loader2 size={14} className="animate-spin text-rose-400" />
+                    ) : isRecording ? (
+                      <Square size={12} className="fill-current" />
+                    ) : (
+                      <Mic size={15} strokeWidth={2} />
+                    )}
+                  </button>
+
+                  {/* Input Field */}
+                  <input
+                    ref={plusQuickInputRef}
+                    type="text"
+                    value={plusQuickText}
+                    onChange={(e) => setPlusQuickText(e.target.value)}
+                    placeholder={
+                      isRecording
+                        ? (config?.language === "en" ? "Listening... Speak purchase" : "Lyssnar... Prata in köpet")
+                        : isAudioTranscribing
+                          ? (config?.language === "en" ? "Processing speech..." : "Tolkar röstinlägg...")
+                          : (config?.language === "en" ? "Quick expense: e.g. 45 Coop..." : "Snabbutgift: t.ex. 45 ICA...")
+                    }
+                    className={`w-full h-11 sm:h-12 pl-12 pr-12 rounded-2xl bg-white/[0.035] hover:bg-white/[0.05] focus:bg-white/[0.065] border backdrop-blur-[18px] text-xs sm:text-sm font-normal text-white placeholder-[#9CA6BC]/70 outline-none transition-all shadow-none ${
+                      isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-white/[0.025] focus:border-white/[0.08]"
+                    }`}
+                  />
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={!plusQuickText.trim() || isSubmittingQuick || isAudioTranscribing || isRecording}
+                    className="absolute right-1.5 z-10 w-8.5 h-8.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-20 active:scale-95 text-white flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.05]"
+                  >
+                    <Plus size={16} strokeWidth={2.2} className="text-white" />
+                  </button>
+                </form>
+
+                {/* Feedback notifications */}
+                <AnimatePresence>
+                  {plusSuccessMsg && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/20 text-emerald-300 text-xs font-semibold"
+                    >
+                      <Check size={14} strokeWidth={2.5} className="shrink-0 text-emerald-400" />
+                      <div className="truncate flex-1">
+                        <span>{plusSuccessMsg.text}</span>
+                        {plusSuccessMsg.transcript && (
+                          <p className="text-[11px] opacity-75 italic mt-0.5 truncate">
+                            ”{plusSuccessMsg.transcript}”
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {plusVoiceError && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-xs text-rose-400 px-1 pt-0.5"
+                    >
+                      {plusVoiceError}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
       <AddToHomeScreenModal t={t} theme={config?.appIconTheme} language={(config?.language as string) || landingLanguage} />

@@ -232,44 +232,35 @@ export function BudgetSummaryModule({
       </div>
 
       {/* Grid for other indicators */}
-      <div className="grid grid-cols-3 gap-4 pt-1">
+      <div className="grid grid-cols-3 gap-3 pt-1">
         {/* Snitt per dag */}
-        <div className="space-y-1 text-left">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9CA6BC] block">
-            Snitt per dag
-          </span>
-          <div className="text-sm sm:text-base font-bold font-amount tabular-nums text-white">
-            {formatAmount(dailyAvg, config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || "kr"}</span>
+        <div className="bg-white/[0.035] border border-white/[0.02] p-3 sm:p-3.5 rounded-2xl flex flex-col justify-center text-left min-w-0">
+          <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-white leading-tight">
+            {formatAmount(dailyAvg, config.language)} <span className="text-xs font-normal text-[#9CA6BC]">{config.currency || "kr"}</span>
           </div>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA6BC] mt-1 select-none truncate">
+            {config.language === 'en' ? 'Daily Average' : 'Snitt per dag'}
+          </span>
         </div>
 
         {/* Största kategori */}
-        <div className="space-y-1 text-left col-span-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9CA6BC] block">
-            Största kategori
-          </span>
-          <div className="text-xs sm:text-sm font-bold text-white truncate leading-tight">
-            {largestCategory.name ? (
-              <>
-                <span className="capitalize block truncate">{largestCategory.name}</span>
-                <span className="text-[#9CA6BC] font-normal block text-[11px] mt-0.5 font-amount tabular-nums">
-                  {formatAmount(largestCategory.amount, config.language)} {config.currency || "kr"}
-                </span>
-              </>
-            ) : (
-              <span className="text-[#9CA6BC] font-normal">—</span>
-            )}
+        <div className="bg-white/[0.035] border border-white/[0.02] p-3 sm:p-3.5 rounded-2xl flex flex-col justify-center text-left min-w-0">
+          <div className="text-base sm:text-[17px] font-bold text-white truncate leading-tight capitalize">
+            {largestCategory.name ? largestCategory.name : <span className="text-[#9CA6BC] font-normal">—</span>}
           </div>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA6BC] mt-1 select-none truncate">
+            {config.language === 'en' ? 'Top Category' : 'Största kategori'}
+          </span>
         </div>
 
         {/* Budget använd */}
-        <div className="space-y-1 text-left">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9CA6BC] block">
-            Budget använd
-          </span>
-          <div className="text-sm sm:text-base font-bold font-amount tabular-nums text-white">
+        <div className="bg-white/[0.035] border border-white/[0.02] p-3 sm:p-3.5 rounded-2xl flex flex-col justify-center text-left min-w-0">
+          <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-white leading-tight">
             {budgetUsedPct}%
           </div>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA6BC] mt-1 select-none truncate">
+            {config.language === 'en' ? 'Budget Used' : 'Budget använd'}
+          </span>
         </div>
       </div>
 
