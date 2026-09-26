@@ -48,6 +48,16 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
 
   const totalSpent = totalSpentInPeriod + totalFixed;
 
+  const totalSavings = useMemo(() => {
+    const itemsSum = config.monthlySavingsItems?.reduce((sum: number, item: any) => {
+      const amount = (item.isVariable && stats?.periodId && item.periodOverrides && item.periodOverrides[stats.periodId] !== undefined)
+        ? item.periodOverrides[stats.periodId]
+        : (Number(item.amount) || 0);
+      return sum + amount;
+    }, 0) || 0;
+    return itemsSum + (Number(config.monthlySavings) || 0);
+  }, [config.monthlySavingsItems, config.monthlySavings, stats?.periodId]);
+
   const daysElapsed = useMemo(() => {
     if (!stats) return 0;
     const now = new Date();
@@ -99,20 +109,20 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
           </span>
         </div>
 
-        {/* 3-column Grid for Past Period */}
+        {/* 3-column Grid for Past Period: Fixed, Income, Savings */}
         <div className="grid grid-cols-3 gap-2.5">
           <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
             <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
-              {t('totalSpent' as any) || 'Spenderat'}
+              {t('fixed' as any) || 'Fasta utgifter'}
             </span>
             <span className="text-[14px] sm:text-[16px] font-bold font-amount tabular-nums text-center truncate w-full text-[var(--text-primary)]">
-              -{formatAmount(Math.round(totalSpent), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-85">{config.currency || 'kr'}</span>
+              -{formatAmount(Math.round(stats.totalFixedExpenses || stats.totalFixed || 0), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-85">{config.currency || 'kr'}</span>
             </span>
           </div>
 
           <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
             <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
-              {t('income' as any) || 'Inkomst'}
+              {t('income' as any) || 'Inkomster'}
             </span>
             <span className="text-[14px] sm:text-[16px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
               +{formatAmount(Math.round(stats.totalIncome || 0), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-85">{config.currency || 'kr'}</span>
@@ -121,10 +131,10 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
 
           <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
             <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
-              {t('fixed' as any) || 'Fasta kostnader'}
+              {t('monthlySavings' as any) || 'Månadssparande'}
             </span>
             <span className="text-[14px] sm:text-[16px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
-              -{formatAmount(Math.round(totalFixed || stats.totalFixedExpenses || 0), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-85">{config.currency || 'kr'}</span>
+              -{formatAmount(Math.round(totalSavings), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-85">{config.currency || 'kr'}</span>
             </span>
           </div>
         </div>
@@ -149,32 +159,65 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
         </div>
       </div>
 
-      {/* Secondary Metrics: 3-column Grid (Compact, Color-themed & Coherent) */}
-      <div className="grid grid-cols-3 gap-2.5">
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
-          <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
+      {/* Complete Financial Overview: 6 Key Metrics Grid */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+        {/* 1. Spenderat */}
+        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
+          <span className="text-[10.5px] sm:text-[11.5px] font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
             {t('spent')}
           </span>
-          <span className="text-[14px] sm:text-[16px] font-bold font-amount tabular-nums text-center truncate w-full text-[var(--text-primary)]">
-            -{formatAmount(Math.round(totalSpent), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-85">{config.currency || 'kr'}</span>
+          <span className="text-[13.5px] sm:text-[15px] font-bold font-amount tabular-nums text-center truncate w-full text-[var(--text-primary)]">
+            -{formatAmount(Math.round(totalSpent), config.language)} <span className="font-sans text-[10px] sm:text-[11px] font-medium opacity-80">{config.currency || 'kr'}</span>
           </span>
         </div>
         
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
-          <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
+        {/* 2. Snitt / dag */}
+        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
+          <span className="text-[10.5px] sm:text-[11.5px] font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
             {t('averagePerDay')}
           </span>
-          <span className="text-[14px] sm:text-[16px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
-            -{daysElapsed > 0 ? formatAmount(Math.round(totalSpent / daysElapsed), config.language) : 0} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-85">{config.currency || 'kr'}</span>
+          <span className="text-[13.5px] sm:text-[15px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
+            -{daysElapsed > 0 ? formatAmount(Math.round(totalSpent / daysElapsed), config.language) : 0} <span className="font-sans text-[10px] sm:text-[11px] font-medium opacity-80">{config.currency || 'kr'}</span>
           </span>
         </div>
 
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
-          <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
+        {/* 3. Budget / dag */}
+        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
+          <span className="text-[10.5px] sm:text-[11.5px] font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
             {t('baseDailyBudget')}
           </span>
-          <span className="text-[14px] sm:text-[16px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
-            +{formatAmount(Math.round(stats.baseDailyBudgetCents || 0), config.language)} <span className="font-sans text-[11px] sm:text-xs font-medium opacity-85">{config.currency || 'kr'}</span>
+          <span className="text-[13.5px] sm:text-[15px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
+            +{formatAmount(Math.round(stats.baseDailyBudgetCents || 0), config.language)} <span className="font-sans text-[10px] sm:text-[11px] font-medium opacity-80">{config.currency || 'kr'}</span>
+          </span>
+        </div>
+
+        {/* 4. Fasta utgifter */}
+        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
+          <span className="text-[10.5px] sm:text-[11.5px] font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
+            {t('fixed' as any) || 'Fasta utgifter'}
+          </span>
+          <span className="text-[13.5px] sm:text-[15px] font-bold font-amount tabular-nums text-center truncate w-full text-[var(--text-primary)]">
+            -{formatAmount(Math.round(stats.totalFixedExpenses || stats.totalFixed || 0), config.language)} <span className="font-sans text-[10px] sm:text-[11px] font-medium opacity-80">{config.currency || 'kr'}</span>
+          </span>
+        </div>
+
+        {/* 5. Inkomster */}
+        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
+          <span className="text-[10.5px] sm:text-[11.5px] font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
+            {t('income' as any) || 'Inkomster'}
+          </span>
+          <span className="text-[13.5px] sm:text-[15px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
+            +{formatAmount(Math.round(stats.totalIncome || 0), config.language)} <span className="font-sans text-[10px] sm:text-[11px] font-medium opacity-80">{config.currency || 'kr'}</span>
+          </span>
+        </div>
+
+        {/* 6. Månadssparande */}
+        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)]">
+          <span className="text-[10.5px] sm:text-[11.5px] font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">
+            {t('monthlySavings' as any) || 'Månadssparande'}
+          </span>
+          <span className="text-[13.5px] sm:text-[15px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">
+            -{formatAmount(Math.round(totalSavings), config.language)} <span className="font-sans text-[10px] sm:text-[11px] font-medium opacity-80">{config.currency || 'kr'}</span>
           </span>
         </div>
       </div>

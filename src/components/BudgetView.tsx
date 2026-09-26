@@ -516,37 +516,6 @@ export function BudgetView({
           </div>
         </motion.div>
 
-        {/* Core Stats Modules - Standardized, Color-themed & Compact */}
-        <div className="grid grid-cols-3 gap-2.5">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden"
-          >
-            <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">{t('fixedExpenses') || 'Fasta utgifter'}</span>
-            <span className="text-[15px] sm:text-[17px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">-{formatAmount(Math.abs(stats.totalFixed || 0), config.language)} {config.currency || 'kr'}</span>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden"
-          >
-            <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">{t('incomes') || 'Inkomster'}</span>
-            <span className="text-[15px] sm:text-[17px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-center truncate w-full">+{formatAmount(Math.abs(stats.totalIncome || 0), config.language)} {config.currency || 'kr'}</span>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[68px] sm:min-h-[74px] rounded-[16px] flex flex-col items-center justify-center space-y-1 shadow-2xs border border-[var(--border-color)] bg-[var(--surface-color)] overflow-hidden"
-          >
-            <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">{t('monthlySavings') || 'Månadssparande'}</span>
-          </motion.div>
-        </div>
       </div>
 
       {/* Budget Filter Segmented Control */}
@@ -581,6 +550,20 @@ export function BudgetView({
         >
           {t('monthlySavings' as TranslationKey) || 'Sparande'}
         </button>
+      </div>
+
+      {/* Dynamic Total Amount Header for Active Tab */}
+      <div className="flex items-center justify-between px-2.5 pt-1 -mb-4">
+        <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+          {budgetFilter === 'fixed' && (t('fixedExpenses') || 'Fasta utgifter')}
+          {budgetFilter === 'income' && (t('incomes') || 'Inkomster')}
+          {budgetFilter === 'savings' && (t('monthlySavings') || 'Månadssparande')}
+        </span>
+        <span className="text-base sm:text-lg font-black font-amount tabular-nums text-[var(--text-primary)]">
+          {budgetFilter === 'fixed' && `-${formatAmount(Math.abs(stats.totalFixed || 0), config.language)} ${config.currency || 'kr'}`}
+          {budgetFilter === 'income' && `+${formatAmount(Math.abs(stats.totalIncome || 0), config.language)} ${config.currency || 'kr'}`}
+          {budgetFilter === 'savings' && `-${formatAmount(Math.abs(totalSavings || 0), config.language)} ${config.currency || 'kr'}`}
+        </span>
       </div>
 
       <AnimatePresence mode="wait">
