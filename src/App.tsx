@@ -1868,18 +1868,101 @@ export default function App() {
 
       // Parse/map settings locally from dbProfile to prevent redundant DB query level
       if (dbProfile && Object.keys(dbProfile).length > 0) {
+        // Migrate category emojis back to Lucide icon names
+        const migrateCategories = (cats: any[]) => {
+          let hasChanged = false;
+          const migrated = cats.map((cat) => {
+            if (cat.icon && isEmojiString(cat.icon)) {
+              hasChanged = true;
+              return { ...cat, icon: resolveLucideIcon(cat.icon) };
+            }
+            return cat;
+          });
+          return { migrated, hasChanged };
+        };
+
+        const migrateExpenseCategories = (cats: any[]) => {
+          const { migrated } = migrateCategories(cats);
+          let { hasChanged } = migrateCategories(cats);
+          const hasInsurance = migrated.some(
+            (c) =>
+              (c.name || '').trim().toLowerCase() === "försäkringar" ||
+              (c.name || '').trim().toLowerCase() === "försäkring" ||
+              (c.name || '').trim().toLowerCase() === "insurance",
+          );
+          if (!hasInsurance && migrated.length > 0) {
+            const ovrigtIdx = migrated.findIndex(
+              (c) => (c.name || '').trim().toLowerCase() === "övrigt",
+            );
+            const newCat = {
+              name: "Försäkringar",
+              icon: "shield",
+              color: "#0ea5e9",
+            };
+            if (ovrigtIdx !== -1) {
+              migrated.splice(ovrigtIdx, 0, newCat);
+            } else {
+              migrated.push(newCat);
+            }
+            hasChanged = true;
+          }
+          return { migrated, hasChanged };
+        };
+
+        const rawCategories = dbProfile.categories && dbProfile.categories.length > 0
+          ? dbProfile.categories
+          : DEFAULT_EXPENSE_CATEGORIES;
+
+        const rawIncomeCategories = dbProfile.income_categories && dbProfile.income_categories.length > 0
+          ? dbProfile.income_categories
+          : DEFAULT_INCOME_CATEGORIES;
+
+        const { migrated: migratedExpense, hasChanged: expenseChanged } =
+          migrateExpenseCategories(rawCategories);
+        const { migrated: migratedIncome, hasChanged: incomeChanged } =
+          migrateCategories(rawIncomeCategories);
+
+        if (expenseChanged || incomeChanged) {
+          console.log("[Migration fetchData] Migrated categories back to icons");
+          dbProfile.categories = migratedExpense;
+          dbProfile.income_categories = migratedIncome;
+          
+          // Async save migrated settings back
+          dataService.saveSettings(session.user.id, {
+            currency: dbProfile.currency === "SEK" ? "kr" : dbProfile.currency,
+            language: dbProfile.language,
+            payday: dbProfile.payday,
+            paydayType: dbProfile.payday_type || PaydayType.TWENTY_FIFTH,
+            paydayBeforeWeekend: dbProfile.payday_before_weekend,
+            categories: migratedExpense,
+            incomeCategories: migratedIncome,
+            initialSpent: Number(dbProfile.initial_spent || 0),
+            notifications: dbProfile.notifications,
+            securityLock: dbProfile.security_lock,
+            darkMode: dbProfile.dark_mode !== false,
+            savingsPot: dbProfile.savings_pot || 0,
+            savingsGoals: dbProfile.savings_goals || [],
+            totalSavedLifetime: dbProfile.total_saved_lifetime || 0,
+            surplusIncome: dbProfile.surplus_income || 0,
+            monthlySavings: dbProfile.monthly_savings || 0,
+            monthlySavingsItems: dbProfile.monthly_savings_items || [],
+            includeFixedExpensesInAnalysis: dbProfile.include_fixed_expenses_in_analysis !== false,
+            showFixedExpensesInTodayView: dbProfile.show_fixed_expenses_in_today_view !== false,
+            showFixedExpensesInCalendar: dbProfile.show_fixed_expenses_in_calendar !== false,
+            appIconTheme: dbProfile.app_icon_theme,
+          }).catch((err) => {
+            console.error("[Migration fetchData] Failed to save migrated settings:", err);
+          });
+        }
+
         const mappedConfig = {
           currency: dbProfile.currency === "SEK" ? "kr" : dbProfile.currency,
           language: dbProfile.language,
           payday: dbProfile.payday,
           paydayType: dbProfile.payday_type || PaydayType.TWENTY_FIFTH,
           paydayBeforeWeekend: dbProfile.payday_before_weekend,
-          categories: (dbProfile.categories && dbProfile.categories.length > 0)
-            ? dbProfile.categories
-            : DEFAULT_EXPENSE_CATEGORIES,
-          incomeCategories: (dbProfile.income_categories && dbProfile.income_categories.length > 0)
-            ? dbProfile.income_categories
-            : DEFAULT_INCOME_CATEGORIES,
+          categories: dbProfile.categories,
+          incomeCategories: dbProfile.income_categories,
           initialSpent: Number(dbProfile.initial_spent || 0),
           notifications: dbProfile.notifications,
           securityLock: dbProfile.security_lock,
@@ -1905,7 +1988,6 @@ export default function App() {
             dbProfile.show_fixed_expenses_in_calendar !== undefined
               ? dbProfile.show_fixed_expenses_in_calendar
               : true,
-          appIconTheme: dbProfile.app_icon_theme,
         };
         setConfig(mappedConfig);
       } else {

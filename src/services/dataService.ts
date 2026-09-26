@@ -182,7 +182,8 @@ export const dataService = {
 
     let { error } = await supabase
       .from('profiles')
-      .upsert(payload);
+      .update(payload)
+      .eq('id', userId);
     
     // Robust fallback if user's Supabase profiles table is missing newly added columns
     let attempts = 0;
@@ -190,13 +191,36 @@ export const dataService = {
       attempts++;
       const match = error.message?.match(/column "([^"]+)"/);
       if (match && match[1] && match[1] in payload) {
-        console.warn(`[Supabase saveSettings] Column "${match[1]}" missing. Stripping and retrying (${attempts}/35)...`);
+        console.warn(`[Supabase saveSettings] Column "${match[1]}" missing. Stripping and retrying UPDATE (${attempts}/35)...`);
         delete payload[match[1]];
-        const retryResult = await supabase.from('profiles').upsert(payload);
+        const retryResult = await supabase.from('profiles').update(payload).eq('id', userId);
         error = retryResult.error;
       } else {
         break;
       }
+    }
+
+    // Fallback to UPSERT if UPDATE fails due to row missing or other issues
+    if (error) {
+      console.warn("[Supabase saveSettings] UPDATE failed, falling back to UPSERT...", error);
+      let upsertError = null;
+      const upsertResult = await supabase.from('profiles').upsert(payload);
+      upsertError = upsertResult.error;
+      
+      let upsertAttempts = 0;
+      while (upsertError && (upsertError as any).code === '42703' && upsertAttempts < 35) {
+        upsertAttempts++;
+        const match = upsertError.message?.match(/column "([^"]+)"/);
+        if (match && match[1] && match[1] in payload) {
+          console.warn(`[Supabase saveSettings] Column "${match[1]}" missing. Stripping and retrying UPSERT (${upsertAttempts}/35)...`);
+          delete payload[match[1]];
+          const retryResult = await supabase.from('profiles').upsert(payload);
+          upsertError = retryResult.error;
+        } else {
+          break;
+        }
+      }
+      error = upsertError;
     }
 
     if (error) {
