@@ -1,10 +1,14 @@
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, X, Calendar, Coins, ChevronRight, Zap } from 'lucide-react';
+import React, { useState, useRef, useMemo } from 'react';
+import { motion } from 'motion/react';
+import { Calendar, MinusCircle, PlusCircle, Zap } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
+import { DejziAvatar } from './DejziSummaryModal';
+import { parseQuickExpense } from '../utils/expenseAiParser';
 import { feedback } from '../utils/feedback';
+
+export { DejziAvatar };
 
 interface GreetingModuleProps {
   userName?: string;
@@ -32,74 +36,34 @@ interface GreetingModuleProps {
   currentPeriodDate?: Date;
   config: any;
   onUpdateConfig?: (newConfig: any) => void;
+  onAddExpense?: () => void;
+  onAddIncome?: () => void;
+  onQuickAddExpense?: (amount: number, note?: string, category?: string) => Promise<void> | void;
+  onOpenCalculator?: () => void;
+  allTransactions?: any[];
   children?: React.ReactNode;
 }
 
-export function DejziAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
-  const sizeClasses = {
-    sm: 'w-7 h-7',
-    md: 'w-9 h-9',
-    lg: 'w-16 h-16',
-  }[size];
-
-  const svgSizes = {
-    sm: 'w-6 h-6',
-    md: 'w-8 h-8',
-    lg: 'w-14 h-14',
-  }[size];
-
-  return (
-    <div className={`relative ${sizeClasses} flex items-center justify-center shrink-0`}>
-      <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/25 via-emerald-400/20 to-cyan-400/25 rounded-full blur-xs animate-pulse" />
-      <motion.div
-        animate={{ y: [0, -2, 0], rotate: [0, 1.5, -1.5, 0] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-        className={`relative ${svgSizes} flex items-center justify-center`}
-      >
-        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm overflow-visible">
-          <defs>
-            <radialGradient id="dejziBody" cx="40%" cy="35%" r="65%">
-              <stop offset="0%" stopColor="#FFFFFF" />
-              <stop offset="40%" stopColor="#FEF08A" />
-              <stop offset="100%" stopColor="#F59E0B" />
-            </radialGradient>
-            <radialGradient id="dejziCheek" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#FB7185" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#FB7185" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <circle cx="50" cy="50" r="38" fill="url(#dejziBody)" stroke="#FFFFFF" strokeWidth="2.5" />
-          <circle cx="35" cy="56" r="6" fill="url(#dejziCheek)" />
-          <circle cx="65" cy="56" r="6" fill="url(#dejziCheek)" />
-          <ellipse cx="40" cy="48" rx="4.5" ry="5.5" fill="#0F172A" />
-          <circle cx="38.5" cy="46" r="1.8" fill="#FFFFFF" />
-          <ellipse cx="60" cy="48" rx="4.5" ry="5.5" fill="#0F172A" />
-          <circle cx="58.5" cy="46" r="1.8" fill="#FFFFFF" />
-          <path d="M 45 58 Q 50 63 55 58" fill="none" stroke="#0F172A" strokeWidth="2.2" strokeLinecap="round" />
-        </svg>
-        <div className="absolute -top-0.5 -right-0.5 text-amber-400 drop-shadow-xs">
-          <Sparkles size={size === 'lg' ? 14 : 9} />
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
 export function GreetingModule({
-  userName,
-  availableForD,
+  availableForD: _availableForD,
   currency,
   date,
   language,
   stats,
   t,
   calendarDays,
-  setSelectedDate: _setSelectedDate,
-  isCurrentPeriod: _isCurrentPeriod,
+  config,
+  onAddExpense,
+  onAddIncome,
+  onQuickAddExpense,
+  _onOpenCalculator,
+  allTransactions = [],
   children
 }: GreetingModuleProps) {
-  const [isDejziModalOpen, setIsDejziModalOpen] = useState(false);
   const isEn = language === 'en';
+  const [quickText, setQuickText] = useState('');
+  const [isSubmittingQuick, setIsSubmittingQuick] = useState(false);
+  const quickInputRef = useRef<HTMLInputElement>(null);
 
   const effectiveRemainingDays = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return stats?.remainingDays || 1;
@@ -116,272 +80,143 @@ export function GreetingModule({
     return stats?.remainingDays || 1;
   }, [calendarDays, date, stats?.remainingDays]);
 
-  const todayDayData = useMemo(() => {
-    if (!calendarDays || calendarDays.length === 0) return null;
-    return calendarDays.find((d: any) => d.isToday) || null;
-  }, [calendarDays]);
+  const handleQuickExpenseSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = quickText.trim();
+    if (!clean || isSubmittingQuick || !onQuickAddExpense) return;
 
-  // Dejzi mascot advice calculation
-  const dejziInfo = useMemo(() => {
-    if (!stats) return null;
+    setIsSubmittingQuick(true);
+    try {
+      const defaultCategory = isEn ? 'Uncategorized' : 'Okategoriserat';
+      const parsed = await parseQuickExpense(
+        clean,
+        config?.categories || [],
+        allTransactions,
+        defaultCategory
+      );
 
-    const spentTodayRound = todayDayData ? Math.round(todayDayData.daySpent || 0) : 0;
-    const remainingToday = Math.round(availableForD || 0);
-    const remainingDaysTotal = stats.remainingDays || 1;
-    const futureDaysLeft = Math.max(0, remainingDaysTotal - 1);
-
-    if (remainingToday < 0) {
-      const overAmount = Math.abs(remainingToday);
-      
-      let detailStr = null;
-      let actionTip = null;
-      if (futureDaysLeft === 0) {
-        detailStr = isEn
-          ? `Payday tomorrow! Hold tight.`
-          : `Lön imorgon! Håll ut sista biten.`;
-        actionTip = isEn ? 'Final stretch before payday!' : 'Sista spurten innan lön!';
-      } else if (futureDaysLeft === 1) {
-        const perDayDecrease = Math.round(overAmount / 1);
-        detailStr = isEn
-          ? `Reduces tomorrow's allowance by ${formatAmount(perDayDecrease, language)} ${currency}.`
-          : `Minskar morgondagen med ${formatAmount(perDayDecrease, language)} ${currency}.`;
-        actionTip = isEn ? 'Tomorrow adjusts automatically.' : 'Morgondagen anpassas automatiskt.';
-      } else {
-        const perDayDecrease = Math.round(overAmount / futureDaysLeft);
-        detailStr = isEn
-          ? `Reduces daily allowance by ${formatAmount(perDayDecrease, language)} ${currency}/day ahead.`
-          : `Dras av med ${formatAmount(perDayDecrease, language)} ${currency}/dag framöver.`;
-        actionTip = isEn
-          ? `Try keeping daily spending under ${formatAmount(Math.max(0, Math.round((stats.remainingPeriodCents || 0) / futureDaysLeft)), language)} ${currency}/day.`
-          : `Försök hålla köpen under ${formatAmount(Math.max(0, Math.round((stats.remainingPeriodCents || 0) / futureDaysLeft)), language)} ${currency}/dag.`;
+      if (parsed.amount && parsed.amount > 0) {
+        await onQuickAddExpense(parsed.amount, parsed.merchant, parsed.category);
+        feedback.success();
+        setQuickText('');
+        setIsQuickExpenseOpen(false);
       }
-
-      return {
-        pillBadge: isEn ? `${formatAmount(overAmount, language)} ${currency} over` : `${formatAmount(overAmount, language)} ${currency} över`,
-        message: isEn
-          ? `You have exceeded today's budget by ${formatAmount(overAmount, language)} ${currency}.`
-          : `Du har överskridit dagens budget med ${formatAmount(overAmount, language)} ${currency}.`,
-        detail: detailStr,
-        actionTip,
-        type: 'warning',
-        spentToday: spentTodayRound,
-        remainingToday,
-        remainingDays: remainingDaysTotal,
-      };
+    } catch (_err) {
+      console.error('Quick expense failed', _err);
+    } finally {
+      setIsSubmittingQuick(false);
     }
-
-    let pillBadge = '';
-    let msg = '';
-    if (spentTodayRound === 0) {
-      pillBadge = isEn ? 'No spending yet' : 'Inget köpt än';
-      msg = isEn
-        ? `No spending yet! You have ${formatAmount(remainingToday, language)} ${currency} left for today.`
-        : `Inga köp gjorda än idag! Du har ${formatAmount(remainingToday, language)} ${currency} kvar att röra dig med.`;
-    } else {
-      pillBadge = isEn ? `${formatAmount(remainingToday, language)} ${currency} left today` : `${formatAmount(remainingToday, language)} ${currency} kvar idag`;
-      msg = isEn
-        ? `You've spent ${formatAmount(spentTodayRound, language)} ${currency} today. You still have ${formatAmount(remainingToday, language)} ${currency} left.`
-        : `Du har spenderat ${formatAmount(spentTodayRound, language)} ${currency} idag. Du har ${formatAmount(remainingToday, language)} ${currency} kvar.`;
-    }
-
-    let detail = null;
-    let actionTip = null;
-    if (remainingToday > 0) {
-      if (futureDaysLeft === 0) {
-        detail = isEn
-          ? `Make it through today to secure a +${formatAmount(remainingToday, language)} ${currency} surplus! 🎉`
-          : `Klarar du dagen får du ett överskott på +${formatAmount(remainingToday, language)} ${currency}! 🎉`;
-        actionTip = isEn ? 'Surplus will be celebrated on payday!' : 'Överskottet firas på lönedagen!';
-      } else if (futureDaysLeft === 1) {
-        const perDayBonus = Math.round(remainingToday / 1);
-        detail = isEn
-          ? `Saving the rest rolls over +${formatAmount(perDayBonus, language)} ${currency} directly to tomorrow!`
-          : `Sparar du resten flyttas +${formatAmount(perDayBonus, language)} ${currency} direkt till morgondagen!`;
-        actionTip = isEn ? 'Keep going to boost tomorrow!' : 'Håll i för att boosta morgondagen!';
-      } else {
-        const perDayBonus = Math.round(remainingToday / futureDaysLeft);
-        detail = isEn
-          ? `Saving the rest adds +${formatAmount(perDayBonus, language)} ${currency}/day to all remaining days.`
-          : `Sparar du resten fördelas +${formatAmount(perDayBonus, language)} ${currency}/dag ut på alla kommande dagar.`;
-        actionTip = isEn
-          ? `Every unspent krona strengthens your daily budget ahead!`
-          : `Varje osparad krona idag stärker din dagsbudget framöver!`;
-      }
-    }
-
-    return {
-      pillBadge,
-      message: msg,
-      detail: detail,
-      actionTip,
-      type: 'success',
-      spentToday: spentTodayRound,
-      remainingToday,
-      remainingDays: remainingDaysTotal,
-    };
-  }, [stats, todayDayData, availableForD, language, currency, isEn]);
+  };
 
   return (
-    <>
-      <div className="space-y-4 sm:space-y-5 font-sans relative">
-        {/* The Premium Main Rounded Card */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4 }}
-          className="pb-1 text-[var(--text-primary)] relative flex flex-col"
-        >
-          <div className="w-full relative flex flex-col pt-1 pb-1">
-            {/* Header Top Row: Left Stats & Right Dejzi Interactive Badge */}
-            <div className="flex items-start justify-between gap-4">
-              {/* Left Side: Totalt kvar */}
-              <div className="flex flex-col text-left justify-center min-w-0">
-                <span className="text-xs font-bold text-[var(--text-secondary)] tracking-wider mb-1.5 block uppercase">
-                  {t('totalRemaining')}
+    <div className="space-y-4 sm:space-y-5 font-sans relative">
+      {/* The Premium Main Rounded Card */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="pb-1 text-[var(--text-primary)] relative flex flex-col"
+      >
+        <div className="w-full relative flex flex-col pt-1 pb-1">
+          {/* Header Top Row: Left Stats & Right Dagar till nästa lön Badge */}
+          <div className="flex items-start justify-between gap-4">
+            {/* Left Side: Totalt kvar */}
+            <div className="flex flex-col text-left justify-center min-w-0">
+              <span className="text-xs font-bold text-[var(--text-secondary)] tracking-wider mb-1.5 block uppercase">
+                {t('totalRemaining')}
+              </span>
+              <div className="flex items-baseline gap-1.5">
+                <AnimatedNumber 
+                  value={stats?.remainingPeriodCents || 0} 
+                  className={`text-[42px] sm:text-[48px] md:text-[54px] leading-none font-black text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
+                    (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : ''
+                  }`}
+                  formatter={(val) => formatAmount(val, language)}
+                />
+                <span className={`text-[20px] sm:text-[22px] font-bold ${
+                  (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
+                }`}>
+                  {currency}
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <AnimatedNumber 
-                    value={stats?.remainingPeriodCents || 0} 
-                    className={`text-[42px] sm:text-[48px] md:text-[54px] leading-none font-black text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
-                      (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : ''
-                    }`}
-                    formatter={(val) => formatAmount(val, language)}
-                  />
-                  <span className={`text-[20px] sm:text-[22px] font-bold ${
-                    (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
-                  }`}>
-                    {currency}
-                  </span>
-                </div>
               </div>
-
-              {/* Right Side: Sleek Integrated Dejzi Assistant Pill Button */}
-              {dejziInfo && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    feedback.tap();
-                    setIsDejziModalOpen(true);
-                  }}
-                  className="group flex items-center gap-2 p-1.5 pr-2.5 sm:pr-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 transition-all cursor-pointer active:scale-95 shrink-0 max-w-[155px] sm:max-w-[185px] shadow-2xs"
-                  title={isEn ? 'Click to see advice from Dejzi' : 'Klicka för råd från Dejzi'}
-                >
-                  <DejziAvatar size="md" />
-                  <div className="flex flex-col items-start min-w-0 text-left">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-500 dark:text-amber-400 leading-none flex items-center gap-1">
-                      Dejzi
-                      <ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform opacity-75" />
-                    </span>
-                    <span className="text-[11px] sm:text-[11.5px] font-semibold text-[var(--text-primary)] truncate max-w-[100px] sm:max-w-[125px] leading-tight mt-0.5">
-                      {dejziInfo.pillBadge}
-                    </span>
-                  </div>
-                </button>
-              )}
             </div>
 
-            {/* Category Budgets Carousel in the bottom of the module */}
-            {children && (
-              <div className="w-full pt-3 mt-4 text-left">
-                {children}
+            {/* Right Side: Dagar till nästa lön */}
+            <div className="flex items-center gap-2 sm:gap-2.5 p-2 px-3 sm:px-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-color)]/70 shrink-0 shadow-2xs">
+              <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--accent-color)] shrink-0">
+                <Calendar size={16} strokeWidth={2.2} />
               </div>
-            )}
+              <div className="flex flex-col items-start min-w-0 text-left">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-80 leading-none">
+                  {isEn ? 'Days to payday' : 'Dagar till nästa lön'}
+                </span>
+                <span className="text-[13px] sm:text-[14px] font-extrabold text-[var(--text-primary)] font-amount tabular-nums leading-tight mt-0.5">
+                  {effectiveRemainingDays} {isEn ? (effectiveRemainingDays === 1 ? 'day' : 'days') : (effectiveRemainingDays === 1 ? 'dag' : 'dagar')}
+                </span>
+              </div>
+            </div>
           </div>
-        </motion.div>
-      </div>
 
-      {/* Dejzi Detailed Advice Modal */}
-      <AnimatePresence>
-        {isDejziModalOpen && dejziInfo && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 12 }}
-              transition={{ duration: 0.2 }}
-              className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[32px] p-6 sm:p-7 w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
+          {/* Middle Row: Single Horizontal Row with Utgift button, Inkomst button, and Snabbutgift input field */}
+          <div className="flex items-center gap-1.5 sm:gap-2 pt-3.5">
+            {/* 1. Utgift Button */}
+            <button
+              type="button"
+              onClick={() => {
+                feedback.tap();
+                onAddExpense?.();
+              }}
+              className="h-11 px-3 sm:px-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 flex items-center justify-center gap-1.5 shrink-0 active:scale-95 shadow-2xs group cursor-pointer text-xs font-bold text-[var(--text-primary)]"
             >
-              {/* Modal Header with Close Button */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <DejziAvatar size="lg" />
-                  <div>
-                    <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
-                      {userName ? `${isEn ? 'Hi' : 'Hej'} ${userName}!` : 'Dejzi'}
-                    </h3>
-                    <p className="text-xs font-semibold text-amber-500 dark:text-amber-400">
-                      {isEn ? 'Your personal budget coach' : 'Din personliga ekonomicoach'}
-                    </p>
-                  </div>
-                </div>
+              <MinusCircle size={16} strokeWidth={2.2} className="text-rose-500 dark:text-rose-400 group-hover:scale-105 transition-transform" />
+              <span>{isEn ? 'Expense' : 'Utgift'}</span>
+            </button>
 
-                <button
-                  type="button"
-                  onClick={() => setIsDejziModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
-                >
-                  <X size={16} />
-                </button>
+            {/* 2. Inkomst Button */}
+            <button
+              type="button"
+              onClick={() => {
+                feedback.tap();
+                onAddIncome?.();
+              }}
+              className="h-11 px-3 sm:px-3.5 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 flex items-center justify-center gap-1.5 shrink-0 active:scale-95 shadow-2xs group cursor-pointer text-xs font-bold text-[var(--text-primary)]"
+            >
+              <PlusCircle size={16} strokeWidth={2.2} className="text-emerald-500 dark:text-emerald-400 group-hover:scale-105 transition-transform" />
+              <span>{isEn ? 'Income' : 'Inkomst'}</span>
+            </button>
+
+            {/* 3. Snabbutgift-rutan */}
+            <form onSubmit={handleQuickExpenseSubmit} className="flex-1 flex items-center gap-1.5 min-w-0">
+              <div className="relative flex-1 min-w-0">
+                <input
+                  ref={quickInputRef}
+                  type="text"
+                  value={quickText}
+                  onChange={(e) => setQuickText(e.target.value)}
+                  placeholder={isEn ? "Quick: 45kr Coop" : "Snabbutgift: t.ex. 45kr ICA"}
+                  className="w-full h-11 px-3 sm:px-3.5 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-color)]/70 text-xs sm:text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-secondary)]/55 focus:border-amber-500 outline-none transition-all shadow-2xs"
+                />
               </div>
-
-              {/* Status & Key Takeaway */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 space-y-1.5">
-                <p className="text-sm font-bold text-[var(--text-primary)] leading-snug">
-                  {dejziInfo.message}
-                </p>
-                {dejziInfo.detail && (
-                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                    {dejziInfo.detail}
-                  </p>
-                )}
-              </div>
-
-              {/* Status Grid Cards */}
-              <div className="grid grid-cols-2 gap-2.5">
-                {/* Dagsbudget kvar */}
-                <div className="p-3.5 rounded-2xl bg-[var(--surface-muted)]/70 border border-[var(--border-color)]/60 flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
-                    <Coins size={13} className="text-amber-500" />
-                    <span>{isEn ? "Today's balance" : 'Dagens saldo'}</span>
-                  </div>
-                  <span className={`text-base font-extrabold font-amount tabular-nums ${dejziInfo.remainingToday < 0 ? 'text-rose-500' : 'text-[var(--text-primary)]'}`}>
-                    {formatAmount(dejziInfo.remainingToday, language)} {currency}
-                  </span>
-                </div>
-
-                {/* Dagar kvar i perioden */}
-                <div className="p-3.5 rounded-2xl bg-[var(--surface-muted)]/70 border border-[var(--border-color)]/60 flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
-                    <Calendar size={13} className="text-emerald-500" />
-                    <span>{isEn ? 'Days to payday' : 'Dagar till lön'}</span>
-                  </div>
-                  <span className="text-base font-extrabold font-amount tabular-nums text-[var(--text-primary)]">
-                    {effectiveRemainingDays} {isEn ? 'days' : 'dagar'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Dejzi Proactive Tip */}
-              {dejziInfo.actionTip && (
-                <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-xs font-medium">
-                  <Zap size={14} className="shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
-                  <span>{dejziInfo.actionTip}</span>
-                </div>
-              )}
-
-              {/* Close / Action Button */}
               <button
-                type="button"
-                onClick={() => setIsDejziModalOpen(false)}
-                className="w-full py-3 px-4 rounded-xl bg-accent text-[var(--text-on-accent)] font-bold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer text-center"
+                type="submit"
+                disabled={!quickText.trim() || isSubmittingQuick}
+                className="h-11 px-3 sm:px-3.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs disabled:opacity-40 active:scale-95 transition-all shrink-0 cursor-pointer flex items-center gap-1 shadow-2xs"
+                title={isEn ? "Save quick expense" : "Spara snabbutgift"}
               >
-                {isEn ? 'Got it, thanks!' : 'Tack Dejzi, jag har koll!'}
+                <Zap size={14} strokeWidth={2.5} />
+                <span className="hidden sm:inline">{isEn ? 'Save' : 'Spara'}</span>
               </button>
-            </motion.div>
+            </form>
           </div>
-        )}
-      </AnimatePresence>
-    </>
+
+          {/* Category Budgets Carousel in the bottom of the module */}
+          {children && (
+            <div className="w-full pt-3 mt-3 text-left">
+              {children}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
   );
 }

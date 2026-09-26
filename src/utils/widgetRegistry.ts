@@ -30,7 +30,7 @@ export const AVAILABLE_WIDGETS: WidgetDefinition[] = [
     descriptionEn: 'Smart one-tap bar to quickly register expenses and incomes.',
     icon: Zap,
     color: '#f43f5e',
-    defaultEnabled: true,
+    defaultEnabled: false,
   },
   {
     id: 'attention_items',

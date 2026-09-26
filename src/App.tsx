@@ -41,6 +41,7 @@ import { LogView } from "./components/LogView";
 import { AnalysisView } from "./components/AnalysisView";
 import { TodayView } from "./components/TodayView";
 import { AppHeader } from "./components/AppHeader";
+import { DejziSummaryModal } from "./components/DejziSummaryModal";
 import { ProfileView } from "./components/ProfileView";
 import { SettingsMainView } from "./components/SettingsMainView";
 import { AddToHomeScreenModal } from "./components/AddToHomeScreenModal";
@@ -303,6 +304,7 @@ export default function App() {
   const [navTrigger, setNavTrigger] = useState(0);
 
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [isDejziSummaryOpen, setIsDejziSummaryOpen] = useState(false);
   const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
@@ -2762,6 +2764,7 @@ export default function App() {
     if (editingTransaction) { setEditingTransaction(null); modalClosed = true; }
     if (viewingTransaction) { handleCloseTransactionView(); modalClosed = true; }
     if (isCalculatorOpen) { setIsCalculatorOpen(false); modalClosed = true; }
+    if (isDejziSummaryOpen) { setIsDejziSummaryOpen(false); modalClosed = true; }
         if (isFeedbackModalOpen) { setIsFeedbackModalOpen(false); modalClosed = true; }
     if (isDeleteAccountModalOpen) { setIsDeleteAccountModalOpen(false); modalClosed = true; }
     if (isSecurityModalOpen) { setIsSecurityModalOpen(false); modalClosed = true; }
@@ -3340,6 +3343,7 @@ export default function App() {
           onOpenSettings={() => handleNavigate("settings")}
           notificationCount={notifications.length}
           onOpenNotifications={() => handleNavigate("notifications")}
+          onOpenDejzi={() => setIsDejziSummaryOpen(true)}
           isDemoMode={isDemoMode}
           language={(config?.language as string) || "sv"}
           activeTab={activeTab}
@@ -3490,6 +3494,7 @@ export default function App() {
                     console.warn("Failed to save updated settings:", err);
                   });
                 }}
+                onOpenCalculator={() => setIsCalculatorOpen(true)}
               />
             </div>
           )}
@@ -4344,6 +4349,24 @@ export default function App() {
             isOpen={isCalculatorOpen}
             onClose={() => setIsCalculatorOpen(false)}
             t={t}
+          />
+        )}
+        {isDejziSummaryOpen && (
+          <DejziSummaryModal
+            isOpen={isDejziSummaryOpen}
+            onClose={() => setIsDejziSummaryOpen(false)}
+            userName={
+              (
+                session?.user?.user_metadata?.full_name ||
+                session?.user?.email?.split("@")[0] ||
+                ""
+              ).split(" ")[0]
+            }
+            stats={stats}
+            calendarDays={calendarDays || []}
+            availableForToday={stats?.availableForD || 0}
+            currency={config?.currency || "kr"}
+            language={(config?.language as string) || "sv"}
           />
         )}
         

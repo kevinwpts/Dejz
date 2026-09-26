@@ -126,6 +126,7 @@ export interface HomeWidgetConfig {
   id: HomeWidgetId;
   enabled: boolean;
   order?: number;
+  size?: 'small' | 'medium' | 'large';
 }
 
 export interface SavingsGoal {

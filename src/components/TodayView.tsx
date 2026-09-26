@@ -20,7 +20,6 @@ import { TransactionItem } from "./TransactionItem";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { BudgetItemLogo } from "./BudgetItem";
-import { QuickExpenseWidget } from "./QuickExpenseWidget";
 import { PeriodTimeline } from "./PeriodTimeline";
 import { MonthlyPulseWidget } from "./widgets/MonthlyPulseWidget";
 import { SavingsGoalsWidget } from "./widgets/SavingsGoalsWidget";
@@ -62,6 +61,7 @@ interface TodayViewProps {
   onViewIncome?: (income: Income) => void;
   onViewMonthlySaving?: (saving: any) => void;
   onUpdateConfig?: (config: Config) => void;
+  onOpenCalculator?: () => void;
 }
 
 export function TodayView({
@@ -94,6 +94,7 @@ export function TodayView({
   onViewIncome,
   onViewMonthlySaving,
   onUpdateConfig,
+  onOpenCalculator,
 }: TodayViewProps) {
   const [isWidgetManagerOpen, setIsWidgetManagerOpen] = useState(false);
   const [isCustomizing, setIsCustomizing] = useState(false);
@@ -314,6 +315,11 @@ export function TodayView({
           currentPeriodDate={currentPeriodDate}
           config={config}
           onUpdateConfig={onUpdateConfig}
+          onAddExpense={() => onAddTransaction(selectedDate)}
+          onAddIncome={() => onAddIncome(selectedDate)}
+          onQuickAddExpense={onQuickAddExpense}
+          onOpenCalculator={onOpenCalculator}
+          allTransactions={allTransactions}
         >
           {/* Category Budgets Carousel - Seamlessly integrated inside the top hero card */}
           {categoryBudgetData.length > 0 ? (
@@ -494,29 +500,6 @@ export function TodayView({
         <AnimatePresence mode="popLayout">
           {resolvedWidgets.map((widgetConfig) => {
             if (!widgetConfig.enabled) return null;
-
-            if (widgetConfig.id === 'quick_expense' && onQuickAddExpense) {
-              return (
-                <motion.div
-                  key="quick_expense"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <QuickExpenseWidget
-                    config={config}
-                    selectedDate={selectedDate}
-                    allTransactions={allTransactions}
-                    onAddExpense={onQuickAddExpense}
-                    onAddIncome={onAddIncome}
-                    onOpenFullExpenseForm={() => onAddTransaction(selectedDate)}
-                    onRemove={() => handleRemoveWidget('quick_expense')}
-                    isCustomizing={isCustomizing}
-                  />
-                </motion.div>
-              );
-            }
 
             if (widgetConfig.id === 'attention_items' && attentionItems.length > 0) {
               return (
@@ -851,6 +834,10 @@ export function TodayView({
         onClose={() => setIsWidgetManagerOpen(false)}
         config={config}
         onSaveWidgets={handleSaveWidgets}
+        stats={stats}
+        selectedDate={selectedDate}
+        allTransactions={allTransactions}
+        attentionItems={attentionItems}
       />
     </motion.div>
   );

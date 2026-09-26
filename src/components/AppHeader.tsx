@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
+import { DejziAvatar } from "./DejziSummaryModal";
 
 interface AppHeaderProps {
   userName?: string;
@@ -11,6 +12,7 @@ interface AppHeaderProps {
   onBack?: () => void;
   notificationCount?: number;
   onOpenNotifications?: () => void;
+  onOpenDejzi?: () => void;
   isDemoMode?: boolean;
   language?: string;
   activeTab?: string;
@@ -26,6 +28,7 @@ export function AppHeader({
   onBack,
   notificationCount = 0,
   onOpenNotifications,
+  onOpenDejzi,
   isDemoMode,
   language: _language = "sv",
   activeTab,
@@ -131,8 +134,24 @@ export function AppHeader({
           </div>
         )}
   
-        {/* Right Actions: Notifications Button (search icon removed) */}
-        <div className="flex items-center shrink-0">
+        {/* Right Actions: Dejzi Coach Button + Notifications Button */}
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          {onOpenDejzi && (
+            <button
+              type="button"
+              onClick={onOpenDejzi}
+              className={`w-10 h-10 sm:w-[42px] sm:h-[42px] rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 ${
+                useWhiteHeader 
+                  ? "text-white/95 hover:bg-white/10" 
+                  : "hover:bg-[var(--surface-muted)]"
+              }`}
+              aria-label="Dejzi sammanfattning"
+              title="Dejzi sammanfattning"
+            >
+              <DejziAvatar size="sm" />
+            </button>
+          )}
+
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
