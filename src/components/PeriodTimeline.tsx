@@ -260,7 +260,7 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-2xl transition-all duration-200 cursor-pointer select-none shrink-0 relative backdrop-blur-md ${
                 isSelected
-                  ? 'bg-[#818cf8]/[0.14] text-white border border-[#8B9CFF]/35 shadow-[0_0_12px_rgba(139,156,255,0.22)] scale-105 font-bold z-10 opacity-100'
+                  ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/35 shadow-[0_2px_6px_rgba(139,156,255,0.08)] scale-105 font-bold z-10 opacity-100'
                   : isRealToday
                   ? 'bg-white/[0.035] text-[#C7CDDC] border border-white/[0.06] hover:bg-white/[0.06] scale-95 opacity-90'
                   : 'bg-white/[0.02] text-[#9CA6BC]/70 hover:text-[#C7CDDC] hover:bg-white/[0.045] border border-white/[0.025] scale-95 opacity-75'

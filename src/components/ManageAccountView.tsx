@@ -207,7 +207,7 @@ export function ManageAccountView({
             </div>
 
             {/* Password */}
-            <Card padding="none" className="overflow-hidden">
+            <Card padding="none" className="overflow-hidden rounded-[24px] bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 shadow-sm">
               <ListRow
                 icon={<Lock size={16} strokeWidth={1.75} />}
                 title={t('changePassword' as any) || 'Ändra lösenord'}
@@ -219,10 +219,10 @@ export function ManageAccountView({
             {/* Connected Accounts */}
             {identities.length > 0 && (
               <div className="space-y-2">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-1 block">
+                <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1.5 opacity-60 block">
                   {t('connectedAccounts' as any) || 'Kopplade konton'}
                 </span>
-                <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/50">
+                <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/30 rounded-[24px] bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 shadow-sm">
                   {identities.map((identity) => (
                     <ListRow
                       key={identity.id}

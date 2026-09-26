@@ -23,15 +23,15 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
     const variantStyles = {
       default:
-        'bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[24px] shadow-sm',
+        'bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 rounded-[24px] shadow-sm',
       hero:
-        'bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[28px] shadow-sm',
+        'bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/70 rounded-[28px] shadow-md',
       nested:
-        'bg-[var(--surface-muted)] border border-[var(--border-color)]/60 rounded-[18px]',
+        'bg-[var(--surface-muted)]/80 backdrop-blur-md border border-[var(--border-color)]/40 rounded-[20px]',
       flat:
-        'bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[20px]',
+        'bg-[var(--surface-color)] backdrop-blur-md border border-[var(--border-color)]/50 rounded-[22px]',
       elevated:
-        'bg-[var(--surface-elevated)] border border-[var(--border-color)] rounded-[28px] shadow-md',
+        'bg-[var(--surface-elevated)] backdrop-blur-xl border border-[var(--border-color)]/70 rounded-[28px] shadow-[0_8px_30px_rgba(0,0,0,0.15)]',
     }[variant];
 
     const paddingStyles = {

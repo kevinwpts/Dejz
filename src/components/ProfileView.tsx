@@ -187,28 +187,28 @@ export function ProfileView({
   const SettingsMenuItem = ({ icon: Icon, label, onClick, rightNode, iconBgColor = "bg-[var(--surface-muted)]", iconTextColor = "text-[var(--text-primary)]" }: { icon: any, label: string, onClick?: () => void, rightNode?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) => (
     <button 
       onClick={onClick}
-      className={`w-full flex items-center justify-between py-3 px-3.5 hover:bg-[var(--surface-muted)]/50 transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
+      className={`w-full flex items-center justify-between py-3.5 px-4 hover:bg-[var(--surface-muted)]/50 transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
     >
-      <div className="flex items-center gap-3 min-w-0">
-        <div className={`w-8 h-8 rounded-[10px] ${iconBgColor} ${iconTextColor} flex items-center justify-center relative shrink-0`}>
+      <div className="flex items-center gap-3.5 min-w-0">
+        <div className={`w-9 h-9 rounded-xl ${iconBgColor} ${iconTextColor} border border-[var(--border-color)]/30 flex items-center justify-center relative shrink-0 shadow-2xs`}>
           <Icon size={16} strokeWidth={1.8} />
         </div>
-        <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate">{label}</span>
+        <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate tracking-tight">{label}</span>
       </div>
-      {rightNode || (onClick && <ChevronRight size={14} strokeWidth={2} className="text-[var(--text-secondary)] group-hover:translate-x-0.5 transition-transform shrink-0" />)}
+      {rightNode || (onClick && <ChevronRight size={15} strokeWidth={2} className="text-[var(--text-secondary)] group-hover:translate-x-0.5 transition-transform shrink-0 opacity-60" />)}
     </button>
   );
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="space-y-5 w-full pb-8"
+      exit={{ opacity: 0, y: -16 }}
+      className="space-y-5 w-full max-w-md mx-auto pb-12 font-sans"
     >
-      {/* User Header */}
-      <div className="flex items-center gap-4 py-1">
-        <div className="relative">
+      {/* User Header Module */}
+      <div className="bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 rounded-[24px] p-5 shadow-sm flex items-center gap-4">
+        <div className="relative shrink-0">
           <label htmlFor="avatar-upload" className="cursor-pointer group block">
             <input 
               type="file" 
@@ -226,11 +226,11 @@ export function ProfileView({
                 }
               }}
             />
-            <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-[18px] flex items-center justify-center overflow-hidden relative bg-[var(--surface-color)] border border-[var(--border-color)]/60 group-hover:border-accent/50 transition-all duration-300 shadow-xs">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-[20px] flex items-center justify-center overflow-hidden relative bg-[var(--surface-muted)] border border-[var(--border-color)]/60 group-hover:border-[var(--accent-color)]/50 transition-all duration-300 shadow-xs">
               {avatarUrl ? (
                 <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-[var(--surface-muted)] text-[var(--text-primary)] text-2xl font-bold">
+                <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-2xl font-bold">
                   {(user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
                 </div>
               )}
@@ -247,7 +247,7 @@ export function ProfileView({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <h3 className="font-bold text-lg text-[var(--text-primary)] truncate tracking-tight">
+            <h3 className="font-bold text-base sm:text-lg text-[var(--text-primary)] truncate tracking-tight">
               {user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('user')}
             </h3>
           </div>
@@ -256,7 +256,7 @@ export function ProfileView({
           </p>
           <button 
             onClick={() => handleSectionClick('manageAccount')}
-            className="px-3 py-1.5 bg-[var(--surface-color)] text-[11px] font-semibold text-[var(--text-primary)] rounded-[10px] border border-[var(--border-color)]/50 hover:bg-[var(--surface-muted)] transition-all flex items-center gap-1.5 w-fit active:scale-95 shadow-2xs cursor-pointer"
+            className="px-3 py-1.5 bg-[var(--surface-muted)]/80 text-[11px] font-semibold text-[var(--text-primary)] rounded-[12px] border border-[var(--border-color)]/40 hover:bg-[var(--surface-muted)] transition-all flex items-center gap-1.5 w-fit active:scale-95 shadow-2xs cursor-pointer"
           >
             {t('manageAccount')}
             <ChevronRight size={11} strokeWidth={2.5} />
@@ -266,23 +266,21 @@ export function ProfileView({
 
       <div className="space-y-4">
         {/* Ekonomi & Budget */}
-        <div className="space-y-1.5">
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] px-1 opacity-60">
+        <div className="space-y-2">
+          <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('economy')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-2xl bg-[var(--surface-color)] shadow-xs">
+          <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-[24px] bg-[var(--surface-color)] backdrop-blur-xl shadow-sm divide-y divide-[var(--border-color)]/30">
             <SettingsMenuItem 
               icon={Calendar} 
               label={t('salary')} 
               onClick={() => handleSectionClick('salary')} 
             />
-            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <SettingsMenuItem 
               icon={Tag} 
               label={t('categories')} 
               onClick={() => handleSectionClick('categories')} 
             />
-            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <SettingsMenuItem 
               icon={CreditCard} 
               label={t('paymentMethod')} 
@@ -292,11 +290,11 @@ export function ProfileView({
         </div>
 
         {/* App Settings */}
-        <div className="space-y-1.5">
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] px-1 opacity-60">
+        <div className="space-y-2">
+          <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('appSettings')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-2xl bg-[var(--surface-color)] shadow-xs">
+          <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-[24px] bg-[var(--surface-color)] backdrop-blur-xl shadow-sm divide-y divide-[var(--border-color)]/30">
             <SettingsMenuItem 
               icon={SlidersHorizontal} 
               label={config.language === 'en' ? 'Allocate Budget' : 'Fördela budget'} 
@@ -304,7 +302,6 @@ export function ProfileView({
               iconTextColor="text-[var(--accent-color)]"
               onClick={() => onNavigate('budget', 'allocate')} 
             />
-            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <SettingsMenuItem 
               icon={Palette} 
               label={t('appearance' as any) || 'Utseende'} 
@@ -320,26 +317,23 @@ export function ProfileView({
                 </div>
               )}
             />
-            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <SettingsMenuItem 
               icon={Globe} 
               label={t('language')} 
               onClick={() => handleSectionClick('language')} 
             />
-            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <SettingsMenuItem 
               icon={Lock} 
               label={t('pinLock')} 
               onClick={onSecurityClick} 
             />
-            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
-            <div className="py-3 px-3.5 space-y-0.5">
+            <div className="py-3.5 px-4 space-y-1">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-[10px] bg-[var(--surface-muted)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)]/30 flex items-center justify-center shrink-0">
                     <Calendar size={16} strokeWidth={1.8} />
                   </div>
-                  <span className="text-[13px] font-semibold text-[var(--text-primary)]">{t('showFixedExpensesInCalendar')}</span>
+                  <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInCalendar')}</span>
                 </div>
                 <ToggleSwitch 
                   isOn={config.showFixedExpensesInCalendar} 
@@ -353,7 +347,7 @@ export function ProfileView({
                   }} 
                 />
               </div>
-              <p className="text-[10.5px] text-[var(--text-secondary)] opacity-70 leading-relaxed pl-11">
+              <p className="text-[11px] text-[var(--text-secondary)] opacity-70 leading-relaxed pl-12">
                 {t('showFixedExpensesInCalendarDesc')}
               </p>
             </div>
@@ -361,71 +355,64 @@ export function ProfileView({
         </div>
 
         {/* Support & Legal */}
-        <div className="space-y-1.5">
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] px-1 opacity-60">
+        <div className="space-y-2">
+          <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('support')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-2xl bg-[var(--surface-color)] shadow-xs">
+          <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-[24px] bg-[var(--surface-color)] backdrop-blur-xl shadow-sm divide-y divide-[var(--border-color)]/30">
             <SettingsMenuItem icon={Mail} label={t('feedback')} onClick={onFeedbackClick} />
-            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <SettingsMenuItem icon={Download} label={t('exportData')} onClick={onExportData} />
-            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <SettingsMenuItem icon={Shield} label={t('privacyPolicy')} onClick={() => onLegalClick('privacy')} />
-            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <SettingsMenuItem icon={FileText} label={t('termsOfService')} onClick={() => onLegalClick('terms')} />
           </div>
         </div>
 
         {/* Account Actions */}
-        <div className="space-y-1.5">
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-danger px-1 opacity-70">
+        <div className="space-y-2">
+          <h4 className="text-[11px] font-bold uppercase tracking-widest text-danger px-1.5 opacity-70">
             {t('dangerZone')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-2xl bg-[var(--surface-color)] shadow-xs">
+          <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-[24px] bg-[var(--surface-color)] backdrop-blur-xl shadow-sm divide-y divide-[var(--border-color)]/30">
             {isDemoMode && (
-              <>
-                <div className="p-3.5 bg-[var(--surface-muted)]/50 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-color)] opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-color)]" />
-                      </span>
-                      <span className="text-xs font-semibold text-[var(--accent-color)]">{t('demoModeActive')}</span>
-                    </div>
+              <div className="p-4 bg-[var(--surface-muted)]/50 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-color)] opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent-color)]" />
+                    </span>
+                    <span className="text-xs font-semibold text-[var(--accent-color)]">{t('demoModeActive')}</span>
                   </div>
-                  <p className="text-[11.5px] text-[var(--text-secondary)] opacity-80 leading-relaxed">
-                    Du utforskar appen med exempeldata. När du är redo kan du avsluta demot för att skapa ett nytt konto eller logga in.
-                  </p>
-                  <button 
-                    onClick={onExitDemo}
-                    className="w-full py-2 px-3.5 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:opacity-90 active:scale-[0.98]"
-                  >
-                    <LogOut size={13} strokeWidth={2} />
-                    <span>{t('exitDemo')}</span>
-                  </button>
                 </div>
-                <div className="h-px bg-[var(--border-color)] opacity-40" />
-              </>
+                <p className="text-[11.5px] text-[var(--text-secondary)] opacity-80 leading-relaxed">
+                  Du utforskar appen med exempeldata. När du är redo kan du avsluta demot för att skapa ett nytt konto eller logga in.
+                </p>
+                <button 
+                  onClick={onExitDemo}
+                  className="w-full py-2.5 px-4 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:opacity-90 active:scale-[0.98]"
+                >
+                  <LogOut size={13} strokeWidth={2} />
+                  <span>{t('exitDemo')}</span>
+                </button>
+              </div>
             )}
             <button 
               onClick={onLogout}
-              className="w-full flex items-center gap-3 py-3 px-3.5 hover:bg-[var(--surface-muted)]/50 transition-all cursor-pointer active:scale-[0.99]"
+              className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-[var(--surface-muted)]/50 transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-8 h-8 rounded-[10px] bg-[var(--surface-muted)] text-[var(--text-secondary)] flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-[var(--surface-muted)] text-[var(--text-secondary)] border border-[var(--border-color)]/30 flex items-center justify-center shrink-0">
                 <LogOut size={16} strokeWidth={1.8} />
               </div>
-              <span className="text-[13px] font-semibold text-[var(--text-primary)]">{t('logout')}</span>
+              <span className="text-[13.5px] font-semibold text-[var(--text-primary)]">{t('logout')}</span>
             </button>
-            <div className="h-px bg-[var(--border-color)] mx-3.5 opacity-40" />
             <button 
               onClick={onDeleteAccount}
-              className="w-full flex items-center gap-3 py-3 px-3.5 hover:bg-danger/5 transition-all cursor-pointer active:scale-[0.99]"
+              className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-danger/5 transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-8 h-8 rounded-[10px] bg-danger/10 text-danger flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-danger/10 text-danger border border-danger/20 flex items-center justify-center shrink-0">
                 <Trash2 size={16} strokeWidth={1.8} />
               </div>
-              <span className="text-[13px] font-semibold text-danger">{t('deleteAccount')}</span>
+              <span className="text-[13.5px] font-semibold text-danger">{t('deleteAccount')}</span>
             </button>
           </div>
         </div>

@@ -309,27 +309,27 @@ export function SettingsView({
         </div>
 
         {/* Pure & Simple Modular list stacked vertically ("under varandra") */}
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           {paydayOptions.map((option) => {
             const isSelected = config.paydayType === option.type;
             return (
               <button
                 key={option.type}
                 onClick={() => handleUpdatePaydayType(option.type)}
-                className={`w-full flex items-center justify-between py-3 px-3.5 rounded-xl border transition-all active:scale-[0.98] cursor-pointer relative ${
+                className={`w-full flex items-center justify-between py-3.5 px-4 rounded-[20px] border backdrop-blur-xl transition-all active:scale-[0.98] cursor-pointer relative ${
                   isSelected 
-                    ? 'bg-accent/5 border-[var(--accent-color)] text-[var(--text-primary)] shadow-xs' 
-                    : 'bg-[var(--surface-color)] border-[var(--border-color)]/30 text-[var(--text-primary)] hover:border-[var(--border-color)]/60'
+                    ? 'bg-accent/10 border-[var(--accent-color)] text-[var(--text-primary)] shadow-xs' 
+                    : 'bg-[var(--surface-color)] border-[var(--border-color)]/50 text-[var(--text-primary)] hover:border-[var(--border-color)]'
                 }`}
               >
-                <span className="text-[13px] font-semibold tracking-tight leading-snug">{option.label}</span>
+                <span className="text-[13.5px] font-semibold tracking-tight leading-snug">{option.label}</span>
                 <div className="relative flex items-center justify-center flex-shrink-0">
                   {isSelected ? (
-                    <div className="w-4 h-4 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
-                      <Check size={10} strokeWidth={3} />
+                    <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
+                      <Check size={11} strokeWidth={3} />
                     </div>
                   ) : (
-                    <div className="w-4 h-4 rounded-full border border-[var(--border-color)]/60 opacity-60" />
+                    <div className="w-5 h-5 rounded-full border border-[var(--border-color)]/60 opacity-60" />
                   )}
                 </div>
               </button>
@@ -347,8 +347,8 @@ export function SettingsView({
               transition={{ duration: 0.2, ease: 'easeOut' }}
               className="overflow-hidden"
             >
-              <div className="bg-[var(--surface-color)] border border-[var(--border-color)]/30 rounded-2xl p-4 mt-1.5 space-y-3">
-                <p className="text-[11px] text-[var(--text-secondary)] text-center font-medium">
+              <div className="bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 rounded-[24px] p-4.5 mt-2 space-y-3 shadow-sm">
+                <p className="text-[11px] text-[var(--text-secondary)] text-center font-semibold uppercase tracking-wider opacity-75">
                   {config.language === 'en' ? 'Select date of the month:' : 'Välj datum i månaden:'}
                 </p>
                 <div className="grid grid-cols-7 gap-1 px-1 justify-items-center max-w-[280px] mx-auto">
@@ -577,30 +577,30 @@ export function SettingsView({
   const renderLanguageSettings = () => (
     <div className="space-y-4 max-w-md mx-auto py-1">
       <SectionHeading icon={Globe} title={(sectionHeaders[config.language || 'sv']?.language || sectionHeaders.sv.language).title} subtitle={(sectionHeaders[config.language || 'sv']?.language || sectionHeaders.sv.language).subtitle} />
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         {Object.entries(languageInfo).map(([code, info]) => {
           const isSelected = config.language === code;
           return (
             <button
                key={code}
                onClick={() => setConfig({ ...config, language: code as Language })}
-               className={`w-full flex items-center justify-between py-3 px-3.5 rounded-xl border transition-all active:scale-[0.98] cursor-pointer relative ${
+               className={`w-full flex items-center justify-between py-3.5 px-4 rounded-[20px] border backdrop-blur-xl transition-all active:scale-[0.98] cursor-pointer relative ${
                  isSelected 
                    ? 'bg-[var(--accent-color)]/10 border-[var(--accent-color)] text-[var(--text-primary)] shadow-xs' 
-                   : 'bg-[var(--surface-color)] border-[var(--border-color)]/30 text-[var(--text-primary)] hover:border-[var(--border-color)]/60'
+                   : 'bg-[var(--surface-color)] border-[var(--border-color)]/50 text-[var(--text-primary)] hover:border-[var(--border-color)]'
                }`}
              >
-               <div className="flex items-center gap-2.5">
+               <div className="flex items-center gap-3">
                  <LanguageFlag language={code as Language} size="md" />
-                 <span className="text-[13px] font-semibold tracking-tight leading-snug">{info.label}</span>
+                 <span className="text-[13.5px] font-semibold tracking-tight leading-snug">{info.label}</span>
                </div>
                <div className="relative flex items-center justify-center flex-shrink-0">
                  {isSelected ? (
-                   <div className="w-4 h-4 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
-                     <Check size={10} strokeWidth={3} />
+                   <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
+                     <Check size={11} strokeWidth={3} />
                    </div>
                  ) : (
-                   <div className="w-4 h-4 rounded-full border border-[var(--border-color)]/60 opacity-60" />
+                   <div className="w-5 h-5 rounded-full border border-[var(--border-color)]/60 opacity-60" />
                  )}
                </div>
              </button>
