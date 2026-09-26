@@ -119,7 +119,7 @@ export function AppHeader({
               {/* Profile Avatar Trigger Button */}
               <button
                 onClick={() => onNavigate("profile")}
-                className={`w-[34px] h-[34px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-[var(--border-color)]/60 shadow-2xs ${
+                className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-[var(--border-color)]/70 shadow-2xs ${
                   activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
                 } ${
                   useWhiteHeader 
@@ -136,7 +136,7 @@ export function AppHeader({
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <User size={17} strokeWidth={2.2} />
+                  <User size={19} strokeWidth={2.2} />
                 )}
               </button>
             </>
@@ -155,11 +155,11 @@ export function AppHeader({
             <button
               type="button"
               onClick={() => onNavigate("search")}
-              className="w-full h-9 sm:h-9.5 px-3 rounded-full flex items-center gap-2 bg-[var(--surface-color)]/90 hover:bg-[var(--surface-color)] dark:bg-white/6 dark:hover:bg-white/10 border border-[var(--border-color)]/80 hover:border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer shadow-2xs group text-left select-none"
+              className="w-full h-10 sm:h-[42px] px-3.5 sm:px-4 rounded-full flex items-center gap-2.5 bg-[var(--surface-color)]/95 hover:bg-[var(--surface-color)] dark:bg-white/7 dark:hover:bg-white/11 border border-[var(--border-color)]/80 hover:border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer shadow-2xs group text-left select-none"
               aria-label="Sök"
             >
-              <Search size={15} strokeWidth={2.2} className="shrink-0 text-[var(--text-secondary)]/70 group-hover:text-[var(--accent-color)] transition-colors" />
-              <span className="text-[13px] sm:text-[13.5px] font-medium text-[var(--text-secondary)]/70 group-hover:text-[var(--text-secondary)] transition-colors truncate">
+              <Search size={17} strokeWidth={2.2} className="shrink-0 text-[var(--text-secondary)]/75 group-hover:text-[var(--accent-color)] transition-colors" />
+              <span className="text-[14px] sm:text-[14.5px] font-medium text-[var(--text-secondary)]/75 group-hover:text-[var(--text-secondary)] transition-colors truncate">
                 {_language === 'en' ? 'Search' : 'Sök'}
               </span>
             </button>
@@ -171,7 +171,7 @@ export function AppHeader({
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 ${
+              className={`w-10 h-10 sm:w-[42px] sm:h-[42px] rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 ${
                 useWhiteHeader 
                   ? "text-white/95 hover:bg-white/10" 
                   : "text-[var(--text-primary)] hover:bg-[var(--surface-muted)]"
@@ -179,7 +179,7 @@ export function AppHeader({
               aria-label="Notiser"
             >
               <Bell
-                size={20}
+                size={22}
                 strokeWidth={2.2}
               />
               {notificationCount > 0 && (
