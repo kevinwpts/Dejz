@@ -23,15 +23,15 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
     const variantStyles = {
       default:
-        'bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 rounded-[24px] shadow-sm',
+        'bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[24px] shadow-none',
       hero:
-        'bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/70 rounded-[28px] shadow-md',
+        'bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] border border-[var(--border-color)]/70 dark:border-white/[0.03] rounded-[28px] shadow-none',
       nested:
-        'bg-[var(--surface-muted)]/80 backdrop-blur-md border border-[var(--border-color)]/40 rounded-[20px]',
+        'bg-[var(--surface-muted)]/80 dark:bg-white/[0.02] backdrop-blur-md border border-[var(--border-color)]/40 dark:border-white/[0.02] rounded-[20px]',
       flat:
-        'bg-[var(--surface-color)] backdrop-blur-md border border-[var(--border-color)]/50 rounded-[22px]',
+        'bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-md border border-[var(--border-color)]/50 dark:border-white/[0.025] rounded-[22px]',
       elevated:
-        'bg-[var(--surface-elevated)] backdrop-blur-xl border border-[var(--border-color)]/70 rounded-[28px] shadow-[0_8px_30px_rgba(0,0,0,0.15)]',
+        'bg-[var(--surface-elevated)] dark:bg-white/[0.035] backdrop-blur-[18px] border border-[var(--border-color)]/70 dark:border-white/[0.035] rounded-[28px] shadow-none',
     }[variant];
 
     const paddingStyles = {
