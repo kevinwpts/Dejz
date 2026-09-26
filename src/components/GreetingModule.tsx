@@ -76,15 +76,29 @@ export function GreetingModule({
     isEn,
     onTextUpdate: (text) => setQuickText(text),
     onSuccess: async (result) => {
-      if (onQuickAddExpense && result.amount > 0) {
-        await onQuickAddExpense(result.amount, result.merchant, result.category);
-        feedback.success();
-        setSuccessMsg({
-          text: `${isEn ? 'Added' : 'Lade till'} ${result.amount} ${currency} (${result.merchant}) ✨`,
-          transcript: result.transcript,
-        });
-        setQuickText('');
-        setTimeout(() => setSuccessMsg(null), 3500);
+      if (onQuickAddExpense && result.items && result.items.length > 0) {
+        let totalAdded = 0;
+        const summaryItems: string[] = [];
+
+        for (const item of result.items) {
+          if (item.amount > 0) {
+            await onQuickAddExpense(item.amount, item.merchant, item.category);
+            totalAdded++;
+            summaryItems.push(`${item.merchant} (${item.amount} ${currency})`);
+          }
+        }
+
+        if (totalAdded > 0) {
+          feedback.success();
+          setSuccessMsg({
+            text: totalAdded === 1
+              ? `${isEn ? 'Added' : 'Lade till'} ${summaryItems[0]} ✨`
+              : `${isEn ? 'Added' : 'Lade till'} ${totalAdded} ${isEn ? 'expenses' : 'utgifter'}: ${summaryItems.join(', ')} ✨`,
+            transcript: result.transcript,
+          });
+          setQuickText('');
+          setTimeout(() => setSuccessMsg(null), 4500);
+        }
       }
     }
   });

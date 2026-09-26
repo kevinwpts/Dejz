@@ -312,21 +312,37 @@ async function startServer() {
                   data: audioBase64
                 }
               },
-              `Lyssna mycket noga på ljudklippet. En person pratar in ett köp eller utgift/inkomst (på svenska eller engelska).
-              Även om personen mumlar, pratar snabbt, otydligt eller i bakgrundsbuller: förstå vad personen köpt och för hur mycket.
+              `Lyssna mycket noga på ljudklippet. En person pratar in ett eller FLERA köp eller utgifter/inkomster (på svenska eller engelska).
+              Även om personen mumlar, pratar snabbt, otydligt eller i bakgrundsbuller: förstå alla köp och belopp som nämns.
 
-              Exempel på vad personen kan säga:
-              - "300 kronor på coop" -> transcript: "300 kronor på Coop", amount: 300, name: "Coop", category: "Mat", type: "expense"
-              - "köpt fika för fyrtiofem spänn" -> transcript: "köpt fika för 45 spänn", amount: 45, name: "Fika", category: "Mat", type: "expense"
-              - "tankat femhundra kronor circle k" -> transcript: "tankat 500 kronor Circle K", amount: 500, name: "Circle K", category: "Transport", type: "expense"
-              - "swish från mikael femtiokronor" -> transcript: "swish från Mikael 50kr", amount: 50, name: "Swish Mikael", category: "Inkomst", type: "income"
+              VIKTIGT: Om personen nämner FLERA köp i samma inspelning (t.ex. "300kr på coop och 700kr på XXL Sport" eller "fika 45 spänn och bensin 300kr"), ska du skapa ETT EGET objekt i listan 'items' för VARJE enskilt köp!
+
+              Exempel:
+              - "300 kronor på coop" -> 
+                transcript: "300 kronor på Coop", 
+                items: [{ amount: 300, name: "Coop", category: "Mat", type: "expense" }]
+
+              - "300kr på coop och 700kr på XXL Sport" -> 
+                transcript: "300kr på coop och 700kr på XXL Sport", 
+                items: [
+                  { amount: 300, name: "Coop", category: "Mat", type: "expense" },
+                  { amount: 700, name: "XXL Sport", category: "Shopping", type: "expense" }
+                ]
+
+              - "fika 45kr och lön 20000kr" -> 
+                transcript: "fika 45kr och lön 20000kr", 
+                items: [
+                  { amount: 45, name: "Fika", category: "Mat", type: "expense" },
+                  { amount: 20000, name: "Lön", category: "Inkomst", type: "income" }
+                ]
 
               Returnera ETT JSON-objekt med:
-              - transcript: string (exakt vad personen sa eller den tolkade meningen)
-              - amount: number (beloppet i sifferform, t.ex. 150)
-              - name: string (butik, ställe eller beskrivning av köpet)
-              - category: string (lämplig kategori som: Mat, Transport, Shopping, Nöje, Hälsa, Boende, Övrigt)
-              - type: "expense" eller "income"
+              - transcript: string (exakt vad personen sa)
+              - items: en lista med ett eller flera objekt. Varje objekt har:
+                - amount: number (beloppet i siffror)
+                - name: string (butik, ställe eller beskrivning av köpet)
+                - category: string (lämplig kategori som: Mat, Transport, Shopping, Nöje, Hälsa, Boende, Övrigt, Inkomst)
+                - type: "expense" eller "income"
               `
             ],
             config: {
@@ -335,12 +351,21 @@ async function startServer() {
                 type: Type.OBJECT,
                 properties: {
                   transcript: { type: Type.STRING },
-                  amount: { type: Type.NUMBER },
-                  name: { type: Type.STRING },
-                  category: { type: Type.STRING },
-                  type: { type: Type.STRING, enum: ["expense", "income"] }
+                  items: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        amount: { type: Type.NUMBER },
+                        name: { type: Type.STRING },
+                        category: { type: Type.STRING },
+                        type: { type: Type.STRING, enum: ["expense", "income"] }
+                      },
+                      required: ["amount", "name", "type"]
+                    }
+                  }
                 },
-                required: ["transcript", "amount", "name", "type"]
+                required: ["transcript", "items"]
               }
             }
           });
@@ -351,12 +376,24 @@ async function startServer() {
           const cleanJson = responseText.replace(/```json\n?|\n?```/g, '').trim();
           const data = JSON.parse(cleanJson);
 
-          if (typeof data.amount !== 'number' || isNaN(data.amount)) {
-            if (typeof data.amount === 'string') {
-              data.amount = parseFloat(data.amount.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
-            } else {
-              data.amount = 0;
-            }
+          // Clean up items
+          if (Array.isArray(data.items)) {
+            data.items = data.items.map((item: any) => ({
+              amount: typeof item.amount === 'number' && !isNaN(item.amount) ? item.amount : (parseFloat(String(item.amount).replace(/[^\d.,]/g, '').replace(',', '.')) || 0),
+              name: item.name || 'Köpt',
+              category: item.category || 'Övrigt',
+              type: item.type === 'income' ? 'income' : 'expense'
+            }));
+          } else {
+            data.items = [];
+          }
+
+          // Backwards compatibility if single item requested
+          if (data.items.length > 0) {
+            data.amount = data.items[0].amount;
+            data.name = data.items[0].name;
+            data.category = data.items[0].category;
+            data.type = data.items[0].type;
           }
 
           return res.json(data);

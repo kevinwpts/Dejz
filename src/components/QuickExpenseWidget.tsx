@@ -217,27 +217,50 @@ export function QuickExpenseWidget({
 
         if (res.ok) {
           const data = await res.json();
-          if (data && data.amount > 0) {
-            // Auto add expense
-            await onAddExpense(data.amount, data.name || 'Röstinlägg', data.category || defaultCategory);
-            feedback.success();
+          if (data && ((Array.isArray(data.items) && data.items.length > 0) || data.amount > 0)) {
+            const itemsToAdd = Array.isArray(data.items) && data.items.length > 0
+              ? data.items
+              : [{ amount: data.amount, name: data.name, category: data.category, type: data.type }];
 
-            setSuccessInfo({
-              amount: data.amount,
-              merchant: data.name || 'Röstinlägg',
-              category: data.category || defaultCategory,
-              transcript: data.transcript,
-            });
+            let totalAdded = 0;
+            const addedSummary: string[] = [];
 
-            setInputText('');
-            setRecordingStatusText(null);
-            setIsAudioTranscribing(false);
+            for (const item of itemsToAdd) {
+              if (item.amount > 0) {
+                await onAddExpense(item.amount, item.name || 'Röstinlägg', item.category || defaultCategory);
+                totalAdded++;
+                addedSummary.push(`${item.name || 'Utgift'} (${item.amount} ${config.currency || 'kr'})`);
+              }
+            }
 
-            setTimeout(() => {
-              setSuccessInfo(null);
-            }, 3500);
+            if (totalAdded > 0) {
+              feedback.success();
+              if (itemsToAdd.length === 1) {
+                setSuccessInfo({
+                  amount: itemsToAdd[0].amount,
+                  merchant: itemsToAdd[0].name || 'Röstinlägg',
+                  category: itemsToAdd[0].category || defaultCategory,
+                  transcript: data.transcript,
+                });
+              } else {
+                setSuccessInfo({
+                  amount: itemsToAdd.reduce((acc: number, i: any) => acc + (i.amount || 0), 0),
+                  merchant: `${totalAdded} utgifter: ${addedSummary.join(', ')}`,
+                  category: 'Flera',
+                  transcript: data.transcript,
+                });
+              }
 
-            return;
+              setInputText('');
+              setRecordingStatusText(null);
+              setIsAudioTranscribing(false);
+
+              setTimeout(() => {
+                setSuccessInfo(null);
+              }, 4500);
+
+              return;
+            }
           } else if (data && data.transcript) {
             setInputText(data.transcript);
           }

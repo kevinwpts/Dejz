@@ -1,9 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { feedback } from '../utils/feedback';
 
+interface VoiceExpenseResultItem {
+  amount: number;
+  merchant: string;
+  category: string;
+  type?: 'expense' | 'income';
+}
+
 interface UseVoiceExpenseOptions {
   isEn?: boolean;
-  onSuccess?: (result: { amount: number; merchant: string; category: string; transcript?: string }) => void;
+  onSuccess?: (result: { items: VoiceExpenseResultItem[]; transcript?: string }) => void;
   onTextUpdate?: (text: string) => void;
 }
 
@@ -176,12 +183,31 @@ export function useVoiceExpense({ isEn = false, onSuccess, onTextUpdate }: UseVo
           setIsAudioTranscribing(false);
           setStatusText(null);
 
-          if (data && data.amount > 0) {
+          const itemsToProcess: VoiceExpenseResultItem[] = [];
+          if (Array.isArray(data.items) && data.items.length > 0) {
+            for (const item of data.items) {
+              if (item.amount > 0) {
+                itemsToProcess.push({
+                  amount: item.amount,
+                  merchant: item.name || 'Röstinlägg',
+                  category: item.category || (isEn ? 'Uncategorized' : 'Okategoriserat'),
+                  type: item.type,
+                });
+              }
+            }
+          } else if (data && data.amount > 0) {
+            itemsToProcess.push({
+              amount: data.amount,
+              merchant: data.name || 'Röstinlägg',
+              category: data.category || (isEn ? 'Uncategorized' : 'Okategoriserat'),
+              type: data.type,
+            });
+          }
+
+          if (itemsToProcess.length > 0) {
             if (onSuccess) {
               onSuccess({
-                amount: data.amount,
-                merchant: data.name || 'Röstinlägg',
-                category: data.category || (isEn ? 'Uncategorized' : 'Okategoriserat'),
+                items: itemsToProcess,
                 transcript: data.transcript,
               });
             }
