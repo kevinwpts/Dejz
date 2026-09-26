@@ -272,9 +272,36 @@ export function TodayView({
           color: cat.color,
           iconName,
           index,
+          pinned: !!cat.pinned,
+          pinOrder: cat.pinOrder !== undefined ? Number(cat.pinOrder) : 9999,
         };
       })
-      .filter((cat) => cat.budgetInKronor > 0 || cat.spent > 0);
+      .filter((cat) => cat.budgetInKronor > 0)
+      .sort((a, b) => {
+        // 1. PINNED CATEGORIES FIRST
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        if (a.pinned && b.pinned) {
+          return a.pinOrder - b.pinOrder;
+        }
+
+        // Neither is pinned - compare percentages spent
+        const aPct = a.budgetInKronor > 0 ? a.spent / a.budgetInKronor : 0;
+        const bPct = b.budgetInKronor > 0 ? b.spent / b.budgetInKronor : 0;
+
+        // 2. OVER BUDGET
+        const aOver = a.isOverBudget;
+        const bOver = b.isOverBudget;
+        if (aOver && !bOver) return -1;
+        if (!aOver && bOver) return 1;
+        if (aOver && bOver) {
+          // Both are over - sort by percentage over budget descending
+          return bPct - aPct;
+        }
+
+        // 3. HIGHEST PERCENT SPENT DESCENDING (e.g. 93% before 10%)
+        return bPct - aPct;
+      });
   }, [stats, config?.categories]);
 
   if (!stats) return null;

@@ -131,8 +131,14 @@ export function AnalysisView({
         );
         
         const icon = cat?.icon || getCategoryIconName(name);
-        return { name, value, color: cat?.color, icon, budget: cat?.budget };
+        const budgetValue = cat?.budget !== undefined && cat?.budget !== null 
+          ? Number(String(cat.budget).replace(/[^0-9.]/g, "")) 
+          : 0;
+        const budgetInKronor = !isNaN(budgetValue) && budgetValue > 0 ? Math.round(budgetValue) : 0;
+
+        return { name, value, color: cat?.color, icon, budget: cat?.budget, budgetInKronor };
       })
+      .filter(item => item.value > 0)
       .sort((a, b) => b.value - a.value);
       
     return { 
@@ -346,7 +352,6 @@ export function AnalysisView({
                   });
 
               const totalItemCount = categoryTransactions.length + categoryFixedExpenses.length;
-              const percentOfTotal = totalSpent > 0 ? Math.round((item.value / totalSpent) * 100) : 0;
 
               return (
                 <div key={item.name} className="transition-colors">
@@ -380,10 +385,6 @@ export function AnalysisView({
                           <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden text-[#9CA6BC]">
                             <span className="text-xs font-normal">
                               {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
-                            </span>
-                            <span className="text-white/20">·</span>
-                            <span className="text-xs font-normal text-[#9CA6BC]">
-                              {percentOfTotal}% {config.language === 'en' ? 'of total' : 'av totalt'}
                             </span>
                           </div>
                         </div>

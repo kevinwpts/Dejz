@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, ArrowLeft, Check, Sparkles, RotateCcw, Plus } from 'lucide-react';
+import { RefreshCw, ArrowLeft, Check, Sparkles, RotateCcw, Plus, Pin, ChevronUp, ChevronDown } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -222,6 +222,72 @@ export function BudgetView({
   
 
 
+  const togglePinCategory = (categoryName: string) => {
+    const cats = config.categories || [];
+    const target = cats.find(c => c.name === categoryName);
+    if (!target) return;
+
+    const isPinned = !target.pinned;
+    
+    let nextOrder = 0;
+    if (isPinned) {
+      const pinnedCats = cats.filter(c => c.pinned);
+      nextOrder = pinnedCats.length > 0 ? Math.max(...pinnedCats.map(c => c.pinOrder || 0)) + 1 : 0;
+    }
+
+    const updated = cats.map(c => {
+      if (c.name === categoryName) {
+        return { ...c, pinned: isPinned, pinOrder: isPinned ? nextOrder : undefined };
+      }
+      return c;
+    });
+
+    setConfig({ ...config, categories: updated });
+  };
+
+  const movePinnedCategory = (categoryName: string, direction: "up" | "down") => {
+    const cats = [...(config.categories || [])];
+    const pinnedCats = cats
+      .filter(c => c.pinned)
+      .sort((a, b) => (a.pinOrder || 0) - (b.pinOrder || 0));
+
+    const index = pinnedCats.findIndex(c => c.name === categoryName);
+    if (index === -1) return;
+
+    if (direction === "up" && index > 0) {
+      const current = pinnedCats[index];
+      const prev = pinnedCats[index - 1];
+      const tempOrder = current.pinOrder || 0;
+      current.pinOrder = prev.pinOrder || 0;
+      prev.pinOrder = tempOrder;
+    } else if (direction === "down" && index < pinnedCats.length - 1) {
+      const current = pinnedCats[index];
+      const next = pinnedCats[index + 1];
+      const tempOrder = current.pinOrder || 0;
+      current.pinOrder = next.pinOrder || 0;
+      next.pinOrder = tempOrder;
+    }
+
+    const updated = cats.map(c => {
+      const match = pinnedCats.find(p => p.name === c.name);
+      if (match) {
+        return { ...c, pinned: true, pinOrder: match.pinOrder };
+      }
+      return c;
+    });
+
+    setConfig({ ...config, categories: updated });
+  };
+
+  const sortedCategoriesForManage = [...(config.categories || [])].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    if (a.pinned && b.pinned) {
+      return (a.pinOrder || 0) - (b.pinOrder || 0);
+    }
+    return 0;
+  });
+
   if (showCategoryBudgets) {
     return (
       <motion.div
@@ -339,7 +405,7 @@ export function BudgetView({
           </span>
           
           <div className="overflow-hidden border border-white/[0.03] rounded-3xl bg-[#14141E]/50 backdrop-blur-xl shadow-none divide-y divide-white/[0.03]">
-            {[...(config.categories || [])].map((cat) => {
+            {sortedCategoriesForManage.map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
               const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
@@ -371,7 +437,50 @@ export function BudgetView({
                 >
                   <div className="flex items-center justify-between gap-3 w-full">
                     {/* Left: Icon & Name & Fixed label */}
-                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      {/* Pin button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePinCategory(cat.name);
+                        }}
+                        className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer flex items-center justify-center shrink-0 ${
+                          cat.pinned 
+                            ? "bg-indigo-500/15 text-indigo-400 border border-indigo-500/30" 
+                            : "bg-white/[0.02] text-[#9CA6BC] hover:text-white border border-transparent hover:border-white/[0.05]"
+                        }`}
+                        title={cat.pinned ? "Avfäst från Hem" : "Fäst på Hem"}
+                      >
+                        <Pin size={12} className={cat.pinned ? "fill-indigo-400" : ""} />
+                      </button>
+
+                      {/* Reorder up/down buttons */}
+                      {cat.pinned && (
+                        <div className="flex flex-col gap-0.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              movePinnedCategory(cat.name, "up");
+                            }}
+                            className="p-1 rounded hover:bg-white/[0.06] text-[#9CA6BC] hover:text-white transition-all cursor-pointer active:scale-75"
+                          >
+                            <ChevronUp size={11} strokeWidth={2.5} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              movePinnedCategory(cat.name, "down");
+                            }}
+                            className="p-1 rounded hover:bg-white/[0.06] text-[#9CA6BC] hover:text-white transition-all cursor-pointer active:scale-75"
+                          >
+                            <ChevronDown size={11} strokeWidth={2.5} />
+                          </button>
+                        </div>
+                      )}
+
                       <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.035] text-[var(--text-primary)] flex items-center justify-center shrink-0">
                         {isEmojiString(iconName) ? (
                           <span className="text-base leading-none">{iconName}</span>

@@ -37,6 +37,8 @@ export interface Category {
   icon: string;
   color?: string;
   budget?: number;
+  pinned?: boolean;
+  pinOrder?: number;
 }
 
 export interface QuickChoice {
