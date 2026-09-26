@@ -129,6 +129,18 @@ export const dataService = {
   async saveSettings(userId: string, config: Config) {
     if (userId === 'demo-user') {
       localStorage.setItem('demo_settings', JSON.stringify(config));
+      // Also sync to demo_profile so categories and income_categories are correctly reflected in getProfile!
+      const savedProfile = localStorage.getItem('demo_profile');
+      if (savedProfile) {
+        try {
+          const profile = JSON.parse(savedProfile);
+          profile.categories = config.categories;
+          profile.income_categories = config.incomeCategories;
+          localStorage.setItem('demo_profile', JSON.stringify(profile));
+        } catch (_e) {
+          console.error("Failed to sync demo_profile:", _e);
+        }
+      }
       return;
     }
 

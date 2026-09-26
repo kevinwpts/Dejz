@@ -541,7 +541,7 @@ export function BudgetView({
                               const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
                               const updatedCategories = (config.categories || []).map((c) => {
                                 if (c.name === cat.name) {
-                                  return { ...c, budget: finalVal > 0 ? finalVal : undefined };
+                                  return { ...c, budget: finalVal > 0 ? finalVal : null };
                                 }
                                 return c;
                               });
@@ -551,14 +551,6 @@ export function BudgetView({
                             onChange={(e) => {
                               const val = e.target.value.replace(/\D/g, "");
                               setInlineInputValue(val);
-                              const numericVal = Number(val) || 0;
-                              const updatedCategories = (config.categories || []).map((c) => {
-                                if (c.name === cat.name) {
-                                  return { ...c, budget: numericVal > 0 ? numericVal : undefined };
-                                }
-                                return c;
-                              });
-                              setConfig({ ...config, categories: updatedCategories });
                             }}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") {
