@@ -48,7 +48,7 @@ export function BudgetView({
   _onResetSavingsPot,
   t,
   currentPeriodId,
-  isDemoMode,
+  _isDemoMode,
   initialSection,
   onClearSection
 }: BudgetViewProps) {
@@ -59,7 +59,6 @@ export function BudgetView({
   const [initialCategoryNames, setInitialCategoryNames] = React.useState<string[]>([]);
 
   const handleOpenCategoryBudgets = () => {
-
     const getCatBudgetPct = (c: any) => {
       if (c.budget === undefined || c.budget === null) return 0;
       return Number(c.budget) || 0;
@@ -92,10 +91,6 @@ export function BudgetView({
       : (Number(item.amount) || 0);
     return sum + amount;
   }, 0) || 0) + (Number(config.monthlySavings) || 0);
-  const _totalOut = (stats?.totalFixed || 0) + totalSavings;
-  const _retentionRate = (stats?.totalIncome || 0) > 0 ? ((stats?.remainingPeriodCents || 0) / stats!.totalIncome) * 100 : 0;
-  const _expensesPercent = (stats?.totalIncome || 0) > 0 ? ((stats?.totalFixed || 0) / stats!.totalIncome) * 100 : 0;
-  const _savingsPercent = (stats?.totalIncome || 0) > 0 ? (totalSavings / stats!.totalIncome) * 100 : 0;
 
   const [fixedSortBy, setFixedSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
 
@@ -138,174 +133,118 @@ export function BudgetView({
     if (!stats || !stats.periodTransactions) return 0;
     let sum = 0;
     stats.periodTransactions.forEach((t: any) => {
-      if (t.category === 'Spargris') return;
-      const splits = t.splits;
-      if (splits && splits.length > 0) {
-        splits.forEach((s: any) => {
-          if (s.category?.trim().toLowerCase() === catName.trim().toLowerCase()) {
-            sum += (Number(s.amount) || 0);
-          }
-        });
-      } else if (t.category?.trim().toLowerCase() === catName.trim().toLowerCase()) {
+      if (t.category?.trim().toLowerCase() === catName.trim().toLowerCase()) {
         sum += (Number(t.amount) || 0);
       }
     });
     return sum;
   };
 
-  const totalBudgetPot = Math.max(
-    0,
-    (stats?.disposablePot !== undefined && stats?.disposablePot !== null)
-      ? stats.disposablePot
-      : ((stats?.totalIncome || 0) - (stats?.totalFixed || 0) - totalSavings)
+  const totalBudgetPot = stats?.periodBudgetCents ? stats.periodBudgetCents / 100 : (stats?.disposablePot || 0);
+
+  const getCategoryBudgetPct = (cat: any) => {
+    if (cat.budget === undefined || cat.budget === null) return 0;
+    return Number(cat.budget) || 0;
+  };
+
+  const getCategoryBudgetKr = (cat: any) => {
+    const pct = getCategoryBudgetPct(cat);
+    return Math.round((totalBudgetPot * pct) / 100);
+  };
+
+  const totalAllocatedPercentage = (config.categories || []).reduce(
+    (sum, c) => sum + getCategoryBudgetPct(c),
+    0
   );
-
-  const getCategoryBudgetPct = (c: any): number => {
-    if (c.budget === undefined || c.budget === null) return 0;
-    if (c.budget > 100) {
-      return totalBudgetPot > 0 ? Math.round((c.budget / totalBudgetPot) * 100) : 0;
-    }
-    return Math.max(0, Math.min(100, Math.round(Number(c.budget) || 0)));
-  };
-
-  const getCategoryBudgetKr = (c: any): number => {
-    const pct = getCategoryBudgetPct(c);
-    return totalBudgetPot > 0 ? Math.round((pct / 100) * totalBudgetPot) : 0;
-  };
-
-  const totalAllocatedPercentage = (config.categories || []).reduce((sum, c) => {
-    return sum + getCategoryBudgetPct(c);
-  }, 0);
-
-  const totalAllocatedKronor = totalBudgetPot > 0 
-    ? Math.round((totalAllocatedPercentage / 100) * totalBudgetPot) 
-    : 0;
-
+  const totalAllocatedKronor = Math.round((totalBudgetPot * totalAllocatedPercentage) / 100);
   const remainingPercentage = 100 - totalAllocatedPercentage;
-  const remainingToAllocate = totalBudgetPot - totalAllocatedKronor;
+  const remainingToAllocate = Math.round((totalBudgetPot * remainingPercentage) / 100);
 
   const handleDistributeEvenly = () => {
-    const categories = config.categories || [];
-    if (categories.length === 0) return;
-
-    // Distribute 100% evenly across categories
-    const count = categories.length;
-    const basePct = Math.floor(100 / count);
-    const remainder = 100 - (basePct * count);
-
-    const updatedCategories = categories.map((c, idx) => ({
-      ...c,
-      budget: basePct + (idx === 0 ? remainder : 0),
-    }));
-
+    const cats = config.categories || [];
+    if (cats.length === 0) return;
+    const basePct = Math.floor(100 / cats.length);
+    let remainder = 100 - basePct * cats.length;
+    const updatedCategories = cats.map((c) => {
+      const added = remainder > 0 ? 1 : 0;
+      if (remainder > 0) remainder--;
+      return { ...c, budget: basePct + added };
+    });
     setConfig({ ...config, categories: updatedCategories });
   };
-
-  if (!stats) return null;
 
   if (showCategoryBudgets) {
     return (
       <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        className="space-y-4"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="space-y-6 font-sans"
       >
-        {/* Header with back button */}
-        <div className="flex items-center justify-between">
+        {/* Top Header */}
+        <div className="flex items-center justify-between px-1">
           <button
+            type="button"
             onClick={handleCloseCategoryBudgets}
-            className="h-9 px-3.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-color)] text-[12px] font-bold text-[var(--text-primary)] hover:bg-[var(--surface-muted)] flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 text-xs font-medium text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
           >
-            <ArrowLeft size={14} />
-            Tillbaka
+            <ArrowLeft size={16} strokeWidth={2} />
+            <span>Tillbaka</span>
           </button>
-          <h2 className="text-[15px] font-bold text-[var(--text-primary)] tracking-tight">
-            Fördela din vardagsbudget
-          </h2>
-          <div className="w-[85px]" /> {/* Spacer for visual balance */}
+          <span className="text-sm font-semibold text-white">
+            Fördela vardagsbudget
+          </span>
+          <div className="w-12" />
         </div>
 
-        {/* Sticky Budget Distribution Hub */}
-        <div className={`sticky ${
-          isDemoMode 
-            ? 'top-[calc(7.2rem+env(safe-area-inset-top)+12px)]' 
-            : 'top-[calc(5rem+env(safe-area-inset-top)+12px)]'
-        } z-20 p-4 sm:p-5 rounded-[22px] border border-[var(--border-color)] bg-[var(--surface-color)]/95 backdrop-blur-md shadow-sm space-y-3`}>
-          {/* Main Key Figures */}
-          <div className="flex items-start justify-between gap-3">
+        {/* Hero Allocation Status Card */}
+        <div className="bg-white/[0.045] backdrop-blur-[20px] border border-white/[0.03] rounded-[24px] p-5 space-y-4 shadow-none">
+          <div className="flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-0.5">
+              <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block mb-1">
                 Kvar att fördela
               </span>
-              <div className="flex items-baseline gap-1.5">
-                <span className={`text-2xl sm:text-3xl font-extrabold font-amount tabular-nums tracking-tight ${
-                  remainingPercentage < 0 
-                    ? 'text-rose-500' 
-                    : remainingPercentage === 0 
-                    ? 'text-emerald-500' 
-                    : 'text-[var(--accent-color)]'
+              <div className="flex items-baseline gap-2">
+                <span className={`text-2xl sm:text-3xl font-semibold font-amount tabular-nums ${
+                  remainingPercentage < 0 ? 'text-rose-400' : remainingPercentage === 0 ? 'text-[#8B9CFF]' : 'text-white'
                 }`}>
-                  {remainingPercentage < 0 ? `+${Math.abs(remainingPercentage)}%` : `${remainingPercentage}%`}
+                  {remainingPercentage}%
                 </span>
-                <span className="text-[12px] font-semibold text-[var(--text-secondary)] tabular-nums">
+                <span className="text-xs font-normal text-[#9CA6BC] tabular-nums">
                   ({formatAmount(Math.abs(remainingToAllocate), config.language)} {config.currency})
                 </span>
-                {remainingPercentage < 0 && (
-                  <span className="text-[10px] font-bold text-rose-500 uppercase tracking-tight bg-rose-500/10 px-1.5 py-0.5 rounded-md">
-                    överfördelat
-                  </span>
-                )}
-                {remainingPercentage === 0 && (
-                  <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-tight bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
-                    100% klart
-                  </span>
-                )}
               </div>
             </div>
 
             <div className="text-right flex flex-col items-end">
-              <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-0.5">
+              <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block mb-1">
                 Vardagsbudget
               </span>
-              <span className="text-[14px] sm:text-[15px] font-bold text-[var(--text-primary)] font-amount tabular-nums">
+              <span className="text-base sm:text-lg font-semibold text-white font-amount tabular-nums">
                 {formatAmount(totalBudgetPot, config.language)} {config.currency}
               </span>
-              <span className="text-[11px] text-[var(--text-secondary)] font-medium">
-                Fördelat: <strong className="text-[var(--text-primary)] font-bold">{totalAllocatedPercentage}%</strong> ({formatAmount(totalAllocatedKronor, config.language)} kr)
+              <span className="text-[11px] text-[#9CA6BC] font-normal">
+                Fördelat: {totalAllocatedPercentage}% ({formatAmount(totalAllocatedKronor, config.language)} kr)
               </span>
             </div>
           </div>
 
-          {/* Multi-colored Category Segment Bar */}
-          <div className="space-y-1">
-            <div className="w-full h-2.5 bg-[var(--border-color)]/50 rounded-full overflow-hidden flex shadow-inner">
-              {(config.categories || [])
-                .filter((c) => getCategoryBudgetPct(c) > 0)
-                .map((c) => {
-                  const pct = getCategoryBudgetPct(c);
-                  const amount = getCategoryBudgetKr(c);
-                  return (
-                    <div
-                      key={c.name}
-                      title={`${c.name}: ${pct}% (${formatAmount(amount, config.language)} kr)`}
-                      style={{
-                        width: `${Math.min(100, pct)}%`,
-                        backgroundColor: c.color || '#94a3b8',
-                      }}
-                      className="h-full transition-all duration-200 border-r border-black/10 last:border-r-0"
-                    />
-                  );
-                })}
-            </div>
+          {/* Progress Bar */}
+          <div className="w-full h-2 bg-white/[0.07] rounded-full overflow-hidden">
+            <div 
+              className={`h-full rounded-full transition-all duration-300 ${
+                remainingPercentage < 0 ? 'bg-rose-500' : 'bg-[#8B9CFF]'
+              }`}
+              style={{ width: `${Math.min(100, totalAllocatedPercentage)}%` }}
+            />
           </div>
 
-          {/* Smart Quick Actions */}
-          <div className="flex items-center justify-between pt-0.5 gap-2 border-t border-[var(--border-color)]/40">
+          {/* Quick Actions */}
+          <div className="flex items-center justify-between pt-2 border-t border-white/[0.04] gap-2">
             <button
               type="button"
               onClick={handleDistributeEvenly}
-              className="text-[11.5px] font-semibold text-[var(--accent-color)] hover:opacity-85 flex items-center gap-1.5 py-1 px-2.5 rounded-full bg-[var(--accent-color)]/10 transition-all cursor-pointer"
+              className="text-xs font-medium text-[#8B9CFF] hover:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-[#818cf8]/[0.12] transition-colors cursor-pointer"
             >
               <Sparkles size={13} />
               Fördela potten jämnt
@@ -317,7 +256,7 @@ export function BudgetView({
                 const updatedCategories = (config.categories || []).map((c) => ({ ...c, budget: undefined }));
                 setConfig({ ...config, categories: updatedCategories });
               }}
-              className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-rose-500 flex items-center gap-1 py-1 px-2 transition-colors cursor-pointer"
+              className="text-xs font-normal text-[#9CA6BC] hover:text-rose-400 flex items-center gap-1 py-1 px-2 transition-colors cursor-pointer"
             >
               <RotateCcw size={12} />
               Nollställ
@@ -325,14 +264,11 @@ export function BudgetView({
           </div>
         </div>
 
-        {/* Compact list of categories */}
-        <div className="space-y-2.5">
+        {/* Categories List */}
+        <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-[12.5px] font-bold text-[var(--text-primary)] tracking-tight">
+            <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">
               Kategorier ({config.categories?.length || 0})
-            </h3>
-            <span className="text-[11px] text-[var(--text-secondary)]">
-              Anpassas automatiskt efter inkomst och fasta utgifter
             </span>
           </div>
           
@@ -341,50 +277,40 @@ export function BudgetView({
               .sort((a, b) => {
                 const indexA = initialCategoryNames.indexOf(a.name);
                 const indexB = initialCategoryNames.indexOf(b.name);
-                if (indexA !== -1 && indexB !== -1) {
-                  return indexA - indexB;
-                }
+                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
                 return getCategoryBudgetPct(b) - getCategoryBudgetPct(a);
               })
               .map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
-
               const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
               const variableSpent = Math.round(getVariableSpentForCategory(cat.name));
-
               const catPct = getCategoryBudgetPct(cat);
               const catKr = getCategoryBudgetKr(cat);
 
               return (
                 <div 
                   key={cat.name}
-                  className="p-3 sm:p-3.5 rounded-[18px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-3xs flex flex-col gap-2 transition-all hover:border-[var(--border-color)]/80"
+                  className="p-3.5 sm:p-4 rounded-[18px] border border-white/[0.025] bg-white/[0.04] backdrop-blur-[18px] flex flex-col gap-2.5 transition-all"
                 >
-                  {/* Top Row: Icon, Name, Calculated Kronor and % Input */}
                   <div className="flex items-center justify-between gap-2.5">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div 
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 shadow-3xs text-[15px]"
-                        style={{ backgroundColor: cat.color || '#94a3b8' }}
-                      >
+                      <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center shrink-0">
                         {isEmojiString(iconName) ? (
-                          <span className="leading-none">{iconName}</span>
+                          <span className="text-sm leading-none">{iconName}</span>
                         ) : Icon ? (
-                          <Icon size={16} strokeWidth={2} />
+                          <Icon size={15} strokeWidth={1.75} className="text-[#C7CDDC]" />
                         ) : (
-                          <div className="w-1.5 h-1.5 rounded-full" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#C7CDDC]" />
                         )}
                       </div>
-                      <div className="min-w-0">
-                        <span className="text-[13px] sm:text-[13.5px] font-bold text-[var(--text-primary)] tracking-tight truncate block">
-                          {cat.name}
-                        </span>
-                      </div>
+                      <span className="text-[13.5px] font-medium text-white truncate">
+                        {cat.name}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[13px] font-bold font-amount tabular-nums text-[var(--text-primary)]">
+                      <span className="text-sm font-semibold font-amount tabular-nums text-white">
                         {formatAmount(catKr, config.language)} kr
                       </span>
                       <div className="relative w-16">
@@ -411,16 +337,16 @@ export function BudgetView({
                             );
                             setConfig({ ...config, categories: updatedCategories });
                           }}
-                          className="w-full h-8 px-2 rounded-[10px] bg-[var(--surface-muted)]/70 border border-[var(--border-color)] text-[12.5px] font-bold text-[var(--text-primary)] text-right pr-5 focus:outline-none focus:ring-1 focus:ring-[var(--accent-color)] tabular-nums"
+                          className="w-full h-8 px-2 rounded-xl bg-white/[0.04] border border-white/[0.035] text-xs font-semibold text-white text-right pr-5 focus:outline-none focus:border-[#8B9CFF] tabular-nums"
                         />
-                        <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[var(--text-secondary)] pointer-events-none">
+                        <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-[#9CA6BC] pointer-events-none">
                           %
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Middle Row: Percentage Slider Control */}
+                  {/* Range Slider */}
                   <div className="px-0.5">
                     <input
                       type="range"
@@ -435,21 +361,17 @@ export function BudgetView({
                         );
                         setConfig({ ...config, categories: updatedCategories });
                       }}
-                      className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[var(--accent-color)] focus:outline-none bg-[var(--border-color)]/60"
-                      style={{
-                        backgroundImage: `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${catPct}%, var(--border-color) ${catPct}%, var(--border-color) 100%)`
-                      }}
+                      className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#8B9CFF] focus:outline-none bg-white/[0.07]"
                     />
                   </div>
 
-                  {/* Context note: variable spent or fixed bills */}
                   {(fixedSpent > 0 || variableSpent > 0) && (
-                    <div className="flex items-center justify-between text-[10.5px] text-[var(--text-secondary)] px-0.5 opacity-75">
+                    <div className="flex items-center justify-between text-[11px] font-normal text-[#9CA6BC] px-0.5">
                       {variableSpent > 0 ? (
-                        <span>Spenderat: <strong className="text-[var(--text-primary)] font-semibold">{formatAmount(variableSpent, config.language)} kr</strong></span>
+                        <span>Spenderat: {formatAmount(variableSpent, config.language)} kr</span>
                       ) : <span />}
                       {fixedSpent > 0 && (
-                        <span>(Fasta räkningar: {formatAmount(fixedSpent, config.language)} kr)</span>
+                        <span>(Fasta: {formatAmount(fixedSpent, config.language)} kr)</span>
                       )}
                     </div>
                   )}
@@ -459,26 +381,26 @@ export function BudgetView({
           </div>
         </div>
 
-        {/* Actions Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
           <button
             onClick={() => {
-              if (confirm("Är du säker på att du vill nollställa all kategoribudgetering? Alla kategorier kommer att återgå till sina förinställda värden.")) {
+              if (confirm("Är du säker på att du vill nollställa all kategoribudgetering?")) {
                 const updatedCategories = config.categories.map((c) => ({ ...c, budget: undefined }));
                 setConfig({ ...config, categories: updatedCategories });
               }
             }}
-            className="w-full h-11 rounded-full border border-red-500/10 bg-red-500/5 hover:bg-red-500/10 text-red-500 text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full h-11 rounded-full border border-rose-500/20 bg-rose-500/05 hover:bg-rose-500/10 text-rose-400 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <Trash2 size={16} />
+            <Trash2 size={14} />
             Nollställ all budgetering
           </button>
           
           <button
-            onClick={() => setShowCategoryBudgets(false)}
-            className="w-full h-11 rounded-full bg-[var(--accent-color)] text-[13px] font-bold text-[var(--text-on-accent)] shadow-sm hover:opacity-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            onClick={handleCloseCategoryBudgets}
+            className="w-full h-11 rounded-full bg-[#818cf8]/[0.18] hover:bg-[#818cf8]/[0.25] text-white border border-[#8B9CFF]/30 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <Check size={16} />
+            <Check size={14} />
             Spara och gå tillbaka
           </button>
         </div>
@@ -488,128 +410,122 @@ export function BudgetView({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-8 sm:space-y-10"
+      transition={{ duration: 0.35 }}
+      className="space-y-7 font-sans"
     >
-      {/* Overview Section - Clean & Simple */}
-      <div className="space-y-4">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="py-2 px-1 flex flex-col items-center text-center"
-        >
-          <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-85 mb-2 block">
-            {t('monthlyDisposable')}
+      {/* Overview Hero Section */}
+      <div className="py-2 text-left space-y-1.5">
+        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
+          {t('monthlyDisposable')}
+        </span>
+        <div className="flex items-baseline gap-2">
+          <AnimatedNumber 
+            value={stats.disposablePot || 0} 
+            className="text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums text-white tracking-tight"
+            formatter={(val) => formatAmount(val, config.language)}
+          />
+          <span className="text-[19px] sm:text-[21px] font-normal text-[#9CA6BC]">
+            {config.currency}
           </span>
-          <div className="flex items-baseline justify-center gap-1.5">
-            <AnimatedNumber 
-                value={stats.disposablePot || 0} 
-                className="text-3xl sm:text-4xl md:text-5xl leading-none font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight"
-                formatter={(val) => formatAmount(val, config.language)}
-            />
-            <span className="text-base sm:text-lg font-light opacity-60 text-[var(--text-secondary)]">
-              {config.currency}
-            </span>
-          </div>
-        </motion.div>
-
+        </div>
       </div>
 
       {/* Budget Filter Segmented Control */}
-      <div className="grid grid-cols-3 gap-1 p-1 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full shadow-xs">
+      <div className="grid grid-cols-3 gap-1 p-1 bg-white/[0.035] backdrop-blur-[18px] border border-white/[0.035] rounded-full">
         <button
           onClick={() => setBudgetFilter('fixed')}
-          className={`h-10 sm:h-11 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
+          className={`h-10 sm:h-11 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
             budgetFilter === 'fixed'
-              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
+              ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
           }`}
         >
           {t('fixedExpenses' as TranslationKey) || 'Fasta utgifter'}
         </button>
         <button
           onClick={() => setBudgetFilter('income')}
-          className={`h-10 sm:h-11 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
+          className={`h-10 sm:h-11 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
             budgetFilter === 'income'
-              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
+              ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
           }`}
         >
           {t('incomes' as TranslationKey) || 'Inkomster'}
         </button>
         <button
           onClick={() => setBudgetFilter('savings')}
-          className={`h-10 sm:h-11 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
+          className={`h-10 sm:h-11 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
             budgetFilter === 'savings'
-              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
+              ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
           }`}
         >
           {t('monthlySavings' as TranslationKey) || 'Sparande'}
         </button>
       </div>
 
-      {/* Dynamic Total Amount Header for Active Tab */}
-      <div className="flex items-center justify-between px-2.5 pt-1 -mb-4">
-        <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+      {/* Total Amount Header */}
+      <div className="flex items-center justify-between px-1 pt-1 -mb-3">
+        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">
           {budgetFilter === 'fixed' && (t('fixedExpenses') || 'Fasta utgifter')}
           {budgetFilter === 'income' && (t('incomes') || 'Inkomster')}
           {budgetFilter === 'savings' && (t('monthlySavings') || 'Månadssparande')}
         </span>
-        <span className="text-base sm:text-lg font-black font-amount tabular-nums text-[var(--text-primary)]">
-          {budgetFilter === 'fixed' && `-${formatAmount(Math.abs(stats.totalFixed || 0), config.language)} ${config.currency || 'kr'}`}
+        <span className="text-base sm:text-lg font-semibold font-amount tabular-nums text-white">
+          {budgetFilter === 'fixed' && `−${formatAmount(Math.abs(stats.totalFixed || 0), config.language)} ${config.currency || 'kr'}`}
           {budgetFilter === 'income' && `+${formatAmount(Math.abs(stats.totalIncome || 0), config.language)} ${config.currency || 'kr'}`}
-          {budgetFilter === 'savings' && `-${formatAmount(Math.abs(totalSavings || 0), config.language)} ${config.currency || 'kr'}`}
+          {budgetFilter === 'savings' && `−${formatAmount(Math.abs(totalSavings || 0), config.language)} ${config.currency || 'kr'}`}
         </span>
       </div>
 
       <AnimatePresence mode="wait">
         <motion.div
           key={budgetFilter}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
+          exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.2 }}
-          className="space-y-8 sm:space-y-10"
+          className="space-y-6"
         >
           {/* Incomes Section */}
           {budgetFilter === 'income' && (
             <div className="space-y-3.5">
-              <div className="flex justify-end px-2">
-                <button onClick={onAddIncome} className="h-8 px-3 rounded-full bg-[var(--surface-color)] text-[12px] font-semibold text-[var(--text-primary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] transition-all cursor-pointer inline-flex items-center justify-center shadow-2xs">
-                  + {t('newIncome')}
+              <div className="flex justify-end px-1">
+                <button 
+                  onClick={onAddIncome} 
+                  className="h-8 px-3 rounded-full bg-white/[0.04] hover:bg-white/[0.07] text-xs font-medium text-[#C7CDDC] hover:text-white border border-white/[0.035] transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5"
+                >
+                  <Plus size={13} strokeWidth={2} />
+                  <span>{t('newIncome')}</span>
                 </button>
               </div>
-              <div className="space-y-3.5">
+              <div className="space-y-2.5">
                 {sortedIncomes.length > 0 ? (
-                  <div className="space-y-2.5">
-                    <AnimatePresence mode="popLayout">
-                      {sortedIncomes.map((income, index) => (
-                        <motion.div
-                          key={`${income.id}-${index}`}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ delay: index * 0.05 }}
-                        >
-                          <BudgetItem 
-                            item={income} 
-                            onClick={() => onViewIncome(income)} 
-                            currency={config.currency} 
-                            type="income"
-                            language={config.language as Language}
-                            t={t}
-                            config={config}
-                            currentPeriodId={currentPeriodId}
-                            isGrouped={false}
-                          />
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
+                  <AnimatePresence mode="popLayout">
+                    {sortedIncomes.map((income, index) => (
+                      <motion.div
+                        key={`${income.id}-${index}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ delay: index * 0.04 }}
+                      >
+                        <BudgetItem 
+                          item={income} 
+                          onClick={() => onViewIncome(income)} 
+                          currency={config.currency} 
+                          type="income"
+                          language={config.language as Language}
+                          t={t}
+                          config={config}
+                          currentPeriodId={currentPeriodId}
+                          isGrouped={false}
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 ) : (
                   <EmptyState title={t('noDataAvailable')} />
                 )}
@@ -619,34 +535,33 @@ export function BudgetView({
 
           {/* Fixed Expenses Section */}
           {budgetFilter === 'fixed' && (
-            <div className="space-y-3.5 pt-2 sm:pt-3">
-              {/* Toolbar: Sorting & Add Button */}
+            <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2 px-1">
                 {/* Sort controls */}
-                <div className="flex items-center gap-1 bg-[var(--surface-color)] p-1 rounded-xl border border-[var(--border-color)]/70 shadow-2xs">
-                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] px-1.5 flex items-center gap-1">
+                <div className="flex items-center gap-1 bg-white/[0.035] p-1 rounded-xl border border-white/[0.035]">
+                  <span className="text-[11px] font-normal text-[#9CA6BC] px-1.5 flex items-center gap-1">
                     <ArrowUpDown size={11} className="opacity-70" />
                     <span className="hidden sm:inline">{config.language === 'en' ? 'Sort:' : 'Sortera:'}</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => setFixedSortBy('day')}
-                    className={`h-7 px-2.5 rounded-lg text-[11.5px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`h-7 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center gap-1 ${
                       fixedSortBy === 'day'
-                        ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
+                        ? 'bg-[#818cf8]/[0.18] text-white border border-[#8B9CFF]/30'
+                        : 'text-[#9CA6BC] hover:text-[#C7CDDC]'
                     }`}
                   >
-                    <Calendar size={12} />
-                    <span>{config.language === 'en' ? 'Day (1–31)' : 'Dragningsdag'}</span>
+                    <Calendar size={11} />
+                    <span>{config.language === 'en' ? 'Day' : 'Dragningsdag'}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setFixedSortBy('name')}
-                    className={`h-7 px-2.5 rounded-lg text-[11.5px] font-semibold transition-all cursor-pointer ${
+                    className={`h-7 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                       fixedSortBy === 'name'
-                        ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
+                        ? 'bg-[#818cf8]/[0.18] text-white border border-[#8B9CFF]/30'
+                        : 'text-[#9CA6BC] hover:text-[#C7CDDC]'
                     }`}
                   >
                     <span>{config.language === 'en' ? 'Name' : 'Namn'}</span>
@@ -654,23 +569,22 @@ export function BudgetView({
                   <button
                     type="button"
                     onClick={() => setFixedSortBy('amount')}
-                    className={`h-7 px-2.5 rounded-lg text-[11.5px] font-semibold transition-all cursor-pointer ${
+                    className={`h-7 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                       fixedSortBy === 'amount'
-                        ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
+                        ? 'bg-[#818cf8]/[0.18] text-white border border-[#8B9CFF]/30'
+                        : 'text-[#9CA6BC] hover:text-[#C7CDDC]'
                     }`}
                   >
                     <span>{config.language === 'en' ? 'Amount' : 'Belopp'}</span>
                   </button>
                 </div>
 
-                {/* Add Fixed Expense Button */}
                 <button
                   type="button"
                   onClick={onAddFixedExpense}
-                  className="h-8 px-3 rounded-xl bg-[var(--surface-color)] text-[12px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs active:scale-95"
+                  className="h-8 px-3 rounded-full bg-white/[0.04] hover:bg-white/[0.07] text-xs font-medium text-[#C7CDDC] hover:text-white border border-white/[0.035] transition-colors cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  <Plus size={14} strokeWidth={2.5} className="text-[var(--accent-color)]" />
+                  <Plus size={13} strokeWidth={2} />
                   <span>{t('newFixedExpense')}</span>
                 </button>
               </div>
@@ -685,13 +599,13 @@ export function BudgetView({
                   }, {} as Record<string, FixedExpense[]>)
                 ).map(([freq, items]) => (
                   <div key={freq} className="space-y-2.5">
-                    <div className="flex items-center gap-3 px-2">
-                      <span className="text-xs font-semibold text-[var(--accent-color)] opacity-90">
+                    <div className="flex items-center gap-3 px-1 pt-1">
+                      <span className="text-xs font-medium text-[#9CA6BC]">
                         {Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq) 
                           ? t(`freq_${Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq)!.toLowerCase()}` as TranslationKey)
                           : freq}
                       </span>
-                      <div className="h-[0.5px] flex-1 bg-[var(--border-color)]" />
+                      <div className="h-px flex-1 bg-white/[0.04]" />
                     </div>
                     <div className="space-y-2.5">
                       <AnimatePresence mode="popLayout">
@@ -701,7 +615,7 @@ export function BudgetView({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ delay: index * 0.05 }}
+                            transition={{ delay: index * 0.04 }}
                           >
                             <BudgetItem 
                               item={expense} 
@@ -728,64 +642,62 @@ export function BudgetView({
 
           {/* Monthly Savings Section */}
           {budgetFilter === 'savings' && (
-            <div className="space-y-3.5 pt-2 sm:pt-3">
+            <div className="space-y-4">
               <div className="flex justify-end px-1">
                 <button 
                   type="button"
                   onClick={onAddMonthlySaving} 
-                  className="h-8 px-3 rounded-xl bg-[var(--surface-color)] text-[12px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs active:scale-95"
+                  className="h-8 px-3 rounded-full bg-white/[0.04] hover:bg-white/[0.07] text-xs font-medium text-[#C7CDDC] hover:text-white border border-white/[0.035] transition-colors cursor-pointer inline-flex items-center gap-1.5"
                 >
-                  <Plus size={14} strokeWidth={2.5} className="text-[var(--accent-color)]" />
+                  <Plus size={13} strokeWidth={2} />
                   <span>{t('newMonthlySaving')}</span>
                 </button>
               </div>
-              <div className="space-y-3.5">
+              <div className="space-y-2.5">
                 {sortedSavings.length > 0 ? (
-                  <div className="space-y-2.5">
-                    <AnimatePresence mode="popLayout">
-                      {sortedSavings.map((saving, index) => (
-                        <motion.div
-                          key={`${saving.id}-${index}`}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ delay: index * 0.05 }}
-                        >
-                          <BudgetItem 
-                            item={saving} 
-                            onClick={() => onViewMonthlySaving(saving)} 
-                            currency={config.currency} 
-                            type="expense"
-                            language={config.language as Language}
-                            t={t}
-                            config={config}
-                            currentPeriodId={currentPeriodId}
-                            isGrouped={false}
-                          />
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
+                  <AnimatePresence mode="popLayout">
+                    {sortedSavings.map((saving, index) => (
+                      <motion.div
+                        key={`${saving.id}-${index}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ delay: index * 0.04 }}
+                      >
+                        <BudgetItem 
+                          item={saving} 
+                          onClick={() => onViewMonthlySaving(saving)} 
+                          currency={config.currency} 
+                          type="expense"
+                          language={config.language as Language}
+                          t={t}
+                          config={config}
+                          currentPeriodId={currentPeriodId}
+                          isGrouped={false}
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 ) : config.monthlySavings > 0 ? (
                   <button 
                     type="button"
                     onClick={onAddMonthlySaving}
-                    className="w-full bg-[var(--surface-color)] p-4 sm:p-5 rounded-[16px] border border-[var(--border-color)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-between text-left group shadow-xs cursor-pointer active:scale-[0.99]"
+                    className="w-full bg-white/[0.04] p-4 sm:p-5 rounded-[20px] border border-white/[0.025] hover:bg-white/[0.06] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)] group-hover:scale-105 transition-transform shrink-0">
-                        <RefreshCw size={18} strokeWidth={1.75} />
+                      <div className="w-10 h-10 rounded-full bg-white/[0.05] border border-white/[0.035] flex items-center justify-center text-[#C7CDDC] shrink-0">
+                        <RefreshCw size={17} strokeWidth={1.75} />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[14px] sm:text-[15px] font-bold text-[var(--text-primary)] tracking-tight leading-tight">
+                        <p className="text-sm font-semibold text-white tracking-tight leading-tight">
                           Migrera månadssparande
                         </p>
-                        <p className="text-xs font-medium text-[var(--text-secondary)] mt-1">
-                          Lägg till sparande på <span className="font-amount tabular-nums font-bold text-[var(--text-primary)]">{formatAmount(config.monthlySavings)}</span> <span className="font-sans text-[11px] font-bold text-[var(--text-secondary)]">{config.currency}</span>
+                        <p className="text-xs font-normal text-[#9CA6BC] mt-1">
+                          Lägg till sparande på <span className="font-amount tabular-nums font-semibold text-white">{formatAmount(config.monthlySavings)}</span> <span className="text-xs text-[#9CA6BC]">{config.currency}</span>
                         </p>
                       </div>
                     </div>
-                    <div className="h-7 px-2.5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] text-[11px] font-semibold shrink-0 ml-3 flex items-center justify-center group-hover:opacity-90 transition-opacity">
+                    <div className="h-7 px-3 rounded-full bg-[#818cf8]/[0.18] text-white border border-[#8B9CFF]/30 text-xs font-medium shrink-0 ml-3 flex items-center justify-center">
                       Lägg till
                     </div>
                   </button>
@@ -802,7 +714,6 @@ export function BudgetView({
           )}
         </motion.div>
       </AnimatePresence>
-      
     </motion.div>
   );
 }

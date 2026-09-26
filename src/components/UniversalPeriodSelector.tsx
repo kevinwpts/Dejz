@@ -75,55 +75,50 @@ export function UniversalPeriodSelector({
 
   if (variant === 'header') {
     return (
-      <div className="inline-flex items-center gap-0.5 sm:gap-1 bg-[var(--surface-color)] border border-[var(--border-color)]/80 rounded-full shadow-2xs px-1 sm:px-1.5 py-0.5 max-w-[210px] sm:max-w-none transition-all select-none">
+      <div className="inline-flex items-center gap-0.5 sm:gap-1 bg-white/[0.035] border border-white/[0.035] backdrop-blur-[16px] rounded-full px-1 sm:px-1.5 py-0.5 max-w-[210px] sm:max-w-none transition-all select-none">
         <button 
           type="button"
           onClick={handlePrevPeriod}
           disabled={!canGoPrev}
           className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
             canGoPrev 
-              ? 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]' 
-              : 'text-[var(--text-secondary)] opacity-30 cursor-not-allowed'
+              ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.06]' 
+              : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
           }`}
           aria-label="Föregående period"
         >
-          <ChevronLeft size={16} strokeWidth={2.5} />
+          <ChevronLeft size={15} strokeWidth={2} />
         </button>
             
         {onOpenPicker ? (
           <button 
             type="button"
             onClick={handleCenterClick}
-            className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-full hover:bg-[var(--surface-muted)]/70 transition-all cursor-pointer group min-w-0"
+            className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-full hover:bg-white/[0.05] transition-all cursor-pointer group min-w-0"
             title={periodName || month}
           >
             <div className="flex items-baseline gap-1 min-w-0">
-              {isCurrentPeriod === false && (
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)] shrink-0 self-center mr-0.5" />
-              )}
-              <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate">
+              <span className="text-xs font-semibold tracking-tight truncate text-white">
                 {month}
               </span>
               {dates && (
-                <span className="hidden md:inline text-[11px] font-medium text-[var(--text-secondary)] opacity-60 shrink-0">
+                <span className="text-[10.5px] font-normal text-[#9CA6BC] truncate hidden sm:inline">
                   ({dates})
                 </span>
               )}
             </div>
-            <ChevronDown size={13} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:text-[var(--accent-color)] transition-all shrink-0" />
+            <ChevronDown size={12} className="text-[#9CA6BC] group-hover:text-white transition-colors shrink-0" />
           </button>
         ) : (
-          <div className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 min-w-0 select-none">
-            <div className="flex items-baseline gap-1 min-w-0">
-              <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)] truncate">
-                {month}
+          <div className="flex items-baseline gap-1 px-1.5 sm:px-2.5 py-1 min-w-0">
+            <span className="text-xs font-semibold tracking-tight truncate text-white">
+              {month}
+            </span>
+            {dates && (
+              <span className="text-[10.5px] font-normal text-[#9CA6BC] truncate hidden sm:inline">
+                ({dates})
               </span>
-              {dates && (
-                <span className="hidden md:inline text-[11px] font-medium text-[var(--text-secondary)] opacity-60 shrink-0">
-                  ({dates})
-                </span>
-              )}
-            </div>
+            )}
           </div>
         )}
 
@@ -133,12 +128,12 @@ export function UniversalPeriodSelector({
           disabled={!canGoNext}
           className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
             canGoNext 
-              ? 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]' 
-              : 'text-[var(--text-secondary)] opacity-30 cursor-not-allowed'
+              ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.06]' 
+              : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
           }`}
           aria-label="Nästa period"
         >
-          <ChevronRight size={16} strokeWidth={2.5} />
+          <ChevronRight size={15} strokeWidth={2} />
         </button>
       </div>
     );
@@ -150,47 +145,47 @@ export function UniversalPeriodSelector({
 
   return (
     <div className={containerClasses}>
-      <div className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full shadow-xs px-2 sm:px-3 py-1 flex items-center justify-between transition-all">
+      <div className="bg-white/[0.035] border border-white/[0.035] backdrop-blur-[18px] rounded-full px-2 sm:px-3 py-1 flex items-center justify-between transition-all">
         <button 
           type="button"
           onClick={handlePrevPeriod}
           disabled={!canGoPrev}
           className={`p-2 rounded-full transition-all active:scale-95 cursor-pointer ${
             canGoPrev 
-              ? 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]' 
-              : 'text-[var(--text-secondary)] opacity-30 cursor-not-allowed'
+              ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.06]' 
+              : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
           }`}
           aria-label="Föregående period"
         >
-          <ChevronLeft size={18} strokeWidth={2.2} />
+          <ChevronLeft size={16} strokeWidth={2} />
         </button>
             
         {onOpenPicker ? (
           <button 
             type="button"
             onClick={handleCenterClick}
-            className="flex flex-col items-center group/label px-3 py-1 rounded-full hover:bg-[var(--surface-muted)]/60 transition-all cursor-pointer"
+            className="flex flex-col items-center group/label px-3 py-1 rounded-full hover:bg-white/[0.05] transition-all cursor-pointer"
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold tracking-tight transition-colors duration-300 text-[var(--text-primary)] group-hover/label:text-[var(--accent-color)]">
+              <span className="text-sm font-semibold tracking-tight text-white group-hover/label:text-[#8B9CFF] transition-colors">
                 {month}
               </span>
-              <CalendarIcon size={13} className="text-[var(--text-secondary)] opacity-70 group-hover/label:text-[var(--accent-color)] transition-colors" />
-              <ChevronDown size={14} className="text-[var(--text-secondary)] opacity-50 group-hover/label:opacity-100 transition-opacity" />
+              <CalendarIcon size={13} className="text-[#9CA6BC] group-hover/label:text-[#8B9CFF] transition-colors" />
+              <ChevronDown size={13} className="text-[#9CA6BC] group-hover/label:text-white transition-opacity" />
             </div>
             {dates && (
-              <span className="text-[11px] font-medium transition-opacity duration-300 text-[var(--text-secondary)] opacity-60">
+              <span className="text-[11px] font-normal text-[#9CA6BC] mt-0.5">
                 {dates}
               </span>
             )}
           </button>
         ) : (
           <div className="flex flex-col items-center px-3 py-0.5 select-none">
-            <span className="text-sm font-bold tracking-tight text-[var(--text-primary)]">
+            <span className="text-sm font-semibold tracking-tight text-white">
               {month}
             </span>
             {dates && (
-              <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-60">
+              <span className="text-[11px] font-normal text-[#9CA6BC] mt-0.5">
                 {dates}
               </span>
             )}
@@ -203,12 +198,12 @@ export function UniversalPeriodSelector({
           disabled={!canGoNext}
           className={`p-2 rounded-full transition-all active:scale-95 cursor-pointer ${
             canGoNext 
-              ? 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]' 
-              : 'text-[var(--text-secondary)] opacity-30 cursor-not-allowed'
+              ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.06]' 
+              : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
           }`}
           aria-label="Nästa period"
         >
-          <ChevronRight size={18} strokeWidth={2.2} />
+          <ChevronRight size={16} strokeWidth={2} />
         </button>
       </div>
     </div>

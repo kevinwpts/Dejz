@@ -9,7 +9,6 @@ import { EmptyState } from './EmptyState';
 import { BudgetSummaryModule } from './BudgetSummaryModule';
 import { UniversalPeriodSelector } from './UniversalPeriodSelector';
 import { formatAmount } from '../utils/format';
-
 import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
 import { getEmojiSolidColor } from '../utils/ui';
 
@@ -126,13 +125,11 @@ export function AnalysisView({
 
     const data = Object.entries(breakdown)
       .map(([name, value]) => {
-        // Robust matching: trim and lowercase both sides
         const searchName = name.trim().toLowerCase();
         const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
           c => c.name.trim().toLowerCase() === searchName
         );
         
-        // Use the icon from settings if found, otherwise fall back to default emoji
         const icon = cat?.icon || getCategoryIconName(name);
         return { name, value, color: cat?.color, icon, budget: cat?.budget };
       })
@@ -147,12 +144,12 @@ export function AnalysisView({
 
   const totalSpent = (analysisFilter === 'fixed' ? 0 : totalSpentInPeriod) + 
     (analysisFilter !== 'variable' ? totalFixed : 0);
-  const COLORS = ['#2A2A2A', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#333333', '#222222', '#555555', '#444444'];
+  const COLORS = ['#818cf8', '#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#14b8a6', '#f59e0b', '#64748b', '#8b5cf6'];
 
   if (!stats) return null;
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-7 font-sans">
       {/* Period Selector on Page */}
       {periods && onPeriodChange && currentPeriodDate && (
         <UniversalPeriodSelector
@@ -166,6 +163,7 @@ export function AnalysisView({
         />
       )}
 
+      {/* Budget Summary Metrics */}
       <BudgetSummaryModule
         stats={stats}
         config={config}
@@ -175,16 +173,16 @@ export function AnalysisView({
       />
 
       {/* Analysis Filter - Segmented Control */}
-      <div className="grid grid-cols-3 gap-1 p-1 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full shadow-xs">
+      <div className="grid grid-cols-3 gap-1 p-1 bg-white/[0.035] backdrop-blur-[18px] border border-white/[0.035] rounded-full">
         <button
           onClick={() => {
             setAnalysisFilter('all');
             setExpandedCategory(null);
           }}
-          className={`h-10 sm:h-11 px-2 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-10 sm:h-11 px-2 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center ${
             analysisFilter === 'all'
-              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
+              ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
           }`}
         >
           {t('all' as TranslationKey)}
@@ -194,10 +192,10 @@ export function AnalysisView({
             setAnalysisFilter('variable');
             setExpandedCategory(null);
           }}
-          className={`h-10 sm:h-11 px-2 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-10 sm:h-11 px-2 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center ${
             analysisFilter === 'variable'
-              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
+              ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
           }`}
         >
           {t('variableExpenses' as TranslationKey)}
@@ -207,36 +205,43 @@ export function AnalysisView({
             setAnalysisFilter('fixed');
             setExpandedCategory(null);
           }}
-          className={`h-10 sm:h-11 px-2 rounded-full text-[12px] sm:text-[13px] font-bold transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-10 sm:h-11 px-2 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center ${
             analysisFilter === 'fixed'
-              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
+              ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
           }`}
         >
           {t('fixedExpenses' as TranslationKey)}
         </button>
       </div>
 
-      <div className="p-6 sm:p-7 rounded-[28px] border border-[var(--border-color)] bg-[var(--surface-color)] shadow-sm flex flex-col items-center relative overflow-hidden">
-        <h3 className="text-[15px] font-bold text-[var(--text-primary)] tracking-tight self-start mb-4 relative z-10">{t('distribution')}</h3>
-        <div className="w-full h-72 relative z-10">
+      {/* Donut Chart Distribution Card */}
+      <div className="p-5 sm:p-6 rounded-[24px] border border-white/[0.025] bg-white/[0.04] backdrop-blur-[20px] shadow-none flex flex-col items-center relative overflow-hidden">
+        <div className="flex items-center justify-between w-full mb-3 px-1">
+          <span className="text-sm font-semibold text-white tracking-tight">{t('distribution')}</span>
+          <span className="text-[11px] font-normal text-[#9CA6BC] tabular-nums">
+            {categoryData.filter(c => c.value > 0).length} {config.language === 'en' ? 'categories' : 'kategorier'}
+          </span>
+        </div>
+
+        <div className="w-full h-64 sm:h-72 relative z-10">
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20">
             <AnimatePresence mode="wait">
               {expandedCategory ? (
                 <motion.div 
                   key={expandedCategory}
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.92 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="flex flex-col items-center text-center px-12"
+                  exit={{ opacity: 0, scale: 0.92 }}
+                  className="flex flex-col items-center text-center px-8"
                 >
-                  <span className="text-xs font-semibold text-[var(--accent-color)] mb-1">
+                  <span className="text-xs font-medium text-[#8B9CFF] mb-1 truncate max-w-[140px]">
                     {expandedCategory}
                   </span>
-                  <span className="text-2xl font-bold text-[var(--text-primary)] font-amount tabular-nums leading-none">
-                    <span className="font-amount tabular-nums">{Math.round(categoryData.find(c => c.name === expandedCategory)?.value || 0).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}</span>
+                  <span className="text-2xl sm:text-3xl font-semibold text-white font-amount tabular-nums leading-none">
+                    {Math.round(categoryData.find(c => c.name === expandedCategory)?.value || 0).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
                   </span>
-                  <span className="text-[10px] font-semibold text-[var(--text-secondary)] opacity-70 mt-1">
+                  <span className="text-[11px] font-normal text-[#9CA6BC] mt-1">
                     {config.currency}
                   </span>
                 </motion.div>
@@ -248,13 +253,13 @@ export function AnalysisView({
                   exit={{ opacity: 0 }}
                   className="flex flex-col items-center text-center"
                 >
-                  <span className="text-xs font-semibold text-[var(--text-secondary)] mb-1 opacity-80">
+                  <span className="text-xs font-medium text-[#9CA6BC] mb-1">
                     {t('total')}
                   </span>
-                  <span className="text-2xl font-bold text-[var(--text-primary)] font-amount tabular-nums leading-none">
-                    <span className="font-amount tabular-nums">{Math.round(totalSpent).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}</span>
+                  <span className="text-2xl sm:text-3xl font-semibold text-white font-amount tabular-nums leading-none">
+                    {Math.round(totalSpent).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
                   </span>
-                  <span className="text-[10px] font-semibold text-[var(--text-secondary)] opacity-70 mt-1">
+                  <span className="text-[11px] font-normal text-[#9CA6BC] mt-1">
                     {config.currency}
                   </span>
                 </motion.div>
@@ -267,9 +272,9 @@ export function AnalysisView({
                 data={categoryData}
                 cx="50%"
                 cy="50%"
-                innerRadius={75}
-                outerRadius={95}
-                paddingAngle={4}
+                innerRadius={72}
+                outerRadius={92}
+                paddingAngle={3}
                 dataKey="value"
                 stroke="none"
                 onClick={(data) => {
@@ -279,32 +284,36 @@ export function AnalysisView({
                   }
                 }}
                 animationBegin={0}
-                animationDuration={800}
+                animationDuration={600}
               >
                 {categoryData.map((entry: any, index) => (
                   <Cell 
                     key={`cell-${index}`} 
                     fill={entry.color || COLORS[index % COLORS.length]} 
-                    opacity={expandedCategory ? (expandedCategory === entry.name ? 1 : 0.3) : 1}
+                    opacity={expandedCategory ? (expandedCategory === entry.name ? 1 : 0.25) : 0.9}
                     style={{ 
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.25s ease'
                     }}
                     strokeWidth={expandedCategory === entry.name ? 2 : 0}
-                    stroke={expandedCategory === entry.name ? 'var(--surface-color)' : 'none'}
+                    stroke={expandedCategory === entry.name ? '#14141E' : 'none'}
                   />
                 ))}
               </Pie>
-              <Tooltip 
-                content={() => null}
-              />
+              <Tooltip content={() => null} />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h3 className="text-[15px] font-bold text-[var(--text-primary)] tracking-tight px-2">{t('categories')}</h3>
-        <div className="space-y-2.5">
+      {/* Categories Breakdown List */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">
+            {t('categories')} ({categoryData.length})
+          </span>
+        </div>
+
+        <div className="space-y-2">
           {categoryData.map((item: any, index) => {
             const isExpanded = expandedCategory === item.name;
             const iconName = item.icon || getCategoryIconName(item.name);
@@ -337,7 +346,6 @@ export function AnalysisView({
 
             const totalItemCount = categoryTransactions.length + categoryFixedExpenses.length;
 
-
             const disposablePot = Math.max(
               0,
               (stats?.disposablePot !== undefined && stats?.disposablePot !== null)
@@ -357,86 +365,85 @@ export function AnalysisView({
             }
 
             const remainingBudget = budgetInKronor - Math.round(item.value);
-            const _showCircle = analysisFilter === 'all';
             
             return (
               <motion.div 
                 id={`category-${item.name}`} 
                 key={item.name} 
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={isExpanded ? "rounded-[16px] border border-[var(--border-color)] shadow-xs overflow-hidden bg-[var(--surface-color)] transition-all duration-200" : ""}
+                transition={{ delay: index * 0.03 }}
+                className={isExpanded ? "rounded-[22px] border border-white/[0.03] bg-white/[0.045] backdrop-blur-[20px] overflow-hidden transition-all duration-200" : ""}
               >
-                <motion.div 
-                  whileHover={isExpanded ? undefined : { scale: 1.002 }}
-                  whileTap={isExpanded ? undefined : { scale: 0.99 }}
-                  className={`px-[18px] py-[15px] min-h-[78px] flex flex-col justify-center group transition-all duration-200 cursor-pointer ${
+                <div 
+                  className={`p-3.5 sm:p-4 min-h-[70px] flex flex-col justify-center group transition-all duration-200 cursor-pointer ${
                     isExpanded 
-                      ? 'bg-[var(--surface-color)] border-b border-[var(--border-color)]/30' 
-                      : 'bg-[var(--transaction-bg)] border border-[var(--border-color)] rounded-[16px] shadow-xs hover:bg-[var(--surface-muted)]'
+                      ? 'border-b border-white/[0.035]' 
+                      : 'bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.025] rounded-[18px] backdrop-blur-[18px]'
                   }`}
                   onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
                 >
-                  <div className="flex items-center justify-between gap-[12px] w-full">
-                    <div className="flex items-center gap-[12px] min-w-0 flex-1">
-                      {/* Standard Transaction Logo sizing */}
-                      <div className="w-[42px] h-[42px] rounded-full flex items-center justify-center shrink-0 shadow-xs relative z-10"
+                  <div className="flex items-center justify-between gap-3 w-full">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      {/* Category Icon */}
+                      <div 
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0"
                         style={{ 
                           backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
                           color: '#fff'
                         }}
                       >
                         {isEmojiString(iconName) ? (
-                          <span className="text-[20px] leading-none">{iconName}</span>
+                          <span className="text-[17px] leading-none">{iconName}</span>
                         ) : Icon ? (
-                          <Icon size={20} strokeWidth={2.0} />
+                          <Icon size={16} strokeWidth={1.75} />
                         ) : (
-                          <div className="w-2 h-2 rounded-full" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
                         )}
                       </div>
 
                       <div className="min-w-0 flex-1 flex flex-col justify-center">
-                        <p className={`text-[14px] sm:text-[14.5px] font-semibold leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors ${
-                          isExpanded ? 'text-[var(--accent-color)] font-bold' : 'text-[var(--text-primary)] group-hover:text-[var(--accent-color)]'
+                        <p className={`text-[14px] sm:text-[14.5px] font-semibold leading-tight truncate tracking-tight transition-colors ${
+                          isExpanded ? 'text-[#8B9CFF]' : 'text-white group-hover:text-white'
                         }`}>
                           {item.name}
                         </p>
                         <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
                           {hasBudget ? (
-                            <span className={`text-[12px] font-medium truncate ${
-                              remainingBudget < 0 ? 'text-amber-500 font-semibold' : 'text-[var(--text-secondary)] opacity-85'
+                            <span className={`text-xs font-normal truncate ${
+                              remainingBudget < 0 ? 'text-rose-400 font-medium' : 'text-[#9CA6BC]'
                             }`}>
                               {remainingBudget < 0 ? (
                                 <span>Över budget: {formatAmount(Math.abs(remainingBudget), config.language)} kr</span>
                               ) : (
-                                <span>Kvar: <strong className="text-[var(--text-primary)] font-bold">{formatAmount(remainingBudget, config.language)} kr</strong></span>
+                                <span>Kvar: <strong className="text-white font-medium">{formatAmount(remainingBudget, config.language)} kr</strong></span>
                               )}
                             </span>
                           ) : (
-                            <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-85">
+                            <span className="text-xs font-normal text-[#9CA6BC]">
                               {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
+
                     <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
                       <div className="text-right flex flex-col items-end justify-center">
-                        <p className="text-[14.5px] sm:text-[15px] font-bold text-[var(--text-primary)] leading-tight whitespace-nowrap tracking-tight">
-                          <span className="font-amount tabular-nums font-bold">{formatAmount(Math.round(item.value), config.language)}</span>
-                          <span className="text-[11px] font-semibold opacity-60 ml-1">{config.currency}</span>
+                        <p className="text-[14px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-white leading-tight">
+                          {formatAmount(Math.round(item.value), config.language)}
+                          <span className="text-[11px] font-normal text-[#9CA6BC] ml-1">{config.currency}</span>
                         </p>
-                        <p className="text-[11px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5 tabular-nums">
+                        <p className="text-[11px] font-normal text-[#9CA6BC] mt-0.5 tabular-nums">
                           {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
                         </p>
                       </div>
-                      <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[var(--accent-color)]' : 'text-[var(--text-tertiary)]'}`}>
-                        <ChevronDown size={18} strokeWidth={2.2} />
+                      <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[#8B9CFF]' : 'text-[#9CA6BC]'}`}>
+                        <ChevronDown size={16} strokeWidth={2} />
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
                 
                 <AnimatePresence>
                   {isExpanded && (
@@ -448,7 +455,7 @@ export function AnalysisView({
                       className="overflow-hidden"
                     >
                       {(categoryTransactions.length > 0 || categoryFixedExpenses.length > 0) ? (
-                        <div className="bg-[var(--surface-color)] divide-y divide-[var(--border-color)]/30 overflow-hidden">
+                        <div className="divide-y divide-white/[0.035] overflow-hidden">
                           {categoryTransactions.map(t => {
                             let displayAmount = t.amount;
                             const transactionSplits = (t as any).splits;

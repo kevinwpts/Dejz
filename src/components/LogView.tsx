@@ -91,7 +91,7 @@ export function LogView({
   if (!stats) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Period Selector on Page */}
       {periods && onPeriodChange && currentPeriodDate && (
         <UniversalPeriodSelector
@@ -105,25 +105,25 @@ export function LogView({
         />
       )}
 
-      <div className="space-y-3 bg-transparent p-0">
-        {/* Type Filters (Alla, Utgift, Inkomst, Kvitto) */}
-        <div className="grid grid-cols-4 gap-1 p-1 bg-[var(--surface-color)] rounded-full border border-[var(--border-color)] shadow-xs">
+      {/* Type Filters (Alla, Utgift, Inkomst, Kvitto) */}
+      <div className="space-y-3">
+        <div className="grid grid-cols-4 gap-1 p-1 bg-white/[0.035] backdrop-blur-[18px] rounded-full border border-white/[0.035]">
           {(['all', 'expense', 'income', 'receipt'] as const).map(type => {
             const isActive = typeFilter === type;
             return (
               <button
                 key={type}
                 onClick={() => setTypeFilter(type)}
-                className={`flex items-center justify-center gap-1.5 h-10 sm:h-11 px-1 rounded-full text-[13px] font-semibold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 h-10 sm:h-11 px-1 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer ${
                   isActive 
-                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs' 
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/60'
+                    ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none' 
+                    : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
                 }`}
               >
-                {type === 'all' && <LayoutGrid size={13} strokeWidth={2.2} className={isActive ? 'opacity-100' : 'opacity-70'} />}
-                {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={2.2} className={isActive ? 'opacity-100' : 'opacity-70'} />}
-                {type === 'income' && <ArrowUpRight size={13} strokeWidth={2.2} className={isActive ? 'opacity-100' : 'opacity-70'} />}
-                {type === 'receipt' && <FileText size={13} strokeWidth={2.2} className={isActive ? 'opacity-100' : 'opacity-70'} />}
+                {type === 'all' && <LayoutGrid size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
+                {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
+                {type === 'income' && <ArrowUpRight size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
+                {type === 'receipt' && <FileText size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
                 <span className="truncate">{t(type as TranslationKey)}</span>
               </button>
             );
@@ -131,6 +131,7 @@ export function LogView({
         </div>
       </div>
 
+      {/* Transactions List */}
       <div className="space-y-6">
         <div className="space-y-5">
           {groupedExpenses.map(([date, dayTransactions], index) => (
@@ -138,15 +139,15 @@ export function LogView({
               key={date} 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
+              transition={{ delay: index * 0.04 }}
               className="space-y-2"
             >
-              <div className="px-2 flex items-center justify-between">
-                <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight capitalize">
+              <div className="px-1 flex items-center justify-between">
+                <span className="text-xs font-medium text-[#9CA6BC] tracking-tight capitalize">
                   {new Date(date).toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
                 </span>
               </div>
-              <div className="bg-[var(--surface-color)] rounded-[16px] border border-[var(--border-color)] shadow-xs divide-y divide-[var(--border-color)]/30 overflow-hidden">
+              <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
                 {dayTransactions.map((transaction: Transaction) => (
                   <TransactionItem 
                     key={transaction.id}
@@ -163,7 +164,7 @@ export function LogView({
         </div>
         {(filteredExpenses?.length || 0) === 0 && (
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             className="py-8"
           >

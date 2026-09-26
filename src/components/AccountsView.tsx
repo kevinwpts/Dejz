@@ -26,7 +26,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
       const data = await dataService.getAccounts(userId);
       setAccounts(data);
     } catch (_error) {
-      console.error('Failed to load accounts:', error);
+      console.error('Failed to load accounts:', _error);
       addToast('Kunde inte ladda konton', 'error');
     } finally {
       setIsLoading(false);
@@ -47,7 +47,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
       id: isEditing ? isEditing.id : `acc_${Date.now()}`,
       name: name.trim(),
       initialBalance: Number(initialBalance) || 0,
-      currentBalance: Number(initialBalance) || 0, // In this simple version we set both.
+      currentBalance: Number(initialBalance) || 0,
       currency: 'kr'
     };
 
@@ -62,7 +62,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
       addToast(isEditing ? 'Kontot uppdaterades' : 'Kontot har lagts till', 'success');
       handleCloseModal();
     } catch (_error) {
-      console.error('Error saving account:', error);
+      console.error('Error saving account:', _error);
       addToast('Kunde inte spara kontot', 'error');
     }
   };
@@ -78,7 +78,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
       setAccounts(prev => prev.filter(a => a.id !== id));
       addToast('Kontot har raderats', 'success');
     } catch (_error) {
-      console.error('Error deleting account:', error);
+      console.error('Error deleting account:', _error);
       addToast('Kunde inte radera kontot', 'error');
     }
   };
@@ -101,81 +101,95 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className=""
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -12 }}
+      className="space-y-6 font-sans"
     >
-      <div className="flex items-center justify-between px-2 mb-6">
-        <button onClick={onBack} className="flex items-center gap-2 text-[var(--text-secondary)] py-2 hover:text-[var(--text-primary)] transition-colors shrink-0">
-          <ChevronLeft size={20} />
-          <span className="text-sm font-medium">Tillbaka</span>
+      <div className="flex items-center justify-between px-1">
+        <button 
+          type="button"
+          onClick={onBack} 
+          className="flex items-center gap-1.5 text-xs font-medium text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
+        >
+          <ChevronLeft size={16} strokeWidth={2} />
+          <span>Tillbaka</span>
         </button>
         <button 
+          type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-1.5 bg-accent/10 text-accent h-7 px-2.5 rounded-full text-[11px] font-semibold hover:bg-accent/20 transition-colors"
+          className="flex items-center gap-1.5 bg-[#818cf8]/[0.16] hover:bg-[#818cf8]/[0.24] text-white border border-[#8B9CFF]/30 h-8 px-3 rounded-full text-xs font-medium transition-colors cursor-pointer"
         >
-          <Plus size={13} strokeWidth={2.5} />
-          Lägg till konto
+          <Plus size={13} strokeWidth={2} />
+          <span>Lägg till konto</span>
         </button>
       </div>
 
-      <div className="px-6 space-y-6">
+      <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-semibold text-[var(--text-primary)]">Mina Konton</h2>
-          <p className="text-[var(--text-tertiary)] mt-2">Hantera dina saldon t.ex. på SEB, Swedbank, etc.</p>
+          <h2 className="text-xl sm:text-2xl font-semibold text-white tracking-tight">Mina konton</h2>
+          <p className="text-xs sm:text-[13px] text-[#9CA6BC] mt-1">Hantera dina saldon på dina olika bankkonton</p>
         </div>
 
         {/* Total Balance Card */}
-        <div className="bg-[var(--surface-color)] rounded-[26px] p-6 relative overflow-hidden shadow-xs border border-[var(--border-color)]">
-          <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
-            <Wallet size={120} />
-          </div>
-          <p className="text-xs font-medium text-[var(--text-secondary)] mb-2">Totalt saldo</p>
-          <div className="text-4xl font-semibold font-amount text-[var(--text-primary)]">
-            {totalBalance.toLocaleString('sv-SE')} <span className="text-xl text-[var(--text-tertiary)]">kr</span>
+        <div className="bg-white/[0.045] backdrop-blur-[20px] rounded-[24px] p-5 sm:p-6 relative overflow-hidden border border-white/[0.03]">
+          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block mb-1.5">
+            Totalt saldo
+          </span>
+          <div className="text-3xl sm:text-4xl font-semibold font-amount tabular-nums text-white">
+            {totalBalance.toLocaleString('sv-SE')} <span className="text-base sm:text-lg font-normal text-[#9CA6BC]">kr</span>
           </div>
         </div>
 
         {isLoading ? (
           <div className="flex justify-center p-8">
-            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-6 h-6 border-2 border-[#8B9CFF] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : accounts.length === 0 ? (
-          <div className="bg-[var(--surface-color)] rounded-[16px] p-8 flex flex-col items-center justify-center text-center shadow-xs border border-[var(--border-color)]">
-            <div className="w-14 h-14 rounded-full bg-accent/10 text-accent flex items-center justify-center mb-4">
-              <Wallet size={28} />
+          <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[20px] p-8 flex flex-col items-center justify-center text-center border border-white/[0.025]">
+            <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center mb-3">
+              <Wallet size={22} strokeWidth={1.75} />
             </div>
-            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Inga konton än</h3>
-            <p className="text-[var(--text-secondary)] text-sm mb-6">Lägg till ditt första konto för att börja hålla koll på ditt saldo.</p>
+            <h3 className="text-sm font-semibold text-white mb-1">Inga konton än</h3>
+            <p className="text-xs text-[#9CA6BC] max-w-xs mb-4">Lägg till ditt första konto för att hålla koll på dina saldon.</p>
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(true)}
+              className="h-8 px-3 rounded-full bg-[#818cf8]/[0.16] hover:bg-[#818cf8]/[0.24] text-white border border-[#8B9CFF]/30 text-xs font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus size={13} strokeWidth={2} />
+              <span>Lägg till konto</span>
+            </button>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {accounts.map(account => (
               <div 
                 key={account.id}
                 onClick={() => handleOpenEdit(account)}
-                className="bg-[var(--surface-color)] rounded-[16px] p-4 sm:p-5 transition-all cursor-pointer group flex items-center justify-between shadow-xs border border-[var(--border-color)] hover:bg-[var(--surface-muted)]"
+                className="bg-white/[0.04] backdrop-blur-[18px] rounded-[18px] p-3.5 sm:p-4 transition-all cursor-pointer group flex items-center justify-between border border-white/[0.025] hover:bg-white/[0.06]"
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[var(--surface-muted)] flex items-center justify-center text-[var(--text-primary)]">
-                    <Wallet size={20} />
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/[0.04] border border-white/[0.035] flex items-center justify-center text-[#C7CDDC] shrink-0">
+                    <Wallet size={16} strokeWidth={1.75} />
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-[var(--text-primary)]">{account.name}</h3>
-                    <p className="text-sm text-[var(--text-secondary)] font-medium mt-0.5">
-                      <span className="font-amount">{account.initialBalance.toLocaleString('sv-SE')}</span> <span className="font-sans text-[10px] opacity-50">kr</span>
+                  <div className="min-w-0">
+                    <h3 className="text-[14px] sm:text-[14.5px] font-semibold text-white truncate tracking-tight">{account.name}</h3>
+                    <p className="text-xs text-[#9CA6BC] font-medium mt-0.5">
+                      <span className="font-amount tabular-nums text-white">{account.initialBalance.toLocaleString('sv-SE')}</span> <span className="text-[11px] font-normal text-[#9CA6BC]">kr</span>
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <button 
+                    type="button"
                     onClick={(e) => handleDelete(account.id, e)}
-                    className="w-8 h-8 rounded-full bg-danger/10 text-danger flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="w-7 h-7 rounded-full bg-rose-500/[0.12] hover:bg-rose-500/[0.22] text-rose-400 flex items-center justify-center transition-colors cursor-pointer"
+                    title="Radera konto"
                   >
-                    <Trash2 size={15} />
+                    <Trash2 size={13} />
                   </button>
-                  <ChevronLeft className="text-[var(--text-tertiary)] rotate-180" size={18} />
+                  <ChevronLeft className="text-[#9CA6BC] rotate-180" size={16} />
                 </div>
               </div>
             ))}
@@ -189,56 +203,58 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md p-0 sm:p-4"
           >
             <motion.div 
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="w-full sm:max-w-md bg-[var(--bg-color)] sm:rounded-[24px] rounded-t-[28px] rounded-b-none overflow-hidden shadow-2xl flex flex-col border-t sm:border border-[var(--border-color)]"
+              className="w-full sm:max-w-md bg-[#12131D] sm:rounded-[24px] rounded-t-[28px] rounded-b-none overflow-hidden shadow-2xl flex flex-col border border-white/[0.08]"
               style={{ maxHeight: '90vh' }}
             >
-              <div className="flex items-center justify-between p-6 pb-4 border-b border-[var(--border-color)]">
-                <h2 className="text-xl font-semibold text-[var(--text-primary)]">
+              <div className="flex items-center justify-between p-5 pb-4 border-b border-white/[0.06]">
+                <h2 className="text-base font-semibold text-white tracking-tight">
                   {isEditing ? 'Redigera konto' : 'Lägg till konto'}
                 </h2>
                 <button 
+                  type="button"
                   onClick={handleCloseModal}
-                  className="w-9 h-9 rounded-[10px] bg-[var(--surface-color)] hover:bg-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] transition-all"
+                  className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-[#9CA6BC] hover:text-white transition-all cursor-pointer"
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               </div>
 
-              <div className="p-6 space-y-5 overflow-y-auto">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-[var(--text-secondary)] pl-1">Kontonamn</label>
+              <div className="p-5 space-y-4 overflow-y-auto">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] pl-0.5">Kontonamn</label>
                   <input 
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="t.ex. SEB Lönekonto"
-                    className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[12px] px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/30"
+                    className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-none focus:border-[#8B9CFF] transition-all placeholder-[#9CA6BC]/40"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-[var(--text-secondary)] pl-1">Saldo (kr)</label>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] pl-0.5">Saldo (kr)</label>
                   <input 
                     type="number"
                     value={initialBalance}
                     onChange={(e) => setInitialBalance(e.target.value)}
                     placeholder="0"
-                    className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[12px] px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/30"
+                    className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-none focus:border-[#8B9CFF] transition-all placeholder-[#9CA6BC]/40 font-amount tabular-nums"
                   />
                 </div>
               </div>
 
-              <div className="p-6 pt-0 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6">
+              <div className="p-5 pt-1 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-5">
                 <button 
+                  type="button"
                   onClick={handleSave}
-                  className="w-full bg-accent text-[var(--text-on-accent)] font-semibold text-base py-3.5 rounded-[12px] hover:bg-accent/90 transition-colors shadow-sm"
+                  className="w-full bg-[#818cf8]/[0.22] hover:bg-[#818cf8]/[0.32] text-white border border-[#8B9CFF]/35 font-medium text-sm py-3 rounded-full transition-colors cursor-pointer"
                 >
                   Spara konto
                 </button>
