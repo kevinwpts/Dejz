@@ -21,6 +21,7 @@ import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { BudgetItemLogo } from "./BudgetItem";
 import { QuickExpenseWidget } from "./QuickExpenseWidget";
+import { PeriodTimeline } from "./PeriodTimeline";
 import { ICON_MAP, getCategoryIconName, isEmojiString } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 
@@ -432,6 +433,24 @@ export function TodayView({
             selectedDate={selectedDate}
             allTransactions={allTransactions || transactions}
             onAddExpense={onQuickAddExpense}
+          />
+        </motion.div>
+      )}
+
+      {/* Period Timeline / Tidslinje under snabb utgift */}
+      {calendarDays && calendarDays.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.13 }}
+        >
+          <PeriodTimeline
+            calendarDays={calendarDays}
+            selectedDate={normalizedSelectedDate}
+            onSelectDate={setSelectedDate}
+            stats={stats}
+            language={config.language}
+            isCurrentPeriod={isCurrentPeriod}
           />
         </motion.div>
       )}

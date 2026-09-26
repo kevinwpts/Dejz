@@ -267,10 +267,10 @@ export function PeriodTimeline({
   const effectiveActiveTime = activeCenterTime || selectedTime;
 
   return (
-    <div className="relative group/timeline w-full my-3 font-sans overflow-visible" id="period_timeline_wrapper">
+    <div className="relative group/timeline w-full my-1 sm:my-1.5 font-sans overflow-visible" id="period_timeline_wrapper">
       {/* Top Center Focus Indicator */}
-      <div className="absolute left-1/2 -top-1.5 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center">
-        <div className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_8px_var(--accent-color)]" />
+      <div className="absolute left-1/2 -top-1 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center">
+        <div className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_6px_var(--accent-color)]" />
       </div>
 
       {/* Left Scroll Arrow Button */}
@@ -279,11 +279,11 @@ export function PeriodTimeline({
           <button
             type="button"
             onClick={() => handleStep('prev')}
-            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-sm"
+            className="pointer-events-auto w-6 h-6 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-sm"
             aria-label="Föregående dag"
             title="Föregående dag"
           >
-            <ChevronLeft size={18} strokeWidth={2.5} />
+            <ChevronLeft size={14} strokeWidth={2.5} />
           </button>
         </div>
       )}
@@ -295,7 +295,7 @@ export function PeriodTimeline({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative flex items-center gap-2.5 overflow-x-auto py-5 px-0 no-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory"
+        className="relative flex items-center gap-1.5 overflow-x-auto py-2 px-0 no-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -305,7 +305,7 @@ export function PeriodTimeline({
       >
         {/* Left Centering Spacer: exactly half container width minus half item width, allowing Day 1 to reach center */}
         <div
-          className="shrink-0 w-[calc(50%-33px)] sm:w-[calc(50%-37px)] pointer-events-none"
+          className="shrink-0 w-[calc(50%-24px)] sm:w-[calc(50%-26px)] pointer-events-none"
           aria-hidden="true"
         />
 
@@ -336,17 +336,17 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`snap-center flex flex-col items-center justify-center gap-1 w-[66px] sm:w-[74px] h-[72px] sm:h-[80px] p-2 rounded-2xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
+              className={`snap-center flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[52px] h-[52px] sm:h-[56px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_8px_22px_rgba(0,0,0,0.18)] dark:shadow-[0_8px_22px_rgba(255,255,255,0.12)] scale-105 font-bold z-10 opacity-100 ring-2 ring-accent/50'
+                  ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_4px_14px_rgba(0,0,0,0.18)] dark:shadow-[0_4px_14px_rgba(255,255,255,0.12)] scale-105 font-bold z-10 opacity-100 ring-2 ring-accent/50'
                   : isRealToday
-                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-dashed border-[var(--text-primary)]/50 hover:border-[var(--text-primary)] scale-95 opacity-80'
+                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border border-dashed border-[var(--text-primary)]/50 hover:border-[var(--text-primary)] scale-95 opacity-85'
                   : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 scale-95 opacity-70'
               }`}
             >
               {/* Day of Week */}
               <span
-                className={`text-[9px] sm:text-[10px] tracking-wider uppercase leading-none ${
+                className={`text-[8.5px] sm:text-[9px] tracking-wider uppercase leading-none ${
                   isSelected
                     ? 'opacity-90 font-bold'
                     : isRealToday
@@ -358,16 +358,14 @@ export function PeriodTimeline({
               </span>
 
               {/* Day Number */}
-              <span className="text-[15px] sm:text-[17px] leading-none font-bold tabular-nums font-amount">
+              <span className="text-[13px] sm:text-[14px] leading-none font-bold tabular-nums font-amount">
                 {dayNumber}
               </span>
 
               {/* Today Dot Indicator */}
               {isRealToday && (
                 <span
-                  className={`w-1.5 h-1.5 rounded-full absolute bottom-1.5 ${
-                    isSelected ? 'bg-accent' : 'bg-accent'
-                  }`}
+                  className="w-1 h-1 rounded-full absolute bottom-1 bg-accent"
                 />
               )}
             </motion.button>
@@ -376,17 +374,17 @@ export function PeriodTimeline({
 
         {/* Lön / Payday Box at the end of the timeline */}
         <div
-          className="snap-center flex flex-col items-center justify-center gap-1 w-[66px] sm:w-[74px] h-[72px] sm:h-[80px] p-2 rounded-2xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-75"
+          className="snap-center flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[52px] h-[52px] sm:h-[56px] p-1.5 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-75"
         >
-          <span className="text-[15px] leading-none">💸</span>
-          <span className="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase">
+          <span className="text-[12px] leading-none">💸</span>
+          <span className="text-[8px] sm:text-[8.5px] font-bold tracking-wider uppercase">
             {isEn ? 'Payday' : 'Lön'}
           </span>
         </div>
 
         {/* Right Centering Spacer: exactly half container width minus half item width, allowing the last item to reach center */}
         <div
-          className="shrink-0 w-[calc(50%-33px)] sm:w-[calc(50%-37px)] pointer-events-none"
+          className="shrink-0 w-[calc(50%-24px)] sm:w-[calc(50%-26px)] pointer-events-none"
           aria-hidden="true"
         />
       </div>
@@ -397,11 +395,11 @@ export function PeriodTimeline({
           <button
             type="button"
             onClick={() => handleStep('next')}
-            className="pointer-events-auto w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-sm"
+            className="pointer-events-auto w-6 h-6 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-sm"
             aria-label="Nästa dag"
             title="Nästa dag"
           >
-            <ChevronRight size={18} strokeWidth={2.5} />
+            <ChevronRight size={14} strokeWidth={2.5} />
           </button>
         </div>
       )}

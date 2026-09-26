@@ -897,17 +897,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </button>
 
                         {/* AI Smart Income Input Box */}
-                        <div className="p-3 sm:p-3.5 rounded-[20px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-3xs space-y-2 mt-1">
-                          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--accent-color)]">
-                            <div className="flex items-center gap-1.5">
-                              <Sparkles size={13} className="text-amber-400" />
-                              <span>{isEn ? 'Smart add with AI' : 'Snabb-lägg till med AI'}</span>
-                            </div>
-                            <span className="text-[10px] text-[var(--text-secondary)] font-medium opacity-75">
-                              {isEn ? 'Free text' : 'Skriv fritt'}
-                            </span>
-                          </div>
-
+                        <div className="p-2 sm:p-2.5 rounded-[18px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-3xs space-y-2 mt-1">
                           <form onSubmit={handleAiAddIncome} className="flex items-center gap-1.5">
                             <div className="relative flex-1">
                               <input
@@ -916,7 +906,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                                 onChange={(e) => setAiIncomePrompt(e.target.value)}
                                 placeholder={isEn ? 'E.g. "25000 from Ur & Penn", "CSN 13200"' : 'T.ex. "25000 från ur & penn", "CSN 13200"'}
                                 disabled={isAiParsing}
-                                className="w-full bg-[var(--surface-muted)]/70 border border-[var(--border-color)] rounded-[14px] px-3.5 py-2 text-[12.5px] font-medium text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:border-[var(--accent-color)] focus:bg-[var(--surface-color)] outline-none transition-all pr-8"
+                                className="w-full bg-[var(--surface-muted)]/70 border border-[var(--border-color)] rounded-[14px] px-3.5 py-2.5 text-[12.5px] font-medium text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:border-[var(--accent-color)] focus:bg-[var(--surface-color)] outline-none transition-all pr-8"
                               />
                               {aiIncomePrompt && !isAiParsing && (
                                 <button
@@ -932,14 +922,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             <button
                               type="submit"
                               disabled={!aiIncomePrompt.trim() || isAiParsing}
-                              className="h-[36px] px-3.5 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-[11.5px] flex items-center gap-1.5 transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
+                              className="h-[38px] px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-[12px] flex items-center gap-1.5 transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
                             >
                               {isAiParsing ? (
                                 <Loader2 size={14} className="animate-spin" />
                               ) : (
                                 <>
-                                  <Sparkles size={12} />
-                                  <span>{isEn ? 'Add' : 'Tolka'}</span>
+                                  <Sparkles size={13} />
+                                  <span>{isEn ? 'Add' : 'Lägg till'}</span>
                                 </>
                               )}
                             </button>

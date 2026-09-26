@@ -5,7 +5,6 @@ import { Sparkles } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
-import { PeriodTimeline } from './PeriodTimeline';
 
 interface GreetingModuleProps {
   userName?: string;
@@ -82,8 +81,8 @@ export function GreetingModule({
   stats,
   t,
   calendarDays,
-  setSelectedDate,
-  isCurrentPeriod,
+  setSelectedDate: _setSelectedDate,
+  isCurrentPeriod: _isCurrentPeriod,
   children
 }: GreetingModuleProps) {
   const effectiveRemainingDays = useMemo(() => {
@@ -255,18 +254,6 @@ export function GreetingModule({
             )}
           </div>
         </motion.div>
-      )}
-
-      {/* Period Timeline / Calendar */}
-      {calendarDays && calendarDays.length > 0 && (
-        <PeriodTimeline
-          calendarDays={calendarDays}
-          selectedDate={date}
-          onSelectDate={setSelectedDate}
-          stats={stats}
-          language={language}
-          isCurrentPeriod={isCurrentPeriod}
-        />
       )}
     </div>
   );
