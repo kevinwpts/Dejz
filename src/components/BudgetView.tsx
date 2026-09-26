@@ -56,19 +56,7 @@ export function BudgetView({
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
   });
-  const [initialCategoryNames, setInitialCategoryNames] = React.useState<string[]>([]);
-
   const handleOpenCategoryBudgets = () => {
-    const getCatBudgetPct = (c: any) => {
-      if (c.budget === undefined || c.budget === null) return 0;
-      return Number(c.budget) || 0;
-    };
-
-    const sortedNames = [...(config.categories || [])]
-      .sort((a, b) => getCatBudgetPct(b) - getCatBudgetPct(a))
-      .map(c => c.name);
-
-    setInitialCategoryNames(sortedNames);
     setShowCategoryBudgets(true);
   };
 
@@ -129,48 +117,122 @@ export function BudgetView({
       }, 0);
   };
 
-  const getVariableSpentForCategory = (catName: string) => {
-    if (!stats || !stats.periodTransactions) return 0;
-    let sum = 0;
-    stats.periodTransactions.forEach((t: any) => {
-      if (t.category?.trim().toLowerCase() === catName.trim().toLowerCase()) {
-        sum += (Number(t.amount) || 0);
+
+
+  // --- Category Budget Allocation Logic & Calculations ---
+  const totalIncomeSum = (incomes || []).reduce((sum, i) => {
+    const amount = (i.isVariable && i.periodOverrides && i.periodOverrides[currentPeriodId] !== undefined)
+      ? i.periodOverrides[currentPeriodId]
+      : (Number(i.amount) || 0);
+    return sum + amount;
+  }, 0);
+
+  const totalFixedSum = (fixedExpenses || []).reduce((sum, e) => {
+    const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
+      ? e.periodOverrides[currentPeriodId]
+      : (Number(e.amount) || 0);
+    switch (e.frequency) {
+      case 'quarterly': return sum + amount / 3;
+      case 'semi-annually': return sum + amount / 6;
+      case 'annually': return sum + amount / 12;
+      default: return sum + amount;
+    }
+  }, 0);
+
+  const totalSavingsSum = (config.monthlySavingsItems?.reduce((sum, item) => {
+    const amount = (item.isVariable && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined)
+      ? item.periodOverrides[currentPeriodId]
+      : (Number(item.amount) || 0);
+    return sum + amount;
+  }, 0) || 0) + (Number(config.monthlySavings) || 0);
+
+  const calculatedEverydayBudget = Math.max(0, Math.round(totalIncomeSum - totalFixedSum - totalSavingsSum));
+  const everydayBudget = stats?.disposablePot !== undefined ? Math.round(stats.disposablePot) : calculatedEverydayBudget;
+
+  // Category Budget Editing Modal State
+  const [editingCategory, setEditingCategory] = React.useState<any | null>(null);
+  const [editAmountText, setEditAmountText] = React.useState<string>('');
+
+  // Legacy Percentage Normalization on Open
+  React.useEffect(() => {
+    if (showCategoryBudgets && config.categories && config.categories.length > 0) {
+      const budgetValues = config.categories.map((c) => Number(c.budget) || 0);
+      const totalSum = budgetValues.reduce((a, b) => a + b, 0);
+      const maxVal = Math.max(...budgetValues, 0);
+
+      // If budgets look like legacy percentages (max <= 100 and sum <= 100) and everydayBudget > 500, convert to SEK
+      if (maxVal <= 100 && totalSum <= 100 && totalSum > 0 && everydayBudget > 500) {
+        const normalized = config.categories.map((c) => {
+          if (!c.budget || Number(c.budget) <= 0) return { ...c, budget: undefined };
+          const converted = Math.round((everydayBudget * Number(c.budget)) / 100);
+          return { ...c, budget: converted > 0 ? converted : undefined };
+        });
+        setConfig({ ...config, categories: normalized });
       }
-    });
-    return sum;
-  };
+    }
+  }, [showCategoryBudgets, everydayBudget]);
 
-  const totalBudgetPot = stats?.periodBudgetCents ? stats.periodBudgetCents / 100 : (stats?.disposablePot || 0);
+  const totalAllocated = (config.categories || []).reduce((sum, c) => {
+    const val = Number(c.budget) || 0;
+    return sum + (val > 0 ? val : 0);
+  }, 0);
 
-  const getCategoryBudgetPct = (cat: any) => {
-    if (cat.budget === undefined || cat.budget === null) return 0;
-    return Number(cat.budget) || 0;
-  };
+  const remainingToAllocate = everydayBudget - totalAllocated;
+  const isOverAllocated = remainingToAllocate < 0;
 
-  const getCategoryBudgetKr = (cat: any) => {
-    const pct = getCategoryBudgetPct(cat);
-    return Math.round((totalBudgetPot * pct) / 100);
-  };
-
-  const totalAllocatedPercentage = (config.categories || []).reduce(
-    (sum, c) => sum + getCategoryBudgetPct(c),
-    0
-  );
-  const totalAllocatedKronor = Math.round((totalBudgetPot * totalAllocatedPercentage) / 100);
-  const remainingPercentage = 100 - totalAllocatedPercentage;
-  const remainingToAllocate = Math.round((totalBudgetPot * remainingPercentage) / 100);
-
-  const handleDistributeEvenly = () => {
+  // Automatic Distribution (Secondary choice requested by user)
+  const handleAutoDistribute = () => {
     const cats = config.categories || [];
-    if (cats.length === 0) return;
-    const basePct = Math.floor(100 / cats.length);
-    let remainder = 100 - basePct * cats.length;
-    const updatedCategories = cats.map((c) => {
-      const added = remainder > 0 ? 1 : 0;
-      if (remainder > 0) remainder--;
-      return { ...c, budget: basePct + added };
+    if (cats.length === 0 || everydayBudget <= 0) return;
+
+    // Target amount to distribute: if 0 allocated, distribute everydayBudget; else distribute remainingToAllocate across unbudgeted
+    const unbudgetedCats = cats.filter((c) => !c.budget || Number(c.budget) <= 0);
+    const targetPool = unbudgetedCats.length > 0 ? unbudgetedCats : cats;
+
+    const amountPerCat = Math.floor(everydayBudget / targetPool.length / 50) * 50; // round to nearest 50 kr
+
+    const updated = cats.map((c) => {
+      if (targetPool.some((t) => t.name === c.name)) {
+        return { ...c, budget: amountPerCat > 0 ? amountPerCat : 500 };
+      }
+      return c;
     });
+
+    setConfig({ ...config, categories: updated });
+  };
+
+  // Auto-adapt down if over-allocated
+  const handleAutoAdaptDown = () => {
+    if (!isOverAllocated || totalAllocated <= 0 || everydayBudget <= 0) return;
+    const ratio = everydayBudget / totalAllocated;
+
+    const updated = (config.categories || []).map((c) => {
+      if (!c.budget || Number(c.budget) <= 0) return c;
+      const scaled = Math.round((Number(c.budget) * ratio) / 50) * 50;
+      return { ...c, budget: scaled > 0 ? scaled : undefined };
+    });
+
+    setConfig({ ...config, categories: updated });
+  };
+
+  const handleOpenEditCategoryModal = (cat: any) => {
+    setEditingCategory(cat);
+    setEditAmountText(cat.budget && Number(cat.budget) > 0 ? String(Number(cat.budget)) : '');
+  };
+
+  const handleSaveCategoryBudget = (newAmount?: number) => {
+    if (!editingCategory) return;
+    const finalAmount = newAmount !== undefined ? newAmount : (Number(editAmountText.replace(/\s/g, '')) || 0);
+
+    const updatedCategories = (config.categories || []).map((c) => {
+      if (c.name === editingCategory.name) {
+        return { ...c, budget: finalAmount > 0 ? finalAmount : undefined };
+      }
+      return c;
+    });
+
     setConfig({ ...config, categories: updatedCategories });
+    setEditingCategory(null);
   };
 
   if (showCategoryBudgets) {
@@ -179,7 +241,7 @@ export function BudgetView({
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        className="space-y-6 font-sans"
+        className="space-y-5 font-sans"
       >
         {/* Top Header */}
         <div className="flex items-center justify-between px-1">
@@ -197,57 +259,62 @@ export function BudgetView({
           <div className="w-12" />
         </div>
 
-        {/* Hero Allocation Status Card */}
-        <div className="bg-white/[0.045] backdrop-blur-[20px] border border-white/[0.03] rounded-[24px] p-5 space-y-4 shadow-none">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block mb-1">
-                Kvar att fördela
-              </span>
-              <div className="flex items-baseline gap-2">
-                <span className={`text-2xl sm:text-3xl font-semibold font-amount tabular-nums ${
-                  remainingPercentage < 0 ? 'text-rose-400' : remainingPercentage === 0 ? 'text-[#8B9CFF]' : 'text-white'
-                }`}>
-                  {remainingPercentage}%
-                </span>
-                <span className="text-xs font-normal text-[#9CA6BC] tabular-nums">
-                  ({formatAmount(Math.abs(remainingToAllocate), config.language)} {config.currency})
-                </span>
-              </div>
-            </div>
+        {/* Concept & Hero Allocation Summary Card */}
+        <div className="bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[24px] p-5 space-y-4 shadow-none">
+          <p className="text-xs text-[var(--text-secondary)] opacity-85 leading-relaxed border-b border-[var(--border-color)]/30 dark:border-white/[0.035] pb-3">
+            Dejz har redan räknat bort dina fasta kostnader ({formatAmount(totalFixedSum, config.language)} kr). Nu bestämmer du hur du vill fördela din kvarvarande <span className="font-semibold text-[var(--text-primary)]">vardagsbudget</span>.
+          </p>
 
-            <div className="text-right flex flex-col items-end">
-              <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block mb-1">
+          <div className="grid grid-cols-3 gap-2 pt-1 text-center sm:text-left">
+            <div>
+              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block opacity-70 mb-0.5">
                 Vardagsbudget
               </span>
-              <span className="text-base sm:text-lg font-semibold text-white font-amount tabular-nums">
-                {formatAmount(totalBudgetPot, config.language)} {config.currency}
+              <span className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                {formatAmount(everydayBudget, config.language)} kr
               </span>
-              <span className="text-[11px] text-[#9CA6BC] font-normal">
-                Fördelat: {totalAllocatedPercentage}% ({formatAmount(totalAllocatedKronor, config.language)} kr)
+            </div>
+
+            <div>
+              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block opacity-70 mb-0.5">
+                Fördelat
+              </span>
+              <span className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                {formatAmount(totalAllocated, config.language)} kr
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block opacity-70 mb-0.5">
+                {isOverAllocated ? 'Överfördelat' : 'Kvar att fördela'}
+              </span>
+              <span className={`text-base sm:text-lg font-bold font-amount tabular-nums ${
+                isOverAllocated ? 'text-rose-400' : remainingToAllocate === 0 ? 'text-[#8B9CFF]' : 'text-emerald-400'
+              }`}>
+                {formatAmount(Math.abs(remainingToAllocate), config.language)} kr
               </span>
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="w-full h-2 bg-white/[0.07] rounded-full overflow-hidden">
+          {/* Simple Secondary Progress Bar */}
+          <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
             <div 
               className={`h-full rounded-full transition-all duration-300 ${
-                remainingPercentage < 0 ? 'bg-rose-500' : 'bg-[#8B9CFF]'
+                isOverAllocated ? 'bg-rose-500' : 'bg-[var(--accent-color)] dark:bg-[#8B9CFF]'
               }`}
-              style={{ width: `${Math.min(100, totalAllocatedPercentage)}%` }}
+              style={{ width: `${Math.min(100, Math.round((totalAllocated / (everydayBudget || 1)) * 100))}%` }}
             />
           </div>
 
-          {/* Quick Actions */}
-          <div className="flex items-center justify-between pt-2 border-t border-white/[0.04] gap-2">
+          {/* Secondary Quick Actions */}
+          <div className="flex items-center justify-between pt-1 border-t border-[var(--border-color)]/30 dark:border-white/[0.035] gap-2">
             <button
               type="button"
-              onClick={handleDistributeEvenly}
-              className="text-xs font-medium text-[#8B9CFF] hover:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-[#818cf8]/[0.12] transition-colors cursor-pointer"
+              onClick={handleAutoDistribute}
+              className="text-xs font-semibold text-[#8B9CFF] hover:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-[#818cf8]/[0.12] transition-all cursor-pointer active:scale-95"
             >
               <Sparkles size={13} />
-              Fördela potten jämnt
+              Fördela automatiskt
             </button>
 
             <button
@@ -256,7 +323,7 @@ export function BudgetView({
                 const updatedCategories = (config.categories || []).map((c) => ({ ...c, budget: undefined }));
                 setConfig({ ...config, categories: updatedCategories });
               }}
-              className="text-xs font-normal text-[#9CA6BC] hover:text-rose-400 flex items-center gap-1 py-1 px-2 transition-colors cursor-pointer"
+              className="text-xs font-medium text-[var(--text-secondary)] hover:text-rose-400 flex items-center gap-1 py-1 px-2.5 transition-colors cursor-pointer opacity-80"
             >
               <RotateCcw size={12} />
               Nollställ
@@ -264,146 +331,220 @@ export function BudgetView({
           </div>
         </div>
 
-        {/* Categories List */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">
-              Kategorier ({config.categories?.length || 0})
-            </span>
+        {/* Over-allocation Notice Banner if budget decreased */}
+        {isOverAllocated && (
+          <div className="p-3.5 rounded-[20px] bg-rose-500/10 border border-rose-500/20 text-rose-300 flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="font-semibold text-rose-400 shrink-0">⚠️</span>
+              <p className="leading-tight">
+                Din vardagsbudget har minskat. Justera dina kategorier med <span className="font-bold">{formatAmount(Math.abs(remainingToAllocate))} kr</span>.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleAutoAdaptDown}
+              className="px-2.5 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-bold text-[11px] shrink-0 cursor-pointer active:scale-95 transition-all"
+            >
+              Anpassa automatiskt
+            </button>
           </div>
-          
-          <div className="space-y-2.5">
-            {[...(config.categories || [])]
-              .sort((a, b) => {
-                const indexA = initialCategoryNames.indexOf(a.name);
-                const indexB = initialCategoryNames.indexOf(b.name);
-                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-                return getCategoryBudgetPct(b) - getCategoryBudgetPct(a);
-              })
-              .map((cat) => {
-              const iconName = cat.icon;
-              const Icon = ICON_MAP[iconName];
-              const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
-              const variableSpent = Math.round(getVariableSpentForCategory(cat.name));
-              const catPct = getCategoryBudgetPct(cat);
-              const catKr = getCategoryBudgetKr(cat);
+        )}
 
-              return (
-                <div 
-                  key={cat.name}
-                  className="p-3.5 sm:p-4 rounded-[18px] border border-white/[0.025] bg-white/[0.04] backdrop-blur-[18px] flex flex-col gap-2.5 transition-all"
-                >
-                  <div className="flex items-center justify-between gap-2.5">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center shrink-0">
+        {/* Clean Continuous Category List */}
+        <div className="space-y-2">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60 block">
+            Kategorier ({config.categories?.length || 0})
+          </span>
+          
+          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[24px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
+            {[...(config.categories || [])]
+              .map((cat) => {
+                const iconName = cat.icon;
+                const Icon = ICON_MAP[iconName];
+                const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
+                const catBudget = Number(cat.budget) || 0;
+
+                return (
+                  <div 
+                    key={cat.name}
+                    onClick={() => handleOpenEditCategoryModal(cat)}
+                    className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-[var(--surface-muted)]/50 dark:hover:bg-white/[0.03] transition-all cursor-pointer group active:scale-[0.99]"
+                  >
+                    {/* Left: Icon & Name & Discrete Fixed Info */}
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <div className="w-9 h-9 rounded-xl bg-[var(--surface-muted)] dark:bg-white/[0.04] border border-[var(--border-color)]/30 dark:border-white/[0.035] text-[var(--text-primary)] flex items-center justify-center shrink-0">
                         {isEmojiString(iconName) ? (
-                          <span className="text-sm leading-none">{iconName}</span>
+                          <span className="text-base leading-none">{iconName}</span>
                         ) : Icon ? (
-                          <Icon size={15} strokeWidth={1.75} className="text-[#C7CDDC]" />
+                          <Icon size={16} strokeWidth={1.8} className="text-[var(--text-primary)]" />
                         ) : (
-                          <div className="w-1.5 h-1.5 rounded-full bg-[#C7CDDC]" />
+                          <div className="w-2 h-2 rounded-full bg-[var(--text-primary)]" />
                         )}
                       </div>
-                      <span className="text-[13.5px] font-medium text-white truncate">
-                        {cat.name}
-                      </span>
+
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate block tracking-tight">
+                          {cat.name}
+                        </span>
+                        {fixedSpent > 0 ? (
+                          <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-70 block truncate">
+                            Fasta kostnader: {formatAmount(fixedSpent, config.language)} kr · Redan avräknat
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-50 block truncate">
+                            Rörlig vardagsbudget
+                          </span>
+                        )}
+                      </div>
                     </div>
 
+                    {/* Right: Budgeted Amount Pill */}
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-sm font-semibold font-amount tabular-nums text-white">
-                        {formatAmount(catKr, config.language)} kr
-                      </span>
-                      <div className="relative w-16">
-                        <input
-                          type="number"
-                          min={0}
-                          max={100}
-                          step={1}
-                          placeholder="0"
-                          value={catPct > 0 ? catPct : ''}
-                          onChange={(e) => {
-                            if (e.target.value === '') {
-                              const updatedCategories = (config.categories || []).map((c) => 
-                                c.name === cat.name ? { ...c, budget: undefined } : c
-                              );
-                              setConfig({ ...config, categories: updatedCategories });
-                              return;
-                            }
-                            let val = Math.round(Number(e.target.value));
-                            if (val < 0) val = 0;
-                            if (val > 100) val = 100;
-                            const updatedCategories = (config.categories || []).map((c) => 
-                              c.name === cat.name ? { ...c, budget: val } : c
-                            );
-                            setConfig({ ...config, categories: updatedCategories });
-                          }}
-                          className="w-full h-8 px-2 rounded-xl bg-white/[0.04] border border-white/[0.035] text-xs font-semibold text-white text-right pr-5 focus:outline-none focus:border-[#8B9CFF] tabular-nums"
-                        />
-                        <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-[#9CA6BC] pointer-events-none">
-                          %
-                        </span>
+                      <div className={`px-3 py-1.5 rounded-xl border transition-all text-xs font-bold font-amount tabular-nums flex items-center gap-1 ${
+                        catBudget > 0 
+                          ? 'bg-[var(--surface-muted)] dark:bg-white/[0.08] text-[var(--text-primary)] border-[var(--border-color)] dark:border-white/[0.08] group-hover:border-[var(--accent-color)]/50' 
+                          : 'bg-transparent text-[var(--text-secondary)] opacity-50 border-transparent group-hover:opacity-80'
+                      }`}>
+                        <span>{catBudget > 0 ? `${formatAmount(catBudget, config.language)} kr` : '0 kr'}</span>
                       </div>
                     </div>
                   </div>
-
-                  {/* Range Slider */}
-                  <div className="px-0.5">
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={1}
-                      value={catPct}
-                      onChange={(e) => {
-                        const val = Math.round(Number(e.target.value));
-                        const updatedCategories = (config.categories || []).map((c) => 
-                          c.name === cat.name ? { ...c, budget: val } : c
-                        );
-                        setConfig({ ...config, categories: updatedCategories });
-                      }}
-                      className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-[#8B9CFF] focus:outline-none bg-white/[0.07]"
-                    />
-                  </div>
-
-                  {(fixedSpent > 0 || variableSpent > 0) && (
-                    <div className="flex items-center justify-between text-[11px] font-normal text-[#9CA6BC] px-0.5">
-                      {variableSpent > 0 ? (
-                        <span>Spenderat: {formatAmount(variableSpent, config.language)} kr</span>
-                      ) : <span />}
-                      {fixedSpent > 0 && (
-                        <span>(Fasta: {formatAmount(fixedSpent, config.language)} kr)</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Bottom Save & Exit Buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
           <button
+            type="button"
             onClick={() => {
               if (confirm("Är du säker på att du vill nollställa all kategoribudgetering?")) {
-                const updatedCategories = config.categories.map((c) => ({ ...c, budget: undefined }));
+                const updatedCategories = (config.categories || []).map((c) => ({ ...c, budget: undefined }));
                 setConfig({ ...config, categories: updatedCategories });
               }
             }}
-            className="w-full h-11 rounded-full border border-rose-500/20 bg-rose-500/05 hover:bg-rose-500/10 text-rose-400 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full h-11 rounded-full border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-rose-400 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
           >
             <Trash2 size={14} />
             Nollställ all budgetering
           </button>
           
           <button
+            type="button"
             onClick={handleCloseCategoryBudgets}
-            className="w-full h-11 rounded-full bg-[#818cf8]/[0.18] hover:bg-[#818cf8]/[0.25] text-white border border-[#8B9CFF]/30 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full h-11 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-xs"
           >
-            <Check size={14} />
+            <Check size={14} strokeWidth={2.5} />
             Spara och gå tillbaka
           </button>
         </div>
+
+        {/* Modal for Editing Individual Category Budget */}
+        <AnimatePresence>
+          {editingCategory && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="w-full max-w-sm bg-[var(--surface-color)] border border-[var(--border-color)]/80 rounded-[28px] p-5 space-y-5 shadow-2xl relative"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-[var(--surface-muted)] text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                    {isEmojiString(editingCategory.icon) ? (
+                      <span className="text-lg">{editingCategory.icon}</span>
+                    ) : ICON_MAP[editingCategory.icon] ? (
+                      React.createElement(ICON_MAP[editingCategory.icon], { size: 18, strokeWidth: 2 })
+                    ) : (
+                      <div className="w-2 h-2 rounded-full bg-[var(--text-primary)]" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-bold text-base text-[var(--text-primary)] truncate">
+                      Budget för {editingCategory.name}
+                    </h3>
+                    <p className="text-xs text-[var(--text-secondary)] opacity-80">
+                      Anges i kronor per månad
+                    </p>
+                  </div>
+                </div>
+
+                {getFixedSpentForCategory(editingCategory.name) > 0 && (
+                  <div className="p-3 rounded-2xl bg-[var(--surface-muted)] border border-[var(--border-color)]/40 text-xs text-[var(--text-secondary)] leading-relaxed">
+                    ℹ️ Fasta kostnader på <span className="font-bold text-[var(--text-primary)]">{formatAmount(Math.round(getFixedSpentForCategory(editingCategory.name)))} kr</span> är redan avräknade. Här sätter du enbart extra rörliga pengar.
+                  </div>
+                )}
+
+                {/* Quick Presets */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] opacity-60 block px-1">
+                    Snabblänkar
+                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {[500, 1000, 2000, 3000, 0].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => handleSaveCategoryBudget(preset)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 ${
+                          (Number(editAmountText) || 0) === preset
+                            ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)]'
+                            : 'bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)]/50 hover:border-[var(--border-color)]'
+                        }`}
+                      >
+                        {preset === 0 ? '0 kr' : `+${formatAmount(preset)} kr`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Direct SEK Input */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] opacity-60 block px-1">
+                    Ange belopp (kr)
+                  </label>
+                  <div className="relative flex items-center">
+                    <input
+                      type="number"
+                      min={0}
+                      step={50}
+                      placeholder="0"
+                      autoFocus
+                      value={editAmountText}
+                      onChange={(e) => setEditAmountText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveCategoryBudget();
+                      }}
+                      className="w-full h-12 px-4 rounded-2xl bg-[var(--surface-muted)] border border-[var(--border-color)] focus:border-[var(--accent-color)] text-base font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none transition-all"
+                    />
+                    <span className="absolute right-4 text-sm font-semibold text-[var(--text-secondary)] pointer-events-none">
+                      kr
+                    </span>
+                  </div>
+                </div>
+
+                {/* Modal Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditingCategory(null)}
+                    className="px-4 py-2.5 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                  >
+                    Avbryt
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSaveCategoryBudget()}
+                    className="px-5 py-2.5 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-xs"
+                  >
+                    Spara
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </motion.div>
     );
   }
