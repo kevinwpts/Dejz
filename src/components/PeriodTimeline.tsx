@@ -22,16 +22,6 @@ export function PeriodTimeline({
   const dayRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
   const isInitialMount = useRef(true);
 
-  // Tracks the day currently aligned with the center of the timeline
-  const [activeCenterTime, setActiveCenterTime] = useState<number | null>(null);
-  const activeCenterTimeRef = useRef<number | null>(null);
-
-  // Flags to prevent programmatic scroll from fighting user touch/drag gestures
-  const isProgrammaticScroll = useRef(false);
-  const isInternalSelection = useRef(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const selectDebounceRef = useRef<NodeJS.Timeout | null>(null);
-
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
@@ -63,8 +53,8 @@ export function PeriodTimeline({
     setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
   }, []);
 
-  // Function to center any given day card element directly in the viewport center
-  const centerElement = useCallback((el: HTMLElement | null, behavior: ScrollBehavior = 'smooth') => {
+  // Smoothly scroll the selected day into comfortable view without artificial blank space
+  const scrollToElement = useCallback((el: HTMLElement | null, behavior: ScrollBehavior = 'smooth') => {
     if (!el || !scrollContainerRef.current) return;
     const container = scrollContainerRef.current;
 
@@ -72,95 +62,39 @@ export function PeriodTimeline({
     const elOffsetLeft = el.offsetLeft;
     const elWidth = el.offsetWidth;
 
-    // Center target: align the middle of the element with the middle of the container
+    // Center if in middle, clamp to 0 at start (no left blank space)
     const targetScrollLeft = elOffsetLeft + elWidth / 2 - containerWidth / 2;
+    const maxScroll = Math.max(0, container.scrollWidth - containerWidth);
+    const clampedScroll = Math.max(0, Math.min(maxScroll, targetScrollLeft));
 
-    if (Math.abs(container.scrollLeft - targetScrollLeft) > 1.5) {
-      isProgrammaticScroll.current = true;
+    if (Math.abs(container.scrollLeft - clampedScroll) > 1) {
       container.scrollTo({
-        left: Math.max(0, targetScrollLeft),
+        left: clampedScroll,
         behavior,
       });
 
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-      scrollTimeoutRef.current = setTimeout(() => {
-        isProgrammaticScroll.current = false;
+      setTimeout(() => {
         checkScrollability();
-      }, behavior === 'auto' ? 50 : 380);
+      }, behavior === 'auto' ? 50 : 350);
     }
   }, [checkScrollability]);
 
-  // Real-time detection: find the day card closest to the horizontal center of the viewport
-  const handleScroll = useCallback(() => {
-    checkScrollability();
-
-    if (isProgrammaticScroll.current) return;
-
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const containerCenter = container.scrollLeft + container.clientWidth / 2;
-    let closestDay: { time: number; dateStr: string; element: HTMLElement } | null = null;
-    let minDistance = Infinity;
-
-    dayRefs.current.forEach((btn, time) => {
-      if (!btn) return;
-      const btnCenter = btn.offsetLeft + btn.offsetWidth / 2;
-      const distance = Math.abs(btnCenter - containerCenter);
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestDay = {
-          time,
-          dateStr: btn.getAttribute('data-date') || '',
-          element: btn,
-        };
-      }
-    });
-
-    if (closestDay && closestDay.time !== activeCenterTimeRef.current) {
-      activeCenterTimeRef.current = closestDay.time;
-      setActiveCenterTime(closestDay.time);
-
-      // Light haptic tick as we pass through days
-      feedback.slider();
-
-      // Flag that this selection was initiated by the user scrolling the timeline
-      isInternalSelection.current = true;
-
-      if (selectDebounceRef.current) clearTimeout(selectDebounceRef.current);
-      selectDebounceRef.current = setTimeout(() => {
-        if (closestDay) {
-          onSelectDate(new Date(closestDay.dateStr));
-        }
-      }, 50);
-    }
-  }, [checkScrollability, onSelectDate]);
-
-  // Synchronize on mount and whenever selectedTime changes externally (e.g. "Today" button)
+  // Synchronize on mount and whenever selectedTime changes (e.g. app load, reset to today)
   useEffect(() => {
     if (!selectedTime) return;
-
-    // If change was initiated by the user scrolling the timeline, do not trigger programmatic scrollTo!
-    if (isInternalSelection.current) {
-      isInternalSelection.current = false;
-      return;
-    }
-
-    activeCenterTimeRef.current = selectedTime;
-    setActiveCenterTime(selectedTime);
 
     const timer = setTimeout(() => {
       const el = dayRefs.current.get(selectedTime) ||
         scrollContainerRef.current?.querySelector<HTMLButtonElement>(`[data-time="${selectedTime}"]`);
       if (el) {
-        centerElement(el, isInitialMount.current ? 'auto' : 'smooth');
+        scrollToElement(el, isInitialMount.current ? 'auto' : 'smooth');
       }
       isInitialMount.current = false;
       checkScrollability();
-    }, 30);
+    }, 40);
 
     return () => clearTimeout(timer);
-  }, [selectedTime, calendarDays, centerElement, checkScrollability]);
+  }, [selectedTime, calendarDays, scrollToElement, checkScrollability]);
 
   // Event listeners for scroll, wheel and window resize
   useEffect(() => {
@@ -168,6 +102,10 @@ export function PeriodTimeline({
     if (!container) return;
 
     checkScrollability();
+
+    const handleScroll = () => {
+      checkScrollability();
+    };
 
     // Wheel event handler: maps vertical scroll wheel to horizontal timeline movement
     const handleWheel = (e: WheelEvent) => {
@@ -186,19 +124,16 @@ export function PeriodTimeline({
       container.removeEventListener('scroll', handleScroll);
       container.removeEventListener('wheel', handleWheel);
       window.removeEventListener('resize', checkScrollability);
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-      if (selectDebounceRef.current) clearTimeout(selectDebounceRef.current);
     };
-  }, [calendarDays, checkScrollability, handleScroll]);
+  }, [calendarDays, checkScrollability]);
 
   // Step prev/next day via arrow buttons
   const handleStep = (direction: 'prev' | 'next') => {
-    const currentTime = activeCenterTime || selectedTime;
     const currentIndex = calendarDays.findIndex((d: any) => {
       if (!d.date) return false;
       const dDate = new Date(d.date);
       const dTime = new Date(dDate.getFullYear(), dDate.getMonth(), dDate.getDate()).getTime();
-      return dTime === currentTime;
+      return dTime === selectedTime;
     });
 
     const targetIndex = direction === 'prev' ? currentIndex - 1 : currentIndex + 1;
@@ -208,13 +143,11 @@ export function PeriodTimeline({
       const targetTime = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate()).getTime();
       const el = dayRefs.current.get(targetTime);
 
-      isInternalSelection.current = false;
-      activeCenterTimeRef.current = targetTime;
-      setActiveCenterTime(targetTime);
+      feedback.selection();
       onSelectDate(targetDate);
 
       if (el) {
-        centerElement(el, 'smooth');
+        scrollToElement(el, 'smooth');
       }
     }
   };
@@ -257,25 +190,16 @@ export function PeriodTimeline({
     e.stopPropagation();
 
     const targetEl = e.currentTarget;
-    isInternalSelection.current = false;
-    activeCenterTimeRef.current = dayTime;
-    setActiveCenterTime(dayTime);
+    feedback.selection();
     onSelectDate(new Date(dayDate));
-    centerElement(targetEl, 'smooth');
+    scrollToElement(targetEl, 'smooth');
   };
-
-  const effectiveActiveTime = activeCenterTime || selectedTime;
 
   return (
     <div className="relative group/timeline w-full my-1 sm:my-1.5 font-sans overflow-visible" id="period_timeline_wrapper">
-      {/* Top Center Focus Indicator */}
-      <div className="absolute left-1/2 -top-1 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center">
-        <div className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_6px_var(--accent-color)]" />
-      </div>
-
       {/* Left Scroll Arrow Button */}
       {canScrollLeft && (
-        <div className="hidden md:flex absolute left-1 top-0 bottom-0 z-20 items-center pointer-events-none">
+        <div className="hidden md:flex absolute -left-2.5 top-0 bottom-0 z-20 items-center pointer-events-none">
           <button
             type="button"
             onClick={() => handleStep('prev')}
@@ -288,14 +212,14 @@ export function PeriodTimeline({
         </div>
       )}
 
-      {/* Horizontal Scrollable Day Strip with Centering Spacers */}
+      {/* Horizontal Scrollable Day Strip - Clean natural alignment */}
       <div
         ref={scrollContainerRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative flex items-center gap-1.5 overflow-x-auto py-2 px-0 no-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory"
+        className="relative flex items-center gap-1.5 overflow-x-auto py-1 px-1 no-scrollbar cursor-grab active:cursor-grabbing"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -303,17 +227,11 @@ export function PeriodTimeline({
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        {/* Left Centering Spacer: exactly half container width minus half item width, allowing Day 1 to reach center */}
-        <div
-          className="shrink-0 w-[calc(50%-24px)] sm:w-[calc(50%-26px)] pointer-events-none"
-          aria-hidden="true"
-        />
-
         {calendarDays.map((day: any, index: number) => {
           if (!day.date) return null;
           const dayDate = new Date(day.date);
           const dayTime = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate()).getTime();
-          const isSelected = effectiveActiveTime === dayTime;
+          const isSelected = selectedTime === dayTime;
           const isRealToday = dayTime === todayTime;
           const dayNumber = dayDate.getDate();
 
@@ -336,7 +254,7 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`snap-center flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[52px] h-[52px] sm:h-[56px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[52px] h-[52px] sm:h-[56px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
                   ? 'bg-[#181818] text-white dark:bg-white dark:text-[#181818] shadow-[0_4px_14px_rgba(0,0,0,0.18)] dark:shadow-[0_4px_14px_rgba(255,255,255,0.12)] scale-105 font-bold z-10 opacity-100 ring-2 ring-accent/50'
                   : isRealToday
@@ -374,24 +292,18 @@ export function PeriodTimeline({
 
         {/* Lön / Payday Box at the end of the timeline */}
         <div
-          className="snap-center flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[52px] h-[52px] sm:h-[56px] p-1.5 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-75"
+          className="flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[52px] h-[52px] sm:h-[56px] p-1.5 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-75 ml-0.5"
         >
           <span className="text-[12px] leading-none">💸</span>
           <span className="text-[8px] sm:text-[8.5px] font-bold tracking-wider uppercase">
             {isEn ? 'Payday' : 'Lön'}
           </span>
         </div>
-
-        {/* Right Centering Spacer: exactly half container width minus half item width, allowing the last item to reach center */}
-        <div
-          className="shrink-0 w-[calc(50%-24px)] sm:w-[calc(50%-26px)] pointer-events-none"
-          aria-hidden="true"
-        />
       </div>
 
       {/* Right Scroll Arrow Button */}
       {canScrollRight && (
-        <div className="hidden md:flex absolute right-1 top-0 bottom-0 z-20 items-center pointer-events-none">
+        <div className="hidden md:flex absolute -right-2.5 top-0 bottom-0 z-20 items-center pointer-events-none">
           <button
             type="button"
             onClick={() => handleStep('next')}
