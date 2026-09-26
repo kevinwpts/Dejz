@@ -53,7 +53,7 @@ export function TransactionItem({
   const actionOpacity = useTransform(x, [-84, -20, 0], [1, 0.7, 0]);
 
   const getLocale = () => {
-    const lang = config.language || 'sv';
+    const lang = config?.language || 'sv';
     const mapping: Record<string, string> = {
       sv: 'sv-SE',
       en: 'en-US',
@@ -65,7 +65,7 @@ export function TransactionItem({
   };
 
   const getL10n = (sv: string, en: string, no?: string, da?: string, fi?: string) => {
-    const lang = config.language || 'sv';
+    const lang = config?.language || 'sv';
     if (lang === 'sv') return sv;
     if (lang === 'no') return no || sv;
     if (lang === 'da') return da || sv;
@@ -97,7 +97,7 @@ export function TransactionItem({
 
   const renderCategoryBadge = (categoryName: string, amount?: number) => {
     const searchCat = (categoryName || '').trim().toLowerCase();
-    const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+    const cat = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
       c => c.name.trim().toLowerCase() === searchCat
     );
     const iconKey = cat?.icon || getCategoryIconName(categoryName || '');
@@ -119,7 +119,7 @@ export function TransactionItem({
         ) : null}
         <span className="text-[12px] font-medium text-[var(--text-secondary)] tracking-tight whitespace-nowrap">
           {capitalize(categoryName || '')}
-          {amount !== undefined && <span className="ml-1 opacity-60">({formatAmount(amount, config.language)})</span>}
+          {amount !== undefined && <span className="ml-1 opacity-60">({formatAmount(amount, config?.language || 'sv')})</span>}
         </span>
       </div>
     );
@@ -247,8 +247,8 @@ export function TransactionItem({
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
             <p className={`text-[14.5px] sm:text-[15px] font-bold whitespace-nowrap tracking-tight ${amountColor}`}>
               <span className="opacity-70 mr-0.5 text-[13px] font-bold">{transaction.type === 'income' ? '+' : '-'}</span>
-              <span className="font-amount tabular-nums font-bold tracking-tight">{formatAmount(finalAmount, config.language)}</span>
-              <span className="text-[11px] font-semibold opacity-60 ml-1">{config.currency}</span>
+              <span className="font-amount tabular-nums font-bold tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
+              <span className="text-[11px] font-semibold opacity-60 ml-1">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixed ? (
               <p className="text-[11px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5 tabular-nums">
@@ -302,7 +302,7 @@ export function TransactionItem({
                   {merchantName}
                 </span>
                 <span className="font-amount font-bold text-rose-500 tabular-nums">
-                  {formatAmount(finalAmount, config.language)} {config.currency || 'kr'}
+                  {formatAmount(finalAmount, config?.language || 'sv')} {config?.currency || 'kr'}
                 </span>
               </div>
 

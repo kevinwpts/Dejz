@@ -18,8 +18,8 @@ export function DailySummaryWidget({
   onRemove,
   isCustomizing,
 }: DailySummaryWidgetProps) {
-  const isEn = config.language === 'en';
-  const currency = config.currency || 'kr';
+  const isEn = config?.language === 'en';
+  const currency = config?.currency || 'kr';
 
   const isToday = new Date(selectedDate).toDateString() === new Date().toDateString();
   const dailyAvailable = stats?.availableTodayCents ? stats.availableTodayCents / 100 : (stats?.dailyBudget || 0);

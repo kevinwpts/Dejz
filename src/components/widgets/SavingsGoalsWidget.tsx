@@ -16,9 +16,9 @@ export function SavingsGoalsWidget({
   onRemove,
   isCustomizing,
 }: SavingsGoalsWidgetProps) {
-  const isEn = config.language === 'en';
-  const currency = config.currency || 'kr';
-  const goals = (config.savingsGoals || []).filter((g) => !g.isCompleted).slice(0, 2);
+  const isEn = config?.language === 'en';
+  const currency = config?.currency || 'kr';
+  const goals = (config?.savingsGoals || []).filter((g) => !g.isCompleted).slice(0, 2);
 
   return (
     <div className="bg-white/[0.035] backdrop-blur-xl border border-white/[0.08] rounded-[24px] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.15)] relative group transition-all">

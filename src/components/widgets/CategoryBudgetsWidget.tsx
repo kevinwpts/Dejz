@@ -21,10 +21,10 @@ export function CategoryBudgetsWidget({
   onRemove,
   isCustomizing,
 }: CategoryBudgetsWidgetProps) {
-  const isEn = config.language === 'en';
-  const currency = config.currency || 'kr';
+  const isEn = config?.language === 'en';
+  const currency = config?.currency || 'kr';
 
-  const categoryBudgets = (config.categories || [])
+  const categoryBudgets = (config?.categories || [])
     .filter((c) => c.budget && c.budget > 0)
     .slice(0, 3)
     .map((cat) => {

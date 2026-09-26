@@ -18,14 +18,14 @@ export function MonthlyPulseWidget({
   onRemove,
   isCustomizing,
 }: MonthlyPulseWidgetProps) {
-  const isEn = config.language === 'en';
-  const currency = config.currency || 'kr';
+  const isEn = config?.language === 'en';
+  const currency = config?.currency || 'kr';
 
   const totalPot = stats?.periodBudgetCents ? stats.periodBudgetCents / 100 : (stats?.disposablePot || 0);
   const totalSpent = stats?.totalSpentInPeriod ? stats.totalSpentInPeriod / 100 : (stats?.periodSpent || 0);
   const remainingPot = stats?.remainingPeriodCents ? stats.remainingPeriodCents / 100 : (stats?.periodRemaining || 0);
   const daysLeft = stats?.daysLeft ?? stats?.remainingDays ?? 0;
-  const savingsPot = Number(config.savingsPot) || 0;
+  const savingsPot = Number(config?.savingsPot) || 0;
 
   const spentPercentage = totalPot > 0 ? Math.min(100, Math.round((totalSpent / totalPot) * 100)) : 0;
 

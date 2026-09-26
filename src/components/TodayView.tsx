@@ -2,7 +2,6 @@ import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 import {
-  Wallet,
   RotateCcw,
   SlidersHorizontal,
   ChevronRight,
@@ -100,18 +99,18 @@ export function TodayView({
   const [isCustomizing, setIsCustomizing] = useState(false);
 
   const resolvedWidgets = useMemo(() => {
-    return getResolvedHomeWidgets(config.homeWidgets);
-  }, [config.homeWidgets]);
+    return getResolvedHomeWidgets(config?.homeWidgets);
+  }, [config?.homeWidgets]);
 
   const handleRemoveWidget = (widgetId: string) => {
-    if (!onUpdateConfig) return;
+    if (!onUpdateConfig || !config) return;
     const current = getResolvedHomeWidgets(config.homeWidgets);
     const updated = current.map((w) => (w.id === widgetId ? { ...w, enabled: false } : w));
     onUpdateConfig({ ...config, homeWidgets: updated });
   };
 
   const handleSaveWidgets = (updatedWidgets: HomeWidgetConfig[]) => {
-    if (!onUpdateConfig) return;
+    if (!onUpdateConfig || !config) return;
     onUpdateConfig({ ...config, homeWidgets: updatedWidgets });
   };
 
@@ -205,7 +204,7 @@ export function TodayView({
     });
 
     if (config.monthlySavingsItems) {
-      config.monthlySavingsItems.forEach((s: any) => {
+      config.monthlySavingsItems.forEach((s) => {
         if (s.deductionDay === day) {
           const amount =
             s.isVariable &&
@@ -218,8 +217,8 @@ export function TodayView({
           transactions.push({
             id: `fixed-sav-${s.id}`,
             amount,
-            type: "saving",
-            category: s.category || (config.language === "en" ? "Monthly Saving" : "Månadssparande"),
+            type: "expense",
+            category: config.language === "en" ? "Savings" : "Sparande",
             merchant: s.name,
             timestamp: normalizedSelectedDate.getTime(),
             isFixed: true,
@@ -235,28 +234,23 @@ export function TodayView({
   const categoryBudgetData = useMemo(() => {
     if (!stats || !config.categories || config.categories.length === 0) return [];
 
-    const periodTransactions = stats.periodTransactions || [];
-    const spendingTransactions = periodTransactions.filter(
-      (t: any) => t.type !== 'income' && t.category !== 'Spargris'
-    );
+    const categoriesWithBudget = config.categories.filter((c: any) => c.budget && Number(c.budget) > 0);
+    const pool = categoriesWithBudget.length > 0 ? categoriesWithBudget : config.categories;
 
-    const disposablePot = stats.disposablePot || 0;
-
-    return config.categories.map((cat, index) => {
+    return pool.map((cat: any, index: number) => {
       const name = cat.name;
-      const spent = spendingTransactions
-        .filter((t: any) => t.category === name)
-        .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
+      const spent = stats.periodTransactions
+        ? stats.periodTransactions
+            .filter((t: any) => t.category === name && t.type !== "income")
+            .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0)
+        : 0;
 
+      const hasBudget = cat.budget !== undefined && cat.budget !== null && cat.budget !== "" && Number(cat.budget) > 0;
       let budgetInKronor = 0;
-      let hasBudget = false;
 
-      if (cat.budget !== undefined && cat.budget > 0) {
-        const pct = cat.budget > 100 && disposablePot > 0 
-          ? (cat.budget / disposablePot) * 100 
-          : cat.budget;
-        budgetInKronor = disposablePot > 0 ? Math.round((pct / 100) * disposablePot) : 0;
-        hasBudget = budgetInKronor > 0;
+      if (hasBudget) {
+        const rawBudget = Number(cat.budget);
+        budgetInKronor = Math.round(rawBudget);
       }
 
       const remaining = budgetInKronor - Math.round(spent);
@@ -282,191 +276,332 @@ export function TodayView({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="space-y-6 relative font-sans"
+      className="space-y-8 relative font-sans pb-16"
     >
-      {/* Subtle atmospheric ambient glow effects behind Hem content */}
-      <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-full max-w-lg h-96 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.08),transparent_70%)] pointer-events-none -z-10" />
-      <div className="absolute top-96 -right-20 w-80 h-80 bg-[radial-gradient(circle_at_50%_50%,rgba(56,189,248,0.03),transparent_70%)] pointer-events-none -z-10" />
+      {/* Deep atmospheric tonal background fields for warmth, depth and luxury */}
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[450px] bg-[radial-gradient(circle_at_50%_20%,rgba(79,70,229,0.06),transparent_65%)] pointer-events-none -z-10 blur-2xl" />
+      <div className="absolute top-72 -left-20 w-[420px] h-[420px] bg-[radial-gradient(circle,rgba(124,58,237,0.04),transparent_65%)] pointer-events-none -z-10 blur-3xl" />
+      <div className="absolute top-[600px] -right-20 w-[450px] h-[450px] bg-[radial-gradient(circle,rgba(56,189,248,0.03),transparent_70%)] pointer-events-none -z-10 blur-3xl" />
 
-      {/* 1. HERO GREETING MODULE (Totalt kvar, Dagar till lön, Snabba actions, Budgetkategorier) */}
-      <div className="relative">
-        <GreetingModule
-          userName={userName}
-          availableForD={todayData?.availableForD || stats?.availableForD || 0}
-          currency={config.currency}
-          isToday={!!selectedDayData?.isToday}
-          date={normalizedSelectedDate}
-          language={config.language}
-          stats={stats}
-          t={t}
-          calendarDays={calendarDays}
-          setSelectedDate={setSelectedDate}
-          setCurrentPeriodDate={setCurrentPeriodDate}
-          periodStart={stats.periodStart}
-          periodEnd={stats.periodEnd}
-          isFuturePeriod={stats.isFuturePeriod}
-          isPastPeriod={stats.isPastPeriod}
-          periods={periods}
-          avatarUrl={avatarUrl}
-          onNavigate={onNavigate}
-          showFixedInCalendar={config.showFixedExpensesInCalendar}
-          isCurrentPeriod={isCurrentPeriod}
-          currentPeriodDate={currentPeriodDate}
-          config={config}
-          onUpdateConfig={onUpdateConfig}
-          onAddExpense={() => onAddTransaction(selectedDate)}
-          onAddIncome={() => onAddIncome(selectedDate)}
-          onQuickAddExpense={onQuickAddExpense}
-          onOpenCalculator={onOpenCalculator}
-          allTransactions={allTransactions}
-        >
-          {/* Category Budgets - Seamlessly integrated with generous breathing room and clean monochromatic aesthetic */}
-          {categoryBudgetData.length > 0 ? (
-            <div className="space-y-3 pt-1">
-              <div className="flex items-center justify-between px-0.5">
-                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                  {config.language === 'en' ? 'Category Budgets' : 'Kategoribudgetar'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onNavigate("budget", "category-budgets")}
-                  className="text-[11px] font-medium text-slate-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
-                >
-                  <span>{config.language === 'en' ? 'Manage' : 'Hantera'}</span>
-                  <ChevronRight size={12} />
-                </button>
-              </div>
+      {/* 1. HERO AREA & ACTIONS (Directly on page background) */}
+      <GreetingModule
+        userName={userName}
+        availableForD={todayData?.availableForD || stats?.availableForD || 0}
+        currency={config.currency}
+        isToday={!!selectedDayData?.isToday}
+        date={normalizedSelectedDate}
+        language={config.language}
+        stats={stats}
+        t={t}
+        calendarDays={calendarDays}
+        setSelectedDate={setSelectedDate}
+        setCurrentPeriodDate={setCurrentPeriodDate}
+        periodStart={stats.periodStart}
+        periodEnd={stats.periodEnd}
+        isFuturePeriod={stats.isFuturePeriod}
+        isPastPeriod={stats.isPastPeriod}
+        periods={periods}
+        avatarUrl={avatarUrl}
+        onNavigate={onNavigate}
+        showFixedInCalendar={config.showFixedExpensesInCalendar}
+        isCurrentPeriod={isCurrentPeriod}
+        currentPeriodDate={currentPeriodDate}
+        config={config}
+        onUpdateConfig={onUpdateConfig}
+        onAddExpense={() => onAddTransaction(selectedDate)}
+        onAddIncome={() => onAddIncome(selectedDate)}
+        onQuickAddExpense={onQuickAddExpense}
+        onOpenCalculator={onOpenCalculator}
+        allTransactions={allTransactions}
+      />
 
-              <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
-                {categoryBudgetData.map((cat, index) => {
-                  const Icon = ICON_MAP[cat.iconName];
-                  const spentPct = cat.budgetInKronor > 0 
-                    ? Math.min(100, Math.round((cat.spent / cat.budgetInKronor) * 100))
-                    : 0;
+      {/* 2. BUDGETKATEGORIER (High priority primary content block with frosted cards) */}
+      <div className="space-y-3.5 pt-1">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[11px] sm:text-[12px] font-bold uppercase tracking-[0.16em] text-slate-400">
+            {config.language === 'en' ? 'Category Budgets' : 'Budgetkategorier'}
+          </span>
+          <button
+            type="button"
+            onClick={() => onNavigate("budget", "category-budgets")}
+            className="text-[12px] font-medium text-slate-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1 group"
+          >
+            <span>{config.language === 'en' ? 'Manage' : 'Hantera'}</span>
+            <ChevronRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
 
-                  return (
-                    <motion.button
-                      key={cat.name}
-                      initial={{ opacity: 0, scale: 0.96, x: 8 }}
-                      animate={{ opacity: 1, scale: 1, x: 0 }}
-                      transition={{ delay: 0.1 + index * 0.02 }}
-                      onClick={() => onNavigate("analysis")}
-                      className="flex-shrink-0 flex flex-col justify-between p-3.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] backdrop-blur-md transition-all group text-left active:scale-[0.98] min-w-[144px] sm:min-w-[156px] max-w-[170px] cursor-pointer snap-start border border-white/[0.07] shadow-2xs"
-                    >
-                      {/* Top Row: Monochrome Minimalist Icon + Category Name */}
-                      <div className="flex items-center gap-2.5 mb-2.5">
-                        <div className="w-7 h-7 rounded-xl bg-white/[0.05] border border-white/[0.08] text-slate-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                          {isEmojiString(cat.iconName) ? (
-                            <span className="text-[13px] leading-none">{cat.iconName}</span>
-                          ) : Icon ? (
-                            <Icon size={14} strokeWidth={1.75} className="text-slate-300" />
-                          ) : (
-                            <div className="w-2 h-2 rounded-full bg-slate-400" />
-                          )}
-                        </div>
+        {categoryBudgetData.length > 0 ? (
+          <div className="flex items-center gap-3.5 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
+            {categoryBudgetData.map((cat, index) => {
+              const Icon = ICON_MAP[cat.iconName];
+              const spentPct = cat.budgetInKronor > 0 
+                ? Math.min(100, Math.round((cat.spent / cat.budgetInKronor) * 100))
+                : 0;
 
-                        <span className="text-xs font-semibold text-slate-200 tracking-tight truncate flex-1">
-                          {cat.name}
-                        </span>
-                      </div>
-
-                      {/* Bottom Row: Amount Remaining & Progress Bar */}
-                      <div className="flex flex-col w-full space-y-1">
-                        <div className="flex items-baseline justify-between gap-1">
-                          {cat.hasBudget ? (
-                            cat.isOverBudget ? (
-                              <span className="text-[13px] sm:text-[14px] font-bold text-rose-400 font-amount tabular-nums">
-                                +{formatAmount(Math.abs(cat.remaining), config.language)} kr
-                              </span>
-                            ) : (
-                              <span className="text-[13px] sm:text-[14px] font-bold text-white font-amount tabular-nums">
-                                {formatAmount(cat.remaining, config.language)} kr
-                              </span>
-                            )
-                          ) : (
-                            <span className="text-[13px] sm:text-[14px] font-bold text-slate-300 font-amount tabular-nums">
-                              {formatAmount(cat.spent, config.language)} kr
-                            </span>
-                          )}
-
-                          <span className="text-[10px] font-medium text-slate-400 shrink-0">
-                            {cat.hasBudget 
-                              ? (cat.isOverBudget 
-                                  ? (config.language === 'en' ? 'over' : 'över') 
-                                  : (config.language === 'en' ? 'left' : 'kvar')) 
-                              : (config.language === 'en' ? 'spent' : 'använt')}
-                          </span>
-                        </div>
-
-                        {/* Sleek 2px budget progress bar */}
-                        {cat.hasBudget && (
-                          <div className="w-full h-1 bg-white/[0.06] rounded-full overflow-hidden mt-1">
-                            <div 
-                              className={`h-full rounded-full transition-all duration-500 ${
-                                cat.isOverBudget ? 'bg-rose-500' : 'bg-white/70'
-                              }`}
-                              style={{ width: `${spentPct}%` }} 
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </motion.button>
-                  );
-                })}
-
-                {/* Direct shortcut card at the end of carousel */}
+              return (
                 <motion.button
+                  key={cat.name}
                   initial={{ opacity: 0, scale: 0.96, x: 8 }}
                   animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 0.1 + categoryBudgetData.length * 0.02 }}
-                  onClick={() => onNavigate("budget", "category-budgets")}
-                  className="flex-shrink-0 flex flex-col justify-between p-3.5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[130px] max-w-[140px] cursor-pointer snap-start border border-dashed border-white/[0.1]"
+                  transition={{ delay: 0.08 + index * 0.02 }}
+                  onClick={() => onNavigate("analysis")}
+                  className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.035] hover:bg-white/[0.065] backdrop-blur-md transition-all group text-left active:scale-[0.98] min-w-[155px] sm:min-w-[170px] max-w-[185px] cursor-pointer snap-start border border-white/[0.07] shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-white/[0.04] text-slate-400 group-hover:text-white border border-white/[0.07] shrink-0">
-                      <SlidersHorizontal size={13} strokeWidth={1.75} />
+                  {/* Top Row: Minimalist Monochrome Icon + Category Name */}
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.08] text-slate-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      {isEmojiString(cat.iconName) ? (
+                        <span className="text-[14px] leading-none">{cat.iconName}</span>
+                      ) : Icon ? (
+                        <Icon size={15} strokeWidth={1.75} className="text-slate-300" />
+                      ) : (
+                        <div className="w-2 h-2 rounded-full bg-slate-400" />
+                      )}
                     </div>
-                    <span className="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors truncate">
-                      {config.language === "en" ? "Manage" : "Hantera"}
+
+                    <span className="text-xs sm:text-[13px] font-semibold text-slate-200 tracking-tight truncate flex-1">
+                      {cat.name}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[10px] font-medium text-slate-400">
-                    <span>{config.language === "en" ? "Edit limits" : "Justera"}</span>
-                    <span>→</span>
+
+                  {/* Bottom Row: Amount Remaining & Sleek 2px Progress Bar */}
+                  <div className="flex flex-col w-full space-y-1.5">
+                    <div className="flex items-baseline justify-between gap-1">
+                      {cat.hasBudget ? (
+                        cat.isOverBudget ? (
+                          <span className="text-[14px] sm:text-[15px] font-bold text-rose-400 font-amount tabular-nums">
+                            +{formatAmount(Math.abs(cat.remaining), config.language)} kr
+                          </span>
+                        ) : (
+                          <span className="text-[14px] sm:text-[15px] font-bold text-white font-amount tabular-nums">
+                            {formatAmount(cat.remaining, config.language)} kr
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-[14px] sm:text-[15px] font-bold text-slate-300 font-amount tabular-nums">
+                          {formatAmount(cat.spent, config.language)} kr
+                        </span>
+                      )}
+
+                      <span className="text-[10.5px] font-medium text-slate-400 shrink-0">
+                        {cat.hasBudget 
+                          ? (cat.isOverBudget 
+                              ? (config.language === 'en' ? 'over' : 'över') 
+                              : (config.language === 'en' ? 'left' : 'kvar')) 
+                          : (config.language === 'en' ? 'spent' : 'använt')}
+                      </span>
+                    </div>
+
+                    {cat.hasBudget && (
+                      <div className="w-full h-1 bg-white/[0.06] rounded-full overflow-hidden mt-0.5">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            cat.isOverBudget ? 'bg-rose-500' : 'bg-white/70'
+                          }`}
+                          style={{ width: `${spentPct}%` }} 
+                        />
+                      </div>
+                    )}
                   </div>
                 </motion.button>
-              </div>
-            </div>
-          ) : (
-            <button
-              type="button"
+              );
+            })}
+
+            {/* Direct shortcut card at the end of carousel */}
+            <motion.button
+              initial={{ opacity: 0, scale: 0.96, x: 8 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
               onClick={() => onNavigate("budget", "category-budgets")}
-              className="w-full p-3.5 rounded-2xl border border-dashed border-white/[0.12] hover:border-white/25 bg-white/[0.02] hover:bg-white/[0.05] transition-all flex items-center justify-between text-left group cursor-pointer text-white"
+              className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[135px] max-w-[145px] cursor-pointer snap-start border border-dashed border-white/[0.1]"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-slate-300 group-hover:text-white transition-colors">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.04] text-slate-400 group-hover:text-white border border-white/[0.07] shrink-0">
                   <SlidersHorizontal size={14} strokeWidth={1.75} />
                 </div>
-                <div>
-                  <p className="text-xs font-semibold text-white leading-snug">
-                    {config.language === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    {config.language === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
-                  </p>
-                </div>
+                <span className="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors truncate">
+                  {config.language === "en" ? "Manage" : "Hantera"}
+                </span>
               </div>
-              <ChevronRight size={14} className="text-slate-400 group-hover:text-white transition-colors" />
-            </button>
-          )}
-        </GreetingModule>
+              <div className="flex items-center justify-between text-[11px] font-medium text-slate-400">
+                <span>{config.language === "en" ? "Edit limits" : "Justera"}</span>
+                <span>→</span>
+              </div>
+            </motion.button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onNavigate("budget", "category-budgets")}
+            className="w-full p-4 rounded-2xl border border-dashed border-white/[0.12] hover:border-white/25 bg-white/[0.02] hover:bg-white/[0.05] transition-all flex items-center justify-between text-left group cursor-pointer text-white"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-slate-300 group-hover:text-white transition-colors">
+                <SlidersHorizontal size={15} strokeWidth={1.75} />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-semibold text-white leading-snug">
+                  {config.language === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
+                </p>
+                <p className="text-[11px] text-slate-400">
+                  {config.language === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={15} className="text-slate-400 group-hover:text-white transition-colors" />
+          </button>
+        )}
       </div>
 
-      {/* 2. CUSTOMIZABLE WIDGETS SECTION */}
-      <div className="space-y-4">
+      {/* 3. PERIOD TIMELINE */}
+      {calendarDays && calendarDays.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+          className="pt-2"
+        >
+          <PeriodTimeline
+            calendarDays={calendarDays}
+            selectedDate={normalizedSelectedDate}
+            onSelectDate={setSelectedDate}
+            stats={stats}
+            language={config.language}
+            isCurrentPeriod={isCurrentPeriod}
+          />
+        </motion.div>
+      )}
+
+      {/* 4. SELECTED DAY'S TRANSACTIONS */}
+      <div className="space-y-4 pt-1">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.14em] text-slate-400">
+            {stats.isPastPeriod
+              ? (config.language === "en" ? "Period Transactions" : "Periodens transaktioner")
+              : selectedDate.toDateString() === new Date().toDateString()
+                ? `${t("todayLabel").charAt(0).toUpperCase() + t("todayLabel").slice(1)}, ${selectedDate.toLocaleDateString(config.language === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
+                : selectedDate.toLocaleDateString(
+                    config.language === "en" ? "en-US" : "sv-SE",
+                    { day: "numeric", month: "long" },
+                  )}
+          </h3>
+          {!isTodaySelected && (
+            <button
+              onClick={handleGoToToday}
+              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] backdrop-blur-md text-xs font-medium text-slate-300 hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs ml-auto"
+            >
+              <RotateCcw size={11} strokeWidth={1.75} />
+              <span>{config.language === "en" ? "Today" : "Idag"}</span>
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <AnimatePresence mode="popLayout">
+            {(stats.isPastPeriod
+              ? stats.periodTransactions
+              : selectedDayData?.transactions
+            )?.length > 0 ? (
+              <motion.div className="space-y-2.5" key="transactions">
+                {(stats.isPastPeriod
+                  ? stats.periodTransactions || []
+                  : selectedDayData?.transactions || []
+                ).map((transaction: Transaction, index: number) => (
+                  <motion.div
+                    key={transaction.id}
+                    initial={{ opacity: 0, x: -15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 15 }}
+                    transition={{ delay: index * 0.02 }}
+                  >
+                    <TransactionItem
+                      transaction={transaction}
+                      config={config}
+                      onView={onViewTransaction}
+                      onDelete={onDeleteTransaction}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : fixedTransactions.length === 0 ? (
+              <EmptyState
+                title={t("noTransactionsToday")}
+                description={t("addFirstTransaction")}
+                onAction={() => onAddTransaction(selectedDate)}
+                actionLabel={t("addExpense")}
+              />
+            ) : null}
+          </AnimatePresence>
+
+          {/* Fixed transactions for the day */}
+          {fixedTransactions.length > 0 && (
+            <div className="space-y-2 pt-1">
+              <h4 className="text-[11px] font-semibold text-slate-400 px-1 uppercase tracking-wider">
+                {config.language === "en" ? "Fixed transactions" : "Fasta transaktioner"}
+              </h4>
+              <div className="space-y-2">
+                {fixedTransactions.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      if (item.type === "income" && onViewIncome) {
+                        onViewIncome(item.originalItem);
+                      } else if (item.originalItem?.targetAmount && onViewMonthlySaving) {
+                        onViewMonthlySaving(item.originalItem);
+                      } else if (onViewFixedExpense) {
+                        onViewFixedExpense(item.originalItem);
+                      }
+                    }}
+                    className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] border border-white/[0.06] backdrop-blur-md transition-all cursor-pointer shadow-2xs group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center shrink-0">
+                        <BudgetItemLogo item={item.originalItem} size={15} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs sm:text-[13px] font-semibold text-slate-200 truncate group-hover:text-white transition-colors">
+                          {item.merchant}
+                        </p>
+                        <p className="text-[11px] text-slate-400 truncate">
+                          {item.category}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-xs sm:text-sm font-bold font-amount tabular-nums ${
+                        item.type === "income" ? "text-emerald-400" : "text-slate-200"
+                      }`}>
+                        {item.type === "income" ? "+" : "-"}{formatAmount(item.amount, config.language)} {config.currency}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 5. LOWER SECTION: WIDGETS & MÅNADSPULS (Positioned further down the scrollable feed) */}
+      <div className="space-y-4 pt-4 border-t border-white/[0.06]">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+            {config.language === 'en' ? 'Widgets & Insights' : 'Widgets & Insikter'}
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsWidgetManagerOpen(true)}
+            className="text-[12px] font-medium text-slate-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+          >
+            <span>{config.language === 'en' ? 'Customize' : 'Anpassa'}</span>
+            <LayoutGrid size={13} />
+          </button>
+        </div>
+
         {/* Customization Bar if active */}
         {isCustomizing && (
           <motion.div
@@ -518,67 +653,30 @@ export function TodayView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.2 }}
-                  className="space-y-3 pt-1"
                 >
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-semibold text-slate-200 tracking-tight">
-                        {t("actionRequired")}
-                      </h4>
-                      <div className="w-5 h-5 rounded-full bg-amber-500/15 text-amber-400 text-[10px] font-bold flex items-center justify-center border border-amber-500/20">
+                  <div className="p-4 rounded-2xl bg-white/[0.035] border border-white/[0.07] backdrop-blur-md shadow-2xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white">
+                        {config.language === 'en' ? 'Attention required' : 'Kräver åtgärd'}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold">
                         {attentionItems.length}
-                      </div>
+                      </span>
                     </div>
-
-                    {isCustomizing && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveWidget('attention_items')}
-                        className="px-2.5 py-0.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-semibold transition-all cursor-pointer"
-                      >
-                        {config.language === 'en' ? 'Remove' : 'Ta bort'}
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide px-1">
-                    {attentionItems.map((item, index) => {
-                      const isPast = item.deductionDay < new Date().getDate();
-                      return (
-                        <motion.button
-                          key={item.id}
-                          initial={{ opacity: 0, scale: 0.9, x: 15 }}
-                          animate={{ opacity: 1, scale: 1, x: 0 }}
-                          transition={{ delay: 0.1 + index * 0.04 }}
+                    <div className="space-y-2">
+                      {attentionItems.map((item, idx) => (
+                        <div
+                          key={idx}
                           onClick={() => onEditAttentionItem?.(item)}
-                          className="flex-shrink-0 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08] backdrop-blur-md p-4 rounded-2xl hover:bg-white/[0.06] transition-all group relative overflow-hidden active:scale-[0.98] min-w-[160px] shadow-2xs cursor-pointer text-left"
+                          className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] transition-all cursor-pointer border border-white/[0.05]"
                         >
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
-                              <BudgetItemLogo
-                                item={item}
-                                type={
-                                  item.budgetType === "income" ? "income" : "expense"
-                                }
-                                config={config}
-                              />
-                            </div>
-                            {isPast && (
-                              <div className="px-2 py-0.5 rounded-full bg-rose-500/15 text-[10px] font-medium text-rose-400 border border-rose-500/20">
-                                {t("delayed")}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span className="text-xs font-semibold text-slate-200 tracking-tight leading-tight mb-1 truncate w-full text-left">
-                              {item.name}
-                            </span>
-                            <span className="text-[11px] font-medium text-slate-400 text-left">
-                              {t("fillInAmount")}
-                            </span>
-                          </div>
-                        </motion.button>
-                      );
-                    })}
+                          <span className="text-xs text-slate-200">{item.name}</span>
+                          <span className="text-xs font-bold text-amber-400 font-amount tabular-nums">
+                            {formatAmount(item.amount, config.language)} {config.currency}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -633,8 +731,8 @@ export function TodayView({
                   transition={{ duration: 0.2 }}
                 >
                   <DailySummaryWidget
-                    stats={stats}
                     config={config}
+                    stats={stats}
                     selectedDate={selectedDate}
                     onRemove={() => handleRemoveWidget('daily_summary')}
                     isCustomizing={isCustomizing}
@@ -689,151 +787,16 @@ export function TodayView({
           })}
         </AnimatePresence>
 
-        {/* Customize Widgets Button Bar */}
-        <div className="flex items-center justify-center gap-2 pt-1 pb-0.5">
+        {/* Manage Widgets Footer Bar */}
+        <div className="flex items-center justify-center gap-2 pt-2">
           <button
             type="button"
             onClick={() => setIsWidgetManagerOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] hover:bg-white/[0.07] text-slate-300 hover:text-white border border-white/[0.08] backdrop-blur-md text-xs font-semibold transition-all shadow-2xs active:scale-95 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/[0.035] hover:bg-white/[0.07] text-slate-300 hover:text-white border border-white/[0.07] backdrop-blur-md text-xs font-semibold transition-all shadow-2xs active:scale-95 cursor-pointer"
           >
             <LayoutGrid size={13} strokeWidth={1.75} className="text-slate-400" />
             <span>{config.language === 'en' ? 'Manage widgets' : 'Hantera widgets'}</span>
           </button>
-
-          {!isCustomizing ? (
-            <button
-              type="button"
-              onClick={() => setIsCustomizing(true)}
-              className="inline-flex items-center gap-1 px-3 py-2 rounded-full bg-white/[0.02] hover:bg-white/[0.05] text-slate-400 hover:text-slate-200 border border-white/[0.06] text-xs font-medium transition-all active:scale-95 cursor-pointer"
-            >
-              <span>{config.language === 'en' ? 'Quick edit' : 'Snabbredigera'}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setIsCustomizing(false)}
-              className="inline-flex items-center gap-1 px-3.5 py-2 rounded-full bg-white text-slate-950 text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
-            >
-              <span>{config.language === 'en' ? 'Done' : 'Klar'}</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* 3. PERIOD TIMELINE */}
-      {calendarDays && calendarDays.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.13 }}
-        >
-          <PeriodTimeline
-            calendarDays={calendarDays}
-            selectedDate={normalizedSelectedDate}
-            onSelectDate={setSelectedDate}
-            stats={stats}
-            language={config.language}
-            isCurrentPeriod={isCurrentPeriod}
-          />
-        </motion.div>
-      )}
-
-      {/* 4. TRANSACTIONS FOR SELECTED DAY */}
-      <div className="space-y-4 pt-2">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-sm font-semibold text-slate-200 tracking-tight">
-            {stats.isPastPeriod
-              ? "Periodens transaktioner"
-              : selectedDate.toDateString() === new Date().toDateString()
-                ? `${t("todayLabel").charAt(0).toUpperCase() + t("todayLabel").slice(1)}, ${selectedDate.toLocaleDateString(config.language === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
-                : selectedDate.toLocaleDateString(
-                    config.language === "en" ? "en-US" : "sv-SE",
-                    { day: "numeric", month: "long" },
-                  )}
-          </h3>
-          {!isTodaySelected && (
-            <button
-              onClick={handleGoToToday}
-              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] backdrop-blur-md text-xs font-medium text-slate-300 hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs ml-auto"
-            >
-              <RotateCcw size={11} strokeWidth={1.75} />
-              <span>{config.language === "en" ? "Today" : "Idag"}</span>
-            </button>
-          )}
-        </div>
-
-        <div className="space-y-4">
-          <AnimatePresence mode="popLayout">
-            {(stats.isPastPeriod
-              ? stats.periodTransactions
-              : selectedDayData?.transactions
-            )?.length > 0 ? (
-              <motion.div className="space-y-2.5" key="transactions">
-                {(stats.isPastPeriod
-                  ? stats.periodTransactions || []
-                  : selectedDayData?.transactions || []
-                ).map((transaction: Transaction, index: number) => (
-                  <motion.div
-                    key={transaction.id}
-                    initial={{ opacity: 0, x: -15 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 15 }}
-                    transition={{ delay: index * 0.04 }}
-                  >
-                    <TransactionItem
-                      transaction={transaction}
-                      config={config}
-                      onView={onViewTransaction}
-                      onDelete={onDeleteTransaction}
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div
-                key="no-transactions"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <EmptyState
-                  icon={Wallet}
-                  title={t("noTransactionsSubtle")}
-                  actionLabel={t("showAll")}
-                  onAction={() => onNavigate("transactions")}
-                />
-              </motion.div>
-            )}
-
-            {!stats.isPastPeriod &&
-              (config.showFixedExpensesInCalendar ?? config.showFixedExpensesInTodayView) &&
-              fixedTransactions.length > 0 && (
-                <motion.div
-                  key="fixed-budget"
-                  initial={{ opacity: 0, x: -15 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 15 }}
-                  className="space-y-2.5"
-                >
-                  {fixedTransactions.map((t: any, index: number) => (
-                    <TransactionItem
-                      key={`${t.id}-${index}`}
-                      transaction={t}
-                      config={config}
-                      isFixed={true}
-                      onClick={() => {
-                        if (t.type === "income") {
-                          onViewIncome?.(t.originalItem || t);
-                        } else if (t.type === "saving") {
-                          onViewMonthlySaving?.(t.originalItem || t);
-                        } else {
-                          onViewFixedExpense?.(t.originalItem || t);
-                        }
-                      }}
-                    />
-                  ))}
-                </motion.div>
-              )}
-          </AnimatePresence>
         </div>
       </div>
 

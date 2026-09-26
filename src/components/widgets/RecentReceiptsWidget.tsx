@@ -20,8 +20,8 @@ export function RecentReceiptsWidget({
   onRemove,
   isCustomizing,
 }: RecentReceiptsWidgetProps) {
-  const isEn = config.language === 'en';
-  const currency = config.currency || 'kr';
+  const isEn = config?.language === 'en';
+  const currency = config?.currency || 'kr';
 
   const receiptTransactions = allTransactions
     .filter((t) => !!t.receiptUrl || !!t.receiptBase64)
