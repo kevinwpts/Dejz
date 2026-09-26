@@ -1013,76 +1013,17 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         )}
                       </div>
 
-                      {/* Search Results OR Popular Quick-Add Grid */}
-                      {presetSearch.trim() ? (
-                        <div className="space-y-2">
-                          <div className="max-h-[26vh] overflow-y-auto pr-1 no-scrollbar space-y-1.5">
-                            {filteredPresets.length > 0 ? (
-                              filteredPresets.map((preset) => {
-                                const isAdded = fixedExpenses.some(
-                                  e => e.name.trim().toLowerCase() === preset.name.trim().toLowerCase()
-                                );
-                                const mockTx = {
-                                  id: preset.id,
-                                  amount: preset.defaultAmount,
-                                  merchant: preset.name,
-                                  category: preset.category,
-                                  type: 'expense' as const,
-                                  timestamp: Date.now(),
-                                };
-                                return (
-                                  <button
-                                    key={preset.id}
-                                    type="button"
-                                    onClick={() => handleTogglePreset(preset)}
-                                    className={`w-full p-2.5 rounded-[16px] flex items-center justify-between gap-3 text-left transition-all cursor-pointer border ${
-                                      isAdded 
-                                        ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-xs ring-2 ring-[var(--accent-color)]/20' 
-                                        : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border-[var(--border-color)] shadow-2xs'
-                                    }`}
-                                  >
-                                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                      <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0">
-                                        <TransactionLogo transaction={mockTx} config={config} size="sm" />
-                                      </div>
-                                      <div className="min-w-0 flex-1">
-                                        <div className="flex items-center gap-1.5">
-                                          <p className="text-[13px] font-bold truncate">{preset.name}</p>
-                                          <span className={`text-[9.5px] px-1.5 py-0.5 rounded-full font-medium ${
-                                            isAdded ? 'bg-white/20 text-white' : 'bg-[var(--chip-bg)] text-[var(--text-secondary)]'
-                                          }`}>
-                                            {preset.category}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 shrink-0">
-                                      <span className="text-[12px] font-bold font-amount tabular-nums">
-                                        {formatAmount(preset.defaultAmount, lang)} {config.currency}
-                                      </span>
-                                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                                        isAdded ? 'bg-white text-[var(--accent-color)]' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] border border-[var(--border-color)]/40'
-                                      }`}>
-                                        {isAdded ? <Check size={12} strokeWidth={3} /> : <Plus size={12} />}
-                                      </div>
-                                    </div>
-                                  </button>
-                                );
-                              })
-                            ) : (
-                              <div className="p-4 text-center bg-[var(--surface-color)] rounded-[16px] border border-[var(--border-color)]">
-                                <p className="text-xs text-[var(--text-secondary)] font-medium">
-                                  {s.noPresetsFound}
-                                </p>
-                              </div>
-                            )}
-                          </div>
+                      {/* Presets Grid (Filtered Search or Popular) */}
+                      {presetSearch.trim() && filteredPresets.length === 0 ? (
+                        <div className="p-4 text-center bg-[var(--surface-color)] rounded-[16px] border border-[var(--border-color)]">
+                          <p className="text-xs text-[var(--text-secondary)] font-medium">
+                            {s.noPresetsFound}
+                          </p>
                         </div>
                       ) : (
                         <div className="space-y-1.5">
-                          {/* Quick Popular Presets Visual Box Grid */}
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[25vh] overflow-y-auto no-scrollbar pr-0.5 p-0.5">
-                            {popularPresets.map((preset) => {
+                            {(presetSearch.trim() ? filteredPresets : popularPresets).map((preset) => {
                               const isAdded = fixedExpenses.some(
                                 e => e.name.trim().toLowerCase() === preset.name.trim().toLowerCase()
                               );
@@ -1137,8 +1078,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       )}
 
                       {/* Added Fixed Expenses List */}
-                      <div className="space-y-2 pt-1 border-t border-[var(--border-color)]/60">
-                        <div className="space-y-1.5 max-h-[22vh] overflow-y-auto pr-1 no-scrollbar">
+                      {fixedExpenses.length > 0 && (
+                        <div className="space-y-1.5 pt-1 border-t border-[var(--border-color)]/60 max-h-[22vh] overflow-y-auto pr-1 no-scrollbar">
                           {fixedExpenses.map((exp, i) => (
                             <BudgetItem
                               key={i}
@@ -1154,23 +1095,23 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                               config={config}
                             />
                           ))}
-
-                          <button 
-                            type="button"
-                            onClick={() => {
-                              setEditingExpenseIndex(null);
-                              setIsAddingExpense(true);
-                            }}
-                            className="w-full py-2.5 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[14px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer"
-                          >
-                            <Plus size={14} />
-                            <span>{s.customExpense}</span>
-                          </button>
                         </div>
-                      </div>
+                      )}
 
-                      {/* Action Buttons: Next */}
-                      <div className="pt-2">
+                      {/* Action Buttons: Create Custom Expense & Next */}
+                      <div className="pt-2 space-y-2">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setEditingExpenseIndex(null);
+                            setIsAddingExpense(true);
+                          }}
+                          className="w-full py-3 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)] rounded-[16px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center gap-1.5 font-bold text-xs sm:text-sm bg-[var(--surface-color)] active:scale-[0.98] cursor-pointer shadow-2xs"
+                        >
+                          <Plus size={15} />
+                          <span>{s.customExpense}</span>
+                        </button>
+
                         <button 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
