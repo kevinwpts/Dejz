@@ -653,10 +653,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 
 
 
-/* Prevent overscroll bounce and pull-to-refresh ONLY on mobile */
-@media (max-width: 768px) {
-  html, body {
-    overscroll-behavior-y: none;
-    overscroll-behavior: none;
-  }
+/* Ensure smooth, native inertia scrolling on iOS and Android devices */
+html, body {
+  overscroll-behavior-y: auto;
+  overscroll-behavior-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
