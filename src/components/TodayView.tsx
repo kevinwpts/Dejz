@@ -567,24 +567,24 @@ export function TodayView({
                         onViewFixedExpense(item.originalItem);
                       }
                     }}
-                    className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.055] border border-white/[0.06] backdrop-blur-[18px] transition-all cursor-pointer shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] group"
+                    className="flex items-center justify-between p-3.5 sm:p-4 rounded-[18px] bg-white/[0.04] hover:bg-white/[0.065] border border-white/[0.07] backdrop-blur-[18px] transition-all cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.12)] group"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.06] flex items-center justify-center shrink-0">
                         <BudgetItemLogo item={item.originalItem} size={15} />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs sm:text-[13px] font-semibold text-[#C7CDDC] truncate group-hover:text-white transition-colors">
+                        <p className="text-xs sm:text-[13.5px] font-semibold text-white truncate">
                           {item.merchant}
                         </p>
-                        <p className="text-[11px] text-[#C7CDDC]/75 truncate">
+                        <p className="text-[11px] text-[#9CA6BC] truncate mt-0.5">
                           {item.category}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <span className={`text-xs sm:text-sm font-bold font-amount tabular-nums ${
-                        item.type === "income" ? "text-emerald-400" : "text-[#C7CDDC]"
+                        item.type === "income" ? "text-emerald-400" : "text-white"
                       }`}>
                         {item.type === "income" ? "+" : "-"}{formatAmount(item.amount, lang)} {config?.currency || 'kr'}
                       </span>

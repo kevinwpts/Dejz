@@ -216,20 +216,20 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-2xl transition-all duration-200 cursor-pointer select-none shrink-0 relative backdrop-blur-md ${
                 isSelected
-                  ? 'bg-white text-slate-950 shadow-[0_6px_20px_rgba(255,255,255,0.15)] scale-105 font-bold z-10 opacity-100 ring-2 ring-white/30'
+                  ? 'bg-[#818cf8]/[0.14] text-white border border-[#8B9CFF]/35 shadow-[0_0_16px_rgba(139,156,255,0.18)] scale-105 font-bold z-10 opacity-100'
                   : isRealToday
-                  ? 'bg-white/[0.06] text-white border border-white/25 hover:bg-white/[0.1] scale-95 opacity-95'
-                  : 'bg-white/[0.025] text-slate-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.06] scale-95 opacity-75'
+                  ? 'bg-white/[0.04] text-[#C7CDDC] border border-white/15 hover:bg-white/[0.07] scale-95 opacity-90'
+                  : 'bg-white/[0.02] text-[#9CA6BC]/70 hover:text-[#C7CDDC] hover:bg-white/[0.045] border border-white/[0.05] scale-95 opacity-75'
               }`}
             >
               {/* Day of Week */}
               <span
                 className={`text-[8.5px] sm:text-[9px] tracking-wider uppercase leading-none ${
                   isSelected
-                    ? 'font-bold opacity-90'
-                    : isRealToday
                     ? 'text-white font-bold'
-                    : 'opacity-70 font-medium'
+                    : isRealToday
+                    ? 'text-[#C7CDDC] font-semibold'
+                    : 'text-[#9CA6BC]/70 font-medium'
                 }`}
               >
                 {isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}

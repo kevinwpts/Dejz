@@ -153,7 +153,7 @@ export function GreetingModule({
         transition={{ duration: 0.45, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
         className="space-y-3"
       >
-        {/* Primary Action Buttons (Utgift, Inkomst, Skanna) */}
+        {/* Primary Action Buttons (Utgift, Inkomst, Skanna) - Visually lightened containers */}
         <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
           {/* Utgift */}
           <button
@@ -162,7 +162,7 @@ export function GreetingModule({
               feedback.tap();
               onAddExpense?.();
             }}
-            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.07] active:scale-[0.98] border border-white/[0.08] backdrop-blur-[18px] flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-[#C7CDDC] hover:text-white transition-all shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
+            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] active:scale-[0.98] border border-white/[0.055] backdrop-blur-[18px] flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-[#C7CDDC] hover:text-white transition-all shadow-none"
           >
             <ArrowDownLeft size={16} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
             <span className="truncate">{isEn ? 'Expense' : 'Utgift'}</span>
@@ -175,7 +175,7 @@ export function GreetingModule({
               feedback.tap();
               onAddIncome?.();
             }}
-            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.07] active:scale-[0.98] border border-white/[0.08] backdrop-blur-[18px] flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-[#C7CDDC] hover:text-white transition-all shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
+            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] active:scale-[0.98] border border-white/[0.055] backdrop-blur-[18px] flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-[#C7CDDC] hover:text-white transition-all shadow-none"
           >
             <ArrowUpRight size={16} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
             <span className="truncate">{isEn ? 'Income' : 'Inkomst'}</span>
@@ -188,7 +188,7 @@ export function GreetingModule({
               feedback.tap();
               onAddExpense?.();
             }}
-            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.07] active:scale-[0.98] border border-white/[0.08] backdrop-blur-[18px] flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-[#C7CDDC] hover:text-white transition-all shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
+            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] active:scale-[0.98] border border-white/[0.055] backdrop-blur-[18px] flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-[#C7CDDC] hover:text-white transition-all shadow-none"
           >
             <Camera size={16} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
             <span className="truncate">{isEn ? 'Scan' : 'Skanna'}</span>

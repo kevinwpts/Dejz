@@ -74,52 +74,43 @@ export function TransactionItem({
   };
 
   const finalAmount = displayAmount !== undefined ? displayAmount : transaction.amount;
-  const amountColor = transaction.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]';
+  const amountColor = transaction.type === 'income' ? 'text-emerald-400' : 'text-white';
 
-  // Determine layout style classes
+  // Determine layout style classes with exact dark glass materials
   let containerClasses = "";
-  let paddingClasses = "px-[18px] py-[15px] min-h-[78px]";
+  let paddingClasses = "px-[16px] sm:px-[18px] py-[14px] min-h-[72px]";
   if (squared) {
-    containerClasses = "bg-transparent rounded-none shadow-none border-b border-[var(--border-color)]/20 last:border-none py-3.5 px-2";
+    containerClasses = "bg-transparent rounded-none shadow-none border-b border-white/[0.06] last:border-none py-3.5 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
-    containerClasses = "bg-[var(--surface-color)] hover:bg-[var(--surface-muted)]/60 rounded-none first:rounded-t-[20px] last:rounded-b-[20px] shadow-none border-none";
+    containerClasses = "bg-white/[0.03] hover:bg-white/[0.055] rounded-none first:rounded-t-[20px] last:rounded-b-[20px] shadow-none border-none backdrop-blur-[18px]";
   } else if (variant === 'nested') {
-    containerClasses = "bg-[var(--card-nested-bg)] hover:bg-[var(--card-nested-bg)]/85 shadow-none border border-[var(--border-color)]/10 rounded-[16px]";
+    containerClasses = "bg-white/[0.03] hover:bg-white/[0.055] shadow-none border border-white/[0.06] rounded-[18px] backdrop-blur-[18px]";
   } else {
     const isTransparentGrouped = isGrouped && !variant;
     if (isTransparentGrouped) {
-      containerClasses = "bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] rounded-[16px] shadow-none border-none";
+      containerClasses = "bg-white/[0.035] hover:bg-white/[0.06] rounded-[18px] shadow-none border-none backdrop-blur-[18px]";
     } else {
-      containerClasses = "bg-[var(--transaction-bg)] shadow-xs border border-[var(--border-color)] rounded-[16px] hover:bg-[var(--surface-muted)]";
+      containerClasses = "bg-white/[0.04] hover:bg-white/[0.065] border border-white/[0.07] rounded-[18px] backdrop-blur-[18px] shadow-[0_4px_16px_rgba(0,0,0,0.12)]";
     }
   }
 
+  // Neutral discreet category display with #9CA6BC (no pill background, no bright red/colored badge)
   const renderCategoryBadge = (categoryName: string, amount?: number) => {
-    const searchCat = (categoryName || '').trim().toLowerCase();
-    const cat = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
-      c => c.name.trim().toLowerCase() === searchCat
-    );
-    const iconKey = cat?.icon || getCategoryIconName(categoryName || '');
-    const color = cat?.color;
+    const iconKey = getCategoryIconName(categoryName || '');
 
     return (
-      <div className="flex items-center gap-1 px-2 h-[22px] rounded-full bg-[var(--chip-bg)] shrink-0 border-none">
+      <div className="flex items-center gap-1.5 shrink-0 text-[#9CA6BC]">
         {iconKey ? (
           <CategoryIcon 
             icon={iconKey} 
-            color={color} 
+            color="#9CA6BC" 
             size="xs" 
           />
-        ) : color ? (
-          <span 
-            className="w-1.5 h-1.5 rounded-full shrink-0" 
-            style={{ backgroundColor: color }} 
-          />
         ) : null}
-        <span className="text-[12px] font-medium text-[var(--text-secondary)] tracking-tight whitespace-nowrap">
+        <span className="text-[12px] font-medium text-[#9CA6BC] tracking-tight whitespace-nowrap">
           {capitalize(categoryName || '')}
-          {amount !== undefined && <span className="ml-1 opacity-60">({formatAmount(amount, config?.language || 'sv')})</span>}
+          {amount !== undefined && <span className="ml-1 opacity-70">({formatAmount(amount, config?.language || 'sv')})</span>}
         </span>
       </div>
     );
@@ -149,7 +140,7 @@ export function TransactionItem({
 
   return (
     <>
-      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[16px]'} select-none`}>
+      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[18px]'} select-none`}>
         {/* Swipe Left Background Action: Delete */}
         {canSwipe && (
           <motion.div 
@@ -203,22 +194,26 @@ export function TransactionItem({
           className={`${paddingClasses} relative z-10 flex items-center justify-between gap-[12px] group transition-colors duration-150 ${containerClasses} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
         >
           <div className="flex items-center gap-[12px] min-w-0 flex-1">
+            {/* Real Logo in original color */}
             <div className="flex-shrink-0">
               <TransactionLogo transaction={transaction} config={config} />
             </div>
             
             <div className="min-w-0 flex-1 flex flex-col justify-center">
-              <p className="text-[14px] sm:text-[14.5px] font-semibold text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight transition-colors group-hover:text-[var(--accent-color)]">
+              {/* Primary Merchant Name */}
+              <p className="text-[14px] sm:text-[14.5px] font-semibold text-white leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
                 {merchantName}
               </p>
-              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
+              
+              {/* Secondary Details (Category, Note, Paperclip) in #9CA6BC */}
+              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#9CA6BC]">
                 {hideCategoryBadge ? (
                   (transaction.timestamp || transaction.date) ? (
-                    <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-80 tabular-nums">
+                    <span className="text-[12px] font-normal text-[#9CA6BC] opacity-80 tabular-nums">
                       {new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
                     </span>
                   ) : isFixed ? (
-                    <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-80">
+                    <span className="text-[11px] font-medium text-[#9CA6BC] opacity-80">
                       {getL10n('Fast utgift', 'Fixed expense', 'Fast utgift', 'Fast udgift', 'Kiinteä kulu')}
                     </span>
                   ) : null
@@ -233,17 +228,18 @@ export function TransactionItem({
                 )}
 
                 {transaction.note && !isFixed && (
-                  <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 truncate italic min-w-0 flex-1">
-                    {hideCategoryBadge ? `• ${transaction.note}` : transaction.note}
+                  <span className="text-[12px] font-normal text-[#9CA6BC]/80 truncate italic min-w-0 flex-1">
+                    {hideCategoryBadge ? `• ${transaction.note}` : `• ${transaction.note}`}
                   </span>
                 )}
                 {transaction.receiptUrl && (
-                  <Paperclip className="w-3 h-3 text-[var(--text-secondary)] opacity-75 shrink-0" />
+                  <Paperclip className="w-3 h-3 text-[#9CA6BC] opacity-75 shrink-0" />
                 )}
               </div>
             </div>
           </div>
           
+          {/* Primary Amount */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
             <p className={`text-[14.5px] sm:text-[15px] font-bold whitespace-nowrap tracking-tight ${amountColor}`}>
               <span className="opacity-70 mr-0.5 text-[13px] font-bold">{transaction.type === 'income' ? '+' : '-'}</span>
@@ -251,13 +247,13 @@ export function TransactionItem({
               <span className="text-[11px] font-semibold opacity-60 ml-1">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixed ? (
-              <p className="text-[11px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5 tabular-nums">
+              <p className="text-[11px] font-normal text-[#9CA6BC]/80 mt-0.5 tabular-nums">
                 {showDate 
                   ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
                   : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}
               </p>
             ) : isFixed && (
-              <span className="text-[10px] font-medium text-[var(--text-secondary)] opacity-85 bg-white/10 dark:bg-white/[0.06] px-2 py-0.5 rounded-full mt-0.5 whitespace-nowrap">
+              <span className="text-[10px] font-medium text-[#9CA6BC] opacity-85 px-1.5 py-0.5 rounded-md mt-0.5 whitespace-nowrap">
                 {getL10n(
                   transaction.type === 'income' ? 'FAST INKOMST' : transaction.type === 'saving' ? 'FAST SPARANDE' : 'FAST UTGIFT',
                   transaction.type === 'income' ? 'FIXED INCOME' : transaction.type === 'saving' ? 'FIXED SAVINGS' : 'FIXED EXPENSE',
@@ -280,7 +276,7 @@ export function TransactionItem({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 10 }}
               transition={{ duration: 0.16 }}
-              className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[24px] p-5 sm:p-6 w-full max-w-sm shadow-2xl space-y-4"
+              className="bg-[#14141E] border border-white/[0.08] rounded-[24px] p-5 sm:p-6 w-full max-w-sm shadow-2xl space-y-4"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3">
@@ -288,17 +284,17 @@ export function TransactionItem({
                   <AlertTriangle size={20} strokeWidth={2.2} />
                 </div>
                 <div>
-                  <h3 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
+                  <h3 className="text-[16px] font-bold text-white tracking-tight">
                     {getL10n('Ta bort transaktion?', 'Delete transaction?')}
                   </h3>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  <p className="text-xs text-[#9CA6BC] mt-0.5">
                     {getL10n('Denna åtgärd går inte att ångra.', 'This action cannot be undone.')}
                   </p>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-[var(--surface-muted)]/70 border border-[var(--border-color)]/60 flex items-center justify-between text-xs">
-                <span className="font-semibold text-[var(--text-primary)] truncate max-w-[180px]">
+              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-between text-xs">
+                <span className="font-semibold text-white truncate max-w-[180px]">
                   {merchantName}
                 </span>
                 <span className="font-amount font-bold text-rose-500 tabular-nums">
@@ -313,7 +309,7 @@ export function TransactionItem({
                     setShowConfirmModal(false);
                     setIsOpen(false);
                   }}
-                  className="py-2.5 px-4 rounded-xl text-xs font-semibold text-[var(--text-primary)] bg-[var(--surface-muted)] hover:bg-[var(--surface-muted)]/80 border border-[var(--border-color)] transition-all cursor-pointer active:scale-95"
+                  className="py-2.5 px-4 rounded-xl text-xs font-semibold text-white bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] transition-all cursor-pointer active:scale-95"
                 >
                   {getL10n('Avbryt', 'Cancel')}
                 </button>
