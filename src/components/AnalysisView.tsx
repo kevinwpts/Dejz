@@ -172,17 +172,17 @@ export function AnalysisView({
         t={t}
       />
 
-      {/* Analysis Filter - Segmented Control */}
-      <div className="grid grid-cols-3 gap-1 p-1 bg-white/[0.035] backdrop-blur-[18px] border border-white/[0.035] rounded-full">
+      {/* Analysis Filter - Clean horizontal row directly on background */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
         <button
           onClick={() => {
             setAnalysisFilter('all');
             setExpandedCategory(null);
           }}
-          className={`h-10 sm:h-11 px-2 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'all'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
-              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
           {t('all' as TranslationKey)}
@@ -192,10 +192,10 @@ export function AnalysisView({
             setAnalysisFilter('variable');
             setExpandedCategory(null);
           }}
-          className={`h-10 sm:h-11 px-2 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'variable'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
-              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
           {t('variableExpenses' as TranslationKey)}
@@ -205,10 +205,10 @@ export function AnalysisView({
             setAnalysisFilter('fixed');
             setExpandedCategory(null);
           }}
-          className={`h-10 sm:h-11 px-2 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center ${
+          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'fixed'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
-              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
           {t('fixedExpenses' as TranslationKey)}
@@ -216,7 +216,7 @@ export function AnalysisView({
       </div>
 
       {/* Donut Chart Distribution Card */}
-      <div className="p-5 sm:p-6 rounded-[24px] border border-white/[0.025] bg-white/[0.04] backdrop-blur-[20px] shadow-none flex flex-col items-center relative overflow-hidden">
+      <div className="p-5 sm:p-6 rounded-[24px] border border-white/[0.025] bg-white/[0.035] backdrop-blur-[18px] shadow-none flex flex-col items-center relative overflow-hidden">
         <div className="flex items-center justify-between w-full mb-3 px-1">
           <span className="text-sm font-semibold text-white tracking-tight">{t('distribution')}</span>
           <span className="text-[11px] font-normal text-[#9CA6BC] tabular-nums">
@@ -305,7 +305,7 @@ export function AnalysisView({
         </div>
       </div>
 
-      {/* Categories Breakdown List */}
+      {/* Categories Breakdown - Single Unified Cohesive List */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">
@@ -313,227 +313,185 @@ export function AnalysisView({
           </span>
         </div>
 
-        <div className="space-y-2">
-          {categoryData.map((item: any, index) => {
-            const isExpanded = expandedCategory === item.name;
-            const iconName = item.icon || getCategoryIconName(item.name);
-            const Icon = ICON_MAP[iconName];
-            
-            // Get transactions for this category
-            const categoryTransactions = analysisFilter === 'fixed' ? [] : filteredExpenses
-              .filter(t => {
-                const catName = item.name;
-                if (t.type === 'income') {
-                  if (t.category === 'Budgetökning' && catName === 'Spargris') return true;
-                  return false;
-                }
-                
-                const transactionSplits = (t as any).splits;
-                if (transactionSplits && transactionSplits.length > 0) {
-                  return transactionSplits.some((s: any) => (s.category || '').trim() === catName.trim());
-                }
-                
-                return (t.category || '').trim() === catName.trim();
-              })
-              .sort((a, b) => b.timestamp - a.timestamp);
+        {categoryData.length > 0 ? (
+          <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+            {categoryData.map((item: any, index) => {
+              const isExpanded = expandedCategory === item.name;
+              const iconName = item.icon || getCategoryIconName(item.name);
+              const Icon = ICON_MAP[iconName];
               
-            // Get fixed expenses for this category
-            const categoryFixedExpenses = analysisFilter === 'variable' ? [] : fixedExpenses
-                .filter(e => {
-                  const catName = e.category || t('fixedExpenses');
-                  return catName === item.name;
-                });
+              // Get transactions for this category
+              const categoryTransactions = analysisFilter === 'fixed' ? [] : filteredExpenses
+                .filter(t => {
+                  const catName = item.name;
+                  if (t.type === 'income') {
+                    if (t.category === 'Budgetökning' && catName === 'Spargris') return true;
+                    return false;
+                  }
+                  
+                  const transactionSplits = (t as any).splits;
+                  if (transactionSplits && transactionSplits.length > 0) {
+                    return transactionSplits.some((s: any) => (s.category || '').trim() === catName.trim());
+                  }
+                  
+                  return (t.category || '').trim() === catName.trim();
+                })
+                .sort((a, b) => b.timestamp - a.timestamp);
+                
+              // Get fixed expenses for this category
+              const categoryFixedExpenses = analysisFilter === 'variable' ? [] : fixedExpenses
+                  .filter(e => {
+                    const catName = e.category || t('fixedExpenses');
+                    return catName === item.name;
+                  });
 
-            const totalItemCount = categoryTransactions.length + categoryFixedExpenses.length;
+              const totalItemCount = categoryTransactions.length + categoryFixedExpenses.length;
+              const percentOfTotal = totalSpent > 0 ? Math.round((item.value / totalSpent) * 100) : 0;
 
-            const disposablePot = Math.max(
-              0,
-              (stats?.disposablePot !== undefined && stats?.disposablePot !== null)
-                ? stats.disposablePot
-                : ((stats?.totalIncome || 0) - (stats?.totalFixed || 0))
-            );
-
-            let budgetInKronor = 0;
-            let hasBudget = false;
-
-            if (item.budget !== undefined && item.budget > 0) {
-              const pct = item.budget > 100 && disposablePot > 0 
-                ? (item.budget / disposablePot) * 100 
-                : item.budget;
-              budgetInKronor = disposablePot > 0 ? Math.round((pct / 100) * disposablePot) : 0;
-              hasBudget = budgetInKronor > 0;
-            }
-
-            const remainingBudget = budgetInKronor - Math.round(item.value);
-            
-            return (
-              <motion.div 
-                id={`category-${item.name}`} 
-                key={item.name} 
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.03 }}
-                className={isExpanded ? "rounded-[22px] border border-white/[0.03] bg-white/[0.045] backdrop-blur-[20px] overflow-hidden transition-all duration-200" : ""}
-              >
-                <div 
-                  className={`p-3.5 sm:p-4 min-h-[70px] flex flex-col justify-center group transition-all duration-200 cursor-pointer ${
-                    isExpanded 
-                      ? 'border-b border-white/[0.035]' 
-                      : 'bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.025] rounded-[18px] backdrop-blur-[18px]'
-                  }`}
-                  onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
-                >
-                  <div className="flex items-center justify-between gap-3 w-full">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {/* Category Icon */}
-                      <div 
-                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0"
-                        style={{ 
-                          backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
-                          color: '#fff'
-                        }}
-                      >
-                        {isEmojiString(iconName) ? (
-                          <span className="text-[17px] leading-none">{iconName}</span>
-                        ) : Icon ? (
-                          <Icon size={16} strokeWidth={1.75} />
-                        ) : (
-                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                        )}
-                      </div>
-
-                      <div className="min-w-0 flex-1 flex flex-col justify-center">
-                        <p className={`text-[14px] sm:text-[14.5px] font-semibold leading-tight truncate tracking-tight transition-colors ${
-                          isExpanded ? 'text-[#8B9CFF]' : 'text-white group-hover:text-white'
-                        }`}>
-                          {item.name}
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden">
-                          {hasBudget ? (
-                            <span className={`text-xs font-normal truncate ${
-                              remainingBudget < 0 ? 'text-rose-400 font-medium' : 'text-[#9CA6BC]'
-                            }`}>
-                              {remainingBudget < 0 ? (
-                                <span>Över budget: {formatAmount(Math.abs(remainingBudget), config.language)} kr</span>
-                              ) : (
-                                <span>Kvar: <strong className="text-white font-medium">{formatAmount(remainingBudget, config.language)} kr</strong></span>
-                              )}
-                            </span>
+              return (
+                <div key={item.name} className="transition-colors">
+                  <div 
+                    className="p-3.5 sm:p-4 min-h-[68px] flex flex-col justify-center group hover:bg-white/[0.03] transition-colors cursor-pointer"
+                    onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
+                  >
+                    <div className="flex items-center justify-between gap-3 w-full">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        {/* Category Icon */}
+                        <div 
+                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0"
+                          style={{ 
+                            backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
+                            color: '#fff'
+                          }}
+                        >
+                          {isEmojiString(iconName) ? (
+                            <span className="text-[17px] leading-none">{iconName}</span>
+                          ) : Icon ? (
+                            <Icon size={16} strokeWidth={1.75} />
                           ) : (
-                            <span className="text-xs font-normal text-[#9CA6BC]">
-                              {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
-                            </span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-white" />
                           )}
                         </div>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
-                      <div className="text-right flex flex-col items-end justify-center">
-                        <p className="text-[14px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-white leading-tight">
-                          {formatAmount(Math.round(item.value), config.language)}
-                          <span className="text-[11px] font-normal text-[#9CA6BC] ml-1">{config.currency}</span>
-                        </p>
-                        <p className="text-[11px] font-normal text-[#9CA6BC] mt-0.5 tabular-nums">
-                          {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
-                        </p>
+                        <div className="min-w-0 flex-1 flex flex-col justify-center">
+                          <p className="text-[14px] sm:text-[14.5px] font-medium text-white leading-tight truncate tracking-tight">
+                            {item.name}
+                          </p>
+                          <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden text-[#9CA6BC]">
+                            <span className="text-xs font-normal">
+                              {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
+                            </span>
+                            <span className="text-white/20">·</span>
+                            <span className="text-xs font-normal text-[#9CA6BC]">
+                              {percentOfTotal}% {config.language === 'en' ? 'of total' : 'av totalt'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[#8B9CFF]' : 'text-[#9CA6BC]'}`}>
-                        <ChevronDown size={16} strokeWidth={2} />
+
+                      <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
+                        <div className="text-right flex flex-col items-end justify-center">
+                          <p className="text-[14px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-white leading-tight">
+                            {formatAmount(Math.round(item.value), config.language)}
+                            <span className="text-[11px] font-normal text-[#9CA6BC] ml-1">{config.currency}</span>
+                          </p>
+                        </div>
+                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[#8B9CFF]' : 'text-[#9CA6BC]'}`}>
+                          <ChevronDown size={16} strokeWidth={2} />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      {(categoryTransactions.length > 0 || categoryFixedExpenses.length > 0) ? (
-                        <div className="divide-y divide-white/[0.035] overflow-hidden">
-                          {categoryTransactions.map(t => {
-                            let displayAmount = t.amount;
-                            const transactionSplits = (t as any).splits;
-                            if (transactionSplits && transactionSplits.length > 0) {
-                              const relevantSplits = transactionSplits.filter((s: any) => 
-                                (s.category || '').trim() === item.name.trim()
-                              );
-                              if (relevantSplits.length > 0) {
-                                displayAmount = relevantSplits.reduce((sum: number, s: any) => sum + s.amount, 0);
-                              } else {
-                                displayAmount = 0;
+                  
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden bg-white/[0.015] border-t border-white/[0.03]"
+                      >
+                        {(categoryTransactions.length > 0 || categoryFixedExpenses.length > 0) ? (
+                          <div className="divide-y divide-white/[0.035] overflow-hidden">
+                            {categoryTransactions.map(t => {
+                              let displayAmount = t.amount;
+                              const transactionSplits = (t as any).splits;
+                              if (transactionSplits && transactionSplits.length > 0) {
+                                const relevantSplits = transactionSplits.filter((s: any) => 
+                                  (s.category || '').trim() === item.name.trim()
+                                );
+                                if (relevantSplits.length > 0) {
+                                  displayAmount = relevantSplits.reduce((sum: number, s: any) => sum + s.amount, 0);
+                                } else {
+                                  displayAmount = 0;
+                                }
                               }
-                            }
-                            
-                            return (
-                              <TransactionItem
-                                key={t.id}
-                                transaction={t}
-                                config={config}
-                                displayAmount={displayAmount}
-                                onView={onViewTransaction}
-                                onDelete={onDeleteTransaction}
-                                showAllCategories={false}
-                                showDate={true}
-                                variant="transparent"
-                              />
-                            );
-                          })}
+                              
+                              return (
+                                <TransactionItem
+                                  key={t.id}
+                                  transaction={t}
+                                  config={config}
+                                  displayAmount={displayAmount}
+                                  onView={onViewTransaction}
+                                  onDelete={onDeleteTransaction}
+                                  showAllCategories={false}
+                                  showDate={true}
+                                  variant="transparent"
+                                />
+                              );
+                            })}
 
-                          {categoryFixedExpenses.map(e => {
-                            let amount = Number(e.amount) || 0;
-                            switch (e.frequency) {
-                              case Frequency.QUARTERLY: amount = amount / 3; break;
-                              case Frequency.SEMI_ANNUALLY: amount = amount / 6; break;
-                              case Frequency.ANNUALLY: amount = amount / 12; break;
-                              default: break;
-                            }
-                            
-                            const mockTransaction: Transaction = {
-                              id: e.id,
-                              amount: amount,
-                              category: e.category || t('fixedExpenses'),
-                              type: 'expense',
-                              timestamp: stats?.periodStart ? new Date(stats.periodStart).getTime() : Date.now(),
-                              note: e.name,
-                              merchant: e.name,
-                              logo: e.logo,
-                              icon: e.icon,
-                              tags: [],
-                            };
-                            
-                            return (
-                              <TransactionItem
-                                key={`fixed-${e.id}`}
-                                transaction={mockTransaction}
-                                config={config}
-                                isFixed={true}
-                                onClick={() => {
-                                  onViewFixedExpense?.(e);
-                                }}
-                                variant="transparent"
-                              />
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <EmptyState title={t('noDataAvailable')} className="py-6" />
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-          {(categoryData?.length || 0) === 0 && (
-            <EmptyState title={t('noDataAvailable')} />
-          )}
-        </div>
+                            {categoryFixedExpenses.map(e => {
+                              let amount = Number(e.amount) || 0;
+                              switch (e.frequency) {
+                                case Frequency.QUARTERLY: amount = amount / 3; break;
+                                case Frequency.SEMI_ANNUALLY: amount = amount / 6; break;
+                                case Frequency.ANNUALLY: amount = amount / 12; break;
+                                default: break;
+                              }
+                              
+                              const mockTransaction: Transaction = {
+                                id: e.id,
+                                amount: amount,
+                                category: e.category || t('fixedExpenses'),
+                                type: 'expense',
+                                timestamp: stats?.periodStart ? new Date(stats.periodStart).getTime() : Date.now(),
+                                note: e.name,
+                                merchant: e.name,
+                                logo: e.logo,
+                                icon: e.icon,
+                                tags: [],
+                              };
+                              
+                              return (
+                                <TransactionItem
+                                  key={`fixed-${e.id}`}
+                                  transaction={mockTransaction}
+                                  config={config}
+                                  isFixed={true}
+                                  onClick={() => {
+                                    onViewFixedExpense?.(e);
+                                  }}
+                                  variant="transparent"
+                                />
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <EmptyState title={t('noDataAvailable')} className="py-6" />
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState title={t('noDataAvailable')} />
+        )}
       </div>
     </div>
   );

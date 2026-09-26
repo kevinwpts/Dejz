@@ -106,29 +106,27 @@ export function LogView({
       )}
 
       {/* Type Filters (Alla, Utgift, Inkomst, Kvitto) */}
-      <div className="space-y-3">
-        <div className="grid grid-cols-4 gap-1 p-1 bg-white/[0.035] backdrop-blur-[18px] rounded-full border border-white/[0.035]">
-          {(['all', 'expense', 'income', 'receipt'] as const).map(type => {
-            const isActive = typeFilter === type;
-            return (
-              <button
-                key={type}
-                onClick={() => setTypeFilter(type)}
-                className={`flex items-center justify-center gap-1.5 h-10 sm:h-11 px-1 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer ${
-                  isActive 
-                    ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none' 
-                    : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
-                }`}
-              >
-                {type === 'all' && <LayoutGrid size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
-                {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
-                {type === 'income' && <ArrowUpRight size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
-                {type === 'receipt' && <FileText size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
-                <span className="truncate">{t(type as TranslationKey)}</span>
-              </button>
-            );
-          })}
-        </div>
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
+        {(['all', 'expense', 'income', 'receipt'] as const).map(type => {
+          const isActive = typeFilter === type;
+          return (
+            <button
+              key={type}
+              onClick={() => setTypeFilter(type)}
+              className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+                isActive 
+                  ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none' 
+                  : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
+              }`}
+            >
+              {type === 'all' && <LayoutGrid size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
+              {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
+              {type === 'income' && <ArrowUpRight size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
+              {type === 'receipt' && <FileText size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
+              <span>{t(type as TranslationKey)}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Transactions List */}

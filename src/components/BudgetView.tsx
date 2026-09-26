@@ -433,33 +433,33 @@ export function BudgetView({
       </div>
 
       {/* Budget Filter Segmented Control */}
-      <div className="grid grid-cols-3 gap-1 p-1 bg-white/[0.035] backdrop-blur-[18px] border border-white/[0.035] rounded-full">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
         <button
           onClick={() => setBudgetFilter('fixed')}
-          className={`h-10 sm:h-11 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
+          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'fixed'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
-              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
           {t('fixedExpenses' as TranslationKey) || 'Fasta utgifter'}
         </button>
         <button
           onClick={() => setBudgetFilter('income')}
-          className={`h-10 sm:h-11 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
+          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'income'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
-              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
           {t('incomes' as TranslationKey) || 'Inkomster'}
         </button>
         <button
           onClick={() => setBudgetFilter('savings')}
-          className={`h-10 sm:h-11 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer text-center truncate flex items-center justify-center px-2 ${
+          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'savings'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
-              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.04]'
+              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
           {t('monthlySavings' as TranslationKey) || 'Sparande'}
@@ -467,7 +467,7 @@ export function BudgetView({
       </div>
 
       {/* Total Amount Header */}
-      <div className="flex items-center justify-between px-1 pt-1 -mb-3">
+      <div className="flex items-center justify-between px-1 pt-2">
         <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">
           {budgetFilter === 'fixed' && (t('fixedExpenses') || 'Fasta utgifter')}
           {budgetFilter === 'income' && (t('incomes') || 'Inkomster')}
@@ -491,100 +491,90 @@ export function BudgetView({
         >
           {/* Incomes Section */}
           {budgetFilter === 'income' && (
-            <div className="space-y-3.5">
+            <div className="space-y-4">
               <div className="flex justify-end px-1">
                 <button 
                   onClick={onAddIncome} 
-                  className="h-8 px-3 rounded-full bg-white/[0.04] hover:bg-white/[0.07] text-xs font-medium text-[#C7CDDC] hover:text-white border border-white/[0.035] transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5"
+                  className="text-xs font-medium text-[#8B9CFF] hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
                 >
-                  <Plus size={13} strokeWidth={2} />
+                  <Plus size={14} strokeWidth={2} />
                   <span>{t('newIncome')}</span>
                 </button>
               </div>
-              <div className="space-y-2.5">
-                {sortedIncomes.length > 0 ? (
-                  <AnimatePresence mode="popLayout">
-                    {sortedIncomes.map((income, index) => (
-                      <motion.div
-                        key={`${income.id}-${index}`}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ delay: index * 0.04 }}
-                      >
-                        <BudgetItem 
-                          item={income} 
-                          onClick={() => onViewIncome(income)} 
-                          currency={config.currency} 
-                          type="income"
-                          language={config.language as Language}
-                          t={t}
-                          config={config}
-                          currentPeriodId={currentPeriodId}
-                          isGrouped={false}
-                        />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                ) : (
-                  <EmptyState title={t('noDataAvailable')} />
-                )}
-              </div>
+
+              {sortedIncomes.length > 0 ? (
+                <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+                  {sortedIncomes.map((income) => (
+                    <BudgetItem 
+                      key={income.id}
+                      item={income} 
+                      onClick={() => onViewIncome(income)} 
+                      currency={config.currency} 
+                      type="income"
+                      language={config.language as Language}
+                      t={t}
+                      config={config}
+                      currentPeriodId={currentPeriodId}
+                      isGrouped={true}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState title={t('noDataAvailable')} />
+              )}
             </div>
           )}
 
           {/* Fixed Expenses Section */}
           {budgetFilter === 'fixed' && (
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2 px-1">
-                {/* Sort controls */}
-                <div className="flex items-center gap-1 bg-white/[0.035] p-1 rounded-xl border border-white/[0.035]">
-                  <span className="text-[11px] font-normal text-[#9CA6BC] px-1.5 flex items-center gap-1">
-                    <ArrowUpDown size={11} className="opacity-70" />
-                    <span className="hidden sm:inline">{config.language === 'en' ? 'Sort:' : 'Sortera:'}</span>
-                  </span>
+            <div className="space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+                {/* Discreet text sort controls */}
+                <div className="flex items-center gap-2 text-xs text-[#9CA6BC]">
+                  <span className="text-[11px] text-[#9CA6BC]/70">{config.language === 'en' ? 'Sort:' : 'Sortera:'}</span>
                   <button
                     type="button"
                     onClick={() => setFixedSortBy('day')}
-                    className={`h-7 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center gap-1 ${
-                      fixedSortBy === 'day'
-                        ? 'bg-[#818cf8]/[0.18] text-white border border-[#8B9CFF]/30'
-                        : 'text-[#9CA6BC] hover:text-[#C7CDDC]'
+                    className={`transition-colors cursor-pointer ${
+                      fixedSortBy === 'day' 
+                        ? 'text-white font-semibold' 
+                        : 'hover:text-[#C7CDDC]'
                     }`}
                   >
-                    <Calendar size={11} />
-                    <span>{config.language === 'en' ? 'Day' : 'Dragningsdag'}</span>
+                    {config.language === 'en' ? 'Day' : 'Dragningsdag'}
                   </button>
+                  <span className="text-white/10">·</span>
                   <button
                     type="button"
                     onClick={() => setFixedSortBy('name')}
-                    className={`h-7 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                      fixedSortBy === 'name'
-                        ? 'bg-[#818cf8]/[0.18] text-white border border-[#8B9CFF]/30'
-                        : 'text-[#9CA6BC] hover:text-[#C7CDDC]'
+                    className={`transition-colors cursor-pointer ${
+                      fixedSortBy === 'name' 
+                        ? 'text-white font-semibold' 
+                        : 'hover:text-[#C7CDDC]'
                     }`}
                   >
-                    <span>{config.language === 'en' ? 'Name' : 'Namn'}</span>
+                    {config.language === 'en' ? 'Name' : 'Namn'}
                   </button>
+                  <span className="text-white/10">·</span>
                   <button
                     type="button"
                     onClick={() => setFixedSortBy('amount')}
-                    className={`h-7 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                      fixedSortBy === 'amount'
-                        ? 'bg-[#818cf8]/[0.18] text-white border border-[#8B9CFF]/30'
-                        : 'text-[#9CA6BC] hover:text-[#C7CDDC]'
+                    className={`transition-colors cursor-pointer ${
+                      fixedSortBy === 'amount' 
+                        ? 'text-white font-semibold' 
+                        : 'hover:text-[#C7CDDC]'
                     }`}
                   >
-                    <span>{config.language === 'en' ? 'Amount' : 'Belopp'}</span>
+                    {config.language === 'en' ? 'Amount' : 'Belopp'}
                   </button>
                 </div>
 
                 <button
                   type="button"
                   onClick={onAddFixedExpense}
-                  className="h-8 px-3 rounded-full bg-white/[0.04] hover:bg-white/[0.07] text-xs font-medium text-[#C7CDDC] hover:text-white border border-white/[0.035] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  className="text-xs font-medium text-[#8B9CFF] hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
                 >
-                  <Plus size={13} strokeWidth={2} />
+                  <Plus size={14} strokeWidth={2} />
                   <span>{t('newFixedExpense')}</span>
                 </button>
               </div>
@@ -598,39 +588,29 @@ export function BudgetView({
                     return acc;
                   }, {} as Record<string, FixedExpense[]>)
                 ).map(([freq, items]) => (
-                  <div key={freq} className="space-y-2.5">
+                  <div key={freq} className="space-y-2">
                     <div className="flex items-center gap-3 px-1 pt-1">
                       <span className="text-xs font-medium text-[#9CA6BC]">
                         {Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq) 
                           ? t(`freq_${Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq)!.toLowerCase()}` as TranslationKey)
                           : freq}
                       </span>
-                      <div className="h-px flex-1 bg-white/[0.04]" />
                     </div>
-                    <div className="space-y-2.5">
-                      <AnimatePresence mode="popLayout">
-                        {items.map((expense, index) => (
-                          <motion.div
-                            key={`${expense.id}-${index}`}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ delay: index * 0.04 }}
-                          >
-                            <BudgetItem 
-                              item={expense} 
-                              onClick={() => onViewFixedExpense(expense)} 
-                              currency={config.currency} 
-                              type="expense"
-                              language={config.language as Language}
-                              t={t}
-                              config={config}
-                              currentPeriodId={currentPeriodId}
-                              isGrouped={false}
-                            />
-                          </motion.div>
-                        ))}
-                      </AnimatePresence>
+                    <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+                      {items.map((expense) => (
+                        <BudgetItem 
+                          key={expense.id}
+                          item={expense} 
+                          onClick={() => onViewFixedExpense(expense)} 
+                          currency={config.currency} 
+                          type="expense"
+                          language={config.language as Language}
+                          t={t}
+                          config={config}
+                          currentPeriodId={currentPeriodId}
+                          isGrouped={true}
+                        />
+                      ))}
                     </div>
                   </div>
                 ))
@@ -647,69 +627,61 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddMonthlySaving} 
-                  className="h-8 px-3 rounded-full bg-white/[0.04] hover:bg-white/[0.07] text-xs font-medium text-[#C7CDDC] hover:text-white border border-white/[0.035] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  className="text-xs font-medium text-[#8B9CFF] hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
                 >
-                  <Plus size={13} strokeWidth={2} />
+                  <Plus size={14} strokeWidth={2} />
                   <span>{t('newMonthlySaving')}</span>
                 </button>
               </div>
-              <div className="space-y-2.5">
-                {sortedSavings.length > 0 ? (
-                  <AnimatePresence mode="popLayout">
-                    {sortedSavings.map((saving, index) => (
-                      <motion.div
-                        key={`${saving.id}-${index}`}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ delay: index * 0.04 }}
-                      >
-                        <BudgetItem 
-                          item={saving} 
-                          onClick={() => onViewMonthlySaving(saving)} 
-                          currency={config.currency} 
-                          type="expense"
-                          language={config.language as Language}
-                          t={t}
-                          config={config}
-                          currentPeriodId={currentPeriodId}
-                          isGrouped={false}
-                        />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                ) : config.monthlySavings > 0 ? (
-                  <button 
-                    type="button"
-                    onClick={onAddMonthlySaving}
-                    className="w-full bg-white/[0.04] p-4 sm:p-5 rounded-[20px] border border-white/[0.025] hover:bg-white/[0.06] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
-                  >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-white/[0.05] border border-white/[0.035] flex items-center justify-center text-[#C7CDDC] shrink-0">
-                        <RefreshCw size={17} strokeWidth={1.75} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-white tracking-tight leading-tight">
-                          Migrera månadssparande
-                        </p>
-                        <p className="text-xs font-normal text-[#9CA6BC] mt-1">
-                          Lägg till sparande på <span className="font-amount tabular-nums font-semibold text-white">{formatAmount(config.monthlySavings)}</span> <span className="text-xs text-[#9CA6BC]">{config.currency}</span>
-                        </p>
-                      </div>
+
+              {sortedSavings.length > 0 ? (
+                <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+                  {sortedSavings.map((saving) => (
+                    <BudgetItem 
+                      key={saving.id}
+                      item={saving} 
+                      onClick={() => onViewMonthlySaving(saving)} 
+                      currency={config.currency} 
+                      type="expense"
+                      language={config.language as Language}
+                      t={t}
+                      config={config}
+                      currentPeriodId={currentPeriodId}
+                      isGrouped={true}
+                    />
+                  ))}
+                </div>
+              ) : config.monthlySavings > 0 ? (
+                <button 
+                  type="button"
+                  onClick={onAddMonthlySaving} 
+                  className="w-full bg-white/[0.04] p-4 sm:p-5 rounded-[22px] border border-white/[0.025] hover:bg-white/[0.06] transition-all flex items-center justify-between text-left group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/[0.035] flex items-center justify-center text-[#C7CDDC] shrink-0">
+                      <RefreshCw size={17} strokeWidth={1.75} />
                     </div>
-                    <div className="h-7 px-3 rounded-full bg-[#818cf8]/[0.18] text-white border border-[#8B9CFF]/30 text-xs font-medium shrink-0 ml-3 flex items-center justify-center">
-                      Lägg till
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white tracking-tight leading-tight">
+                        Migrera månadssparande
+                      </p>
+                      <p className="text-xs font-normal text-[#9CA6BC] mt-1">
+                        Lägg till sparande på <span className="font-amount tabular-nums font-semibold text-white">{formatAmount(config.monthlySavings)}</span> <span className="text-xs text-[#9CA6BC]">{config.currency}</span>
+                      </p>
                     </div>
-                  </button>
-                ) : (
-                  <EmptyState 
-                    title={config.language === 'en' ? 'No monthly savings added yet' : 'Inget månadssparande inlagt än'} 
-                    description={config.language === 'en' ? 'Add recurring monthly savings to reserve money automatically.' : 'Lägg in fast månadssparande för att automatiskt avsätta pengar varje månad.'}
-                    actionLabel={`+ ${t('newMonthlySaving')}`}
-                    onAction={onAddMonthlySaving}
-                  />
-                )}
-              </div>
+                  </div>
+                  <div className="h-7 px-3 rounded-full bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 text-xs font-medium shrink-0 ml-3 flex items-center justify-center">
+                    Lägg till
+                  </div>
+                </button>
+              ) : (
+                <EmptyState 
+                  title={config.language === 'en' ? 'No monthly savings added yet' : 'Inget månadssparande inlagt än'} 
+                  description={config.language === 'en' ? 'Add recurring monthly savings to reserve money automatically.' : 'Lägg in fast månadssparande för att automatiskt avsätta pengar varje månad.'}
+                  actionLabel={`+ ${t('newMonthlySaving')}`}
+                  onAction={onAddMonthlySaving}
+                />
+              )}
             </div>
           )}
         </motion.div>

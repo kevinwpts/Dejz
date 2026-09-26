@@ -46,15 +46,9 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   const paymentString = item.paymentMethod ? (typeof item.paymentMethod === 'string' ? item.paymentMethod : item.paymentMethod?.name) : '';
 
   return (
-    <motion.div 
-      whileHover={{ scale: 1.005 }}
-      whileTap={{ scale: 0.99 }}
+    <div 
       onClick={onClick}
-      className={`px-3.5 sm:px-4.5 py-3 sm:py-3.5 min-h-[72px] rounded-[18px] flex items-center justify-between gap-2.5 sm:gap-3 group transition-all duration-200 ${
-        isGrouped 
-          ? 'bg-transparent' 
-          : 'bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.025] backdrop-blur-[18px] shadow-none'
-      } cursor-pointer active:scale-[0.99]`}
+      className="px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 group transition-colors hover:bg-white/[0.03] cursor-pointer"
     >
       {/* Left side: Logo + Name + Category */}
       <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
@@ -69,7 +63,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           <p 
-            className="text-[14px] sm:text-[14.5px] font-semibold text-white leading-tight truncate tracking-tight transition-colors group-hover:text-white"
+            className="text-[14px] sm:text-[14.5px] font-medium text-white leading-tight truncate tracking-tight group-hover:text-white"
             title={displayName}
           >
             {displayName}
@@ -105,7 +99,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
       
       {/* Right side: Amount + Deduction metadata */}
       <div className="flex flex-col items-end justify-center shrink-0 max-w-[46%] sm:max-w-[42%] text-right pl-1">
-        <p className={`text-[14.5px] sm:text-[15px] font-semibold whitespace-nowrap tracking-tight ${type === 'income' ? 'text-emerald-400' : 'text-white'}`}>
+        <p className={`text-[14px] sm:text-[14.5px] font-semibold whitespace-nowrap tracking-tight ${type === 'income' ? 'text-emerald-400' : 'text-white'}`}>
           <span className="opacity-75 mr-0.5 text-[13px] font-semibold">{type === 'income' ? '+' : '−'}</span>
           <span className="font-amount tabular-nums font-semibold tracking-tight">{formatAmount(currentAmount, language)}</span>
           <span className="text-[12px] font-normal text-[#9CA6BC] ml-1">{currency}</span>
@@ -114,7 +108,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         {/* Right-aligned deduction metadata under amount */}
         <div className="flex items-center gap-1 mt-0.5 justify-end max-w-full overflow-hidden text-[#9CA6BC]">
           {(dayString || paymentString) && (
-            <span className="text-[11px] font-normal text-[#9CA6BC]/80 tracking-tight truncate">
+            <span className="text-[11px] font-normal text-[#9CA6BC] tracking-tight truncate">
               {dayString && <span>{dayString}</span>}
               {dayString && paymentString && <span className="mx-1 opacity-50">·</span>}
               {paymentString && <span className="truncate max-w-[70px] sm:max-w-[100px]">{paymentString}</span>}
@@ -122,6 +116,6 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

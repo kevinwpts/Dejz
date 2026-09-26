@@ -141,51 +141,51 @@ export function UniversalPeriodSelector({
 
   const containerClasses = variant === 'modal' 
     ? 'mb-2 transition-all'
-    : 'sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-30 mb-4 transition-all';
+    : 'sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-30 mb-5 transition-all';
 
   return (
     <div className={containerClasses}>
-      <div className="bg-white/[0.035] border border-white/[0.035] backdrop-blur-[18px] rounded-full px-2 sm:px-3 py-1 flex items-center justify-between transition-all">
+      <div className="flex items-center justify-between px-1 py-1 transition-all">
         <button 
           type="button"
           onClick={handlePrevPeriod}
           disabled={!canGoPrev}
-          className={`p-2 rounded-full transition-all active:scale-95 cursor-pointer ${
+          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
             canGoPrev 
-              ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.06]' 
-              : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
+              ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.05]' 
+              : 'text-[#9CA6BC]/30 cursor-not-allowed'
           }`}
           aria-label="Föregående period"
         >
-          <ChevronLeft size={16} strokeWidth={2} />
+          <ChevronLeft size={18} strokeWidth={2} />
         </button>
             
         {onOpenPicker ? (
           <button 
             type="button"
             onClick={handleCenterClick}
-            className="flex flex-col items-center group/label px-3 py-1 rounded-full hover:bg-white/[0.05] transition-all cursor-pointer"
+            className="flex flex-col items-center group/label px-4 py-1 rounded-2xl hover:bg-white/[0.04] transition-all cursor-pointer"
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold tracking-tight text-white group-hover/label:text-[#8B9CFF] transition-colors">
+              <span className="text-base sm:text-lg font-semibold tracking-tight text-white group-hover/label:text-[#8B9CFF] transition-colors">
                 {month}
               </span>
-              <CalendarIcon size={13} className="text-[#9CA6BC] group-hover/label:text-[#8B9CFF] transition-colors" />
+              <CalendarIcon size={14} className="text-[#9CA6BC] group-hover/label:text-[#8B9CFF] transition-colors" />
               <ChevronDown size={13} className="text-[#9CA6BC] group-hover/label:text-white transition-opacity" />
             </div>
             {dates && (
-              <span className="text-[11px] font-normal text-[#9CA6BC] mt-0.5">
+              <span className="text-xs font-normal text-[#9CA6BC] mt-0.5">
                 {dates}
               </span>
             )}
           </button>
         ) : (
-          <div className="flex flex-col items-center px-3 py-0.5 select-none">
-            <span className="text-sm font-semibold tracking-tight text-white">
+          <div className="flex flex-col items-center px-4 py-1 select-none">
+            <span className="text-base sm:text-lg font-semibold tracking-tight text-white">
               {month}
             </span>
             {dates && (
-              <span className="text-[11px] font-normal text-[#9CA6BC] mt-0.5">
+              <span className="text-xs font-normal text-[#9CA6BC] mt-0.5">
                 {dates}
               </span>
             )}
@@ -196,14 +196,14 @@ export function UniversalPeriodSelector({
           type="button"
           onClick={handleNextPeriod}
           disabled={!canGoNext}
-          className={`p-2 rounded-full transition-all active:scale-95 cursor-pointer ${
+          className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
             canGoNext 
-              ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.06]' 
-              : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
+              ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.05]' 
+              : 'text-[#9CA6BC]/30 cursor-not-allowed'
           }`}
           aria-label="Nästa period"
         >
-          <ChevronRight size={16} strokeWidth={2} />
+          <ChevronRight size={18} strokeWidth={2} />
         </button>
       </div>
     </div>

@@ -71,6 +71,19 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     return Math.round((realToday.getTime() - startMidnight) / oneDay);
   }, [stats?.periodStart, stats?.periodEnd]);
 
+  const daysRemaining = useMemo(() => {
+    if (!stats) return 1;
+    const now = new Date();
+    const realToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endMidnight = new Date(stats.periodEnd.getFullYear(), stats.periodEnd.getMonth(), stats.periodEnd.getDate()).getTime();
+    const oneDay = 24 * 60 * 60 * 1000;
+    const diff = Math.ceil((endMidnight - realToday.getTime()) / oneDay) + 1;
+    return Math.max(1, diff);
+  }, [stats?.periodEnd]);
+
+  const dailyAvg = daysElapsed > 0 ? Math.round(totalSpent / daysElapsed) : 0;
+  const remainingPerDay = Math.round(stats.remainingPeriodCents / daysRemaining);
+
   if (!stats) return null;
 
   const disposablePot = stats.disposablePot;
@@ -82,12 +95,12 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     return (
       <div className="space-y-4 font-sans">
         {/* Period Closing Hero */}
-        <div className="py-2 text-center relative flex flex-col items-center">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="py-2 text-left relative">
+          <div className="flex items-center gap-2 mb-1.5">
             <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] select-none">
               {t('periodClosing' as any) || 'Periodavslut'}
             </span>
-            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium tracking-tight ${
+            <span className={`px-2 py-0.5 rounded-full text-[10.5px] font-medium tracking-tight ${
               isPositive 
                 ? 'bg-emerald-500/[0.14] text-emerald-400 border border-emerald-500/20' 
                 : 'bg-rose-500/[0.14] text-rose-400 border border-rose-500/20'
@@ -96,7 +109,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
             </span>
           </div>
 
-          <div className="flex items-baseline justify-center gap-1.5 mb-1">
+          <div className="flex items-baseline gap-2">
             <span className={`text-4xl sm:text-5xl leading-none font-semibold font-amount tabular-nums tracking-tight ${
               isPositive ? 'text-emerald-400' : 'text-rose-400'
             }`}>
@@ -106,37 +119,34 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
               {config.currency}
             </span>
           </div>
-          <span className="text-xs text-[#9CA6BC]">
-            {t('result' as any) || 'Resultat'}
-          </span>
         </div>
 
-        {/* 3-column Grid for Past Period: Fixed, Income, Savings */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-          <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[18px] flex flex-col items-center justify-center space-y-1 bg-white/[0.04] backdrop-blur-[16px] border border-white/[0.025] shadow-none">
-            <span className="text-[10.5px] sm:text-[11.5px] font-medium text-[#9CA6BC] tracking-tight text-center truncate w-full">
-              {t('fixed' as any) || 'Fasta utgifter'}
+        {/* 3-column Airy Summary */}
+        <div className="grid grid-cols-3 gap-2 p-3 bg-white/[0.035] backdrop-blur-[18px] rounded-[20px] border border-white/[0.025]">
+          <div className="text-center">
+            <span className="text-[11px] font-medium text-[#9CA6BC] block mb-0.5">
+              {t('fixed' as any) || 'Fasta'}
             </span>
-            <span className="text-[13.5px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-center truncate w-full text-white">
-              −{formatAmount(Math.round(stats.totalFixedExpenses || stats.totalFixed || 0), config.language)} <span className="font-sans text-[10.5px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+            <span className="text-xs sm:text-sm font-semibold font-amount tabular-nums text-white">
+              −{formatAmount(Math.round(stats.totalFixedExpenses || stats.totalFixed || 0), config.language)} {config.currency || 'kr'}
             </span>
           </div>
 
-          <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[18px] flex flex-col items-center justify-center space-y-1 bg-white/[0.04] backdrop-blur-[16px] border border-white/[0.025] shadow-none">
-            <span className="text-[10.5px] sm:text-[11.5px] font-medium text-[#9CA6BC] tracking-tight text-center truncate w-full">
+          <div className="text-center border-x border-white/[0.04]">
+            <span className="text-[11px] font-medium text-[#9CA6BC] block mb-0.5">
               {t('income' as any) || 'Inkomster'}
             </span>
-            <span className="text-[13.5px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-emerald-400 text-center truncate w-full">
-              +{formatAmount(Math.round(stats.totalIncome || 0), config.language)} <span className="font-sans text-[10.5px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+            <span className="text-xs sm:text-sm font-semibold font-amount tabular-nums text-emerald-400">
+              +{formatAmount(Math.round(stats.totalIncome || 0), config.language)} {config.currency || 'kr'}
             </span>
           </div>
 
-          <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[18px] flex flex-col items-center justify-center space-y-1 bg-white/[0.04] backdrop-blur-[16px] border border-white/[0.025] shadow-none">
-            <span className="text-[10.5px] sm:text-[11.5px] font-medium text-[#9CA6BC] tracking-tight text-center truncate w-full">
-              {t('monthlySavings' as any) || 'Månadssparande'}
+          <div className="text-center">
+            <span className="text-[11px] font-medium text-[#9CA6BC] block mb-0.5">
+              {t('monthlySavings' as any) || 'Sparande'}
             </span>
-            <span className="text-[13.5px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-white text-center truncate w-full">
-              −{formatAmount(Math.round(totalSavings), config.language)} <span className="font-sans text-[10.5px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+            <span className="text-xs sm:text-sm font-semibold font-amount tabular-nums text-white">
+              −{formatAmount(Math.round(totalSavings), config.language)} {config.currency || 'kr'}
             </span>
           </div>
         </div>
@@ -144,101 +154,70 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     );
   }
 
+  const budgetLeftPct = Math.max(0, Math.min(100, Math.round((stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) * 100)));
+
   return (
-    <div className="space-y-4 font-sans">
-      {/* Primary Hero Metric: Total Remaining */}
-      <div className="py-2 text-center relative flex flex-col items-center">
-        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] mb-1.5 block select-none">
-          {t('totalRemaining' as any)}
+    <div className="space-y-5 font-sans">
+      {/* Primary Hero Metric: Total Kvar i perioden directly on background */}
+      <div className="py-2 text-left space-y-1.5">
+        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
+          {t('totalRemaining' as any) || 'Total kvar i perioden'}
         </span>
-        <div className="flex items-baseline justify-center gap-1.5">
-          <span className={`text-3xl sm:text-4xl md:text-5xl leading-none font-semibold font-amount tabular-nums tracking-tight ${
+        <div className="flex items-baseline gap-2">
+          <span className={`text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums tracking-tight ${
             stats.remainingPeriodCents < 0 ? 'text-rose-400' : 'text-white'
           }`}>
             {Math.round(Math.abs(stats.remainingPeriodCents)).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
           </span>
-          <span className="text-lg sm:text-xl font-normal text-[#9CA6BC]">
+          <span className="text-[19px] sm:text-[21px] font-normal text-[#9CA6BC]">
             {config.currency}
           </span>
         </div>
       </div>
 
-      {/* Complete Financial Overview: 6 Key Metrics Grid */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-        {/* 1. Spenderat */}
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[18px] flex flex-col items-center justify-center space-y-1 bg-white/[0.04] backdrop-blur-[16px] border border-white/[0.025] shadow-none">
-          <span className="text-[10.5px] sm:text-[11.5px] font-medium text-[#9CA6BC] tracking-tight text-center truncate w-full">
-            {t('spent')}
+      {/* Secondary Airy Summary Row */}
+      <div className="grid grid-cols-3 gap-2 py-3 px-3.5 bg-white/[0.035] backdrop-blur-[18px] rounded-[20px] border border-white/[0.025]">
+        <div className="text-left">
+          <span className="text-[10.5px] sm:text-[11px] font-normal text-[#9CA6BC] block mb-0.5 truncate">
+            {t('spent') || 'Spenderat'}
           </span>
-          <span className="text-[13.5px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-center truncate w-full text-white">
-            −{formatAmount(Math.round(totalSpent), config.language)} <span className="font-sans text-[10px] sm:text-[10.5px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
-          </span>
-        </div>
-        
-        {/* 2. Snitt / dag */}
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[18px] flex flex-col items-center justify-center space-y-1 bg-white/[0.04] backdrop-blur-[16px] border border-white/[0.025] shadow-none">
-          <span className="text-[10.5px] sm:text-[11.5px] font-medium text-[#9CA6BC] tracking-tight text-center truncate w-full">
-            {t('averagePerDay')}
-          </span>
-          <span className="text-[13.5px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-white text-center truncate w-full">
-            −{daysElapsed > 0 ? formatAmount(Math.round(totalSpent / daysElapsed), config.language) : 0} <span className="font-sans text-[10px] sm:text-[10.5px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+          <span className="text-xs sm:text-[13.5px] font-semibold font-amount tabular-nums text-white">
+            −{formatAmount(Math.round(totalSpent), config.language)} <span className="text-[10px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
           </span>
         </div>
 
-        {/* 3. Budget / dag */}
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[18px] flex flex-col items-center justify-center space-y-1 bg-white/[0.04] backdrop-blur-[16px] border border-white/[0.025] shadow-none">
-          <span className="text-[10.5px] sm:text-[11.5px] font-medium text-[#9CA6BC] tracking-tight text-center truncate w-full">
-            {t('baseDailyBudget')}
+        <div className="text-left border-l border-white/[0.04] pl-2 sm:pl-3">
+          <span className="text-[10.5px] sm:text-[11px] font-normal text-[#9CA6BC] block mb-0.5 truncate">
+            {t('averagePerDay') || 'Snitt/dag'}
           </span>
-          <span className="text-[13.5px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-white text-center truncate w-full">
-            +{formatAmount(Math.round(stats.baseDailyBudgetCents || 0), config.language)} <span className="font-sans text-[10px] sm:text-[10.5px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
-          </span>
-        </div>
-
-        {/* 4. Fasta utgifter */}
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[18px] flex flex-col items-center justify-center space-y-1 bg-white/[0.04] backdrop-blur-[16px] border border-white/[0.025] shadow-none">
-          <span className="text-[10.5px] sm:text-[11.5px] font-medium text-[#9CA6BC] tracking-tight text-center truncate w-full">
-            {t('fixed' as any) || 'Fasta utgifter'}
-          </span>
-          <span className="text-[13.5px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-center truncate w-full text-white">
-            −{formatAmount(Math.round(stats.totalFixedExpenses || stats.totalFixed || 0), config.language)} <span className="font-sans text-[10px] sm:text-[10.5px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+          <span className="text-xs sm:text-[13.5px] font-semibold font-amount tabular-nums text-white">
+            −{formatAmount(dailyAvg, config.language)} <span className="text-[10px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
           </span>
         </div>
 
-        {/* 5. Inkomster */}
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[18px] flex flex-col items-center justify-center space-y-1 bg-white/[0.04] backdrop-blur-[16px] border border-white/[0.025] shadow-none">
-          <span className="text-[10.5px] sm:text-[11.5px] font-medium text-[#9CA6BC] tracking-tight text-center truncate w-full">
-            {t('income' as any) || 'Inkomster'}
+        <div className="text-left border-l border-white/[0.04] pl-2 sm:pl-3">
+          <span className="text-[10.5px] sm:text-[11px] font-normal text-[#9CA6BC] block mb-0.5 truncate">
+            Kvar per dag
           </span>
-          <span className="text-[13.5px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-emerald-400 text-center truncate w-full">
-            +{formatAmount(Math.round(stats.totalIncome || 0), config.language)} <span className="font-sans text-[10px] sm:text-[10.5px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
-          </span>
-        </div>
-
-        {/* 6. Månadssparande */}
-        <div className="py-2.5 px-2 sm:py-3 sm:px-3 min-h-[66px] rounded-[18px] flex flex-col items-center justify-center space-y-1 bg-white/[0.04] backdrop-blur-[16px] border border-white/[0.025] shadow-none">
-          <span className="text-[10.5px] sm:text-[11.5px] font-medium text-[#9CA6BC] tracking-tight text-center truncate w-full">
-            {t('monthlySavings' as any) || 'Månadssparande'}
-          </span>
-          <span className="text-[13.5px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-white text-center truncate w-full">
-            −{formatAmount(Math.round(totalSavings), config.language)} <span className="font-sans text-[10px] sm:text-[10.5px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+          <span className={`text-xs sm:text-[13.5px] font-semibold font-amount tabular-nums ${remainingPerDay < 0 ? 'text-rose-400' : 'text-white'}`}>
+            {formatAmount(remainingPerDay, config.language)} <span className="text-[10px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
           </span>
         </div>
       </div>
 
-      {/* Progress Bar Card */}
-      <div className="pt-2 pb-1 relative">
-        <div className="flex justify-between items-end mb-2 relative z-10">
+      {/* Integrated Clean Progress Bar */}
+      <div className="pt-1 pb-1">
+        <div className="flex justify-between items-center mb-2">
           <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">{t('budgetLeft')}</span>
-          <span className={`text-base sm:text-lg font-semibold font-amount tabular-nums ${(stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'text-rose-400' : 'text-white'}`}>
-            {Math.max(0, Math.min(100, Math.round((stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) * 100)))}% 
+          <span className={`text-xs sm:text-sm font-semibold font-amount tabular-nums ${budgetLeftPct < 10 ? 'text-rose-400' : 'text-white'}`}>
+            {budgetLeftPct}%
           </span>
         </div>
-        <div className="w-full h-2 bg-white/[0.07] rounded-full overflow-hidden mb-1 relative z-10">
-           <div 
-             className={`h-full rounded-full transition-all duration-700 ease-out ${(stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) < 0.1 ? 'bg-rose-500' : 'bg-[#8B9CFF]'}`} 
-             style={{ width: `${Math.max(0, Math.min(100, (stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) * 100))}%` }}
-           />
+        <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
+          <div 
+            className={`h-full rounded-full transition-all duration-700 ease-out ${budgetLeftPct < 10 ? 'bg-rose-500' : 'bg-[#8B9CFF]'}`} 
+            style={{ width: `${budgetLeftPct}%` }}
+          />
         </div>
       </div>
     </div>
