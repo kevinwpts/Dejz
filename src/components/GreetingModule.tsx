@@ -1,12 +1,13 @@
 import React, { useState, useRef, useMemo } from 'react';
-import { motion } from 'motion/react';
-import { Calendar, ArrowDownLeft, ArrowUpRight, Camera, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Calendar, ArrowDownLeft, ArrowUpRight, Camera, Zap, Mic, Square, Loader2, Volume2, Check } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { DejziAvatar } from './DejziSummaryModal';
 import { parseQuickExpense } from '../utils/expenseAiParser';
 import { feedback } from '../utils/feedback';
+import { useVoiceExpense } from '../hooks/useVoiceExpense';
 
 export { DejziAvatar };
 
@@ -61,7 +62,32 @@ export function GreetingModule({
   const isEn = language === 'en';
   const [quickText, setQuickText] = useState('');
   const [isSubmittingQuick, setIsSubmittingQuick] = useState(false);
+  const [successMsg, setSuccessMsg] = useState<{ text: string; transcript?: string } | null>(null);
   const quickInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    isRecording,
+    isAudioTranscribing,
+    statusText,
+    error: voiceError,
+    toggleRecording,
+    stopRecordingAndProcess
+  } = useVoiceExpense({
+    isEn,
+    onTextUpdate: (text) => setQuickText(text),
+    onSuccess: async (result) => {
+      if (onQuickAddExpense && result.amount > 0) {
+        await onQuickAddExpense(result.amount, result.merchant, result.category);
+        feedback.success();
+        setSuccessMsg({
+          text: `${isEn ? 'Added' : 'Lade till'} ${result.amount} ${currency} (${result.merchant}) ✨`,
+          transcript: result.transcript,
+        });
+        setQuickText('');
+        setTimeout(() => setSuccessMsg(null), 3500);
+      }
+    }
+  });
 
   const effectiveRemainingDays = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return stats?.remainingDays || 1;
@@ -78,8 +104,8 @@ export function GreetingModule({
     return stats?.remainingDays || 1;
   }, [calendarDays, date, stats?.remainingDays]);
 
-  const handleQuickExpenseSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleQuickExpenseSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     const clean = quickText.trim();
     if (!clean || isSubmittingQuick || !onQuickAddExpense) return;
 
@@ -96,12 +122,27 @@ export function GreetingModule({
       if (parsed.amount && parsed.amount > 0) {
         await onQuickAddExpense(parsed.amount, parsed.merchant, parsed.category);
         feedback.success();
+        setSuccessMsg({
+          text: `${isEn ? 'Added' : 'Lade till'} ${parsed.amount} ${currency} (${parsed.merchant}) ✨`
+        });
         setQuickText('');
+        setTimeout(() => setSuccessMsg(null), 3500);
       }
     } catch (_err) {
       console.error('Quick expense failed', _err);
     } finally {
       setIsSubmittingQuick(false);
+    }
+  };
+
+  const handleMicClick = async () => {
+    if (isRecording) {
+      const res = await stopRecordingAndProcess(quickText);
+      if (res && !res.handled && quickText.trim()) {
+        handleQuickExpenseSubmit();
+      }
+    } else {
+      toggleRecording(quickText);
     }
   };
 
@@ -208,25 +249,126 @@ export function GreetingModule({
           </button>
         </div>
 
-        {/* Snabbutgift Input Bar (rgba(255,255,255,0.035), blur 18px, border 0.025) */}
-        <form onSubmit={handleQuickExpenseSubmit} className="relative flex items-center pt-0.5">
-          <input
-            ref={quickInputRef}
-            type="text"
-            value={quickText}
-            onChange={(e) => setQuickText(e.target.value)}
-            placeholder={isEn ? "Quick expense: e.g. 45 Coop" : "Snabbutgift: t.ex. 45 ICA"}
-            className="w-full h-11 sm:h-12 pl-4 pr-12 rounded-2xl bg-white/[0.035] hover:bg-white/[0.05] focus:bg-white/[0.065] border border-white/[0.025] focus:border-white/[0.08] backdrop-blur-[18px] text-xs sm:text-sm font-normal text-white placeholder-[#9CA6BC]/70 outline-none transition-all shadow-none"
-          />
-          <button
-            type="submit"
-            disabled={!quickText.trim() || isSubmittingQuick}
-            className="absolute right-1.5 w-8.5 h-8.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-20 active:scale-95 text-[#C7CDDC] flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.035]"
-            title={isEn ? "Save quick expense" : "Spara snabbutgift"}
-          >
-            <Zap size={14} strokeWidth={1.75} className="text-[#C7CDDC]" />
-          </button>
-        </form>
+        {/* Snabbutgift Input Bar with Microphone Integration */}
+        <div className="space-y-2">
+          <form onSubmit={handleQuickExpenseSubmit} className="relative flex items-center pt-0.5">
+            <input
+              ref={quickInputRef}
+              type="text"
+              value={quickText}
+              onChange={(e) => setQuickText(e.target.value)}
+              placeholder={
+                isRecording
+                  ? isEn
+                    ? 'Speak now, e.g. "300 kr Coop"...'
+                    : 'Prata nu, t.ex. "300 kr Coop"...'
+                  : isEn
+                    ? 'Quick expense: e.g. 45 Coop or tap mic...'
+                    : 'Snabbutgift: t.ex. 45 ICA eller tryck micken...'
+              }
+              className={`w-full h-11 sm:h-12 pl-4 pr-24 rounded-2xl bg-white/[0.035] hover:bg-white/[0.05] focus:bg-white/[0.065] border backdrop-blur-[18px] text-xs sm:text-sm font-normal text-white placeholder-[#9CA6BC]/70 outline-none transition-all shadow-none ${
+                isRecording ? 'border-rose-500/80 ring-2 ring-rose-500/30' : 'border-white/[0.025] focus:border-white/[0.08]'
+              }`}
+            />
+
+            {/* Microphne & Submit Actions */}
+            <div className="absolute right-1.5 flex items-center gap-1.5">
+              {/* Microphone button */}
+              <button
+                type="button"
+                onClick={handleMicClick}
+                disabled={isSubmittingQuick || isAudioTranscribing}
+                aria-label={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
+                title={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
+                className={`w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all cursor-pointer border select-none ${
+                  isRecording
+                    ? 'bg-rose-500 text-white border-rose-400 animate-pulse shadow-md shadow-rose-500/30 scale-105'
+                    : isAudioTranscribing
+                      ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                      : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20 active:scale-95'
+                }`}
+              >
+                {isAudioTranscribing ? (
+                  <Loader2 size={14} className="animate-spin text-rose-400" />
+                ) : isRecording ? (
+                  <Square size={12} className="fill-current" />
+                ) : (
+                  <Mic size={15} strokeWidth={2} />
+                )}
+              </button>
+
+              {/* Submit button */}
+              <button
+                type="submit"
+                disabled={!quickText.trim() || isSubmittingQuick || isAudioTranscribing || isRecording}
+                className="w-8.5 h-8.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-20 active:scale-95 text-[#C7CDDC] flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.035]"
+                title={isEn ? 'Save quick expense' : 'Spara snabbutgift'}
+              >
+                <Zap size={14} strokeWidth={1.75} className="text-[#C7CDDC]" />
+              </button>
+            </div>
+          </form>
+
+          {/* Voice Status & Feedback */}
+          <AnimatePresence>
+            {(statusText || isRecording || isAudioTranscribing) && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/15 border border-rose-500/20 text-rose-300 text-xs font-medium"
+              >
+                {isRecording ? (
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  </span>
+                ) : (
+                  <Volume2 size={14} className="shrink-0 animate-pulse text-rose-400" />
+                )}
+                <span className="truncate flex-1">{statusText}</span>
+                {isRecording && (
+                  <button
+                    type="button"
+                    onClick={handleMicClick}
+                    className="text-[11px] underline font-bold hover:text-white cursor-pointer ml-auto shrink-0"
+                  >
+                    {isEn ? 'Done' : 'Klar'}
+                  </button>
+                )}
+              </motion.div>
+            )}
+
+            {successMsg && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/20 text-emerald-300 text-xs font-semibold"
+              >
+                <Check size={14} strokeWidth={2.5} className="shrink-0 text-emerald-400" />
+                <div className="truncate flex-1">
+                  <span>{successMsg.text}</span>
+                  {successMsg.transcript && (
+                    <p className="text-[11px] opacity-75 italic mt-0.5 truncate">
+                      ”{successMsg.transcript}”
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {voiceError && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-xs text-rose-400 px-1"
+              >
+                {voiceError}
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
       </motion.div>
 
       {children}
