@@ -216,7 +216,7 @@ export function AnalysisView({
       </div>
 
       {/* Donut Chart Distribution Card */}
-      <div className="p-5 sm:p-6 rounded-[24px] border border-white/[0.025] bg-white/[0.035] backdrop-blur-[18px] shadow-none flex flex-col items-center relative overflow-hidden">
+      <div className="p-5 sm:p-6 rounded-[24px] border border-white/[0.02] bg-white/[0.025] backdrop-blur-[18px] shadow-none flex flex-col items-center relative overflow-hidden">
         <div className="flex items-center justify-between w-full mb-3 px-1">
           <span className="text-sm font-semibold text-white tracking-tight">{t('distribution')}</span>
           <span className="text-[11px] font-normal text-[#9CA6BC] tabular-nums">

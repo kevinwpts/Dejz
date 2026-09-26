@@ -121,32 +121,32 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
           </div>
         </div>
 
-        {/* 3-column Airy Summary */}
-        <div className="grid grid-cols-3 gap-2 p-3 bg-white/[0.035] backdrop-blur-[18px] rounded-[20px] border border-white/[0.025]">
-          <div className="text-center">
-            <span className="text-[11px] font-medium text-[#9CA6BC] block mb-0.5">
+        {/* 3-column Airy Summary directly against background */}
+        <div className="grid grid-cols-3 gap-3 px-1 py-1">
+          <div>
+            <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
               {t('fixed' as any) || 'Fasta'}
             </span>
-            <span className="text-xs sm:text-sm font-semibold font-amount tabular-nums text-white">
-              −{formatAmount(Math.round(stats.totalFixedExpenses || stats.totalFixed || 0), config.language)} {config.currency || 'kr'}
+            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-white">
+              −{formatAmount(Math.round(stats.totalFixedExpenses || stats.totalFixed || 0), config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
             </span>
           </div>
 
-          <div className="text-center border-x border-white/[0.04]">
-            <span className="text-[11px] font-medium text-[#9CA6BC] block mb-0.5">
+          <div>
+            <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
               {t('income' as any) || 'Inkomster'}
             </span>
-            <span className="text-xs sm:text-sm font-semibold font-amount tabular-nums text-emerald-400">
-              +{formatAmount(Math.round(stats.totalIncome || 0), config.language)} {config.currency || 'kr'}
+            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-emerald-400">
+              +{formatAmount(Math.round(stats.totalIncome || 0), config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
             </span>
           </div>
 
-          <div className="text-center">
-            <span className="text-[11px] font-medium text-[#9CA6BC] block mb-0.5">
+          <div>
+            <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
               {t('monthlySavings' as any) || 'Sparande'}
             </span>
-            <span className="text-xs sm:text-sm font-semibold font-amount tabular-nums text-white">
-              −{formatAmount(Math.round(totalSavings), config.language)} {config.currency || 'kr'}
+            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-white">
+              −{formatAmount(Math.round(totalSavings), config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
             </span>
           </div>
         </div>
@@ -158,10 +158,10 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
 
   return (
     <div className="space-y-5 font-sans">
-      {/* Primary Hero Metric: Total Kvar i perioden directly on background */}
+      {/* Primary Hero Metric: TOTALT KVAR directly on background */}
       <div className="py-2 text-left space-y-1.5">
         <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
-          {t('totalRemaining' as any) || 'Total kvar i perioden'}
+          TOTALT KVAR
         </span>
         <div className="flex items-baseline gap-2">
           <span className={`text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums tracking-tight ${
@@ -175,32 +175,32 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
         </div>
       </div>
 
-      {/* Secondary Airy Summary Row */}
-      <div className="grid grid-cols-3 gap-2 py-3 px-3.5 bg-white/[0.035] backdrop-blur-[18px] rounded-[20px] border border-white/[0.025]">
-        <div className="text-left">
-          <span className="text-[10.5px] sm:text-[11px] font-normal text-[#9CA6BC] block mb-0.5 truncate">
+      {/* Secondary 3-column stats directly against background without cards or borders */}
+      <div className="grid grid-cols-3 gap-3 px-1 py-1">
+        <div>
+          <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
             {t('spent') || 'Spenderat'}
           </span>
-          <span className="text-xs sm:text-[13.5px] font-semibold font-amount tabular-nums text-white">
-            −{formatAmount(Math.round(totalSpent), config.language)} <span className="text-[10px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+          <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-white">
+            −{formatAmount(Math.round(totalSpent), config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
           </span>
         </div>
 
-        <div className="text-left border-l border-white/[0.04] pl-2 sm:pl-3">
-          <span className="text-[10.5px] sm:text-[11px] font-normal text-[#9CA6BC] block mb-0.5 truncate">
-            {t('averagePerDay') || 'Snitt/dag'}
+        <div>
+          <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
+            {t('averagePerDay') || 'Spenderat per dag'}
           </span>
-          <span className="text-xs sm:text-[13.5px] font-semibold font-amount tabular-nums text-white">
-            −{formatAmount(dailyAvg, config.language)} <span className="text-[10px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+          <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-white">
+            −{formatAmount(dailyAvg, config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
           </span>
         </div>
 
-        <div className="text-left border-l border-white/[0.04] pl-2 sm:pl-3">
-          <span className="text-[10.5px] sm:text-[11px] font-normal text-[#9CA6BC] block mb-0.5 truncate">
+        <div>
+          <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
             Kvar per dag
           </span>
-          <span className={`text-xs sm:text-[13.5px] font-semibold font-amount tabular-nums ${remainingPerDay < 0 ? 'text-rose-400' : 'text-white'}`}>
-            {formatAmount(remainingPerDay, config.language)} <span className="text-[10px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+          <span className={`text-sm sm:text-base font-semibold font-amount tabular-nums ${remainingPerDay < 0 ? 'text-rose-400' : 'text-white'}`}>
+            {formatAmount(remainingPerDay, config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
           </span>
         </div>
       </div>

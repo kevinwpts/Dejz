@@ -78,20 +78,20 @@ export function TransactionItem({
 
   // Determine layout style classes with exact dark glass materials
   let containerClasses = "";
-  let paddingClasses = "px-[16px] sm:px-[18px] py-[14px] min-h-[72px]";
+  let paddingClasses = "px-[14px] sm:px-[16px] py-[12px] min-h-[66px]";
   if (squared) {
-    containerClasses = "bg-transparent rounded-none shadow-none border-b border-white/[0.06] last:border-none py-3.5 px-2";
+    containerClasses = "bg-transparent rounded-none shadow-none border-b border-white/[0.04] last:border-none py-3 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
-    containerClasses = "bg-white/[0.03] hover:bg-white/[0.055] rounded-none first:rounded-t-[20px] last:rounded-b-[20px] shadow-none border-none backdrop-blur-[18px]";
+    containerClasses = "bg-transparent hover:bg-white/[0.03] rounded-none shadow-none border-none transition-colors";
   } else if (variant === 'nested') {
-    containerClasses = "bg-white/[0.03] hover:bg-white/[0.055] shadow-none border border-white/[0.06] rounded-[18px] backdrop-blur-[18px]";
+    containerClasses = "bg-white/[0.025] hover:bg-white/[0.05] shadow-none border border-white/[0.025] rounded-[18px] backdrop-blur-[16px]";
   } else {
     const isTransparentGrouped = isGrouped && !variant;
     if (isTransparentGrouped) {
-      containerClasses = "bg-white/[0.035] hover:bg-white/[0.06] rounded-[18px] shadow-none border-none backdrop-blur-[18px]";
+      containerClasses = "bg-white/[0.03] hover:bg-white/[0.05] rounded-[18px] shadow-none border-none backdrop-blur-[16px]";
     } else {
-      containerClasses = "bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.025] rounded-[18px] backdrop-blur-[18px] shadow-none";
+      containerClasses = "bg-white/[0.035] hover:bg-white/[0.055] border border-white/[0.02] rounded-[18px] backdrop-blur-[16px] shadow-none";
     }
   }
 

@@ -169,7 +169,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
               </span>
             </div>
 
-            <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+            <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.03] divide-y divide-white/[0.05] overflow-hidden">
               {accounts.map(account => (
                 <div 
                   key={account.id}
