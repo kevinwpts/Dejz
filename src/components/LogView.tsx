@@ -170,12 +170,12 @@ export function LogView({
             <EmptyState
               icon={Wallet}
               title={(transactions?.length || 0) === 0 ? t('noTransactions') : t('noTransactionsSubtle')}
-              description={(transactions?.length || 0) > 0 && searchTerm ? getL10n(
-                'Vi kunde inte hitta några matchande transaktioner för din sökning.',
-                'No matching transactions found for your search.',
-                'Vi fant ingen samsvarende transaksjoner for søket ditt.',
-                'Vi fandt ingen matchende transaktioner til din søgning.',
-                'Hakuasi vastaavia tapahtumia ei löytynyt.'
+              description={(transactions?.length || 0) > 0 && typeFilter !== 'all' ? getL10n(
+                'Inga transaktioner matchar det valda filtret.',
+                'No transactions match the selected filter.',
+                'Ingen transaksjoner samsvarer med det valgte filteret.',
+                'Ingen transaktioner matcher det valgte filter.',
+                'Ei tapahtumia valitulla suodattimella.'
               ) : undefined}
               actionLabel={(transactions?.length || 0) === 0 ? t('addExpense') : undefined}
               onAction={(transactions?.length || 0) === 0 ? onAddTransaction : undefined}

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, ArrowRight, Loader2, Wallet, CreditCard, Target, Plus, ChevronLeft, Check, Sparkles, TrendingUp, ShieldCheck, Search, X, Zap } from 'lucide-react';
+import { User, ArrowRight, Loader2, Wallet, CreditCard, Target, Plus, ChevronLeft, Check, Sparkles, TrendingUp, ShieldCheck, Search, X } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { Config, Frequency, Category } from '../types';
@@ -277,7 +277,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     else if (step === 'age') setStep('gender');
     else if (step === 'gender') setStep('payday');
     else if (step === 'payday') setStep('income');
-    else if (step === 'income') setStep('expenses');
+    else if (step === 'income') {
+      if (incomes.length === 0) return;
+      setStep('expenses');
+    }
     else if (step === 'expenses') setStep('budget');
     else if (step === 'budget') setStep('goals');
     else if (step === 'goals') setStep('midMonth');
@@ -574,7 +577,17 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                   </div>
                 </div>
                 
-                <div />
+                {step === 'goals' ? (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-1.5 rounded-full hover:bg-[var(--surface-muted)] transition-all cursor-pointer border border-transparent hover:border-[var(--border-color)] active:scale-95"
+                  >
+                    {s.skip}
+                  </button>
+                ) : (
+                  <div />
+                )}
               </div>
 
               <div className="flex-1 flex flex-col justify-start sm:justify-center py-2">
@@ -809,8 +822,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       </div>
                       
                       <div className="bg-[var(--surface-color)] p-5 rounded-[22px] border border-[var(--border-color)] shadow-xs text-center space-y-3">
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-60">{s.customDate}</p>
-                        
                         <div className="flex justify-center items-baseline gap-1">
                           <motion.span 
                             key={payday}
@@ -922,15 +933,12 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             <button
                               type="submit"
                               disabled={!aiIncomePrompt.trim() || isAiParsing}
-                              className="h-[38px] px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-[12px] flex items-center gap-1.5 transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
+                              className="h-[38px] px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-[12px] flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
                             >
                               {isAiParsing ? (
                                 <Loader2 size={14} className="animate-spin" />
                               ) : (
-                                <>
-                                  <Sparkles size={13} />
-                                  <span>{isEn ? 'Add' : 'Lägg till'}</span>
-                                </>
+                                <span>{isEn ? 'Add' : 'Lägg till'}</span>
                               )}
                             </button>
                           </form>
@@ -946,21 +954,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </div>
                       </div>
 
-                      <div className="pt-2 space-y-2">
+                      <div className="pt-2">
                         <button 
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
+                          disabled={incomes.length === 0}
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={handleNext}
-                          className="w-full text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1 transition-colors cursor-pointer"
-                        >
-                          {s.skipStep}
                         </button>
                       </div>
                     </motion.div>
@@ -1015,10 +1016,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       {/* Search Results OR Popular Quick-Add Grid */}
                       {presetSearch.trim() ? (
                         <div className="space-y-2">
-                          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)] px-1">
-                            <span>Sökresultat ({filteredPresets.length})</span>
-                            <span className="text-[10px] opacity-70">Klicka för att välja</span>
-                          </div>
                           <div className="max-h-[26vh] overflow-y-auto pr-1 no-scrollbar space-y-1.5">
                             {filteredPresets.length > 0 ? (
                               filteredPresets.map((preset) => {
@@ -1083,14 +1080,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </div>
                       ) : (
                         <div className="space-y-1.5">
-                          <div className="flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)] px-1">
-                            <div className="flex items-center gap-1.5">
-                              <Zap size={12} className="text-amber-500" />
-                              <span>{s.popularPresets} ({popularPresets.length} st)</span>
-                            </div>
-                            <span className="text-[10px] opacity-70 font-normal">Klicka för att välja</span>
-                          </div>
-
                           {/* Quick Popular Presets Visual Box Grid */}
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[25vh] overflow-y-auto no-scrollbar pr-0.5 p-0.5">
                             {popularPresets.map((preset) => {
@@ -1149,13 +1138,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
 
                       {/* Added Fixed Expenses List */}
                       <div className="space-y-2 pt-1 border-t border-[var(--border-color)]/60">
-                        <div className="flex items-center justify-between px-1 text-[11px] font-bold text-[var(--text-secondary)]">
-                          <span>Dina valda utgifter ({fixedExpenses.length} st)</span>
-                          <span className="font-amount font-bold text-[var(--text-primary)]">
-                            {formatAmount(fixedExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0), lang)} {config.currency}/mån
-                          </span>
-                        </div>
-
                         <div className="space-y-1.5 max-h-[22vh] overflow-y-auto pr-1 no-scrollbar">
                           {fixedExpenses.map((exp, i) => (
                             <BudgetItem
@@ -1187,22 +1169,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </div>
                       </div>
 
-                      {/* Action Buttons: Next & Skip */}
-                      <div className="pt-2 space-y-2">
+                      {/* Action Buttons: Next */}
+                      <div className="pt-2">
                         <button 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                         >
                           <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={handleNext}
-                          className="w-full text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1 transition-colors cursor-pointer"
-                        >
-                          {s.skipStep}
                         </button>
                       </div>
                     </motion.div>
@@ -1457,21 +1431,13 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </div>
                       )}
 
-                      <div className="space-y-2">
+                      <div className="pt-2">
                         <button 
                           onClick={handleNext}
                           className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 px-4 rounded-[16px] font-bold text-xs sm:text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
                         >
                           <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={handleNext}
-                          className="w-full text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] py-1 transition-colors cursor-pointer"
-                        >
-                          {s.skipStep}
                         </button>
                       </div>
                     </motion.div>

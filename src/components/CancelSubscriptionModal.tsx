@@ -6,7 +6,6 @@ import {
   ExternalLink,
   Phone,
   Mail,
-  Sparkles,
   ShieldAlert,
   Trash2,
   HelpCircle,
@@ -116,9 +115,8 @@ export function CancelSubscriptionModal({
                 <h3 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
                   {isEn ? 'Cancel Subscription / Contract' : 'Säg upp abonnemang & avtal'}
                 </h3>
-                <p className="text-[11.5px] text-[var(--text-secondary)] flex items-center gap-1">
-                  <Sparkles size={11} className="text-[var(--accent-color)]" />
-                  <span>{isEn ? 'AI-assisted cancellation guide' : 'AI-assisterad uppsägningsguide'}</span>
+                <p className="text-[11.5px] text-[var(--text-secondary)]">
+                  {isEn ? 'Direct link and step-by-step guide' : 'Direktlänk och steg-för-steg-guide'}
                 </p>
               </div>
             </div>

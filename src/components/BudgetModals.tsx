@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 
-import { X, Check, Trash2, ChevronDown, Receipt, PiggyBank, Banknote, Pencil, ShieldAlert, Sparkles, ChevronRight } from 'lucide-react';
+import { X, Check, Trash2, ChevronDown, Receipt, PiggyBank, Banknote, Pencil, ShieldAlert, ChevronRight } from 'lucide-react';
 import { Income, FixedExpense, Frequency, Category, Config, MonthlySaving } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
@@ -702,7 +702,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             </div>
           </div>
 
-          {/* Säg upp abonnemang / avtal - AI Assistant Button */}
+          {/* Säg upp abonnemang / avtal Button */}
           <button
             type="button"
             onClick={() => setIsCancelModalOpen(true)}
@@ -713,14 +713,11 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                 <ShieldAlert size={16} strokeWidth={2.2} />
               </div>
               <div className="text-left">
-                <div className="flex items-center gap-1.5">
-                  <p className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                    {config.language === 'en' ? 'Cancel subscription / contract' : 'Säg upp abonnemang / avtal'}
-                  </p>
-                  <Sparkles size={11} className="text-[var(--accent-color)]" />
-                </div>
+                <p className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                  {config.language === 'en' ? 'Cancel subscription / contract' : 'Säg upp abonnemang / avtal'}
+                </p>
                 <p className="text-[11px] text-[var(--text-secondary)]">
-                  {config.language === 'en' ? 'AI lookup for direct cancellation link & steps' : 'AI-guide & direktlänk till uppsägning'}
+                  {config.language === 'en' ? 'Direct link and instructions for cancellation' : 'Direktlänk och instruktioner för uppsägning'}
                 </p>
               </div>
             </div>
@@ -1148,14 +1145,11 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     <ShieldAlert size={16} strokeWidth={2.2} />
                   </div>
                   <div className="text-left">
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                        {config?.language === 'en' ? 'Cancel subscription / contract' : 'Säg upp abonnemang / avtal'}
-                      </p>
-                      <Sparkles size={11} className="text-[var(--accent-color)]" />
-                    </div>
+                    <p className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                      {config?.language === 'en' ? 'Cancel subscription / contract' : 'Säg upp abonnemang / avtal'}
+                    </p>
                     <p className="text-[11px] text-[var(--text-secondary)]">
-                      {config?.language === 'en' ? 'AI lookup for direct cancellation link & steps' : 'AI-guide & direktlänk till uppsägning'}
+                      {config?.language === 'en' ? 'Direct link and instructions for cancellation' : 'Direktlänk och instruktioner för uppsägning'}
                     </p>
                   </div>
                 </div>
