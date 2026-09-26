@@ -175,7 +175,7 @@ export function BudgetView({
       // If budgets look like legacy percentages (max <= 100 and sum <= 100) and everydayBudget > 500, convert to SEK
       if (maxVal <= 100 && totalSum <= 100 && totalSum > 0 && everydayBudget > 500) {
         const normalized = config.categories.map((c) => {
-          if (!c.budget || Number(c.budget) <= 0) return { ...c, budget: undefined };
+          if (!c.budget || Number(c.budget) <= 0) return { ...c, budget: null };
           const converted = Math.round((everydayBudget * Number(c.budget)) / 100);
           return { ...c, budget: converted > 0 ? converted : undefined };
         });
@@ -398,7 +398,7 @@ export function BudgetView({
                 if (!confirmReset) {
                   setConfirmReset(true);
                 } else {
-                  const updatedCategories = (config.categories || []).map((c) => ({ ...c, budget: undefined }));
+                  const updatedCategories = (config.categories || []).map((c) => ({ ...c, budget: null }));
                   setConfig({ ...config, categories: updatedCategories });
                   setConfirmReset(false);
                 }
