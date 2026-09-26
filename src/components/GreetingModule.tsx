@@ -117,7 +117,7 @@ export function GreetingModule({
         className="pt-3 sm:pt-6 pb-1 text-left space-y-2.5"
       >
         {/* Tracked Minimalist Uppercase Label */}
-        <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.2em] text-slate-400/90 block select-none">
+        <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.2em] text-[#C7CDDC]/85 block select-none">
           {t('totalRemaining')}
         </span>
 
@@ -131,22 +131,22 @@ export function GreetingModule({
             formatter={(val) => formatAmount(val, language)}
           />
           <span className={`text-[22px] sm:text-[26px] font-medium tracking-normal ${
-            isNegative ? 'text-rose-400/80' : 'text-slate-400/90'
+            isNegative ? 'text-rose-400/80' : 'text-[#C7CDDC]/85'
           }`}>
             {currency}
           </span>
         </div>
 
         {/* Payday info - subtle natural typographic line */}
-        <div className="flex items-center gap-2 pt-0.5 text-slate-400/90 text-xs sm:text-[13px] font-medium">
-          <Calendar size={14} strokeWidth={1.75} className="text-slate-400/80 shrink-0" />
+        <div className="flex items-center gap-2 pt-0.5 text-[#C7CDDC]/85 text-xs sm:text-[13px] font-medium">
+          <Calendar size={14} strokeWidth={1.75} className="text-[#C7CDDC]/80 shrink-0" />
           <span>
             {effectiveRemainingDays} {isEn ? (effectiveRemainingDays === 1 ? 'day to payday' : 'days to payday') : (effectiveRemainingDays === 1 ? 'dag till nästa lön' : 'dagar till nästa lön')}
           </span>
         </div>
       </motion.div>
 
-      {/* 2. ACTIONS: Integrated, subtle frosted glass surfaces with soft specular edge highlight */}
+      {/* 2. ACTIONS: Precise glass specifications (rgba(255,255,255,0.045), blur 18px, border 0.08, shadow 0 8px 30px rgba(0,0,0,0.15)) */}
       <motion.div
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
@@ -162,9 +162,9 @@ export function GreetingModule({
               feedback.tap();
               onAddExpense?.();
             }}
-            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.98] border border-white/[0.06] backdrop-blur-xl flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-slate-200 transition-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_6px_24px_rgba(0,0,0,0.2)]"
+            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.07] active:scale-[0.98] border border-white/[0.08] backdrop-blur-[18px] flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-[#C7CDDC] hover:text-white transition-all shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
           >
-            <ArrowDownLeft size={16} strokeWidth={1.8} className="text-slate-300 group-hover:text-white transition-colors" />
+            <ArrowDownLeft size={16} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
             <span className="truncate">{isEn ? 'Expense' : 'Utgift'}</span>
           </button>
 
@@ -175,9 +175,9 @@ export function GreetingModule({
               feedback.tap();
               onAddIncome?.();
             }}
-            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.98] border border-white/[0.06] backdrop-blur-xl flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-slate-200 transition-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_6px_24px_rgba(0,0,0,0.2)]"
+            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.07] active:scale-[0.98] border border-white/[0.08] backdrop-blur-[18px] flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-[#C7CDDC] hover:text-white transition-all shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
           >
-            <ArrowUpRight size={16} strokeWidth={1.8} className="text-slate-300 group-hover:text-white transition-colors" />
+            <ArrowUpRight size={16} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
             <span className="truncate">{isEn ? 'Income' : 'Inkomst'}</span>
           </button>
 
@@ -188,14 +188,14 @@ export function GreetingModule({
               feedback.tap();
               onAddExpense?.();
             }}
-            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.98] border border-white/[0.06] backdrop-blur-xl flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-slate-200 transition-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_6px_24px_rgba(0,0,0,0.2)]"
+            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.07] active:scale-[0.98] border border-white/[0.08] backdrop-blur-[18px] flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-[#C7CDDC] hover:text-white transition-all shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
           >
-            <Camera size={16} strokeWidth={1.8} className="text-slate-300 group-hover:text-white transition-colors" />
+            <Camera size={16} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
             <span className="truncate">{isEn ? 'Scan' : 'Skanna'}</span>
           </button>
         </div>
 
-        {/* Snabbutgift Input Bar */}
+        {/* Snabbutgift Input Bar (rgba(255,255,255,0.04), blur 18px, border 0.07) */}
         <form onSubmit={handleQuickExpenseSubmit} className="relative flex items-center">
           <input
             ref={quickInputRef}
@@ -203,15 +203,15 @@ export function GreetingModule({
             value={quickText}
             onChange={(e) => setQuickText(e.target.value)}
             placeholder={isEn ? "Quick expense: e.g. 45 Coop" : "Snabbutgift: t.ex. 45 ICA"}
-            className="w-full h-12 pl-4 pr-12 rounded-2xl bg-white/[0.025] hover:bg-white/[0.04] focus:bg-white/[0.055] border border-white/[0.06] focus:border-white/[0.15] backdrop-blur-xl text-xs sm:text-sm font-medium text-white placeholder-slate-500 outline-none transition-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_4px_16px_rgba(0,0,0,0.15)]"
+            className="w-full h-12 pl-4 pr-12 rounded-2xl bg-white/[0.04] hover:bg-white/[0.055] focus:bg-white/[0.07] border border-white/[0.07] focus:border-white/[0.14] backdrop-blur-[18px] text-xs sm:text-sm font-medium text-white placeholder-slate-400 outline-none transition-all shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
           />
           <button
             type="submit"
             disabled={!quickText.trim() || isSubmittingQuick}
-            className="absolute right-1.5 w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-20 active:scale-95 text-slate-200 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.06]"
+            className="absolute right-1.5 w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-20 active:scale-95 text-[#C7CDDC] flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.07]"
             title={isEn ? "Save quick expense" : "Spara snabbutgift"}
           >
-            <Zap size={14} strokeWidth={1.8} className="text-slate-300" />
+            <Zap size={14} strokeWidth={1.75} className="text-[#C7CDDC]" />
           </button>
         </form>
       </motion.div>

@@ -119,11 +119,11 @@ export function AppHeader({
             <button
               type="button"
               onClick={() => onNavigate("search")}
-              className="w-full h-10 sm:h-[42px] px-3.5 sm:px-4 rounded-full flex items-center gap-2.5 bg-white/[0.03] hover:bg-white/[0.055] border border-white/[0.06] hover:border-white/[0.1] text-slate-400 hover:text-slate-200 backdrop-blur-xl transition-all cursor-pointer shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] group text-left select-none"
+              className="w-full h-10 sm:h-[42px] px-3.5 sm:px-4 rounded-full flex items-center gap-2.5 bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.07] hover:border-white/[0.12] text-[#C7CDDC] hover:text-white backdrop-blur-[20px] transition-all cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.1)] group text-left select-none"
               aria-label="Sök"
             >
-              <Search size={16} strokeWidth={1.8} className="shrink-0 text-slate-400 group-hover:text-slate-200 transition-colors" />
-              <span className="text-[13.5px] sm:text-[14px] font-medium text-slate-400 group-hover:text-slate-200 transition-colors truncate">
+              <Search size={16} strokeWidth={1.75} className="shrink-0 text-[#C7CDDC] group-hover:text-white transition-colors" />
+              <span className="text-[13.5px] sm:text-[14px] font-medium text-[#C7CDDC] group-hover:text-white transition-colors truncate">
                 {_language === 'en' ? 'Search' : 'Sök'}
               </span>
             </button>
