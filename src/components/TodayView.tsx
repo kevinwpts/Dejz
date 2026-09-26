@@ -358,11 +358,11 @@ export function TodayView({
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   transition={{ delay: 0.08 + index * 0.02 }}
                   onClick={() => onNavigate("analysis")}
-                  className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.065] backdrop-blur-[20px] transition-all group text-left active:scale-[0.98] min-w-[155px] sm:min-w-[170px] max-w-[185px] cursor-pointer snap-start border border-white/[0.07] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.15)]"
+                  className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.065] backdrop-blur-[20px] transition-all group text-left active:scale-[0.98] min-w-[155px] sm:min-w-[170px] max-w-[185px] cursor-pointer snap-start border border-white/[0.03] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]"
                 >
-                  {/* Top Row: Minimalist Monochrome Icon (#C7CDDC, stroke 1.75, bg-white/[0.05]) + Category Name (Medium 500) */}
+                  {/* Top Row: Minimalist Monochrome Icon (#C7CDDC, stroke 1.75, bg-white/[0.04]) + Category Name (Medium 500) */}
                   <div className="flex items-center gap-2.5 mb-3.5">
-                    <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.06] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       {isEmojiString(cat.iconName) ? (
                         <span className="text-[14px] leading-none">{cat.iconName}</span>
                       ) : Icon ? (
@@ -426,10 +426,10 @@ export function TodayView({
               animate={{ opacity: 1, scale: 1, x: 0 }}
               transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
               onClick={() => onNavigate("budget", "category-budgets")}
-              className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[135px] max-w-[145px] cursor-pointer snap-start border border-dashed border-white/[0.08]"
+              className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[135px] max-w-[145px] cursor-pointer snap-start border border-dashed border-white/[0.05]"
             >
               <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.04] text-[#C7CDDC] group-hover:text-white border border-white/[0.06] shrink-0">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.035] text-[#C7CDDC] group-hover:text-white border border-white/[0.035] shrink-0">
                   <SlidersHorizontal size={14} strokeWidth={1.75} />
                 </div>
                 <span className="text-xs font-medium text-[#C7CDDC] group-hover:text-white transition-colors truncate">
@@ -446,10 +446,10 @@ export function TodayView({
           <button
             type="button"
             onClick={() => onNavigate("budget", "category-budgets")}
-            className="w-full p-4 rounded-2xl border border-dashed border-white/[0.1] hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.045] transition-all flex items-center justify-between text-left group cursor-pointer text-white"
+            className="w-full p-4 rounded-2xl border border-dashed border-white/[0.06] hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.045] transition-all flex items-center justify-between text-left group cursor-pointer text-white"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center text-[#C7CDDC] group-hover:text-white transition-colors">
+              <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.04] flex items-center justify-center text-[#C7CDDC] group-hover:text-white transition-colors">
                 <SlidersHorizontal size={15} strokeWidth={1.75} />
               </div>
               <div>
@@ -501,7 +501,7 @@ export function TodayView({
           {!isTodaySelected && (
             <button
               onClick={handleGoToToday}
-              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white/[0.045] hover:bg-white/[0.07] border border-white/[0.07] backdrop-blur-[18px] text-xs font-medium text-[#C7CDDC] hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs ml-auto"
+              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.045] backdrop-blur-[18px] text-xs font-medium text-[#C7CDDC] hover:text-white transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
             >
               <RotateCcw size={11} strokeWidth={1.75} />
               <span>{lang === "en" ? "Today" : "Idag"}</span>
@@ -540,8 +540,8 @@ export function TodayView({
               </motion.div>
             ) : fixedTransactions.length === 0 ? (
               <EmptyState
-                title={t("noTransactionsToday")}
-                description={t("addFirstTransaction")}
+                title={isTodaySelected ? t("noTransactionsToday") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
+                description={isTodaySelected ? t("addFirstTransaction") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
                 onAction={() => onAddTransaction(selectedDate)}
                 actionLabel={t("addExpense")}
               />
@@ -567,10 +567,10 @@ export function TodayView({
                         onViewFixedExpense(item.originalItem);
                       }
                     }}
-                    className="flex items-center justify-between p-3.5 sm:p-4 rounded-[18px] bg-white/[0.04] hover:bg-white/[0.065] border border-white/[0.07] backdrop-blur-[18px] transition-all cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.12)] group"
+                    className="flex items-center justify-between p-3.5 sm:p-4 rounded-[18px] bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.025] backdrop-blur-[18px] transition-all cursor-pointer shadow-none group"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.06] flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.035] flex items-center justify-center shrink-0">
                         <BudgetItemLogo item={item.originalItem} size={15} />
                       </div>
                       <div className="min-w-0">

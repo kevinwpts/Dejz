@@ -33,7 +33,6 @@ export function AppHeader({
   language: _language = "sv",
   activeTab,
 }: AppHeaderProps) {
-  const [isVisible, setIsVisible] = useState(true);
   const [isAtTop, setIsAtTop] = useState(true);
 
   const isProfileOrSettings = activeTab === "profile" || activeTab === "settings";
@@ -50,22 +49,11 @@ export function AppHeader({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Visa alltid headern
-  useEffect(() => {
-    setIsVisible(true);
-  }, [_navTrigger, title, isProfileOrSettings]);
-
   return (
     <header
-      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
-        isProfileOrSettings || isVisible
-          ? "translate-y-0 opacity-100"
-          : isDemoMode
-          ? "-translate-y-[200%] opacity-0 pointer-events-none"
-          : "-translate-y-full opacity-0 pointer-events-none"
-      } ${
+      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out translate-y-0 opacity-100 ${
         !isAtTop || isProfileOrSettings
-          ? "bg-[var(--bg-color)]/85 backdrop-blur-xl border-b border-[var(--border-color)]/60 shadow-xs"
+          ? "bg-[#080A14]/85 backdrop-blur-xl border-b border-white/[0.035] shadow-xs"
           : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >
@@ -87,7 +75,7 @@ export function AppHeader({
               {/* Profile Avatar Trigger Button */}
               <button
                 onClick={() => onNavigate("profile")}
-                className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_12px_rgba(0,0,0,0.15)] bg-white/[0.035] hover:bg-white/[0.07] text-slate-200 ${
+                className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-white/[0.045] bg-white/[0.035] hover:bg-white/[0.07] text-slate-200 ${
                   activeTab === "profile" ? "ring-2 ring-indigo-400/50" : ""
                 }`}
                 aria-label="Profil"
@@ -119,7 +107,7 @@ export function AppHeader({
             <button
               type="button"
               onClick={() => onNavigate("search")}
-              className="w-full h-10 sm:h-[42px] px-3.5 sm:px-4 rounded-full flex items-center gap-2.5 bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.07] hover:border-white/[0.12] text-[#C7CDDC] hover:text-white backdrop-blur-[20px] transition-all cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.1)] group text-left select-none"
+              className="w-full h-10 sm:h-[42px] px-3.5 sm:px-4 rounded-full flex items-center gap-2.5 bg-white/[0.035] hover:bg-white/[0.055] border border-white/[0.035] hover:border-white/[0.07] text-[#C7CDDC] hover:text-white backdrop-blur-[20px] transition-all cursor-pointer shadow-none group text-left select-none"
               aria-label="Sök"
             >
               <Search size={16} strokeWidth={1.75} className="shrink-0 text-[#C7CDDC] group-hover:text-white transition-colors" />

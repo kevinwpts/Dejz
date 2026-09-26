@@ -165,7 +165,7 @@ export function GreetingModule({
             }}
             className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
           >
-            <div className="w-14 h-14 sm:w-[58px] sm:h-[58px] rounded-full bg-white/[0.05] group-hover:bg-white/[0.08] border border-white/[0.07] backdrop-blur-[16px] flex items-center justify-center transition-colors">
+            <div className="w-14 h-14 sm:w-[58px] sm:h-[58px] rounded-full bg-white/[0.045] group-hover:bg-white/[0.07] border border-white/[0.035] backdrop-blur-[16px] flex items-center justify-center transition-colors">
               <ArrowDownLeft size={20} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
             </div>
             <span className="text-xs font-medium text-[#C7CDDC]/90 group-hover:text-white transition-colors text-center">
@@ -182,7 +182,7 @@ export function GreetingModule({
             }}
             className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
           >
-            <div className="w-14 h-14 sm:w-[58px] sm:h-[58px] rounded-full bg-white/[0.05] group-hover:bg-white/[0.08] border border-white/[0.07] backdrop-blur-[16px] flex items-center justify-center transition-colors">
+            <div className="w-14 h-14 sm:w-[58px] sm:h-[58px] rounded-full bg-white/[0.045] group-hover:bg-white/[0.07] border border-white/[0.035] backdrop-blur-[16px] flex items-center justify-center transition-colors">
               <ArrowUpRight size={20} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
             </div>
             <span className="text-xs font-medium text-[#C7CDDC]/90 group-hover:text-white transition-colors text-center">
@@ -199,7 +199,7 @@ export function GreetingModule({
             }}
             className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
           >
-            <div className="w-14 h-14 sm:w-[58px] sm:h-[58px] rounded-full bg-white/[0.05] group-hover:bg-white/[0.08] border border-white/[0.07] backdrop-blur-[16px] flex items-center justify-center transition-colors">
+            <div className="w-14 h-14 sm:w-[58px] sm:h-[58px] rounded-full bg-white/[0.045] group-hover:bg-white/[0.07] border border-white/[0.035] backdrop-blur-[16px] flex items-center justify-center transition-colors">
               <Camera size={20} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
             </div>
             <span className="text-xs font-medium text-[#C7CDDC]/90 group-hover:text-white transition-colors text-center">
@@ -208,7 +208,7 @@ export function GreetingModule({
           </button>
         </div>
 
-        {/* Snabbutgift Input Bar (rgba(255,255,255,0.04), blur 18px, border 0.07) */}
+        {/* Snabbutgift Input Bar (rgba(255,255,255,0.035), blur 18px, border 0.025) */}
         <form onSubmit={handleQuickExpenseSubmit} className="relative flex items-center pt-0.5">
           <input
             ref={quickInputRef}
@@ -216,12 +216,12 @@ export function GreetingModule({
             value={quickText}
             onChange={(e) => setQuickText(e.target.value)}
             placeholder={isEn ? "Quick expense: e.g. 45 Coop" : "Snabbutgift: t.ex. 45 ICA"}
-            className="w-full h-11 sm:h-12 pl-4 pr-12 rounded-2xl bg-white/[0.04] hover:bg-white/[0.055] focus:bg-white/[0.07] border border-white/[0.07] focus:border-white/[0.14] backdrop-blur-[18px] text-xs sm:text-sm font-normal text-white placeholder-[#9CA6BC]/70 outline-none transition-all shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
+            className="w-full h-11 sm:h-12 pl-4 pr-12 rounded-2xl bg-white/[0.035] hover:bg-white/[0.05] focus:bg-white/[0.065] border border-white/[0.025] focus:border-white/[0.08] backdrop-blur-[18px] text-xs sm:text-sm font-normal text-white placeholder-[#9CA6BC]/70 outline-none transition-all shadow-none"
           />
           <button
             type="submit"
             disabled={!quickText.trim() || isSubmittingQuick}
-            className="absolute right-1.5 w-8.5 h-8.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-20 active:scale-95 text-[#C7CDDC] flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.07]"
+            className="absolute right-1.5 w-8.5 h-8.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-20 active:scale-95 text-[#C7CDDC] flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.035]"
             title={isEn ? "Save quick expense" : "Spara snabbutgift"}
           >
             <Zap size={14} strokeWidth={1.75} className="text-[#C7CDDC]" />

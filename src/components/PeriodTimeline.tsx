@@ -218,8 +218,8 @@ export function PeriodTimeline({
                 isSelected
                   ? 'bg-[#818cf8]/[0.14] text-white border border-[#8B9CFF]/35 shadow-[0_0_16px_rgba(139,156,255,0.18)] scale-105 font-bold z-10 opacity-100'
                   : isRealToday
-                  ? 'bg-white/[0.04] text-[#C7CDDC] border border-white/15 hover:bg-white/[0.07] scale-95 opacity-90'
-                  : 'bg-white/[0.02] text-[#9CA6BC]/70 hover:text-[#C7CDDC] hover:bg-white/[0.045] border border-white/[0.05] scale-95 opacity-75'
+                  ? 'bg-white/[0.035] text-[#C7CDDC] border border-white/[0.06] hover:bg-white/[0.06] scale-95 opacity-90'
+                  : 'bg-white/[0.02] text-[#9CA6BC]/70 hover:text-[#C7CDDC] hover:bg-white/[0.045] border border-white/[0.025] scale-95 opacity-75'
               }`}
             >
               {/* Day of Week */}
@@ -252,7 +252,7 @@ export function PeriodTimeline({
 
         {/* Lön / Payday Box at the end of the timeline */}
         <div
-          className="flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 backdrop-blur-md select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5"
+          className="flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-2xl bg-emerald-500/08 text-emerald-400 border border-emerald-500/15 backdrop-blur-md select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5"
         >
           <span className="text-[12px] leading-none">💰</span>
           <span className="text-[8px] sm:text-[8.5px] font-bold tracking-wider uppercase">
@@ -267,7 +267,7 @@ export function PeriodTimeline({
           <button
             type="button"
             onClick={() => handleStep('next')}
-            className="pointer-events-auto w-6 h-6 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-sm"
+            className="pointer-events-auto w-6 h-6 rounded-full bg-white/[0.035] hover:bg-white/[0.07] text-[#C7CDDC] border border-white/[0.035] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-none"
             aria-label="Nästa dag"
             title="Nästa dag"
           >

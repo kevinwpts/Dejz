@@ -91,7 +91,7 @@ export function TransactionItem({
     if (isTransparentGrouped) {
       containerClasses = "bg-white/[0.035] hover:bg-white/[0.06] rounded-[18px] shadow-none border-none backdrop-blur-[18px]";
     } else {
-      containerClasses = "bg-white/[0.04] hover:bg-white/[0.065] border border-white/[0.07] rounded-[18px] backdrop-blur-[18px] shadow-[0_4px_16px_rgba(0,0,0,0.12)]";
+      containerClasses = "bg-white/[0.04] hover:bg-white/[0.06] border border-white/[0.025] rounded-[18px] backdrop-blur-[18px] shadow-none";
     }
   }
 
