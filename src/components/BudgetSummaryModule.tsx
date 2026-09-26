@@ -9,9 +9,23 @@ interface BudgetSummaryModuleProps {
   transactions: any[];
   fixedExpenses: any[];
   t: (key: TranslationKey) => string;
+  totalSpentOverride?: number;
+  dailyAvgOverride?: number;
+  largestCategoryOverride?: { name: string; amount: number };
+  budgetUsedPctOverride?: number;
 }
 
-export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses, t }: BudgetSummaryModuleProps) {
+export function BudgetSummaryModule({ 
+  stats, 
+  config, 
+  transactions, 
+  fixedExpenses, 
+  t,
+  totalSpentOverride,
+  dailyAvgOverride,
+  largestCategoryOverride,
+  budgetUsedPctOverride
+}: BudgetSummaryModuleProps) {
   const filteredExpenses = useMemo(() => {
     if (!stats || !transactions) return [];
     return transactions
@@ -46,7 +60,7 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     return { totalFixed: fixedSum, totalSpentInPeriod: spentSum };
   }, [filteredExpenses, fixedExpenses, stats?.periodId]);
 
-  const totalSpent = totalSpentInPeriod + totalFixed;
+  const totalSpent = totalSpentOverride !== undefined ? totalSpentOverride : (totalSpentInPeriod + totalFixed);
 
   const totalSavings = useMemo(() => {
     const itemsSum = config.monthlySavingsItems?.reduce((sum: number, item: any) => {
@@ -81,11 +95,11 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     return Math.max(1, diff);
   }, [stats?.periodEnd]);
 
-  const dailyAvg = daysElapsed > 0 ? Math.round(totalSpent / daysElapsed) : 0;
+  const dailyAvg = dailyAvgOverride !== undefined ? dailyAvgOverride : (daysElapsed > 0 ? Math.round(totalSpent / daysElapsed) : 0);
   const _remainingPerDay = stats ? Math.round(stats.remainingPeriodCents / daysRemaining) : 0;
   const disposablePot = stats ? stats.disposablePot : 0;
 
-  const largestCategory = useMemo(() => {
+  const localLargestCategory = useMemo(() => {
     const categoryMap: { [key: string]: number } = {};
 
     // 1. Add variable expenses
@@ -127,7 +141,9 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     return { name: maxCat, amount: maxVal };
   }, [filteredExpenses, fixedExpenses, stats?.periodId]);
 
-  const budgetUsedPct = (stats && stats.totalIncome > 0) ? Math.round((totalSpent / stats.totalIncome) * 100) : 0;
+  const largestCategory = largestCategoryOverride !== undefined ? largestCategoryOverride : localLargestCategory;
+
+  const budgetUsedPct = budgetUsedPctOverride !== undefined ? budgetUsedPctOverride : ((stats && stats.totalIncome > 0) ? Math.round((totalSpent / stats.totalIncome) * 100) : 0);
   const _budgetLeftPct = stats ? Math.max(0, Math.min(100, Math.round((stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) * 100))) : 0;
 
   if (!stats) return null;

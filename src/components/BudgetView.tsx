@@ -637,23 +637,6 @@ export function BudgetView({
       transition={{ duration: 0.35 }}
       className="space-y-7 font-sans"
     >
-      {/* Overview Hero Section */}
-      <div className="py-2 text-left space-y-1.5">
-        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
-          {t('monthlyDisposable')}
-        </span>
-        <div className="flex items-baseline gap-2">
-          <AnimatedNumber 
-            value={Math.round(totalIncomeSum - totalFixedSum)} 
-            className="text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums text-white tracking-tight"
-            formatter={(val) => formatAmount(val, config.language)}
-          />
-          <span className="text-[19px] sm:text-[21px] font-normal text-[#9CA6BC]">
-            {config.currency}
-          </span>
-        </div>
-      </div>
-
       {/* Budget Filter Segmented Control */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
         <button
@@ -688,12 +671,27 @@ export function BudgetView({
         </button>
       </div>
 
+      {/* Overview Hero Section */}
+      <div className="py-2 text-left space-y-1.5">
+        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
+          {t('monthlyDisposable')}
+        </span>
+        <div className="flex items-baseline gap-2">
+          <AnimatedNumber 
+            value={Math.round(totalIncomeSum - totalFixedSum)} 
+            className="text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums text-white tracking-tight"
+            formatter={(val) => formatAmount(val, config.language)}
+          />
+          <span className="text-[19px] sm:text-[21px] font-normal text-[#9CA6BC]">
+            {config.currency}
+          </span>
+        </div>
+      </div>
+
       {/* Total Amount Header */}
       <div className="flex items-center justify-between px-1 pt-2">
-        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">
-          {budgetFilter === 'fixed' && (t('fixedExpenses') || 'Fasta utgifter')}
-          {budgetFilter === 'income' && (t('incomes') || 'Inkomster')}
-          {budgetFilter === 'savings' && (t('monthlySavings') || 'Månadssparande')}
+        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] select-none">
+          {config.language === 'en' ? 'TOTAL' : 'TOTALT'}
         </span>
         <span className="text-base sm:text-lg font-semibold font-amount tabular-nums text-white">
           {budgetFilter === 'fixed' && `−${formatAmount(Math.abs(stats.totalFixed || 0), config.language)} ${config.currency || 'kr'}`}

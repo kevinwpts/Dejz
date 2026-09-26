@@ -287,29 +287,32 @@ export function GreetingModule({
           {t('totalRemaining')}
         </span>
 
-        {/* Primary Hero Amount (Semibold 600 - Bold 700) */}
-        <div className="flex items-baseline gap-2">
-          <AnimatedNumber 
-            value={stats?.remainingPeriodCents || 0} 
-            className={`text-[52px] sm:text-[64px] leading-[0.98] font-semibold sm:font-bold font-amount tabular-nums tracking-tight ${
-              isNegative ? 'text-rose-400' : 'text-white'
-            }`}
-            formatter={(val) => formatAmount(val, language)}
-          />
-          {/* Lighter, smaller currency label (Regular 400) */}
-          <span className={`text-[19px] sm:text-[21px] font-normal tracking-normal ${
-            isNegative ? 'text-rose-400/80' : 'text-[#9CA6BC]'
-          }`}>
-            {currency}
-          </span>
-        </div>
+        {/* Amount & Payday Info in a row */}
+        <div className="flex flex-wrap sm:flex-nowrap items-baseline sm:items-center justify-between gap-3 w-full">
+          {/* Primary Hero Amount (Semibold 600 - Bold 700) */}
+          <div className="flex items-baseline gap-2">
+            <AnimatedNumber 
+              value={stats?.remainingPeriodCents || 0} 
+              className={`text-[52px] sm:text-[64px] leading-[0.98] font-semibold sm:font-bold font-amount tabular-nums tracking-tight ${
+                isNegative ? 'text-rose-400' : 'text-white'
+              }`}
+              formatter={(val) => formatAmount(val, language)}
+            />
+            {/* Lighter, smaller currency label (Regular 400) */}
+            <span className={`text-[19px] sm:text-[21px] font-normal tracking-normal ${
+              isNegative ? 'text-rose-400/80' : 'text-[#9CA6BC]'
+            }`}>
+              {currency}
+            </span>
+          </div>
 
-        {/* Payday info - secondary, calm typographic line (Regular 400) */}
-        <div className="flex items-center gap-2 pt-0.5 text-[#9CA6BC] text-xs sm:text-[13px] font-normal">
-          <Calendar size={14} strokeWidth={1.75} className="text-[#9CA6BC] shrink-0" />
-          <span>
-            {effectiveRemainingDays} {isEn ? (effectiveRemainingDays === 1 ? 'day to payday' : 'days to payday') : (effectiveRemainingDays === 1 ? 'dag till nästa lön' : 'dagar till nästa lön')}
-          </span>
+          {/* Payday info - rendered inline to the right as an elegant metadata badge */}
+          <div className="flex items-center gap-1.5 text-[#9CA6BC] text-xs sm:text-[13px] font-normal bg-white/[0.045] px-3 py-1.5 rounded-full border border-white/[0.03] shadow-none cursor-pointer hover:bg-white/[0.07] transition-all select-none self-center shrink-0">
+            <Calendar size={13} strokeWidth={1.75} className="text-[#9CA6BC] shrink-0" />
+            <span className="whitespace-nowrap font-medium tracking-tight">
+              {effectiveRemainingDays} {isEn ? (effectiveRemainingDays === 1 ? 'day to payday' : 'days to payday') : (effectiveRemainingDays === 1 ? 'dag till nästa lön' : 'dagar till nästa lön')}
+            </span>
+          </div>
         </div>
       </motion.div>
 

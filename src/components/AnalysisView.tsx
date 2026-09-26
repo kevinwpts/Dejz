@@ -152,6 +152,29 @@ export function AnalysisView({
     (analysisFilter !== 'variable' ? totalFixed : 0);
   const COLORS = ['#818cf8', '#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#14b8a6', '#f59e0b', '#64748b', '#8b5cf6'];
 
+  const daysElapsed = useMemo(() => {
+    if (!stats) return 0;
+    const now = new Date();
+    const realToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startMidnight = new Date(stats.periodStart.getFullYear(), stats.periodStart.getMonth(), stats.periodStart.getDate()).getTime();
+    const endMidnight = new Date(stats.periodEnd.getFullYear(), stats.periodEnd.getMonth(), stats.periodEnd.getDate()).getTime();
+    const oneDay = 24 * 60 * 60 * 1000;
+    
+    if (realToday.getTime() > endMidnight) return Math.round((endMidnight - startMidnight) / oneDay) + 1;
+    if (realToday.getTime() < startMidnight) return 0;
+    return Math.round((realToday.getTime() - startMidnight) / oneDay);
+  }, [stats?.periodStart, stats?.periodEnd]);
+
+  const dailyAvg = daysElapsed > 0 ? Math.round(totalSpent / daysElapsed) : 0;
+
+  const largestCategory = useMemo(() => {
+    if (categoryData.length === 0) return { name: "", amount: 0 };
+    const first = categoryData[0];
+    return { name: first.name, amount: first.value };
+  }, [categoryData]);
+
+  const budgetUsedPct = stats.totalIncome > 0 ? Math.round((totalSpent / stats.totalIncome) * 100) : 0;
+
   if (!stats) return null;
 
   return (
@@ -168,15 +191,6 @@ export function AnalysisView({
           allowFuture={false}
         />
       )}
-
-      {/* Budget Summary Metrics */}
-      <BudgetSummaryModule
-        stats={stats}
-        config={config}
-        transactions={transactions}
-        fixedExpenses={fixedExpenses}
-        t={t}
-      />
 
       {/* Analysis Filter - Clean horizontal row directly on background */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
@@ -220,6 +234,19 @@ export function AnalysisView({
           {t('fixedExpenses' as TranslationKey)}
         </button>
       </div>
+
+      {/* Budget Summary Metrics */}
+      <BudgetSummaryModule
+        stats={stats}
+        config={config}
+        transactions={transactions}
+        fixedExpenses={fixedExpenses}
+        t={t}
+        totalSpentOverride={totalSpent}
+        dailyAvgOverride={dailyAvg}
+        largestCategoryOverride={largestCategory}
+        budgetUsedPctOverride={budgetUsedPct}
+      />
 
       {/* Donut Chart Distribution Card */}
       <div className="p-5 sm:p-6 rounded-[24px] border border-white/[0.02] bg-white/[0.025] backdrop-blur-[18px] shadow-none flex flex-col items-center relative overflow-hidden">

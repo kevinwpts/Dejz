@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import {
   Home,
   History,
-  SlidersHorizontal,
   BarChart3,
   WalletCards,
 } from "lucide-react";
@@ -62,19 +61,7 @@ export function CustomBottomNavigation({
           onClick={() => setActiveTab("transactions")}
         />
 
-        {/* 3. Budget */}
-        <NavItem
-          icon={SlidersHorizontal}
-          label="Budget"
-          isActive={isAllocateActive}
-          onClick={() => {
-            if (onNavigateSection) {
-              onNavigateSection("budget", "allocate");
-            } else {
-              setActiveTab("budget");
-            }
-          }}
-        />
+
 
         {/* 4. Analys */}
         <NavItem
