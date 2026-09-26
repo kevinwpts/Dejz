@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
-import { motion } from 'motion/react';
-
-import { Sparkles } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Sparkles, X, Calendar, Coins, ChevronRight, Zap } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
+import { feedback } from '../utils/feedback';
 
 interface GreetingModuleProps {
   userName?: string;
@@ -35,16 +35,28 @@ interface GreetingModuleProps {
   children?: React.ReactNode;
 }
 
-function DejziAvatar() {
+export function DejziAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
+  const sizeClasses = {
+    sm: 'w-7 h-7',
+    md: 'w-9 h-9',
+    lg: 'w-16 h-16',
+  }[size];
+
+  const svgSizes = {
+    sm: 'w-6 h-6',
+    md: 'w-8 h-8',
+    lg: 'w-14 h-14',
+  }[size];
+
   return (
-    <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
-      <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/30 via-emerald-400/30 to-cyan-400/30 rounded-full blur-md animate-pulse" />
+    <div className={`relative ${sizeClasses} flex items-center justify-center shrink-0`}>
+      <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/25 via-emerald-400/20 to-cyan-400/25 rounded-full blur-xs animate-pulse" />
       <motion.div
-        animate={{ y: [0, -3, 0], rotate: [0, 2, -2, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-        className="relative w-11 h-11 flex items-center justify-center"
+        animate={{ y: [0, -2, 0], rotate: [0, 1.5, -1.5, 0] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+        className={`relative ${svgSizes} flex items-center justify-center`}
       >
-        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md overflow-visible">
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm overflow-visible">
           <defs>
             <radialGradient id="dejziBody" cx="40%" cy="35%" r="65%">
               <stop offset="0%" stopColor="#FFFFFF" />
@@ -65,8 +77,8 @@ function DejziAvatar() {
           <circle cx="58.5" cy="46" r="1.8" fill="#FFFFFF" />
           <path d="M 45 58 Q 50 63 55 58" fill="none" stroke="#0F172A" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
-        <div className="absolute -top-1 -right-1 text-amber-400 drop-shadow">
-          <Sparkles size={12} />
+        <div className="absolute -top-0.5 -right-0.5 text-amber-400 drop-shadow-xs">
+          <Sparkles size={size === 'lg' ? 14 : 9} />
         </div>
       </motion.div>
     </div>
@@ -74,6 +86,7 @@ function DejziAvatar() {
 }
 
 export function GreetingModule({
+  userName,
   availableForD,
   currency,
   date,
@@ -85,8 +98,11 @@ export function GreetingModule({
   isCurrentPeriod: _isCurrentPeriod,
   children
 }: GreetingModuleProps) {
+  const [isDejziModalOpen, setIsDejziModalOpen] = useState(false);
+  const isEn = language === 'en';
+
   const effectiveRemainingDays = useMemo(() => {
-    if (!calendarDays || calendarDays.length === 0) return stats.remainingDays || 1;
+    if (!calendarDays || calendarDays.length === 0) return stats?.remainingDays || 1;
     const normDate = new Date(date || new Date());
     normDate.setHours(0, 0, 0, 0);
     const index = calendarDays.findIndex((d: any) => {
@@ -97,12 +113,8 @@ export function GreetingModule({
     if (index !== -1) {
       return Math.max(1, calendarDays.length - index);
     }
-    return stats.remainingDays || 1;
-  }, [calendarDays, date, stats.remainingDays]);
-
-  const futureDays = Math.max(1, effectiveRemainingDays - 1);
-  const _impact = Math.round(Math.abs(availableForD) / futureDays);
-  void _impact;
+    return stats?.remainingDays || 1;
+  }, [calendarDays, date, stats?.remainingDays]);
 
   const todayDayData = useMemo(() => {
     if (!calendarDays || calendarDays.length === 0) return null;
@@ -122,139 +134,254 @@ export function GreetingModule({
       const overAmount = Math.abs(remainingToday);
       
       let detailStr = null;
+      let actionTip = null;
       if (futureDaysLeft === 0) {
-        detailStr = language === 'en'
+        detailStr = isEn
           ? `Payday tomorrow! Hold tight.`
-          : `Lön imorgon! Håll ut.`;
+          : `Lön imorgon! Håll ut sista biten.`;
+        actionTip = isEn ? 'Final stretch before payday!' : 'Sista spurten innan lön!';
       } else if (futureDaysLeft === 1) {
         const perDayDecrease = Math.round(overAmount / 1);
-        detailStr = language === 'en'
-          ? `Tomorrow's allowance down by ${formatAmount(perDayDecrease, language)} ${currency}.`
+        detailStr = isEn
+          ? `Reduces tomorrow's allowance by ${formatAmount(perDayDecrease, language)} ${currency}.`
           : `Minskar morgondagen med ${formatAmount(perDayDecrease, language)} ${currency}.`;
+        actionTip = isEn ? 'Tomorrow adjusts automatically.' : 'Morgondagen anpassas automatiskt.';
       } else {
         const perDayDecrease = Math.round(overAmount / futureDaysLeft);
-        detailStr = language === 'en'
-          ? `Reduces daily allowance by ${formatAmount(perDayDecrease, language)} ${currency}/day.`
-          : `Dra ner med ${formatAmount(perDayDecrease, language)} ${currency}/dag framöver.`;
+        detailStr = isEn
+          ? `Reduces daily allowance by ${formatAmount(perDayDecrease, language)} ${currency}/day ahead.`
+          : `Dras av med ${formatAmount(perDayDecrease, language)} ${currency}/dag framöver.`;
+        actionTip = isEn
+          ? `Try keeping daily spending under ${formatAmount(Math.max(0, Math.round((stats.remainingPeriodCents || 0) / futureDaysLeft)), language)} ${currency}/day.`
+          : `Försök hålla köpen under ${formatAmount(Math.max(0, Math.round((stats.remainingPeriodCents || 0) / futureDaysLeft)), language)} ${currency}/dag.`;
       }
 
       return {
-        message: language === 'en'
-          ? `${formatAmount(overAmount, language)} ${currency} over today's budget.`
-          : `${formatAmount(overAmount, language)} ${currency} över dagens budget.`,
+        pillBadge: isEn ? `${formatAmount(overAmount, language)} ${currency} over` : `${formatAmount(overAmount, language)} ${currency} över`,
+        message: isEn
+          ? `You have exceeded today's budget by ${formatAmount(overAmount, language)} ${currency}.`
+          : `Du har överskridit dagens budget med ${formatAmount(overAmount, language)} ${currency}.`,
         detail: detailStr,
-        type: 'warning'
+        actionTip,
+        type: 'warning',
+        spentToday: spentTodayRound,
+        remainingToday,
+        remainingDays: remainingDaysTotal,
       };
     }
 
+    let pillBadge = '';
     let msg = '';
     if (spentTodayRound === 0) {
-      msg = language === 'en'
-        ? `No spending yet! ${formatAmount(remainingToday, language)} ${currency} left.`
-        : `Inget spenderat än! ${formatAmount(remainingToday, language)} ${currency} kvar.`;
+      pillBadge = isEn ? 'No spending yet' : 'Inget köpt än';
+      msg = isEn
+        ? `No spending yet! You have ${formatAmount(remainingToday, language)} ${currency} left for today.`
+        : `Inga köp gjorda än idag! Du har ${formatAmount(remainingToday, language)} ${currency} kvar att röra dig med.`;
     } else {
-      msg = language === 'en'
-        ? `Spent ${formatAmount(spentTodayRound, language)} ${currency} today. ${formatAmount(remainingToday, language)} ${currency} left.`
-        : `Spenderat ${formatAmount(spentTodayRound, language)} ${currency} idag. ${formatAmount(remainingToday, language)} ${currency} kvar.`;
+      pillBadge = isEn ? `${formatAmount(remainingToday, language)} ${currency} left today` : `${formatAmount(remainingToday, language)} ${currency} kvar idag`;
+      msg = isEn
+        ? `You've spent ${formatAmount(spentTodayRound, language)} ${currency} today. You still have ${formatAmount(remainingToday, language)} ${currency} left.`
+        : `Du har spenderat ${formatAmount(spentTodayRound, language)} ${currency} idag. Du har ${formatAmount(remainingToday, language)} ${currency} kvar.`;
     }
 
     let detail = null;
+    let actionTip = null;
     if (remainingToday > 0) {
       if (futureDaysLeft === 0) {
-        detail = language === 'en'
-          ? `Klarar dagen to get +${formatAmount(remainingToday, language)} ${currency} surplus! 🎉`
-          : `Klarar du dagen får du +${formatAmount(remainingToday, language)} ${currency} i överskott! 🎉`;
+        detail = isEn
+          ? `Make it through today to secure a +${formatAmount(remainingToday, language)} ${currency} surplus! 🎉`
+          : `Klarar du dagen får du ett överskott på +${formatAmount(remainingToday, language)} ${currency}! 🎉`;
+        actionTip = isEn ? 'Surplus will be celebrated on payday!' : 'Överskottet firas på lönedagen!';
       } else if (futureDaysLeft === 1) {
         const perDayBonus = Math.round(remainingToday / 1);
-        detail = language === 'en'
-          ? `No more spending means +${formatAmount(perDayBonus, language)} ${currency} tomorrow!`
-          : `Spara resten och få +${formatAmount(perDayBonus, language)} ${currency} imorgon!`;
+        detail = isEn
+          ? `Saving the rest rolls over +${formatAmount(perDayBonus, language)} ${currency} directly to tomorrow!`
+          : `Sparar du resten flyttas +${formatAmount(perDayBonus, language)} ${currency} direkt till morgondagen!`;
+        actionTip = isEn ? 'Keep going to boost tomorrow!' : 'Håll i för att boosta morgondagen!';
       } else {
         const perDayBonus = Math.round(remainingToday / futureDaysLeft);
-        detail = language === 'en'
-          ? `No more spending adds +${formatAmount(perDayBonus, language)} ${currency}/day ahead.`
-          : `Spara resten och få +${formatAmount(perDayBonus, language)} ${currency}/dag framöver.`;
+        detail = isEn
+          ? `Saving the rest adds +${formatAmount(perDayBonus, language)} ${currency}/day to all remaining days.`
+          : `Sparar du resten fördelas +${formatAmount(perDayBonus, language)} ${currency}/dag ut på alla kommande dagar.`;
+        actionTip = isEn
+          ? `Every unspent krona strengthens your daily budget ahead!`
+          : `Varje osparad krona idag stärker din dagsbudget framöver!`;
       }
     }
 
     return {
+      pillBadge,
       message: msg,
       detail: detail,
-      type: 'success'
+      actionTip,
+      type: 'success',
+      spentToday: spentTodayRound,
+      remainingToday,
+      remainingDays: remainingDaysTotal,
     };
-  }, [stats, todayDayData, availableForD, language, currency]);
+  }, [stats, todayDayData, availableForD, language, currency, isEn]);
 
   return (
-    <div className="space-y-4 sm:space-y-5 font-sans relative">
-      {/* 1. Seamless Integrated Grand Hero Area aligned cleanly with other tabs */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="pb-2 text-[var(--text-primary)] relative overflow-hidden flex flex-col"
-      >
+    <>
+      <div className="space-y-4 sm:space-y-5 font-sans relative">
         {/* The Premium Main Rounded Card */}
-        <div className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[32px] p-7 sm:p-8 shadow-xs relative overflow-hidden flex flex-col">
-          {/* Clean Stats Row with Totalt kvar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            <div className="flex flex-col text-left justify-center">
-              <span className="text-xs font-bold text-[var(--text-secondary)] tracking-wider mb-1.5 block uppercase">
-                {t('totalRemaining')}
-              </span>
-              <div className="flex items-baseline gap-1.5">
-                <AnimatedNumber 
-                  value={stats?.remainingPeriodCents || 0} 
-                  className={`text-[48px] sm:text-[54px] md:text-[60px] leading-none font-black text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
-                    (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : ''
-                  }`}
-                  formatter={(val) => formatAmount(val, language)}
-                />
-                <span className={`text-[22px] sm:text-[24px] font-bold ${
-                  (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
-                }`}>
-                  {currency}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Integrated Category Budgets Carousel as the Bottom Section inside the Card */}
-          {children && (
-            <div className="w-full pt-4 mt-6 text-left border-t border-[var(--border-color)]/60">
-              {children}
-            </div>
-          )}
-        </div>
-      </motion.div>
-
-      {/* Dejzi Mascot Card with Premium Animated Avatar */}
-      {dejziInfo && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12 }}
-          className="rounded-[22px] border border-[var(--border-color)] p-4 bg-gradient-to-br from-[var(--surface-color)] via-[var(--surface-color)] to-[var(--surface-muted)]/50 shadow-sm relative overflow-hidden flex items-center gap-4"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="pb-1 text-[var(--text-primary)] relative overflow-hidden flex flex-col"
         >
-          <div className="flex flex-col items-center gap-1 shrink-0">
-            <DejziAvatar />
-            <span className="text-[10px] font-bold tracking-wider text-[var(--text-secondary)] opacity-90">
-              Dejzi
-            </span>
-          </div>
+          <div className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[32px] p-6 sm:p-7 shadow-xs relative overflow-hidden flex flex-col">
+            {/* Header Top Row: Left Stats & Right Dejzi Interactive Badge */}
+            <div className="flex items-start justify-between gap-4">
+              {/* Left Side: Totalt kvar */}
+              <div className="flex flex-col text-left justify-center min-w-0">
+                <span className="text-xs font-bold text-[var(--text-secondary)] tracking-wider mb-1.5 block uppercase">
+                  {t('totalRemaining')}
+                </span>
+                <div className="flex items-baseline gap-1.5">
+                  <AnimatedNumber 
+                    value={stats?.remainingPeriodCents || 0} 
+                    className={`text-[42px] sm:text-[48px] md:text-[54px] leading-none font-black text-[var(--text-primary)] font-amount tabular-nums tracking-tight ${
+                      (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : ''
+                    }`}
+                    formatter={(val) => formatAmount(val, language)}
+                  />
+                  <span className={`text-[20px] sm:text-[22px] font-bold ${
+                    (stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-secondary)]'
+                  }`}>
+                    {currency}
+                  </span>
+                </div>
+              </div>
 
-          <div className="flex-1 min-w-0 pr-1">
-            <p className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
-              {dejziInfo.message}
-            </p>
+              {/* Right Side: Sleek Integrated Dejzi Assistant Pill Button */}
+              {dejziInfo && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    feedback.tap();
+                    setIsDejziModalOpen(true);
+                  }}
+                  className="group flex items-center gap-2 p-1.5 pr-2.5 sm:pr-3 rounded-2xl bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 transition-all cursor-pointer active:scale-95 shrink-0 max-w-[155px] sm:max-w-[185px] shadow-2xs"
+                  title={isEn ? 'Click to see advice from Dejzi' : 'Klicka för råd från Dejzi'}
+                >
+                  <DejziAvatar size="md" />
+                  <div className="flex flex-col items-start min-w-0 text-left">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-500 dark:text-amber-400 leading-none flex items-center gap-1">
+                      Dejzi
+                      <ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform opacity-75" />
+                    </span>
+                    <span className="text-[11px] sm:text-[11.5px] font-semibold text-[var(--text-primary)] truncate max-w-[100px] sm:max-w-[125px] leading-tight mt-0.5">
+                      {dejziInfo.pillBadge}
+                    </span>
+                  </div>
+                </button>
+              )}
+            </div>
 
-            {dejziInfo.detail && (
-              <p className="text-xs text-[var(--text-secondary)] opacity-85 mt-0.5 leading-normal">
-                {dejziInfo.detail}
-              </p>
+            {/* Category Budgets Carousel in the bottom of the card */}
+            {children && (
+              <div className="w-full pt-4 mt-5 text-left border-t border-[var(--border-color)]/60">
+                {children}
+              </div>
             )}
           </div>
         </motion.div>
-      )}
-    </div>
+      </div>
+
+      {/* Dejzi Detailed Advice Modal */}
+      <AnimatePresence>
+        {isDejziModalOpen && dejziInfo && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 12 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[32px] p-6 sm:p-7 w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header with Close Button */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <DejziAvatar size="lg" />
+                  <div>
+                    <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
+                      {userName ? `${isEn ? 'Hi' : 'Hej'} ${userName}!` : 'Dejzi'}
+                    </h3>
+                    <p className="text-xs font-semibold text-amber-500 dark:text-amber-400">
+                      {isEn ? 'Your personal budget coach' : 'Din personliga ekonomicoach'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsDejziModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Status & Key Takeaway */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 space-y-1.5">
+                <p className="text-sm font-bold text-[var(--text-primary)] leading-snug">
+                  {dejziInfo.message}
+                </p>
+                {dejziInfo.detail && (
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                    {dejziInfo.detail}
+                  </p>
+                )}
+              </div>
+
+              {/* Status Grid Cards */}
+              <div className="grid grid-cols-2 gap-2.5">
+                {/* Dagsbudget kvar */}
+                <div className="p-3.5 rounded-2xl bg-[var(--surface-muted)]/70 border border-[var(--border-color)]/60 flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
+                    <Coins size={13} className="text-amber-500" />
+                    <span>{isEn ? "Today's balance" : 'Dagens saldo'}</span>
+                  </div>
+                  <span className={`text-base font-extrabold font-amount tabular-nums ${dejziInfo.remainingToday < 0 ? 'text-rose-500' : 'text-[var(--text-primary)]'}`}>
+                    {formatAmount(dejziInfo.remainingToday, language)} {currency}
+                  </span>
+                </div>
+
+                {/* Dagar kvar i perioden */}
+                <div className="p-3.5 rounded-2xl bg-[var(--surface-muted)]/70 border border-[var(--border-color)]/60 flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
+                    <Calendar size={13} className="text-emerald-500" />
+                    <span>{isEn ? 'Days to payday' : 'Dagar till lön'}</span>
+                  </div>
+                  <span className="text-base font-extrabold font-amount tabular-nums text-[var(--text-primary)]">
+                    {effectiveRemainingDays} {isEn ? 'days' : 'dagar'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Dejzi Proactive Tip */}
+              {dejziInfo.actionTip && (
+                <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-xs font-medium">
+                  <Zap size={14} className="shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                  <span>{dejziInfo.actionTip}</span>
+                </div>
+              )}
+
+              {/* Close / Action Button */}
+              <button
+                type="button"
+                onClick={() => setIsDejziModalOpen(false)}
+                className="w-full py-3 px-4 rounded-xl bg-accent text-[var(--text-on-accent)] font-bold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer text-center"
+              >
+                {isEn ? 'Got it, thanks!' : 'Tack Dejzi, jag har koll!'}
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

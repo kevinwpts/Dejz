@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, ArrowLeft, Check, Trash2, SlidersHorizontal, ChevronRight, Sparkles, RotateCcw } from 'lucide-react';
+import { RefreshCw, ArrowLeft, Check, Trash2, Sparkles, RotateCcw, Calendar, ArrowUpDown, Plus } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -97,10 +97,25 @@ export function BudgetView({
   const _expensesPercent = (stats?.totalIncome || 0) > 0 ? ((stats?.totalFixed || 0) / stats!.totalIncome) * 100 : 0;
   const _savingsPercent = (stats?.totalIncome || 0) > 0 ? (totalSavings / stats!.totalIncome) * 100 : 0;
 
-  // sortItems removed
+  const [fixedSortBy, setFixedSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
 
   const sortedIncomes = incomes || [];
-  const sortedFixedExpenses = fixedExpenses || [];
+  const sortedFixedExpenses = React.useMemo(() => {
+    const list = [...(fixedExpenses || [])];
+    if (fixedSortBy === 'day') {
+      return list.sort((a, b) => {
+        const dayA = typeof a.deductionDay === 'number' && a.deductionDay > 0 ? a.deductionDay : 999;
+        const dayB = typeof b.deductionDay === 'number' && b.deductionDay > 0 ? b.deductionDay : 999;
+        if (dayA !== dayB) return dayA - dayB;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+    } else if (fixedSortBy === 'amount') {
+      return list.sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0));
+    } else {
+      return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
+  }, [fixedExpenses, fixedSortBy]);
+
   const sortedSavings = config?.monthlySavingsItems || [];
 
   const getFixedSpentForCategory = (catName: string) => {
@@ -532,28 +547,6 @@ export function BudgetView({
             <span className="text-[11px] sm:text-xs font-semibold text-[var(--text-secondary)] tracking-tight text-center truncate w-full">{t('monthlySavings') || 'Månadssparande'}</span>
           </motion.div>
         </div>
-
-        {/* Quick Action to Allocate Everyday Budget */}
-        <button
-          type="button"
-          onClick={handleOpenCategoryBudgets}
-          className="w-full p-3.5 sm:p-4 rounded-[22px] border border-[var(--border-color)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)]/50 transition-all flex items-center justify-between group cursor-pointer shadow-2xs"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center transition-transform group-hover:scale-105">
-              <SlidersHorizontal size={20} strokeWidth={2} />
-            </div>
-            <div className="text-left">
-              <span className="text-[13.5px] font-bold text-[var(--text-primary)] block">
-                {config.language === 'en' ? 'Allocate everyday budget' : 'Fördela din vardagsbudget'}
-              </span>
-              <span className="text-[11.5px] text-[var(--text-secondary)] font-medium">
-                {config.language === 'en' ? 'Set percentage or amount per category' : 'Sätt gränser och fördela per kategori'}
-              </span>
-            </div>
-          </div>
-          <ChevronRight size={18} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-        </button>
       </div>
 
       {/* Budget Filter Segmented Control */}
@@ -644,9 +637,58 @@ export function BudgetView({
           {/* Fixed Expenses Section */}
           {budgetFilter === 'fixed' && (
             <div className="space-y-3.5 pt-2 sm:pt-3">
-              <div className="flex justify-end px-2">
-                <button onClick={onAddFixedExpense} className="h-8 px-3 rounded-full bg-[var(--surface-color)] text-[12px] font-semibold text-[var(--text-primary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] transition-all cursor-pointer inline-flex items-center justify-center shadow-2xs">
-                  + {t('newFixedExpense')}
+              {/* Toolbar: Sorting & Add Button */}
+              <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                {/* Sort controls */}
+                <div className="flex items-center gap-1 bg-[var(--surface-color)] p-1 rounded-xl border border-[var(--border-color)]/70 shadow-2xs">
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] px-1.5 flex items-center gap-1">
+                    <ArrowUpDown size={11} className="opacity-70" />
+                    <span className="hidden sm:inline">{config.language === 'en' ? 'Sort:' : 'Sortera:'}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setFixedSortBy('day')}
+                    className={`h-7 px-2.5 rounded-lg text-[11.5px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                      fixedSortBy === 'day'
+                        ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
+                    }`}
+                  >
+                    <Calendar size={12} />
+                    <span>{config.language === 'en' ? 'Day (1–31)' : 'Dragningsdag'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFixedSortBy('name')}
+                    className={`h-7 px-2.5 rounded-lg text-[11.5px] font-semibold transition-all cursor-pointer ${
+                      fixedSortBy === 'name'
+                        ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
+                    }`}
+                  >
+                    <span>{config.language === 'en' ? 'Name' : 'Namn'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFixedSortBy('amount')}
+                    className={`h-7 px-2.5 rounded-lg text-[11.5px] font-semibold transition-all cursor-pointer ${
+                      fixedSortBy === 'amount'
+                        ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
+                    }`}
+                  >
+                    <span>{config.language === 'en' ? 'Amount' : 'Belopp'}</span>
+                  </button>
+                </div>
+
+                {/* Add Fixed Expense Button */}
+                <button
+                  type="button"
+                  onClick={onAddFixedExpense}
+                  className="h-8 px-3 rounded-xl bg-[var(--surface-color)] text-[12px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs active:scale-95"
+                >
+                  <Plus size={14} strokeWidth={2.5} className="text-[var(--accent-color)]" />
+                  <span>{t('newFixedExpense')}</span>
                 </button>
               </div>
 

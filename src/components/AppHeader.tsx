@@ -101,9 +101,9 @@ export function AppHeader({
           : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >
-      <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2 relative`}>
+      <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2.5 sm:gap-3.5 relative`}>
         {/* Left: Back button OR Profile Picture */}
-        <div className="flex items-center gap-3 min-w-0 z-10">
+        <div className="flex items-center gap-3 shrink-0 z-10">
           {onBack ? (
             <button
               onClick={onBack}
@@ -119,7 +119,7 @@ export function AppHeader({
               {/* Profile Avatar Trigger Button */}
               <button
                 onClick={() => onNavigate("profile")}
-                className={`w-[32px] h-[32px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 ${
+                className={`w-[34px] h-[34px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-[var(--border-color)]/60 shadow-2xs ${
                   activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
                 } ${
                   useWhiteHeader 
@@ -136,28 +136,42 @@ export function AppHeader({
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <User size={16} strokeWidth={2.2} />
+                  <User size={17} strokeWidth={2.2} />
                 )}
               </button>
             </>
           )}
         </div>
 
-        {/* Center Title when onBack is present */}
-        {onBack && title && (
-          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none max-w-[60%] text-center">
+        {/* Middle: Title (when onBack is active) OR Search Input Box */}
+        {onBack && title ? (
+          <div className="flex-1 min-w-0 text-center px-2">
             <h1 className="text-[16px] sm:text-[18px] font-bold font-exo tracking-tight truncate text-[var(--text-primary)]">
               {title}
             </h1>
           </div>
+        ) : (
+          <div className="flex-1 min-w-0 max-w-md mx-1 sm:mx-2">
+            <button
+              type="button"
+              onClick={() => onNavigate("search")}
+              className="w-full h-9 sm:h-9.5 px-3 rounded-full flex items-center gap-2 bg-[var(--surface-color)]/90 hover:bg-[var(--surface-color)] dark:bg-white/6 dark:hover:bg-white/10 border border-[var(--border-color)]/80 hover:border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer shadow-2xs group text-left select-none"
+              aria-label="Sök"
+            >
+              <Search size={15} strokeWidth={2.2} className="shrink-0 text-[var(--text-secondary)]/70 group-hover:text-[var(--accent-color)] transition-colors" />
+              <span className="text-[13px] sm:text-[13.5px] font-medium text-[var(--text-secondary)]/70 group-hover:text-[var(--text-secondary)] transition-colors truncate">
+                {_language === 'en' ? 'Search transactions, categories...' : 'Sök transaktioner, butiker...'}
+              </span>
+            </button>
+          </div>
         )}
   
-        {/* Right Actions: Notifications, Search */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {/* Right Actions: Notifications Button (search icon removed) */}
+        <div className="flex items-center shrink-0">
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 ${
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 ${
                 useWhiteHeader 
                   ? "text-white/95 hover:bg-white/10" 
                   : "text-[var(--text-primary)] hover:bg-[var(--surface-muted)]"
@@ -165,7 +179,7 @@ export function AppHeader({
               aria-label="Notiser"
             >
               <Bell
-                size={22}
+                size={20}
                 strokeWidth={2.2}
               />
               {notificationCount > 0 && (
@@ -175,18 +189,6 @@ export function AppHeader({
               )}
             </button>
           )}
-  
-          <button
-            onClick={() => onNavigate("search")}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
-              useWhiteHeader 
-                ? "text-white/95 hover:bg-white/10" 
-                : "text-[var(--text-primary)] hover:bg-[var(--surface-muted)]"
-            }`}
-            aria-label="Sök"
-          >
-            <Search size={22} strokeWidth={2.2} />
-          </button>
         </div>
       </div>
     </header>

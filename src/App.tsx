@@ -4,56 +4,7 @@
  */
 
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from "react";
-
-function TabWrapper({
-  tabKey,
-  scrollPositionsRef,
-  children,
-}: {
-  tabKey: string;
-  scrollPositionsRef: React.MutableRefObject<Record<string, number>>;
-  children: React.ReactNode;
-}) {
-  useLayoutEffect(() => {
-    const targetY = scrollPositionsRef.current[tabKey] ?? 0;
-    if (targetY > 0) {
-      document.body.style.minHeight = `${targetY + window.innerHeight + 200}px`;
-    }
-
-    const restore = () => {
-      window.scrollTo({ top: targetY, behavior: "instant" as any });
-    };
-
-    restore();
-    const t1 = setTimeout(restore, 50);
-    const t2 = setTimeout(restore, 150);
-
-    let isRestoring = true;
-    const restoreTimer = setTimeout(() => {
-      isRestoring = false;
-      document.body.style.minHeight = "";
-    }, 350);
-
-    const handleScroll = () => {
-      if (isRestoring) return;
-      if (document.body.style.overflow === "hidden") return;
-      scrollPositionsRef.current[tabKey] = window.scrollY;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(restoreTimer);
-      document.body.style.minHeight = "";
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [tabKey, scrollPositionsRef]);
-
-  return <>{children}</>;
-}
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence } from "motion/react";
 import {
   PaymentMethod,
   Frequency,
@@ -414,6 +365,36 @@ export default function App() {
   const [navHistory, setNavHistory] = useState<{ tab: Tab; section?: string }[]>([]);
 
   const tabScrollPositions = useRef<Record<string, number>>({});
+
+  // Continuously record scroll position for current active tab
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (activeTab) {
+            tabScrollPositions.current[activeTab] = window.scrollY;
+          }
+          setIsAtTop(window.scrollY <= 10);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [activeTab]);
+
+  // Instantly restore previous scroll position when switching to any tab
+  useLayoutEffect(() => {
+    const savedY = tabScrollPositions.current[activeTab] ?? 0;
+    window.scrollTo({ top: savedY, behavior: "instant" as any });
+
+    const raf = requestAnimationFrame(() => {
+      window.scrollTo({ top: savedY, behavior: "instant" as any });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [activeTab]);
 
   const handleLegalClick = (
     type: "privacy" | "terms" | "cookies" | "contact",
@@ -3390,457 +3371,399 @@ export default function App() {
 
             <PullToRefresh onRefresh={handleRefresh}>
         <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
-          <AnimatePresence>
-            {activeTab === "today" && stats && (
-              <motion.div
-                key="today"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.08 }}
-              >
-                <TabWrapper tabKey="today" scrollPositionsRef={tabScrollPositions}>
-                  <TodayView
-                    stats={stats}
-                    config={config}
-                    userName={
-                      (() => {
-                        const raw = (
-                          profile?.full_name ||
-                          session?.user?.user_metadata?.full_name ||
-                          session?.user?.user_metadata?.name ||
-                          ""
-                        ).trim();
-                        if (raw) return raw.split(" ")[0];
-                        const email = session?.user?.email || "";
-                        if (email.toLowerCase().startsWith("kevin")) return "Kevin";
-                        if (email.includes("@")) {
-                          const part = email.split("@")[0];
-                          return part.charAt(0).toUpperCase() + part.slice(1);
-                        }
-                        return "";
-                      })()
+          {stats && (
+            <div style={{ display: activeTab === "today" ? "block" : "none" }}>
+              <TodayView
+                stats={stats}
+                config={config}
+                userName={
+                  (() => {
+                    const raw = (
+                      profile?.full_name ||
+                      session?.user?.user_metadata?.full_name ||
+                      session?.user?.user_metadata?.name ||
+                      ""
+                    ).trim();
+                    if (raw) return raw.split(" ")[0];
+                    const email = session?.user?.email || "";
+                    if (email.toLowerCase().startsWith("kevin")) return "Kevin";
+                    if (email.includes("@")) {
+                      const part = email.split("@")[0];
+                      return part.charAt(0).toUpperCase() + part.slice(1);
                     }
-                    incomes={incomes}
-                    fixedExpenses={fixedExpenses}
-                    selectedDate={targetDate}
-                    setSelectedDate={setTargetDate}
-                    onAddTransaction={() => {
-                      setTransactionType("expense");
-                      setTargetDate(new Date());
-                      setIsAddTransactionOpen(true);
-                    }}
-                    onQuickAddExpense={async (amount: number, note?: string, category?: string) => {
-                      const isEn = config.language === 'en';
-                      const defaultName = isEn ? 'Quick expense' : 'Snabb utgift';
-                      const defaultCategory = isEn ? 'Uncategorized' : 'Okategoriserat';
-                      const categoryName = category?.trim() || defaultCategory;
-                      const merchantName = note?.trim() || defaultName;
+                    return "";
+                  })()
+                }
+                incomes={incomes}
+                fixedExpenses={fixedExpenses}
+                selectedDate={targetDate}
+                setSelectedDate={setTargetDate}
+                onAddTransaction={() => {
+                  setTransactionType("expense");
+                  setTargetDate(new Date());
+                  setIsAddTransactionOpen(true);
+                }}
+                onQuickAddExpense={async (amount: number, note?: string, category?: string) => {
+                  const isEn = config.language === 'en';
+                  const defaultName = isEn ? 'Quick expense' : 'Snabb utgift';
+                  const defaultCategory = isEn ? 'Uncategorized' : 'Okategoriserat';
+                  const categoryName = category?.trim() || defaultCategory;
+                  const merchantName = note?.trim() || defaultName;
 
-                      const now = new Date();
-                      let timestamp = Date.now();
+                  const now = new Date();
+                  let timestamp = Date.now();
 
-                      if (targetDate) {
-                        const d = new Date(targetDate);
-                        if (d.toDateString() === now.toDateString()) {
-                          timestamp = Date.now();
-                        } else {
-                          d.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
-                          timestamp = d.getTime();
-                        }
-                      }
+                  if (targetDate) {
+                    const d = new Date(targetDate);
+                    if (d.toDateString() === now.toDateString()) {
+                      timestamp = Date.now();
+                    } else {
+                      d.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+                      timestamp = d.getTime();
+                    }
+                  }
 
-                      await addTransaction(
-                        {
-                          amount,
-                          type: "expense",
-                          category: categoryName,
-                          merchant: merchantName,
-                          note: note?.trim() || "",
-                          tags: [],
-                          isBackdated: timestamp < Date.now() - 60000,
-                        },
-                        timestamp,
-                      );
-                    }}
-                    onAddIncome={() => {
-                      setTransactionType("income");
-                      setTargetDate(new Date());
-                      setIsAddTransactionOpen(true);
-                    }}
-                    onViewTransaction={(t) => {
-                      setViewingTransaction(t);
-                    }}
-                    onViewFixedExpense={(expense) => {
-                      setViewingFixedExpense(expense);
-                    }}
-                    onViewIncome={(income) => {
-                      setViewingIncome(income);
-                    }}
-                    onViewMonthlySaving={(saving) => {
-                      setViewingMonthlySaving(saving);
-                    }}
-                    onDeleteTransaction={deleteTransaction}
-                    currentPeriodDate={currentPeriodDate}
-                    currentPeriodStart={currentPeriodStart}
-                    currentPeriodEnd={currentPeriodEnd}
-                    isCurrentPeriod={isCurrentPeriod}
-                    periods={periods}
-                    setCurrentPeriodDate={setCurrentPeriodDate}
-                    onNavigate={handleNavigate}
-                    transactions={stats?.periodTransactions || []}
-                    allTransactions={transactions}
-                    t={t}
-                    avatarUrl={avatarUrl}
-                    attentionItems={attentionItems}
-                    onEditAttentionItem={(item) => {
-                      if (item.isVariable) {
-                        setItemToUpdateVariable(item);
-                        setIsVariableUpdateModalOpen(true);
-                        return;
-                      }
-                      if (item.budgetType === "income") {
-                        setEditingIncome(item);
-                        setIsIncomeModalOpen(true);
-                      } else if (item.budgetType === "expense") {
-                        setEditingFixedExpense(item);
-                        setIsFixedExpenseModalOpen(true);
-                      } else if (item.budgetType === "savings") {
-                        setEditingMonthlySaving(item);
-                        setIsMonthlySavingModalOpen(true);
-                      }
-                    }}
-                    onUpdateConfig={(newConfig) => {
-                      setConfig(newConfig);
-                      if (session?.user?.id) {
-                        dataService.saveSettings(session.user.id, newConfig);
-                      }
-                    }}
-                  />
-                </TabWrapper>
-              </motion.div>
-            )}
+                  await addTransaction(
+                    {
+                      amount,
+                      type: "expense",
+                      category: categoryName,
+                      merchant: merchantName,
+                      note: note?.trim() || "",
+                      tags: [],
+                      isBackdated: timestamp < Date.now() - 60000,
+                    },
+                    timestamp,
+                  );
+                }}
+                onAddIncome={() => {
+                  setTransactionType("income");
+                  setTargetDate(new Date());
+                  setIsAddTransactionOpen(true);
+                }}
+                onViewTransaction={(t) => {
+                  setViewingTransaction(t);
+                }}
+                onViewFixedExpense={(expense) => {
+                  setViewingFixedExpense(expense);
+                }}
+                onViewIncome={(income) => {
+                  setViewingIncome(income);
+                }}
+                onViewMonthlySaving={(saving) => {
+                  setViewingMonthlySaving(saving);
+                }}
+                onDeleteTransaction={deleteTransaction}
+                currentPeriodDate={currentPeriodDate}
+                currentPeriodStart={currentPeriodStart}
+                currentPeriodEnd={currentPeriodEnd}
+                isCurrentPeriod={isCurrentPeriod}
+                periods={periods}
+                setCurrentPeriodDate={setCurrentPeriodDate}
+                onNavigate={handleNavigate}
+                transactions={stats?.periodTransactions || []}
+                allTransactions={transactions}
+                t={t}
+                avatarUrl={avatarUrl}
+                attentionItems={attentionItems}
+                onEditAttentionItem={(item) => {
+                  if (item.isVariable) {
+                    setItemToUpdateVariable(item);
+                    setIsVariableUpdateModalOpen(true);
+                    return;
+                  }
+                  if (item.budgetType === "income") {
+                    setEditingIncome(item);
+                    setIsIncomeModalOpen(true);
+                  } else if (item.budgetType === "expense") {
+                    setEditingFixedExpense(item);
+                    setIsFixedExpenseModalOpen(true);
+                  } else if (item.budgetType === "savings") {
+                    setEditingMonthlySaving(item);
+                    setIsMonthlySavingModalOpen(true);
+                  }
+                }}
+                onUpdateConfig={(newConfig) => {
+                  setConfig(newConfig);
+                  if (session?.user?.id) {
+                    dataService.saveSettings(session.user.id, newConfig);
+                  }
+                }}
+              />
+            </div>
+          )}
 
-            {activeTab === "analysis" && stats && (
-              <motion.div
-                key="analysis"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.08 }}
-              >
-                <TabWrapper tabKey="analysis" scrollPositionsRef={tabScrollPositions}>
-                  <AnalysisView
-                    transactions={transactions}
-                    stats={stats}
-                    config={config}
-                    t={t}
-                    fixedExpenses={fixedExpenses}
-                    currentLang={config.language as Language}
-                    onViewTransaction={(t) => {
-                      setViewingTransaction(t);
-                    }}
-                    onDeleteTransaction={deleteTransaction}
-                    onViewFixedExpense={(expense) => {
-                      setViewingFixedExpense(expense);
-                    }}
-                    periods={periods}
-                    currentPeriodDate={currentPeriodDate}
-                    onPeriodChange={setCurrentPeriodDate}
-                    onOpenCalendarPicker={() => setIsCalendarModalOpen(true)}
-                  />
-                </TabWrapper>
-              </motion.div>
-            )}
+          {stats && (
+            <div style={{ display: activeTab === "analysis" ? "block" : "none" }}>
+              <AnalysisView
+                transactions={transactions}
+                stats={stats}
+                config={config}
+                t={t}
+                fixedExpenses={fixedExpenses}
+                currentLang={config.language as Language}
+                onViewTransaction={(t) => {
+                  setViewingTransaction(t);
+                }}
+                onDeleteTransaction={deleteTransaction}
+                onViewFixedExpense={(expense) => {
+                  setViewingFixedExpense(expense);
+                }}
+                periods={periods}
+                currentPeriodDate={currentPeriodDate}
+                onPeriodChange={setCurrentPeriodDate}
+                onOpenCalendarPicker={() => setIsCalendarModalOpen(true)}
+              />
+            </div>
+          )}
 
-            {activeTab === "transactions" && stats && (
-              <motion.div
-                key="transactions"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.08 }}
-              >
-                <TabWrapper tabKey="transactions" scrollPositionsRef={tabScrollPositions}>
-                  <LogView
-                    transactions={transactions}
-                    stats={stats}
-                    config={config}
-                    onAddTransaction={() => {
-                      setTransactionType("expense");
-                      setTargetDate(new Date());
-                      setIsAddTransactionOpen(true);
-                    }}
-                    onAddIncome={() => {
-                      setTransactionType("income");
-                      setTargetDate(new Date());
-                      setIsAddTransactionOpen(true);
-                    }}
-                    onViewTransaction={(t) => {
-                      setViewingTransaction(t);
-                    }}
-                    onDeleteTransaction={deleteTransaction}
-                    t={t}
-                    currentLang={config.language as Language}
-                    periods={periods}
-                    currentPeriodDate={currentPeriodDate}
-                    onPeriodChange={setCurrentPeriodDate}
-                    onOpenCalendarPicker={() => setIsCalendarModalOpen(true)}
-                  />
-                </TabWrapper>
-              </motion.div>
-            )}
+          {stats && (
+            <div style={{ display: activeTab === "transactions" ? "block" : "none" }}>
+              <LogView
+                transactions={transactions}
+                stats={stats}
+                config={config}
+                onAddTransaction={() => {
+                  setTransactionType("expense");
+                  setTargetDate(new Date());
+                  setIsAddTransactionOpen(true);
+                }}
+                onAddIncome={() => {
+                  setTransactionType("income");
+                  setTargetDate(new Date());
+                  setIsAddTransactionOpen(true);
+                }}
+                onViewTransaction={(t) => {
+                  setViewingTransaction(t);
+                }}
+                onDeleteTransaction={deleteTransaction}
+                t={t}
+                currentLang={config.language as Language}
+                periods={periods}
+                currentPeriodDate={currentPeriodDate}
+                onPeriodChange={setCurrentPeriodDate}
+                onOpenCalendarPicker={() => setIsCalendarModalOpen(true)}
+              />
+            </div>
+          )}
 
-            {activeTab === "budget" && stats && (
-              <motion.div
-                key="budget"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.08 }}
-              >
-                <TabWrapper tabKey="budget" scrollPositionsRef={tabScrollPositions}>
-                  <BudgetView
-                    stats={stats}
-                    config={config}
-                    setConfig={(newConfig) => {
-                      setConfig(newConfig);
-                      const activeUserId = session?.user?.id || "demo-user";
-                      dataService.saveSettings(activeUserId, newConfig).catch((err) => {
-                        console.error("Failed to save category budgets:", err);
-                      });
-                    }}
-                    initialSection={budgetSection}
-                    onClearSection={() => setBudgetSection(null)}
-                    incomes={incomes}
-                    setIncomes={setIncomes}
-                    fixedExpenses={fixedExpenses}
-                    setFixedExpenses={setFixedExpenses}
-                    onAddIncome={() => {
-                      setEditingIncome(null);
-                      setIsIncomeModalOpen(true);
-                    }}
-                    onEditIncome={(income) => {
-                      setEditingIncome(income);
-                      setIsIncomeModalOpen(true);
-                    }}
-                    onViewIncome={(income) => {
-                      setViewingIncome(income);
-                    }}
-                    onAddFixedExpense={() => {
-                      setEditingFixedExpense(null);
-                      setIsFixedExpenseModalOpen(true);
-                    }}
-                    onEditFixedExpense={(expense) => {
-                      setEditingFixedExpense(expense);
-                      setIsFixedExpenseModalOpen(true);
-                    }}
-                    onViewFixedExpense={(expense) => {
-                      setViewingFixedExpense(expense);
-                    }}
-                    onAddMonthlySaving={() => {
-                      setEditingMonthlySaving(null);
-                      setIsMonthlySavingModalOpen(true);
-                    }}
-                    onEditMonthlySaving={(s) => {
-                      setEditingMonthlySaving(s);
-                      setIsMonthlySavingModalOpen(true);
-                    }}
-                    onViewMonthlySaving={(s) => {
-                      setViewingMonthlySaving(s);
-                    }}
-                    onResetSavingsPot={handleResetSavingsPot}
-                    t={t}
-                    currentPeriodId={currentPeriodId}
-                    isDemoMode={isDemoMode}
-                  />
-                </TabWrapper>
-              </motion.div>
-            )}
+          {stats && (
+            <div style={{ display: activeTab === "budget" ? "block" : "none" }}>
+              <BudgetView
+                stats={stats}
+                config={config}
+                setConfig={(newConfig) => {
+                  setConfig(newConfig);
+                  const activeUserId = session?.user?.id || "demo-user";
+                  dataService.saveSettings(activeUserId, newConfig).catch((err) => {
+                    console.error("Failed to save category budgets:", err);
+                  });
+                }}
+                initialSection={budgetSection}
+                onClearSection={() => setBudgetSection(null)}
+                incomes={incomes}
+                setIncomes={setIncomes}
+                fixedExpenses={fixedExpenses}
+                setFixedExpenses={setFixedExpenses}
+                onAddIncome={() => {
+                  setEditingIncome(null);
+                  setIsIncomeModalOpen(true);
+                }}
+                onEditIncome={(income) => {
+                  setEditingIncome(income);
+                  setIsIncomeModalOpen(true);
+                }}
+                onViewIncome={(income) => {
+                  setViewingIncome(income);
+                }}
+                onAddFixedExpense={() => {
+                  setEditingFixedExpense(null);
+                  setIsFixedExpenseModalOpen(true);
+                }}
+                onEditFixedExpense={(expense) => {
+                  setEditingFixedExpense(expense);
+                  setIsFixedExpenseModalOpen(true);
+                }}
+                onViewFixedExpense={(expense) => {
+                  setViewingFixedExpense(expense);
+                }}
+                onAddMonthlySaving={() => {
+                  setEditingMonthlySaving(null);
+                  setIsMonthlySavingModalOpen(true);
+                }}
+                onEditMonthlySaving={(s) => {
+                  setEditingMonthlySaving(s);
+                  setIsMonthlySavingModalOpen(true);
+                }}
+                onViewMonthlySaving={(s) => {
+                  setViewingMonthlySaving(s);
+                }}
+                onResetSavingsPot={handleResetSavingsPot}
+                t={t}
+                currentPeriodId={currentPeriodId}
+                isDemoMode={isDemoMode}
+              />
+            </div>
+          )}
 
-            {activeTab === "settings" && config && (
-              <motion.div
-                key="settings"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.08 }}
-              >
-                <TabWrapper tabKey="settings" scrollPositionsRef={tabScrollPositions}>
-                  <SettingsMainView
-                    onBack={() => setActiveTab("today")}
-                    config={config}
-                    initialSection={settingsSection as any}
-                    setConfig={async (newConfig) => {
-                      if (!session) return;
-                      try {
-                        setConfig(newConfig);
-                        if (newConfig.language) {
-                          setLandingLanguage(newConfig.language as Language);
-                        }
-                        await dataService.saveSettings(session.user.id, newConfig);
-                      } catch (err) {
-                        console.error("Error saving config:", err);
-                      }
-                    }}
-                    t={t}
-                    onNavigate={handleNavigate}
-                    onSecurityClick={() => setIsSecurityModalOpen(true)}
-                    subscriptionStatus={subscriptionStatus}
-                    onFeedbackClick={() => setIsFeedbackModalOpen(true)}
-                    onExportData={handleExportData}
-                    onLegalClick={(type) => setLegalModal({ isOpen: true, type })}
-                    profile={profile}
-                    userId={session?.user?.id}
-                    session={session}
-                    onRefresh={fetchData}
-                    onResetSavingsPot={handleResetSavingsPot}
-                    onResetCompletedGoals={handleResetCompletedGoals}
-                    onClearTransactions={handleClearTransactions}
-                    onResetAll={resetAll}
-                    onTriggerProUpgradeModal={() => setIsProModalOpen(true)}
-                  />
-                </TabWrapper>
-              </motion.div>
-            )}
+          {config && (
+            <div style={{ display: activeTab === "settings" ? "block" : "none" }}>
+              <SettingsMainView
+                onBack={() => setActiveTab("today")}
+                config={config}
+                initialSection={settingsSection as any}
+                setConfig={async (newConfig) => {
+                  if (!session) return;
+                  try {
+                    setConfig(newConfig);
+                    if (newConfig.language) {
+                      setLandingLanguage(newConfig.language as Language);
+                    }
+                    await dataService.saveSettings(session.user.id, newConfig);
+                  } catch (err) {
+                    console.error("Error saving config:", err);
+                  }
+                }}
+                t={t}
+                onNavigate={handleNavigate}
+                onSecurityClick={() => setIsSecurityModalOpen(true)}
+                subscriptionStatus={subscriptionStatus}
+                onFeedbackClick={() => setIsFeedbackModalOpen(true)}
+                onExportData={handleExportData}
+                onLegalClick={(type) => setLegalModal({ isOpen: true, type })}
+                profile={profile}
+                userId={session?.user?.id}
+                session={session}
+                onRefresh={fetchData}
+                onResetSavingsPot={handleResetSavingsPot}
+                onResetCompletedGoals={handleResetCompletedGoals}
+                onClearTransactions={handleClearTransactions}
+                onResetAll={resetAll}
+                onTriggerProUpgradeModal={() => setIsProModalOpen(true)}
+              />
+            </div>
+          )}
 
-            {activeTab === "profile" && config && (
-              <motion.div
-                key="profile"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.08 }}
-              >
-                <TabWrapper tabKey="profile" scrollPositionsRef={tabScrollPositions}>
-                  <ProfileView
-                    onBack={() => setActiveTab("today")}
-                    user={session?.user}
-                    onLogout={handleLogout}
-                    onUploadAvatar={handleUploadAvatar}
-                    avatarUrl={avatarUrl}
-                    config={config}
-                    initialSection={profileSection}
-                    setConfig={async (newConfig) => {
-                      if (!session) return;
-                      try {
-                        setConfig(newConfig);
-                        if (newConfig.language) {
-                          setLandingLanguage(newConfig.language as Language);
-                        }
-                        await dataService.saveSettings(
-                          session.user.id,
-                          newConfig,
-                        );
-                      } catch (err) {
-                        console.error("Error saving config:", err);
-                      }
-                    }}
-                    onNavigate={handleNavigate}
-                    isDemoMode={isDemoMode}
-                    onExitDemo={handleExitDemo}
-                    onFeedbackClick={() => setIsFeedbackModalOpen(true)}
-                    onDeleteAccount={() => setIsDeleteAccountModalOpen(true)}
-                    onExportData={handleExportData}
-                    onLegalClick={handleLegalClick}
-                    stats={stats}
-                    t={t}
-                    subscriptionStatus={subscriptionStatus}
-                    trialEnd={trialEnd}
-                    nextBillingDate={nextBillingDate}
-                    onPaymentSuccess={async () => {
-                      try {
-                        const result = await verifyPayment(session.user.id);
-                        if (result.success) {
-                          setSubscriptionStatus(result.status);
-                          if (result.status === "canceling") {
-                            addToast("Abonnemanget är nu uppsagt.", "info");
-                          } else if (
-                            result.status === "active" ||
-                            result.status === "trialing" ||
-                            result.status === "lifetime"
-                          ) {
-                            addToast(
-                              "Betalning genomförd! Du är nu Pro.",
-                              "success",
-                            );
-                          }
-                        } else {
-                          addToast(
-                            "Betalningen behandlas fortfarande. Det kan ta en liten stund.",
-                            "info",
-                          );
-                        }
-
-                        const dbProfile = await dataService.getProfile(
-                          session.user.id,
-                        );
-                        if (dbProfile) {
-                          setSubscriptionStatus((prev) => {
-                            if (isPro(prev)) return prev;
-                            return dbProfile.subscription_status || "free";
-                          });
-                          setTrialEnd(dbProfile.trial_end);
-                          setNextBillingDate(dbProfile.next_billing_date);
-                        }
-                      } catch (e: any) {
-                        console.error("Payment verification failed:", e);
+          {config && (
+            <div style={{ display: activeTab === "profile" ? "block" : "none" }}>
+              <ProfileView
+                onBack={() => setActiveTab("today")}
+                user={session?.user}
+                onLogout={handleLogout}
+                onUploadAvatar={handleUploadAvatar}
+                avatarUrl={avatarUrl}
+                config={config}
+                initialSection={profileSection}
+                setConfig={async (newConfig) => {
+                  if (!session) return;
+                  try {
+                    setConfig(newConfig);
+                    if (newConfig.language) {
+                      setLandingLanguage(newConfig.language as Language);
+                    }
+                    await dataService.saveSettings(
+                      session.user.id,
+                      newConfig,
+                    );
+                  } catch (err) {
+                    console.error("Error saving config:", err);
+                  }
+                }}
+                onNavigate={handleNavigate}
+                isDemoMode={isDemoMode}
+                onExitDemo={handleExitDemo}
+                onFeedbackClick={() => setIsFeedbackModalOpen(true)}
+                onDeleteAccount={() => setIsDeleteAccountModalOpen(true)}
+                onExportData={handleExportData}
+                onLegalClick={handleLegalClick}
+                stats={stats}
+                t={t}
+                subscriptionStatus={subscriptionStatus}
+                trialEnd={trialEnd}
+                nextBillingDate={nextBillingDate}
+                onPaymentSuccess={async () => {
+                  try {
+                    const result = await verifyPayment(session.user.id);
+                    if (result.success) {
+                      setSubscriptionStatus(result.status);
+                      if (result.status === "canceling") {
+                        addToast("Abonnemanget är nu uppsagt.", "info");
+                      } else if (
+                        result.status === "active" ||
+                        result.status === "trialing" ||
+                        result.status === "lifetime"
+                      ) {
                         addToast(
-                          `Ett fel uppstod vid verifiering av betalningen: ${e?.message || "Okänt fel"}`,
-                          "error",
+                          "Betalning genomförd! Du är nu Pro.",
+                          "success",
                         );
                       }
-                    }}
-                    onShowToast={addToast}
-                    onSecurityClick={() => setIsSecurityModalOpen(true)}
-                    profile={profile}
-                    userId={session?.user.id || ""}
-                    session={session}
-                    onRefresh={handleRefresh}
-                    onResetSavingsPot={handleResetSavingsPot}
-                    onResetCompletedGoals={handleResetCompletedGoals}
-                    onClearTransactions={handleClearTransactions}
-                    onResetAll={resetAll}
-                    addToast={addToast}
-                    transactions={transactions}
-                    incomes={incomes}
-                    fixedExpenses={fixedExpenses}
-                    setCurrentPeriodDate={setCurrentPeriodDate}
-                    periods={periods}
-                    onViewTransaction={setViewingTransaction}
-                  />
-                </TabWrapper>
-              </motion.div>
-            )}
+                    } else {
+                      addToast(
+                        "Betalningen behandlas fortfarande. Det kan ta en liten stund.",
+                        "info",
+                      );
+                    }
 
-            {activeTab === "notifications" && config && (
-              <motion.div
-                key="notifications"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.08 }}
-              >
-                <TabWrapper tabKey="notifications" scrollPositionsRef={tabScrollPositions}>
-                  <NotificationsView
-                    notifications={notifications}
-                    onOpenItem={(item) => {
-                      setItemToUpdateVariable(item);
-                      setIsVariableUpdateModalOpen(true);
-                    }}
-                    onConfirmStandard={async (item) => {
-                      await handleSaveVariableOverride(item, Number(item.amount) || 0);
-                    }}
-                    onDismiss={handleDismissNotification}
-                    onBack={() => handleGoBack()}
-                    currency={config.currency}
-                    config={config}
-                    t={t}
-                  />
-                </TabWrapper>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                    const dbProfile = await dataService.getProfile(
+                      session.user.id,
+                    );
+                    if (dbProfile) {
+                      setSubscriptionStatus((prev) => {
+                        if (isPro(prev)) return prev;
+                        return dbProfile.subscription_status || "free";
+                      });
+                      setTrialEnd(dbProfile.trial_end);
+                      setNextBillingDate(dbProfile.next_billing_date);
+                    }
+                  } catch (e: any) {
+                    console.error("Payment verification failed:", e);
+                    addToast(
+                      `Ett fel uppstod vid verifiering av betalningen: ${e?.message || "Okänt fel"}`,
+                      "error",
+                    );
+                  }
+                }}
+                onShowToast={addToast}
+                onSecurityClick={() => setIsSecurityModalOpen(true)}
+                profile={profile}
+                userId={session?.user.id || ""}
+                session={session}
+                onRefresh={handleRefresh}
+                onResetSavingsPot={handleResetSavingsPot}
+                onResetCompletedGoals={handleResetCompletedGoals}
+                onClearTransactions={handleClearTransactions}
+                onResetAll={resetAll}
+                addToast={addToast}
+                transactions={transactions}
+                incomes={incomes}
+                fixedExpenses={fixedExpenses}
+                setCurrentPeriodDate={setCurrentPeriodDate}
+                periods={periods}
+                onViewTransaction={setViewingTransaction}
+              />
+            </div>
+          )}
+
+          {config && (
+            <div style={{ display: activeTab === "notifications" ? "block" : "none" }}>
+              <NotificationsView
+                notifications={notifications}
+                onOpenItem={(item) => {
+                  setItemToUpdateVariable(item);
+                  setIsVariableUpdateModalOpen(true);
+                }}
+                onConfirmStandard={async (item) => {
+                  await handleSaveVariableOverride(item, Number(item.amount) || 0);
+                }}
+                onDismiss={handleDismissNotification}
+                onBack={() => handleGoBack()}
+                currency={config.currency}
+                config={config}
+                t={t}
+              />
+            </div>
+          )}
         </main>
       </PullToRefresh>
 

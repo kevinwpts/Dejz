@@ -10,6 +10,8 @@ interface QuickExpenseWidgetProps {
   selectedDate: Date;
   allTransactions?: Transaction[];
   onAddExpense: (amount: number, note?: string, category?: string) => Promise<void> | void;
+  onAddIncome?: (date?: Date) => void;
+  onOpenFullExpenseForm?: (date?: Date) => void;
 }
 
 export function QuickExpenseWidget({
@@ -17,6 +19,8 @@ export function QuickExpenseWidget({
   selectedDate,
   allTransactions = [],
   onAddExpense,
+  onAddIncome,
+  onOpenFullExpenseForm,
 }: QuickExpenseWidgetProps) {
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -108,14 +112,39 @@ export function QuickExpenseWidget({
           <h4 className="text-[13px] sm:text-[14px] font-bold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Quick expense' : 'Snabb utgift'}
           </h4>
+
+          {/* Date context if not today */}
+          {formattedDateStr && (
+            <span className="text-[11px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full shrink-0">
+              {isEn ? `For ${formattedDateStr}` : `På ${formattedDateStr}`}
+            </span>
+          )}
         </div>
 
-        {/* Date context if not today */}
-        {formattedDateStr && (
-          <span className="text-[11px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full shrink-0">
-            {isEn ? `For ${formattedDateStr}` : `På ${formattedDateStr}`}
-          </span>
-        )}
+        {/* Discrete Secondary Action Buttons */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {onAddIncome && (
+            <button
+              type="button"
+              onClick={() => onAddIncome(selectedDate)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+              title={isEn ? 'Add income' : 'Lägg till inkomst'}
+            >
+              <Plus size={12} strokeWidth={2.8} />
+              <span>{isEn ? 'Income' : 'Inkomst'}</span>
+            </button>
+          )}
+          {onOpenFullExpenseForm && (
+            <button
+              type="button"
+              onClick={() => onOpenFullExpenseForm(selectedDate)}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-muted)]/80 hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/60 active:scale-95 transition-all cursor-pointer"
+              title={isEn ? 'Detailed form' : 'Detaljerat formulär'}
+            >
+              <span>{isEn ? 'More' : 'Fler val'}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Single Input Field Bar */}
