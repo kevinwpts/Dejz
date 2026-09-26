@@ -10,7 +10,6 @@ import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { getCategoryIconName } from '../utils/icons';
-import { IconButton } from './ui';
 
 interface TransactionViewModalProps {
   transaction: Transaction;
@@ -28,8 +27,6 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const isIncome = transaction.type === 'income';
   const isSavings = transaction.type === 'savings';
-  const _accentColor = isIncome ? 'var(--success-color)' : isSavings ? '#ec4899' : 'var(--accent-color)';
-  const _accentBg = isIncome ? 'rgba(16, 185, 129, 0.1)' : isSavings ? 'rgba(236, 72, 153, 0.1)' : 'rgba(var(--accent-rgb), 0.1)';
 
   const getLocale = () => {
     const lang = config.language || 'sv';
@@ -57,6 +54,8 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
   });
 
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
+
+  const merchantName = typeof transaction.merchant === 'object' ? (transaction.merchant as any)?.name : (transaction.merchant || (typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category));
 
   return (
     <motion.div 
@@ -88,167 +87,179 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border-t sm:border border-[var(--border-color)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6"
+        className="bg-[#0D101E] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border-t sm:border border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
           onClick={onClose}
-          className="w-full py-2.5 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
+          className="w-full py-3 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
         >
-          <div className="w-10 h-1 bg-[var(--border-color)] hover:bg-[var(--text-secondary)]/50 rounded-full transition-colors" />
+          <div className="w-10 h-1 bg-white/20 hover:bg-white/40 rounded-full transition-colors" />
         </div>
 
-        {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[var(--border-color)]">
-          <div className="flex justify-start">
+        {/* Compact Header Section */}
+        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-white/[0.04]">
+          <div className="flex items-center gap-3 min-w-0">
             <TransactionLogo transaction={transaction} config={config} size="sm" />
-          </div>
-          <div className="flex justify-center overflow-hidden">
-            <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)] text-center truncate px-2">
-              {transaction.merchant || transaction.category}
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white truncate">
+              {merchantName}
             </h2>
           </div>
-          <div className="flex justify-end">
-            <IconButton 
-              icon={<X size={17} />} 
+          
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button 
+              type="button"
+              onClick={() => onDuplicate(transaction)} 
+              className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
+              title={t('duplicate')}
+              aria-label={t('duplicate')}
+            >
+              <Repeat size={14} strokeWidth={1.75} />
+            </button>
+            <button 
+              type="button"
+              onClick={() => onEdit(transaction)} 
+              className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
+              title={t('edit')}
+              aria-label={t('edit')}
+            >
+              <Pencil size={14} strokeWidth={1.75} />
+            </button>
+            <button 
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)} 
+              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] flex items-center justify-center text-rose-400 transition-colors cursor-pointer"
+              title={t('delete')}
+              aria-label={t('delete')}
+            >
+              <Trash2 size={14} strokeWidth={1.75} />
+            </button>
+            <div className="w-px h-4 bg-white/10 mx-0.5" />
+            <button 
+              type="button"
               onClick={onClose} 
-              variant="muted" 
-              size="sm" 
+              className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
               aria-label={t('close')}
-            />
+            >
+              <X size={16} strokeWidth={1.75} />
+            </button>
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          {/* Actions Bar */}
-          <div className="flex justify-end gap-2 pt-1">
-            <IconButton 
-              icon={<Repeat size={15} />} 
-              onClick={() => onDuplicate(transaction)} 
-              variant="muted" 
-              size="sm" 
-              aria-label={t('duplicate')}
-              title={t('duplicate')}
-            />
-            <IconButton 
-              icon={<Pencil size={15} />} 
-              onClick={() => onEdit(transaction)} 
-              variant="muted" 
-              size="sm" 
-              aria-label={t('edit')}
-              title={t('edit')}
-            />
-            <IconButton 
-              icon={<Trash2 size={15} />} 
-              onClick={() => setShowDeleteConfirm(true)} 
-              variant="danger" 
-              size="sm" 
-              aria-label={t('delete')}
-              title={t('delete')}
-            />
-          </div>
-          {/* Amount Box */}
-          <div className="bg-[var(--surface-muted)]/50 p-5 rounded-[16px] border border-[var(--border-color)]">
-            <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1">{t('amount')}</p>
-            <p className={`text-3xl font-semibold ${isIncome ? 'text-success' : isSavings ? 'text-accent' : 'text-[var(--text-primary)]'} font-amount`}>
-              <span className="opacity-40 mr-1">{isIncome ? '+' : isSavings ? '→' : '-'}</span>
-              <span className="font-amount">{formatAmount(transaction.amount, config.language)}</span>
-              <span className="text-xl font-semibold text-[var(--text-secondary)] opacity-40 ml-2 font-sans">{config.currency}</span>
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            {/* Merchant */}
-            <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
-               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('merchant')}</p>
-               <p className="text-base font-medium text-[var(--text-primary)] break-words">
-                 {typeof transaction.merchant === 'object' ? (transaction.merchant as any)?.name : (transaction.merchant || (typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category))}
-               </p>
-            </div>
-
-            {/* Date */}
-            <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
-               <div className="flex items-center justify-between mb-1.5">
-                 <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60">{t('date')}</p>
-                 {formattedTime && (
-                   <span className="text-[10px] font-normal text-[var(--text-secondary)] opacity-50 tabular-nums">
-                     {formattedTime}
-                   </span>
-                 )}
-               </div>
-               <p className="text-base font-medium text-[var(--text-primary)] capitalize break-words leading-snug">
-                 {formattedDate}
-               </p>
-            </div>
-
-            {/* Category */}
-            <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
-               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('category')}</p>
-               <div className="space-y-3">
-                 {transaction.splits && transaction.splits.length > 0 ? (
-                   transaction.splits.map((split, idx) => {
-                     const splitCatName = typeof split.category === 'object' ? (split.category as any)?.name : (split.category || '');
-                     const searchCat = splitCatName.trim().toLowerCase();
-                     const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
-                       c => c.name.trim().toLowerCase() === searchCat
-                     );
-                     const iconKey = cat?.icon || getCategoryIconName(splitCatName);
-                     return (
-                       <div key={split.id || idx} className="flex items-center justify-between">
-                         <div className="flex items-center gap-2.5">
-                           {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="sm" />}
-                           <p className="text-base font-medium text-[var(--text-primary)] break-words">{splitCatName}</p>
-                         </div>
-                         <p className="text-sm font-medium text-[var(--text-secondary)] opacity-60">
-                           {formatAmount(split.amount, config.language)} {config.currency}
-                         </p>
-                       </div>
-                     );
-                   })
-                 ) : (
-                   <div className="flex items-center gap-2.5">
-                     {(() => {
-                       const catName = typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '');
-                       const searchCat = catName.trim().toLowerCase();
-                       const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
-                         c => c.name.trim().toLowerCase() === searchCat
-                       );
-                       const iconKey = cat?.icon || getCategoryIconName(catName);
-                       if (!iconKey) return null;
-                       return <CategoryIcon icon={iconKey} color={cat?.color} size="sm" />;
-                     })()}
-                     <p className="text-base font-medium text-[var(--text-primary)] break-words">
-                       {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}
-                     </p>
-                   </div>
-                 )}
-               </div>
-            </div>
+        {/* Main Content Area: One Cohesive Detail Surface */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
+          <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
             
-            {/* Note Section if exists */}
-            {transaction.note && (
-              <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
-                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('ownNote')}</p>
-                <p className="text-sm font-normal text-[var(--text-secondary)] leading-relaxed break-words">
-                  {transaction.note}
+            {/* Amount Row */}
+            <div className="p-4 sm:p-4.5 flex items-center justify-between">
+              <span className="text-xs font-normal text-[#9CA6BC]">
+                {t('amount')}
+              </span>
+              <div className="text-right">
+                <p className={`text-xl sm:text-2xl font-semibold font-amount tabular-nums ${isIncome ? 'text-emerald-400' : 'text-white'}`}>
+                  <span className="opacity-75 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
+                  <span>{formatAmount(transaction.amount, config.language)}</span>
+                  <span className="text-sm font-normal text-[#9CA6BC] ml-1.5 font-sans">{config.currency}</span>
                 </p>
+              </div>
+            </div>
+
+            {/* Merchant / Store Row */}
+            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
+              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+                {t('merchant')}
+              </span>
+              <span className="text-sm font-medium text-white text-right truncate">
+                {merchantName}
+              </span>
+            </div>
+
+            {/* Date Row */}
+            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
+              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+                {t('date')}
+              </span>
+              <div className="text-right">
+                <span className="text-sm font-medium text-white capitalize block">
+                  {formattedDate}
+                </span>
+                {formattedTime && (
+                  <span className="text-[11px] font-normal text-[#9CA6BC] mt-0.5 block tabular-nums">
+                    {formattedTime}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Category Row */}
+            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
+              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+                {t('category')}
+              </span>
+              <div className="text-right">
+                {transaction.splits && transaction.splits.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {transaction.splits.map((split, idx) => {
+                      const splitCatName = typeof split.category === 'object' ? (split.category as any)?.name : (split.category || '');
+                      const searchCat = splitCatName.trim().toLowerCase();
+                      const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+                        c => c.name.trim().toLowerCase() === searchCat
+                      );
+                      const iconKey = cat?.icon || getCategoryIconName(splitCatName);
+                      return (
+                        <div key={split.id || idx} className="flex items-center justify-end gap-2">
+                          {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />}
+                          <span className="text-sm font-medium text-white">{splitCatName}</span>
+                          <span className="text-xs text-[#9CA6BC]">({formatAmount(split.amount, config.language)} {config.currency})</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-end gap-2">
+                    {(() => {
+                      const catName = typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '');
+                      const searchCat = catName.trim().toLowerCase();
+                      const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+                        c => c.name.trim().toLowerCase() === searchCat
+                      );
+                      const iconKey = cat?.icon || getCategoryIconName(catName);
+                      if (!iconKey) return null;
+                      return <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />;
+                    })()}
+                    <span className="text-sm font-medium text-white">
+                      {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Note Row if exists */}
+            {transaction.note && (
+              <div className="p-4 sm:p-4.5 flex items-start justify-between gap-4">
+                <span className="text-xs font-normal text-[#9CA6BC] shrink-0 pt-0.5">
+                  {t('ownNote')}
+                </span>
+                <span className="text-sm font-normal text-white text-right max-w-[65%] break-words">
+                  {transaction.note}
+                </span>
               </div>
             )}
           </div>
 
           {/* Tags Section if exists */}
           {transaction.tags && transaction.tags.length > 0 && (
-            <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
-              <div className="flex items-center gap-2 mb-2 text-[var(--text-tertiary)] opacity-60">
-                <Tag size={12} />
-                <p className="text-xs font-medium">{t('tags')}</p>
+            <div className="p-4 bg-white/[0.035] backdrop-blur-[18px] rounded-[20px] border border-white/[0.025]">
+              <div className="flex items-center gap-1.5 mb-2 text-[#9CA6BC]">
+                <Tag size={12} strokeWidth={1.75} />
+                <span className="text-xs font-medium">{t('tags')}</span>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {(transaction.tags || []).map((tag, index) => (
-                  <span key={index} className="bg-accent/10 text-accent px-2 py-0.5 rounded-[8px] text-[10px] font-semibold">
+                  <span key={index} className="bg-white/[0.06] text-white px-2.5 py-1 rounded-[10px] text-xs font-medium">
                     {tag}
                   </span>
                 ))}
@@ -258,12 +269,12 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
           {/* Receipt Section if exists */}
           {transaction.receiptUrl && (
-            <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
-              <div className="flex items-center gap-2 mb-3 text-[var(--text-tertiary)] opacity-60">
-                <Receipt size={12} />
-                <p className="text-xs font-medium">{t('receipt')}</p>
+            <div className="p-4 bg-white/[0.035] backdrop-blur-[18px] rounded-[20px] border border-white/[0.025]">
+              <div className="flex items-center gap-1.5 mb-3 text-[#9CA6BC]">
+                <Receipt size={12} strokeWidth={1.75} />
+                <span className="text-xs font-medium">{t('receipt')}</span>
               </div>
-              <div className="relative aspect-[3/4] rounded-[10px] overflow-hidden bg-black/5">
+              <div className="relative aspect-[3/4] rounded-[14px] overflow-hidden bg-black/20 border border-white/[0.05]">
                 <img 
                   src={transaction.receiptUrl} 
                   alt="Receipt" 
@@ -274,9 +285,9 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                   href={transaction.receiptUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/20 transition-all group"
+                  className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-all group"
                 >
-                  <span className="bg-white text-black px-3 py-1.5 rounded-[8px] text-[10px] font-semibold opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 shadow-xs">
+                  <span className="bg-white/95 text-black px-3.5 py-2 rounded-xl text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-lg">
                     Visa fullstorlek
                   </span>
                 </a>
@@ -284,25 +295,21 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             </div>
           )}
         </div>
-        
-
       </motion.div>
 
-      <div>
-        {showDeleteConfirm && (
-          <ConfirmModal
-            isOpen={showDeleteConfirm}
-            title={t('delete')}
-            message={t('deleteConfirm')}
-            onConfirm={() => {
-              onDelete(transaction.id);
-              onClose();
-            }}
-            onCancel={() => setShowDeleteConfirm(false)}
-            t={t}
-          />
-        )}
-      </div>
+      {showDeleteConfirm && (
+        <ConfirmModal
+          isOpen={showDeleteConfirm}
+          title={t('delete')}
+          message={t('deleteConfirm')}
+          onConfirm={() => {
+            onDelete(transaction.id);
+            onClose();
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+          t={t}
+        />
+      )}
     </motion.div>
   );
 }

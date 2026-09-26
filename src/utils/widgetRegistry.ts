@@ -40,7 +40,7 @@ export const AVAILABLE_WIDGETS: WidgetDefinition[] = [
     descriptionEn: 'Alerts for unconfirmed or delayed recurring bills and incomes.',
     icon: BellRing,
     color: '#e58a17',
-    defaultEnabled: true,
+    defaultEnabled: false,
   },
   {
     id: 'monthly_pulse',
@@ -50,7 +50,7 @@ export const AVAILABLE_WIDGETS: WidgetDefinition[] = [
     descriptionEn: 'Quick snapshot of period budget pace, savings rate and remaining pot.',
     icon: Activity,
     color: '#6366f1',
-    defaultEnabled: true,
+    defaultEnabled: false,
   },
   {
     id: 'savings_goals',
@@ -60,7 +60,7 @@ export const AVAILABLE_WIDGETS: WidgetDefinition[] = [
     descriptionEn: 'Active savings goals with visual progress bars and quick deposits.',
     icon: PiggyBank,
     color: '#f59e0b',
-    defaultEnabled: true,
+    defaultEnabled: false,
   },
   {
     id: 'daily_summary',

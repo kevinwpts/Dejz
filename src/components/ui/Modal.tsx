@@ -66,28 +66,31 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/45 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
           />
 
-          {/* Modal Card / Sheet */}
+          {/* Modal Card / Bottom Sheet */}
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className={`relative w-full ${sizeStyles} bg-[var(--surface-color)] border border-[var(--border-color)] rounded-t-[28px] sm:rounded-[28px] shadow-lg max-h-[92vh] sm:max-h-[88vh] flex flex-col z-10 overflow-hidden ${className}`}
+            className={`relative w-full ${sizeStyles} bg-[#10121D] border-t sm:border border-white/[0.04] rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[92vh] sm:max-h-[88vh] flex flex-col z-10 overflow-hidden ${className}`}
           >
+            {/* Mobile Drag Handle */}
+            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-5 sm:p-6 border-b border-[var(--border-color)]/60 shrink-0">
+              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/[0.035] shrink-0">
                 <div className="flex flex-col pr-4">
                   {title && (
-                    <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)]">
+                    <h2 className="text-base sm:text-lg font-semibold text-white tracking-tight">
                       {title}
                     </h2>
                   )}
                   {subtitle && (
-                    <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                    <p className="text-xs text-[#9CA6BC] mt-0.5">
                       {subtitle}
                     </p>
                   )}
@@ -95,7 +98,7 @@ export const Modal: React.FC<ModalProps> = ({
 
                 {showCloseButton && (
                   <IconButton
-                    icon={<X size={18} />}
+                    icon={<X size={18} strokeWidth={2} />}
                     onClick={onClose}
                     variant="muted"
                     size="sm"
@@ -105,14 +108,14 @@ export const Modal: React.FC<ModalProps> = ({
               </div>
             )}
 
-            {/* Scrollable Content */}
-            <div className="p-5 sm:p-6 overflow-y-auto overscroll-contain flex-1">
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 custom-scrollbar">
               {children}
             </div>
 
-            {/* Footer */}
+            {/* Footer / Actions */}
             {footer && (
-              <div className="p-4 sm:p-5 border-t border-[var(--border-color)]/60 bg-[var(--surface-muted)]/30 shrink-0 flex items-center justify-end gap-2.5">
+              <div className="p-4 sm:p-5 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] border-t border-white/[0.035] bg-[#10121D] shrink-0">
                 {footer}
               </div>
             )}

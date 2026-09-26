@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 
 import { CategoryIcon } from './CategoryIcon';
 import { Language, TranslationKey } from '../i18n';
@@ -28,7 +27,7 @@ export function BudgetItemLogo({ item, type, config }: { item: any, type: 'incom
   return <TransactionLogo transaction={tx} config={config} />;
 }
 
-export function BudgetItem({ item, onClick, currency, type = 'expense', language, t, config, currentPeriodId, isGrouped }: BudgetItemProps) {
+export function BudgetItem({ item, onClick, currency, type = 'expense', language, t, config, currentPeriodId, isGrouped: _isGrouped }: BudgetItemProps) {
   const isFixed = Boolean(item.frequency || item.deductionDay); 
   const isSaving = !isFixed && type === 'expense' && !('category' in item);
   

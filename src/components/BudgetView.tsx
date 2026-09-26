@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, ArrowLeft, Check, Trash2, Sparkles, RotateCcw, Calendar, ArrowUpDown, Plus } from 'lucide-react';
+import { RefreshCw, ArrowLeft, Check, Trash2, Sparkles, RotateCcw, Plus } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';

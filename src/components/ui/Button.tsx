@@ -28,29 +28,29 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-bold transition-all duration-150 active:scale-[0.98] select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100';
+      'inline-flex items-center justify-center font-semibold transition-all duration-150 active:scale-[0.98] select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100';
 
     const sizeStyles = {
-      sm: 'text-xs py-2 px-3.5 rounded-[12px] gap-1.5 h-[36px]',
-      md: 'text-xs sm:text-sm py-3 px-4 rounded-[16px] gap-2 h-[46px]',
-      lg: 'text-sm sm:text-base py-3.5 px-6 rounded-[18px] gap-2.5 h-[52px]',
+      sm: 'text-xs py-2 px-4 rounded-full gap-1.5 h-[38px]',
+      md: 'text-xs sm:text-sm py-2.5 px-5 rounded-full gap-2 h-[46px]',
+      lg: 'text-sm sm:text-base py-3 px-6 rounded-full gap-2.5 h-[50px]',
     }[size];
 
     const variantStyles = {
       primary:
-        'bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-95 shadow-xs',
+        'bg-white text-black hover:bg-white/90 font-semibold shadow-none',
       accent:
-        'bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-95 shadow-xs',
+        'bg-[#818cf8]/[0.18] text-white hover:bg-[#818cf8]/[0.26] border border-[#8B9CFF]/30 shadow-none',
       secondary:
-        'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-[var(--surface-color)] border border-[var(--border-color)] shadow-2xs',
+        'bg-white/[0.04] text-white hover:bg-white/[0.08] border border-white/[0.03]',
       outline:
-        'bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]',
+        'bg-transparent text-white hover:bg-white/[0.04] border border-white/[0.04]',
       ghost:
-        'bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]',
+        'bg-transparent text-[#9CA6BC] hover:text-white hover:bg-white/[0.04]',
       subtle:
-        'bg-[var(--accent-color)]/8 text-[var(--accent-color)] hover:bg-[var(--accent-color)]/15 border border-[var(--accent-color)]/20',
+        'bg-[#818cf8]/[0.16] text-white hover:bg-[#818cf8]/[0.24] border border-[#8B9CFF]/30',
       danger:
-        'bg-danger/10 text-danger hover:bg-danger/20 border border-danger/20 shadow-2xs',
+        'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border-none',
     }[variant];
 
     const widthStyle = fullWidth ? 'w-full' : '';

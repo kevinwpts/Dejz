@@ -32,7 +32,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-[12px] font-semibold text-[var(--text-secondary)] flex items-center justify-between"
+            className="text-[12px] sm:text-[13px] font-medium text-[#9CA6BC] flex items-center justify-between"
           >
             <span>{label}</span>
           </label>
@@ -40,7 +40,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative flex items-center w-full">
           {icon && (
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none flex items-center justify-center">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9CA6BC] pointer-events-none flex items-center justify-center">
               {icon}
             </div>
           )}
@@ -49,11 +49,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             disabled={disabled}
-            className={`w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border ${
-              error ? 'border-danger/60 focus:border-danger ring-1 ring-danger/20' : 'border-[var(--border-color)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20'
+            className={`w-full bg-white/[0.035] hover:bg-white/[0.05] focus:bg-white/[0.05] border ${
+              error ? 'border-rose-500/50 focus:border-rose-500' : 'border-white/[0.03] focus:border-[#8B9CFF]/40'
             } rounded-[16px] ${icon ? 'pl-10' : 'pl-4'} ${
               iconRight ? 'pr-10' : 'pr-4'
-            } py-3 font-medium text-xs sm:text-sm text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-secondary)]/50 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+            } py-3 font-medium text-xs sm:text-sm text-white outline-none transition-all placeholder-[#9CA6BC]/40 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
             {...props}
           />
 
@@ -65,13 +65,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {error && (
-          <span className="text-[11px] font-semibold text-danger pl-1 flex items-center gap-1">
+          <span className="text-[11px] font-medium text-rose-400 pl-1 flex items-center gap-1">
             {error}
           </span>
         )}
 
         {helperText && !error && (
-          <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-75 pl-1">
+          <span className="text-[11px] font-normal text-[#9CA6BC] opacity-80 pl-1">
             {helperText}
           </span>
         )}

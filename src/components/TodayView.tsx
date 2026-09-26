@@ -104,6 +104,10 @@ export function TodayView({
     return getResolvedHomeWidgets(config?.homeWidgets);
   }, [config?.homeWidgets]);
 
+  const hasActiveWidgets = useMemo(() => {
+    return resolvedWidgets.some((w) => w.enabled);
+  }, [resolvedWidgets]);
+
   const handleRemoveWidget = (widgetId: string) => {
     if (!onUpdateConfig) return;
     const current = getResolvedHomeWidgets(config?.homeWidgets);
@@ -599,19 +603,21 @@ export function TodayView({
 
       {/* 5. LOWER SECTION: WIDGETS & MÅNADSPULS (Deep scrollable feed) */}
       <div className="space-y-4 pt-6 border-t border-white/[0.06]">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] select-none">
-            {lang === 'en' ? 'Widgets & Insights' : 'Widgets & insikter'}
-          </span>
-          <button
-            type="button"
-            onClick={() => setIsWidgetManagerOpen(true)}
-            className="text-xs font-medium text-[#9CA6BC] hover:text-white transition-colors cursor-pointer flex items-center gap-1"
-          >
-            <span>{lang === 'en' ? 'Customize' : 'Anpassa'}</span>
-            <LayoutGrid size={13} />
-          </button>
-        </div>
+        {hasActiveWidgets && (
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] select-none">
+              {lang === 'en' ? 'Widgets & Insights' : 'Widgets & insikter'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsWidgetManagerOpen(true)}
+              className="text-xs font-medium text-[#9CA6BC] hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <span>{lang === 'en' ? 'Customize' : 'Anpassa'}</span>
+              <LayoutGrid size={13} />
+            </button>
+          </div>
+        )}
 
         {/* Customization Bar if active */}
         {isCustomizing && (
