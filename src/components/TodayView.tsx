@@ -330,16 +330,16 @@ export function TodayView({
       {/* 2. BUDGETKATEGORIER (Glass cards: rgba(255,255,255,0.045), blur 20px, border 0.07, top highlight) */}
       <div className="space-y-3.5 pt-1">
         <div className="flex items-center justify-between px-1">
-          <span className="text-[11px] sm:text-[12px] font-bold uppercase tracking-[0.18em] text-[#C7CDDC]/85 select-none">
+          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] select-none">
             {lang === 'en' ? 'Category Budgets' : 'Budgetkategorier'}
           </span>
           <button
             type="button"
             onClick={() => onNavigate("budget", "category-budgets")}
-            className="text-[12px] font-medium text-[#C7CDDC] hover:text-white transition-colors cursor-pointer flex items-center gap-1 group"
+            className="text-xs font-medium text-[#9CA6BC] hover:text-white transition-colors cursor-pointer flex items-center gap-1 group"
           >
             <span>{lang === 'en' ? 'Manage' : 'Hantera'}</span>
-            <ChevronRight size={13} className="group-hover:translate-x-0.5 transition-transform text-[#C7CDDC] group-hover:text-white" />
+            <ChevronRight size={13} className="group-hover:translate-x-0.5 transition-transform text-[#9CA6BC] group-hover:text-white" />
           </button>
         </div>
 
@@ -360,7 +360,7 @@ export function TodayView({
                   onClick={() => onNavigate("analysis")}
                   className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.065] backdrop-blur-[20px] transition-all group text-left active:scale-[0.98] min-w-[155px] sm:min-w-[170px] max-w-[185px] cursor-pointer snap-start border border-white/[0.07] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.15)]"
                 >
-                  {/* Top Row: Minimalist Monochrome Icon (#C7CDDC, stroke 1.75, bg-white/[0.05]) + Category Name */}
+                  {/* Top Row: Minimalist Monochrome Icon (#C7CDDC, stroke 1.75, bg-white/[0.05]) + Category Name (Medium 500) */}
                   <div className="flex items-center gap-2.5 mb-3.5">
                     <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.06] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       {isEmojiString(cat.iconName) ? (
@@ -372,31 +372,31 @@ export function TodayView({
                       )}
                     </div>
 
-                    <span className="text-xs sm:text-[13px] font-semibold text-[#C7CDDC] group-hover:text-white transition-colors tracking-tight truncate flex-1">
+                    <span className="text-xs sm:text-[13px] font-medium text-[#C7CDDC] group-hover:text-white transition-colors tracking-tight truncate flex-1">
                       {cat.name}
                     </span>
                   </div>
 
-                  {/* Bottom Row: Amount Remaining & Progress Bar (#8B9CFF fill, rgba(255,255,255,0.07) track) */}
+                  {/* Bottom Row: Amount Remaining (Semibold 600) & Progress Bar */}
                   <div className="flex flex-col w-full space-y-1.5">
                     <div className="flex items-baseline justify-between gap-1">
                       {cat.hasBudget ? (
                         cat.isOverBudget ? (
-                          <span className="text-[14px] sm:text-[15px] font-bold text-rose-400 font-amount tabular-nums">
+                          <span className="text-[14px] sm:text-[15px] font-semibold text-rose-400 font-amount tabular-nums">
                             +{formatAmount(Math.abs(cat.remaining), lang)} kr
                           </span>
                         ) : (
-                          <span className="text-[14px] sm:text-[15px] font-bold text-white font-amount tabular-nums">
+                          <span className="text-[14px] sm:text-[15px] font-semibold text-white font-amount tabular-nums">
                             {formatAmount(cat.remaining, lang)} kr
                           </span>
                         )
                       ) : (
-                        <span className="text-[14px] sm:text-[15px] font-bold text-[#C7CDDC] font-amount tabular-nums">
+                        <span className="text-[14px] sm:text-[15px] font-semibold text-[#C7CDDC] font-amount tabular-nums">
                           {formatAmount(cat.spent, lang)} kr
                         </span>
                       )}
 
-                      <span className="text-[10.5px] font-medium text-[#C7CDDC]/80 shrink-0">
+                      <span className="text-[11px] font-normal text-[#9CA6BC] shrink-0">
                         {cat.hasBudget 
                           ? (cat.isOverBudget 
                               ? (lang === 'en' ? 'over' : 'över') 
@@ -432,11 +432,11 @@ export function TodayView({
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.04] text-[#C7CDDC] group-hover:text-white border border-white/[0.06] shrink-0">
                   <SlidersHorizontal size={14} strokeWidth={1.75} />
                 </div>
-                <span className="text-xs font-semibold text-[#C7CDDC] group-hover:text-white transition-colors truncate">
+                <span className="text-xs font-medium text-[#C7CDDC] group-hover:text-white transition-colors truncate">
                   {lang === "en" ? "Manage" : "Hantera"}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[11px] font-medium text-[#C7CDDC]/80">
+              <div className="flex items-center justify-between text-[11px] font-normal text-[#9CA6BC]">
                 <span>{lang === "en" ? "Edit limits" : "Justera"}</span>
                 <span>→</span>
               </div>
@@ -456,12 +456,12 @@ export function TodayView({
                 <p className="text-xs sm:text-sm font-semibold text-white leading-snug">
                   {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
                 </p>
-                <p className="text-[11px] text-[#C7CDDC]/80">
+                <p className="text-[11px] font-normal text-[#9CA6BC]">
                   {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
                 </p>
               </div>
             </div>
-            <ChevronRight size={15} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
+            <ChevronRight size={15} className="text-[#9CA6BC] group-hover:text-white transition-colors" />
           </button>
         )}
       </div>
@@ -485,14 +485,14 @@ export function TodayView({
         </motion.div>
       )}
 
-      {/* 4. SELECTED DAY'S TRANSACTIONS */}
+      {/* 4. SELECTED DAY'S TRANSACTIONS (Natural Swedish casing: Idag, 26 september) */}
       <div className="space-y-4 pt-1">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.16em] text-[#C7CDDC]/85">
+          <h3 className="text-sm font-semibold text-white tracking-tight">
             {stats.isPastPeriod
-              ? (lang === "en" ? "Period Transactions" : "Periodens transaktioner")
+              ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
               : selectedDate.toDateString() === new Date().toDateString()
-                ? `${t("todayLabel").charAt(0).toUpperCase() + t("todayLabel").slice(1)}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
+                ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
                 : selectedDate.toLocaleDateString(
                     lang === "en" ? "en-US" : "sv-SE",
                     { day: "numeric", month: "long" },
@@ -548,10 +548,10 @@ export function TodayView({
             ) : null}
           </AnimatePresence>
 
-          {/* Fixed transactions for the day */}
+          {/* Fixed transactions for the day (Natural Swedish casing) */}
           {fixedTransactions.length > 0 && (
             <div className="space-y-2 pt-1">
-              <h4 className="text-[11px] font-semibold text-[#C7CDDC]/85 px-1 uppercase tracking-wider">
+              <h4 className="text-xs font-medium text-[#9CA6BC] px-1">
                 {lang === "en" ? "Fixed transactions" : "Fasta transaktioner"}
               </h4>
               <div className="space-y-2">
@@ -577,16 +577,16 @@ export function TodayView({
                         <p className="text-xs sm:text-[13.5px] font-semibold text-white truncate">
                           {item.merchant}
                         </p>
-                        <p className="text-[11px] text-[#9CA6BC] truncate mt-0.5">
+                        <p className="text-[11px] font-normal text-[#9CA6BC] truncate mt-0.5">
                           {item.category}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`text-xs sm:text-sm font-bold font-amount tabular-nums ${
+                      <span className={`text-xs sm:text-sm font-semibold font-amount tabular-nums ${
                         item.type === "income" ? "text-emerald-400" : "text-white"
                       }`}>
-                        {item.type === "income" ? "+" : "-"}{formatAmount(item.amount, lang)} {config?.currency || 'kr'}
+                        {item.type === "income" ? "+" : "−"}{formatAmount(item.amount, lang)} {config?.currency || 'kr'}
                       </span>
                     </div>
                   </div>
@@ -600,13 +600,13 @@ export function TodayView({
       {/* 5. LOWER SECTION: WIDGETS & MÅNADSPULS (Deep scrollable feed) */}
       <div className="space-y-4 pt-6 border-t border-white/[0.06]">
         <div className="flex items-center justify-between px-1">
-          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C7CDDC]/85 select-none">
-            {lang === 'en' ? 'Widgets & Insights' : 'Widgets & Insikter'}
+          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] select-none">
+            {lang === 'en' ? 'Widgets & Insights' : 'Widgets & insikter'}
           </span>
           <button
             type="button"
             onClick={() => setIsWidgetManagerOpen(true)}
-            className="text-[12px] font-medium text-[#C7CDDC] hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+            className="text-xs font-medium text-[#9CA6BC] hover:text-white transition-colors cursor-pointer flex items-center gap-1"
           >
             <span>{lang === 'en' ? 'Customize' : 'Anpassa'}</span>
             <LayoutGrid size={13} />

@@ -228,7 +228,7 @@ export function TransactionItem({
                 )}
 
                 {transaction.note && !isFixed && (
-                  <span className="text-[12px] font-normal text-[#9CA6BC]/80 truncate italic min-w-0 flex-1">
+                  <span className="text-[12px] font-normal text-[#9CA6BC]/80 truncate min-w-0 flex-1">
                     {hideCategoryBadge ? `• ${transaction.note}` : `• ${transaction.note}`}
                   </span>
                 )}
@@ -239,27 +239,27 @@ export function TransactionItem({
             </div>
           </div>
           
-          {/* Primary Amount */}
+          {/* Primary Amount (Semibold 600) */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-            <p className={`text-[14.5px] sm:text-[15px] font-bold whitespace-nowrap tracking-tight ${amountColor}`}>
-              <span className="opacity-70 mr-0.5 text-[13px] font-bold">{transaction.type === 'income' ? '+' : '-'}</span>
-              <span className="font-amount tabular-nums font-bold tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
-              <span className="text-[11px] font-semibold opacity-60 ml-1">{config?.currency || 'kr'}</span>
+            <p className={`text-[14.5px] sm:text-[15px] font-semibold whitespace-nowrap tracking-tight ${amountColor}`}>
+              <span className="opacity-75 mr-0.5 text-[13px] font-semibold">{transaction.type === 'income' ? '+' : '−'}</span>
+              <span className="font-amount tabular-nums font-semibold tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
+              <span className="text-[12px] font-normal text-[#9CA6BC] ml-1">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixed ? (
-              <p className="text-[11px] font-normal text-[#9CA6BC]/80 mt-0.5 tabular-nums">
+              <p className="text-[11px] font-normal text-[#9CA6BC]/75 mt-0.5 tabular-nums">
                 {showDate 
                   ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
                   : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}
               </p>
             ) : isFixed && (
-              <span className="text-[10px] font-medium text-[#9CA6BC] opacity-85 px-1.5 py-0.5 rounded-md mt-0.5 whitespace-nowrap">
+              <span className="text-[10px] font-normal text-[#9CA6BC] opacity-80 px-1.5 py-0.5 rounded-md mt-0.5 whitespace-nowrap">
                 {getL10n(
-                  transaction.type === 'income' ? 'FAST INKOMST' : transaction.type === 'saving' ? 'FAST SPARANDE' : 'FAST UTGIFT',
-                  transaction.type === 'income' ? 'FIXED INCOME' : transaction.type === 'saving' ? 'FIXED SAVINGS' : 'FIXED EXPENSE',
-                  transaction.type === 'income' ? 'FAST INNTEKT' : transaction.type === 'saving' ? 'FAST SPARING' : 'FAST UTGIFT',
-                  transaction.type === 'income' ? 'FAST INDKOMST' : transaction.type === 'saving' ? 'FAST OPSPARING' : 'FAST UDGIFT',
-                  transaction.type === 'income' ? 'KIINTEÄ TULO' : transaction.type === 'saving' ? 'KIINTEÄ SÄÄSTÖ' : 'KIINTEÄ KULU'
+                  transaction.type === 'income' ? 'Fast inkomst' : transaction.type === 'saving' ? 'Fast sparande' : 'Fast utgift',
+                  transaction.type === 'income' ? 'Fixed income' : transaction.type === 'saving' ? 'Fixed savings' : 'Fixed expense',
+                  transaction.type === 'income' ? 'Fast inntekt' : transaction.type === 'saving' ? 'Fast sparing' : 'Fast utgift',
+                  transaction.type === 'income' ? 'Fast indkomst' : transaction.type === 'saving' ? 'Fast opsparing' : 'Fast udgift',
+                  transaction.type === 'income' ? 'Kiinteä tulo' : transaction.type === 'saving' ? 'Kiinteä säästö' : 'Kiinteä kulu'
                 )}
               </span>
             )}

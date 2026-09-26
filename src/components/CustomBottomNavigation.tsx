@@ -121,8 +121,8 @@ function NavItem({
       aria-label={label}
       className={`flex-1 flex flex-col items-center justify-center py-1 px-0.5 transition-all duration-200 active:scale-95 cursor-pointer select-none rounded-2xl ${
         isActive
-          ? 'text-[#8B9CFF] font-semibold'
-          : 'text-[#C7CDDC]/65 hover:text-[#C7CDDC] font-medium'
+          ? 'text-[#8B9CFF] font-medium'
+          : 'text-[#C7CDDC]/70 hover:text-[#C7CDDC] font-medium'
       }`}
     >
       <Icon 
@@ -131,8 +131,8 @@ function NavItem({
         fill={isActive && fillOnActive ? "currentColor" : "none"}
         className="transition-transform duration-200 mb-0.5"
       />
-      <span className={`text-[10px] sm:text-[10.5px] leading-tight text-center tracking-tight truncate max-w-[62px] sm:max-w-[70px] ${
-        isActive ? 'text-[#8B9CFF] font-semibold' : 'text-[#C7CDDC]/75 font-medium'
+      <span className={`text-[10px] sm:text-[10.5px] font-medium leading-tight text-center tracking-tight truncate max-w-[62px] sm:max-w-[70px] ${
+        isActive ? 'text-[#8B9CFF]' : 'text-[#C7CDDC]/75'
       }`}>
         {label}
       </span>
