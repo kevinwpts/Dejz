@@ -96,6 +96,7 @@ export function TodayView({
   onUpdateConfig,
 }: TodayViewProps) {
   const [isWidgetManagerOpen, setIsWidgetManagerOpen] = useState(false);
+  const [isCustomizing, setIsCustomizing] = useState(false);
 
   const resolvedWidgets = useMemo(() => {
     return getResolvedHomeWidgets(config.homeWidgets);
@@ -448,6 +449,45 @@ export function TodayView({
 
       {/* 2. CUSTOMIZABLE WIDGETS SECTION */}
       <div className="space-y-3.5">
+        {/* Customization Bar if active */}
+        {isCustomizing && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="flex items-center justify-between p-3 rounded-2xl bg-[var(--surface-color)] border border-[var(--accent-color)]/40 shadow-xs"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-[14px]">🛠️</span>
+              <div>
+                <p className="text-xs font-bold text-[var(--text-primary)]">
+                  {config.language === 'en' ? 'Edit widgets mode' : 'Redigeringsläge aktivt'}
+                </p>
+                <p className="text-[11px] text-[var(--text-secondary)]">
+                  {config.language === 'en' ? 'Click Remove on cards or Add to manage.' : 'Klicka på Ta bort på korten eller Lägg till fler.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setIsWidgetManagerOpen(true)}
+                className="px-2.5 py-1 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-semibold shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+              >
+                {config.language === 'en' ? '+ Add' : '+ Lägg till'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsCustomizing(false)}
+                className="px-2.5 py-1 rounded-xl bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/80 text-xs font-semibold border border-[var(--border-color)] active:scale-95 transition-all cursor-pointer"
+              >
+                {config.language === 'en' ? 'Done' : 'Klar'}
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         <AnimatePresence mode="popLayout">
           {resolvedWidgets.map((widgetConfig) => {
             if (!widgetConfig.enabled) return null;
@@ -468,6 +508,8 @@ export function TodayView({
                     onAddExpense={onQuickAddExpense}
                     onAddIncome={onAddIncome}
                     onOpenFullExpenseForm={() => onAddTransaction(selectedDate)}
+                    onRemove={() => handleRemoveWidget('quick_expense')}
+                    isCustomizing={isCustomizing}
                   />
                 </motion.div>
               );
@@ -492,6 +534,16 @@ export function TodayView({
                         {attentionItems.length}
                       </div>
                     </div>
+
+                    {isCustomizing && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveWidget('attention_items')}
+                        className="px-2 py-0.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] font-semibold transition-all cursor-pointer"
+                      >
+                        {config.language === 'en' ? 'Remove' : 'Ta bort'}
+                      </button>
+                    )}
                   </div>
                   <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-hide px-2">
                     {attentionItems.map((item, index) => {
@@ -551,6 +603,7 @@ export function TodayView({
                     config={config}
                     onNavigate={onNavigate}
                     onRemove={() => handleRemoveWidget('monthly_pulse')}
+                    isCustomizing={isCustomizing}
                   />
                 </motion.div>
               );
@@ -569,6 +622,7 @@ export function TodayView({
                     config={config}
                     onNavigate={onNavigate}
                     onRemove={() => handleRemoveWidget('savings_goals')}
+                    isCustomizing={isCustomizing}
                   />
                 </motion.div>
               );
@@ -588,6 +642,7 @@ export function TodayView({
                     config={config}
                     selectedDate={selectedDate}
                     onRemove={() => handleRemoveWidget('daily_summary')}
+                    isCustomizing={isCustomizing}
                   />
                 </motion.div>
               );
@@ -608,6 +663,7 @@ export function TodayView({
                     stats={stats}
                     onNavigate={onNavigate}
                     onRemove={() => handleRemoveWidget('category_budgets')}
+                    isCustomizing={isCustomizing}
                   />
                 </motion.div>
               );
@@ -628,6 +684,7 @@ export function TodayView({
                     onNavigate={onNavigate}
                     onViewTransaction={onViewTransaction}
                     onRemove={() => handleRemoveWidget('recent_receipts')}
+                    isCustomizing={isCustomizing}
                   />
                 </motion.div>
               );
@@ -637,16 +694,34 @@ export function TodayView({
           })}
         </AnimatePresence>
 
-        {/* Customize Widgets Button */}
-        <div className="flex items-center justify-center pt-1 pb-0.5">
+        {/* Customize Widgets Button Bar */}
+        <div className="flex items-center justify-center gap-2 pt-1 pb-0.5">
           <button
             type="button"
             onClick={() => setIsWidgetManagerOpen(true)}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]/70 text-xs font-semibold transition-all shadow-2xs active:scale-95 cursor-pointer"
           >
             <LayoutGrid size={13} className="text-[var(--accent-color)]" />
-            <span>{config.language === 'en' ? 'Customize widgets' : 'Anpassa widgets'}</span>
+            <span>{config.language === 'en' ? 'Manage widgets' : 'Hantera widgets'}</span>
           </button>
+
+          {!isCustomizing ? (
+            <button
+              type="button"
+              onClick={() => setIsCustomizing(true)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[var(--surface-muted)]/70 hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]/50 text-xs font-medium transition-all active:scale-95 cursor-pointer"
+            >
+              <span>{config.language === 'en' ? 'Quick edit' : 'Snabbredigera'}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsCustomizing(false)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+            >
+              <span>{config.language === 'en' ? 'Done' : 'Klar'}</span>
+            </button>
+          )}
         </div>
       </div>
 

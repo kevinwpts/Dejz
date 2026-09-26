@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Plus, Check, ArrowUp, ArrowDown, RotateCcw, LayoutGrid } from 'lucide-react';
 import { Config, HomeWidgetConfig } from '../../types';
@@ -23,14 +24,14 @@ export function WidgetManagerModal({
   const isEn = config.language === 'en';
 
   const [currentWidgets, setCurrentWidgets] = React.useState<HomeWidgetConfig[]>(() =>
-    getResolvedHomeWidgets(config.homeWidgets)
+    getResolvedHomeWidgets(config?.homeWidgets)
   );
 
   React.useEffect(() => {
     if (isOpen) {
-      setCurrentWidgets(getResolvedHomeWidgets(config.homeWidgets));
+      setCurrentWidgets(getResolvedHomeWidgets(config?.homeWidgets));
     }
-  }, [isOpen, config.homeWidgets]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -67,9 +68,9 @@ export function WidgetManagerModal({
   const activeWidgetConfigs = currentWidgets.filter((w) => w.enabled);
   const inactiveWidgetConfigs = currentWidgets.filter((w) => !w.enabled);
 
-  return (
+  const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/65 backdrop-blur-md">
         {/* Backdrop click */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -85,7 +86,7 @@ export function WidgetManagerModal({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-          className="relative w-full max-w-lg bg-[var(--surface-color)] rounded-t-[28px] sm:rounded-[28px] border border-[var(--border-color)] shadow-2xl max-h-[85vh] flex flex-col z-10 overflow-hidden"
+          className="relative w-full max-w-lg bg-[var(--surface-color)] rounded-t-[28px] sm:rounded-[28px] border border-[var(--border-color)] shadow-2xl max-h-[88vh] flex flex-col z-10 overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[var(--border-color)]/60 shrink-0">
@@ -255,7 +256,7 @@ export function WidgetManagerModal({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-[var(--border-color)]/60 bg-[var(--surface-color)] flex justify-end shrink-0">
+          <div className="p-4 border-t border-[var(--border-color)]/60 bg-[var(--surface-color)] flex justify-end shrink-0 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
             <button
               type="button"
               onClick={onClose}
@@ -269,4 +270,6 @@ export function WidgetManagerModal({
       </div>
     </AnimatePresence>
   );
+
+  return createPortal(modalContent, document.body);
 }

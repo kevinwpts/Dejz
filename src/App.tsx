@@ -3485,9 +3485,10 @@ export default function App() {
                 }}
                 onUpdateConfig={(newConfig) => {
                   setConfig(newConfig);
-                  if (session?.user?.id) {
-                    dataService.saveSettings(session.user.id, newConfig);
-                  }
+                  const activeUserId = session?.user?.id || "demo-user";
+                  dataService.saveSettings(activeUserId, newConfig).catch((err) => {
+                    console.warn("Failed to save updated settings:", err);
+                  });
                 }}
               />
             </div>

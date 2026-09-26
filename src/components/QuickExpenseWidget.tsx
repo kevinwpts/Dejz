@@ -12,6 +12,8 @@ interface QuickExpenseWidgetProps {
   onAddExpense: (amount: number, note?: string, category?: string) => Promise<void> | void;
   onAddIncome?: (date?: Date) => void;
   onOpenFullExpenseForm?: (date?: Date) => void;
+  onRemove?: () => void;
+  isCustomizing?: boolean;
 }
 
 export function QuickExpenseWidget({
@@ -21,6 +23,8 @@ export function QuickExpenseWidget({
   onAddExpense,
   onAddIncome,
   onOpenFullExpenseForm,
+  onRemove,
+  isCustomizing,
 }: QuickExpenseWidgetProps) {
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -123,26 +127,38 @@ export function QuickExpenseWidget({
 
         {/* Discrete Secondary Action Buttons */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {onAddIncome && (
+          {isCustomizing && onRemove ? (
             <button
               type="button"
-              onClick={() => onAddIncome(selectedDate)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-              title={isEn ? 'Add income' : 'Lägg till inkomst'}
+              onClick={onRemove}
+              className="px-2 py-0.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] font-semibold transition-all cursor-pointer"
             >
-              <Plus size={12} strokeWidth={2.8} />
-              <span>{isEn ? 'Income' : 'Inkomst'}</span>
+              {isEn ? 'Remove' : 'Ta bort'}
             </button>
-          )}
-          {onOpenFullExpenseForm && (
-            <button
-              type="button"
-              onClick={() => onOpenFullExpenseForm(selectedDate)}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-muted)]/80 hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/60 active:scale-95 transition-all cursor-pointer"
-              title={isEn ? 'Detailed form' : 'Detaljerat formulär'}
-            >
-              <span>{isEn ? 'More' : 'Fler val'}</span>
-            </button>
+          ) : (
+            <>
+              {onAddIncome && (
+                <button
+                  type="button"
+                  onClick={() => onAddIncome(selectedDate)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+                  title={isEn ? 'Add income' : 'Lägg till inkomst'}
+                >
+                  <Plus size={12} strokeWidth={2.8} />
+                  <span>{isEn ? 'Income' : 'Inkomst'}</span>
+                </button>
+              )}
+              {onOpenFullExpenseForm && (
+                <button
+                  type="button"
+                  onClick={() => onOpenFullExpenseForm(selectedDate)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-muted)]/80 hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/60 active:scale-95 transition-all cursor-pointer"
+                  title={isEn ? 'Detailed form' : 'Detaljerat formulär'}
+                >
+                  <span>{isEn ? 'More' : 'Fler val'}</span>
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
