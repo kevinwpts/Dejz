@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, ArrowDownLeft, ArrowUpRight, Camera, Zap, Mic, Square, Loader2, Volume2, Check } from 'lucide-react';
+import { Calendar, ArrowDownLeft, ArrowUpRight, Camera, Plus, Mic, Square, Loader2, Check } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
@@ -178,7 +178,6 @@ export function GreetingModule({
   const {
     isRecording,
     isAudioTranscribing,
-    statusText,
     error: voiceError,
     toggleRecording,
     stopRecordingAndProcess
@@ -420,58 +419,35 @@ export function GreetingModule({
               placeholder={
                 isRecording
                   ? isEn
-                    ? 'Speak now, e.g. "300 kr Coop"...'
-                    : 'Prata nu, t.ex. "300 kr Coop"...'
-                  : isEn
-                    ? 'Quick expense: e.g. 45 Coop...'
-                    : 'Snabbutgift: t.ex. 45 ICA...'
+                    ? 'Lyssnar... Prata in köpet'
+                    : 'Lyssnar... Prata in köpet'
+                  : isAudioTranscribing
+                    ? isEn
+                      ? 'Tolkar röstinlägg...'
+                      : 'Tolkar röstinlägg...'
+                    : isEn
+                      ? 'Quick expense: e.g. 45 Coop...'
+                      : 'Snabbutgift: t.ex. 45 ICA...'
               }
               className={`w-full h-11 sm:h-12 pl-12 pr-12 rounded-2xl bg-white/[0.035] hover:bg-white/[0.05] focus:bg-white/[0.065] border backdrop-blur-[18px] text-xs sm:text-sm font-normal text-white placeholder-[#9CA6BC]/70 outline-none transition-all shadow-none ${
                 isRecording ? 'border-rose-500/80 ring-2 ring-rose-500/30' : 'border-white/[0.025] focus:border-white/[0.08]'
               }`}
             />
 
-            {/* Submit button on the RIGHT */}
+            {/* Submit button on the RIGHT: Simple Plus Icon */}
             <button
               type="submit"
               disabled={!quickText.trim() || isSubmittingQuick || isAudioTranscribing || isRecording}
-              className="absolute right-1.5 z-10 w-8.5 h-8.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-20 active:scale-95 text-[#C7CDDC] flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.035]"
-              title={isEn ? 'Save quick expense' : 'Spara snabbutgift'}
+              className="absolute right-1.5 z-10 w-8.5 h-8.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] disabled:opacity-20 active:scale-95 text-white flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.05]"
+              title={isEn ? 'Add expense' : 'Lägg till utgift'}
+              aria-label={isEn ? 'Add expense' : 'Lägg till utgift'}
             >
-              <Zap size={14} strokeWidth={1.75} className="text-[#C7CDDC]" />
+              <Plus size={16} strokeWidth={2.2} className="text-white" />
             </button>
           </form>
 
-          {/* Voice Status & Feedback */}
+          {/* Inline Success & Error Feedback */}
           <AnimatePresence>
-            {(statusText || isRecording || isAudioTranscribing) && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/15 border border-rose-500/20 text-rose-300 text-xs font-medium"
-              >
-                {isRecording ? (
-                  <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                  </span>
-                ) : (
-                  <Volume2 size={14} className="shrink-0 animate-pulse text-rose-400" />
-                )}
-                <span className="truncate flex-1">{statusText}</span>
-                {isRecording && (
-                  <button
-                    type="button"
-                    onClick={handleMicClick}
-                    className="text-[11px] underline font-bold hover:text-white cursor-pointer ml-auto shrink-0"
-                  >
-                    {isEn ? 'Done' : 'Klar'}
-                  </button>
-                )}
-              </motion.div>
-            )}
-
             {successMsg && (
               <motion.div
                 initial={{ opacity: 0, y: -4 }}

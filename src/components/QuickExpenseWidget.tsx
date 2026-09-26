@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Check, Plus, Sparkles, AlertCircle, Mic, Square, Loader2, Volume2 } from 'lucide-react';
+import { Check, Plus, Sparkles, AlertCircle, Mic, Square, Loader2 } from 'lucide-react';
 import { Config, Transaction } from '../types';
 import { parseQuickExpense } from '../utils/expenseAiParser';
 import { feedback } from '../utils/feedback';
@@ -30,7 +30,7 @@ export function QuickExpenseWidget({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isAudioTranscribing, setIsAudioTranscribing] = useState(false);
-  const [recordingStatusText, setRecordingStatusText] = useState<string | null>(null);
+  const [_recordingStatusText, setRecordingStatusText] = useState<string | null>(null);
   const [successInfo, setSuccessInfo] = useState<{ amount: number; merchant: string; category: string; transcript?: string } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -354,7 +354,7 @@ export function QuickExpenseWidget({
       <div className="flex items-center justify-between gap-2 mb-2.5">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-500 dark:bg-rose-500/15 dark:text-rose-400 flex items-center justify-center shrink-0">
-            <Zap size={14} strokeWidth={2.2} />
+            <Plus size={14} strokeWidth={2.5} />
           </div>
           <h4 className="text-[13px] sm:text-[14px] font-bold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Quick expense' : 'Snabb utgift'}
@@ -447,11 +447,15 @@ export function QuickExpenseWidget({
             placeholder={
               isRecording
                 ? isEn
-                  ? 'Speak now, e.g. "300 kr Coop"...'
-                  : 'Prata nu, t.ex. "300 kr Coop"...'
-                : isEn
-                  ? 'e.g. 300kr Coop, or tap mic...'
-                  : 't.ex. 300kr Coop, eller tryck micken...'
+                  ? 'Lyssnar... Prata in köpet'
+                  : 'Lyssnar... Prata in köpet'
+                : isAudioTranscribing
+                  ? isEn
+                    ? 'Tolkar röstinlägg...'
+                    : 'Tolkar röstinlägg...'
+                  : isEn
+                    ? 'e.g. 300kr Coop, or tap mic...'
+                    : 't.ex. 300kr Coop, eller tryck micken...'
             }
             value={inputText}
             onChange={(e) => {
@@ -485,37 +489,6 @@ export function QuickExpenseWidget({
           </button>
         </div>
       </form>
-
-      {/* Live Voice Status Indicator */}
-      <AnimatePresence>
-        {(recordingStatusText || isRecording || isAudioTranscribing) && (
-          <motion.div
-            initial={{ opacity: 0, height: 0, marginTop: 0 }}
-            animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
-            exit={{ opacity: 0, height: 0, marginTop: 0 }}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-semibold"
-          >
-            {isRecording ? (
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-              </span>
-            ) : (
-              <Volume2 size={14} className="shrink-0 animate-pulse text-rose-500" />
-            )}
-            <span className="truncate flex-1">{recordingStatusText}</span>
-            {isRecording && (
-              <button
-                type="button"
-                onClick={handleStopRecordingAndProcess}
-                className="text-[11px] underline font-bold hover:text-rose-700 cursor-pointer"
-              >
-                {isEn ? 'Done' : 'Klar'}
-              </button>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Instant Success Feedback Toast */}
       <AnimatePresence>

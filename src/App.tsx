@@ -3302,8 +3302,13 @@ export default function App() {
 
   return (
     <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden bg-[var(--bg-color)] bg-[var(--bg-gradient)] bg-fixed">
-      {/* Ambient Blue / Indigo Background Atmosphere */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none" aria-hidden="true">
+      {/* Ambient Blue / Indigo Background Atmosphere - Active ONLY on Home Tab ("today") */}
+      <div 
+        className={`fixed inset-0 pointer-events-none z-0 overflow-hidden select-none transition-opacity duration-500 ${
+          activeTab === "today" ? "opacity-100" : "opacity-0"
+        }`} 
+        aria-hidden="true"
+      >
         {/* Top-Center Primary Blue Radial Glow */}
         <div 
           className="absolute -top-[120px] left-1/2 -translate-x-1/2 w-[1100px] h-[650px] rounded-full opacity-40 dark:opacity-65 blur-[120px] transition-opacity duration-700"
