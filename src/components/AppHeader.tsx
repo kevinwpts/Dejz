@@ -53,7 +53,7 @@ export function AppHeader({
     <header
       className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out translate-y-0 opacity-100 ${
         !isAtTop || isProfileOrSettings
-          ? "bg-[#080A14]/85 backdrop-blur-xl border-b border-white/[0.035] shadow-xs"
+          ? "bg-[#080A14]/85 backdrop-blur-xl border-b border-white/[0.018] shadow-none"
           : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >
