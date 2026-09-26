@@ -707,7 +707,7 @@ export const translations: Record<Language, any> = {
     totalSpent: 'Totalt spenderat',
     result: 'Resultat',
     toThePot: 'Till potten',
-    totalRemaining: 'Totalt kvar',
+    totalRemaining: 'Kvar att spendera',
     salaryIn: 'Nästa lön',
     oneDay: 'dag',
     increaseBudget: 'Öka budgeten',

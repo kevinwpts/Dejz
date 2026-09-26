@@ -240,42 +240,41 @@ export function TodayView({
   const categoryBudgetData = useMemo(() => {
     if (!stats || !config?.categories || config.categories.length === 0) return [];
 
-    const categoriesWithBudget = config.categories.filter((c: any) => c.budget && Number(c.budget) > 0);
-    const pool = categoriesWithBudget.length > 0 ? categoriesWithBudget : config.categories;
+    const pool = config.categories;
 
-    return pool.map((cat: any, index: number) => {
-      const name = cat.name;
-      const spent = stats.periodTransactions
-        ? stats.periodTransactions
-            .filter((t: any) => t.category === name && t.type !== "income")
-            .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0)
-        : 0;
+    return pool
+      .map((cat: any, index: number) => {
+        const name = cat.name;
+        const spent = stats.periodTransactions
+          ? stats.periodTransactions
+              .filter((t: any) => t.category?.toLowerCase() === name.toLowerCase() && t.type !== "income")
+              .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0)
+          : 0;
 
-      const hasBudget = cat.budget !== undefined && cat.budget !== null && cat.budget !== "" && Number(cat.budget) > 0;
-      let budgetInKronor = 0;
+        const budgetValue = cat.budget !== undefined && cat.budget !== null 
+          ? Number(String(cat.budget).replace(/[^0-9.]/g, "")) 
+          : 0;
+        
+        const budgetInKronor = !isNaN(budgetValue) && budgetValue > 0 ? Math.round(budgetValue) : 0;
+        const hasBudget = budgetInKronor > 0;
+        const remaining = budgetInKronor - Math.round(spent);
+        const iconName = cat.icon || getCategoryIconName(name);
+        const isOverBudget = hasBudget && remaining < 0;
 
-      if (hasBudget) {
-        const rawBudget = Number(cat.budget);
-        budgetInKronor = Math.round(rawBudget);
-      }
-
-      const remaining = budgetInKronor - Math.round(spent);
-      const iconName = cat.icon || getCategoryIconName(name);
-      const isOverBudget = hasBudget && remaining < 0;
-
-      return {
-        name,
-        spent: Math.round(spent),
-        budget: cat.budget,
-        budgetInKronor,
-        hasBudget,
-        remaining,
-        isOverBudget,
-        color: cat.color,
-        iconName,
-        index,
-      };
-    });
+        return {
+          name,
+          spent: Math.round(spent),
+          budget: cat.budget,
+          budgetInKronor,
+          hasBudget,
+          remaining,
+          isOverBudget,
+          color: cat.color,
+          iconName,
+          index,
+        };
+      })
+      .filter((cat) => cat.budgetInKronor > 0 || cat.spent > 0);
   }, [stats, config?.categories]);
 
   if (!stats) return null;

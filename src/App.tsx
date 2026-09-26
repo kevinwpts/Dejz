@@ -3301,7 +3301,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden bg-[var(--bg-color)] bg-[var(--bg-gradient)] bg-fixed">
+    <div className={`min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden bg-[var(--bg-color)] ${activeTab === "today" ? "dark:bg-[radial-gradient(140%_90%_at_50%_-10%,#12183A_0%,#0A0E22_45%,#080A16_100%)]" : ""} bg-fixed transition-colors duration-500`}>
       {/* Ambient Blue / Indigo Background Atmosphere - Active ONLY on Home Tab ("today") */}
       <div 
         className={`fixed inset-0 pointer-events-none z-0 overflow-hidden select-none transition-opacity duration-500 ${
@@ -3588,6 +3588,7 @@ export default function App() {
               <BudgetView
                 stats={stats}
                 config={config}
+                allTransactions={transactions}
                 setConfig={(newConfig) => {
                   setConfig(newConfig);
                   const activeUserId = session?.user?.id || "demo-user";
