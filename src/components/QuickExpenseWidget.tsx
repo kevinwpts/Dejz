@@ -386,12 +386,38 @@ export function QuickExpenseWidget({
       {/* Single Input Field Bar with Microphone Integration */}
       <form onSubmit={handleSubmit} className="relative">
         <div
-          className={`relative flex items-center bg-[var(--surface-muted)]/70 dark:bg-white/5 border rounded-xl transition-all pl-3.5 pr-1.5 py-1.5 min-h-[46px] ${
+          className={`relative flex items-center bg-[var(--surface-muted)]/70 dark:bg-white/5 border rounded-xl transition-all pl-2 pr-1.5 py-1.5 min-h-[46px] ${
             isRecording
               ? 'border-rose-500/80 ring-2 ring-rose-500/25 bg-rose-500/5'
               : 'border-[var(--border-color)]/70 hover:border-[var(--border-color)] focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15'
           }`}
         >
+          {/* Microphone Button on the LEFT */}
+          <button
+            type="button"
+            onClick={toggleRecording}
+            disabled={isProcessing || isAudioTranscribing}
+            aria-label={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
+            title={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
+            className={`relative w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-bold flex items-center justify-center transition-all select-none cursor-pointer shrink-0 mr-1.5 ${
+              isRecording
+                ? 'bg-rose-500 text-white shadow-md shadow-rose-500/30 scale-105 animate-pulse'
+                : isAudioTranscribing
+                  ? 'bg-rose-500/15 text-rose-500 border border-rose-500/30'
+                  : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 active:scale-95'
+            }`}
+            id="quick_expense_mic_btn"
+          >
+            {isAudioTranscribing ? (
+              <Loader2 size={16} className="animate-spin text-rose-500" />
+            ) : isRecording ? (
+              <Square size={14} className="fill-current" />
+            ) : (
+              <Mic size={17} strokeWidth={2.3} />
+            )}
+          </button>
+
+          {/* Text Input in the middle */}
           <input
             ref={inputRef}
             type="text"
@@ -401,8 +427,8 @@ export function QuickExpenseWidget({
                   ? 'Speak now, e.g. "300 kr Coop"...'
                   : 'Prata nu, t.ex. "300 kr Coop"...'
                 : isEn
-                  ? 'e.g. 300kr Coop, or press mic to speak...'
-                  : 't.ex. 300kr Coop, eller tryck på micken...'
+                  ? 'e.g. 300kr Coop, or tap mic...'
+                  : 't.ex. 300kr Coop, eller tryck micken...'
             }
             value={inputText}
             onChange={(e) => {
@@ -416,52 +442,24 @@ export function QuickExpenseWidget({
             disabled={isProcessing || isAudioTranscribing}
           />
 
-          {/* Action Buttons: Microphone + Submit */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* Microphone Button */}
-            <button
-              type="button"
-              onClick={toggleRecording}
-              disabled={isProcessing || isAudioTranscribing}
-              aria-label={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
-              title={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
-              className={`relative w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-bold flex items-center justify-center transition-all select-none cursor-pointer ${
-                isRecording
-                  ? 'bg-rose-500 text-white shadow-md shadow-rose-500/30 scale-105 animate-pulse'
-                  : isAudioTranscribing
-                    ? 'bg-rose-500/15 text-rose-500 border border-rose-500/30'
-                    : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 active:scale-95'
-              }`}
-              id="quick_expense_mic_btn"
-            >
-              {isAudioTranscribing ? (
-                <Loader2 size={16} className="animate-spin text-rose-500" />
-              ) : isRecording ? (
-                <Square size={14} className="fill-current" />
-              ) : (
-                <Mic size={17} strokeWidth={2.3} />
-              )}
-            </button>
-
-            {/* Submit Action Button */}
-            <button
-              type="submit"
-              disabled={!inputText.trim() || isProcessing || isAudioTranscribing || isRecording}
-              aria-label={isEn ? 'Add' : 'Lägg till'}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-bold flex items-center justify-center shrink-0 transition-all select-none ${
-                inputText.trim() && !isProcessing && !isAudioTranscribing && !isRecording
-                  ? 'bg-accent text-white shadow-xs hover:opacity-90 active:scale-95 cursor-pointer'
-                  : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]/30 cursor-not-allowed border border-[var(--border-color)]/40'
-              }`}
-              id="quick_expense_submit_btn"
-            >
-              {isProcessing ? (
-                <Sparkles size={15} className="animate-spin text-white" />
-              ) : (
-                <Plus size={18} strokeWidth={2.5} />
-              )}
-            </button>
-          </div>
+          {/* Submit Action Button on the RIGHT */}
+          <button
+            type="submit"
+            disabled={!inputText.trim() || isProcessing || isAudioTranscribing || isRecording}
+            aria-label={isEn ? 'Add' : 'Lägg till'}
+            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg font-bold flex items-center justify-center shrink-0 transition-all select-none ${
+              inputText.trim() && !isProcessing && !isAudioTranscribing && !isRecording
+                ? 'bg-accent text-white shadow-xs hover:opacity-90 active:scale-95 cursor-pointer'
+                : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]/30 cursor-not-allowed border border-[var(--border-color)]/40'
+            }`}
+            id="quick_expense_submit_btn"
+          >
+            {isProcessing ? (
+              <Sparkles size={15} className="animate-spin text-white" />
+            ) : (
+              <Plus size={18} strokeWidth={2.5} />
+            )}
+          </button>
         </div>
       </form>
 

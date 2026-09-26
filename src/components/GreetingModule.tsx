@@ -252,6 +252,31 @@ export function GreetingModule({
         {/* Snabbutgift Input Bar with Microphone Integration */}
         <div className="space-y-2">
           <form onSubmit={handleQuickExpenseSubmit} className="relative flex items-center pt-0.5">
+            {/* Microphone Button on the LEFT */}
+            <button
+              type="button"
+              onClick={handleMicClick}
+              disabled={isSubmittingQuick || isAudioTranscribing}
+              aria-label={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
+              title={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
+              className={`absolute left-1.5 z-10 w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all cursor-pointer border select-none ${
+                isRecording
+                  ? 'bg-rose-500 text-white border-rose-400 animate-pulse shadow-md shadow-rose-500/30 scale-105'
+                  : isAudioTranscribing
+                    ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                    : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20 active:scale-95'
+              }`}
+            >
+              {isAudioTranscribing ? (
+                <Loader2 size={14} className="animate-spin text-rose-400" />
+              ) : isRecording ? (
+                <Square size={12} className="fill-current" />
+              ) : (
+                <Mic size={15} strokeWidth={2} />
+              )}
+            </button>
+
+            {/* Input Field with Left & Right Padding */}
             <input
               ref={quickInputRef}
               type="text"
@@ -263,50 +288,23 @@ export function GreetingModule({
                     ? 'Speak now, e.g. "300 kr Coop"...'
                     : 'Prata nu, t.ex. "300 kr Coop"...'
                   : isEn
-                    ? 'Quick expense: e.g. 45 Coop or tap mic...'
-                    : 'Snabbutgift: t.ex. 45 ICA eller tryck micken...'
+                    ? 'Quick expense: e.g. 45 Coop...'
+                    : 'Snabbutgift: t.ex. 45 ICA...'
               }
-              className={`w-full h-11 sm:h-12 pl-4 pr-24 rounded-2xl bg-white/[0.035] hover:bg-white/[0.05] focus:bg-white/[0.065] border backdrop-blur-[18px] text-xs sm:text-sm font-normal text-white placeholder-[#9CA6BC]/70 outline-none transition-all shadow-none ${
+              className={`w-full h-11 sm:h-12 pl-12 pr-12 rounded-2xl bg-white/[0.035] hover:bg-white/[0.05] focus:bg-white/[0.065] border backdrop-blur-[18px] text-xs sm:text-sm font-normal text-white placeholder-[#9CA6BC]/70 outline-none transition-all shadow-none ${
                 isRecording ? 'border-rose-500/80 ring-2 ring-rose-500/30' : 'border-white/[0.025] focus:border-white/[0.08]'
               }`}
             />
 
-            {/* Microphne & Submit Actions */}
-            <div className="absolute right-1.5 flex items-center gap-1.5">
-              {/* Microphone button */}
-              <button
-                type="button"
-                onClick={handleMicClick}
-                disabled={isSubmittingQuick || isAudioTranscribing}
-                aria-label={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
-                title={isRecording ? (isEn ? 'Stop listening' : 'Stoppa inspelning') : isEn ? 'Speak expense' : 'Prata in utgift'}
-                className={`w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all cursor-pointer border select-none ${
-                  isRecording
-                    ? 'bg-rose-500 text-white border-rose-400 animate-pulse shadow-md shadow-rose-500/30 scale-105'
-                    : isAudioTranscribing
-                      ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
-                      : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20 active:scale-95'
-                }`}
-              >
-                {isAudioTranscribing ? (
-                  <Loader2 size={14} className="animate-spin text-rose-400" />
-                ) : isRecording ? (
-                  <Square size={12} className="fill-current" />
-                ) : (
-                  <Mic size={15} strokeWidth={2} />
-                )}
-              </button>
-
-              {/* Submit button */}
-              <button
-                type="submit"
-                disabled={!quickText.trim() || isSubmittingQuick || isAudioTranscribing || isRecording}
-                className="w-8.5 h-8.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-20 active:scale-95 text-[#C7CDDC] flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.035]"
-                title={isEn ? 'Save quick expense' : 'Spara snabbutgift'}
-              >
-                <Zap size={14} strokeWidth={1.75} className="text-[#C7CDDC]" />
-              </button>
-            </div>
+            {/* Submit button on the RIGHT */}
+            <button
+              type="submit"
+              disabled={!quickText.trim() || isSubmittingQuick || isAudioTranscribing || isRecording}
+              className="absolute right-1.5 z-10 w-8.5 h-8.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-20 active:scale-95 text-[#C7CDDC] flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.035]"
+              title={isEn ? 'Save quick expense' : 'Spara snabbutgift'}
+            >
+              <Zap size={14} strokeWidth={1.75} className="text-[#C7CDDC]" />
+            </button>
           </form>
 
           {/* Voice Status & Feedback */}
