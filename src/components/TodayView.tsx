@@ -281,7 +281,7 @@ export function TodayView({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="space-y-8 relative font-sans pb-16 bg-[#080A14] min-h-screen"
+      className="space-y-8 relative font-sans pb-16"
     >
       {/* 1. Deep ambient midnight background with the 3 large diffuse radial gradients */}
       <div className="fixed inset-0 pointer-events-none -z-20 overflow-hidden bg-[#080A14]">
