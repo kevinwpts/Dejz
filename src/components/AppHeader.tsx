@@ -160,7 +160,7 @@ export function AppHeader({
             >
               <Search size={15} strokeWidth={2.2} className="shrink-0 text-[var(--text-secondary)]/70 group-hover:text-[var(--accent-color)] transition-colors" />
               <span className="text-[13px] sm:text-[13.5px] font-medium text-[var(--text-secondary)]/70 group-hover:text-[var(--text-secondary)] transition-colors truncate">
-                {_language === 'en' ? 'Search transactions, categories...' : 'Sök transaktioner, butiker...'}
+                {_language === 'en' ? 'Search' : 'Sök'}
               </span>
             </button>
           </div>

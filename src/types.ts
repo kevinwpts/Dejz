@@ -110,6 +110,22 @@ export interface Config {
   heroBackgroundImage?: string;
   userAgeGroup?: string;
   userGender?: string;
+  homeWidgets?: HomeWidgetConfig[];
+}
+
+export type HomeWidgetId =
+  | 'quick_expense'
+  | 'attention_items'
+  | 'monthly_pulse'
+  | 'savings_goals'
+  | 'daily_summary'
+  | 'category_budgets'
+  | 'recent_receipts';
+
+export interface HomeWidgetConfig {
+  id: HomeWidgetId;
+  enabled: boolean;
+  order?: number;
 }
 
 export interface SavingsGoal {

@@ -68,6 +68,7 @@ export const dataService = {
         : (localSavedConfig?.showFixedExpensesInCalendar !== undefined 
             ? localSavedConfig.showFixedExpensesInCalendar 
             : (profileData.show_fixed_expenses_in_today_view !== undefined ? profileData.show_fixed_expenses_in_today_view : false)),
+      homeWidgets: profileData.home_widgets || localSavedConfig?.homeWidgets || undefined,
     };
   },
 
@@ -163,6 +164,7 @@ export const dataService = {
       include_fixed_expenses_in_analysis: config.includeFixedExpensesInAnalysis,
       show_fixed_expenses_in_today_view: config.showFixedExpensesInTodayView,
       show_fixed_expenses_in_calendar: config.showFixedExpensesInCalendar,
+      home_widgets: config.homeWidgets,
       updated_at: new Date().toISOString()
     };
 

@@ -1,18 +1,19 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 import {
   Wallet,
-  Sparkles,
   RotateCcw,
   SlidersHorizontal,
   ChevronRight,
+  LayoutGrid,
 } from "lucide-react";
 import {
   Transaction,
   Config,
   Income,
   FixedExpense,
+  HomeWidgetConfig,
 } from "../types";
 import { TranslationKey } from "../i18n";
 import { TransactionItem } from "./TransactionItem";
@@ -21,6 +22,13 @@ import { GreetingModule } from "./GreetingModule";
 import { BudgetItemLogo } from "./BudgetItem";
 import { QuickExpenseWidget } from "./QuickExpenseWidget";
 import { PeriodTimeline } from "./PeriodTimeline";
+import { MonthlyPulseWidget } from "./widgets/MonthlyPulseWidget";
+import { SavingsGoalsWidget } from "./widgets/SavingsGoalsWidget";
+import { DailySummaryWidget } from "./widgets/DailySummaryWidget";
+import { CategoryBudgetsWidget } from "./widgets/CategoryBudgetsWidget";
+import { RecentReceiptsWidget } from "./widgets/RecentReceiptsWidget";
+import { WidgetManagerModal } from "./widgets/WidgetManagerModal";
+import { getResolvedHomeWidgets } from "../utils/widgetRegistry";
 import { ICON_MAP, getCategoryIconName, isEmojiString } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 
@@ -87,6 +95,24 @@ export function TodayView({
   onViewMonthlySaving,
   onUpdateConfig,
 }: TodayViewProps) {
+  const [isWidgetManagerOpen, setIsWidgetManagerOpen] = useState(false);
+
+  const resolvedWidgets = useMemo(() => {
+    return getResolvedHomeWidgets(config.homeWidgets);
+  }, [config.homeWidgets]);
+
+  const handleRemoveWidget = (widgetId: string) => {
+    if (!onUpdateConfig) return;
+    const current = getResolvedHomeWidgets(config.homeWidgets);
+    const updated = current.map((w) => (w.id === widgetId ? { ...w, enabled: false } : w));
+    onUpdateConfig({ ...config, homeWidgets: updated });
+  };
+
+  const handleSaveWidgets = (updatedWidgets: HomeWidgetConfig[]) => {
+    if (!onUpdateConfig) return;
+    onUpdateConfig({ ...config, homeWidgets: updatedWidgets });
+  };
+
   const normalizedSelectedDate = useMemo(() => {
     const d = new Date(selectedDate || new Date());
     d.setHours(0, 0, 0, 0);
@@ -98,14 +124,6 @@ export function TodayView({
   const isTodaySelected = useMemo(() => {
     return normalizedSelectedDate.toDateString() === new Date().toDateString();
   }, [normalizedSelectedDate]);
-
-  useEffect(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (!selectedDate || new Date(selectedDate).toDateString() !== today.toDateString()) {
-      setSelectedDate(new Date());
-    }
-  }, [setSelectedDate]);
 
   const handleGoToToday = () => {
     const now = new Date();
@@ -428,25 +446,211 @@ export function TodayView({
         </GreetingModule>
       </motion.div>
 
-      {/* Smart Quick Expense Box (Hero Action) */}
-      {onQuickAddExpense && (
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.11 }}
-        >
-          <QuickExpenseWidget
-            config={config}
-            selectedDate={selectedDate}
-            allTransactions={allTransactions || transactions}
-            onAddExpense={onQuickAddExpense}
-            onAddIncome={onAddIncome}
-            onOpenFullExpenseForm={() => onAddTransaction(selectedDate)}
-          />
-        </motion.div>
-      )}
+      {/* 2. CUSTOMIZABLE WIDGETS SECTION */}
+      <div className="space-y-3.5">
+        <AnimatePresence mode="popLayout">
+          {resolvedWidgets.map((widgetConfig) => {
+            if (!widgetConfig.enabled) return null;
 
-      {/* Period Timeline / Tidslinje under snabb utgift */}
+            if (widgetConfig.id === 'quick_expense' && onQuickAddExpense) {
+              return (
+                <motion.div
+                  key="quick_expense"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <QuickExpenseWidget
+                    config={config}
+                    selectedDate={selectedDate}
+                    allTransactions={allTransactions}
+                    onAddExpense={onQuickAddExpense}
+                    onAddIncome={onAddIncome}
+                    onOpenFullExpenseForm={() => onAddTransaction(selectedDate)}
+                  />
+                </motion.div>
+              );
+            }
+
+            if (widgetConfig.id === 'attention_items' && attentionItems.length > 0) {
+              return (
+                <motion.div
+                  key="attention_items"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-3 pt-1"
+                >
+                  <div className="flex items-center justify-between px-2">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">
+                        {t("actionRequired")}
+                      </h4>
+                      <div className="w-5 h-5 rounded-full bg-[#FFF3E3] text-[#E58A17] dark:bg-[#E58A17]/20 dark:text-[#FFA947] text-[10px] font-bold flex items-center justify-center">
+                        {attentionItems.length}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-hide px-2">
+                    {attentionItems.map((item, index) => {
+                      const isPast = item.deductionDay < new Date().getDate();
+                      return (
+                        <motion.button
+                          key={item.id}
+                          initial={{ opacity: 0, scale: 0.9, x: 20 }}
+                          animate={{ opacity: 1, scale: 1, x: 0 }}
+                          transition={{ delay: 0.1 + index * 0.04 }}
+                          onClick={() => onEditAttentionItem?.(item)}
+                          className="flex-shrink-0 flex flex-col gap-3 bg-[#FFF3E3]/35 dark:bg-[#161A22] border border-[#E58A17]/20 dark:border-[#E58A17]/30 p-5 rounded-[16px] hover:bg-[#FFF3E3]/65 dark:hover:bg-[#1D222C] transition-all group relative overflow-hidden active:scale-[0.98] min-w-[160px] shadow-xs cursor-pointer text-left"
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="w-10 h-10 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0 [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full [&_span]:text-lg">
+                              <BudgetItemLogo
+                                item={item}
+                                type={
+                                  item.budgetType === "income" ? "income" : "expense"
+                                }
+                                config={config}
+                              />
+                            </div>
+                            {isPast && (
+                              <div className="px-2.5 py-0.5 rounded-full bg-danger/10 text-[10px] font-semibold text-danger">
+                                {t("delayed")}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-start">
+                            <span className="text-[13px] font-medium text-[var(--text-primary)] tracking-tight leading-tight mb-1 truncate w-full text-left">
+                              {item.name}
+                            </span>
+                            <span className="text-[11px] font-normal text-[var(--text-secondary)] text-left">
+                              {t("fillInAmount")}
+                            </span>
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              );
+            }
+
+            if (widgetConfig.id === 'monthly_pulse') {
+              return (
+                <motion.div
+                  key="monthly_pulse"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <MonthlyPulseWidget
+                    stats={stats}
+                    config={config}
+                    onNavigate={onNavigate}
+                    onRemove={() => handleRemoveWidget('monthly_pulse')}
+                  />
+                </motion.div>
+              );
+            }
+
+            if (widgetConfig.id === 'savings_goals') {
+              return (
+                <motion.div
+                  key="savings_goals"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <SavingsGoalsWidget
+                    config={config}
+                    onNavigate={onNavigate}
+                    onRemove={() => handleRemoveWidget('savings_goals')}
+                  />
+                </motion.div>
+              );
+            }
+
+            if (widgetConfig.id === 'daily_summary') {
+              return (
+                <motion.div
+                  key="daily_summary"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <DailySummaryWidget
+                    stats={stats}
+                    config={config}
+                    selectedDate={selectedDate}
+                    onRemove={() => handleRemoveWidget('daily_summary')}
+                  />
+                </motion.div>
+              );
+            }
+
+            if (widgetConfig.id === 'category_budgets') {
+              return (
+                <motion.div
+                  key="category_budgets"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <CategoryBudgetsWidget
+                    config={config}
+                    allTransactions={allTransactions}
+                    stats={stats}
+                    onNavigate={onNavigate}
+                    onRemove={() => handleRemoveWidget('category_budgets')}
+                  />
+                </motion.div>
+              );
+            }
+
+            if (widgetConfig.id === 'recent_receipts') {
+              return (
+                <motion.div
+                  key="recent_receipts"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <RecentReceiptsWidget
+                    config={config}
+                    allTransactions={allTransactions}
+                    onNavigate={onNavigate}
+                    onViewTransaction={onViewTransaction}
+                    onRemove={() => handleRemoveWidget('recent_receipts')}
+                  />
+                </motion.div>
+              );
+            }
+
+            return null;
+          })}
+        </AnimatePresence>
+
+        {/* Customize Widgets Button */}
+        <div className="flex items-center justify-center pt-1 pb-0.5">
+          <button
+            type="button"
+            onClick={() => setIsWidgetManagerOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]/70 text-xs font-semibold transition-all shadow-2xs active:scale-95 cursor-pointer"
+          >
+            <LayoutGrid size={13} className="text-[var(--accent-color)]" />
+            <span>{config.language === 'en' ? 'Customize widgets' : 'Anpassa widgets'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 3. PERIOD TIMELINE - Strictly fixed */}
       {calendarDays && calendarDays.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 15 }}
@@ -464,68 +668,7 @@ export function TodayView({
         </motion.div>
       )}
 
-      {/* Attention Items / Budget Actions */}
-      {attentionItems.length > 0 && (
-        <div className="space-y-6 pt-1">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-          >
-            <div className="flex items-center justify-between px-2 mb-4">
-              <div className="flex items-center gap-2">
-                <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">
-                  {t("actionRequired")}
-                </h4>
-                <div className="w-5 h-5 rounded-full bg-[#FFF3E3] text-[#E58A17] dark:bg-[#E58A17]/20 dark:text-[#FFA947] text-[10px] font-bold flex items-center justify-center">
-                  {attentionItems.length}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-hide px-2">
-              {attentionItems.map((item, index) => {
-                const isPast = item.deductionDay < new Date().getDate();
-                return (
-                  <motion.button
-                    key={item.id}
-                    initial={{ opacity: 0, scale: 0.9, x: 20 }}
-                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                    transition={{ delay: 0.2 + index * 0.05 }}
-                    onClick={() => onEditAttentionItem?.(item)}
-                    className="flex-shrink-0 flex flex-col gap-3 bg-[#FFF3E3]/35 dark:bg-[#161A22] border border-[#E58A17]/20 dark:border-[#E58A17]/30 p-5 rounded-[16px] hover:bg-[#FFF3E3]/65 dark:hover:bg-[#1D222C] transition-all group relative overflow-hidden active:scale-[0.98] min-w-[160px] shadow-xs"
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="w-10 h-10 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0 [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full [&_span]:text-lg">
-                        <BudgetItemLogo
-                          item={item}
-                          type={
-                            item.budgetType === "income" ? "income" : "expense"
-                          }
-                          config={config}
-                        />
-                      </div>
-                      {isPast && (
-                        <div className="px-2.5 py-0.5 rounded-full bg-danger/10 text-[10px] font-semibold text-danger">
-                          {t("delayed")}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-start">
-                      <span className="text-[13px] font-medium text-[var(--text-primary)] tracking-tight leading-tight mb-1 truncate w-full text-left">
-                        {item.name}
-                      </span>
-                      <span className="text-[11px] font-normal text-[var(--text-secondary)] text-left">
-                        {t("fillInAmount")}
-                      </span>
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </motion.div>
-        </div>
-      )}
-
+      {/* 4. TRANSACTIONS FOR SELECTED DAY - Strictly fixed */}
       <div className="space-y-3.5 pt-2">
         <div className="flex items-center justify-between px-2 mb-3.5">
           <h3 className="text-[13px] sm:text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
@@ -583,8 +726,10 @@ export function TodayView({
                 animate={{ opacity: 1, scale: 1 }}
               >
                 <EmptyState
-                  icon={(allTransactions?.length || 0) === 0 && (incomes?.length || 0) === 0 && (fixedExpenses?.length || 0) === 0 ? Sparkles : Wallet}
-                  title={(allTransactions?.length || 0) === 0 && (incomes?.length || 0) === 0 && (fixedExpenses?.length || 0) === 0 ? t("noTransactions") : t("noTransactionsSubtle")}
+                  icon={Wallet}
+                  title={t("noTransactionsSubtle")}
+                  actionLabel={t("showAll")}
+                  onAction={() => onNavigate("transactions")}
                 />
               </motion.div>
             )}
@@ -621,6 +766,14 @@ export function TodayView({
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Widget Manager Modal */}
+      <WidgetManagerModal
+        isOpen={isWidgetManagerOpen}
+        onClose={() => setIsWidgetManagerOpen(false)}
+        config={config}
+        onSaveWidgets={handleSaveWidgets}
+      />
     </motion.div>
   );
 }

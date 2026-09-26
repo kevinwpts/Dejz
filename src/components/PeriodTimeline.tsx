@@ -25,12 +25,6 @@ export function PeriodTimeline({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // Drag-to-scroll state for desktop mouse users
-  const isDragging = useRef(false);
-  const startX = useRef(0);
-  const scrollLeftStart = useRef(0);
-  const dragDistance = useRef(0);
-
   const isEn = language === 'en';
   const locale = isEn ? 'en-US' : 'sv-SE';
 
@@ -152,40 +146,8 @@ export function PeriodTimeline({
     }
   };
 
-  // Mouse drag handlers for desktop
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollContainerRef.current) return;
-    isDragging.current = true;
-    dragDistance.current = 0;
-    startX.current = e.pageX - scrollContainerRef.current.offsetLeft;
-    scrollLeftStart.current = scrollContainerRef.current.scrollLeft;
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging.current || !scrollContainerRef.current) return;
-    const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX.current) * 1.3;
-    dragDistance.current = Math.abs(walk);
-    if (dragDistance.current > 4) {
-      e.preventDefault();
-      scrollContainerRef.current.scrollLeft = scrollLeftStart.current - walk;
-    }
-  };
-
-  const handleMouseUp = () => {
-    isDragging.current = false;
-  };
-
-  if (!calendarDays || calendarDays.length === 0) {
-    return null;
-  }
-
   // Handle direct click on a day card
   const handleSelect = (dayDate: any, dayTime: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    if (dragDistance.current > 6) {
-      dragDistance.current = 0;
-      return;
-    }
     e.preventDefault();
     e.stopPropagation();
 
@@ -215,11 +177,7 @@ export function PeriodTimeline({
       {/* Horizontal Scrollable Day Strip - Clean natural alignment */}
       <div
         ref={scrollContainerRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        className="relative flex items-center gap-1.5 overflow-x-auto py-1 px-1 no-scrollbar cursor-grab active:cursor-grabbing"
+        className="relative flex items-center gap-1.5 overflow-x-auto py-1 px-1 no-scrollbar select-none"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
