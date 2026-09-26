@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
-import { motion } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { feedback } from '../utils/feedback';
 
@@ -21,6 +20,12 @@ export function PeriodTimeline({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
   const isInitialMount = useRef(true);
+
+  // Mouse drag refs for desktop horizontal scroll support
+  const isMouseDownRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+  const hasDraggedRef = useRef(false);
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -137,7 +142,9 @@ export function PeriodTimeline({
       const targetTime = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate()).getTime();
       const el = dayRefs.current.get(targetTime);
 
-      feedback.selection();
+      if (typeof feedback.selection === 'function') feedback.selection();
+      else if (typeof feedback.tap === 'function') feedback.tap();
+
       onSelectDate(targetDate);
 
       if (el) {
@@ -146,12 +153,45 @@ export function PeriodTimeline({
     }
   };
 
+  // Mouse drag handlers for desktop mouse interaction
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    isMouseDownRef.current = true;
+    hasDraggedRef.current = false;
+    startXRef.current = e.pageX - container.offsetLeft;
+    scrollLeftRef.current = container.scrollLeft;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isMouseDownRef.current) return;
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - startXRef.current) * 1.5;
+    if (Math.abs(walk) > 4) {
+      hasDraggedRef.current = true;
+    }
+    container.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    isMouseDownRef.current = false;
+  };
+
   // Handle direct click on a day card
   const handleSelect = (dayDate: any, _dayTime: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
+    // If user was dragging on desktop, don't trigger date selection
+    if (hasDraggedRef.current) {
+      hasDraggedRef.current = false;
+      return;
+    }
+
     const targetEl = e.currentTarget;
-    feedback.selection();
+    if (typeof feedback.selection === 'function') feedback.selection();
+    else if (typeof feedback.tap === 'function') feedback.tap();
 
     const d = new Date(dayDate);
     const target = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0, 0);
@@ -179,7 +219,11 @@ export function PeriodTimeline({
       {/* Horizontal Scrollable Day Strip - with generous vertical padding so shadows are never clipped */}
       <div
         ref={scrollContainerRef}
-        className="relative flex items-center gap-2 overflow-x-auto py-3 sm:py-3.5 px-1.5 no-scrollbar select-none -my-2"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUpOrLeave}
+        onMouseLeave={handleMouseUpOrLeave}
+        className="relative flex items-center gap-2 overflow-x-auto py-3 sm:py-3.5 px-1.5 no-scrollbar select-none -my-2 active:cursor-grabbing"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -200,7 +244,7 @@ export function PeriodTimeline({
           const dayWeekdayShort = dayWeekday.slice(0, 3);
 
           return (
-            <motion.button
+            <button
               key={`${day.date}-${index}`}
               ref={(node) => {
                 if (node) {
@@ -246,7 +290,7 @@ export function PeriodTimeline({
                   className="w-1 h-1 rounded-full absolute bottom-1.5 bg-indigo-400 shadow-[0_0_6px_rgba(129,140,248,0.8)]"
                 />
               )}
-            </motion.button>
+            </button>
           );
         })}
 

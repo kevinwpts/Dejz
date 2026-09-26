@@ -318,7 +318,8 @@ textarea {
     background: var(--bg-gradient);     
     min-height: 100%;
     touch-action: pan-x pan-y;
-    overscroll-behavior: auto;
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -639,7 +640,8 @@ html, body {
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: auto;
+  overscroll-behavior-y: none;
+  overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
 }
 html::-webkit-scrollbar, body::-webkit-scrollbar {

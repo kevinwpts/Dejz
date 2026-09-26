@@ -17,6 +17,13 @@ export const feedback = {
     }
   },
 
+  // Selection tap for timeline / toggles
+  selection() {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(8);
+    }
+  },
+
   // Positive action (saving, income)
   success() {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
