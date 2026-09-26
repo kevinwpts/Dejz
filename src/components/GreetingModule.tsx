@@ -108,94 +108,94 @@ export function GreetingModule({
   const isNegative = (stats?.remainingPeriodCents || 0) < 0;
 
   return (
-    <div className="space-y-7 font-sans relative">
-      {/* 1. HERO AREA: Directly on background without card, container or border */}
+    <div className="space-y-8 font-sans relative">
+      {/* 1. HERO AREA: Pure typography & space resting directly on the ambient background */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="pt-4 sm:pt-6 pb-2 text-left space-y-2"
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="pt-3 sm:pt-6 pb-1 text-left space-y-2.5"
       >
-        {/* Uppercase Tracked Label */}
-        <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.18em] text-slate-400 block">
+        {/* Tracked Minimalist Uppercase Label */}
+        <span className="text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.2em] text-slate-400/90 block select-none">
           {t('totalRemaining')}
         </span>
 
-        {/* Massive Elegant Typography Amount */}
-        <div className="flex items-baseline gap-2">
+        {/* Large Elegant Typographic Amount */}
+        <div className="flex items-baseline gap-2.5">
           <AnimatedNumber 
             value={stats?.remainingPeriodCents || 0} 
-            className={`text-[52px] sm:text-[64px] md:text-[72px] leading-none font-black font-amount tabular-nums tracking-[-0.03em] ${
+            className={`text-[54px] sm:text-[66px] md:text-[76px] leading-[0.98] font-black font-amount tabular-nums tracking-[-0.035em] ${
               isNegative ? 'text-rose-400' : 'text-white'
             }`}
             formatter={(val) => formatAmount(val, language)}
           />
-          <span className={`text-[22px] sm:text-[26px] font-semibold tracking-normal ${
-            isNegative ? 'text-rose-400/80' : 'text-slate-400'
+          <span className={`text-[22px] sm:text-[26px] font-medium tracking-normal ${
+            isNegative ? 'text-rose-400/80' : 'text-slate-400/90'
           }`}>
             {currency}
           </span>
         </div>
 
-        {/* Days to payday - natural typographic line in the hero area (not a heavy card) */}
-        <div className="flex items-center gap-2 pt-1 text-slate-400 text-xs sm:text-[13px] font-medium">
-          <Calendar size={14} strokeWidth={1.75} className="text-slate-400" />
+        {/* Payday info - subtle natural typographic line */}
+        <div className="flex items-center gap-2 pt-0.5 text-slate-400/90 text-xs sm:text-[13px] font-medium">
+          <Calendar size={14} strokeWidth={1.75} className="text-slate-400/80 shrink-0" />
           <span>
             {effectiveRemainingDays} {isEn ? (effectiveRemainingDays === 1 ? 'day to payday' : 'days to payday') : (effectiveRemainingDays === 1 ? 'dag till nästa lön' : 'dagar till nästa lön')}
           </span>
         </div>
       </motion.div>
 
-      {/* 2. ACTIONS: Standalone, spacious, clean touch targets directly on the background */}
+      {/* 2. ACTIONS: Integrated, subtle frosted glass surfaces with soft specular edge highlight */}
       <motion.div
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.45, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
         className="space-y-3"
       >
-        {/* Row 1: The 3 Primary Actions (Utgift, Inkomst, Skanna kvitto) */}
+        {/* Primary Action Buttons (Utgift, Inkomst, Skanna) */}
         <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
-          {/* Utgift Button */}
+          {/* Utgift */}
           <button
             type="button"
             onClick={() => {
               feedback.tap();
               onAddExpense?.();
             }}
-            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.035] hover:bg-white/[0.07] active:scale-[0.98] border border-white/[0.07] backdrop-blur-md flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 shrink-0 group cursor-pointer text-xs sm:text-sm font-semibold text-slate-200 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
+            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.98] border border-white/[0.06] backdrop-blur-xl flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-slate-200 transition-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_6px_24px_rgba(0,0,0,0.2)]"
           >
-            <ArrowDownLeft size={17} strokeWidth={1.8} className="text-slate-300 group-hover:text-white transition-colors" />
+            <ArrowDownLeft size={16} strokeWidth={1.8} className="text-slate-300 group-hover:text-white transition-colors" />
             <span className="truncate">{isEn ? 'Expense' : 'Utgift'}</span>
           </button>
 
-          {/* Inkomst Button */}
+          {/* Inkomst */}
           <button
             type="button"
             onClick={() => {
               feedback.tap();
               onAddIncome?.();
             }}
-            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.035] hover:bg-white/[0.07] active:scale-[0.98] border border-white/[0.07] backdrop-blur-md flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 shrink-0 group cursor-pointer text-xs sm:text-sm font-semibold text-slate-200 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
+            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.98] border border-white/[0.06] backdrop-blur-xl flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-slate-200 transition-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_6px_24px_rgba(0,0,0,0.2)]"
           >
-            <ArrowUpRight size={17} strokeWidth={1.8} className="text-slate-300 group-hover:text-white transition-colors" />
+            <ArrowUpRight size={16} strokeWidth={1.8} className="text-slate-300 group-hover:text-white transition-colors" />
             <span className="truncate">{isEn ? 'Income' : 'Inkomst'}</span>
           </button>
 
-          {/* Skanna kvitto Button */}
+          {/* Skanna kvitto */}
           <button
             type="button"
             onClick={() => {
               feedback.tap();
               onAddExpense?.();
             }}
-            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.035] hover:bg-white/[0.07] active:scale-[0.98] border border-white/[0.07] backdrop-blur-md flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 shrink-0 group cursor-pointer text-xs sm:text-sm font-semibold text-slate-200 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
+            className="h-13 sm:h-14 px-3 sm:px-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.98] border border-white/[0.06] backdrop-blur-xl flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 group cursor-pointer text-xs sm:text-sm font-semibold text-slate-200 transition-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_6px_24px_rgba(0,0,0,0.2)]"
           >
-            <Camera size={17} strokeWidth={1.8} className="text-slate-300 group-hover:text-white transition-colors" />
-            <span className="truncate">{isEn ? 'Scan receipt' : 'Skanna'}</span>
+            <Camera size={16} strokeWidth={1.8} className="text-slate-300 group-hover:text-white transition-colors" />
+            <span className="truncate">{isEn ? 'Scan' : 'Skanna'}</span>
           </button>
         </div>
 
-        {/* Row 2: Snabbutgift standalone input bar */}
+        {/* Snabbutgift Input Bar */}
         <form onSubmit={handleQuickExpenseSubmit} className="relative flex items-center">
           <input
             ref={quickInputRef}
@@ -203,12 +203,12 @@ export function GreetingModule({
             value={quickText}
             onChange={(e) => setQuickText(e.target.value)}
             placeholder={isEn ? "Quick expense: e.g. 45 Coop" : "Snabbutgift: t.ex. 45 ICA"}
-            className="w-full h-12 pl-4 pr-12 rounded-2xl bg-white/[0.03] focus:bg-white/[0.06] border border-white/[0.07] focus:border-white/20 backdrop-blur-md text-xs sm:text-sm font-medium text-white placeholder-slate-500 outline-none transition-all shadow-[0_4px_16px_rgba(0,0,0,0.1)]"
+            className="w-full h-12 pl-4 pr-12 rounded-2xl bg-white/[0.025] hover:bg-white/[0.04] focus:bg-white/[0.055] border border-white/[0.06] focus:border-white/[0.15] backdrop-blur-xl text-xs sm:text-sm font-medium text-white placeholder-slate-500 outline-none transition-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05),0_4px_16px_rgba(0,0,0,0.15)]"
           />
           <button
             type="submit"
             disabled={!quickText.trim() || isSubmittingQuick}
-            className="absolute right-1.5 w-9 h-9 rounded-xl bg-white/[0.07] hover:bg-white/[0.14] disabled:opacity-20 active:scale-95 text-slate-200 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.08]"
+            className="absolute right-1.5 w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-20 active:scale-95 text-slate-200 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-white/[0.06]"
             title={isEn ? "Save quick expense" : "Spara snabbutgift"}
           >
             <Zap size={14} strokeWidth={1.8} className="text-slate-300" />
@@ -216,7 +216,6 @@ export function GreetingModule({
         </form>
       </motion.div>
 
-      {/* 3. Budget Categories passed as standalone section */}
       {children}
     </div>
   );

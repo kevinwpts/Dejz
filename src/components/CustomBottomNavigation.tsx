@@ -40,7 +40,7 @@ export function CustomBottomNavigation({
   return (
     <div className="fixed bottom-[calc(6px+env(safe-area-inset-bottom,0px))] sm:bottom-3.5 left-0 right-0 z-40 px-3 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
-        className="w-[94%] sm:w-[86%] max-w-[430px] sm:max-w-[450px] h-[64px] sm:h-[68px] rounded-full px-2 sm:px-3 bg-[var(--surface-color)]/95 text-[var(--text-primary)] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex items-center justify-between pointer-events-auto border border-[var(--border-color)]"
+        className="w-[94%] sm:w-[86%] max-w-[430px] sm:max-w-[450px] h-[64px] sm:h-[68px] rounded-full px-2 sm:px-3 bg-white/[0.04] dark:bg-white/[0.04] text-slate-200 backdrop-blur-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_12px_40px_rgba(0,0,0,0.4)] flex items-center justify-between pointer-events-auto border border-white/[0.08]"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 28 }}
@@ -121,18 +121,18 @@ function NavItem({
       aria-label={label}
       className={`flex-1 flex flex-col items-center justify-center py-1 px-0.5 transition-all duration-200 active:scale-95 cursor-pointer select-none rounded-2xl ${
         isActive
-          ? 'text-[var(--text-primary)] font-semibold'
-          : 'text-[var(--text-secondary)] opacity-60 hover:opacity-100 font-medium'
+          ? 'text-white font-semibold'
+          : 'text-slate-400 opacity-70 hover:opacity-100 font-medium'
       }`}
     >
       <Icon 
-        size={20} 
-        strokeWidth={isActive ? (fillOnActive ? 1.5 : 2.2) : 1.8} 
+        size={19} 
+        strokeWidth={isActive ? (fillOnActive ? 1.6 : 2.0) : 1.75} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
         className="transition-transform duration-200 mb-0.5"
       />
-      <span className={`text-[10px] sm:text-[11px] leading-tight text-center tracking-tight truncate max-w-[62px] sm:max-w-[70px] ${
-        isActive ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-secondary)] font-medium'
+      <span className={`text-[10px] sm:text-[10.5px] leading-tight text-center tracking-tight truncate max-w-[62px] sm:max-w-[70px] ${
+        isActive ? 'text-white font-semibold' : 'text-slate-400 font-medium'
       }`}>
         {label}
       </span>

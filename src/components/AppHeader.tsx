@@ -87,12 +87,8 @@ export function AppHeader({
               {/* Profile Avatar Trigger Button */}
               <button
                 onClick={() => onNavigate("profile")}
-                className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-[var(--border-color)]/70 shadow-2xs ${
-                  activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
-                } ${
-                  useWhiteHeader 
-                    ? "bg-white/15 hover:bg-white/20 text-white" 
-                    : "bg-[var(--surface-muted)] hover:bg-[var(--surface-muted)]/80 text-[var(--text-primary)]"
+                className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-white/[0.08] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_4px_12px_rgba(0,0,0,0.15)] bg-white/[0.035] hover:bg-white/[0.07] text-slate-200 ${
+                  activeTab === "profile" ? "ring-2 ring-indigo-400/50" : ""
                 }`}
                 aria-label="Profil"
               >
@@ -104,7 +100,7 @@ export function AppHeader({
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <User size={19} strokeWidth={2.2} />
+                  <User size={18} strokeWidth={1.8} className="text-slate-300" />
                 )}
               </button>
             </>
@@ -123,11 +119,11 @@ export function AppHeader({
             <button
               type="button"
               onClick={() => onNavigate("search")}
-              className="w-full h-10 sm:h-[42px] px-3.5 sm:px-4 rounded-full flex items-center gap-2.5 bg-[var(--surface-color)]/95 hover:bg-[var(--surface-color)] dark:bg-white/7 dark:hover:bg-white/11 border border-[var(--border-color)]/80 hover:border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer shadow-2xs group text-left select-none"
+              className="w-full h-10 sm:h-[42px] px-3.5 sm:px-4 rounded-full flex items-center gap-2.5 bg-white/[0.03] hover:bg-white/[0.055] border border-white/[0.06] hover:border-white/[0.1] text-slate-400 hover:text-slate-200 backdrop-blur-xl transition-all cursor-pointer shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] group text-left select-none"
               aria-label="Sök"
             >
-              <Search size={17} strokeWidth={2.2} className="shrink-0 text-[var(--text-secondary)]/75 group-hover:text-[var(--accent-color)] transition-colors" />
-              <span className="text-[14px] sm:text-[14.5px] font-medium text-[var(--text-secondary)]/75 group-hover:text-[var(--text-secondary)] transition-colors truncate">
+              <Search size={16} strokeWidth={1.8} className="shrink-0 text-slate-400 group-hover:text-slate-200 transition-colors" />
+              <span className="text-[13.5px] sm:text-[14px] font-medium text-slate-400 group-hover:text-slate-200 transition-colors truncate">
                 {_language === 'en' ? 'Search' : 'Sök'}
               </span>
             </button>
