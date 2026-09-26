@@ -186,10 +186,11 @@ export const dataService = {
     
     // Robust fallback if user's Supabase profiles table is missing newly added columns
     let attempts = 0;
-    while (error && (error as any).code === '42703' && attempts < 5) {
+    while (error && (error as any).code === '42703' && attempts < 35) {
       attempts++;
       const match = error.message?.match(/column "([^"]+)"/);
       if (match && match[1] && match[1] in payload) {
+        console.warn(`[Supabase saveSettings] Column "${match[1]}" missing. Stripping and retrying (${attempts}/35)...`);
         delete payload[match[1]];
         const retryResult = await supabase.from('profiles').upsert(payload);
         error = retryResult.error;
