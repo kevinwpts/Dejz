@@ -644,7 +644,7 @@ export function BudgetView({
         </span>
         <div className="flex items-baseline gap-2">
           <AnimatedNumber 
-            value={stats.disposablePot || 0} 
+            value={Math.round(totalIncomeSum - totalFixedSum)} 
             className="text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums text-white tracking-tight"
             formatter={(val) => formatAmount(val, config.language)}
           />

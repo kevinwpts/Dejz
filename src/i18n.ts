@@ -20,7 +20,7 @@ export const translations: Record<Language, any> = {
     tomorrowLabel: 'Imorgon',
     log: 'Historik',
     transactions: 'Transaktioner',
-    analysis: 'Översikt',
+    analysis: 'Analys',
     budget: 'Budget',
     profile: 'Profil',
     settings: 'Inställningar',

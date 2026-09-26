@@ -340,7 +340,7 @@ export function TodayView({
         <div className="absolute top-[52%] left-[-15%] w-[600px] sm:w-[700px] h-[600px] sm:h-[700px] rounded-full bg-[radial-gradient(circle,rgba(109,40,217,0.08)_0%,rgba(8,10,20,0)_70%)] blur-[100px]" />
       </div>
 
-      {/* 1. HERO AREA & ACTIONS (Directly on canvas) */}
+      {/* 1. HERO AREA & ACTIONS (Directly on canvas, with nested budget categories) */}
       <GreetingModule
         userName={userName}
         availableForD={todayData?.availableForD || stats?.availableForD || 0}
@@ -370,146 +370,134 @@ export function TodayView({
         onQuickAddExpense={onQuickAddExpense}
         onOpenCalculator={onOpenCalculator}
         allTransactions={allTransactions}
-      />
+        categoryBudgets={
+          <div className="pt-1.5 pb-2">
 
-      {/* 2. BUDGETKATEGORIER (Glass cards: rgba(255,255,255,0.045), blur 20px, border 0.07, top highlight) */}
-      <div className="space-y-3.5 pt-1">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] select-none">
-            {lang === 'en' ? 'Category Budgets' : 'Budgetkategorier'}
-          </span>
-          <button
-            type="button"
-            onClick={() => onNavigate("budget", "category-budgets")}
-            className="text-xs font-medium text-[#9CA6BC] hover:text-white transition-colors cursor-pointer flex items-center gap-1 group"
-          >
-            <span>{lang === 'en' ? 'Manage' : 'Hantera'}</span>
-            <ChevronRight size={13} className="group-hover:translate-x-0.5 transition-transform text-[#9CA6BC] group-hover:text-white" />
-          </button>
-        </div>
 
-        {categoryBudgetData.length > 0 ? (
-          <div className="flex items-center gap-3.5 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
-            {categoryBudgetData.map((cat, index) => {
-              const Icon = ICON_MAP[cat.iconName];
-              const spentPct = cat.budgetInKronor > 0 
-                ? Math.min(100, Math.round((cat.spent / cat.budgetInKronor) * 100))
-                : 0;
+            {categoryBudgetData.length > 0 ? (
+              <div className="flex items-center gap-3.5 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
+                {categoryBudgetData.map((cat, index) => {
+                  const Icon = ICON_MAP[cat.iconName];
+                  const spentPct = cat.budgetInKronor > 0 
+                    ? Math.min(100, Math.round((cat.spent / cat.budgetInKronor) * 100))
+                    : 0;
 
-              return (
+                  return (
+                    <motion.button
+                      key={cat.name}
+                      initial={{ opacity: 0, scale: 0.96, x: 8 }}
+                      animate={{ opacity: 1, scale: 1, x: 0 }}
+                      transition={{ delay: 0.08 + index * 0.02 }}
+                      onClick={() => onNavigate("analysis")}
+                      className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.065] backdrop-blur-[20px] transition-all group text-left active:scale-[0.98] min-w-[155px] sm:min-w-[170px] max-w-[185px] cursor-pointer snap-start border border-white/[0.03] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]"
+                    >
+                      {/* Top Row: Minimalist Monochrome Icon (#C7CDDC, stroke 1.75, bg-white/[0.04]) + Category Name (Medium 500) */}
+                      <div className="flex items-center gap-2.5 mb-3.5">
+                        <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                          {isEmojiString(cat.iconName) ? (
+                            <span className="text-[14px] leading-none">{cat.iconName}</span>
+                          ) : Icon ? (
+                            <Icon size={15} strokeWidth={1.75} className="text-[#C7CDDC]" />
+                          ) : (
+                            <div className="w-2 h-2 rounded-full bg-[#C7CDDC]" />
+                          )}
+                        </div>
+
+                        <span className="text-xs sm:text-[13px] font-medium text-[#C7CDDC] group-hover:text-white transition-colors tracking-tight truncate flex-1">
+                          {cat.name}
+                        </span>
+                      </div>
+
+                      {/* Bottom Row: Amount Remaining (Semibold 600) & Progress Bar */}
+                      <div className="flex flex-col w-full space-y-1.5">
+                        <div className="flex items-baseline justify-between gap-1">
+                          {cat.hasBudget ? (
+                            cat.isOverBudget ? (
+                              <span className="text-[14px] sm:text-[15px] font-semibold text-rose-400 font-amount tabular-nums">
+                                +{formatAmount(Math.abs(cat.remaining), lang)} kr
+                              </span>
+                            ) : (
+                              <span className="text-[14px] sm:text-[15px] font-semibold text-white font-amount tabular-nums">
+                                {formatAmount(cat.remaining, lang)} kr
+                              </span>
+                            )
+                          ) : (
+                            <span className="text-[14px] sm:text-[15px] font-semibold text-[#C7CDDC] font-amount tabular-nums">
+                              {formatAmount(cat.spent, lang)} kr
+                            </span>
+                          )}
+
+                          <span className="text-[11px] font-normal text-[#9CA6BC] shrink-0">
+                            {cat.hasBudget 
+                              ? (cat.isOverBudget 
+                                  ? (lang === 'en' ? 'over' : 'över') 
+                                  : (lang === 'en' ? 'left' : 'kvar')) 
+                              : (lang === 'en' ? 'spent' : 'använt')}
+                          </span>
+                        </div>
+
+                        {cat.hasBudget && (
+                          <div className="w-full h-1 bg-white/[0.07] rounded-full overflow-hidden mt-0.5">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                cat.isOverBudget ? 'bg-rose-500' : 'bg-[#8B9CFF]'
+                              }`}
+                              style={{ width: `${spentPct}%` }} 
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </motion.button>
+                  );
+                })}
+
+                {/* Direct shortcut card at the end of carousel */}
                 <motion.button
-                  key={cat.name}
                   initial={{ opacity: 0, scale: 0.96, x: 8 }}
                   animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 0.08 + index * 0.02 }}
-                  onClick={() => onNavigate("analysis")}
-                  className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.065] backdrop-blur-[20px] transition-all group text-left active:scale-[0.98] min-w-[155px] sm:min-w-[170px] max-w-[185px] cursor-pointer snap-start border border-white/[0.03] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]"
+                  transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
+                  onClick={() => onNavigate("budget", "category-budgets")}
+                  className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[135px] max-w-[145px] cursor-pointer snap-start border border-dashed border-white/[0.05]"
                 >
-                  {/* Top Row: Minimalist Monochrome Icon (#C7CDDC, stroke 1.75, bg-white/[0.04]) + Category Name (Medium 500) */}
-                  <div className="flex items-center gap-2.5 mb-3.5">
-                    <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      {isEmojiString(cat.iconName) ? (
-                        <span className="text-[14px] leading-none">{cat.iconName}</span>
-                      ) : Icon ? (
-                        <Icon size={15} strokeWidth={1.75} className="text-[#C7CDDC]" />
-                      ) : (
-                        <div className="w-2 h-2 rounded-full bg-[#C7CDDC]" />
-                      )}
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.035] text-[#C7CDDC] group-hover:text-white border border-white/[0.035] shrink-0">
+                      <SlidersHorizontal size={14} strokeWidth={1.75} />
                     </div>
-
-                    <span className="text-xs sm:text-[13px] font-medium text-[#C7CDDC] group-hover:text-white transition-colors tracking-tight truncate flex-1">
-                      {cat.name}
+                    <span className="text-xs font-medium text-[#C7CDDC] group-hover:text-white transition-colors truncate">
+                      {lang === "en" ? "Manage" : "Hantera"}
                     </span>
                   </div>
-
-                  {/* Bottom Row: Amount Remaining (Semibold 600) & Progress Bar */}
-                  <div className="flex flex-col w-full space-y-1.5">
-                    <div className="flex items-baseline justify-between gap-1">
-                      {cat.hasBudget ? (
-                        cat.isOverBudget ? (
-                          <span className="text-[14px] sm:text-[15px] font-semibold text-rose-400 font-amount tabular-nums">
-                            +{formatAmount(Math.abs(cat.remaining), lang)} kr
-                          </span>
-                        ) : (
-                          <span className="text-[14px] sm:text-[15px] font-semibold text-white font-amount tabular-nums">
-                            {formatAmount(cat.remaining, lang)} kr
-                          </span>
-                        )
-                      ) : (
-                        <span className="text-[14px] sm:text-[15px] font-semibold text-[#C7CDDC] font-amount tabular-nums">
-                          {formatAmount(cat.spent, lang)} kr
-                        </span>
-                      )}
-
-                      <span className="text-[11px] font-normal text-[#9CA6BC] shrink-0">
-                        {cat.hasBudget 
-                          ? (cat.isOverBudget 
-                              ? (lang === 'en' ? 'over' : 'över') 
-                              : (lang === 'en' ? 'left' : 'kvar')) 
-                          : (lang === 'en' ? 'spent' : 'använt')}
-                      </span>
-                    </div>
-
-                    {cat.hasBudget && (
-                      <div className="w-full h-1 bg-white/[0.07] rounded-full overflow-hidden mt-0.5">
-                        <div 
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            cat.isOverBudget ? 'bg-rose-500' : 'bg-[#8B9CFF]'
-                          }`}
-                          style={{ width: `${spentPct}%` }} 
-                        />
-                      </div>
-                    )}
+                  <div className="flex items-center justify-between text-[11px] font-normal text-[#9CA6BC]">
+                    <span>{lang === "en" ? "Edit limits" : "Justera"}</span>
+                    <span>→</span>
                   </div>
                 </motion.button>
-              );
-            })}
-
-            {/* Direct shortcut card at the end of carousel */}
-            <motion.button
-              initial={{ opacity: 0, scale: 0.96, x: 8 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
-              onClick={() => onNavigate("budget", "category-budgets")}
-              className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[135px] max-w-[145px] cursor-pointer snap-start border border-dashed border-white/[0.05]"
-            >
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.035] text-[#C7CDDC] group-hover:text-white border border-white/[0.035] shrink-0">
-                  <SlidersHorizontal size={14} strokeWidth={1.75} />
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onNavigate("budget", "category-budgets")}
+                className="w-full p-4 rounded-2xl border border-dashed border-white/[0.06] hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.045] transition-all flex items-center justify-between text-left group cursor-pointer text-white"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.04] flex items-center justify-center text-[#C7CDDC] group-hover:text-white transition-colors">
+                    <SlidersHorizontal size={15} strokeWidth={1.75} />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm font-semibold text-white leading-snug">
+                      {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
+                    </p>
+                    <p className="text-[11px] font-normal text-[#9CA6BC]">
+                      {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
+                    </p>
+                  </div>
                 </div>
-                <span className="text-xs font-medium text-[#C7CDDC] group-hover:text-white transition-colors truncate">
-                  {lang === "en" ? "Manage" : "Hantera"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-[11px] font-normal text-[#9CA6BC]">
-                <span>{lang === "en" ? "Edit limits" : "Justera"}</span>
-                <span>→</span>
-              </div>
-            </motion.button>
+                <ChevronRight size={15} className="text-[#9CA6BC] group-hover:text-white transition-colors" />
+              </button>
+            )}
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => onNavigate("budget", "category-budgets")}
-            className="w-full p-4 rounded-2xl border border-dashed border-white/[0.06] hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.045] transition-all flex items-center justify-between text-left group cursor-pointer text-white"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.04] flex items-center justify-center text-[#C7CDDC] group-hover:text-white transition-colors">
-                <SlidersHorizontal size={15} strokeWidth={1.75} />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm font-semibold text-white leading-snug">
-                  {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
-                </p>
-                <p className="text-[11px] font-normal text-[#9CA6BC]">
-                  {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
-                </p>
-              </div>
-            </div>
-            <ChevronRight size={15} className="text-[#9CA6BC] group-hover:text-white transition-colors" />
-          </button>
-        )}
-      </div>
+        }
+      />
 
       {/* 3. PERIOD TIMELINE */}
       {calendarDays && calendarDays.length > 0 && (

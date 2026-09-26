@@ -82,11 +82,55 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
   }, [stats?.periodEnd]);
 
   const dailyAvg = daysElapsed > 0 ? Math.round(totalSpent / daysElapsed) : 0;
-  const remainingPerDay = Math.round(stats.remainingPeriodCents / daysRemaining);
+  const _remainingPerDay = stats ? Math.round(stats.remainingPeriodCents / daysRemaining) : 0;
+  const disposablePot = stats ? stats.disposablePot : 0;
+
+  const largestCategory = useMemo(() => {
+    const categoryMap: { [key: string]: number } = {};
+
+    // 1. Add variable expenses
+    if (filteredExpenses) {
+      filteredExpenses.forEach((e) => {
+        if (e.type === 'income') return;
+        if (e.category === 'savings_pot_increase') return;
+        if (e.type === 'expense') {
+          const catName = e.category ? e.category.trim() : "";
+          if (catName) {
+            categoryMap[catName] = (categoryMap[catName] || 0) + (Number(e.amount) || 0);
+          }
+        }
+      });
+    }
+
+    // 2. Add fixed expenses
+    if (fixedExpenses && stats?.periodId) {
+      fixedExpenses.forEach((fe) => {
+        const isPaid = fe.paidInPeriods?.[stats?.periodId];
+        if (isPaid || (!isPaid && fe.deductionDay < new Date().getDate())) {
+          const catName = fe.category ? fe.category.trim() : "Fasta utgifter";
+          categoryMap[catName] = (categoryMap[catName] || 0) + (Number(fe.amount) || 0);
+        }
+      });
+    }
+
+    // Find the largest category
+    let maxCat = "";
+    let maxVal = 0;
+    Object.entries(categoryMap).forEach(([catName, val]) => {
+      const valNum = Number(val) || 0;
+      if (valNum > maxVal) {
+        maxVal = valNum;
+        maxCat = catName;
+      }
+    });
+
+    return { name: maxCat, amount: maxVal };
+  }, [filteredExpenses, fixedExpenses, stats?.periodId]);
+
+  const budgetUsedPct = (stats && stats.totalIncome > 0) ? Math.round((totalSpent / stats.totalIncome) * 100) : 0;
+  const _budgetLeftPct = stats ? Math.max(0, Math.min(100, Math.round((stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) * 100))) : 0;
 
   if (!stats) return null;
-
-  const disposablePot = stats.disposablePot;
 
   if (stats.isPastPeriod) {
     const result = Math.round(stats.remainingPeriodCents);
@@ -154,69 +198,73 @@ export function BudgetSummaryModule({ stats, config, transactions, fixedExpenses
     );
   }
 
-  const budgetLeftPct = Math.max(0, Math.min(100, Math.round((stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) * 100)));
-
   return (
-    <div className="space-y-5 font-sans">
-      {/* Primary Hero Metric: TOTALT KVAR directly on background */}
-      <div className="py-2 text-left space-y-1.5">
-        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
-          TOTALT KVAR
+    <div className="space-y-6 font-sans">
+      {/* SPENDERAT DENNA PERIOD */}
+      <div className="py-2 text-left space-y-1">
+        <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
+          SPENDERAT DENNA PERIOD
         </span>
         <div className="flex items-baseline gap-2">
-          <span className={`text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums tracking-tight ${
-            stats.remainingPeriodCents < 0 ? 'text-rose-400' : 'text-white'
-          }`}>
-            {Math.round(Math.abs(stats.remainingPeriodCents)).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
+          <span className="text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums text-white tracking-tight">
+            {formatAmount(Math.round(totalSpent), config.language)}
           </span>
           <span className="text-[19px] sm:text-[21px] font-normal text-[#9CA6BC]">
-            {config.currency}
+            {config.currency || "kr"}
           </span>
         </div>
       </div>
 
-      {/* Secondary 3-column stats directly against background without cards or borders */}
-      <div className="grid grid-cols-3 gap-3 px-1 py-1">
-        <div>
-          <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
-            {t('spent') || 'Spenderat'}
+      {/* Grid for other indicators */}
+      <div className="grid grid-cols-3 gap-4 pt-1">
+        {/* Snitt per dag */}
+        <div className="space-y-1 text-left">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9CA6BC] block">
+            Snitt per dag
           </span>
-          <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-white">
-            −{formatAmount(Math.round(totalSpent), config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
-          </span>
+          <div className="text-sm sm:text-base font-bold font-amount tabular-nums text-white">
+            {formatAmount(dailyAvg, config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || "kr"}</span>
+          </div>
         </div>
 
-        <div>
-          <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
-            {t('averagePerDay') || 'Spenderat per dag'}
+        {/* Största kategori */}
+        <div className="space-y-1 text-left col-span-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9CA6BC] block">
+            Största kategori
           </span>
-          <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-white">
-            −{formatAmount(dailyAvg, config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
-          </span>
+          <div className="text-xs sm:text-sm font-bold text-white truncate leading-tight">
+            {largestCategory.name ? (
+              <>
+                <span className="capitalize block truncate">{largestCategory.name}</span>
+                <span className="text-[#9CA6BC] font-normal block text-[11px] mt-0.5 font-amount tabular-nums">
+                  {formatAmount(largestCategory.amount, config.language)} {config.currency || "kr"}
+                </span>
+              </>
+            ) : (
+              <span className="text-[#9CA6BC] font-normal">—</span>
+            )}
+          </div>
         </div>
 
-        <div>
-          <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
-            Kvar per dag
+        {/* Budget använd */}
+        <div className="space-y-1 text-left">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#9CA6BC] block">
+            Budget använd
           </span>
-          <span className={`text-sm sm:text-base font-semibold font-amount tabular-nums ${remainingPerDay < 0 ? 'text-rose-400' : 'text-white'}`}>
-            {formatAmount(remainingPerDay, config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
-          </span>
+          <div className="text-sm sm:text-base font-bold font-amount tabular-nums text-white">
+            {budgetUsedPct}%
+          </div>
         </div>
       </div>
 
-      {/* Integrated Clean Progress Bar */}
-      <div className="pt-1 pb-1">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">{t('budgetLeft')}</span>
-          <span className={`text-xs sm:text-sm font-semibold font-amount tabular-nums ${budgetLeftPct < 10 ? 'text-rose-400' : 'text-white'}`}>
-            {budgetLeftPct}%
-          </span>
-        </div>
-        <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden">
+      {/* Clean progress bar for budget used */}
+      <div className="pt-1">
+        <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
           <div 
-            className={`h-full rounded-full transition-all duration-700 ease-out ${budgetLeftPct < 10 ? 'bg-rose-500' : 'bg-[#8B9CFF]'}`} 
-            style={{ width: `${budgetLeftPct}%` }}
+            className={`h-full rounded-full transition-all duration-700 ease-out ${
+              budgetUsedPct > 90 ? "bg-rose-500" : "bg-indigo-400"
+            }`} 
+            style={{ width: `${Math.min(100, budgetUsedPct)}%` }}
           />
         </div>
       </div>

@@ -44,6 +44,7 @@ interface GreetingModuleProps {
   onOpenCalculator?: () => void;
   allTransactions?: any[];
   children?: React.ReactNode;
+  categoryBudgets?: React.ReactNode;
 }
 
 export function GreetingModule({
@@ -58,7 +59,8 @@ export function GreetingModule({
   onAddIncome,
   onQuickAddExpense,
   allTransactions = [],
-  children
+  children,
+  categoryBudgets
 }: GreetingModuleProps) {
   const isEn = language === 'en';
   const [quickText, setQuickText] = useState('');
@@ -310,6 +312,8 @@ export function GreetingModule({
           </span>
         </div>
       </motion.div>
+
+      {categoryBudgets}
 
       {/* 2. ACTIONS: 3 Round translucent icon buttons with labels underneath + Snabbutgift */}
       <motion.div
