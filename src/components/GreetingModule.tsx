@@ -8,6 +8,7 @@ import { DejziAvatar } from './DejziSummaryModal';
 import { parseQuickExpense } from '../utils/expenseAiParser';
 import { feedback } from '../utils/feedback';
 import { useVoiceExpense } from '../hooks/useVoiceExpense';
+import { supabase } from '../supabaseClient';
 
 export { DejziAvatar };
 
@@ -65,6 +66,7 @@ export function GreetingModule({
   const [successMsg, setSuccessMsg] = useState<{ text: string; transcript?: string } | null>(null);
   const quickInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [isScanningReceipt, setIsScanningReceipt] = useState(false);
 
   const handleKvittoClick = () => {
     feedback.tap();
@@ -75,10 +77,101 @@ export function GreetingModule({
     }
   };
 
-  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const prepareReceiptImage = async (file: File): Promise<{ base64: string; mimeType: string }> => {
+    try {
+      const resized = await new Promise<{ base64: string; mimeType: string }>((resolve, reject) => {
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.onload = () => {
+          try {
+            URL.revokeObjectURL(objectUrl);
+            const maxDimension = 1920;
+            let { width, height } = img;
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              } else {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('Canvas context unavailable');
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+            const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+            resolve({ base64, mimeType: 'image/jpeg' });
+          } catch (err) {
+            URL.revokeObjectURL(objectUrl);
+            reject(err);
+          }
+        };
+        img.onerror = (err) => {
+          URL.revokeObjectURL(objectUrl);
+          reject(err);
+        };
+        img.src = objectUrl;
+      });
+      return resized;
+    } catch {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const res = reader.result as string;
+          resolve(res.includes(',') ? res.split(',')[1] : res);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      return { base64, mimeType: file.type || 'image/jpeg' };
+    }
+  };
+
+  const handleCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && onAddExpense) {
-      onAddExpense();
+    if (!file) return;
+
+    setIsScanningReceipt(true);
+    setSuccessMsg({ text: isEn ? 'Scanning receipt & saving...' : '📷 Läser av kvitto och sparar...' });
+    feedback.tap();
+
+    try {
+      const { base64, mimeType } = await prepareReceiptImage(file);
+      const { data, error } = await supabase.functions.invoke('scan-receipt', {
+        body: { image: base64, mimeType },
+      });
+
+      if (error || !data || !data.amount || Number(data.amount) <= 0) {
+        setIsScanningReceipt(false);
+        setSuccessMsg(null);
+        if (onAddExpense) onAddExpense();
+        return;
+      }
+
+      const amount = Number(data.amount);
+      const merchant = data.merchant || (isEn ? 'Receipt' : 'Kvitto');
+      const category = data.category || (isEn ? 'Uncategorized' : 'Okategoriserat');
+
+      if (onQuickAddExpense) {
+        await onQuickAddExpense(amount, merchant, category);
+        feedback.success();
+        setSuccessMsg({
+          text: isEn 
+            ? `Saved ${amount} ${currency} from ${merchant} ✨` 
+            : `Sparade ${amount} ${currency} från ${merchant} ✨`
+        });
+        setTimeout(() => setSuccessMsg(null), 4000);
+      }
+    } catch (err) {
+      console.error('Auto receipt scan error:', err);
+      if (onAddExpense) onAddExpense();
+    } finally {
+      setIsScanningReceipt(false);
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -266,13 +359,18 @@ export function GreetingModule({
           <button
             type="button"
             onClick={handleKvittoClick}
+            disabled={isScanningReceipt}
             className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
           >
             <div className="w-14 h-14 sm:w-[58px] sm:h-[58px] rounded-full bg-white/[0.045] group-hover:bg-white/[0.07] border border-white/[0.035] backdrop-blur-[16px] flex items-center justify-center transition-colors">
-              <Camera size={20} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
+              {isScanningReceipt ? (
+                <Loader2 size={20} className="animate-spin text-white" />
+              ) : (
+                <Camera size={20} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
+              )}
             </div>
             <span className="text-xs font-medium text-[#C7CDDC]/90 group-hover:text-white transition-colors text-center">
-              {isEn ? 'Receipt' : 'Kvitto'}
+              {isScanningReceipt ? (isEn ? 'Scanning...' : 'Scannar...') : (isEn ? 'Receipt' : 'Kvitto')}
             </span>
           </button>
 
