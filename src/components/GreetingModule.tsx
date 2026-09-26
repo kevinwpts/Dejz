@@ -38,7 +38,6 @@ interface GreetingModuleProps {
 
 export function GreetingModule({
   currency,
-  date,
   language,
   stats,
   t,
@@ -50,7 +49,7 @@ export function GreetingModule({
 
   const effectiveRemainingDays = useMemo(() => {
     if (!stats) return 1;
-    const normDate = new Date(date);
+    const normDate = new Date();
     normDate.setHours(0, 0, 0, 0);
     const index = calendarDays.findIndex((d: any) => {
       const dDate = new Date(d.date);
@@ -61,7 +60,7 @@ export function GreetingModule({
       return Math.max(1, calendarDays.length - index);
     }
     return stats?.remainingDays || 1;
-  }, [calendarDays, date, stats?.remainingDays]);
+  }, [calendarDays, stats?.remainingDays]);
 
   const isNegative = (stats?.remainingPeriodCents || 0) < 0;
 
