@@ -64,6 +64,23 @@ export function GreetingModule({
   const [isSubmittingQuick, setIsSubmittingQuick] = useState(false);
   const [successMsg, setSuccessMsg] = useState<{ text: string; transcript?: string } | null>(null);
   const quickInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const handleKvittoClick = () => {
+    feedback.tap();
+    if (cameraInputRef.current) {
+      cameraInputRef.current.click();
+    } else {
+      onAddExpense?.();
+    }
+  };
+
+  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onAddExpense) {
+      onAddExpense();
+    }
+  };
 
   const {
     isRecording,
@@ -245,22 +262,28 @@ export function GreetingModule({
             </span>
           </button>
 
-          {/* Skanna */}
+          {/* Kvitto */}
           <button
             type="button"
-            onClick={() => {
-              feedback.tap();
-              onAddExpense?.();
-            }}
+            onClick={handleKvittoClick}
             className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
           >
             <div className="w-14 h-14 sm:w-[58px] sm:h-[58px] rounded-full bg-white/[0.045] group-hover:bg-white/[0.07] border border-white/[0.035] backdrop-blur-[16px] flex items-center justify-center transition-colors">
               <Camera size={20} strokeWidth={1.75} className="text-[#C7CDDC] group-hover:text-white transition-colors" />
             </div>
             <span className="text-xs font-medium text-[#C7CDDC]/90 group-hover:text-white transition-colors text-center">
-              {isEn ? 'Scan' : 'Skanna'}
+              {isEn ? 'Receipt' : 'Kvitto'}
             </span>
           </button>
+
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={handleCameraCapture}
+          />
         </div>
 
         {/* Snabbutgift Input Bar with Microphone Integration */}
