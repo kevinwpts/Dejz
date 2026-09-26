@@ -729,9 +729,14 @@ export function BudgetView({
           {/* Monthly Savings Section */}
           {budgetFilter === 'savings' && (
             <div className="space-y-3.5 pt-2 sm:pt-3">
-              <div className="flex justify-end px-2">
-                <button onClick={onAddMonthlySaving} className="h-8 px-3 rounded-full bg-[var(--surface-color)] text-[12px] font-semibold text-[var(--text-primary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] transition-all cursor-pointer inline-flex items-center justify-center shadow-2xs">
-                  + {t('newMonthlySaving')}
+              <div className="flex justify-end px-1">
+                <button 
+                  type="button"
+                  onClick={onAddMonthlySaving} 
+                  className="h-8 px-3 rounded-xl bg-[var(--surface-color)] text-[12px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs active:scale-95"
+                >
+                  <Plus size={14} strokeWidth={2.5} className="text-[var(--accent-color)]" />
+                  <span>{t('newMonthlySaving')}</span>
                 </button>
               </div>
               <div className="space-y-3.5">
@@ -785,7 +790,12 @@ export function BudgetView({
                     </div>
                   </button>
                 ) : (
-                  <EmptyState title={t('noDataAvailable')} />
+                  <EmptyState 
+                    title={config.language === 'en' ? 'No monthly savings added yet' : 'Inget månadssparande inlagt än'} 
+                    description={config.language === 'en' ? 'Add recurring monthly savings to reserve money automatically.' : 'Lägg in fast månadssparande för att automatiskt avsätta pengar varje månad.'}
+                    actionLabel={`+ ${t('newMonthlySaving')}`}
+                    onAction={onAddMonthlySaving}
+                  />
                 )}
               </div>
             </div>

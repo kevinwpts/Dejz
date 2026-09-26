@@ -1462,9 +1462,9 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
   const [name, setName] = useState(saving?.name || '');
   const [amount, setAmount] = useState(formatAmount(saving?.amount || ''));
   
-  const deductionDay = saving?.deductionDay || 1;
+  const [deductionDay, setDeductionDay] = useState(saving?.deductionDay || 25);
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
-  const paymentMethod = typeof saving?.paymentMethod === 'string' ? saving.paymentMethod : (saving?.paymentMethod as any)?.name || firstPaymentMethod;
+  const [paymentMethod, setPaymentMethod] = useState(typeof saving?.paymentMethod === 'string' ? saving.paymentMethod : (saving?.paymentMethod as any)?.name || firstPaymentMethod);
   const [isVariable, setIsVariable] = useState(saving?.isVariable || false);
   const [icon, setIcon] = useState(saving?.icon || 'piggy-bank');
   const originalName = useRef(saving?.name || '');
@@ -1500,9 +1500,15 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
 
   const handleSave = () => {
     const parsedAmount = parseAmount(amount);
+    if (parsedAmount <= 0) {
+      amountInputRef.current?.focus();
+      return;
+    }
+
+    const finalName = name.trim() || t('monthlySavings') || 'Månadssparande';
 
     onSave({ 
-      name, 
+      name: finalName, 
       amount: parsedAmount, 
       icon, 
       logo, 
@@ -1668,6 +1674,43 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               )}
             </div>
           </div>
+
+          {/* Deduction Day */}
+          <div className="space-y-2">
+            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('deductionDay') || 'Dragningsdag'}</label>
+            <div className="relative">
+              <select
+                value={deductionDay}
+                onChange={(e) => setDeductionDay(parseInt(e.target.value))}
+                className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+              >
+                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                  <option key={day} value={day}>{day}</option>
+                ))}
+              </select>
+              <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+            </div>
+          </div>
+
+          {/* Payment Method */}
+          {paymentMethods && paymentMethods.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('paymentMethod') || 'Betalsätt'}</label>
+              <div className="relative">
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                >
+                  {paymentMethods.map((pm: any) => {
+                    const pmName = typeof pm === 'string' ? pm : pm.name;
+                    return <option key={pmName} value={pmName}>{pmName}</option>;
+                  })}
+                </select>
+                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Action Button Footer */}
