@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Plus, Check, ArrowUp, ArrowDown, RotateCcw, LayoutGrid } from 'lucide-react';
+import { X, Plus, Check, ArrowUp, ArrowDown, RotateCcw, LayoutGrid, EyeOff } from 'lucide-react';
 import { Config, HomeWidgetConfig } from '../../types';
 import { AVAILABLE_WIDGETS, DEFAULT_HOME_WIDGETS, getResolvedHomeWidgets } from '../../utils/widgetRegistry';
 import { feedback } from '../../utils/feedback';
@@ -27,38 +27,55 @@ export function WidgetManagerModal({
     getResolvedHomeWidgets(config?.homeWidgets)
   );
 
+  // Sync state whenever modal opens or external homeWidgets change
   React.useEffect(() => {
     if (isOpen) {
       setCurrentWidgets(getResolvedHomeWidgets(config?.homeWidgets));
     }
-  }, [isOpen]);
+  }, [isOpen, config?.homeWidgets]);
 
   if (!isOpen) return null;
 
-  const handleToggleWidget = (id: string) => {
+  const handleToggleWidget = (id: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     feedback.selection();
-    const updated = currentWidgets.map((w) =>
-      w.id === id ? { ...w, enabled: !w.enabled } : w
-    );
+
+    const updated = currentWidgets.map((w) => {
+      if (w.id === id) {
+        return { ...w, enabled: !w.enabled };
+      }
+      return w;
+    });
+
     setCurrentWidgets(updated);
     onSaveWidgets(updated);
   };
 
-  const handleMove = (index: number, direction: 'up' | 'down') => {
+  const handleMoveActive = (activeIdx: number, direction: 'up' | 'down', e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     feedback.selection();
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= currentWidgets.length) return;
 
-    const copy = [...currentWidgets];
-    const [moved] = copy.splice(index, 1);
-    copy.splice(targetIndex, 0, moved);
+    const activeItems = currentWidgets.filter((w) => w.enabled);
+    const inactiveItems = currentWidgets.filter((w) => !w.enabled);
 
-    const reordered = copy.map((w, idx) => ({ ...w, order: idx }));
-    setCurrentWidgets(reordered);
-    onSaveWidgets(reordered);
+    const targetIdx = direction === 'up' ? activeIdx - 1 : activeIdx + 1;
+    if (targetIdx < 0 || targetIdx >= activeItems.length) return;
+
+    const copy = [...activeItems];
+    const [moved] = copy.splice(activeIdx, 1);
+    copy.splice(targetIdx, 0, moved);
+
+    const merged = [...copy, ...inactiveItems].map((w, idx) => ({ ...w, order: idx }));
+    setCurrentWidgets(merged);
+    onSaveWidgets(merged);
   };
 
-  const handleReset = () => {
+  const handleReset = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     feedback.tap();
     setCurrentWidgets(DEFAULT_HOME_WIDGETS);
     onSaveWidgets(DEFAULT_HOME_WIDGETS);
@@ -70,7 +87,7 @@ export function WidgetManagerModal({
 
   const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/65 backdrop-blur-md">
+      <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md select-none">
         {/* Backdrop click */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -86,6 +103,7 @@ export function WidgetManagerModal({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
+          onClick={(e) => e.stopPropagation()}
           className="relative w-full max-w-lg bg-[var(--surface-color)] rounded-t-[28px] sm:rounded-[28px] border border-[var(--border-color)] shadow-2xl max-h-[88vh] flex flex-col z-10 overflow-hidden"
         >
           {/* Header */}
@@ -96,7 +114,7 @@ export function WidgetManagerModal({
               </div>
               <div>
                 <h3 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
-                  {isEn ? 'Customize widgets' : 'Anpassa hemskärmens widgets'}
+                  {isEn ? 'Customize home widgets' : 'Anpassa hemskärmens widgets'}
                 </h3>
                 <p className="text-[11.5px] text-[var(--text-secondary)]">
                   {isEn ? 'Top card, timeline & transactions are fixed.' : 'Huvudkort, tidslinje & transaktioner är fasta.'}
@@ -119,9 +137,13 @@ export function WidgetManagerModal({
             {/* Active Widgets Section */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between px-1">
-                <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-                  {isEn ? 'Active widgets on home screen' : 'Aktiva widgets'} ({activeWidgetConfigs.length})
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                    {isEn ? 'Active widgets' : 'Aktiva widgets'} ({activeWidgetConfigs.length})
+                  </span>
+                </div>
+
                 <button
                   type="button"
                   onClick={handleReset}
@@ -134,7 +156,7 @@ export function WidgetManagerModal({
 
               {activeWidgetConfigs.length > 0 ? (
                 <div className="space-y-2">
-                  {activeWidgetConfigs.map((widgetConfig, idx) => {
+                  {activeWidgetConfigs.map((widgetConfig, activeIdx) => {
                     const def = AVAILABLE_WIDGETS.find((w) => w.id === widgetConfig.id);
                     if (!def) return null;
                     const Icon = def.icon;
@@ -142,19 +164,22 @@ export function WidgetManagerModal({
                     return (
                       <div
                         key={widgetConfig.id}
-                        className="flex items-center justify-between p-3 rounded-2xl bg-[var(--surface-muted)]/50 border border-[var(--border-color)]/70 hover:border-[var(--border-color)] transition-all"
+                        onClick={() => handleToggleWidget(widgetConfig.id)}
+                        className="group flex items-center justify-between p-3 rounded-2xl bg-[var(--surface-muted)]/50 hover:bg-[var(--surface-muted)] border border-[var(--border-color)]/70 hover:border-[var(--border-color)] transition-all cursor-pointer active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
                           <div
-                            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs"
                             style={{ backgroundColor: `${def.color}18`, color: def.color }}
                           >
-                            <Icon size={16} strokeWidth={2.2} />
+                            <Icon size={17} strokeWidth={2.2} />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-[13px] font-bold text-[var(--text-primary)] truncate">
-                              {isEn ? def.titleEn : def.title}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-[13.5px] font-bold text-[var(--text-primary)] truncate">
+                                {isEn ? def.titleEn : def.title}
+                              </p>
+                            </div>
                             <p className="text-[11px] text-[var(--text-secondary)] line-clamp-1">
                               {isEn ? def.descriptionEn : def.description}
                             </p>
@@ -162,35 +187,36 @@ export function WidgetManagerModal({
                         </div>
 
                         {/* Order & Remove Controls */}
-                        <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                           {/* Move up / down */}
                           <div className="flex flex-col gap-0.5 mr-1">
                             <button
                               type="button"
-                              disabled={idx === 0}
-                              onClick={() => handleMove(idx, 'up')}
-                              className="w-5 h-5 rounded flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+                              disabled={activeIdx === 0}
+                              onClick={(e) => handleMoveActive(activeIdx, 'up', e)}
+                              className="w-6 h-5 rounded flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed transition-all"
                               title="Flytta upp"
                             >
-                              <ArrowUp size={11} strokeWidth={2.5} />
+                              <ArrowUp size={12} strokeWidth={2.5} />
                             </button>
                             <button
                               type="button"
-                              disabled={idx === activeWidgetConfigs.length - 1}
-                              onClick={() => handleMove(idx, 'down')}
-                              className="w-5 h-5 rounded flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+                              disabled={activeIdx === activeWidgetConfigs.length - 1}
+                              onClick={(e) => handleMoveActive(activeIdx, 'down', e)}
+                              className="w-6 h-5 rounded flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed transition-all"
                               title="Flytta ner"
                             >
-                              <ArrowDown size={11} strokeWidth={2.5} />
+                              <ArrowDown size={12} strokeWidth={2.5} />
                             </button>
                           </div>
 
                           <button
                             type="button"
-                            onClick={() => handleToggleWidget(widgetConfig.id)}
-                            className="px-2.5 py-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold transition-all cursor-pointer"
+                            onClick={(e) => handleToggleWidget(widgetConfig.id, e)}
+                            className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition-all cursor-pointer active:scale-95 flex items-center gap-1"
                           >
-                            {isEn ? 'Remove' : 'Ta bort'}
+                            <EyeOff size={13} strokeWidth={2.2} />
+                            <span>{isEn ? 'Remove' : 'Ta bort'}</span>
                           </button>
                         </div>
                       </div>
@@ -207,9 +233,12 @@ export function WidgetManagerModal({
             {/* Inactive / Available Widgets Section */}
             {inactiveWidgetConfigs.length > 0 && (
               <div className="space-y-2.5 pt-2">
-                <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider px-1">
-                  {isEn ? 'More widgets to add' : 'Fler tillgängliga widgets'} ({inactiveWidgetConfigs.length})
-                </span>
+                <div className="flex items-center gap-1.5 px-1">
+                  <span className="w-2 h-2 rounded-full bg-sky-500" />
+                  <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                    {isEn ? 'More widgets to add' : 'Fler tillgängliga widgets'} ({inactiveWidgetConfigs.length})
+                  </span>
+                </div>
 
                 <div className="space-y-2">
                   {inactiveWidgetConfigs.map((widgetConfig) => {
@@ -220,17 +249,18 @@ export function WidgetManagerModal({
                     return (
                       <div
                         key={widgetConfig.id}
-                        className="flex items-center justify-between p-3 rounded-2xl bg-[var(--surface-color)] border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)]/50 transition-all"
+                        onClick={() => handleToggleWidget(widgetConfig.id)}
+                        className="group flex items-center justify-between p-3 rounded-2xl bg-[var(--surface-color)] hover:bg-[var(--surface-muted)]/40 border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)]/60 transition-all cursor-pointer active:scale-[0.99]"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
                           <div
-                            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 opacity-80"
+                            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 opacity-80"
                             style={{ backgroundColor: `${def.color}15`, color: def.color }}
                           >
-                            <Icon size={16} strokeWidth={2.2} />
+                            <Icon size={17} strokeWidth={2.2} />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-[13px] font-bold text-[var(--text-primary)] truncate">
+                            <p className="text-[13.5px] font-bold text-[var(--text-primary)] truncate">
                               {isEn ? def.titleEn : def.title}
                             </p>
                             <p className="text-[11px] text-[var(--text-secondary)] line-clamp-1">
@@ -241,10 +271,10 @@ export function WidgetManagerModal({
 
                         <button
                           type="button"
-                          onClick={() => handleToggleWidget(widgetConfig.id)}
-                          className="px-3 py-1.5 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-semibold flex items-center gap-1 shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer shrink-0"
+                          onClick={(e) => handleToggleWidget(widgetConfig.id, e)}
+                          className="px-3.5 py-1.5 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-bold flex items-center gap-1.5 shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer shrink-0"
                         >
-                          <Plus size={13} strokeWidth={2.5} />
+                          <Plus size={14} strokeWidth={2.6} />
                           <span>{isEn ? 'Add' : 'Lägg till'}</span>
                         </button>
                       </div>

@@ -119,5 +119,5 @@ export function getResolvedHomeWidgets(savedWidgets?: HomeWidgetConfig[]): HomeW
     }
   });
 
-  return merged;
+  return merged.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }

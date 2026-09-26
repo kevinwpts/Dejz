@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 
-import { X, Check, Trash2, ChevronDown, Receipt, PiggyBank, Banknote, Pencil } from 'lucide-react';
+import { X, Check, Trash2, ChevronDown, Receipt, PiggyBank, Banknote, Pencil, ShieldAlert, Sparkles, ChevronRight } from 'lucide-react';
 import { Income, FixedExpense, Frequency, Category, Config, MonthlySaving } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
@@ -17,6 +17,7 @@ import { useScrollLock } from '../hooks/useScrollLock';
 import { QuickMathToolbar } from './QuickMathToolbar';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { Button, IconButton } from './ui';
+import { CancelSubscriptionModal } from './CancelSubscriptionModal';
 
 // --- Income View Modal ---
 
@@ -589,6 +590,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
   useScrollLock(true);
   const dragControls = useDragControls();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const expenseCompatible = {
     ...expense,
     note: expense.name,
@@ -699,6 +701,31 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               )}
             </div>
           </div>
+
+          {/* Säg upp abonnemang / avtal - AI Assistant Button */}
+          <button
+            type="button"
+            onClick={() => setIsCancelModalOpen(true)}
+            className="w-full p-3.5 rounded-[16px] bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/25 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                <ShieldAlert size={16} strokeWidth={2.2} />
+              </div>
+              <div className="text-left">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                    {config.language === 'en' ? 'Cancel subscription / contract' : 'Säg upp abonnemang / avtal'}
+                  </p>
+                  <Sparkles size={11} className="text-[var(--accent-color)]" />
+                </div>
+                <p className="text-[11px] text-[var(--text-secondary)]">
+                  {config.language === 'en' ? 'AI lookup for direct cancellation link & steps' : 'AI-guide & direktlänk till uppsägning'}
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-rose-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+          </button>
           
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
@@ -772,6 +799,20 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             t={t}
           />
         )}
+
+        {/* AI Cancellation Assistant Modal */}
+        {isCancelModalOpen && (
+          <CancelSubscriptionModal
+            isOpen={isCancelModalOpen}
+            onClose={() => setIsCancelModalOpen(false)}
+            expense={expense}
+            config={config}
+            onDeleteExpense={(id) => {
+              onDelete(id);
+              onClose();
+            }}
+          />
+        )}
       </div>
     </motion.div>
   );
@@ -811,6 +852,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
   const [autoLogo, setAutoLogo] = useState<string | undefined>(expense?.name ? getLogoUrl(expense.name) : undefined);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showIconSelector, setShowIconSelector] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   
   const amountInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -1093,6 +1135,34 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
             </div>
           </div>
+
+          {expense && (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setIsCancelModalOpen(true)}
+                className="w-full p-3.5 rounded-[16px] bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/25 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                    <ShieldAlert size={16} strokeWidth={2.2} />
+                  </div>
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                        {config?.language === 'en' ? 'Cancel subscription / contract' : 'Säg upp abonnemang / avtal'}
+                      </p>
+                      <Sparkles size={11} className="text-[var(--accent-color)]" />
+                    </div>
+                    <p className="text-[11px] text-[var(--text-secondary)]">
+                      {config?.language === 'en' ? 'AI lookup for direct cancellation link & steps' : 'AI-guide & direktlänk till uppsägning'}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-rose-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Action Button Footer */}
@@ -1178,6 +1248,19 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           }}
           onCancel={() => setShowDeleteConfirm(false)}
           t={t}
+        />
+      )}
+
+      {isCancelModalOpen && expense && (
+        <CancelSubscriptionModal
+          isOpen={isCancelModalOpen}
+          onClose={() => setIsCancelModalOpen(false)}
+          expense={expense}
+          config={config || { language: 'sv', currency: 'kr' } as any}
+          onDeleteExpense={() => {
+            onDelete?.();
+            onClose();
+          }}
         />
       )}
     </motion.div>
