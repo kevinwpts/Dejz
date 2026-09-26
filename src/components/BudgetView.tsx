@@ -259,41 +259,30 @@ export function BudgetView({
           <div className="w-12" />
         </div>
 
-        {/* Concept & Hero Allocation Summary Card */}
+        {/* Concept & Hero Allocation Summary Card with "Kvar att fördela" as main focus */}
         <div className="bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[24px] p-5 space-y-4 shadow-none">
-          <p className="text-xs text-[var(--text-secondary)] opacity-85 leading-relaxed border-b border-[var(--border-color)]/30 dark:border-white/[0.035] pb-3">
-            Dejz har redan räknat bort dina fasta kostnader ({formatAmount(totalFixedSum, config.language)} kr). Nu bestämmer du hur du vill fördela din kvarvarande <span className="font-semibold text-[var(--text-primary)]">vardagsbudget</span>.
-          </p>
+          <div className="flex items-center justify-between border-b border-[var(--border-color)]/30 dark:border-white/[0.035] pb-3">
+            <span className="text-xs font-semibold text-[var(--text-primary)]">
+              Fördela vardagsbudget
+            </span>
+            <span className="text-xs font-medium text-[var(--text-secondary)] opacity-85">
+              Totalt {formatAmount(everydayBudget, config.language)} kr vardagsbudget
+            </span>
+          </div>
 
-          <div className="grid grid-cols-3 gap-2 pt-1 text-center sm:text-left">
-            <div>
-              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block opacity-70 mb-0.5">
-                Vardagsbudget
-              </span>
-              <span className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount tabular-nums">
-                {formatAmount(everydayBudget, config.language)} kr
-              </span>
-            </div>
-
-            <div>
-              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block opacity-70 mb-0.5">
-                Fördelat
-              </span>
-              <span className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-amount tabular-nums">
-                {formatAmount(totalAllocated, config.language)} kr
-              </span>
-            </div>
-
-            <div>
-              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block opacity-70 mb-0.5">
-                {isOverAllocated ? 'Överfördelat' : 'Kvar att fördela'}
-              </span>
-              <span className={`text-base sm:text-lg font-bold font-amount tabular-nums ${
-                isOverAllocated ? 'text-rose-400' : remainingToAllocate === 0 ? 'text-[#8B9CFF]' : 'text-emerald-400'
-              }`}>
-                {formatAmount(Math.abs(remainingToAllocate), config.language)} kr
-              </span>
-            </div>
+          {/* Huge Dynamic Status Headline ("Kvar att fördela" or "För mycket fördelat") */}
+          <div className="text-left space-y-1 pt-1">
+            <span className={`text-[40px] sm:text-[48px] leading-none font-bold font-amount tabular-nums tracking-tight block ${
+              isOverAllocated ? 'text-rose-400' : remainingToAllocate === 0 ? 'text-[#8B9CFF]' : 'text-white'
+            }`}>
+              {formatAmount(Math.abs(remainingToAllocate), config.language)} kr
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] block opacity-80">
+              {isOverAllocated ? 'för mycket fördelat' : 'kvar att fördela'}
+            </span>
+            <p className="text-xs font-medium text-[var(--text-secondary)] opacity-70 pt-0.5">
+              {formatAmount(totalAllocated, config.language)} kr fördelat av {formatAmount(everydayBudget, config.language)} kr vardagsbudget
+            </p>
           </div>
 
           {/* Simple Secondary Progress Bar */}
