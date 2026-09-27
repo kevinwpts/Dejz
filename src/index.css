@@ -1,21 +1,21 @@
-@import url("https://fonts.googleapis.com/css2?family=Special+Gothic:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@100..900&display=swap");
 
-/* Special Gothic - Local High Performance Webfonts (Latin & Latin-Extended for Swedish å, ä, ö, Å, Ä, Ö) */
+/* Big Shoulders Display - Local High Performance Webfonts (Latin & Latin-Extended for Swedish å, ä, ö, Å, Ä, Ö) */
 @font-face {
-  font-family: 'Special Gothic';
+  font-family: 'Big Shoulders Display';
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
-  src: url('/fonts/special-gothic-latin.woff2') format('woff2');
+  src: url('/fonts/big-shoulders-display-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-  font-family: 'Special Gothic';
+  font-family: 'Big Shoulders Display';
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
-  src: url('/fonts/special-gothic-latinext.woff2') format('woff2');
+  src: url('/fonts/big-shoulders-display-latinext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
@@ -25,25 +25,23 @@
 @theme {
   --color-black: #181818;
   --font-sans:
-    "Special Gothic", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Big Shoulders Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display:
-    "Special Gothic", sans-serif;
-  --font-special:
-    "Special Gothic", sans-serif;
-  --font-barlow:
-    "Special Gothic", sans-serif;
+    "Big Shoulders Display", sans-serif;
   --font-shoulders:
-    "Special Gothic", sans-serif;
+    "Big Shoulders Display", sans-serif;
+  --font-barlow:
+    "Big Shoulders Display", sans-serif;
   --font-amount:
-    "Special Gothic", sans-serif;
+    "Big Shoulders Display", sans-serif;
   --font-exo:
-    "Special Gothic", sans-serif;
+    "Big Shoulders Display", sans-serif;
   --font-logo:
-    "Special Gothic", sans-serif;
+    "Big Shoulders Display", sans-serif;
   --font-serif:
-    "Special Gothic", sans-serif;
+    "Big Shoulders Display", sans-serif;
   --font-mono:
-    "Special Gothic", monospace;
+    "Big Shoulders Display", monospace;
 
   --color-accent: var(--accent-color);
   --color-accent-hover: var(--accent-hover);
@@ -77,7 +75,7 @@ input,
 select,
 textarea {
   font-family: var(--font-sans);
-  letter-spacing: 0.005em;
+  letter-spacing: 0.025em;
 }
 
 @utility font-display {
@@ -116,12 +114,24 @@ textarea {
   font-family: var(--font-amount) !important;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+  letter-spacing: 0.02em !important;
 }
 
 .font-amount {
   font-family: var(--font-amount) !important;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+  letter-spacing: 0.02em !important;
+}
+
+/* Ensure no text is squeezed together since Big Shoulders is naturally condensed */
+.tracking-tight,
+.tracking-tighter {
+  letter-spacing: 0.015em !important;
+}
+
+.tracking-normal {
+  letter-spacing: 0.02em !important;
 }
 
 @utility no-scrollbar {
@@ -133,10 +143,10 @@ textarea {
 }
 
 :root {
-  /* Global Typography System - Special Gothic Single Font */
-  --font-display: 'Special Gothic', sans-serif;
-  --font-sans: 'Special Gothic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-amount: 'Special Gothic', sans-serif;
+  /* Global Typography System - Big Shoulders Display Single Font */
+  --font-display: 'Big Shoulders Display', sans-serif;
+  --font-sans: 'Big Shoulders Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-amount: 'Big Shoulders Display', sans-serif;
 
   font-size: 100%;
   -webkit-font-smoothing: antialiased;
@@ -402,31 +412,31 @@ textarea {
   }
 
   h1 {
-    font-weight: 700;
-    letter-spacing: -0.015em;
+    font-weight: 800;
+    letter-spacing: 0.015em;
   }
 
   h2 {
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.015em;
   }
 
   h3 {
     font-weight: 600;
-    letter-spacing: -0.005em;
+    letter-spacing: 0.02em;
   }
 
   h4,
   h5,
   h6 {
     font-weight: 600;
-    letter-spacing: 0em;
+    letter-spacing: 0.02em;
   }
 
   p {
     color: var(--text-secondary);
     line-height: 1.48;
-    letter-spacing: 0.005em;
+    letter-spacing: 0.025em;
     font-weight: 400;
   }
 
@@ -434,22 +444,22 @@ textarea {
     font-family: var(--font-amount) !important;
     font-feature-settings: "tnum" 1;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.015em;
+    letter-spacing: 0.02em !important;
     font-weight: 700;
   }
 
   .input-label,
   .uppercase-label {
-    letter-spacing: 0.05em;
-    @apply font-semibold text-xs text-[var(--text-secondary)];
+    letter-spacing: 0.06em;
+    @apply font-bold text-xs text-[var(--text-secondary)];
   }
 
   .tracking-wider {
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
   }
 
   .tracking-widest {
-    letter-spacing: 0.06em;
+    letter-spacing: 0.07em;
   }
 
   input,
@@ -457,7 +467,7 @@ textarea {
   select,
   button {
     font-family: var(--font-sans);
-    letter-spacing: 0.005em;
+    letter-spacing: 0.025em;
   }
 
   input,
@@ -565,7 +575,7 @@ textarea {
     color: var(--btn-primary-text);
     border: none;
     font-size: 0.875rem;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.02em;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
