@@ -664,11 +664,11 @@ export function BudgetView({
       </div>
 
       {/* Overview Hero Section */}
-      <div className="py-2 text-left space-y-1.5">
+      <div className="py-2 text-center space-y-1.5 flex flex-col items-center">
         <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
           {t('monthlyDisposable')}
         </span>
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-baseline justify-center gap-2">
           <AnimatedNumber 
             value={Math.round(totalIncomeSum - totalFixedSum)} 
             className="text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums text-white tracking-tight"
