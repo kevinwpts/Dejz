@@ -411,7 +411,11 @@ export function TodayView({
 
   if (!stats) return null;
 
-  const stickyHeaderOffset = isDemoMode
+  const heroStickyTop = isDemoMode
+    ? 'top-[calc(7.2rem+env(safe-area-inset-top))]'
+    : 'top-[calc(5rem+env(safe-area-inset-top))]';
+
+  const timelineStickyTop = isDemoMode
     ? 'top-[calc(6.8rem+env(safe-area-inset-top))]'
     : 'top-[calc(4.4rem+env(safe-area-inset-top))]';
 
@@ -420,10 +424,7 @@ export function TodayView({
       {/* 1. HERO AREA & ACTIONS (Sticky background that bottom sheet expands over) */}
       <div
         ref={heroRef}
-        className={`sticky ${stickyHeaderOffset} z-0 transition-opacity duration-150 ease-out origin-top pointer-events-auto`}
-        style={{
-          opacity: heroOpacity,
-        }}
+        className={`sticky ${heroStickyTop} z-0 pointer-events-auto`}
       >
         <GreetingModule
         userName={userName}
@@ -587,7 +588,7 @@ export function TodayView({
       {/* 2. EXPANDING BOTTOM SHEET (Scroll-driven surface covering hero as user scrolls down) */}
       <div
         ref={sheetRef}
-        className="relative z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#232323] rounded-t-[32px] sm:rounded-t-[36px] border-t border-white/[0.1] shadow-[0_-20px_50px_rgba(0,0,0,0.85)] min-h-[calc(100vh-8rem)] pt-2 pb-40 space-y-6 mt-3 sm:mt-4"
+        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#232323] rounded-t-[32px] sm:rounded-t-[36px] border-t border-white/[0.1] shadow-[0_-20px_50px_rgba(0,0,0,0.85)] min-h-[calc(100vh-8rem)] pt-2 pb-40 space-y-6 mt-3 sm:mt-4"
       >
         {/* Visual Grab Handle / Sheet Indicator */}
         <div
@@ -601,7 +602,7 @@ export function TodayView({
 
         {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
         {calendarDays && calendarDays.length > 0 && (
-          <div className={`sticky ${stickyHeaderOffset} z-20 bg-[#232323]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-1 pb-3 border-b border-white/[0.03] transition-all`}>
+          <div className={`sticky ${timelineStickyTop} z-20 bg-[#232323]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-1 pb-3 border-b border-white/[0.03] transition-all`}>
             <PeriodTimeline
               calendarDays={calendarDays}
               selectedDate={normalizedSelectedDate}
