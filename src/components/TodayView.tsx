@@ -422,7 +422,7 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.08 + index * 0.02 }}
                       onClick={() => onNavigate("analysis")}
-                      className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.045] hover:bg-white/[0.065] backdrop-blur-[20px] transition-all group text-left active:scale-[0.98] min-w-[155px] sm:min-w-[170px] max-w-[185px] cursor-pointer snap-start border border-white/[0.03] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]"
+                      className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.04] backdrop-blur-[18px] transition-all group text-left active:scale-[0.98] min-w-[155px] sm:min-w-[170px] max-w-[185px] cursor-pointer snap-start border border-white/[0.03] shadow-none"
                     >
                       {/* Top Row: Minimalist Monochrome Icon (#C7CDDC, stroke 1.75, bg-white/[0.04]) + Category Name (Medium 500) */}
                       <div className="flex items-center gap-2.5 mb-3.5">
@@ -733,7 +733,7 @@ export function TodayView({
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="p-4 rounded-2xl bg-white/[0.045] border border-white/[0.07] backdrop-blur-[20px] shadow-2xs space-y-3">
+                  <div className="p-4 rounded-2xl bg-white/[0.035] border border-white/[0.07] backdrop-blur-[18px] shadow-none space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-white">
                         {lang === 'en' ? 'Attention required' : 'Kräver åtgärd'}

@@ -3639,36 +3639,7 @@ export default function App() {
   }
 
   return (
-    <div className={`min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden bg-[var(--bg-color)] ${activeTab === "today" ? "dark:bg-[radial-gradient(140%_90%_at_50%_-10%,#12183A_0%,#0A0E22_45%,#080A16_100%)]" : ""} bg-fixed transition-colors duration-500`}>
-      {/* Ambient Blue / Indigo Background Atmosphere - Active ONLY on Home Tab ("today") */}
-      <div 
-        className={`fixed inset-0 pointer-events-none z-0 overflow-hidden select-none transition-opacity duration-500 ${
-          activeTab === "today" ? "opacity-100" : "opacity-0"
-        }`} 
-        aria-hidden="true"
-      >
-        {/* Top-Center Primary Blue Radial Glow */}
-        <div 
-          className="absolute -top-[120px] left-1/2 -translate-x-1/2 w-[1100px] h-[650px] rounded-full opacity-40 dark:opacity-65 blur-[120px] transition-opacity duration-700"
-          style={{
-            background: 'radial-gradient(ellipse at center, rgba(99, 102, 241, 0.22) 0%, rgba(59, 130, 246, 0.14) 40%, rgba(30, 58, 138, 0.05) 75%, transparent 100%)'
-          }}
-        />
-        {/* Right Desktop Ambient Blue Accent */}
-        <div 
-          className="absolute top-[10%] -right-[150px] w-[750px] h-[750px] rounded-full opacity-30 dark:opacity-50 blur-[140px] transition-opacity duration-700"
-          style={{
-            background: 'radial-gradient(circle at center, rgba(129, 140, 248, 0.18) 0%, rgba(37, 99, 235, 0.1) 50%, transparent 80%)'
-          }}
-        />
-        {/* Left Desktop Ambient Indigo Accent */}
-        <div 
-          className="absolute top-[35%] -left-[150px] w-[700px] h-[700px] rounded-full opacity-25 dark:opacity-45 blur-[130px] transition-opacity duration-700"
-          style={{
-            background: 'radial-gradient(circle at center, rgba(79, 70, 229, 0.16) 0%, rgba(29, 78, 216, 0.08) 50%, transparent 80%)'
-          }}
-        />
-      </div>
+    <div className={`min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden bg-[var(--bg-color)] transition-colors duration-500`}>
 
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 

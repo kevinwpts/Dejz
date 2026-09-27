@@ -21,7 +21,7 @@ export function SavingsGoalsWidget({
   const goals = (config?.savingsGoals || []).filter((g) => !g.isCompleted).slice(0, 2);
 
   return (
-    <div className="bg-white/[0.035] backdrop-blur-xl border border-white/[0.08] rounded-[24px] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.15)] relative group transition-all">
+    <div className="bg-white/[0.025] backdrop-blur-lg border border-white/[0.05] rounded-[24px] p-5 shadow-none relative group transition-all">
       {/* Header */}
       <div className="flex items-center justify-between mb-3.5">
         <div className="flex items-center gap-2.5">
