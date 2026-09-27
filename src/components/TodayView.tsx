@@ -438,12 +438,12 @@ export function TodayView({
 
   return (
     <div className="relative font-sans">
-      {/* SOLID FLAT BACKGROUND LAYER (#6C6BFF) */}
+      {/* SOLID FLAT BACKGROUND LAYER (#C3D2C9) */}
       <div 
         className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-colors duration-300"
         style={{
           height: '100vh',
-          backgroundColor: '#6C6BFF',
+          backgroundColor: '#C3D2C9',
         }}
       />
 
