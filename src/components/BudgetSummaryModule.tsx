@@ -218,14 +218,14 @@ export function BudgetSummaryModule({
     <div className="space-y-6 font-sans">
       {/* SPENDERAT DENNA PERIOD */}
       <div className="py-2 text-center space-y-1 flex flex-col items-center">
-        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.16em] text-[#9CA6BC] block select-none font-display">
+        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#9CA6BC] block select-none font-display">
           SPENDERAT DENNA PERIOD
         </span>
         <div className="flex items-baseline justify-center gap-2">
-          <span className="text-[52px] sm:text-[64px] leading-none font-bold font-amount tabular-nums text-white tracking-tight">
+          <span className="text-[52px] sm:text-[64px] leading-none font-bold font-amount tabular-nums text-white tracking-normal">
             {formatAmount(Math.round(totalSpent), config.language)}
           </span>
-          <span className="text-[22px] sm:text-[26px] font-medium font-sans text-[#9CA6BC]">
+          <span className="text-[22px] sm:text-[26px] font-semibold text-[#9CA6BC]">
             {config.currency || "kr"}
           </span>
         </div>

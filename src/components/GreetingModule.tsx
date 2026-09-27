@@ -74,22 +74,22 @@ export function GreetingModule({
         className="pt-3 sm:pt-5 pb-1 text-center flex flex-col items-center space-y-2"
       >
         {/* Tracked Minimalist Uppercase Structural Label (Barlow Condensed) */}
-        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.16em] text-[#9CA6BC] block select-none font-display">
+        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#9CA6BC] block select-none font-display">
           {t('totalRemaining')}
         </span>
 
         <div className="flex flex-col items-center w-full">
-          {/* Primary Hero Amount (Inter) */}
+          {/* Primary Hero Amount (Barlow Condensed) */}
           <div className="flex items-baseline gap-2">
             <AnimatedNumber 
               value={stats?.remainingPeriodCents || 0} 
-              className={`text-[72px] sm:text-[84px] leading-[0.9] font-bold font-amount tabular-nums tracking-tight ${
+              className={`text-[72px] sm:text-[84px] leading-[0.9] font-bold font-amount tabular-nums tracking-normal ${
                 isNegative ? 'text-rose-400' : 'text-white'
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
-            {/* Lighter, smaller currency label (Inter) */}
-            <span className={`text-[24px] sm:text-[28px] font-medium font-sans tracking-normal ${
+            {/* Lighter, smaller currency label (Barlow Condensed) */}
+            <span className={`text-[24px] sm:text-[28px] font-semibold tracking-normal ${
               isNegative ? 'text-rose-400/80' : 'text-[#9CA6BC]'
             }`}>
               {currency}

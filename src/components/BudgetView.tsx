@@ -663,7 +663,7 @@ export function BudgetView({
 
       {/* Overview Hero Section - Dynamic based on filter */}
       <div className="py-2 text-center space-y-1.5 flex flex-col items-center">
-        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.16em] text-[#9CA6BC] block select-none font-display">
+        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#9CA6BC] block select-none font-display">
           {budgetFilter === 'fixed' && (config?.language === 'en' ? 'TOTAL FIXED EXPENSES' : 'TOTALA FASTA UTGIFTER')}
           {budgetFilter === 'income' && (config?.language === 'en' ? 'TOTAL INCOME' : 'TOTALA INKOMSTER')}
           {budgetFilter === 'savings' && (config?.language === 'en' ? 'TOTAL SAVINGS' : 'TOTALT SPARANDE')}
@@ -675,7 +675,7 @@ export function BudgetView({
               budgetFilter === 'income' ? totalIncomeSum :
               totalSavingsSum
             )} 
-            className={`text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums tracking-tight ${
+            className={`text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums tracking-normal ${
               budgetFilter === 'income' ? 'text-emerald-400' : 'text-white'
             }`}
             formatter={(val) => {
@@ -683,7 +683,7 @@ export function BudgetView({
               return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
-          <span className={`text-[19px] sm:text-[21px] font-normal ${
+          <span className={`text-[19px] sm:text-[21px] font-semibold ${
             budgetFilter === 'income' ? 'text-emerald-400/80' : 'text-[#9CA6BC]'
           }`}>
             {config?.currency}
