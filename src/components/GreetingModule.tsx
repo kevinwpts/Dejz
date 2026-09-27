@@ -71,15 +71,14 @@ export function GreetingModule({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="pt-3 sm:pt-5 pb-1 text-left space-y-2"
+        className="pt-3 sm:pt-5 pb-1 text-center flex flex-col items-center space-y-2"
       >
         {/* Tracked Minimalist Uppercase Structural Label (500 Medium) */}
         <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
           {t('totalRemaining')}
         </span>
 
-        {/* Amount & Payday Info in a row */}
-        <div className="flex flex-wrap sm:flex-nowrap items-baseline sm:items-center justify-between gap-3 w-full">
+        <div className="flex flex-col items-center w-full">
           {/* Primary Hero Amount (Semibold 600 - Bold 700) */}
           <div className="flex items-baseline gap-2">
             <AnimatedNumber 
@@ -97,15 +96,17 @@ export function GreetingModule({
             </span>
           </div>
 
-          {/* Payday info - rendered inline to the right as an elegant metadata badge */}
-          <div className="flex items-center gap-1.5 text-[#9CA6BC] text-xs sm:text-[13px] font-normal bg-white/[0.045] px-3 py-1.5 rounded-full border border-white/[0.03] shadow-none cursor-pointer hover:bg-white/[0.07] transition-all select-none self-center shrink-0">
-            <Calendar size={13} strokeWidth={1.75} className="text-[#9CA6BC] shrink-0" />
-            <span className="whitespace-nowrap font-medium tracking-tight">
-              {effectiveRemainingDays} {isEn ? (effectiveRemainingDays === 1 ? 'day to payday' : 'days to payday') : (effectiveRemainingDays === 1 ? 'dag till nästa lön' : 'dagar till nästa lön')}
+          {/* Days to salary */}
+          <div className="flex items-center gap-1.5 text-xs text-[#9CA6BC] mt-3 bg-white/[0.03] px-3 py-1 rounded-full">
+            <Calendar size={13} />
+            <span>
+              {effectiveRemainingDays} {isEn ? 'days until payday' : 'dagar till lön'}
             </span>
           </div>
         </div>
-      </motion.div>
+
+
+        </motion.div>
 
       {categoryBudgets}
 

@@ -217,11 +217,11 @@ export function BudgetSummaryModule({
   return (
     <div className="space-y-6 font-sans">
       {/* SPENDERAT DENNA PERIOD */}
-      <div className="py-2 text-left space-y-1">
+      <div className="py-2 text-center space-y-1 flex flex-col items-center">
         <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
           SPENDERAT DENNA PERIOD
         </span>
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-baseline justify-center gap-2">
           <span className="text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums text-white tracking-tight">
             {formatAmount(Math.round(totalSpent), config.language)}
           </span>
