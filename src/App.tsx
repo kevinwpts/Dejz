@@ -3536,7 +3536,7 @@ export default function App() {
   if (!session) {
     const isDark = !showLanding && (config?.darkMode ?? false);
     return (
-      <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-hidden ${isDark ? 'dark' : ''}`}>
+      <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-clip ${isDark ? 'dark' : ''}`}>
         {showLanding ? (
           <>
             <LandingPage
@@ -3639,7 +3639,7 @@ export default function App() {
   }
 
   return (
-    <div className={`min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-hidden bg-[var(--bg-color)] transition-colors duration-500`}>
+    <div className={`min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-clip bg-[var(--bg-color)] transition-colors duration-500`}>
 
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 

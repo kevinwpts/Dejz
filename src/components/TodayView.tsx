@@ -107,16 +107,6 @@ export function TodayView({
 
   const lang = config?.language || 'sv';
 
-  useEffect(() => {
-    const updateHeight = () => {
-      if (heroRef.current) {
-        setHeroHeight(heroRef.current.offsetHeight);
-      }
-    };
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
-  }, []);
 
   useEffect(() => {
     let ticking = false;
@@ -409,6 +399,33 @@ export function TodayView({
       });
   }, [stats, config?.categories, fixedExpenses]);
 
+  useEffect(() => {
+    const updateHeight = () => {
+      if (heroRef.current) {
+        const h = heroRef.current.offsetHeight;
+        if (h > 0) setHeroHeight(h);
+      }
+    };
+    updateHeight();
+    
+    let ro: ResizeObserver | null = null;
+    if (heroRef.current && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const h = (entry.target as HTMLElement).offsetHeight || entry.contentRect.height;
+          if (h > 0) setHeroHeight(h);
+        }
+      });
+      ro.observe(heroRef.current);
+    }
+    
+    window.addEventListener("resize", updateHeight);
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+      if (ro) ro.disconnect();
+    };
+  }, [categoryBudgetData.length, todayData]);
+
   if (!stats) return null;
 
   const heroStickyTop = isDemoMode
@@ -421,174 +438,187 @@ export function TodayView({
 
   return (
     <div className="relative font-sans">
-      {/* 1. HERO AREA & ACTIONS (Sticky background that bottom sheet expands over) */}
+      {/* 1. FIXED STATIC HERO LAYER (Kvar att spendera + Budgetkategorier) */}
       <div
         ref={heroRef}
-        className={`sticky ${heroStickyTop} z-0 pointer-events-auto`}
+        className="fixed left-0 right-0 z-0 pointer-events-auto"
+        style={{
+          top: isDemoMode 
+            ? 'calc(7.2rem + env(safe-area-inset-top))' 
+            : 'calc(5rem + env(safe-area-inset-top))',
+        }}
       >
-        <GreetingModule
-        userName={userName}
-        availableForD={todayData?.availableForD || stats?.availableForD || 0}
-        currency={config?.currency || 'kr'}
-        isToday={!!selectedDayData?.isToday}
-        date={normalizedSelectedDate}
-        language={lang}
-        stats={stats}
-        t={t}
-        calendarDays={calendarDays}
-        setSelectedDate={setSelectedDate}
-        setCurrentPeriodDate={setCurrentPeriodDate}
-        periodStart={stats.periodStart}
-        periodEnd={stats.periodEnd}
-        isFuturePeriod={stats.isFuturePeriod}
-        isPastPeriod={stats.isPastPeriod}
-        periods={periods}
-        avatarUrl={avatarUrl}
-        onNavigate={onNavigate}
-        showFixedInCalendar={config?.showFixedExpensesInCalendar}
-        isCurrentPeriod={isCurrentPeriod}
-        currentPeriodDate={currentPeriodDate}
-        config={config}
-        onUpdateConfig={onUpdateConfig}
-        onAddExpense={() => onAddTransaction(selectedDate)}
-        onAddIncome={() => onAddIncome(selectedDate)}
-        onQuickAddExpense={onQuickAddExpense}
-        onOpenCalculator={onOpenCalculator}
-        allTransactions={allTransactions}
-        categoryBudgets={
-          <div className="pt-1.5 pb-2">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          <GreetingModule
+            userName={userName}
+            availableForD={todayData?.availableForD || stats?.availableForD || 0}
+            currency={config?.currency || 'kr'}
+            isToday={!!selectedDayData?.isToday}
+            date={normalizedSelectedDate}
+            language={lang}
+            stats={stats}
+            t={t}
+            calendarDays={calendarDays}
+            setSelectedDate={setSelectedDate}
+            setCurrentPeriodDate={setCurrentPeriodDate}
+            periodStart={stats.periodStart}
+            periodEnd={stats.periodEnd}
+            isFuturePeriod={stats.isFuturePeriod}
+            isPastPeriod={stats.isPastPeriod}
+            periods={periods}
+            avatarUrl={avatarUrl}
+            onNavigate={onNavigate}
+            showFixedInCalendar={config?.showFixedExpensesInCalendar}
+            isCurrentPeriod={isCurrentPeriod}
+            currentPeriodDate={currentPeriodDate}
+            config={config}
+            onUpdateConfig={onUpdateConfig}
+            onAddExpense={() => onAddTransaction(selectedDate)}
+            onAddIncome={() => onAddIncome(selectedDate)}
+            onQuickAddExpense={onQuickAddExpense}
+            onOpenCalculator={onOpenCalculator}
+            allTransactions={allTransactions}
+            categoryBudgets={
+              <div className="pt-1.5 pb-2">
 
 
-            {categoryBudgetData.length > 0 ? (
-              <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
-                {categoryBudgetData.map((cat, index) => {
-                  const Icon = ICON_MAP[cat.iconName];
-                  const spentPct = cat.budgetInKronor > 0 
-                    ? Math.min(100, Math.round((cat.spent / cat.budgetInKronor) * 100))
-                    : 0;
+                {categoryBudgetData.length > 0 ? (
+                  <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
+                    {categoryBudgetData.map((cat, index) => {
+                      const Icon = ICON_MAP[cat.iconName];
+                      const spentPct = cat.budgetInKronor > 0 
+                        ? Math.min(100, Math.round((cat.spent / cat.budgetInKronor) * 100))
+                        : 0;
 
-                  return (
+                      return (
+                        <motion.button
+                          key={cat.name}
+                          initial={{ opacity: 0, scale: 0.96, x: 8 }}
+                          animate={{ opacity: 1, scale: 1, x: 0 }}
+                          transition={{ delay: 0.08 + index * 0.02 }}
+                          onClick={() => onNavigate("analysis")}
+                          className="flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white/[0.025] hover:bg-white/[0.04] backdrop-blur-[18px] transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border border-white/[0.03] shadow-none"
+                        >
+                          {/* Top Row: Minimalist Monochrome Icon + Category Name */}
+                          <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
+                            <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                              {isEmojiString(cat.iconName) ? (
+                                <span className="text-[12.5px] leading-none">{cat.iconName}</span>
+                              ) : Icon ? (
+                                <Icon size={13.5} strokeWidth={1.75} className="text-[#C7CDDC]" />
+                              ) : (
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#C7CDDC]" />
+                              )}
+                            </div>
+
+                            <span className="text-[11.5px] sm:text-xs font-medium text-[#C7CDDC] group-hover:text-white transition-colors tracking-tight truncate flex-1">
+                              {cat.name}
+                            </span>
+                          </div>
+
+                          {/* Bottom Row: Amount Remaining & Progress Bar */}
+                          <div className="flex flex-col w-full space-y-1">
+                            <div className="flex items-baseline justify-between gap-1">
+                              {cat.hasBudget ? (
+                                cat.isOverBudget ? (
+                                  <span className="text-[13px] sm:text-[14px] font-semibold text-rose-400 font-amount tabular-nums">
+                                    +{formatAmount(Math.abs(cat.remaining), lang)} kr
+                                  </span>
+                                ) : (
+                                  <span className="text-[13px] sm:text-[14px] font-semibold text-white font-amount tabular-nums">
+                                    {formatAmount(cat.remaining, lang)} kr
+                                  </span>
+                                )
+                              ) : (
+                                <span className="text-[13px] sm:text-[14px] font-semibold text-[#C7CDDC] font-amount tabular-nums">
+                                  {formatAmount(cat.spent, lang)} kr
+                                </span>
+                              )}
+
+                              <span className="text-[10px] font-normal text-[#9CA6BC] shrink-0">
+                                {cat.hasBudget 
+                                  ? (cat.isOverBudget 
+                                      ? (lang === 'en' ? 'over' : 'över') 
+                                      : (lang === 'en' ? 'left' : 'kvar')) 
+                                  : (lang === 'en' ? 'spent' : 'använt')}
+                              </span>
+                            </div>
+
+                            {cat.hasBudget && (
+                              <div className="w-full h-1 bg-white/[0.07] rounded-full overflow-hidden mt-0.5">
+                                <div 
+                                  className={`h-full rounded-full transition-all duration-500 ${
+                                    cat.isOverBudget ? 'bg-rose-500' : 'bg-[#8B9CFF]'
+                                  }`}
+                                  style={{ width: `${spentPct}%` }} 
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+
+                    {/* Direct shortcut card at the end of carousel */}
                     <motion.button
-                      key={cat.name}
                       initial={{ opacity: 0, scale: 0.96, x: 8 }}
                       animate={{ opacity: 1, scale: 1, x: 0 }}
-                      transition={{ delay: 0.08 + index * 0.02 }}
-                      onClick={() => onNavigate("analysis")}
-                      className="flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white/[0.025] hover:bg-white/[0.04] backdrop-blur-[18px] transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border border-white/[0.03] shadow-none"
+                      transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
+                      onClick={() => onNavigate("budget", "category-budgets")}
+                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-xl sm:rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[115px] max-w-[125px] cursor-pointer snap-start border border-dashed border-white/[0.05]"
                     >
-                      {/* Top Row: Minimalist Monochrome Icon + Category Name */}
-                      <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                          {isEmojiString(cat.iconName) ? (
-                            <span className="text-[12.5px] leading-none">{cat.iconName}</span>
-                          ) : Icon ? (
-                            <Icon size={13.5} strokeWidth={1.75} className="text-[#C7CDDC]" />
-                          ) : (
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#C7CDDC]" />
-                          )}
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.035] text-[#C7CDDC] group-hover:text-white border border-white/[0.035] shrink-0">
+                          <SlidersHorizontal size={13} strokeWidth={1.75} />
                         </div>
-
-                        <span className="text-[11.5px] sm:text-xs font-medium text-[#C7CDDC] group-hover:text-white transition-colors tracking-tight truncate flex-1">
-                          {cat.name}
+                        <span className="text-[11.5px] font-medium text-[#C7CDDC] group-hover:text-white transition-colors truncate">
+                          {lang === "en" ? "Manage" : "Hantera"}
                         </span>
                       </div>
-
-                      {/* Bottom Row: Amount Remaining & Progress Bar */}
-                      <div className="flex flex-col w-full space-y-1">
-                        <div className="flex items-baseline justify-between gap-1">
-                          {cat.hasBudget ? (
-                            cat.isOverBudget ? (
-                              <span className="text-[13px] sm:text-[14px] font-semibold text-rose-400 font-amount tabular-nums">
-                                +{formatAmount(Math.abs(cat.remaining), lang)} kr
-                              </span>
-                            ) : (
-                              <span className="text-[13px] sm:text-[14px] font-semibold text-white font-amount tabular-nums">
-                                {formatAmount(cat.remaining, lang)} kr
-                              </span>
-                            )
-                          ) : (
-                            <span className="text-[13px] sm:text-[14px] font-semibold text-[#C7CDDC] font-amount tabular-nums">
-                              {formatAmount(cat.spent, lang)} kr
-                            </span>
-                          )}
-
-                          <span className="text-[10px] font-normal text-[#9CA6BC] shrink-0">
-                            {cat.hasBudget 
-                              ? (cat.isOverBudget 
-                                  ? (lang === 'en' ? 'over' : 'över') 
-                                  : (lang === 'en' ? 'left' : 'kvar')) 
-                              : (lang === 'en' ? 'spent' : 'använt')}
-                          </span>
-                        </div>
-
-                        {cat.hasBudget && (
-                          <div className="w-full h-1 bg-white/[0.07] rounded-full overflow-hidden mt-0.5">
-                            <div 
-                              className={`h-full rounded-full transition-all duration-500 ${
-                                cat.isOverBudget ? 'bg-rose-500' : 'bg-[#8B9CFF]'
-                              }`}
-                              style={{ width: `${spentPct}%` }} 
-                            />
-                          </div>
-                        )}
+                      <div className="flex items-center justify-between text-[10px] font-normal text-[#9CA6BC]">
+                        <span>{lang === "en" ? "Edit limits" : "Justera"}</span>
+                        <span>→</span>
                       </div>
                     </motion.button>
-                  );
-                })}
-
-                {/* Direct shortcut card at the end of carousel */}
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.96, x: 8 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
-                  onClick={() => onNavigate("budget", "category-budgets")}
-                  className="flex-shrink-0 flex flex-col justify-between p-3 rounded-xl sm:rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[115px] max-w-[125px] cursor-pointer snap-start border border-dashed border-white/[0.05]"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.035] text-[#C7CDDC] group-hover:text-white border border-white/[0.035] shrink-0">
-                      <SlidersHorizontal size={13} strokeWidth={1.75} />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => onNavigate("budget", "category-budgets")}
+                    className="w-full p-4 rounded-2xl border border-dashed border-white/[0.06] hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.045] transition-all flex items-center justify-between text-left group cursor-pointer text-white"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.04] flex items-center justify-center text-[#C7CDDC] group-hover:text-white transition-colors">
+                        <SlidersHorizontal size={15} strokeWidth={1.75} />
+                      </div>
+                      <div>
+                        <p className="text-xs sm:text-sm font-semibold text-white leading-snug">
+                          {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
+                        </p>
+                        <p className="text-[11px] font-normal text-[#9CA6BC]">
+                          {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-[11.5px] font-medium text-[#C7CDDC] group-hover:text-white transition-colors truncate">
-                      {lang === "en" ? "Manage" : "Hantera"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[10px] font-normal text-[#9CA6BC]">
-                    <span>{lang === "en" ? "Edit limits" : "Justera"}</span>
-                    <span>→</span>
-                  </div>
-                </motion.button>
+                    <ChevronRight size={15} className="text-[#9CA6BC] group-hover:text-white transition-colors" />
+                  </button>
+                )}
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => onNavigate("budget", "category-budgets")}
-                className="w-full p-4 rounded-2xl border border-dashed border-white/[0.06] hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.045] transition-all flex items-center justify-between text-left group cursor-pointer text-white"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.04] flex items-center justify-center text-[#C7CDDC] group-hover:text-white transition-colors">
-                    <SlidersHorizontal size={15} strokeWidth={1.75} />
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm font-semibold text-white leading-snug">
-                      {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
-                    </p>
-                    <p className="text-[11px] font-normal text-[#9CA6BC]">
-                      {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight size={15} className="text-[#9CA6BC] group-hover:text-white transition-colors" />
-              </button>
-            )}
-          </div>
-        }
-      />
+            }
+          />
+        </div>
       </div>
+
+      {/* Spacer matching heroHeight so bottom sheet starts directly below the static hero */}
+      <div
+        style={{ height: heroHeight > 0 ? `${heroHeight}px` : '320px' }}
+        className="w-full shrink-0 pointer-events-none"
+      />
 
       {/* 2. EXPANDING BOTTOM SHEET (Scroll-driven surface covering hero as user scrolls down) */}
       <div
         ref={sheetRef}
-        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#232323] rounded-t-[32px] sm:rounded-t-[36px] border-t border-white/[0.1] shadow-[0_-20px_50px_rgba(0,0,0,0.85)] min-h-[calc(100vh-8rem)] pt-2 pb-40 space-y-6 mt-3 sm:mt-4"
+        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#232323] rounded-t-[32px] sm:rounded-t-[36px] border-t border-white/[0.1] shadow-[0_-20px_50px_rgba(0,0,0,0.85)] min-h-[calc(100vh-8rem)] pt-2 pb-40 space-y-6 mt-2"
       >
         {/* Visual Grab Handle / Sheet Indicator */}
         <div
