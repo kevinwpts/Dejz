@@ -506,11 +506,11 @@ export function TodayView({
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.08 + index * 0.02 }}
                           onClick={() => onNavigate("analysis")}
-                          className="flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-black/[0.08] hover:bg-black/[0.12] backdrop-blur-[18px] transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border border-black/[0.1] shadow-none"
+                          className="flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white hover:bg-white/95 text-black transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border border-white/40 shadow-lg"
                         >
                           {/* Top Row: Minimalist Monochrome Icon + Category Name */}
                           <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
-                            <div className="w-7 h-7 rounded-lg bg-black/[0.08] border border-black/[0.08] text-black flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <div className="w-7 h-7 rounded-lg bg-black/[0.05] border border-black/[0.06] text-black flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                               {isEmojiString(cat.iconName) ? (
                                 <span className="text-[12.5px] leading-none">{cat.iconName}</span>
                               ) : Icon ? (
@@ -530,7 +530,7 @@ export function TodayView({
                             <div className="flex items-baseline justify-between gap-1">
                               {cat.hasBudget ? (
                                 cat.isOverBudget ? (
-                                  <span className="text-[13px] sm:text-[14px] font-black text-rose-950 font-amount tabular-nums">
+                                  <span className="text-[13px] sm:text-[14px] font-black text-rose-600 font-amount tabular-nums">
                                     +{formatAmount(Math.abs(cat.remaining), lang)} kr
                                   </span>
                                 ) : (
@@ -544,7 +544,7 @@ export function TodayView({
                                 </span>
                               )}
 
-                              <span className="text-[10px] font-bold text-black/75 shrink-0">
+                              <span className="text-[10px] font-bold text-black/60 shrink-0">
                                 {cat.hasBudget 
                                   ? (cat.isOverBudget 
                                       ? (lang === 'en' ? 'over' : 'över') 
@@ -554,10 +554,10 @@ export function TodayView({
                             </div>
 
                             {cat.hasBudget && (
-                              <div className="w-full h-1 bg-black/15 rounded-full overflow-hidden mt-0.5">
+                              <div className="w-full h-1.5 bg-black/10 rounded-full overflow-hidden mt-0.5">
                                 <div 
                                   className={`h-full rounded-full transition-all duration-500 ${
-                                    cat.isOverBudget ? 'bg-rose-900' : 'bg-black'
+                                    cat.isOverBudget ? 'bg-rose-500' : 'bg-[#6C6BFF]'
                                   }`}
                                   style={{ width: `${spentPct}%` }} 
                                 />
@@ -574,17 +574,17 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
                       onClick={() => onNavigate("budget", "category-budgets")}
-                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-xl sm:rounded-2xl bg-black/[0.06] hover:bg-black/[0.1] transition-all group text-left active:scale-[0.98] min-w-[115px] max-w-[125px] cursor-pointer snap-start border border-dashed border-black/25"
+                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-xl sm:rounded-2xl bg-white/90 hover:bg-white text-black transition-all group text-left active:scale-[0.98] min-w-[115px] max-w-[125px] cursor-pointer snap-start border border-dashed border-black/20 shadow-md"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-black/[0.08] text-black border border-black/[0.08] shrink-0">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-black/[0.05] text-black border border-black/[0.06] shrink-0">
                           <SlidersHorizontal size={13} strokeWidth={2} />
                         </div>
                         <span className="text-[11.5px] font-bold text-black truncate">
                           {lang === "en" ? "Manage" : "Hantera"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-[10px] font-bold text-black/75">
+                      <div className="flex items-center justify-between text-[10px] font-bold text-black/60">
                         <span>{lang === "en" ? "Edit limits" : "Justera"}</span>
                         <span>→</span>
                       </div>
@@ -594,22 +594,22 @@ export function TodayView({
                   <button
                     type="button"
                     onClick={() => onNavigate("budget", "category-budgets")}
-                    className="w-full p-4 rounded-2xl border border-dashed border-black/25 hover:border-black/40 bg-black/[0.06] hover:bg-black/[0.1] transition-all flex items-center justify-between text-left group cursor-pointer text-black"
+                    className="w-full p-4 rounded-2xl border border-white/40 hover:bg-white/95 bg-white text-black shadow-lg transition-all flex items-center justify-between text-left group cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-black/[0.08] border border-black/[0.08] flex items-center justify-center text-black transition-colors">
+                      <div className="w-9 h-9 rounded-xl bg-black/[0.05] border border-black/[0.06] flex items-center justify-center text-black transition-colors">
                         <SlidersHorizontal size={15} strokeWidth={2} />
                       </div>
                       <div>
                         <p className="text-xs sm:text-sm font-bold text-black leading-snug">
                           {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
                         </p>
-                        <p className="text-[11px] font-semibold text-black/75">
+                        <p className="text-[11px] font-medium text-black/60">
                           {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
                         </p>
                       </div>
                     </div>
-                    <ChevronRight size={15} className="text-black transition-colors" />
+                    <ChevronRight size={15} className="text-black/60 group-hover:text-black transition-colors" />
                   </button>
                 )}
               </div>
