@@ -497,6 +497,7 @@ export const dataService = {
       category: e.category,
       logo: e.logo,
       deductionDay: e.deduction_day,
+      startMonth: e.start_month,
       isVariable: e.is_variable,
       periodOverrides: e.period_overrides || {},
       note: e.note || undefined
@@ -528,6 +529,7 @@ export const dataService = {
       category: expense.category,
       logo: expense.logo,
       deduction_day: expense.deductionDay,
+      start_month: expense.startMonth,
       is_variable: expense.isVariable,
       period_overrides: expense.periodOverrides || {},
       note: expense.note && expense.note.trim() ? expense.note.trim() : null
@@ -537,10 +539,15 @@ export const dataService = {
       .upsert(payload);
     
     if (error) {
-      if (error.code === '42703' || error.message?.includes('note')) {
-        delete payload.note;
-        const retry = await supabase.from('fixed_expenses').upsert(payload);
-        if (retry.error) throw retry.error;
+      if (error.code === '42703') {
+        const match = error.message?.match(/column "([^"]+)"/);
+        if (match && match[1] && match[1] in payload) {
+          delete payload[match[1]];
+          const retry = await supabase.from('fixed_expenses').upsert(payload);
+          if (retry.error) throw retry.error;
+        } else {
+          throw error;
+        }
       } else {
         throw error;
       }

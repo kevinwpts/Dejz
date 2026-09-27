@@ -12,6 +12,7 @@ import {
   Config,
   Income,
   FixedExpense,
+  Frequency,
   HomeWidgetConfig,
 } from "../types";
 import { TranslationKey } from "../i18n";
@@ -165,71 +166,114 @@ export function TodayView({
 
     incomes.forEach((i) => {
       if (i.deductionDay === day) {
-        const amount =
-          i.isVariable &&
-          periodId &&
-          i.periodOverrides &&
-          i.periodOverrides[periodId] !== undefined
-            ? i.periodOverrides[periodId]
-            : Number(i.amount) || 0;
+        // Frequency check
+        let isActiveThisMonth = true;
+        const currentMonth = normalizedSelectedDate.getMonth();
+        
+        if (i.frequency && i.startMonth !== undefined && i.frequency !== Frequency.MONTHLY) {
+          const startM = i.startMonth;
+          if (i.frequency === Frequency.QUARTERLY) isActiveThisMonth = (currentMonth - startM) % 3 === 0;
+          else if (i.frequency === Frequency.SEMI_ANNUALLY) isActiveThisMonth = (currentMonth - startM) % 6 === 0;
+          else if (i.frequency === Frequency.ANNUALLY) isActiveThisMonth = currentMonth === startM;
+        }
 
-        transactions.push({
-          id: `fixed-inc-${i.id}`,
-          amount,
-          type: "income",
-          category: i.category || (lang === "en" ? "Fixed Income" : "Fast inkomst"),
-          merchant: i.name,
-          timestamp: normalizedSelectedDate.getTime(),
-          isFixed: true,
-          originalItem: i,
-        });
+        if (isActiveThisMonth) {
+          const amount =
+            i.isVariable &&
+            periodId &&
+            i.periodOverrides &&
+            i.periodOverrides[periodId] !== undefined
+              ? i.periodOverrides[periodId]
+              : Number(i.amount) || 0;
+
+          transactions.push({
+            id: `fixed-inc-${i.id}`,
+            amount,
+            type: "income",
+            category: i.category || (lang === "en" ? "Fixed Income" : "Fast inkomst"),
+            merchant: i.name,
+            timestamp: normalizedSelectedDate.getTime(),
+            isFixed: true,
+            originalItem: i,
+          });
+        }
       }
     });
 
     fixedExpenses.forEach((e) => {
       if (e.deductionDay === day) {
-        const amount =
-          e.isVariable &&
-          periodId &&
-          e.periodOverrides &&
-          e.periodOverrides[periodId] !== undefined
-            ? e.periodOverrides[periodId]
-            : Number(e.amount) || 0;
+        // Frequency check
+        let isActiveThisMonth = true;
+        const currentMonth = normalizedSelectedDate.getMonth();
+        
+        if (e.frequency && e.startMonth !== undefined) {
+          const startM = e.startMonth;
+          if (e.frequency === Frequency.QUARTERLY) {
+            isActiveThisMonth = (currentMonth - startM) % 3 === 0;
+          } else if (e.frequency === Frequency.SEMI_ANNUALLY) {
+            isActiveThisMonth = (currentMonth - startM) % 6 === 0;
+          } else if (e.frequency === Frequency.ANNUALLY) {
+            isActiveThisMonth = currentMonth === startM;
+          }
+        }
 
-        transactions.push({
-          id: `fixed-exp-${e.id}`,
-          amount,
-          type: "expense",
-          category: e.category || (lang === "en" ? "Fixed Expense" : "Fast utgift"),
-          merchant: e.name,
-          timestamp: normalizedSelectedDate.getTime(),
-          isFixed: true,
-          originalItem: e,
-        });
+        if (isActiveThisMonth) {
+          const amount =
+            e.isVariable &&
+            periodId &&
+            e.periodOverrides &&
+            e.periodOverrides[periodId] !== undefined
+              ? e.periodOverrides[periodId]
+              : Number(e.amount) || 0;
+
+          transactions.push({
+            id: `fixed-exp-${e.id}`,
+            amount,
+            type: "expense",
+            category: e.category || (lang === "en" ? "Fixed Expense" : "Fast utgift"),
+            merchant: e.name,
+            timestamp: normalizedSelectedDate.getTime(),
+            isFixed: true,
+            originalItem: e,
+          });
+        }
       }
     });
 
     if (config?.monthlySavingsItems) {
       config.monthlySavingsItems.forEach((s) => {
         if (s.deductionDay === day) {
-          const amount =
-            s.isVariable &&
-            periodId &&
-            s.periodOverrides &&
-            s.periodOverrides[periodId] !== undefined
-              ? s.periodOverrides[periodId]
-              : Number(s.amount) || 0;
+          // Frequency check
+          let isActiveThisMonth = true;
+          const currentMonth = normalizedSelectedDate.getMonth();
+          
+          if (s.frequency && s.startMonth !== undefined && s.frequency !== Frequency.MONTHLY) {
+            const startM = s.startMonth;
+            if (s.frequency === Frequency.QUARTERLY) isActiveThisMonth = (currentMonth - startM) % 3 === 0;
+            else if (s.frequency === Frequency.SEMI_ANNUALLY) isActiveThisMonth = (currentMonth - startM) % 6 === 0;
+            else if (s.frequency === Frequency.ANNUALLY) isActiveThisMonth = currentMonth === startM;
+          }
 
-          transactions.push({
-            id: `fixed-sav-${s.id}`,
-            amount,
-            type: "expense",
-            category: lang === "en" ? "Savings" : "Sparande",
-            merchant: s.name,
-            timestamp: normalizedSelectedDate.getTime(),
-            isFixed: true,
-            originalItem: s,
-          });
+          if (isActiveThisMonth) {
+            const amount =
+              s.isVariable &&
+              periodId &&
+              s.periodOverrides &&
+              s.periodOverrides[periodId] !== undefined
+                ? s.periodOverrides[periodId]
+                : Number(s.amount) || 0;
+
+            transactions.push({
+              id: `fixed-sav-${s.id}`,
+              amount,
+              type: "expense",
+              category: lang === "en" ? "Savings" : "Sparande",
+              merchant: s.name,
+              timestamp: normalizedSelectedDate.getTime(),
+              isFixed: true,
+              originalItem: s,
+            });
+          }
         }
       });
     }

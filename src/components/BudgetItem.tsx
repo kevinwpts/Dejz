@@ -1,9 +1,8 @@
 import React from 'react';
-
 import { CategoryIcon } from './CategoryIcon';
 import { Language, TranslationKey } from '../i18n';
 import { formatAmount, capitalize } from '../utils/format';
-import { Config } from '../types';
+import { Config, Frequency } from '../types';
 import { TransactionLogo } from './TransactionLogo';
 
 interface BudgetItemProps {
@@ -34,7 +33,14 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   const displayName = item.name || (isFixed ? item.category : t('savings' as any));
 
   const hasOverride = Boolean(item.isVariable && currentPeriodId && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined);
-  const currentAmount = hasOverride ? item.periodOverrides[currentPeriodId] : (item.amount || 0);
+  const rawAmount = hasOverride ? item.periodOverrides[currentPeriodId] : (item.amount || 0);
+  
+  let displayAmount = rawAmount;
+  if (item.frequency && item.frequency !== Frequency.MONTHLY) {
+    if (item.frequency === Frequency.QUARTERLY) displayAmount = rawAmount / 3;
+    else if (item.frequency === Frequency.SEMI_ANNUALLY) displayAmount = rawAmount / 6;
+    else if (item.frequency === Frequency.ANNUALLY) displayAmount = rawAmount / 12;
+  }
 
   // Format deduction info for right side under amount
   const isEn = language === 'en';
@@ -43,6 +49,37 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
     : ':e';
   const dayString = item.deductionDay ? `${item.deductionDay}${daySuffix}` : '';
   const paymentString = item.paymentMethod ? (typeof item.paymentMethod === 'string' ? item.paymentMethod : item.paymentMethod?.name) : '';
+
+  const getNextDeduction = () => {
+    if (!item.frequency || item.frequency === Frequency.MONTHLY || item.startMonth === undefined || !item.deductionDay) return null;
+    
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    
+    let nextMonth = item.startMonth;
+    let nextYear = currentYear;
+    
+    const interval = item.frequency === Frequency.QUARTERLY ? 3 : item.frequency === Frequency.SEMI_ANNUALLY ? 6 : 12;
+    
+    // Find the next occurrence
+    for (let i = 0; i < 24; i++) { // Check up to 2 years ahead
+      const deductionDate = new Date(nextYear, nextMonth, item.deductionDay);
+      if (deductionDate > now) {
+        return deductionDate;
+      }
+      nextMonth += interval;
+      if (nextMonth >= 12) {
+        nextMonth -= 12;
+        nextYear += 1;
+      }
+    }
+    return null;
+  };
+
+  const nextDeductionDate = getNextDeduction();
+  const nextDeductionString = nextDeductionDate 
+    ? (isEn ? `Next: ${nextDeductionDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}` : `Nästa: ${nextDeductionDate.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}`)
+    : '';
 
   return (
     <div 
@@ -100,12 +137,17 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
       <div className="flex flex-col items-end justify-center shrink-0 max-w-[46%] sm:max-w-[42%] text-right pl-1">
         <p className={`text-[14px] sm:text-[14.5px] font-semibold whitespace-nowrap tracking-tight ${type === 'income' ? 'text-emerald-400' : 'text-white'}`}>
           <span className="opacity-75 mr-0.5 text-[13px] font-semibold">{type === 'income' ? '+' : '−'}</span>
-          <span className="font-amount tabular-nums font-semibold tracking-tight">{formatAmount(currentAmount, language)}</span>
+          <span className="font-amount tabular-nums font-semibold tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
           <span className="text-[12px] font-normal text-[#9CA6BC] ml-1">{currency}</span>
         </p>
 
         {/* Right-aligned deduction metadata under amount */}
-        <div className="flex items-center gap-1 mt-0.5 justify-end max-w-full overflow-hidden text-[#9CA6BC]">
+        <div className="flex flex-col items-end gap-0.5 mt-0.5 justify-end max-w-full overflow-hidden text-[#9CA6BC]">
+          {nextDeductionString && (
+            <span className="text-[10px] font-semibold text-accent/90 tracking-tight whitespace-nowrap">
+              {nextDeductionString} ({formatAmount(rawAmount, language)} {currency})
+            </span>
+          )}
           {(dayString || paymentString) && (
             <span className="text-[11px] font-normal text-[#9CA6BC] tracking-tight truncate">
               {dayString && <span>{dayString}</span>}

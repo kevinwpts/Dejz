@@ -2305,10 +2305,38 @@ export default function App() {
           );
 
           const dayNum = d.getDate();
+          const currentMonth = d.getMonth();
           const hasFixedItems = 
-            fixedExpenses.some((e) => e.deductionDay === dayNum) ||
-            incomes.some((i) => i.deductionDay === dayNum) ||
-            (config.monthlySavingsItems || []).some((s) => s.deductionDay === dayNum);
+            fixedExpenses.some((e) => {
+              if (e.deductionDay !== dayNum) return false;
+              if (e.frequency && e.startMonth !== undefined && e.frequency !== Frequency.MONTHLY) {
+                const startM = e.startMonth;
+                if (e.frequency === Frequency.QUARTERLY) return (currentMonth - startM) % 3 === 0;
+                if (e.frequency === Frequency.SEMI_ANNUALLY) return (currentMonth - startM) % 6 === 0;
+                if (e.frequency === Frequency.ANNUALLY) return currentMonth === startM;
+              }
+              return true;
+            }) ||
+            incomes.some((i) => {
+              if (i.deductionDay !== dayNum) return false;
+              if (i.frequency && i.startMonth !== undefined && i.frequency !== Frequency.MONTHLY) {
+                const startM = i.startMonth;
+                if (i.frequency === Frequency.QUARTERLY) return (currentMonth - startM) % 3 === 0;
+                if (i.frequency === Frequency.SEMI_ANNUALLY) return (currentMonth - startM) % 6 === 0;
+                if (i.frequency === Frequency.ANNUALLY) return currentMonth === startM;
+              }
+              return true;
+            }) ||
+            (config.monthlySavingsItems || []).some((s) => {
+              if (s.deductionDay !== dayNum) return false;
+              if (s.frequency && s.startMonth !== undefined && s.frequency !== Frequency.MONTHLY) {
+                const startM = s.startMonth;
+                if (s.frequency === Frequency.QUARTERLY) return (currentMonth - startM) % 3 === 0;
+                if (s.frequency === Frequency.SEMI_ANNUALLY) return (currentMonth - startM) % 6 === 0;
+                if (s.frequency === Frequency.ANNUALLY) return currentMonth === startM;
+              }
+              return true;
+            });
 
           dayInfos.push({
             date: d,

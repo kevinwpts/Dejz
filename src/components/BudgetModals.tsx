@@ -251,6 +251,8 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
   const [amount, setAmount] = useState(formatAmount(income?.amount || ''));
   
   const [deductionDay, setDeductionDay] = useState(income?.deductionDay || initialDeductionDay || 25);
+  const [startMonth, setStartMonth] = useState(income?.startMonth ?? new Date().getMonth());
+  const [frequency, setFrequency] = useState(income?.frequency || Frequency.MONTHLY);
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
   const paymentMethod = typeof income?.paymentMethod === 'string' ? income.paymentMethod : (income?.paymentMethod as any)?.name || firstPaymentMethod;
   const [isVariable, setIsVariable] = useState(income?.isVariable || false);
@@ -298,6 +300,8 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
       icon, 
       logo, 
       deductionDay, 
+      startMonth: frequency === Frequency.MONTHLY ? undefined : startMonth,
+      frequency,
       paymentMethod, 
       isVariable, 
       periodOverrides: isVariable ? (income?.periodOverrides || {}) : {} 
@@ -485,6 +489,63 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               </select>
               <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
             </div>
+          </div>
+
+          <div className={`grid gap-4 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className="space-y-2">
+              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('frequency')}</label>
+              <div className="relative">
+                <select
+                  value={frequency}
+                  onChange={(e) => setFrequency(e.target.value as Frequency)}
+                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                >
+                  {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
+                    <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
+                  ))}
+                </select>
+                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+              </div>
+            </div>
+
+            {frequency !== Frequency.MONTHLY && (
+              <div className="space-y-2">
+                <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('startMonthLabel')}</label>
+                <div className="relative">
+                  <select
+                    value={startMonth}
+                    onChange={(e) => setStartMonth(parseInt(e.target.value))}
+                    className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const date = new Date(2024, i, 1);
+                      const monthName = date.toLocaleString('sv-SE', { month: 'long' });
+                      const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                      
+                      let cycleText = '';
+                      if (frequency === Frequency.QUARTERLY) {
+                        const m2 = (i + 3) % 12;
+                        const m3 = (i + 6) % 12;
+                        const m4 = (i + 9) % 12;
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)}, ${getMonthShort(m3)}, ${getMonthShort(m4)})`;
+                      } else if (frequency === Frequency.SEMI_ANNUALLY) {
+                        const m2 = (i + 6) % 12;
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)})`;
+                      }
+
+                      return (
+                        <option key={i} value={i}>
+                          {capitalizedMonth}{cycleText}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Category */}
@@ -793,6 +854,11 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               </span>
               <span className="text-sm font-medium text-white text-right">
                 {expense.deductionDay ? `${expense.deductionDay}e` : '-'}
+                {expense.frequency !== Frequency.MONTHLY && expense.startMonth !== undefined && (
+                  <span className="text-xs font-normal text-[#9CA6BC] ml-1">
+                    ({new Date(2024, expense.startMonth, 1).toLocaleString('sv-SE', { month: 'short' })})
+                  </span>
+                )}
               </span>
             </div>
 
@@ -901,6 +967,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
   const [category, setCategory] = useState(typeof expense?.category === 'object' ? (expense.category as any)?.name : (expense?.category || (categories && categories.length > 0 ? categories[0].name : '')));
   const [name, setName] = useState(expense?.name || '');
   const [deductionDay, setDeductionDay] = useState(expense?.deductionDay || 1);
+  const [startMonth, setStartMonth] = useState(expense?.startMonth ?? new Date().getMonth());
   const [frequency, setFrequency] = useState(expense?.frequency || Frequency.MONTHLY);
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
   const [paymentMethod, setPaymentMethod] = useState(typeof expense?.paymentMethod === 'string' ? expense.paymentMethod : (expense?.paymentMethod as any)?.name || firstPaymentMethod);
@@ -951,6 +1018,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
       icon, 
       logo, 
       deductionDay, 
+      startMonth: frequency === Frequency.MONTHLY ? undefined : startMonth,
       isVariable, 
       periodOverrides: isVariable ? (expense?.periodOverrides || {}) : {} 
     });
@@ -1181,20 +1249,61 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('frequency')}</label>
-            <div className="relative">
-              <select
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value as Frequency)}
-                className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
-              >
-                {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                  <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
-                ))}
-              </select>
-              <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+          <div className={`grid gap-4 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className="space-y-2">
+              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('frequency')}</label>
+              <div className="relative">
+                <select
+                  value={frequency}
+                  onChange={(e) => setFrequency(e.target.value as Frequency)}
+                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                >
+                  {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
+                    <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
+                  ))}
+                </select>
+                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+              </div>
             </div>
+
+            {frequency !== Frequency.MONTHLY && (
+              <div className="space-y-2">
+                <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('startMonthLabel')}</label>
+                <div className="relative">
+                  <select
+                    value={startMonth}
+                    onChange={(e) => setStartMonth(parseInt(e.target.value))}
+                    className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const date = new Date(2024, i, 1);
+                      const monthName = date.toLocaleString('sv-SE', { month: 'long' });
+                      const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                      
+                      let cycleText = '';
+                      if (frequency === Frequency.QUARTERLY) {
+                        const m2 = (i + 3) % 12;
+                        const m3 = (i + 6) % 12;
+                        const m4 = (i + 9) % 12;
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)}, ${getMonthShort(m3)}, ${getMonthShort(m4)})`;
+                      } else if (frequency === Frequency.SEMI_ANNUALLY) {
+                        const m2 = (i + 6) % 12;
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)})`;
+                      }
+
+                      return (
+                        <option key={i} value={i}>
+                          {capitalizedMonth}{cycleText}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                </div>
+              </div>
+            )}
           </div>
 
           {expense && (
@@ -1527,6 +1636,8 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
   const [amount, setAmount] = useState(formatAmount(saving?.amount || ''));
   
   const [deductionDay, setDeductionDay] = useState(saving?.deductionDay || 25);
+  const [startMonth, setStartMonth] = useState(saving?.startMonth ?? new Date().getMonth());
+  const [frequency, setFrequency] = useState(saving?.frequency || Frequency.MONTHLY);
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
   const [paymentMethod, setPaymentMethod] = useState(typeof saving?.paymentMethod === 'string' ? saving.paymentMethod : (saving?.paymentMethod as any)?.name || firstPaymentMethod);
   const [isVariable, setIsVariable] = useState(saving?.isVariable || false);
@@ -1577,6 +1688,8 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
       icon, 
       logo, 
       deductionDay, 
+      startMonth: frequency === Frequency.MONTHLY ? undefined : startMonth,
+      frequency,
       paymentMethod, 
       isVariable, 
       periodOverrides: isVariable ? (saving?.periodOverrides || {}) : {} 
@@ -1754,6 +1867,63 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               </select>
               <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
             </div>
+          </div>
+
+          <div className={`grid gap-4 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className="space-y-2">
+              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('frequency')}</label>
+              <div className="relative">
+                <select
+                  value={frequency}
+                  onChange={(e) => setFrequency(e.target.value as Frequency)}
+                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                >
+                  {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
+                    <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
+                  ))}
+                </select>
+                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+              </div>
+            </div>
+
+            {frequency !== Frequency.MONTHLY && (
+              <div className="space-y-2">
+                <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('startMonthLabel')}</label>
+                <div className="relative">
+                  <select
+                    value={startMonth}
+                    onChange={(e) => setStartMonth(parseInt(e.target.value))}
+                    className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const date = new Date(2024, i, 1);
+                      const monthName = date.toLocaleString('sv-SE', { month: 'long' });
+                      const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                      
+                      let cycleText = '';
+                      if (frequency === Frequency.QUARTERLY) {
+                        const m2 = (i + 3) % 12;
+                        const m3 = (i + 6) % 12;
+                        const m4 = (i + 9) % 12;
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)}, ${getMonthShort(m3)}, ${getMonthShort(m4)})`;
+                      } else if (frequency === Frequency.SEMI_ANNUALLY) {
+                        const m2 = (i + 6) % 12;
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)})`;
+                      }
+
+                      return (
+                        <option key={i} value={i}>
+                          {capitalizedMonth}{cycleText}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Payment Method */}

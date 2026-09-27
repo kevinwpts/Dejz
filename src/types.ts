@@ -59,6 +59,8 @@ export interface MonthlySaving {
   icon?: string;
   logo?: string;
   deductionDay?: number;
+  frequency?: Frequency;
+  startMonth?: number; // 0-11
   paymentMethod?: string;
   isVariable?: boolean;
   periodOverrides?: Record<string, number>;
@@ -153,6 +155,8 @@ export interface Income {
   icon?: string;
   logo?: string;
   deductionDay?: number;
+  frequency?: Frequency;
+  startMonth?: number; // 0-11
   paymentMethod?: string;
   isVariable?: boolean;
   periodOverrides?: Record<string, number>;
@@ -169,6 +173,7 @@ export interface FixedExpense {
   icon?: string;
   logo?: string;
   deductionDay?: number;
+  startMonth?: number; // 0-11
   isVariable?: boolean;
   periodOverrides?: Record<string, number>;
   note?: string;

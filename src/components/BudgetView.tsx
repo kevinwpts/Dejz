@@ -116,9 +116,9 @@ export function BudgetView({
           ? e.periodOverrides[currentPeriodId]
           : (Number(e.amount) || 0);
         switch (e.frequency) {
-          case 'quarterly': return sum + amount / 3;
-          case 'semi-annually': return sum + amount / 6;
-          case 'annually': return sum + amount / 12;
+          case Frequency.QUARTERLY: return sum + amount / 3;
+          case Frequency.SEMI_ANNUALLY: return sum + amount / 6;
+          case Frequency.ANNUALLY: return sum + amount / 12;
           default: return sum + amount;
         }
       }, 0);
@@ -139,9 +139,9 @@ export function BudgetView({
       ? e.periodOverrides[currentPeriodId]
       : (Number(e.amount) || 0);
     switch (e.frequency) {
-      case 'quarterly': return sum + amount / 3;
-      case 'semi-annually': return sum + amount / 6;
-      case 'annually': return sum + amount / 12;
+      case Frequency.QUARTERLY: return sum + amount / 3;
+      case Frequency.SEMI_ANNUALLY: return sum + amount / 6;
+      case Frequency.ANNUALLY: return sum + amount / 12;
       default: return sum + amount;
     }
   }, 0);
@@ -664,9 +664,9 @@ export function BudgetView({
       {/* Overview Hero Section - Dynamic based on filter */}
       <div className="py-2 text-center space-y-1.5 flex flex-col items-center">
         <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
-          {budgetFilter === 'fixed' && (config.language === 'en' ? 'TOTAL FIXED EXPENSES' : 'TOTALA FASTA UTGIFTER')}
-          {budgetFilter === 'income' && (config.language === 'en' ? 'TOTAL INCOME' : 'TOTALA INKOMSTER')}
-          {budgetFilter === 'savings' && (config.language === 'en' ? 'TOTAL SAVINGS' : 'TOTALT SPARANDE')}
+          {budgetFilter === 'fixed' && (config?.language === 'en' ? 'TOTAL FIXED EXPENSES' : 'TOTALA FASTA UTGIFTER')}
+          {budgetFilter === 'income' && (config?.language === 'en' ? 'TOTAL INCOME' : 'TOTALA INKOMSTER')}
+          {budgetFilter === 'savings' && (config?.language === 'en' ? 'TOTAL SAVINGS' : 'TOTALT SPARANDE')}
         </span>
         <div className="flex items-baseline justify-center gap-2">
           <AnimatedNumber 
@@ -680,13 +680,13 @@ export function BudgetView({
             }`}
             formatter={(val) => {
               const prefix = budgetFilter === 'income' ? '+' : '−';
-              return `${prefix}${formatAmount(val, config.language)}`;
+              return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
           <span className={`text-[19px] sm:text-[21px] font-normal ${
             budgetFilter === 'income' ? 'text-emerald-400/80' : 'text-[#9CA6BC]'
           }`}>
-            {config.currency}
+            {config?.currency}
           </span>
         </div>
       </div>
