@@ -41,7 +41,7 @@ export function AnalysisView({
   periods,
   currentPeriodDate,
   onPeriodChange,
-  _onOpenCalendarPicker
+  onOpenCalendarPicker
 }: AnalysisViewProps) {
   const _paydaySetting = config.payday || 25;
   const _adjustment = config.paydayBeforeWeekend ? WeekendAdjustment.BEFORE : WeekendAdjustment.NONE;
@@ -181,6 +181,22 @@ export function AnalysisView({
     <div className="space-y-6 sm:space-y-7 font-sans">
       {/* Analysis Filter - Clean horizontal row directly on background */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
+        {periods && onPeriodChange && currentPeriodDate && (
+          <>
+            <UniversalPeriodSelector
+              periods={periods}
+              currentDate={currentPeriodDate}
+              onChange={onPeriodChange}
+              periodName={stats.periodName}
+              isCurrentPeriod={stats.isCurrentPeriod}
+              variant="dropdown"
+              allowFuture={false}
+              onOpenPicker={onOpenCalendarPicker}
+            />
+            <div className="w-px h-4 bg-white/[0.08] mx-0.5 shrink-0" />
+          </>
+        )}
+
         <button
           onClick={() => {
             setAnalysisFilter('all');
@@ -223,21 +239,6 @@ export function AnalysisView({
           <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-white' : 'text-[#9CA6BC]'} />
           <span>{t('fixedExpenses' as TranslationKey)}</span>
         </button>
-
-        {periods && onPeriodChange && currentPeriodDate && (
-          <>
-            <div className="w-px h-4 bg-white/[0.08] mx-0.5 shrink-0" />
-            <UniversalPeriodSelector
-              periods={periods}
-              currentDate={currentPeriodDate}
-              onChange={onPeriodChange}
-              periodName={stats.periodName}
-              isCurrentPeriod={stats.isCurrentPeriod}
-              variant="dropdown"
-              allowFuture={false}
-            />
-          </>
-        )}
       </div>
 
       {/* Budget Summary Metrics */}

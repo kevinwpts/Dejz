@@ -36,7 +36,7 @@ export function LogView({
   periods,
   currentPeriodDate,
   onPeriodChange,
-  _onOpenCalendarPicker
+  onOpenCalendarPicker
 }: LogViewProps) {
   const getLocale = () => {
     const lang = currentLang || 'sv';
@@ -94,6 +94,22 @@ export function LogView({
     <div className="space-y-6 font-sans">
       {/* Type Filters (Alla, Utgift, Inkomst, Kvitto) */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
+        {periods && onPeriodChange && currentPeriodDate && (
+          <>
+            <UniversalPeriodSelector
+              periods={periods}
+              currentDate={currentPeriodDate}
+              onChange={onPeriodChange}
+              periodName={stats.periodName}
+              isCurrentPeriod={stats.isCurrentPeriod}
+              variant="dropdown"
+              allowFuture={false}
+              onOpenPicker={onOpenCalendarPicker}
+            />
+            <div className="w-px h-4 bg-white/[0.08] mx-0.5 shrink-0" />
+          </>
+        )}
+
         {(['all', 'expense', 'income', 'receipt'] as const).map(type => {
           const isActive = typeFilter === type;
           return (
@@ -114,21 +130,6 @@ export function LogView({
             </button>
           );
         })}
-
-        {periods && onPeriodChange && currentPeriodDate && (
-          <>
-            <div className="w-px h-4 bg-white/[0.08] mx-0.5 shrink-0" />
-            <UniversalPeriodSelector
-              periods={periods}
-              currentDate={currentPeriodDate}
-              onChange={onPeriodChange}
-              periodName={stats.periodName}
-              isCurrentPeriod={stats.isCurrentPeriod}
-              variant="dropdown"
-              allowFuture={false}
-            />
-          </>
-        )}
       </div>
 
       {/* Transactions List */}
