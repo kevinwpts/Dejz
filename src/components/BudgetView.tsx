@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, ArrowLeft, Check, Sparkles, RotateCcw, Plus, Pin, ChevronUp, ChevronDown } from 'lucide-react';
+import { RefreshCw, ArrowLeft, Check, Sparkles, RotateCcw, Plus, Pin, ChevronUp, ChevronDown, Calendar, ArrowDownLeft, PiggyBank } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -633,32 +633,35 @@ export function BudgetView({
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
         <button
           onClick={() => setBudgetFilter('fixed')}
-          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'fixed'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
               : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
+          <Calendar size={13} />
           {t('fixedExpenses' as TranslationKey) || 'Fasta utgifter'}
         </button>
         <button
           onClick={() => setBudgetFilter('income')}
-          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'income'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
               : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
+          <ArrowDownLeft size={13} />
           {t('incomes' as TranslationKey) || 'Inkomster'}
         </button>
         <button
           onClick={() => setBudgetFilter('savings')}
-          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'savings'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
               : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
+          <PiggyBank size={13} />
           {t('monthlySavings' as TranslationKey) || 'Sparande'}
         </button>
       </div>
