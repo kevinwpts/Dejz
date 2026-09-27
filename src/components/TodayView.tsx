@@ -438,22 +438,14 @@ export function TodayView({
 
   return (
     <div className="relative font-sans">
-      {/* RICH RED AMBIENT BACKGROUND LAYER (Behind Hero Area) */}
+      {/* SOLID FLAT PALE RED BACKGROUND LAYER (Behind Hero Area, completely without glow or white highlights) */}
       <div 
-        className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-all duration-500"
+        className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-colors duration-300"
         style={{
           height: '100vh',
-          background: 'linear-gradient(180deg, #7c141d 0%, #630f17 38%, #480a0f 75%, #30060a 100%)',
+          backgroundColor: '#381e22',
         }}
-      >
-        {/* Subtle warm ambient glow in top center */}
-        <div 
-          className="absolute inset-0 opacity-70"
-          style={{
-            background: 'radial-gradient(circle at 50% 18%, rgba(244, 63, 94, 0.25) 0%, rgba(190, 18, 60, 0.12) 42%, transparent 75%)',
-          }}
-        />
-      </div>
+      />
 
       {/* 1. FIXED STATIC HERO LAYER (Kvar att spendera + Budgetkategorier) */}
       <div
