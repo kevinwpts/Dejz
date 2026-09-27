@@ -1,21 +1,54 @@
-@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&display=swap");
 
-/* Big Shoulders Display - Local High Performance Webfonts (Latin & Latin-Extended for Swedish å, ä, ö, Å, Ä, Ö) */
+/* Barlow Semi Condensed - Local High Performance Webfonts (Latin & Latin-Extended for Swedish å, ä, ö, Å, Ä, Ö) */
 @font-face {
-  font-family: 'Big Shoulders Display';
+  font-family: 'Barlow Semi Condensed';
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 400;
   font-display: swap;
-  src: url('/fonts/big-shoulders-display-latin.woff2') format('woff2');
+  src: url('/fonts/barlow-semi-condensed-400-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow Semi Condensed';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/barlow-semi-condensed-400-latinext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
-  font-family: 'Big Shoulders Display';
+  font-family: 'Barlow Semi Condensed';
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 600;
   font-display: swap;
-  src: url('/fonts/big-shoulders-display-latinext.woff2') format('woff2');
+  src: url('/fonts/barlow-semi-condensed-600-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow Semi Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/barlow-semi-condensed-600-latinext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Barlow Semi Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/barlow-semi-condensed-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Barlow Semi Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/barlow-semi-condensed-700-latinext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
@@ -25,23 +58,23 @@
 @theme {
   --color-black: #181818;
   --font-sans:
-    "Big Shoulders Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Barlow Semi Condensed", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display:
-    "Big Shoulders Display", sans-serif;
+    "Barlow Semi Condensed", sans-serif;
   --font-shoulders:
-    "Big Shoulders Display", sans-serif;
+    "Barlow Semi Condensed", sans-serif;
   --font-barlow:
-    "Big Shoulders Display", sans-serif;
+    "Barlow Semi Condensed", sans-serif;
   --font-amount:
-    "Big Shoulders Display", sans-serif;
+    "Barlow Semi Condensed", sans-serif;
   --font-exo:
-    "Big Shoulders Display", sans-serif;
+    "Barlow Semi Condensed", sans-serif;
   --font-logo:
-    "Big Shoulders Display", sans-serif;
+    "Barlow Semi Condensed", sans-serif;
   --font-serif:
-    "Big Shoulders Display", sans-serif;
+    "Barlow Semi Condensed", sans-serif;
   --font-mono:
-    "Big Shoulders Display", monospace;
+    "Barlow Semi Condensed", monospace;
 
   --color-accent: var(--accent-color);
   --color-accent-hover: var(--accent-hover);
@@ -75,7 +108,7 @@ input,
 select,
 textarea {
   font-family: var(--font-sans);
-  letter-spacing: 0.025em;
+  letter-spacing: 0.012em;
 }
 
 @utility font-display {
@@ -143,10 +176,10 @@ textarea {
 }
 
 :root {
-  /* Global Typography System - Big Shoulders Display Single Font */
-  --font-display: 'Big Shoulders Display', sans-serif;
-  --font-sans: 'Big Shoulders Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-amount: 'Big Shoulders Display', sans-serif;
+  /* Global Typography System - Barlow Semi Condensed Single Font */
+  --font-display: 'Barlow Semi Condensed', sans-serif;
+  --font-sans: 'Barlow Semi Condensed', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-amount: 'Barlow Semi Condensed', sans-serif;
 
   font-size: 100%;
   -webkit-font-smoothing: antialiased;
@@ -412,31 +445,31 @@ textarea {
   }
 
   h1 {
-    font-weight: 800;
-    letter-spacing: 0.015em;
+    font-weight: 700;
+    letter-spacing: 0em;
   }
 
   h2 {
     font-weight: 700;
-    letter-spacing: 0.015em;
+    letter-spacing: 0.005em;
   }
 
   h3 {
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
   }
 
   h4,
   h5,
   h6 {
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.012em;
   }
 
   p {
     color: var(--text-secondary);
-    line-height: 1.48;
-    letter-spacing: 0.025em;
+    line-height: 1.46;
+    letter-spacing: 0.012em;
     font-weight: 400;
   }
 
@@ -444,14 +477,14 @@ textarea {
     font-family: var(--font-amount) !important;
     font-feature-settings: "tnum" 1;
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em !important;
+    letter-spacing: 0.005em !important;
     font-weight: 700;
   }
 
   .input-label,
   .uppercase-label {
     letter-spacing: 0.06em;
-    @apply font-bold text-xs text-[var(--text-secondary)];
+    @apply font-semibold text-xs text-[var(--text-secondary)];
   }
 
   .tracking-wider {
@@ -467,7 +500,7 @@ textarea {
   select,
   button {
     font-family: var(--font-sans);
-    letter-spacing: 0.025em;
+    letter-spacing: 0.015em;
   }
 
   input,
