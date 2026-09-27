@@ -110,7 +110,7 @@ export function LogView({
           </>
         )}
 
-        {(['all', 'expense', 'income', 'receipt'] as const).map(type => {
+        {(['all', 'expense', 'income'] as const).map(type => {
           const isActive = typeFilter === type;
           return (
             <button
