@@ -75,7 +75,7 @@ export function UniversalPeriodSelector({
 
   if (variant === 'header') {
     return (
-      <div className="inline-flex items-center gap-0.5 sm:gap-1 bg-white/[0.035] border border-white/[0.035] backdrop-blur-[16px] rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none">
+      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] bg-[#818cf8]/[0.18] border-[#8B9CFF]/35 text-white shadow-none">
         <button 
           type="button"
           onClick={handlePrevPeriod}
@@ -91,37 +91,19 @@ export function UniversalPeriodSelector({
           <ChevronLeft size={15} strokeWidth={2} />
         </button>
             
-        {onOpenPicker ? (
-          <button 
-            type="button"
-            onClick={handleCenterClick}
-            className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full hover:bg-white/[0.05] transition-all cursor-pointer group min-w-0"
-            title={periodName || month}
-          >
-            <div className="flex items-baseline gap-1 min-w-0">
-              <span className="text-[13px] sm:text-[14px] font-bold font-display uppercase tracking-wider truncate text-white">
-                {month}
-              </span>
-              {dates && (
-                <span className="text-[10.5px] font-normal text-[#9CA6BC] truncate hidden sm:inline">
-                  ({dates})
-                </span>
-              )}
-            </div>
-            <ChevronDown size={12} className="text-[#9CA6BC] group-hover:text-white transition-colors shrink-0" />
-          </button>
-        ) : (
-          <div className="flex items-baseline gap-1 px-1.5 sm:px-2 py-0.5 min-w-0">
-            <span className="text-[13px] sm:text-[14px] font-bold font-display uppercase tracking-wider truncate text-white">
-              {month}
-            </span>
-            {dates && (
-              <span className="text-[10.5px] font-normal text-[#9CA6BC] truncate hidden sm:inline">
-                ({dates})
-              </span>
-            )}
-          </div>
-        )}
+        <div 
+          className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full min-w-0 select-none"
+          title={periodName || month}
+        >
+          <CalendarIcon 
+            size={13} 
+            strokeWidth={1.8} 
+            className="text-[#8B9CFF] shrink-0" 
+          />
+          <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate text-white">
+            {month}
+          </span>
+        </div>
 
         <button 
           type="button"

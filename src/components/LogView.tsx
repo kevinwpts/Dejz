@@ -11,7 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X, 
-  Check, 
+  RotateCcw, 
   Layers
 } from 'lucide-react';
 import { Transaction, Config } from '../types';
@@ -45,7 +45,9 @@ export function LogView({
 }: LogViewProps) {
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'receipt'>('all');
   const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isPeriodPickerOpen, setIsPeriodPickerOpen] = useState(false);
+  const [modalPeriod, setModalPeriod] = useState<any | null>(null);
 
   useScrollLock(isPeriodPickerOpen);
 
@@ -70,15 +72,6 @@ export function LogView({
     return en;
   };
 
-  // Prepare available periods: current and past periods first, newest at the top for the modal
-  const selectablePeriods = useMemo(() => {
-    if (!periods || periods.length === 0) return [];
-    return periods
-      .filter(p => !p.isFuture || p.isCurrent)
-      .slice()
-      .reverse();
-  }, [periods]);
-
   // Chronological list of past and current periods (earliest to latest) for arrow navigation
   const chronologicalPeriods = useMemo(() => {
     if (!periods || periods.length === 0) return [];
@@ -90,29 +83,39 @@ export function LogView({
     return chronologicalPeriods.findIndex(p => p.name === selectedPeriod.name);
   }, [selectedPeriod, chronologicalPeriods]);
 
-  const canGoPrev = chronologicalPeriods.length > 0 && (selectedPeriod === null || currentIndex > 0);
-  const canGoNext = selectedPeriod !== null;
+  const canGoPrev = selectedDate !== null || (chronologicalPeriods.length > 0 && (selectedPeriod === null || currentIndex > 0));
+  const canGoNext = selectedDate !== null || selectedPeriod !== null;
 
-  const handlePrevPeriod = (e: React.MouseEvent) => {
+  const handlePrev = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (selectedDate) {
+      const prev = new Date(selectedDate);
+      prev.setDate(prev.getDate() - 1);
+      setSelectedDate(prev);
+      return;
+    }
     if (chronologicalPeriods.length === 0) return;
     if (selectedPeriod === null) {
-      // From all periods, step into current / latest period
       setSelectedPeriod(chronologicalPeriods[chronologicalPeriods.length - 1]);
     } else if (currentIndex > 0) {
       setSelectedPeriod(chronologicalPeriods[currentIndex - 1]);
     }
   };
 
-  const handleNextPeriod = (e: React.MouseEvent) => {
+  const handleNext = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (selectedDate) {
+      const next = new Date(selectedDate);
+      next.setDate(next.getDate() + 1);
+      setSelectedDate(next);
+      return;
+    }
     if (chronologicalPeriods.length === 0 || selectedPeriod === null) return;
     if (currentIndex < chronologicalPeriods.length - 1) {
       setSelectedPeriod(chronologicalPeriods[currentIndex + 1]);
     } else {
-      // Stepping forward from latest period returns to "All periods"
       setSelectedPeriod(null);
     }
   };
@@ -124,12 +127,50 @@ export function LogView({
       : selectedPeriod.name;
   }, [selectedPeriod]);
 
+  const activeFilterLabel = useMemo(() => {
+    if (selectedDate) {
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+      
+      if (selectedDate.toDateString() === today.toDateString()) {
+        return getL10n('Idag', 'Today', 'I dag', 'I dag', 'Tänään');
+      }
+      if (selectedDate.toDateString() === yesterday.toDateString()) {
+        return getL10n('Igår', 'Yesterday', 'I går', 'I går', 'Eilen');
+      }
+      
+      return selectedDate.toLocaleDateString(getLocale(), {
+        day: 'numeric',
+        month: 'short',
+        year: selectedDate.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+      });
+    }
+
+    if (selectedPeriod) {
+      return selectedMonthName;
+    }
+
+    return getL10n('Alla perioder', 'All periods', 'Alle perioder', 'Alle perioder', 'Kaikki jaksot');
+  }, [selectedDate, selectedPeriod, selectedMonthName, currentLang]);
+
+  // Filter transactions by date / period / type
   const filteredExpenses = useMemo(() => {
     if (!transactions) return [];
     return transactions
       .filter(e => {
-        // Filter by period if user specifically selected one
-        if (selectedPeriod?.start && selectedPeriod?.end) {
+        // 1. Day filter has top priority if user chose a specific day
+        if (selectedDate) {
+          const startOfDay = new Date(selectedDate);
+          startOfDay.setHours(0, 0, 0, 0);
+          const endOfDay = new Date(selectedDate);
+          endOfDay.setHours(23, 59, 59, 999);
+          if (e.timestamp < startOfDay.getTime() || e.timestamp > endOfDay.getTime()) {
+            return false;
+          }
+        } 
+        // 2. Period filter if selected
+        else if (selectedPeriod?.start && selectedPeriod?.end) {
           const startTime = new Date(selectedPeriod.start).getTime();
           const endTime = new Date(selectedPeriod.end).getTime() + 86399999;
           if (e.timestamp < startTime || e.timestamp > endTime) {
@@ -137,6 +178,7 @@ export function LogView({
           }
         }
 
+        // 3. Type filter
         let matchesType = false;
         if (typeFilter === 'all') matchesType = true;
         else if (typeFilter === 'receipt') matchesType = !!e.receiptUrl;
@@ -145,7 +187,7 @@ export function LogView({
         return matchesType;
       })
       .sort((a, b) => b.timestamp - a.timestamp);
-  }, [transactions, typeFilter, selectedPeriod]);
+  }, [transactions, typeFilter, selectedPeriod, selectedDate]);
 
   const groupedExpenses = useMemo(() => {
     const groups: Record<string, Transaction[]> = {};
@@ -157,60 +199,141 @@ export function LogView({
     return Object.entries(groups).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime());
   }, [filteredExpenses]);
 
+  // Modal Calendar logic
+  const modalIndex = useMemo(() => {
+    if (!modalPeriod || chronologicalPeriods.length === 0) return -1;
+    return chronologicalPeriods.findIndex(p => p.name === modalPeriod.name);
+  }, [modalPeriod, chronologicalPeriods]);
+
+  const canModalGoPrev = modalIndex > 0;
+  const canModalGoNext = modalIndex >= 0 && modalIndex < chronologicalPeriods.length - 1;
+
+  const handleModalPrev = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (canModalGoPrev) {
+      const prevP = chronologicalPeriods[modalIndex - 1];
+      setModalPeriod(prevP);
+      setSelectedPeriod(prevP);
+      setSelectedDate(null);
+    }
+  };
+
+  const handleModalNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (canModalGoNext) {
+      const nextP = chronologicalPeriods[modalIndex + 1];
+      setModalPeriod(nextP);
+      setSelectedPeriod(nextP);
+      setSelectedDate(null);
+    }
+  };
+
+  const modalPeriodDate = useMemo(() => {
+    if (modalPeriod?.date) return new Date(modalPeriod.date);
+    if (modalPeriod?.start) return new Date(modalPeriod.start);
+    return new Date();
+  }, [modalPeriod]);
+
+  const calendarMonthData = useMemo(() => {
+    const year = modalPeriodDate.getFullYear();
+    const month = modalPeriodDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayWeekday = (new Date(year, month, 1).getDay() + 6) % 7; // Monday = 0
+
+    // Pre-calculate transactions per day in this month
+    const txByDay: Record<number, { hasIncome: boolean; hasExpense: boolean; count: number }> = {};
+    if (transactions) {
+      transactions.forEach(tx => {
+        const d = new Date(tx.timestamp);
+        if (d.getFullYear() === year && d.getMonth() === month) {
+          const dayNum = d.getDate();
+          if (!txByDay[dayNum]) {
+            txByDay[dayNum] = { hasIncome: false, hasExpense: false, count: 0 };
+          }
+          txByDay[dayNum].count++;
+          if (tx.type === 'income') txByDay[dayNum].hasIncome = true;
+          if (tx.type === 'expense') txByDay[dayNum].hasExpense = true;
+        }
+      });
+    }
+
+    return {
+      year,
+      month,
+      daysInMonth,
+      firstDayWeekday,
+      txByDay
+    };
+  }, [modalPeriodDate, transactions]);
+
+  const weekdayNames = useMemo(() => {
+    if (currentLang === 'en') return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    if (currentLang === 'no' || currentLang === 'da') return ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
+    if (currentLang === 'fi') return ['Ma', 'Ti', 'Ke', 'To', 'Pe', 'La', 'Su'];
+    return ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'];
+  }, [currentLang]);
+
+  const today = useMemo(() => new Date(), []);
+
   if (!transactions) return null;
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Top Filter Bar: Period Selector with Left/Right Arrows + Type Filters */}
+      {/* Top Filter Bar: Period/Day Selector with Left/Right Arrows + Type Filters */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
-        {/* Period Selector with Left & Right Arrows (like in Analysis) */}
+        {/* Period / Day Selector with Left & Right Arrows */}
         {periods && periods.length > 0 && (
           <>
             <div className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] ${
-              selectedPeriod
+              selectedDate || selectedPeriod
                 ? 'bg-[#818cf8]/[0.18] border-[#8B9CFF]/35 text-white shadow-none'
                 : 'bg-white/[0.035] border-white/[0.035] text-[#C7CDDC]'
             }`}>
               <button
                 type="button"
-                onClick={handlePrevPeriod}
+                onClick={handlePrev}
                 disabled={!canGoPrev}
                 className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
                   canGoPrev 
                     ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.06]' 
                     : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
                 }`}
-                aria-label="Föregående period"
-                title="Föregående period"
+                aria-label={selectedDate ? 'Föregående dag' : 'Föregående period'}
+                title={selectedDate ? 'Föregående dag' : 'Föregående period'}
               >
                 <ChevronLeft size={15} strokeWidth={2} />
               </button>
 
               <button
                 type="button"
-                onClick={() => setIsPeriodPickerOpen(true)}
+                onClick={() => {
+                  const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
+                  setModalPeriod(initial);
+                  setIsPeriodPickerOpen(true);
+                }}
                 className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full hover:bg-white/[0.05] transition-all cursor-pointer group min-w-0"
-                title={selectedPeriod ? selectedMonthName : getL10n('Alla perioder', 'All periods', 'Alle perioder', 'Alle perioder', 'Kaikki jaksot')}
+                title={activeFilterLabel}
               >
                 <CalendarIcon 
                   size={13} 
                   strokeWidth={1.8} 
-                  className={selectedPeriod ? 'text-[#8B9CFF]' : 'text-[#9CA6BC] group-hover:text-white transition-colors'} 
+                  className={selectedDate || selectedPeriod ? 'text-[#8B9CFF]' : 'text-[#9CA6BC] group-hover:text-white transition-colors'} 
                 />
                 <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate">
-                  {selectedPeriod 
-                    ? selectedMonthName 
-                    : getL10n('Alla perioder', 'All periods', 'Alle perioder', 'Alle perioder', 'Kaikki jaksot')}
+                  {activeFilterLabel}
                 </span>
-                {selectedPeriod ? (
+                {selectedDate || selectedPeriod ? (
                   <span
                     role="button"
                     tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation();
+                      setSelectedDate(null);
                       setSelectedPeriod(null);
                     }}
-                    className="p-0.5 hover:bg-white/20 rounded-full transition-colors ml-0.5"
+                    className="p-0.5 hover:bg-white/20 rounded-full transition-colors ml-0.5 cursor-pointer"
                     title={getL10n('Rensa filter (visa alla)', 'Clear filter (show all)', 'Fjern filter', 'Ryd filter', 'Tyhjennä')}
                   >
                     <X size={11} strokeWidth={2.5} className="text-[#C7CDDC] hover:text-white" />
@@ -222,15 +345,15 @@ export function LogView({
 
               <button
                 type="button"
-                onClick={handleNextPeriod}
+                onClick={handleNext}
                 disabled={!canGoNext}
                 className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
                   canGoNext 
                     ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.06]' 
                     : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
                 }`}
-                aria-label="Nästa period"
-                title="Nästa period"
+                aria-label={selectedDate ? 'Nästa dag' : 'Nästa period'}
+                title={selectedDate ? 'Nästa dag' : 'Nästa period'}
               >
                 <ChevronRight size={15} strokeWidth={2} />
               </button>
@@ -278,6 +401,9 @@ export function LogView({
                 <span className="text-xs font-medium text-[#9CA6BC] tracking-tight capitalize">
                   {new Date(date).toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
                 </span>
+                <span className="text-[11px] text-[#9CA6BC]/60 font-mono">
+                  {dayTransactions.length} {dayTransactions.length === 1 ? 'st' : 'st'}
+                </span>
               </div>
               <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
                 {dayTransactions.map((transaction: Transaction) => (
@@ -305,7 +431,15 @@ export function LogView({
             <EmptyState
               icon={Wallet}
               title={
-                selectedPeriod 
+                selectedDate 
+                  ? getL10n(
+                      `Inga transaktioner för ${activeFilterLabel}`, 
+                      `No transactions for ${activeFilterLabel}`,
+                      `Ingen transaksjoner for ${activeFilterLabel}`,
+                      `Ingen transaktioner for ${activeFilterLabel}`,
+                      `Ei tapahtumia päivälle ${activeFilterLabel}`
+                    )
+                  : selectedPeriod 
                   ? getL10n(
                       `Inga transaktioner för ${selectedMonthName}`, 
                       `No transactions for ${selectedMonthName}`,
@@ -316,10 +450,13 @@ export function LogView({
                   : (transactions?.length || 0) === 0 ? t('noTransactions') : t('noTransactionsSubtle')
               }
               description={
-                selectedPeriod ? (
+                selectedDate || selectedPeriod ? (
                   <button
                     type="button"
-                    onClick={() => setSelectedPeriod(null)}
+                    onClick={() => {
+                      setSelectedDate(null);
+                      setSelectedPeriod(null);
+                    }}
                     className="text-xs font-medium text-[#8B9CFF] hover:underline cursor-pointer mt-1"
                   >
                     {getL10n('Visa alla transaktioner istället', 'Show all transactions instead', 'Vis alle transaksjoner i stedet', 'Vis alle transaktioner i stedet', 'Näytä kaikki tapahtumat sen sijaan')}
@@ -341,7 +478,7 @@ export function LogView({
         )}
       </div>
 
-      {/* Period Selection Modal */}
+      {/* Calendar & Period Modal */}
       <AnimatePresence>
         {isPeriodPickerOpen && (
           <div 
@@ -354,7 +491,7 @@ export function LogView({
               exit={{ opacity: 0, y: 40, scale: 0.98 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#232323] border-t sm:border border-white/[0.08] w-full max-w-md rounded-t-[28px] rounded-b-none sm:rounded-[24px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[82vh] flex flex-col overflow-hidden text-white"
+              className="bg-[#232323] border-t sm:border border-white/[0.08] w-full max-w-md rounded-t-[28px] rounded-b-none sm:rounded-[24px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[88vh] flex flex-col overflow-hidden text-white"
             >
               {/* Header */}
               <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.06] shrink-0">
@@ -364,15 +501,15 @@ export function LogView({
                   </div>
                   <div>
                     <h3 className="text-[15px] font-bold text-white leading-tight">
-                      {getL10n('Välj period', 'Select period', 'Velg periode', 'Vælg periode', 'Valitse jakso')}
+                      {getL10n('Välj dag eller period', 'Select day or period', 'Velg dag eller periode', 'Vælg dag eller periode', 'Valitse päivä tai jakso')}
                     </h3>
                     <p className="text-[11px] text-[#9CA6BC] mt-0.5">
                       {getL10n(
-                        'Visa alla eller zooma in på en månad', 
-                        'View all or zoom in on a specific month',
-                        'Vis alle eller zoom inn på en måned',
-                        'Vis alle eller zoom ind på en måned',
-                        'Näytä kaikki tai rajaa tiettyyn kuukauteen'
+                        'Klicka på ett datum eller visa en hel period', 
+                        'Click a date or view an entire period',
+                        'Klikk på en dato eller vis en hel periode',
+                        'Klik på en dato eller se en hel periode',
+                        'Klikkaa päivää tai tarkastele koko jaksoa'
                       )}
                     </p>
                   </div>
@@ -388,117 +525,163 @@ export function LogView({
                 </button>
               </div>
 
-              {/* Scrollable Options List */}
-              <div className="overflow-y-auto space-y-1.5 py-3 pr-1 scrollbar-thin">
-                {/* Option: All periods (Infinite scroll) */}
+              {/* Period Stepper (Left / Right) */}
+              <div className="flex items-center justify-between bg-white/[0.03] border border-white/[0.06] rounded-2xl p-1.5 mt-3.5">
+                <button
+                  type="button"
+                  onClick={handleModalPrev}
+                  disabled={!canModalGoPrev}
+                  className={`p-2 rounded-xl transition-all cursor-pointer ${
+                    canModalGoPrev
+                      ? 'text-[#C7CDDC] hover:text-white hover:bg-white/[0.06] active:scale-90'
+                      : 'text-white/20 cursor-not-allowed'
+                  }`}
+                  aria-label="Föregående period"
+                  title="Föregående period"
+                >
+                  <ChevronLeft size={18} strokeWidth={2.2} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedPeriod(modalPeriod);
+                    setSelectedDate(null);
+                    setIsPeriodPickerOpen(false);
+                  }}
+                  className="flex flex-col items-center text-center px-2 min-w-0 cursor-pointer group hover:opacity-85 transition-opacity"
+                  title={getL10n('Välj hela perioden', 'Select full period')}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold text-white tracking-tight truncate capitalize group-hover:text-[#8B9CFF] transition-colors">
+                      {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
+                    </span>
+                    {modalPeriod?.isCurrent && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#8B9CFF]/20 text-[#8B9CFF] tracking-tight">
+                        {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
+                      </span>
+                    )}
+                  </div>
+                  {modalPeriod?.name?.includes('(') && (
+                    <span className="text-[11px] text-[#9CA6BC] font-medium truncate mt-0.5">
+                      {modalPeriod.name.split('(')[1]?.replace(')', '').trim()}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleModalNext}
+                  disabled={!canModalGoNext}
+                  className={`p-2 rounded-xl transition-all cursor-pointer ${
+                    canModalGoNext
+                      ? 'text-[#C7CDDC] hover:text-white hover:bg-white/[0.06] active:scale-90'
+                      : 'text-white/20 cursor-not-allowed'
+                  }`}
+                  aria-label="Nästa period"
+                  title="Nästa period"
+                >
+                  <ChevronRight size={18} strokeWidth={2.2} />
+                </button>
+              </div>
+
+              {/* Quick Actions (Full period vs All transactions) */}
+              <div className="grid grid-cols-2 gap-2 mt-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedPeriod(modalPeriod);
+                    setSelectedDate(null);
+                    setIsPeriodPickerOpen(false);
+                  }}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                    selectedPeriod?.name === modalPeriod?.name && !selectedDate
+                      ? 'bg-[#818cf8]/25 text-[#8B9CFF] border-[#8B9CFF]/40 shadow-sm'
+                      : 'bg-white/[0.03] text-[#C7CDDC] hover:text-white hover:bg-white/[0.06] border-white/[0.05]'
+                  }`}
+                >
+                  <Layers size={13} strokeWidth={2} />
+                  <span>{getL10n('Visa hela perioden', 'View full period', 'Vis hele perioden', 'Vis hele perioden', 'Koko jakso')}</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
                     setSelectedPeriod(null);
+                    setSelectedDate(null);
                     setIsPeriodPickerOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer text-left border ${
-                    selectedPeriod === null
-                      ? 'bg-[#818cf8]/[0.16] border-[#8B9CFF]/35 text-white'
-                      : 'bg-white/[0.025] hover:bg-white/[0.05] border-white/[0.04] text-[#C7CDDC]'
+                  className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                    selectedPeriod === null && selectedDate === null
+                      ? 'bg-[#818cf8]/25 text-[#8B9CFF] border-[#8B9CFF]/40 shadow-sm'
+                      : 'bg-white/[0.03] text-[#C7CDDC] hover:text-white hover:bg-white/[0.06] border-white/[0.05]'
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                      selectedPeriod === null 
-                        ? 'bg-[#818cf8]/25 text-[#8B9CFF]' 
-                        : 'bg-white/[0.04] text-[#9CA6BC]'
-                    }`}>
-                      <Layers size={16} strokeWidth={1.8} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[13.5px] font-semibold text-white tracking-tight">
-                        {getL10n('Alla perioder', 'All periods', 'Alle perioder', 'Alle perioder', 'Kaikki jaksot')}
-                      </div>
-                      <div className="text-[11px] text-[#9CA6BC] truncate">
-                        {getL10n(
-                          'Oändligt rullande flöde (standard)', 
-                          'Infinite flowing feed (default)',
-                          'Uendelig rullende feed (standard)',
-                          'Uendelig rullende feed (standard)',
-                          'Loputon selausnäkymä (oletus)'
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {selectedPeriod === null && (
-                    <div className="w-5 h-5 rounded-full bg-[#8B9CFF] flex items-center justify-center text-[#232323] shrink-0 ml-2">
-                      <Check size={12} strokeWidth={3} />
-                    </div>
-                  )}
+                  <RotateCcw size={13} strokeWidth={2} />
+                  <span>{getL10n('Alla transaktioner', 'All transactions', 'Alle transaksjoner', 'Alle transaktioner', 'Kaikki tapahtumat')}</span>
                 </button>
+              </div>
 
-                {/* Divider */}
-                <div className="pt-2 pb-1 px-1 flex items-center gap-2">
-                  <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[#9CA6BC]/70">
-                    {getL10n('Månader & Budgetperioder', 'Months & Periods', 'Måneder & perioder', 'Måneder & perioder', 'Kuukaudet & jaksot')}
-                  </span>
-                  <div className="flex-1 h-px bg-white/[0.04]" />
+              {/* Interactive Calendar Days Grid */}
+              <div className="mt-3.5 bg-white/[0.02] border border-white/[0.05] rounded-2xl p-3 select-none">
+                {/* Weekday headers */}
+                <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+                  {weekdayNames.map((d, i) => (
+                    <div key={i} className="text-center text-[10.5px] font-semibold text-[#9CA6BC] uppercase tracking-wider py-0.5">
+                      {d}
+                    </div>
+                  ))}
                 </div>
 
-                {/* List of specific periods */}
-                {selectablePeriods.map((p, idx) => {
-                  const [mPart, dRange] = p.name.includes('(')
-                    ? p.name.split('(').map((s: string) => s.replace(')', '').trim())
-                    : [p.name, ''];
+                {/* Days Grid */}
+                <div className="grid grid-cols-7 gap-1">
+                  {Array.from({ length: calendarMonthData.firstDayWeekday }).map((_, i) => (
+                    <div key={`empty-${i}`} className="aspect-square opacity-0 pointer-events-none" />
+                  ))}
+                  
+                  {Array.from({ length: calendarMonthData.daysInMonth }).map((_, i) => {
+                    const dayNum = i + 1;
+                    const dayDate = new Date(calendarMonthData.year, calendarMonthData.month, dayNum);
+                    const isSelected = selectedDate && dayDate.toDateString() === selectedDate.toDateString();
+                    const isToday = dayDate.toDateString() === today.toDateString();
+                    const dayTx = calendarMonthData.txByDay[dayNum];
 
-                  const isSelected = selectedPeriod?.name === p.name;
-
-                  return (
-                    <button
-                      key={p.name || idx}
-                      type="button"
-                      onClick={() => {
-                        setSelectedPeriod(p);
-                        setIsPeriodPickerOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer text-left border ${
-                        isSelected
-                          ? 'bg-[#818cf8]/[0.16] border-[#8B9CFF]/35 text-white'
-                          : 'bg-white/[0.025] hover:bg-white/[0.05] border-white/[0.04] text-[#C7CDDC]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                    return (
+                      <button
+                        key={dayNum}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDate(dayDate);
+                          setSelectedPeriod(modalPeriod);
+                          setIsPeriodPickerOpen(false);
+                        }}
+                        className={`aspect-square w-full rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
                           isSelected 
-                            ? 'bg-[#818cf8]/25 text-[#8B9CFF]' 
-                            : 'bg-white/[0.04] text-[#9CA6BC]'
+                            ? 'bg-[#8B9CFF] text-[#1c1c1c] font-bold shadow-md shadow-[#8B9CFF]/30 z-10' 
+                            : isToday
+                            ? 'bg-white/[0.08] text-white border border-[#8B9CFF]/50 font-semibold'
+                            : 'bg-transparent text-[#C7CDDC] hover:bg-white/[0.06] hover:text-white font-medium'
+                        }`}
+                      >
+                        <span className={`text-[13px] sm:text-[14px] leading-none tabular-nums ${
+                          isSelected ? 'text-[#1c1c1c]' : isToday ? 'text-white' : 'text-[#C7CDDC]'
                         }`}>
-                          <CalendarIcon size={15} strokeWidth={1.8} />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[13.5px] font-semibold text-white tracking-tight truncate">
-                              {mPart}
-                            </span>
-                            {p.isCurrent && (
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#8B9CFF]/20 text-[#8B9CFF] tracking-tight">
-                                {getL10n('Nuvarande', 'Current', 'Nåværende', 'Nuværende', 'Nykyinen')}
-                              </span>
-                            )}
-                          </div>
-                          {dRange && (
-                            <div className="text-[11px] text-[#9CA6BC] truncate mt-0.5">
-                              {dRange}
-                            </div>
+                          {dayNum}
+                        </span>
+                        
+                        {/* Transaction Dots */}
+                        <div className="flex items-center justify-center gap-0.5 pointer-events-none h-1 w-full">
+                          {dayTx?.hasIncome && (
+                            <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-emerald-900' : 'bg-emerald-400'}`} />
+                          )}
+                          {dayTx?.hasExpense && (
+                            <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[#1c1c1c]' : 'bg-[#8B9CFF]'}`} />
                           )}
                         </div>
-                      </div>
-
-                      {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-[#8B9CFF] flex items-center justify-center text-[#232323] shrink-0 ml-2">
-                          <Check size={12} strokeWidth={3} />
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </motion.div>
           </div>

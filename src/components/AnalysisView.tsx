@@ -191,7 +191,6 @@ export function AnalysisView({
               isCurrentPeriod={stats.isCurrentPeriod}
               variant="header"
               allowFuture={false}
-              onOpenPicker={onOpenCalendarPicker}
             />
             <div className="w-px h-4 bg-white/[0.08] mx-0.5 shrink-0" />
           </>
