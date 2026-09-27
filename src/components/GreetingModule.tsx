@@ -74,7 +74,7 @@ export function GreetingModule({
         className="pt-3 sm:pt-5 pb-1 text-center flex flex-col items-center space-y-2"
       >
         {/* Tracked Minimalist Uppercase Structural Label (Barlow Condensed) */}
-        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-black/80 block select-none font-display">
+        <span className="text-[13px] sm:text-[14px] font-semibold uppercase tracking-[0.08em] text-[#9CA6BC] block select-none font-display">
           {t('totalRemaining')}
         </span>
 
@@ -84,21 +84,21 @@ export function GreetingModule({
             <AnimatedNumber 
               value={stats?.remainingPeriodCents || 0} 
               className={`text-[72px] sm:text-[84px] leading-[0.9] font-black font-amount tabular-nums tracking-normal ${
-                isNegative ? 'text-rose-700' : 'text-black'
+                isNegative ? 'text-rose-400' : 'text-white'
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
             {/* Currency label (Barlow Condensed) */}
             <span className={`text-[24px] sm:text-[28px] font-bold tracking-normal ${
-              isNegative ? 'text-rose-700/80' : 'text-black/80'
+              isNegative ? 'text-rose-400/80' : 'text-white/80'
             }`}>
               {currency}
             </span>
           </div>
 
           {/* Days to salary */}
-          <div className="flex items-center gap-1.5 text-xs text-black font-semibold mt-3 bg-black/10 px-3 py-1 rounded-full border border-black/15 shadow-none">
-            <Calendar size={13} className="text-black" />
+          <div className="flex items-center gap-1.5 text-xs text-[#C7CDDC] font-medium mt-3 bg-white/[0.045] px-3 py-1 rounded-full border border-white/[0.06] shadow-none">
+            <Calendar size={13} className="text-[#9CA6BC]" />
             <span>
               {effectiveRemainingDays} {isEn ? 'days until payday' : 'dagar till lön'}
             </span>
