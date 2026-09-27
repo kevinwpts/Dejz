@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 import {
@@ -98,8 +98,52 @@ export function TodayView({
 }: TodayViewProps) {
   const [isWidgetManagerOpen, setIsWidgetManagerOpen] = useState(false);
   const [isCustomizing, setIsCustomizing] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const [heroHeight, setHeroHeight] = useState(300);
 
   const lang = config?.language || 'sv';
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (heroRef.current) {
+        setHeroHeight(heroRef.current.offsetHeight);
+      }
+    };
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, []);
+
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleToggleExpand = useCallback(() => {
+    const threshold = Math.max(60, (heroHeight || 300) * 0.4);
+    if (window.scrollY > threshold) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      const target = heroRef.current ? heroRef.current.offsetHeight : 300;
+      window.scrollTo({ top: target, behavior: "smooth" });
+    }
+  }, [heroHeight]);
+
+  const progress = Math.min(1, Math.max(0, scrollY / Math.max(1, heroHeight || 300)));
+  const heroOpacity = Math.max(0.25, 1 - progress * 0.75);
+  const heroScale = Math.max(0.96, 1 - progress * 0.04);
 
   const resolvedWidgets = useMemo(() => {
     return getResolvedHomeWidgets(config?.homeWidgets);
@@ -367,14 +411,21 @@ export function TodayView({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="space-y-8 relative font-sans pb-16"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25 }}
+      className="relative font-sans"
     >
-
-      {/* 1. HERO AREA & ACTIONS (Directly on canvas, with nested budget categories) */}
-      <GreetingModule
+      {/* 1. HERO AREA & ACTIONS (Sticky background that bottom sheet expands over) */}
+      <div
+        ref={heroRef}
+        className="sticky top-[calc(4.8rem+env(safe-area-inset-top))] z-0 transition-[opacity,transform] duration-150 ease-out origin-top pointer-events-auto"
+        style={{
+          opacity: heroOpacity,
+          transform: `scale(${heroScale})`,
+        }}
+      >
+        <GreetingModule
         userName={userName}
         availableForD={todayData?.availableForD || stats?.availableForD || 0}
         currency={config?.currency || 'kr'}
@@ -531,25 +582,36 @@ export function TodayView({
           </div>
         }
       />
+      </div>
 
-      {/* 3. PERIOD TIMELINE */}
-      {calendarDays && calendarDays.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12 }}
-          className="pt-1 overflow-visible"
+      {/* 2. EXPANDING BOTTOM SHEET (Scroll-driven surface covering hero as user scrolls down) */}
+      <div
+        ref={sheetRef}
+        className="relative z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#232323] rounded-t-[32px] sm:rounded-t-[36px] border-t border-white/[0.08] shadow-[0_-16px_48px_rgba(0,0,0,0.65)] min-h-[calc(100vh-8rem)] pt-2 pb-40 space-y-6 mt-3 sm:mt-4"
+      >
+        {/* Visual Grab Handle / Sheet Indicator */}
+        <div
+          onClick={handleToggleExpand}
+          className="w-full flex flex-col items-center justify-center py-2 cursor-pointer group active:opacity-70 transition-opacity select-none touch-manipulation"
+          title={progress > 0.5 ? (lang === 'en' ? 'Click to show overview' : 'Klicka för att visa översikt') : (lang === 'en' ? 'Click to expand' : 'Klicka för att expandera')}
+          aria-label="Expand or collapse sheet"
         >
-          <PeriodTimeline
-            calendarDays={calendarDays}
-            selectedDate={normalizedSelectedDate}
-            onSelectDate={setSelectedDate}
-            stats={stats}
-            language={lang}
-            isCurrentPeriod={isCurrentPeriod}
-          />
-        </motion.div>
-      )}
+          <div className="w-11 h-1 rounded-full bg-white/20 group-hover:bg-white/40 transition-colors" />
+        </div>
+
+        {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
+        {calendarDays && calendarDays.length > 0 && (
+          <div className="sticky top-[calc(4.6rem+env(safe-area-inset-top))] z-20 bg-[#232323]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-1 pb-3 border-b border-white/[0.03] transition-all">
+            <PeriodTimeline
+              calendarDays={calendarDays}
+              selectedDate={normalizedSelectedDate}
+              onSelectDate={setSelectedDate}
+              stats={stats}
+              language={lang}
+              isCurrentPeriod={isCurrentPeriod}
+            />
+          </div>
+        )}
 
       {/* 4. SELECTED DAY'S TRANSACTIONS (Natural Swedish casing: Idag, 26 september) */}
       <div className="space-y-4 pt-1">
@@ -878,6 +940,9 @@ export function TodayView({
             <span>{lang === 'en' ? 'Manage widgets' : 'Hantera widgets'}</span>
           </button>
         </div>
+      </div>
+
+      {/* Close 2. EXPANDING BOTTOM SHEET */}
       </div>
 
       {/* Widget Manager Modal */}

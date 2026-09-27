@@ -334,7 +334,7 @@ export function AnalysisView({
                       transition: 'all 0.25s ease'
                     }}
                     strokeWidth={expandedCategory === entry.name ? 2 : 0}
-                    stroke={expandedCategory === entry.name ? '#14141E' : 'none'}
+                    stroke={expandedCategory === entry.name ? '#232323' : 'none'}
                   />
                 ))}
               </Pie>

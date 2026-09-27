@@ -84,8 +84,10 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
     };
   }, [isRefreshing, pullDistance, onRefresh]);
 
+  const contentTransform = useTransform(pullDistance, (d) => d > 0 ? `translate3d(0, ${d}px, 0)` : 'none');
+
   return (
-    <div ref={containerRef} className="relative min-h-dvh overflow-x-hidden">
+    <div ref={containerRef} className="relative min-h-dvh overflow-x-clip">
       {/* Pull Indicator */}
       <motion.div 
         style={{ opacity, scale, y: pullDistance }}
@@ -99,7 +101,7 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
       </motion.div>
 
       {/* Content */}
-      <motion.div style={{ y: pullDistance }}>
+      <motion.div style={{ transform: contentTransform }}>
         {children}
       </motion.div>
     </div>

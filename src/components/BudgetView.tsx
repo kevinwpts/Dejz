@@ -416,7 +416,7 @@ export function BudgetView({
             Kategorier ({config.categories?.length || 0})
           </span>
           
-          <div className="overflow-hidden border border-white/[0.03] rounded-3xl bg-[#14141E]/50 backdrop-blur-xl shadow-none divide-y divide-white/[0.03]">
+          <div className="overflow-hidden border border-white/[0.04] rounded-3xl bg-[#2b2b2b] backdrop-blur-xl shadow-none divide-y divide-white/[0.04]">
             {sortedCategoriesForManage.map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];

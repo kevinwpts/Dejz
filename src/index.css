@@ -201,27 +201,27 @@ textarea {
   --bg-secondary: #232323;
   --bg-gradient: linear-gradient(180deg, #232323 0%, #232323 100%);
 
-  --surface-color: #17161D;
-  --surface-gradient: #17161D;
-  --surface-elevated: #211F27;
-  --surface-elevated-gradient: #211F27;
-  --surface-solid: #17161D;
-  --surface-muted: #292730; /* Surface hover */
+  --surface-color: #2b2b2b;
+  --surface-gradient: #2b2b2b;
+  --surface-elevated: #312f2f;
+  --surface-elevated-gradient: #312f2f;
+  --surface-solid: #2b2b2b;
+  --surface-muted: #383838; /* Surface hover */
   --surface-tint: rgba(255, 255, 255, 0.01);
 
   --text-primary: #F9F8F6;
-  --text-secondary: #B5B2BC;
-  --text-tertiary: #85818C;
-  --text-inactive: #4E525C;
+  --text-secondary: #A8A8A8;
+  --text-tertiary: #737373;
+  --text-inactive: #525252;
 
-  --border-color: #222028;
-  --border-strong: #222028;
+  --border-color: #333333;
+  --border-strong: #3D3D3D;
   --inner-highlight: transparent;
 
-  --chip-bg: #211F27;
+  --chip-bg: #312f2f;
   --transaction-bg: var(--surface-color);
-  --card-nested-bg: #211F27;
-  --remaining-today-gradient: #17161D;
+  --card-nested-bg: #312f2f;
+  --remaining-today-gradient: #2b2b2b;
 
   /* Custom Elevation Levels - Dark Mode */
   --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -235,9 +235,9 @@ textarea {
   --accent-hover: #EBEAE8;
   --accent-gradient: linear-gradient(135deg, #F9F8F6 0%, #EBEAE8 100%);
   --text-on-accent: #0B0A12;
-  --accent-soft: #292730;
+  --accent-soft: #383838;
   --accent-glow: rgba(249, 248, 246, 0.05);
-  --accent-secondary-color: #222028;
+  --accent-secondary-color: #333333;
 
   /* Primary button states (Dark mode) */
   --btn-primary-bg: #F9F8F6;

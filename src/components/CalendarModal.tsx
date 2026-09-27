@@ -165,7 +165,7 @@ export function CalendarModal({
                         </div>
 
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-[#8B9CFF] flex items-center justify-center text-[#080A14] shrink-0 ml-2">
+                          <div className="w-5 h-5 rounded-full bg-[#8B9CFF] flex items-center justify-center text-[#232323] shrink-0 ml-2">
                             <Check size={12} strokeWidth={3} />
                           </div>
                         )}
