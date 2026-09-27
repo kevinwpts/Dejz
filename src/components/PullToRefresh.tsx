@@ -23,6 +23,8 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
   const startY = useRef(0);
   const isPulling = useRef(false);
 
+  const contentRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -45,11 +47,17 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
         const resistance = Math.max(0.2, 0.5 - (diff / 1000));
         const move = diff * resistance;
         pullDistance.set(move);
+        if (contentRef.current) {
+          contentRef.current.style.transform = `translate3d(0, ${move}px, 0)`;
+        }
         
         // Prevent default scrolling when pulling
         if (e.cancelable) e.preventDefault();
       } else {
         isPulling.current = false;
+        if (contentRef.current) {
+          contentRef.current.style.transform = '';
+        }
         animate(pullDistance, 0, { type: 'spring', stiffness: 300, damping: 30 });
       }
     };
@@ -60,15 +68,33 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
       
       if (pullDistance.get() >= threshold) {
         setIsRefreshing(true);
+        if (contentRef.current) {
+          contentRef.current.style.transition = 'transform 0.2s ease-out';
+          contentRef.current.style.transform = `translate3d(0, ${threshold}px, 0)`;
+        }
         animate(pullDistance, threshold, { type: 'spring', stiffness: 300, damping: 30 });
         
         try {
           await onRefresh();
         } finally {
           setIsRefreshing(false);
+          if (contentRef.current) {
+            contentRef.current.style.transition = 'transform 0.25s ease-out';
+            contentRef.current.style.transform = '';
+            setTimeout(() => {
+              if (contentRef.current) contentRef.current.style.transition = '';
+            }, 300);
+          }
           animate(pullDistance, 0, { type: 'spring', stiffness: 200, damping: 25 });
         }
       } else {
+        if (contentRef.current) {
+          contentRef.current.style.transition = 'transform 0.25s ease-out';
+          contentRef.current.style.transform = '';
+          setTimeout(() => {
+            if (contentRef.current) contentRef.current.style.transition = '';
+          }, 300);
+        }
         animate(pullDistance, 0, { type: 'spring', stiffness: 300, damping: 30 });
       }
     };
@@ -84,10 +110,8 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
     };
   }, [isRefreshing, pullDistance, onRefresh]);
 
-  const contentTransform = useTransform(pullDistance, (d) => d > 0 ? `translate3d(0, ${d}px, 0)` : 'none');
-
   return (
-    <div ref={containerRef} className="relative min-h-dvh overflow-x-clip">
+    <div ref={containerRef} className="relative min-h-dvh">
       {/* Pull Indicator */}
       <motion.div 
         style={{ opacity, scale, y: pullDistance }}
@@ -100,10 +124,10 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
         </div>
       </motion.div>
 
-      {/* Content */}
-      <motion.div style={{ transform: contentTransform }}>
+      {/* Content: clean DOM div with no persistent transforms so sticky children work natively */}
+      <div ref={contentRef}>
         {children}
-      </motion.div>
+      </div>
     </div>
   );
 }

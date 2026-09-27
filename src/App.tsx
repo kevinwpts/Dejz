@@ -3720,6 +3720,7 @@ export default function App() {
               <TodayView
                 stats={stats}
                 config={config}
+                isDemoMode={isDemoMode}
                 userName={
                   (() => {
                     const raw = (
