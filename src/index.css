@@ -196,10 +196,10 @@ textarea {
 
 .dark {
   /* Premium Dark Theme (Dejz Design System) */
-  --bg-top-color: #080A14;
-  --bg-color: #080A14;
-  --bg-secondary: #080A14;
-  --bg-gradient: linear-gradient(180deg, #080A14 0%, #080A14 100%);
+  --bg-top-color: #232323;
+  --bg-color: #232323;
+  --bg-secondary: #232323;
+  --bg-gradient: linear-gradient(180deg, #232323 0%, #232323 100%);
 
   --surface-color: #17161D;
   --surface-gradient: #17161D;
@@ -245,7 +245,7 @@ textarea {
   --btn-primary-hover: #EBEAE8;
   --btn-primary-pressed: #D7D6D4;
 
-  --modal-bg: #17161D;
+  --modal-bg: #232323;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
   --bg-hover: #38230E; /* active brand subtle in dark mode */
@@ -299,7 +299,7 @@ textarea {
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.07) !important;
 }
 .dark .glass-nav {
-  background: rgba(25, 28, 32, 0.88) !important;
+  background: #242424 !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid var(--border-color) !important;

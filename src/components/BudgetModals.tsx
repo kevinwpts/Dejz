@@ -82,7 +82,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-[#0D101E] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border-t sm:border border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-[#232323] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border-t sm:border border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -136,7 +136,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
 
         {/* Main Content Area: One Cohesive Detail Surface */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+          <div className="bg-[#312f2f] rounded-[24px] border border-white/[0.05] divide-y divide-white/[0.05] overflow-hidden">
             
             {/* Amount Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between">
@@ -729,7 +729,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[#0D101E] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border-t sm:border border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-[#232323] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border-t sm:border border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -783,7 +783,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
         {/* Main Content Area: One Cohesive Detail Surface */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+          <div className="bg-[#312f2f] rounded-[24px] border border-white/[0.05] divide-y divide-white/[0.05] overflow-hidden">
             
             {/* Amount Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between">
@@ -1544,7 +1544,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             />
           </div>
 
-          <div className="bg-[var(--surface-muted)]/50 p-5 rounded-[16px] border border-[var(--border-color)]">
+          <div className="bg-[#312f2f] p-5 rounded-[16px] border border-white/[0.05]">
             <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1">{t('amount')}</p>
             <p className="text-3xl font-semibold text-accent font-amount">
               <span className="opacity-40 mr-1">→</span>
@@ -1554,12 +1554,12 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
+            <div className="bg-[#312f2f] p-4 rounded-[16px] border border-white/[0.05] col-span-2">
               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('savingsGoal') || 'Sparmål'}</p>
               <p className="text-base font-medium text-[var(--text-primary)] break-words">{saving.name}</p>
             </div>
 
-            <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] col-span-2">
+            <div className="bg-[#312f2f] p-4 rounded-[16px] border border-white/[0.05] col-span-2">
               <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('type')}</p>
               <div className="flex items-center gap-2.5">
                 <CategoryIcon 
@@ -1573,14 +1573,14 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             </div>
 
             {saving.deductionDay ? (
-              <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
+              <div className="bg-[#312f2f] p-4 rounded-[16px] border border-white/[0.05]">
                 <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('deductionDay')}</p>
                 <p className="text-base font-medium text-[var(--text-primary)]">{`${saving.deductionDay}e`}</p>
               </div>
             ) : null}
 
             {saving.paymentMethod ? (
-              <div className="bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)]">
+              <div className="bg-[#312f2f] p-4 rounded-[16px] border border-white/[0.05]">
                 <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('paymentMethod')}</p>
                 <div className="flex items-center gap-2">
                   {(() => {

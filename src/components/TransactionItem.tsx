@@ -276,7 +276,7 @@ export function TransactionItem({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 10 }}
               transition={{ duration: 0.16 }}
-              className="bg-[#14141E] border border-white/[0.08] rounded-[24px] p-5 sm:p-6 w-full max-w-sm shadow-2xl space-y-4"
+              className="bg-[#232323] border border-white/[0.08] rounded-[24px] p-5 sm:p-6 w-full max-w-sm shadow-2xl space-y-4"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3">

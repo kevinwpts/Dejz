@@ -75,7 +75,7 @@ export const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className={`relative w-full ${sizeStyles} bg-[#10121D] border-t sm:border border-white/[0.04] rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[92vh] sm:max-h-[88vh] flex flex-col z-10 overflow-hidden ${className}`}
+            className={`relative w-full ${sizeStyles} bg-[#232323] border-t sm:border border-white/[0.04] rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[92vh] sm:max-h-[88vh] flex flex-col z-10 overflow-hidden ${className}`}
           >
             {/* Mobile Drag Handle */}
             <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
@@ -115,7 +115,7 @@ export const Modal: React.FC<ModalProps> = ({
 
             {/* Footer / Actions */}
             {footer && (
-              <div className="p-4 sm:p-5 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] border-t border-white/[0.035] bg-[#10121D] shrink-0">
+              <div className="p-4 sm:p-5 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] border-t border-white/[0.035] bg-[#232323] shrink-0">
                 {footer}
               </div>
             )}

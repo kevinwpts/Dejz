@@ -1363,7 +1363,7 @@ export default function App() {
         document.body.classList.add("light");
       }
 
-      const themeColor = isDark ? "#0B0A12" : "#FAFAF8";
+      const themeColor = isDark ? "#232323" : "#FAFAF8";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -4817,7 +4817,7 @@ export default function App() {
               animate={{ y: 0, scale: 1 }}
               exit={{ y: 80, scale: 0.96 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="w-full max-w-[420px] rounded-3xl bg-[#14141E]/95 border border-white/[0.06] shadow-2xl p-5 relative z-10 space-y-5"
+              className="w-full max-w-[420px] rounded-3xl bg-[#232323] border border-white/[0.06] shadow-2xl p-5 relative z-10 space-y-5"
             >
               {/* Header with X Close Button */}
               <div className="flex items-center justify-between pb-1">

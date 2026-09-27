@@ -87,7 +87,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-[#0D101E] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border-t sm:border border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-[#232323] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border-t sm:border border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -150,7 +150,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
         {/* Main Content Area: One Cohesive Detail Surface */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+          <div className="bg-[#312f2f] rounded-[24px] border border-white/[0.05] divide-y divide-white/[0.05] overflow-hidden">
             
             {/* Amount Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between">
@@ -252,7 +252,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
           {/* Tags Section if exists */}
           {transaction.tags && transaction.tags.length > 0 && (
-            <div className="p-4 bg-white/[0.035] backdrop-blur-[18px] rounded-[20px] border border-white/[0.025]">
+            <div className="p-4 bg-[#312f2f] rounded-[20px] border border-white/[0.05]">
               <div className="flex items-center gap-1.5 mb-2 text-[#9CA6BC]">
                 <Tag size={12} strokeWidth={1.75} />
                 <span className="text-xs font-medium">{t('tags')}</span>
@@ -269,7 +269,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
           {/* Receipt Section if exists */}
           {transaction.receiptUrl && (
-            <div className="p-4 bg-white/[0.035] backdrop-blur-[18px] rounded-[20px] border border-white/[0.025]">
+            <div className="p-4 bg-[#312f2f] rounded-[20px] border border-white/[0.05]">
               <div className="flex items-center gap-1.5 mb-3 text-[#9CA6BC]">
                 <Receipt size={12} strokeWidth={1.75} />
                 <span className="text-xs font-medium">{t('receipt')}</span>

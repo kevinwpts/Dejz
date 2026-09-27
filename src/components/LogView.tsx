@@ -354,7 +354,7 @@ export function LogView({
               exit={{ opacity: 0, y: 40, scale: 0.98 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#0D101E] border-t sm:border border-white/[0.08] w-full max-w-md rounded-t-[28px] rounded-b-none sm:rounded-[24px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[82vh] flex flex-col overflow-hidden text-white"
+              className="bg-[#232323] border-t sm:border border-white/[0.08] w-full max-w-md rounded-t-[28px] rounded-b-none sm:rounded-[24px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[82vh] flex flex-col overflow-hidden text-white"
             >
               {/* Header */}
               <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.06] shrink-0">
