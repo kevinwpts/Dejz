@@ -19,7 +19,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
     <div className={`flex items-center justify-between mb-3 px-1 ${className}`}>
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
-          <h3 className="text-xs sm:text-sm font-bold text-[var(--text-secondary)]">
+          <h3 className="text-sm sm:text-base font-bold font-shoulders uppercase tracking-wider text-[var(--text-secondary)]">
             {title}
           </h3>
           {count !== undefined && (

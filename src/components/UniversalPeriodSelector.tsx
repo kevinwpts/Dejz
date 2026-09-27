@@ -99,7 +99,7 @@ export function UniversalPeriodSelector({
             title={periodName || month}
           >
             <div className="flex items-baseline gap-1 min-w-0">
-              <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate text-white">
+              <span className="text-[13px] sm:text-[14px] font-bold font-shoulders uppercase tracking-wider truncate text-white">
                 {month}
               </span>
               {dates && (
@@ -112,7 +112,7 @@ export function UniversalPeriodSelector({
           </button>
         ) : (
           <div className="flex items-baseline gap-1 px-1.5 sm:px-2 py-0.5 min-w-0">
-            <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate text-white">
+            <span className="text-[13px] sm:text-[14px] font-bold font-shoulders uppercase tracking-wider truncate text-white">
               {month}
             </span>
             {dates && (
@@ -149,7 +149,7 @@ export function UniversalPeriodSelector({
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.035] hover:bg-white/[0.06] border border-white/[0.03] transition-all cursor-pointer group select-none"
       >
         <CalendarIcon size={13} className="text-[#9CA6BC] group-hover:text-[#8B9CFF] transition-colors" />
-        <span className="text-xs font-semibold text-white tracking-tight">
+        <span className="text-xs sm:text-[13px] font-bold font-shoulders uppercase tracking-wider text-white">
           {month}
         </span>
         <ChevronDown size={12} className="text-[#9CA6BC] group-hover:text-white transition-colors shrink-0" />
@@ -185,7 +185,7 @@ export function UniversalPeriodSelector({
             className="flex flex-col items-center group/label px-4 py-1 rounded-2xl hover:bg-white/[0.04] transition-all cursor-pointer"
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-base sm:text-lg font-semibold tracking-tight text-white group-hover/label:text-[#8B9CFF] transition-colors">
+              <span className="text-lg sm:text-xl font-bold font-shoulders uppercase tracking-wider text-white group-hover/label:text-[#8B9CFF] transition-colors">
                 {month}
               </span>
               <CalendarIcon size={14} className="text-[#9CA6BC] group-hover/label:text-[#8B9CFF] transition-colors" />

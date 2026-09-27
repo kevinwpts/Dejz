@@ -75,7 +75,7 @@
   --font-shoulders:
     "Big Shoulders", "Big Shoulders Display", sans-serif;
   --font-display:
-    "Changa One", "Chango", sans-serif;
+    "Big Shoulders", "Big Shoulders Display", sans-serif;
   --font-amount:
     "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-exo:
@@ -136,7 +136,11 @@ textarea {
 }
 
 @utility font-display {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Big Shoulders", "Big Shoulders Display", sans-serif !important;
+}
+
+.font-display {
+  font-family: "Big Shoulders", "Big Shoulders Display", sans-serif !important;
 }
 
 @utility font-exo {
@@ -425,33 +429,31 @@ textarea {
   h3,
   h4,
   h5,
-  h6 {
+  h6,
+  .section-title,
+  .modal-title,
+  .header-title {
     color: var(--text-primary);
-    letter-spacing: -0.01em;
-    line-height: 1.1;
+    font-family: "Big Shoulders", "Big Shoulders Display", sans-serif !important;
+    line-height: 1.15;
   }
 
-  h1,
+  h1 {
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
   h2 {
-    font-family: "Changa One", "Chango", sans-serif;
-    font-weight: 400;
+    font-weight: 700;
+    letter-spacing: normal;
   }
 
   h3,
   h4,
   h5,
   h6 {
-    font-family: var(--font-sans);
-    @apply font-semibold;
-  }
-
-  h1 {
-    @apply tracking-tight;
-  }
-
-  h2,
-  h3 {
-    @apply tracking-normal;
+    font-weight: 700;
+    letter-spacing: normal;
   }
 
   p {
