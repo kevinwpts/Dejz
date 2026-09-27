@@ -189,7 +189,7 @@ export function AnalysisView({
               onChange={onPeriodChange}
               periodName={stats.periodName}
               isCurrentPeriod={stats.isCurrentPeriod}
-              variant="dropdown"
+              variant="header"
               allowFuture={false}
               onOpenPicker={onOpenCalendarPicker}
             />

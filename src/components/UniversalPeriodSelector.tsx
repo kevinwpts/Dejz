@@ -75,7 +75,7 @@ export function UniversalPeriodSelector({
 
   if (variant === 'header') {
     return (
-      <div className="inline-flex items-center gap-0.5 sm:gap-1 bg-white/[0.035] border border-white/[0.035] backdrop-blur-[16px] rounded-full px-1 sm:px-1.5 py-0.5 max-w-[210px] sm:max-w-none transition-all select-none">
+      <div className="inline-flex items-center gap-0.5 sm:gap-1 bg-white/[0.035] border border-white/[0.035] backdrop-blur-[16px] rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none">
         <button 
           type="button"
           onClick={handlePrevPeriod}
@@ -86,6 +86,7 @@ export function UniversalPeriodSelector({
               : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
           }`}
           aria-label="Föregående period"
+          title="Föregående period"
         >
           <ChevronLeft size={15} strokeWidth={2} />
         </button>
@@ -94,11 +95,11 @@ export function UniversalPeriodSelector({
           <button 
             type="button"
             onClick={handleCenterClick}
-            className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-full hover:bg-white/[0.05] transition-all cursor-pointer group min-w-0"
+            className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full hover:bg-white/[0.05] transition-all cursor-pointer group min-w-0"
             title={periodName || month}
           >
             <div className="flex items-baseline gap-1 min-w-0">
-              <span className="text-xs font-semibold tracking-tight truncate text-white">
+              <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate text-white">
                 {month}
               </span>
               {dates && (
@@ -110,8 +111,8 @@ export function UniversalPeriodSelector({
             <ChevronDown size={12} className="text-[#9CA6BC] group-hover:text-white transition-colors shrink-0" />
           </button>
         ) : (
-          <div className="flex items-baseline gap-1 px-1.5 sm:px-2.5 py-1 min-w-0">
-            <span className="text-xs font-semibold tracking-tight truncate text-white">
+          <div className="flex items-baseline gap-1 px-1.5 sm:px-2 py-0.5 min-w-0">
+            <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate text-white">
               {month}
             </span>
             {dates && (
@@ -132,6 +133,7 @@ export function UniversalPeriodSelector({
               : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
           }`}
           aria-label="Nästa period"
+          title="Nästa period"
         >
           <ChevronRight size={15} strokeWidth={2} />
         </button>

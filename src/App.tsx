@@ -3866,8 +3866,8 @@ export default function App() {
             <div style={{ display: activeTab === "transactions" ? "block" : "none" }}>
               <LogView
                 transactions={transactions}
-                stats={stats}
                 config={config}
+                periods={periods}
                 onAddTransaction={() => {
                   setTransactionType("expense");
                   setTargetDate(new Date());
@@ -3884,10 +3884,6 @@ export default function App() {
                 onDeleteTransaction={deleteTransaction}
                 t={t}
                 currentLang={config.language as Language}
-                periods={periods}
-                currentPeriodDate={currentPeriodDate}
-                onPeriodChange={setCurrentPeriodDate}
-                onOpenCalendarPicker={() => setIsCalendarModalOpen(true)}
               />
             </div>
           )}

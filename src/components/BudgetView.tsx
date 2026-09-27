@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, ArrowLeft, Check, Sparkles, RotateCcw, Plus, Pin, ChevronUp, ChevronDown, Calendar, ArrowDownLeft, PiggyBank } from 'lucide-react';
+import { RefreshCw, ArrowLeft, Check, Sparkles, RotateCcw, Plus, Pin, ChevronUp, ChevronDown, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -741,7 +741,7 @@ export function BudgetView({
           {budgetFilter === 'fixed' && (
             <div className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-                {/* Discreet text sort controls */}
+                {/* Single compact sort toggle button */}
                 <button
                   type="button"
                   onClick={() => {
@@ -749,12 +749,14 @@ export function BudgetView({
                     else if (fixedSortBy === 'name') setFixedSortBy('amount');
                     else setFixedSortBy('day');
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.08] text-xs text-white transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.035] text-xs text-white transition-all cursor-pointer select-none active:scale-95"
+                  title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
-                  <span className="text-[#9CA6BC]/70">
+                  <ArrowUpDown size={12} strokeWidth={2} className="text-[#8B9CFF] shrink-0" />
+                  <span className="text-[#9CA6BC]/80">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
-                  <span className="font-semibold">
+                  <span className="font-semibold text-white">
                     {fixedSortBy === 'day' 
                       ? (config.language === 'en' ? 'Day' : 'Dragningsdag')
                       : fixedSortBy === 'name'

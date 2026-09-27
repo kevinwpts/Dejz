@@ -408,7 +408,7 @@ export function TodayView({
 
 
             {categoryBudgetData.length > 0 ? (
-              <div className="flex items-center gap-3.5 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
+              <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
                 {categoryBudgetData.map((cat, index) => {
                   const Icon = ICON_MAP[cat.iconName];
                   const spentPct = cat.budgetInKronor > 0 
@@ -422,45 +422,45 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.08 + index * 0.02 }}
                       onClick={() => onNavigate("analysis")}
-                      className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.04] backdrop-blur-[18px] transition-all group text-left active:scale-[0.98] min-w-[155px] sm:min-w-[170px] max-w-[185px] cursor-pointer snap-start border border-white/[0.03] shadow-none"
+                      className="flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white/[0.025] hover:bg-white/[0.04] backdrop-blur-[18px] transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border border-white/[0.03] shadow-none"
                     >
-                      {/* Top Row: Minimalist Monochrome Icon (#C7CDDC, stroke 1.75, bg-white/[0.04]) + Category Name (Medium 500) */}
-                      <div className="flex items-center gap-2.5 mb-3.5">
-                        <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      {/* Top Row: Minimalist Monochrome Icon + Category Name */}
+                      <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                           {isEmojiString(cat.iconName) ? (
-                            <span className="text-[14px] leading-none">{cat.iconName}</span>
+                            <span className="text-[12.5px] leading-none">{cat.iconName}</span>
                           ) : Icon ? (
-                            <Icon size={15} strokeWidth={1.75} className="text-[#C7CDDC]" />
+                            <Icon size={13.5} strokeWidth={1.75} className="text-[#C7CDDC]" />
                           ) : (
-                            <div className="w-2 h-2 rounded-full bg-[#C7CDDC]" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#C7CDDC]" />
                           )}
                         </div>
 
-                        <span className="text-xs sm:text-[13px] font-medium text-[#C7CDDC] group-hover:text-white transition-colors tracking-tight truncate flex-1">
+                        <span className="text-[11.5px] sm:text-xs font-medium text-[#C7CDDC] group-hover:text-white transition-colors tracking-tight truncate flex-1">
                           {cat.name}
                         </span>
                       </div>
 
-                      {/* Bottom Row: Amount Remaining (Semibold 600) & Progress Bar */}
-                      <div className="flex flex-col w-full space-y-1.5">
+                      {/* Bottom Row: Amount Remaining & Progress Bar */}
+                      <div className="flex flex-col w-full space-y-1">
                         <div className="flex items-baseline justify-between gap-1">
                           {cat.hasBudget ? (
                             cat.isOverBudget ? (
-                              <span className="text-[14px] sm:text-[15px] font-semibold text-rose-400 font-amount tabular-nums">
+                              <span className="text-[13px] sm:text-[14px] font-semibold text-rose-400 font-amount tabular-nums">
                                 +{formatAmount(Math.abs(cat.remaining), lang)} kr
                               </span>
                             ) : (
-                              <span className="text-[14px] sm:text-[15px] font-semibold text-white font-amount tabular-nums">
+                              <span className="text-[13px] sm:text-[14px] font-semibold text-white font-amount tabular-nums">
                                 {formatAmount(cat.remaining, lang)} kr
                               </span>
                             )
                           ) : (
-                            <span className="text-[14px] sm:text-[15px] font-semibold text-[#C7CDDC] font-amount tabular-nums">
+                            <span className="text-[13px] sm:text-[14px] font-semibold text-[#C7CDDC] font-amount tabular-nums">
                               {formatAmount(cat.spent, lang)} kr
                             </span>
                           )}
 
-                          <span className="text-[11px] font-normal text-[#9CA6BC] shrink-0">
+                          <span className="text-[10px] font-normal text-[#9CA6BC] shrink-0">
                             {cat.hasBudget 
                               ? (cat.isOverBudget 
                                   ? (lang === 'en' ? 'over' : 'över') 
@@ -490,17 +490,17 @@ export function TodayView({
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
                   onClick={() => onNavigate("budget", "category-budgets")}
-                  className="flex-shrink-0 flex flex-col justify-between p-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[135px] max-w-[145px] cursor-pointer snap-start border border-dashed border-white/[0.05]"
+                  className="flex-shrink-0 flex flex-col justify-between p-3 rounded-xl sm:rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[115px] max-w-[125px] cursor-pointer snap-start border border-dashed border-white/[0.05]"
                 >
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.035] text-[#C7CDDC] group-hover:text-white border border-white/[0.035] shrink-0">
-                      <SlidersHorizontal size={14} strokeWidth={1.75} />
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.035] text-[#C7CDDC] group-hover:text-white border border-white/[0.035] shrink-0">
+                      <SlidersHorizontal size={13} strokeWidth={1.75} />
                     </div>
-                    <span className="text-xs font-medium text-[#C7CDDC] group-hover:text-white transition-colors truncate">
+                    <span className="text-[11.5px] font-medium text-[#C7CDDC] group-hover:text-white transition-colors truncate">
                       {lang === "en" ? "Manage" : "Hantera"}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] font-normal text-[#9CA6BC]">
+                  <div className="flex items-center justify-between text-[10px] font-normal text-[#9CA6BC]">
                     <span>{lang === "en" ? "Edit limits" : "Justera"}</span>
                     <span>→</span>
                   </div>
