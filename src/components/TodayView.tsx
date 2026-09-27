@@ -620,28 +620,28 @@ export function TodayView({
 
       {/* Spacer matching heroHeight so bottom sheet starts directly below the static hero */}
       <div
-        style={{ height: heroHeight > 0 ? `${heroHeight}px` : '320px' }}
+        style={{ height: heroHeight > 0 ? `${Math.max(0, heroHeight - 16)}px` : '290px' }}
         className="w-full shrink-0 pointer-events-none"
       />
 
       {/* 2. EXPANDING BOTTOM SHEET (Scroll-driven surface covering hero as user scrolls down) */}
       <div
         ref={sheetRef}
-        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#232323] rounded-t-[32px] sm:rounded-t-[36px] border-t border-white/[0.1] shadow-none min-h-[calc(100vh-8rem)] pt-2 pb-40 space-y-6 mt-2"
+        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#232323] rounded-t-[32px] sm:rounded-t-[36px] border-t border-white/[0.1] shadow-none min-h-[calc(100vh-8rem)] pt-1.5 pb-40 space-y-4 -mt-2"
       >
         {/* Visual Grab Handle / Sheet Indicator */}
         <div
           onClick={handleToggleExpand}
-          className="w-full flex flex-col items-center justify-center py-2 cursor-pointer group active:opacity-70 transition-opacity select-none touch-manipulation"
+          className="w-full flex flex-col items-center justify-center py-1 cursor-pointer group active:opacity-70 transition-opacity select-none touch-manipulation"
           title={progress > 0.5 ? (lang === 'en' ? 'Click to show overview' : 'Klicka för att visa översikt') : (lang === 'en' ? 'Click to expand' : 'Klicka för att expandera')}
           aria-label="Expand or collapse sheet"
         >
-          <div className="w-11 h-1 rounded-full bg-white/20 group-hover:bg-white/40 transition-colors" />
+          <div className="w-10 h-1 rounded-full bg-white/20 group-hover:bg-white/40 transition-colors" />
         </div>
 
         {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
         {calendarDays && calendarDays.length > 0 && (
-          <div className={`sticky ${timelineStickyTop} z-20 bg-[#232323]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-1 pb-3 border-b border-white/[0.03] transition-all`}>
+          <div className={`sticky ${timelineStickyTop} z-20 bg-[#232323]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-0 pb-2.5 border-b border-white/[0.03] transition-all`}>
             <PeriodTimeline
               calendarDays={calendarDays}
               selectedDate={normalizedSelectedDate}
