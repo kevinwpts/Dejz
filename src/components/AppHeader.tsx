@@ -84,12 +84,12 @@ export function AppHeader({
       }`}
     >
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2 relative`}>
-        {/* Left: Back button OR Profile Picture */}
-        <div className="flex items-center gap-3 shrink-0 z-10 min-w-[40px]">
+        {/* Left: Back button OR Profile Picture + Title right next to it */}
+        <div className="flex items-center gap-3 shrink-0 z-10">
           {onBack ? (
             <button
               onClick={onBack}
-              className={`flex items-center gap-1 group active:scale-95 transition-all py-0.5 -ml-1 pr-2 cursor-pointer ${
+              className={`flex items-center gap-1 group active:scale-95 transition-all py-0.5 -ml-1 pr-1 cursor-pointer ${
                 useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
               }`}
               aria-label="Tillbaka"
@@ -117,14 +117,17 @@ export function AppHeader({
               )}
             </button>
           )}
+
+          {/* Title right next to profile picture */}
+          <div className="min-w-0 text-left flex items-center pl-1">
+            <h1 className="text-[19px] sm:text-[22px] font-bold font-display uppercase tracking-[0.05em] text-[var(--text-primary)] truncate select-none leading-none">
+              {displayTitle}
+            </h1>
+          </div>
         </div>
 
-        {/* Middle: Title in Large Uppercase where the search box was */}
-        <div className="flex-1 min-w-0 text-center px-1 sm:px-2 flex items-center justify-center">
-          <h1 className="text-[20px] sm:text-[23px] font-bold font-display uppercase tracking-[0.05em] text-[var(--text-primary)] truncate select-none leading-none">
-            {displayTitle}
-          </h1>
-        </div>
+        {/* Empty flex-1 spacer if needed or let right actions push */}
+        <div className="flex-1" />
   
         {/* Right Actions: Notifications + Search Icon (between notifications and dejzi) + Dejzi Coach */}
         <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 z-10">
