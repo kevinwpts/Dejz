@@ -114,20 +114,22 @@ export function LogView({
             </button>
           );
         })}
-      </div>
 
-      {/* Period Selector on Page */}
-      {periods && onPeriodChange && currentPeriodDate && (
-        <UniversalPeriodSelector
-          periods={periods}
-          currentDate={currentPeriodDate}
-          onChange={onPeriodChange}
-          periodName={stats.periodName}
-          isCurrentPeriod={stats.isCurrentPeriod}
-          variant="standalone"
-          allowFuture={false}
-        />
-      )}
+        {periods && onPeriodChange && currentPeriodDate && (
+          <>
+            <div className="w-px h-4 bg-white/[0.08] mx-0.5 shrink-0" />
+            <UniversalPeriodSelector
+              periods={periods}
+              currentDate={currentPeriodDate}
+              onChange={onPeriodChange}
+              periodName={stats.periodName}
+              isCurrentPeriod={stats.isCurrentPeriod}
+              variant="dropdown"
+              allowFuture={false}
+            />
+          </>
+        )}
+      </div>
 
       {/* Transactions List */}
       <div className="space-y-6">

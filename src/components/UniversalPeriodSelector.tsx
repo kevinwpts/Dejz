@@ -8,7 +8,7 @@ interface UniversalPeriodSelectorProps {
   periodName?: string;
   isCurrentPeriod?: boolean;
   onOpenPicker?: () => void;
-  variant?: 'standalone' | 'header' | 'modal';
+  variant?: 'standalone' | 'header' | 'modal' | 'dropdown';
   allowFuture?: boolean;
 }
 
@@ -136,6 +136,22 @@ export function UniversalPeriodSelector({
           <ChevronRight size={15} strokeWidth={2} />
         </button>
       </div>
+    );
+  }
+
+  if (variant === 'dropdown') {
+    return (
+      <button 
+        type="button"
+        onClick={handleCenterClick}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.035] hover:bg-white/[0.06] border border-white/[0.03] transition-all cursor-pointer group select-none"
+      >
+        <CalendarIcon size={13} className="text-[#9CA6BC] group-hover:text-[#8B9CFF] transition-colors" />
+        <span className="text-xs font-semibold text-white tracking-tight">
+          {month}
+        </span>
+        <ChevronDown size={12} className="text-[#9CA6BC] group-hover:text-white transition-colors shrink-0" />
+      </button>
     );
   }
 
