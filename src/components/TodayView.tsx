@@ -438,12 +438,12 @@ export function TodayView({
 
   return (
     <div className="relative font-sans">
-      {/* SOLID FLAT PALE RED BACKGROUND LAYER (Behind Hero Area, completely without glow or white highlights) */}
+      {/* SOLID FLAT BACKGROUND LAYER (#6C6BFF) */}
       <div 
         className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-colors duration-300"
         style={{
           height: '100vh',
-          backgroundColor: '#381e22',
+          backgroundColor: '#6C6BFF',
         }}
       />
 
@@ -506,21 +506,21 @@ export function TodayView({
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.08 + index * 0.02 }}
                           onClick={() => onNavigate("analysis")}
-                          className="flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white/[0.025] hover:bg-white/[0.04] backdrop-blur-[18px] transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border border-white/[0.03] shadow-none"
+                          className="flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-black/[0.08] hover:bg-black/[0.12] backdrop-blur-[18px] transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border border-black/[0.1] shadow-none"
                         >
                           {/* Top Row: Minimalist Monochrome Icon + Category Name */}
                           <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
-                            <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <div className="w-7 h-7 rounded-lg bg-black/[0.08] border border-black/[0.08] text-black flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                               {isEmojiString(cat.iconName) ? (
                                 <span className="text-[12.5px] leading-none">{cat.iconName}</span>
                               ) : Icon ? (
-                                <Icon size={13.5} strokeWidth={1.75} className="text-[#C7CDDC]" />
+                                <Icon size={13.5} strokeWidth={2} className="text-black" />
                               ) : (
-                                <div className="w-1.5 h-1.5 rounded-full bg-[#C7CDDC]" />
+                                <div className="w-1.5 h-1.5 rounded-full bg-black" />
                               )}
                             </div>
 
-                            <span className="text-[11.5px] sm:text-xs font-medium text-[#C7CDDC] group-hover:text-white transition-colors tracking-tight truncate flex-1">
+                            <span className="text-[11.5px] sm:text-xs font-bold text-black tracking-tight truncate flex-1">
                               {cat.name}
                             </span>
                           </div>
@@ -530,21 +530,21 @@ export function TodayView({
                             <div className="flex items-baseline justify-between gap-1">
                               {cat.hasBudget ? (
                                 cat.isOverBudget ? (
-                                  <span className="text-[13px] sm:text-[14px] font-semibold text-rose-400 font-amount tabular-nums">
+                                  <span className="text-[13px] sm:text-[14px] font-black text-rose-950 font-amount tabular-nums">
                                     +{formatAmount(Math.abs(cat.remaining), lang)} kr
                                   </span>
                                 ) : (
-                                  <span className="text-[13px] sm:text-[14px] font-semibold text-white font-amount tabular-nums">
+                                  <span className="text-[13px] sm:text-[14px] font-black text-black font-amount tabular-nums">
                                     {formatAmount(cat.remaining, lang)} kr
                                   </span>
                                 )
                               ) : (
-                                <span className="text-[13px] sm:text-[14px] font-semibold text-[#C7CDDC] font-amount tabular-nums">
+                                <span className="text-[13px] sm:text-[14px] font-black text-black font-amount tabular-nums">
                                   {formatAmount(cat.spent, lang)} kr
                                 </span>
                               )}
 
-                              <span className="text-[10px] font-normal text-[#9CA6BC] shrink-0">
+                              <span className="text-[10px] font-bold text-black/75 shrink-0">
                                 {cat.hasBudget 
                                   ? (cat.isOverBudget 
                                       ? (lang === 'en' ? 'over' : 'över') 
@@ -554,10 +554,10 @@ export function TodayView({
                             </div>
 
                             {cat.hasBudget && (
-                              <div className="w-full h-1 bg-white/[0.07] rounded-full overflow-hidden mt-0.5">
+                              <div className="w-full h-1 bg-black/15 rounded-full overflow-hidden mt-0.5">
                                 <div 
                                   className={`h-full rounded-full transition-all duration-500 ${
-                                    cat.isOverBudget ? 'bg-rose-500' : 'bg-[#8B9CFF]'
+                                    cat.isOverBudget ? 'bg-rose-900' : 'bg-black'
                                   }`}
                                   style={{ width: `${spentPct}%` }} 
                                 />
@@ -574,17 +574,17 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
                       onClick={() => onNavigate("budget", "category-budgets")}
-                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-xl sm:rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] transition-all group text-left active:scale-[0.98] min-w-[115px] max-w-[125px] cursor-pointer snap-start border border-dashed border-white/[0.05]"
+                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-xl sm:rounded-2xl bg-black/[0.06] hover:bg-black/[0.1] transition-all group text-left active:scale-[0.98] min-w-[115px] max-w-[125px] cursor-pointer snap-start border border-dashed border-black/25"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.035] text-[#C7CDDC] group-hover:text-white border border-white/[0.035] shrink-0">
-                          <SlidersHorizontal size={13} strokeWidth={1.75} />
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-black/[0.08] text-black border border-black/[0.08] shrink-0">
+                          <SlidersHorizontal size={13} strokeWidth={2} />
                         </div>
-                        <span className="text-[11.5px] font-medium text-[#C7CDDC] group-hover:text-white transition-colors truncate">
+                        <span className="text-[11.5px] font-bold text-black truncate">
                           {lang === "en" ? "Manage" : "Hantera"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-[10px] font-normal text-[#9CA6BC]">
+                      <div className="flex items-center justify-between text-[10px] font-bold text-black/75">
                         <span>{lang === "en" ? "Edit limits" : "Justera"}</span>
                         <span>→</span>
                       </div>
@@ -594,22 +594,22 @@ export function TodayView({
                   <button
                     type="button"
                     onClick={() => onNavigate("budget", "category-budgets")}
-                    className="w-full p-4 rounded-2xl border border-dashed border-white/[0.06] hover:border-white/15 bg-white/[0.02] hover:bg-white/[0.045] transition-all flex items-center justify-between text-left group cursor-pointer text-white"
+                    className="w-full p-4 rounded-2xl border border-dashed border-black/25 hover:border-black/40 bg-black/[0.06] hover:bg-black/[0.1] transition-all flex items-center justify-between text-left group cursor-pointer text-black"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.04] flex items-center justify-center text-[#C7CDDC] group-hover:text-white transition-colors">
-                        <SlidersHorizontal size={15} strokeWidth={1.75} />
+                      <div className="w-9 h-9 rounded-xl bg-black/[0.08] border border-black/[0.08] flex items-center justify-center text-black transition-colors">
+                        <SlidersHorizontal size={15} strokeWidth={2} />
                       </div>
                       <div>
-                        <p className="text-xs sm:text-sm font-semibold text-white leading-snug">
+                        <p className="text-xs sm:text-sm font-bold text-black leading-snug">
                           {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
                         </p>
-                        <p className="text-[11px] font-normal text-[#9CA6BC]">
+                        <p className="text-[11px] font-semibold text-black/75">
                           {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
                         </p>
                       </div>
                     </div>
-                    <ChevronRight size={15} className="text-[#9CA6BC] group-hover:text-white transition-colors" />
+                    <ChevronRight size={15} className="text-black transition-colors" />
                   </button>
                 )}
               </div>

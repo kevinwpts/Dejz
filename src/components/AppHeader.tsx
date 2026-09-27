@@ -75,6 +75,8 @@ export function AppHeader({
 
   const displayTitle = (title || getFallbackTitle()).toUpperCase();
 
+  const isHomeAtTop = (activeTab === "today" || !activeTab) && isAtTop;
+
   return (
     <header
       className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out translate-y-0 opacity-100 ${
@@ -90,7 +92,7 @@ export function AppHeader({
             <button
               onClick={onBack}
               className={`flex items-center gap-1 group active:scale-95 transition-all py-0.5 -ml-1 pr-1 cursor-pointer ${
-                useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
+                isHomeAtTop ? "text-black" : useWhiteHeader ? "text-white" : "text-[var(--text-primary)]"
               }`}
               aria-label="Tillbaka"
             >
@@ -99,7 +101,11 @@ export function AppHeader({
           ) : (
             <button
               onClick={() => onNavigate("profile")}
-              className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-white/[0.045] bg-white/[0.035] hover:bg-white/[0.07] text-slate-200 ${
+              className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 ${
+                isHomeAtTop 
+                  ? "border border-black/15 bg-black/10 hover:bg-black/15 text-black" 
+                  : "border border-white/[0.045] bg-white/[0.035] hover:bg-white/[0.07] text-slate-200"
+              } ${
                 activeTab === "profile" ? "ring-2 ring-indigo-400/50" : ""
               }`}
               aria-label="Profil"
@@ -113,14 +119,16 @@ export function AppHeader({
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <User size={18} strokeWidth={1.8} className="text-slate-300" />
+                <User size={18} strokeWidth={2} className={isHomeAtTop ? "text-black" : "text-slate-300"} />
               )}
             </button>
           )}
 
           {/* Title right next to profile picture */}
           <div className="min-w-0 text-left flex items-center pl-1">
-            <h1 className="text-[19px] sm:text-[22px] font-bold font-display uppercase tracking-[0.05em] text-[var(--text-primary)] truncate select-none leading-none">
+            <h1 className={`text-[19px] sm:text-[22px] font-extrabold font-display uppercase tracking-[0.05em] truncate select-none leading-none ${
+              isHomeAtTop ? "text-black" : "text-[var(--text-primary)]"
+            }`}>
               {displayTitle}
             </h1>
           </div>
@@ -136,7 +144,9 @@ export function AppHeader({
             <button
               onClick={onOpenNotifications}
               className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 ${
-                useWhiteHeader 
+                isHomeAtTop
+                  ? "text-black hover:bg-black/10"
+                  : useWhiteHeader 
                   ? "text-white/95 hover:bg-white/10" 
                   : "text-[var(--text-primary)] hover:bg-white/[0.06]"
               }`}
@@ -165,7 +175,11 @@ export function AppHeader({
                 onNavigate("search");
               }
             }}
-            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[var(--text-primary)] hover:bg-white/[0.06]`}
+            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 ${
+              isHomeAtTop 
+                ? "text-black hover:bg-black/10" 
+                : "text-[var(--text-primary)] hover:bg-white/[0.06]"
+            }`}
             aria-label={_language === 'en' ? 'Search' : 'Sök'}
             title={_language === 'en' ? 'Search' : 'Sök'}
           >
@@ -177,7 +191,9 @@ export function AppHeader({
             <button
               type="button"
               onClick={onOpenDejzi}
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 hover:bg-white/[0.06]`}
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 ${
+                isHomeAtTop ? "hover:bg-black/10" : "hover:bg-white/[0.06]"
+              }`}
               aria-label="Dejzi sammanfattning"
               title="Dejzi sammanfattning"
             >
