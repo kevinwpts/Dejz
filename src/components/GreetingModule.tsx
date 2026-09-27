@@ -73,23 +73,23 @@ export function GreetingModule({
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className="pt-3 sm:pt-5 pb-1 text-center flex flex-col items-center space-y-2"
       >
-        {/* Tracked Minimalist Uppercase Structural Label (500 Medium) */}
-        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
+        {/* Tracked Minimalist Uppercase Structural Label (Big Shoulders) */}
+        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.18em] text-[#9CA6BC] block select-none font-shoulders">
           {t('totalRemaining')}
         </span>
 
         <div className="flex flex-col items-center w-full">
-          {/* Primary Hero Amount (Semibold 600 - Bold 700) */}
+          {/* Primary Hero Amount (Big Shoulders) */}
           <div className="flex items-baseline gap-2">
             <AnimatedNumber 
               value={stats?.remainingPeriodCents || 0} 
-              className={`text-[52px] sm:text-[64px] leading-[0.98] font-semibold sm:font-bold font-amount tabular-nums tracking-tight ${
+              className={`text-[60px] sm:text-[74px] leading-[0.92] font-bold font-shoulders tabular-nums tracking-tight ${
                 isNegative ? 'text-rose-400' : 'text-white'
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
-            {/* Lighter, smaller currency label (Regular 400) */}
-            <span className={`text-[19px] sm:text-[21px] font-normal tracking-normal ${
+            {/* Lighter, smaller currency label (Big Shoulders) */}
+            <span className={`text-[22px] sm:text-[26px] font-semibold font-shoulders tracking-normal ${
               isNegative ? 'text-rose-400/80' : 'text-[#9CA6BC]'
             }`}>
               {currency}
