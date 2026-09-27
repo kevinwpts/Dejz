@@ -77,12 +77,7 @@ export function BudgetView({
     onClearSection?.();
   };
 
-  const totalSavings = (config.monthlySavingsItems?.reduce((sum, item) => {
-    const amount = (item.isVariable && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined)
-      ? item.periodOverrides[currentPeriodId]
-      : (Number(item.amount) || 0);
-    return sum + amount;
-  }, 0) || 0) + (Number(config.monthlySavings) || 0);
+
 
   const [fixedSortBy, setFixedSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [confirmReset, setConfirmReset] = React.useState(false);
@@ -666,34 +661,36 @@ export function BudgetView({
         </button>
       </div>
 
-      {/* Overview Hero Section */}
+      {/* Overview Hero Section - Dynamic based on filter */}
       <div className="py-2 text-center space-y-1.5 flex flex-col items-center">
         <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
-          {t('monthlyDisposable')}
+          {budgetFilter === 'fixed' && (config.language === 'en' ? 'TOTAL FIXED EXPENSES' : 'TOTALA FASTA UTGIFTER')}
+          {budgetFilter === 'income' && (config.language === 'en' ? 'TOTAL INCOME' : 'TOTALA INKOMSTER')}
+          {budgetFilter === 'savings' && (config.language === 'en' ? 'TOTAL SAVINGS' : 'TOTALT SPARANDE')}
         </span>
         <div className="flex items-baseline justify-center gap-2">
           <AnimatedNumber 
-            value={Math.round(totalIncomeSum - totalFixedSum)} 
-            className="text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums text-white tracking-tight"
-            formatter={(val) => formatAmount(val, config.language)}
+            value={Math.round(
+              budgetFilter === 'fixed' ? totalFixedSum :
+              budgetFilter === 'income' ? totalIncomeSum :
+              totalSavingsSum
+            )} 
+            className={`text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums tracking-tight ${
+              budgetFilter === 'income' ? 'text-emerald-400' : 'text-white'
+            }`}
+            formatter={(val) => {
+              const prefix = budgetFilter === 'income' ? '+' : '−';
+              return `${prefix}${formatAmount(val, config.language)}`;
+            }}
           />
-          <span className="text-[19px] sm:text-[21px] font-normal text-[#9CA6BC]">
+          <span className={`text-[19px] sm:text-[21px] font-normal ${
+            budgetFilter === 'income' ? 'text-emerald-400/80' : 'text-[#9CA6BC]'
+          }`}>
             {config.currency}
           </span>
         </div>
       </div>
 
-      {/* Total Amount Header */}
-      <div className="flex items-center justify-between px-1 pt-2">
-        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] select-none">
-          {config.language === 'en' ? 'TOTAL' : 'TOTALT'}
-        </span>
-        <span className="text-base sm:text-lg font-semibold font-amount tabular-nums text-white">
-          {budgetFilter === 'fixed' && `−${formatAmount(Math.abs(stats.totalFixed || 0), config.language)} ${config.currency || 'kr'}`}
-          {budgetFilter === 'income' && `+${formatAmount(Math.abs(stats.totalIncome || 0), config.language)} ${config.currency || 'kr'}`}
-          {budgetFilter === 'savings' && `−${formatAmount(Math.abs(totalSavings || 0), config.language)} ${config.currency || 'kr'}`}
-        </span>
-      </div>
 
       <AnimatePresence mode="wait">
         <motion.div
