@@ -258,11 +258,11 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-2xl transition-all duration-200 cursor-pointer select-none shrink-0 relative backdrop-blur-md ${
+              className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative backdrop-blur-md ${
                 isSelected
-                  ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/35 shadow-[0_2px_6px_rgba(139,156,255,0.08)] scale-105 font-bold z-10 opacity-100'
+                  ? 'bg-white/[0.14] text-white border border-white/25 shadow-none scale-105 font-bold z-10 opacity-100'
                   : isRealToday
-                  ? 'bg-white/[0.035] text-[#C7CDDC] border border-white/[0.06] hover:bg-white/[0.06] scale-95 opacity-90'
+                  ? 'bg-white/[0.04] text-[#C7CDDC] border border-white/[0.08] hover:bg-white/[0.07] scale-95 opacity-90'
                   : 'bg-white/[0.02] text-[#9CA6BC]/70 hover:text-[#C7CDDC] hover:bg-white/[0.045] border border-white/[0.025] scale-95 opacity-75'
               }`}
             >
@@ -283,20 +283,13 @@ export function PeriodTimeline({
               <span className="text-[13px] sm:text-[14px] leading-none font-bold tabular-nums font-amount">
                 {dayNumber}
               </span>
-
-              {/* Today Dot Indicator */}
-              {isRealToday && (
-                <span
-                  className="w-1 h-1 rounded-full absolute bottom-1.5 bg-indigo-400 shadow-[0_0_6px_rgba(129,140,248,0.8)]"
-                />
-              )}
             </button>
           );
         })}
 
         {/* Lön / Payday Box at the end of the timeline */}
         <div
-          className="flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-2xl bg-emerald-500/08 text-emerald-400 border border-emerald-500/15 backdrop-blur-md select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5"
+          className="flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl bg-emerald-500/08 text-emerald-400 border border-emerald-500/15 backdrop-blur-md select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5"
         >
           <span className="text-[12px] leading-none">💰</span>
           <span className="text-[8px] sm:text-[8.5px] font-bold tracking-wider uppercase">
