@@ -618,7 +618,7 @@ export function TodayView({
       {/* 2. EXPANDING BOTTOM SHEET (Scroll-driven surface covering hero as user scrolls down) */}
       <div
         ref={sheetRef}
-        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#232323] rounded-t-[32px] sm:rounded-t-[36px] border-t border-white/[0.1] shadow-[0_-20px_50px_rgba(0,0,0,0.85)] min-h-[calc(100vh-8rem)] pt-2 pb-40 space-y-6 mt-2"
+        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#232323] rounded-t-[32px] sm:rounded-t-[36px] border-t border-white/[0.1] shadow-none min-h-[calc(100vh-8rem)] pt-2 pb-40 space-y-6 mt-2"
       >
         {/* Visual Grab Handle / Sheet Indicator */}
         <div
