@@ -119,23 +119,19 @@ function NavItem({
     <button
       onClick={onClick}
       aria-label={label}
-      className={`flex-1 flex flex-col items-center justify-center py-1 px-0.5 transition-all duration-200 active:scale-95 cursor-pointer select-none rounded-2xl ${
+      title={label}
+      className={`flex-1 h-full flex items-center justify-center py-2 px-1 transition-all duration-200 active:scale-90 cursor-pointer select-none rounded-2xl relative ${
         isActive
-          ? 'text-[#8B9CFF] font-medium'
-          : 'text-[#C7CDDC]/70 hover:text-[#C7CDDC] font-medium'
+          ? 'text-[#8B9CFF]'
+          : 'text-[#C7CDDC]/60 hover:text-[#C7CDDC]'
       }`}
     >
       <Icon 
-        size={19} 
-        strokeWidth={1.75} 
+        size={23} 
+        strokeWidth={isActive ? 2.3 : 1.85} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
-        className="transition-transform duration-200 mb-0.5"
+        className="transition-transform duration-200"
       />
-      <span className={`text-[10px] sm:text-[10.5px] font-medium leading-tight text-center tracking-tight truncate max-w-[62px] sm:max-w-[70px] ${
-        isActive ? 'text-[#8B9CFF]' : 'text-[#C7CDDC]/75'
-      }`}>
-        {label}
-      </span>
     </button>
   );
 }

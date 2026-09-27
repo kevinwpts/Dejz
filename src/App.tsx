@@ -3418,7 +3418,7 @@ export default function App() {
   };
 
   const headerTitle = useMemo(() => {
-    if (activeTab === "today") return undefined;
+    if (activeTab === "today") return config?.language === 'en' ? 'Overview' : 'Överblick';
     if (activeTab === "notifications") return t("notificationsTitle");
     if (activeTab === "transactions") return t("log");
     if (activeTab === "analysis") return t("analysis");
@@ -3426,7 +3426,7 @@ export default function App() {
       return budgetSection ? (config?.language === 'en' ? 'Budget' : 'Budget') : (config?.language === 'en' ? 'Finances' : 'Ekonomi');
     }
     if (activeTab === "settings") {
-      if (settingsSection === "main") return undefined;
+      if (settingsSection === "main") return config?.language === 'en' ? 'Settings' : 'Inställningar';
       switch (settingsSection) {
         case "salary": return t("salary");
         case "categories": return t("categories");
@@ -3436,7 +3436,7 @@ export default function App() {
       }
     }
     if (activeTab === "profile") {
-      if (profileSection === "main") return undefined;
+      if (profileSection === "main") return t("profile");
       switch (profileSection) {
         case "salary": return t("salary");
         case "categories": return t("categories");
@@ -3447,8 +3447,8 @@ export default function App() {
         default: return t("profile");
       }
     }
-    return undefined;
-  }, [activeTab, profileSection, settingsSection, t]);
+    return config?.language === 'en' ? 'Overview' : 'Överblick';
+  }, [activeTab, budgetSection, profileSection, settingsSection, config?.language, t]);
 
   if (!isSupabaseConfigured) {
     return (
@@ -3679,6 +3679,7 @@ export default function App() {
           })()}
           avatarUrl={avatarUrl}
           onNavigate={handleNavigate}
+          onOpenSearch={() => setIsSearchModalOpen(true)}
           onOpenSettings={() => handleNavigate("settings")}
           notificationCount={notifications.length}
           onOpenNotifications={() => handleNavigate("notifications")}
