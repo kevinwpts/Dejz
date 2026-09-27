@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, LayoutGrid, TrendingUp, Calendar } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Transaction, FixedExpense, Config, WeekendAdjustment, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -186,39 +186,42 @@ export function AnalysisView({
             setAnalysisFilter('all');
             setExpandedCategory(null);
           }}
-          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'all'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
               : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
-          {t('all' as TranslationKey)}
+          <LayoutGrid size={13} strokeWidth={1.75} className={analysisFilter === 'all' ? 'text-white' : 'text-[#9CA6BC]'} />
+          <span>{t('all' as TranslationKey)}</span>
         </button>
         <button
           onClick={() => {
             setAnalysisFilter('variable');
             setExpandedCategory(null);
           }}
-          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'variable'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
               : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
-          {t('variableExpenses' as TranslationKey)}
+          <TrendingUp size={13} strokeWidth={1.75} className={analysisFilter === 'variable' ? 'text-white' : 'text-[#9CA6BC]'} />
+          <span>{t('variableExpenses' as TranslationKey)}</span>
         </button>
         <button
           onClick={() => {
             setAnalysisFilter('fixed');
             setExpandedCategory(null);
           }}
-          className={`h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'fixed'
               ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
               : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
           }`}
         >
-          {t('fixedExpenses' as TranslationKey)}
+          <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-white' : 'text-[#9CA6BC]'} />
+          <span>{t('fixedExpenses' as TranslationKey)}</span>
         </button>
       </div>
 

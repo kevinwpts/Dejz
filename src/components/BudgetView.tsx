@@ -742,45 +742,27 @@ export function BudgetView({
             <div className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-3 px-1">
                 {/* Discreet text sort controls */}
-                <div className="flex items-center gap-2 text-xs text-[#9CA6BC]">
-                  <span className="text-[11px] text-[#9CA6BC]/70">{config.language === 'en' ? 'Sort:' : 'Sortera:'}</span>
-                  <button
-                    type="button"
-                    onClick={() => setFixedSortBy('day')}
-                    className={`transition-colors cursor-pointer ${
-                      fixedSortBy === 'day' 
-                        ? 'text-white font-semibold' 
-                        : 'hover:text-[#C7CDDC]'
-                    }`}
-                  >
-                    {config.language === 'en' ? 'Day' : 'Dragningsdag'}
-                  </button>
-                  <span className="text-white/10">·</span>
-                  <button
-                    type="button"
-                    onClick={() => setFixedSortBy('name')}
-                    className={`transition-colors cursor-pointer ${
-                      fixedSortBy === 'name' 
-                        ? 'text-white font-semibold' 
-                        : 'hover:text-[#C7CDDC]'
-                    }`}
-                  >
-                    {config.language === 'en' ? 'Name' : 'Namn'}
-                  </button>
-                  <span className="text-white/10">·</span>
-                  <button
-                    type="button"
-                    onClick={() => setFixedSortBy('amount')}
-                    className={`transition-colors cursor-pointer ${
-                      fixedSortBy === 'amount' 
-                        ? 'text-white font-semibold' 
-                        : 'hover:text-[#C7CDDC]'
-                    }`}
-                  >
-                    {config.language === 'en' ? 'Amount' : 'Belopp'}
-                  </button>
-                </div>
-
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (fixedSortBy === 'day') setFixedSortBy('name');
+                    else if (fixedSortBy === 'name') setFixedSortBy('amount');
+                    else setFixedSortBy('day');
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.08] text-xs text-white transition-colors"
+                >
+                  <span className="text-[#9CA6BC]/70">
+                    {config.language === 'en' ? 'Sort:' : 'Sortera:'}
+                  </span>
+                  <span className="font-semibold">
+                    {fixedSortBy === 'day' 
+                      ? (config.language === 'en' ? 'Day' : 'Dragningsdag')
+                      : fixedSortBy === 'name'
+                      ? (config.language === 'en' ? 'Name' : 'Namn')
+                      : (config.language === 'en' ? 'Amount' : 'Belopp')
+                    }
+                  </span>
+                </button>
                 <button
                   type="button"
                   onClick={onAddFixedExpense}
