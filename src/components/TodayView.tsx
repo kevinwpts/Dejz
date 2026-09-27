@@ -506,7 +506,7 @@ export function TodayView({
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.08 + index * 0.02 }}
                           onClick={() => onNavigate("analysis")}
-                          className="flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white hover:bg-white/95 text-black transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border border-white/40 shadow-lg"
+                          className="flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white hover:bg-white/95 text-black transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border-none shadow-none"
                         >
                           {/* Top Row: Minimalist Monochrome Icon + Category Name */}
                           <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
@@ -574,7 +574,7 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
                       onClick={() => onNavigate("budget", "category-budgets")}
-                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-xl sm:rounded-2xl bg-white/90 hover:bg-white text-black transition-all group text-left active:scale-[0.98] min-w-[115px] max-w-[125px] cursor-pointer snap-start border border-dashed border-black/20 shadow-md"
+                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-xl sm:rounded-2xl bg-white/90 hover:bg-white text-black transition-all group text-left active:scale-[0.98] min-w-[115px] max-w-[125px] cursor-pointer snap-start border border-dashed border-black/20 shadow-none"
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-black/[0.05] text-black border border-black/[0.06] shrink-0">
@@ -594,7 +594,7 @@ export function TodayView({
                   <button
                     type="button"
                     onClick={() => onNavigate("budget", "category-budgets")}
-                    className="w-full p-4 rounded-2xl border border-white/40 hover:bg-white/95 bg-white text-black shadow-lg transition-all flex items-center justify-between text-left group cursor-pointer"
+                    className="w-full p-4 rounded-2xl bg-white hover:bg-white/95 text-black shadow-none border-none transition-all flex items-center justify-between text-left group cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-black/[0.05] border border-black/[0.06] flex items-center justify-center text-black transition-colors">
