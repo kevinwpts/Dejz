@@ -85,7 +85,7 @@ export const Modal: React.FC<ModalProps> = ({
               <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/[0.035] shrink-0">
                 <div className="flex flex-col pr-4">
                   {title && (
-                    <h2 className="text-lg sm:text-xl font-bold font-shoulders text-white tracking-normal">
+                    <h2 className="text-lg sm:text-xl font-bold font-display text-white tracking-normal">
                       {title}
                     </h2>
                   )}

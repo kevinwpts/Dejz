@@ -39,7 +39,7 @@ export function CustomBottomNavigation({
   const isBudgetActive = activeTab === "budget" && !isAllocateActive;
 
   return (
-    <div className="fixed bottom-2.5 sm:bottom-3.5 left-0 right-0 z-40 px-2.5 sm:px-6 pointer-events-none flex justify-center">
+    <div className="fixed bottom-[18px] sm:bottom-[22px] left-0 right-0 z-40 px-2.5 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
         className="w-[94%] sm:w-[86%] max-w-[430px] sm:max-w-[450px] h-[64px] sm:h-[68px] rounded-[20px] sm:rounded-[22px] px-2 sm:px-3 bg-[#242424] text-[#C7CDDC] backdrop-blur-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.5)] flex items-center justify-between pointer-events-auto border border-white/[0.04]"
         initial={{ y: 20, opacity: 0 }}

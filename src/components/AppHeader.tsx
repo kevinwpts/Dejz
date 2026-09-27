@@ -98,7 +98,7 @@ export function AppHeader({
         {/* Middle: Title (when onBack is active) OR Search Input Box */}
         {onBack && title ? (
           <div className="flex-1 min-w-0 text-center px-2">
-            <h1 className="text-[17px] sm:text-[19px] font-bold font-shoulders tracking-tight truncate text-[var(--text-primary)]">
+            <h1 className="text-[17px] sm:text-[19px] font-bold font-display tracking-tight truncate text-[var(--text-primary)]">
               {title}
             </h1>
           </div>

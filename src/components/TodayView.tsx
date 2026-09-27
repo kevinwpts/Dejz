@@ -616,7 +616,7 @@ export function TodayView({
       {/* 4. SELECTED DAY'S TRANSACTIONS (Natural Swedish casing: Idag, 26 september) */}
       <div className="space-y-4 pt-1">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-base sm:text-lg font-bold font-shoulders uppercase tracking-wider text-white">
+          <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-white">
             {stats.isPastPeriod
               ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
               : selectedDate.toDateString() === new Date().toDateString()
@@ -679,7 +679,7 @@ export function TodayView({
           {/* Fixed transactions for the day (Natural Swedish casing) */}
           {fixedTransactions.length > 0 && (
             <div className="space-y-2 pt-1">
-              <h4 className="text-xs sm:text-[13px] font-bold font-shoulders uppercase tracking-wider text-[#9CA6BC] px-1">
+              <h4 className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[#9CA6BC] px-1">
                 {lang === "en" ? "Fixed transactions" : "Fasta transaktioner"}
               </h4>
               <div className="space-y-2">

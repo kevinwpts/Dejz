@@ -663,7 +663,7 @@ export function BudgetView({
 
       {/* Overview Hero Section - Dynamic based on filter */}
       <div className="py-2 text-center space-y-1.5 flex flex-col items-center">
-        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
+        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.16em] text-[#9CA6BC] block select-none font-display">
           {budgetFilter === 'fixed' && (config?.language === 'en' ? 'TOTAL FIXED EXPENSES' : 'TOTALA FASTA UTGIFTER')}
           {budgetFilter === 'income' && (config?.language === 'en' ? 'TOTAL INCOME' : 'TOTALA INKOMSTER')}
           {budgetFilter === 'savings' && (config?.language === 'en' ? 'TOTAL SAVINGS' : 'TOTALT SPARANDE')}
