@@ -244,7 +244,7 @@ interface IncomeModalProps {
   categories: Category[];
 }
 
-export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, userId, isPro, categories, paymentMethods, _currentPeriodId, initialDeductionDay }: IncomeModalProps & { paymentMethods: any[], _currentPeriodId?: string, currentPeriodId?: string, initialDeductionDay?: number }) {
+export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, userId, isPro, categories, paymentMethods, _currentPeriodId, initialDeductionDay, config }: IncomeModalProps & { paymentMethods: any[], _currentPeriodId?: string, currentPeriodId?: string, initialDeductionDay?: number, config: Config }) {
   useScrollLock(true);
   const [name, setName] = useState(income?.name || '');
   const [note, setNote] = useState(income?.note || '');
@@ -519,7 +519,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
-                      const monthName = date.toLocaleString('sv-SE', { month: 'long' });
+                      const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                       const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                       
                       let cycleText = '';
@@ -527,11 +527,11 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                         const m2 = (i + 3) % 12;
                         const m3 = (i + 6) % 12;
                         const m4 = (i + 9) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
                         cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)}, ${getMonthShort(m3)}, ${getMonthShort(m4)})`;
                       } else if (frequency === Frequency.SEMI_ANNUALLY) {
                         const m2 = (i + 6) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
                         cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)})`;
                       }
 
@@ -959,7 +959,7 @@ interface FixedExpenseModalProps {
   paymentMethods: any[];
 }
 
-export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, currency, categories, userId, isPro, paymentMethods, _currentPeriodId }: FixedExpenseModalProps & { categories: Category[], _currentPeriodId?: string, currentPeriodId?: string }) {
+export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, currency, categories, userId, isPro, paymentMethods, _currentPeriodId, config }: FixedExpenseModalProps & { categories: Category[], _currentPeriodId?: string, currentPeriodId?: string, config: Config }) {
   useScrollLock(true);
   const [amount, setAmount] = useState(formatAmount(expense?.amount || ''));
   const [note, setNote] = useState(expense?.note || '');
@@ -1277,7 +1277,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
-                      const monthName = date.toLocaleString('sv-SE', { month: 'long' });
+                      const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                       const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                       
                       let cycleText = '';
@@ -1285,11 +1285,11 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                         const m2 = (i + 3) % 12;
                         const m3 = (i + 6) % 12;
                         const m4 = (i + 9) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
                         cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)}, ${getMonthShort(m3)}, ${getMonthShort(m4)})`;
                       } else if (frequency === Frequency.SEMI_ANNUALLY) {
                         const m2 = (i + 6) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
                         cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)})`;
                       }
 
@@ -1630,7 +1630,7 @@ interface MonthlySavingModalProps {
   isPro: boolean;
 }
 
-export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, currency, userId, isPro, paymentMethods, _currentPeriodId }: MonthlySavingModalProps & { paymentMethods: any[], _currentPeriodId?: string, currentPeriodId?: string }) {
+export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, currency, userId, isPro, paymentMethods, _currentPeriodId, config }: MonthlySavingModalProps & { paymentMethods: any[], _currentPeriodId?: string, currentPeriodId?: string, config: Config }) {
   useScrollLock(true);
   const [name, setName] = useState(saving?.name || '');
   const [amount, setAmount] = useState(formatAmount(saving?.amount || ''));
@@ -1897,7 +1897,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
-                      const monthName = date.toLocaleString('sv-SE', { month: 'long' });
+                      const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                       const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                       
                       let cycleText = '';
@@ -1905,11 +1905,11 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                         const m2 = (i + 3) % 12;
                         const m3 = (i + 6) % 12;
                         const m4 = (i + 9) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
                         cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)}, ${getMonthShort(m3)}, ${getMonthShort(m4)})`;
                       } else if (frequency === Frequency.SEMI_ANNUALLY) {
                         const m2 = (i + 6) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString('sv-SE', { month: 'short' });
+                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
                         cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)})`;
                       }
 

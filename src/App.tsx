@@ -2546,7 +2546,7 @@ export default function App() {
           periodId,
         };
       } catch (_error) {
-        console.error("Error calculating stats:", error);
+        console.error("Error calculating stats:", _error);
         return null;
       }
     },
@@ -4616,6 +4616,7 @@ export default function App() {
             isPro={isPro(subscriptionStatus)}
             categories={config.incomeCategories}
             paymentMethods={config?.paymentMethods || []}
+            config={config}
           />
         )}
         {viewingFixedExpense && (
@@ -4676,6 +4677,7 @@ export default function App() {
             userId={session?.user.id}
             isPro={isPro(subscriptionStatus)}
             paymentMethods={config?.paymentMethods || []}
+            config={config}
           />
         )}
         {viewingMonthlySaving && (
@@ -4715,6 +4717,7 @@ export default function App() {
             userId={session?.user.id}
             isPro={isPro(subscriptionStatus)}
             paymentMethods={config?.paymentMethods || []}
+            config={config}
           />
         )}
         {isCalculatorOpen && (

@@ -372,17 +372,6 @@ export function TodayView({
       transition={{ duration: 0.35 }}
       className="space-y-8 relative font-sans pb-16"
     >
-      {/* 1. Deep ambient midnight background with the 3 large diffuse radial gradients */}
-      <div className="fixed inset-0 pointer-events-none -z-20 overflow-hidden bg-[#080A14]">
-        {/* 1. Uppe till höger: mörk indigo/blå rgba(67, 56, 202, 0.16) */}
-        <div className="absolute -top-24 right-[-10%] w-[650px] sm:w-[750px] h-[650px] sm:h-[750px] rounded-full bg-[radial-gradient(circle,rgba(67,56,202,0.16)_0%,rgba(8,10,20,0)_70%)] blur-[90px]" />
-
-        {/* 2. Bakom/under saldoområdet: mörk blå rgba(37, 99, 235, 0.10) */}
-        <div className="absolute top-[8%] left-1/2 -translate-x-1/2 w-[700px] sm:w-[800px] h-[550px] rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.10)_0%,rgba(8,10,20,0)_70%)] blur-[100px]" />
-
-        {/* 3. Längre ned till vänster: mörk violett rgba(109, 40, 217, 0.08) */}
-        <div className="absolute top-[52%] left-[-15%] w-[600px] sm:w-[700px] h-[600px] sm:h-[700px] rounded-full bg-[radial-gradient(circle,rgba(109,40,217,0.08)_0%,rgba(8,10,20,0)_70%)] blur-[100px]" />
-      </div>
 
       {/* 1. HERO AREA & ACTIONS (Directly on canvas, with nested budget categories) */}
       <GreetingModule
