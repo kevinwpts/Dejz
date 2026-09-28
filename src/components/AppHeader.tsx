@@ -188,8 +188,8 @@ export function AppHeader({
               }
             }}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-white hover:bg-white/10"
-            aria-label={_language === 'en' ? 'Search' : 'Sök'}
-            title={_language === 'en' ? 'Search' : 'Sök'}
+            aria-label={language === 'en' ? 'Search' : 'Sök'}
+            title={language === 'en' ? 'Search' : 'Sök'}
           >
             <Search size={19} strokeWidth={2.2} />
           </button>
