@@ -30,6 +30,7 @@ interface LogViewProps {
   t: (key: TranslationKey) => string;
   currentLang: Language;
   periods?: any[];
+  isDemoMode?: boolean;
 }
 
 export function LogView({ 
@@ -41,7 +42,8 @@ export function LogView({
   onDeleteTransaction, 
   t, 
   currentLang,
-  periods
+  periods,
+  isDemoMode
 }: LogViewProps) {
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'receipt'>('all');
   const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
@@ -277,13 +279,18 @@ export function LogView({
 
   const today = useMemo(() => new Date(), []);
 
+  const stickyTop = isDemoMode
+    ? 'top-[calc(6.8rem+env(safe-area-inset-top))]'
+    : 'top-[calc(4.4rem+env(safe-area-inset-top))]';
+
   if (!transactions) return null;
 
   return (
     <div className="space-y-6 font-sans">
       {/* Top Filter Bar: Period/Day Selector with Left/Right Arrows + Type Filters */}
-      <div className="sticky top-[calc(env(safe-area-inset-top))] z-30 bg-[#F5F2EC] dark:bg-[#0B0A12] py-2 -mx-2 px-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar shadow-sm">
-        {/* Period / Day Selector with Left & Right Arrows */}
+      <div className={`sticky ${stickyTop} z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2.5 bg-[#F7F5F0]/95 dark:bg-[#232323]/95 backdrop-blur-md border-b border-[#E6E2D8]/60 dark:border-white/[0.04] transition-all`}>
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
+          {/* Period / Day Selector with Left & Right Arrows */}
         {periods && periods.length > 0 && (
           <>
             <div className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] ${
@@ -384,6 +391,7 @@ export function LogView({
             </button>
           );
         })}
+        </div>
       </div>
 
       {/* Transactions List */}

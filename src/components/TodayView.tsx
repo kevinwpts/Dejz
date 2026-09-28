@@ -552,39 +552,41 @@ export function TodayView({
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                           onClick={() => handleCategoryClick(cat.name)}
-                          className="flex-shrink-0 flex items-center gap-2.5 py-2 px-3 rounded-xl bg-white dark:bg-white/[0.035] hover:bg-[#F7F5F0] dark:hover:bg-white/[0.07] text-[var(--text-primary)] transition-all group cursor-pointer snap-start border border-[#E6E2D8]/80 dark:border-white/[0.06] shadow-2xs relative"
+                          className="flex-shrink-0 flex flex-col gap-2 py-2 px-3 rounded-xl bg-white dark:bg-white/[0.035] hover:bg-[#F7F5F0] dark:hover:bg-white/[0.07] text-[var(--text-primary)] transition-all group cursor-pointer snap-start border border-[#E6E2D8]/80 dark:border-white/[0.06] shadow-2xs relative min-w-[140px]"
                         >
-                          {/* Mini Icon */}
-                          <div className="w-6 h-6 rounded-lg bg-[#F7F5F0] dark:bg-white/[0.06] border border-[#E6E2D8] dark:border-white/[0.08] text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
-                            {isEmojiString(cat.iconName) ? (
-                              <span className="text-[11px] leading-none">{cat.iconName}</span>
-                            ) : Icon ? (
-                              <Icon size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white" />
-                            ) : (
-                              <div className="w-1.5 h-1.5 rounded-full bg-[#1C1917] dark:bg-white" />
-                            )}
+                          <div className="flex items-center gap-2.5">
+                            {/* Mini Icon */}
+                            <div className="w-6 h-6 rounded-lg bg-[#F7F5F0] dark:bg-white/[0.06] border border-[#E6E2D8] dark:border-white/[0.08] text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
+                              {isEmojiString(cat.iconName) ? (
+                                <span className="text-[11px] leading-none">{cat.iconName}</span>
+                              ) : Icon ? (
+                                <Icon size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white" />
+                              ) : (
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#1C1917] dark:bg-white" />
+                              )}
+                            </div>
+
+                            {/* Name and Amount */}
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-xs font-semibold tracking-tight truncate text-[#1C1917] dark:text-white max-w-[80px]">
+                                {cat.name}
+                              </span>
+                              <span className={`text-xs font-bold tabular-nums tracking-tight ${
+                                cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[#6E6961] dark:text-[#9CA6BC]'
+                              }`}>
+                                {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} kr` : `${formatAmount(cat.spent, lang)} kr`}
+                              </span>
+                            </div>
                           </div>
 
-                          {/* Name and Amount */}
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-xs font-semibold tracking-tight truncate text-[#1C1917] dark:text-white max-w-[80px]">
-                              {cat.name}
-                            </span>
-                            <span className={`text-xs font-bold tabular-nums tracking-tight ${
-                              cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[#6E6961] dark:text-[#9CA6BC]'
-                            }`}>
-                              {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} kr` : `${formatAmount(cat.spent, lang)} kr`}
-                            </span>
-                          </div>
-
-                          {/* Mini progress ring or dot indicator */}
+                          {/* Horizontal progress bar */}
                           {cat.hasBudget && (
-                            <div className="w-1.5 h-6 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden flex flex-col justify-end ml-0.5">
+                            <div className="w-full h-1 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
                               <div 
-                                className={`w-full rounded-full transition-all duration-500 ${
+                                className={`h-full rounded-full transition-all duration-500 ${
                                   cat.isOverBudget ? 'bg-rose-500' : 'bg-neutral-900 dark:bg-white'
                                 }`} 
-                                style={{ height: `${spentPct}%` }} 
+                                style={{ width: `${spentPct}%` }} 
                               />
                             </div>
                           )}
