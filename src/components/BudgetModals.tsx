@@ -1227,28 +1227,6 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             </div>
           </div>
 
-          {/* Category */}
-          <div className="space-y-4 pt-4 border-t border-[var(--border-color)]/30">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-[11px] font-medium text-[var(--text-secondary)] ml-1">{t('category')}</h3>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {(categories || []).map(cat => {
-                const isActive = category === cat.name;
-                return (
-                  <CategoryTile
-                    key={cat.name}
-                    name={cat.name}
-                    icon={cat.icon}
-                    color={cat.color}
-                    isActive={isActive}
-                    onClick={() => setCategory(cat.name)}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
           <div className={`grid gap-4 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
             <div className="space-y-2">
               <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('frequency')}</label>
@@ -1304,6 +1282,28 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Category */}
+          <div className="space-y-4 pt-4 border-t border-[var(--border-color)]/30">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-[11px] font-medium text-[var(--text-secondary)] ml-1">{t('category')}</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {(categories || []).map(cat => {
+                const isActive = category === cat.name;
+                return (
+                  <CategoryTile
+                    key={cat.name}
+                    name={cat.name}
+                    icon={cat.icon}
+                    color={cat.color}
+                    isActive={isActive}
+                    onClick={() => setCategory(cat.name)}
+                  />
+                );
+              })}
+            </div>
           </div>
 
           {expense && (

@@ -50,49 +50,20 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   const dayString = item.deductionDay ? `${item.deductionDay}${daySuffix}` : '';
   const paymentString = item.paymentMethod ? (typeof item.paymentMethod === 'string' ? item.paymentMethod : item.paymentMethod?.name) : '';
 
-  const getNextDeduction = () => {
-    if (!item.frequency || item.frequency === Frequency.MONTHLY || item.startMonth === undefined || !item.deductionDay) return null;
-    
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    
-    let nextMonth = item.startMonth;
-    let nextYear = currentYear;
-    
-    const interval = item.frequency === Frequency.QUARTERLY ? 3 : item.frequency === Frequency.SEMI_ANNUALLY ? 6 : 12;
-    
-    // Find the next occurrence
-    for (let i = 0; i < 24; i++) { // Check up to 2 years ahead
-      const deductionDate = new Date(nextYear, nextMonth, item.deductionDay);
-      if (deductionDate > now) {
-        return deductionDate;
-      }
-      nextMonth += interval;
-      if (nextMonth >= 12) {
-        nextMonth -= 12;
-        nextYear += 1;
-      }
-    }
-    return null;
-  };
-
-  const nextDeductionDate = getNextDeduction();
-  const nextDeductionString = nextDeductionDate 
-    ? (isEn ? `Next: ${nextDeductionDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}` : `Nästa: ${nextDeductionDate.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}`)
-    : '';
-
   return (
     <div 
       onClick={onClick}
       className="px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3 group transition-colors hover:bg-white/[0.03] cursor-pointer"
     >
       {/* Left side: Logo + Name + Category */}
-      <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="relative flex-shrink-0">
           <BudgetItemLogo item={item} type={type} config={config} />
           {item.isVariable && (
-            <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#818cf8] rounded-full flex items-center justify-center shadow-sm">
-              <span className="text-[7.5px] font-bold text-white">{t('variableShort' as any)}</span>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#818cf8] border border-[#232323] rounded-full flex items-center justify-center z-10 select-none">
+              <span className="text-[8px] font-extrabold text-white leading-none flex items-center justify-center text-center -translate-y-[0.5px]">
+                {t('variableShort' as any)}
+              </span>
             </div>
           )}
         </div>
@@ -143,11 +114,6 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
 
         {/* Right-aligned deduction metadata under amount */}
         <div className="flex flex-col items-end gap-0.5 mt-0.5 justify-end max-w-full overflow-hidden text-[#9CA6BC]">
-          {nextDeductionString && (
-            <span className="text-[10px] font-semibold text-accent/90 tracking-tight whitespace-nowrap">
-              {nextDeductionString} ({formatAmount(rawAmount, language)} {currency})
-            </span>
-          )}
           {(dayString || paymentString) && (
             <span className="text-[11px] font-normal text-[#9CA6BC] tracking-tight truncate">
               {dayString && <span>{dayString}</span>}

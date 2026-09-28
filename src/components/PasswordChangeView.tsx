@@ -62,7 +62,7 @@ export function PasswordChangeView({ onBack, t, addToast, userEmail }: PasswordC
   };
 
   return (
-    <div className="space-y-6 max-w-md mx-auto">
+    <div className="space-y-6 w-full font-sans">
       <div className="flex items-center gap-3">
         <IconButton
           icon={<ChevronLeft size={18} />}

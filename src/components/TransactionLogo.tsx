@@ -84,7 +84,7 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
   // Step 1: Explicit Logo URL / Data URI
   if (isExplicitLogoUrl && !imgError) {
     return (
-      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs`}>
+      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0`}>
         <img 
           src={explicitLogo!} 
           alt={title} 
@@ -99,7 +99,7 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
   // Step 1.2: Instant Brand Vector Logo (Tinder, Max (HBO), SATS, Coop, ICA, etc.)
   if (instantSvg && !imgError) {
     return (
-      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs`}>
+      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0`}>
         <img 
           src={instantSvg} 
           alt={title} 
@@ -114,7 +114,7 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
   // Step 1.5: Known Brand Logo (Tinder, SkyShowtime, HBO Max, etc.)
   if (brandLogo && !imgError) {
     return (
-      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs`}>
+      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0`}>
         <img 
           src={brandLogo} 
           alt={title} 
@@ -139,7 +139,7 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
   // Step 4: Auto Logo URL (if no explicit logo/icon or if explicit failed)
   if (autoLogoUrl && !autoImgError) {
     return (
-      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 shadow-xs`}>
+      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0`}>
         <img 
           src={autoLogoUrl} 
           alt={title} 

@@ -80,6 +80,7 @@ export function BudgetView({
 
 
   const [fixedSortBy, setFixedSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
+  const [incomeSortBy, setIncomeSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [confirmReset, setConfirmReset] = React.useState(false);
 
   React.useEffect(() => {
@@ -89,7 +90,22 @@ export function BudgetView({
     }
   }, [confirmReset]);
 
-  const sortedIncomes = incomes || [];
+  const sortedIncomes = React.useMemo(() => {
+    const list = [...(incomes || [])];
+    if (incomeSortBy === 'day') {
+      return list.sort((a, b) => {
+        const dayA = typeof a.deductionDay === 'number' && a.deductionDay > 0 ? a.deductionDay : 999;
+        const dayB = typeof b.deductionDay === 'number' && b.deductionDay > 0 ? b.deductionDay : 999;
+        if (dayA !== dayB) return dayA - dayB;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+    } else if (incomeSortBy === 'amount') {
+      return list.sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0));
+    } else {
+      return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
+  }, [incomes, incomeSortBy]);
+
   const sortedFixedExpenses = React.useMemo(() => {
     const list = [...(fixedExpenses || [])];
     if (fixedSortBy === 'day') {
@@ -687,8 +703,32 @@ export function BudgetView({
         >
           {/* Incomes Section */}
           {budgetFilter === 'income' && (
-            <div className="space-y-4">
-              <div className="flex justify-end px-1">
+            <div className="space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+                {/* Single compact sort toggle button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (incomeSortBy === 'day') setIncomeSortBy('name');
+                    else if (incomeSortBy === 'name') setIncomeSortBy('amount');
+                    else setIncomeSortBy('day');
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.035] text-xs text-white transition-all cursor-pointer select-none active:scale-95"
+                  title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
+                >
+                  <ArrowUpDown size={12} strokeWidth={2} className="text-[#8B9CFF] shrink-0" />
+                  <span className="text-[#9CA6BC]/80">
+                    {config.language === 'en' ? 'Sort:' : 'Sortera:'}
+                  </span>
+                  <span className="font-semibold text-white">
+                    {incomeSortBy === 'day' 
+                      ? (config.language === 'en' ? 'Day' : 'Ankomstdag')
+                      : incomeSortBy === 'name'
+                      ? (config.language === 'en' ? 'Name' : 'Namn')
+                      : (config.language === 'en' ? 'Amount' : 'Belopp')
+                    }
+                  </span>
+                </button>
                 <button 
                   onClick={onAddIncome} 
                   className="text-xs font-medium text-[#8B9CFF] hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"

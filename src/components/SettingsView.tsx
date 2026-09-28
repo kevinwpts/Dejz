@@ -188,7 +188,7 @@ export function SettingsView({
     ];
 
     return (
-      <div className="space-y-4 max-w-md mx-auto py-1">
+      <div className="space-y-4 w-full py-1">
         {/* Next Payday Status Line — Minimalist and subtle */}
         <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)] px-1">
           <Calendar size={13} className="opacity-60" />
@@ -373,7 +373,7 @@ export function SettingsView({
 
   const renderCategoriesSettings = () => {
     return (
-      <div className="space-y-6 max-w-md mx-auto py-2">
+      <div className="space-y-6 w-full py-2">
         <div className="flex p-1 bg-[var(--bg-color)] rounded-2xl border-[0.5px] border-[var(--border-color)]">
           <button
             onClick={() => setCategoryTab('expense')}
@@ -414,7 +414,7 @@ export function SettingsView({
     });
 
     return (
-      <div className="space-y-4 max-w-md mx-auto py-1">
+      <div className="space-y-4 w-full py-1">
         <div className="grid grid-cols-3 gap-2.5">
           {methodsList.map((method, index) => (
             <button
@@ -461,7 +461,7 @@ export function SettingsView({
   };
 
   const renderLanguageSettings = () => (
-    <div className="space-y-4 max-w-md mx-auto py-1">
+    <div className="space-y-4 w-full py-1">
       <div className="flex flex-col gap-2">
         {Object.entries(languageInfo).map(([code, info]) => {
           const isSelected = config.language === code;
@@ -534,7 +534,7 @@ export function SettingsView({
     };
 
     return (
-      <div className="space-y-4 max-w-md mx-auto py-1">
+      <div className="space-y-4 w-full py-1">
         <div className="flex flex-col gap-2.5">
           {options.map((opt) => {
             const isSelected = currentMode === opt.id;

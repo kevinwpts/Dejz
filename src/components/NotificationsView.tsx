@@ -35,13 +35,13 @@ export function NotificationsView({
         transition={{ duration: 0.2 }}
         className="py-16 px-4 text-center flex flex-col items-center justify-center space-y-3"
       >
-        <div className="w-14 h-14 rounded-2xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center mb-1 shadow-inner">
+        <div className="w-14 h-14 rounded-2xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center mb-4">
           <Check size={28} strokeWidth={2.5} />
         </div>
-        <h3 className="text-base font-semibold text-[var(--text-primary)]">
+        <h3 className="text-base font-semibold text-[var(--text-primary)] tracking-tight">
           {t('noNotifications')}
         </h3>
-        <p className="text-xs text-[var(--text-secondary)] max-w-xs leading-relaxed">
+        <p className="text-xs text-[var(--text-secondary)] max-w-xs leading-relaxed mt-1">
           {config.language === 'en'
             ? 'All your variable bills and expenses are up to date for this period.'
             : 'Alla dina varierande räkningar och utgifter är uppdaterade för denna period.'}

@@ -192,7 +192,7 @@ export function ProfileView({
       className={`w-full flex items-center justify-between py-3.5 px-4 hover:bg-[var(--surface-muted)]/50 transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
     >
       <div className="flex items-center gap-3.5 min-w-0">
-        <div className={`w-9 h-9 rounded-xl ${iconBgColor} ${iconTextColor} border border-[var(--border-color)]/30 flex items-center justify-center relative shrink-0 shadow-2xs`}>
+        <div className={`w-9 h-9 rounded-xl ${iconBgColor} ${iconTextColor} border border-[var(--border-color)]/30 flex items-center justify-center relative shrink-0`}>
           <Icon size={16} strokeWidth={1.8} />
         </div>
         <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate tracking-tight">{label}</span>
@@ -206,7 +206,7 @@ export function ProfileView({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
-      className="space-y-5 w-full max-w-md mx-auto pb-12 font-sans"
+      className="space-y-5 w-full pb-12 font-sans"
     >
       {/* User Header Module */}
       <div className="bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[24px] p-5 shadow-none flex items-center gap-4">
