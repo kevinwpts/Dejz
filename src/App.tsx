@@ -5194,9 +5194,9 @@ export default function App() {
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
                 >
                   <div className="w-14 h-14 rounded-full bg-[#F0EDE6] dark:bg-white/[0.045] group-hover:bg-[#E6E2D8] dark:group-hover:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.035] flex items-center justify-center transition-colors">
-                    <ArrowDownLeft size={20} strokeWidth={1.75} className="text-[#1C1917] dark:text-[#C7CDDC] group-hover:text-emerald-600 dark:group-hover:text-white transition-colors" />
+                    <ArrowDownLeft size={20} strokeWidth={1.75} className="text-[#1C1917] dark:text-[#C7CDDC] group-hover:text-neutral-900 dark:text-white dark:group-hover:text-white transition-colors" />
                   </div>
-                  <span className="text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC]/90 group-hover:text-emerald-600 dark:group-hover:text-white transition-colors text-center">
+                  <span className="text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC]/90 group-hover:text-neutral-900 dark:text-white dark:group-hover:text-white transition-colors text-center">
                     {config?.language === "en" ? "Expense" : "Utgift"}
                   </span>
                 </button>
@@ -5214,9 +5214,9 @@ export default function App() {
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
                 >
                   <div className="w-14 h-14 rounded-full bg-[#F0EDE6] dark:bg-white/[0.045] group-hover:bg-[#E6E2D8] dark:group-hover:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.035] flex items-center justify-center transition-colors">
-                    <ArrowUpRight size={20} strokeWidth={1.75} className="text-[#1C1917] dark:text-[#C7CDDC] group-hover:text-emerald-600 dark:group-hover:text-white transition-colors" />
+                    <ArrowUpRight size={20} strokeWidth={1.75} className="text-[#1C1917] dark:text-[#C7CDDC] group-hover:text-neutral-900 dark:text-white dark:group-hover:text-white transition-colors" />
                   </div>
-                  <span className="text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC]/90 group-hover:text-emerald-600 dark:group-hover:text-white transition-colors text-center">
+                  <span className="text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC]/90 group-hover:text-neutral-900 dark:text-white dark:group-hover:text-white transition-colors text-center">
                     {config?.language === "en" ? "Income" : "Inkomst"}
                   </span>
                 </button>
@@ -5230,12 +5230,12 @@ export default function App() {
                 >
                   <div className="w-14 h-14 rounded-full bg-[#F0EDE6] dark:bg-white/[0.045] group-hover:bg-[#E6E2D8] dark:group-hover:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.035] flex items-center justify-center transition-colors">
                     {isScanningReceipt ? (
-                      <Loader2 size={20} className="animate-spin text-emerald-600 dark:text-white" />
+                      <Loader2 size={20} className="animate-spin text-neutral-900 dark:text-white dark:text-white" />
                     ) : (
-                      <Camera size={20} strokeWidth={1.75} className="text-[#1C1917] dark:text-[#C7CDDC] group-hover:text-emerald-600 dark:group-hover:text-white transition-colors" />
+                      <Camera size={20} strokeWidth={1.75} className="text-[#1C1917] dark:text-[#C7CDDC] group-hover:text-neutral-900 dark:text-white dark:group-hover:text-white transition-colors" />
                     )}
                   </div>
-                  <span className="text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC]/90 group-hover:text-emerald-600 dark:group-hover:text-white transition-colors text-center">
+                  <span className="text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC]/90 group-hover:text-neutral-900 dark:text-white dark:group-hover:text-white transition-colors text-center">
                     {isScanningReceipt ? (config?.language === "en" ? "Scanning..." : "Scannar...") : (config?.language === "en" ? "Receipt" : "Kvitto")}
                   </span>
                 </button>
@@ -5289,7 +5289,7 @@ export default function App() {
                           : (config?.language === "en" ? "Quick expense: e.g. 45 Coop..." : "Snabbutgift: t.ex. 45 ICA...")
                     }
                     className={`w-full h-11 sm:h-12 pl-12 pr-12 rounded-2xl bg-[#F0EDE6] dark:bg-white/[0.035] hover:bg-[#E6E2D8] dark:hover:bg-white/[0.05] focus:bg-[#FFFFFF] dark:focus:bg-white/[0.065] border text-xs sm:text-sm font-normal text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#9CA6BC]/70 outline-none transition-all shadow-none ${
-                      isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-[#E6E2D8] dark:border-white/[0.025] focus:border-emerald-500 dark:focus:border-white/[0.08]"
+                      isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-[#E6E2D8] dark:border-white/[0.025] focus:border-neutral-800 dark:text-white dark:focus:border-white/[0.08]"
                     }`}
                   />
 
@@ -5297,7 +5297,7 @@ export default function App() {
                   <button
                     type="submit"
                     disabled={!plusQuickText.trim() || isSubmittingQuick || isAudioTranscribing || isRecording}
-                    className="absolute right-1.5 z-10 w-8.5 h-8.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-white/[0.06] dark:hover:bg-white/[0.12] disabled:opacity-20 active:scale-95 dark:text-white flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-emerald-700 dark:border-white/[0.05]"
+                    className="absolute right-1.5 z-10 w-8.5 h-8.5 rounded-xl bg-neutral-900 dark:text-white hover:bg-neutral-900 dark:text-white text-white dark:bg-white/[0.06] dark:hover:bg-white/[0.12] disabled:opacity-20 active:scale-95 dark:text-white flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-neutral-900 dark:text-white dark:border-white/[0.05]"
                   >
                     <Plus size={16} strokeWidth={2.2} className="text-white" />
                   </button>
@@ -5310,9 +5310,9 @@ export default function App() {
                       initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/20 text-emerald-300 text-xs font-semibold"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-800 dark:text-white/15 border border-neutral-800 dark:text-white/20 text-[#1C1917] dark:text-white 300 text-xs font-semibold"
                     >
-                      <Check size={14} strokeWidth={2.5} className="shrink-0 text-emerald-400" />
+                      <Check size={14} strokeWidth={2.5} className="shrink-0 text-neutral-200 dark:text-white" />
                       <div className="truncate flex-1">
                         <span>{plusSuccessMsg.text}</span>
                         {plusSuccessMsg.transcript && (

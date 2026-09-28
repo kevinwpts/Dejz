@@ -75,7 +75,7 @@ export function UniversalPeriodSelector({
 
   if (variant === 'header') {
     return (
-      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-[#05b862]/[0.18] dark:border-[#05b862]/35 dark:text-white shadow-none">
+      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] bg-[#FFFFFF] dark:bg-white/[0.06] border-[#E6E2D8] dark:border-white/10 text-[#1C1917] dark:text-white shadow-none">
         <button 
           type="button"
           onClick={handlePrevPeriod}
@@ -83,7 +83,7 @@ export function UniversalPeriodSelector({
           className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
             canGoPrev 
               ? 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]' 
-              : 'text-[#6E6961]/30 dark:text-[#9CA6BC] opacity-25 cursor-not-allowed'
+              : 'text-[#6E6961]/70 dark:text-[#9CA6BC]/70 cursor-not-allowed'
           }`}
           aria-label="Föregående period"
           title="Föregående period"
@@ -98,7 +98,7 @@ export function UniversalPeriodSelector({
           <CalendarIcon 
             size={13} 
             strokeWidth={1.8} 
-            className="text-emerald-600 dark:text-[#05b862] shrink-0" 
+            className="text-[#1C1917] dark:text-white shrink-0" 
           />
           <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate text-[#1C1917] dark:text-white">
             {month}
@@ -112,7 +112,7 @@ export function UniversalPeriodSelector({
           className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
             canGoNext 
               ? 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]' 
-              : 'text-[#6E6961]/30 dark:text-[#9CA6BC] opacity-25 cursor-not-allowed'
+              : 'text-[#6E6961]/70 dark:text-[#9CA6BC]/70 cursor-not-allowed'
           }`}
           aria-label="Nästa period"
           title="Nästa period"
@@ -130,7 +130,7 @@ export function UniversalPeriodSelector({
         onClick={handleCenterClick}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/[0.035] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.06] border border-[#E6E2D8] dark:border-white/[0.03] transition-all cursor-pointer group select-none"
       >
-        <CalendarIcon size={13} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover:text-emerald-600 dark:group-hover:text-[#05b862] transition-colors" />
+        <CalendarIcon size={13} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover:text-neutral-900 dark:text-white dark:group-hover:text-[#1C1917] dark:text-white transition-colors" />
         <span className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[#1C1917] dark:text-white">
           {month}
         </span>
@@ -167,10 +167,10 @@ export function UniversalPeriodSelector({
             className="flex flex-col items-center group/label px-4 py-1 rounded-2xl hover:bg-black/5 dark:hover:bg-white/[0.04] transition-all cursor-pointer"
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-lg sm:text-xl font-bold font-display uppercase tracking-wider text-[#1C1917] dark:text-white group-hover/label:text-emerald-600 dark:group-hover/label:text-[#05b862] transition-colors">
+              <span className="text-lg sm:text-xl font-bold font-display uppercase tracking-wider text-[#1C1917] dark:text-white group-hover/label:text-neutral-900 dark:text-white dark:group-hover/label:text-[#1C1917] dark:text-white transition-colors">
                 {month}
               </span>
-              <CalendarIcon size={14} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover/label:text-emerald-600 dark:group-hover/label:text-[#05b862] transition-colors" />
+              <CalendarIcon size={14} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover/label:text-neutral-900 dark:text-white dark:group-hover/label:text-[#1C1917] dark:text-white transition-colors" />
               <ChevronDown size={13} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover/label:text-[#1C1917] dark:group-hover/label:text-white transition-opacity" />
             </div>
             {dates && (

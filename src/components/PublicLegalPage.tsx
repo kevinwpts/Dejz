@@ -161,7 +161,7 @@ export function PublicLegalPage({
             className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-xl transition-all shadow-xs cursor-pointer"
             title="Kopiera länk till detta dokument"
           >
-            {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+            {copied ? <Check size={14} className="text-neutral-800 dark:text-white" /> : <Copy size={14} />}
             <span>
               {copied
                 ? (language === 'sv' ? 'Kopierad!' : 'Copied!')
@@ -210,7 +210,7 @@ function SwedishPrivacyPolicy() {
   return (
     <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6">
       <header className="border-b border-[var(--border-color)] pb-6 space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 mb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-neutral-800 dark:text-white/10 text-neutral-900 dark:text-white border border-neutral-800 dark:text-white/20 mb-2">
           <Lock size={12} />
           GDPR & Google OAuth Compliant
         </div>
@@ -380,7 +380,7 @@ function EnglishPrivacyPolicy() {
   return (
     <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6">
       <header className="border-b border-[var(--border-color)] pb-6 space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 mb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-neutral-800 dark:text-white/10 text-neutral-900 dark:text-white border border-neutral-800 dark:text-white/20 mb-2">
           <Lock size={12} />
           GDPR & Google OAuth Compliant
         </div>

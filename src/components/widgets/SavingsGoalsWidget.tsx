@@ -76,7 +76,7 @@ export function SavingsGoalsWidget({
                       {goal.title}
                     </span>
                   </div>
-                  <span className="text-[11px] font-bold tabular-nums text-emerald-600 dark:text-emerald-400 shrink-0 ml-2">
+                  <span className="text-[11px] font-bold tabular-nums text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white shrink-0 ml-2">
                     {progress}%
                   </span>
                 </div>
@@ -84,7 +84,7 @@ export function SavingsGoalsWidget({
                 {/* Progress bar */}
                 <div className="w-full h-1.5 bg-[var(--border-color)]/40 rounded-full overflow-hidden mb-1.5">
                   <div
-                    className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                    className="h-full bg-neutral-800 dark:text-white rounded-full transition-all duration-500"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -103,7 +103,7 @@ export function SavingsGoalsWidget({
           onClick={() => onNavigate('budget', 'savings-goals')}
           className="w-full py-3 px-4 rounded-xl border border-dashed border-[var(--border-color)] hover:border-[var(--accent-color)]/50 bg-[var(--surface-muted)]/30 hover:bg-[var(--surface-muted)]/60 flex items-center justify-center gap-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer"
         >
-          <Plus size={14} className="text-emerald-500" />
+          <Plus size={14} className="text-neutral-800 dark:text-white" />
           <span>{isEn ? 'Create your first savings goal' : 'Skapa ditt första sparmål'}</span>
         </button>
       )}

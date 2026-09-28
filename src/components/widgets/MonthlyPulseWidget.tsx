@@ -94,7 +94,7 @@ export function MonthlyPulseWidget({
             <PiggyBank size={11} className="opacity-70" />
             <span className="truncate">{isEn ? 'Savings pot' : 'Sparpott'}</span>
           </div>
-          <p className="text-[15px] sm:text-[16px] font-bold text-emerald-600 dark:text-emerald-400 font-amount tabular-nums mt-1 truncate">
+          <p className="text-[15px] sm:text-[16px] font-bold text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white font-amount tabular-nums mt-1 truncate">
             {formatAmount(savingsPot, config.language)} <span className="text-[10.5px] font-normal text-[var(--text-secondary)]">{currency}</span>
           </p>
         </div>

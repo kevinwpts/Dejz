@@ -340,7 +340,7 @@ export function ReceiptCameraModal({
                 <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-xl" />
 
                 {/* Subtle animated scan sweep line */}
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-[bounce_2.5s_infinite]" />
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-neutral-200 dark:text-white to-transparent animate-[bounce_2.5s_infinite]" />
               </div>
 
               {/* Guide hint */}

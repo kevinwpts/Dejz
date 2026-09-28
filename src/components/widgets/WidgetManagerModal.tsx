@@ -334,7 +334,7 @@ export function WidgetManagerModal({
                         </div>
 
                         {isAdded && (
-                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
+                          <span className="text-[10px] font-bold text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white bg-neutral-800 dark:text-white/10 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
                             <CheckCircle2 size={12} />
                             {isEn ? 'Added' : 'Tillagd'}
                           </span>

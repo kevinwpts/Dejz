@@ -203,11 +203,11 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'all'
-              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
-          <LayoutGrid size={13} strokeWidth={1.75} className={analysisFilter === 'all' ? 'text-emerald-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <LayoutGrid size={13} strokeWidth={1.75} className={analysisFilter === 'all' ? 'text-[#1C1917] dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('all' as TranslationKey)}</span>
         </button>
         <button
@@ -217,11 +217,11 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'variable'
-              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
-          <TrendingUp size={13} strokeWidth={1.75} className={analysisFilter === 'variable' ? 'text-emerald-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <TrendingUp size={13} strokeWidth={1.75} className={analysisFilter === 'variable' ? 'text-[#1C1917] dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('variableExpenses' as TranslationKey)}</span>
         </button>
         <button
@@ -231,11 +231,11 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'fixed'
-              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
-          <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-emerald-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-[#1C1917] dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('fixedExpenses' as TranslationKey)}</span>
         </button>
       </div>
@@ -273,7 +273,7 @@ export function AnalysisView({
                   exit={{ opacity: 0, scale: 0.92 }}
                   className="flex flex-col items-center text-center px-8"
                 >
-                  <span className="text-xs font-medium text-emerald-600 dark:text-[#05b862] mb-1 truncate max-w-[140px]">
+                  <span className="text-xs font-medium text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white mb-1 truncate max-w-[140px]">
                     {expandedCategory}
                   </span>
                   <span className="text-2xl sm:text-3xl font-semibold text-[#1C1917] dark:text-white font-amount tabular-nums leading-none">
@@ -429,7 +429,7 @@ export function AnalysisView({
                             <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1">{config.currency}</span>
                           </p>
                         </div>
-                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-emerald-600 dark:text-[#05b862]' : 'text-[#6E6961] dark:text-[#9CA6BC]'}`}>
+                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'}`}>
                           <ChevronDown size={16} strokeWidth={2} />
                         </div>
                       </div>

@@ -118,7 +118,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
         <button 
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="text-xs font-medium text-[#05b862] hover:text-[#049d53] transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
+          className="text-xs font-medium text-[#1C1917] dark:text-white hover:text-[#049d53] transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
         >
           <Plus size={14} strokeWidth={2} />
           <span>Lägg till konto</span>
@@ -143,7 +143,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
 
         {isLoading ? (
           <div className="flex justify-center p-8">
-            <div className="w-6 h-6 border-2 border-emerald-600 dark:border-[#05b862] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-6 h-6 border-2 border-neutral-900 dark:text-white dark:border-[#1C1917] dark:border-white border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : accounts.length === 0 ? (
           <div className="bg-[#FFFFFF] dark:bg-white/[0.035] rounded-[24px] p-8 flex flex-col items-center justify-center text-center border border-[#E6E2D8] dark:border-white/[0.025] shadow-xs dark:shadow-none">
@@ -155,7 +155,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
             <button
               type="button"
               onClick={() => setIsAddModalOpen(true)}
-              className="text-xs font-medium text-emerald-600 dark:text-[#05b862] hover:text-emerald-800 dark:hover:text-white transition-colors inline-flex items-center gap-1.5"
+              className="text-xs font-medium text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white hover:text-[#1C1917] dark:text-white 800 dark:hover:text-white transition-colors inline-flex items-center gap-1.5"
             >
               <Plus size={14} strokeWidth={2} />
               <span>Lägg till konto</span>
@@ -242,7 +242,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="t.ex. SEB Lönekonto"
-                    className="w-full bg-[#F0EDE6] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#1C1917] dark:text-white focus:outline-none focus:border-[#05b862] dark:focus:border-[#05b862] transition-all placeholder-[#8C867C] dark:placeholder-[#9CA6BC]/40"
+                    className="w-full bg-[#F0EDE6] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#1C1917] dark:text-white focus:outline-none focus:border-[#1C1917] dark:border-white dark:focus:border-[#1C1917] dark:border-white transition-all placeholder-[#8C867C] dark:placeholder-[#9CA6BC]/40"
                   />
                 </div>
 
@@ -253,7 +253,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
                     value={initialBalance}
                     onChange={(e) => setInitialBalance(e.target.value)}
                     placeholder="0"
-                    className="w-full bg-[#F0EDE6] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#1C1917] dark:text-white focus:outline-none focus:border-[#05b862] dark:focus:border-[#05b862] transition-all placeholder-[#8C867C] dark:placeholder-[#9CA6BC]/40 font-amount tabular-nums"
+                    className="w-full bg-[#F0EDE6] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#1C1917] dark:text-white focus:outline-none focus:border-[#1C1917] dark:border-white dark:focus:border-[#1C1917] dark:border-white transition-all placeholder-[#8C867C] dark:placeholder-[#9CA6BC]/40 font-amount tabular-nums"
                   />
                 </div>
               </div>
@@ -262,7 +262,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
                 <button 
                   type="button"
                   onClick={handleSave}
-                  className="w-full bg-[#05b862] hover:bg-[#049d53] text-white font-medium text-sm py-3 rounded-full transition-colors cursor-pointer shadow-xs"
+                  className="w-full bg-[#1C1917] dark:bg-white hover:bg-[#049d53] text-white font-medium text-sm py-3 rounded-full transition-colors cursor-pointer shadow-xs"
                 >
                   Spara konto
                 </button>

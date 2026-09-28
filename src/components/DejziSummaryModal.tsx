@@ -18,7 +18,7 @@ export function DejziAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
 
   return (
     <div className={`relative ${sizeClasses} flex items-center justify-center shrink-0`}>
-      <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/25 via-emerald-400/20 to-cyan-400/25 rounded-full blur-xs animate-pulse" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/25 via-neutral-200 dark:text-white/20 to-cyan-400/25 rounded-full blur-xs animate-pulse" />
       <motion.div
         animate={{ y: [0, -2, 0], rotate: [0, 1.5, -1.5, 0] }}
         transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -263,7 +263,7 @@ export function DejziSummaryModal({
               {/* Dagar kvar till lön */}
               <div className="p-3.5 rounded-2xl bg-[var(--surface-muted)]/70 border border-[var(--border-color)]/60 flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
-                  <Calendar size={13} className="text-emerald-500" />
+                  <Calendar size={13} className="text-neutral-800 dark:text-white" />
                   <span>{isEn ? 'Days to payday' : 'Dagar till lön'}</span>
                 </div>
                 <span className="text-base font-extrabold font-amount tabular-nums text-[var(--text-primary)]">
@@ -296,8 +296,8 @@ export function DejziSummaryModal({
 
             {/* Dejzi Proactive Tip */}
             {dejziInfo?.actionTip && (
-              <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-xs font-medium">
-                <Zap size={14} className="shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+              <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-neutral-800 dark:text-white/10 text-[#1C1917] dark:text-white 800 dark:text-[#1C1917] dark:text-white 300 text-xs font-medium">
+                <Zap size={14} className="shrink-0 text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white mt-0.5" />
                 <span>{dejziInfo.actionTip}</span>
               </div>
             )}

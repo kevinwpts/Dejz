@@ -304,7 +304,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                        <PlusSquare size={13} className="text-emerald-500" />
+                        <PlusSquare size={13} className="text-neutral-800 dark:text-white" />
                         {activePlatform === 'ios' ? localized.iosStep2Title : localized.androidStep2Title}
                       </div>
                       <div className="text-[11px] text-[var(--text-secondary)] opacity-70 truncate">

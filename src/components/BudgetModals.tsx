@@ -144,7 +144,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                 {t('amount')}
               </span>
               <div className="text-right">
-                <p className="text-xl sm:text-2xl font-semibold font-amount tabular-nums text-emerald-600 dark:text-emerald-400">
+                <p className="text-xl sm:text-2xl font-semibold font-amount tabular-nums text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white">
                   <span className="opacity-75 mr-1">+</span>
                   <span>{formatAmount(displayAmount, config.language)}</span>
                   <span className="text-sm font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1.5 font-sans">{currency}</span>
@@ -1546,7 +1546,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
 
           <div className="bg-[#FFFFFF] dark:bg-[#312f2f] p-5 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.05] shadow-xs dark:shadow-none">
             <p className="text-xs font-medium text-[#6E6961] dark:text-[var(--text-secondary)] opacity-75 mb-1">{t('amount')}</p>
-            <p className="text-3xl font-semibold text-emerald-600 dark:text-emerald-400 font-amount">
+            <p className="text-3xl font-semibold text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white font-amount">
               <span className="opacity-40 mr-1">→</span>
               <span className="font-amount">{formatAmount(saving.amount)}</span>
               <span className="text-xl font-semibold text-[#8C867C] dark:text-[var(--text-secondary)] opacity-60 ml-2 font-sans">{currency}</span>

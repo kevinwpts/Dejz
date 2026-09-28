@@ -60,7 +60,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         <div className="relative flex-shrink-0">
           <BudgetItemLogo item={item} type={type} config={config} />
           {item.isVariable && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#05b862] border border-white dark:border-[#232323] rounded-full flex items-center justify-center z-10 select-none">
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#1C1917] dark:bg-white border border-white dark:border-[#232323] rounded-full flex items-center justify-center z-10 select-none">
               <span className="text-[8px] font-extrabold text-white leading-none flex items-center justify-center text-center -translate-y-[0.5px]">
                 {t('variableShort' as any)}
               </span>
@@ -106,7 +106,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
       
       {/* Right side: Amount + Deduction metadata */}
       <div className="flex flex-col items-end justify-center shrink-0 max-w-[46%] sm:max-w-[42%] text-right pl-1">
-        <p className={`text-[14px] sm:text-[14.5px] font-semibold whitespace-nowrap tracking-tight ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-white'}`}>
+        <p className={`text-[14px] sm:text-[14.5px] font-semibold whitespace-nowrap tracking-tight ${type === 'income' ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white' : 'text-[#1C1917] dark:text-white'}`}>
           <span className="opacity-75 mr-0.5 text-[13px] font-semibold">{type === 'income' ? '+' : '−'}</span>
           <span className="font-amount tabular-nums font-semibold tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
           <span className="text-[12px] font-normal text-[#8C867C] dark:text-[#9CA6BC] ml-1">{currency}</span>

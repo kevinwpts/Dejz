@@ -84,7 +84,7 @@ export function ResetPasswordModal({
 
           {success ? (
             <div className="text-center py-6 space-y-4">
-              <div className="w-14 h-14 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20">
+              <div className="w-14 h-14 bg-neutral-800 dark:text-white/10 text-neutral-800 dark:text-white rounded-full flex items-center justify-center mx-auto border border-neutral-800 dark:text-white/20">
                 <CheckCircle2 size={30} />
               </div>
               <div className="space-y-1">

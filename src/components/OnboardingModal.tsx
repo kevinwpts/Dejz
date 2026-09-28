@@ -945,7 +945,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
 
                           {aiFeedback && (
                             <p className={`text-[11px] font-medium px-1 flex items-center gap-1 transition-all ${
-                              aiFeedback.type === 'success' ? 'text-emerald-500' : 'text-rose-500'
+                              aiFeedback.type === 'success' ? 'text-neutral-800 dark:text-white' : 'text-rose-500'
                             }`}>
                               {aiFeedback.type === 'success' ? <Check size={12} strokeWidth={2.5} /> : null}
                               <span>{aiFeedback.message}</span>
@@ -1156,7 +1156,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             </span>
                             <div className="flex items-baseline gap-1.5">
                               <span className={`text-xl sm:text-2xl font-extrabold font-amount tabular-nums ${
-                                remainingPct < 0 ? 'text-rose-500' : remainingPct === 0 ? 'text-emerald-500' : 'text-[var(--accent-color)]'
+                                remainingPct < 0 ? 'text-rose-500' : remainingPct === 0 ? 'text-neutral-800 dark:text-white' : 'text-[var(--accent-color)]'
                               }`}>
                                 {remainingPct < 0 ? `+${Math.abs(remainingPct)}%` : `${remainingPct}%`}
                               </span>
@@ -1164,7 +1164,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                                 ({formatAmount(Math.abs(remainingKr), config.language)} {config.currency || 'kr'})
                               </span>
                               {remainingPct === 0 && (
-                                <span className="text-[9.5px] font-bold text-emerald-500 uppercase tracking-tight bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
+                                <span className="text-[9.5px] font-bold text-neutral-800 dark:text-white uppercase tracking-tight bg-neutral-800 dark:text-white/10 px-1.5 py-0.5 rounded-md">
                                   100% klart
                                 </span>
                               )}

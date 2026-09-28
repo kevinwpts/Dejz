@@ -40,7 +40,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       primary:
         'bg-white text-black hover:bg-white/90 font-semibold shadow-none',
       accent:
-        'bg-[#05b862]/[0.18] text-white hover:bg-[#05b862]/[0.26] border border-[#05b862]/30 shadow-none',
+        'bg-[#1C1917] dark:bg-white/[0.18] text-white hover:bg-[#1C1917] dark:bg-white/[0.26] border border-[#1C1917] dark:border-white/30 shadow-none',
       secondary:
         'bg-white/[0.04] text-white hover:bg-white/[0.08] border border-white/[0.03]',
       outline:
@@ -48,7 +48,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ghost:
         'bg-transparent text-[#9CA6BC] hover:text-white hover:bg-white/[0.04]',
       subtle:
-        'bg-[#05b862]/[0.16] text-white hover:bg-[#05b862]/[0.24] border border-[#05b862]/30',
+        'bg-[#1C1917] dark:bg-white/[0.16] text-white hover:bg-[#1C1917] dark:bg-white/[0.24] border border-[#1C1917] dark:border-white/30',
       danger:
         'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border-none',
     }[variant];

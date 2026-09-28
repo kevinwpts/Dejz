@@ -70,7 +70,7 @@ export function NotificationsView({
         if (isIncome) {
           if (isToday) {
             statusBadgeText = config.language === 'en' ? 'Arrives today' : 'Kommer idag';
-            statusBadgeStyle = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
+            statusBadgeStyle = 'bg-neutral-800 dark:text-white/10 text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white';
           } else if (isPast) {
             statusBadgeText = config.language === 'en' ? `Arrived on the ${n.deductionDay}th` : `Kom den ${n.deductionDay}:e`;
             statusBadgeStyle = 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
@@ -180,7 +180,7 @@ export function NotificationsView({
                 onClick={() => onConfirmStandard(n.item)}
                 className="w-full py-3 px-4 rounded-[14px] bg-[var(--surface-muted)] text-[var(--text-primary)] font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-[var(--surface-color)] active:scale-[0.98] transition-all cursor-pointer"
               >
-                <Check size={15} className="text-emerald-500" strokeWidth={2.5} />
+                <Check size={15} className="text-neutral-800 dark:text-white" strokeWidth={2.5} />
                 <span>
                   {config.language === 'en'
                     ? `Keep standard (${formatAmount(n.expectedAmount)} ${currency})`

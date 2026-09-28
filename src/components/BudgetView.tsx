@@ -353,7 +353,7 @@ export function BudgetView({
                 </>
               ) : (
                 <>
-                  <span className="text-emerald-600 dark:text-emerald-400">{formatAmount(totalAllocated, config.language)} kr</span>
+                  <span className="text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white">{formatAmount(totalAllocated, config.language)} kr</span>
                   <span className="text-[#6E6961] dark:text-white/60 text-lg sm:text-xl font-medium"> fördelat av </span>
                   <span>{formatAmount(totalIncomeSum, config.language)} kr</span>
                 </>
@@ -364,7 +364,7 @@ export function BudgetView({
                 ⚠️ Du har fördelat {formatAmount(Math.abs(remainingToAllocate), config.language)} kr mer än din inkomst ({formatAmount(totalIncomeSum, config.language)} kr)
               </span>
             ) : (
-              <span className="text-xs font-semibold tracking-wide text-emerald-600 dark:text-emerald-400 block mt-1">
+              <span className="text-xs font-semibold tracking-wide text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white block mt-1">
                 ✓ {formatAmount(remainingToAllocate, config.language)} kr kvar att fördela av din inkomst ({formatAmount(totalIncomeSum, config.language)} kr)
               </span>
             )}
@@ -374,7 +374,7 @@ export function BudgetView({
           <div className="w-full h-1.5 bg-black/5 dark:bg-white/[0.06] rounded-full overflow-hidden">
             <div 
               className={`h-full rounded-full transition-all duration-300 ${
-                isOverAllocated ? "bg-rose-500" : "bg-emerald-600 dark:bg-emerald-400"
+                isOverAllocated ? "bg-rose-500" : "bg-neutral-900 dark:text-white dark:bg-neutral-200 dark:text-white"
               }`}
               style={{ width: `${Math.min(100, Math.round((totalAllocated / (totalIncomeSum || 1)) * 100))}%` }}
             />
@@ -395,7 +395,7 @@ export function BudgetView({
               <button
                 type="button"
                 onClick={handleAutoDistribute}
-                className="text-[11px] font-bold text-emerald-600 dark:text-emerald-300 hover:text-emerald-800 dark:hover:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-emerald-50 dark:bg-emerald-500/[0.08] border border-emerald-200 dark:border-emerald-500/15 transition-all cursor-pointer active:scale-95"
+                className="text-[11px] font-bold text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white 300 hover:text-[#1C1917] dark:text-white 800 dark:hover:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-[#1C1917] dark:bg-white/[0.12] 50 dark:bg-neutral-800 dark:text-white/[0.08] border border-[#1C1917] dark:border-white/20 200 dark:border-neutral-800 dark:text-white/15 transition-all cursor-pointer active:scale-95"
               >
                 <Sparkles size={11} />
                 Fördela automatiskt
@@ -458,12 +458,12 @@ export function BudgetView({
                         }}
                         className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer flex items-center justify-center shrink-0 ${
                           cat.pinned 
-                            ? "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30" 
+                            ? "bg-[#1C1917] dark:bg-white/[0.12] 50 dark:bg-neutral-800 dark:text-white/15 text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white border border-[#1C1917] dark:border-white/20 200 dark:border-neutral-800 dark:text-white/30" 
                             : "bg-black/5 dark:bg-white/[0.02] text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white border border-transparent hover:border-[#E6E2D8] dark:hover:border-white/[0.05]"
                         }`}
                         title={cat.pinned ? "Avfäst från Hem" : "Fäst på Hem"}
                       >
-                        <Pin size={12} className={cat.pinned ? "fill-emerald-600 dark:fill-emerald-400" : ""} />
+                        <Pin size={12} className={cat.pinned ? "fill-neutral-900 dark:text-white dark:fill-neutral-200 dark:text-white" : ""} />
                       </button>
 
                       {/* Reorder up/down buttons */}
@@ -565,7 +565,7 @@ export function BudgetView({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-full h-8 px-1.5 rounded-lg bg-white dark:bg-white/[0.08] border border-emerald-500 text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                            className="w-full h-8 px-1.5 rounded-lg bg-white dark:bg-white/[0.08] border border-neutral-800 dark:text-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
                           />
                         ) : (
                           <button
@@ -641,8 +641,8 @@ export function BudgetView({
           onClick={() => setBudgetFilter('fixed')}
           className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'fixed'
-              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
           <Calendar size={13} />
@@ -652,8 +652,8 @@ export function BudgetView({
           onClick={() => setBudgetFilter('income')}
           className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'income'
-              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
           <ArrowDownLeft size={13} />
@@ -663,8 +663,8 @@ export function BudgetView({
           onClick={() => setBudgetFilter('savings')}
           className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'savings'
-              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
           <PiggyBank size={13} />
@@ -687,7 +687,7 @@ export function BudgetView({
               totalSavingsSum
             )} 
             className={`text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums tracking-normal ${
-              budgetFilter === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-white'
+              budgetFilter === 'income' ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white' : 'text-[#1C1917] dark:text-white'
             }`}
             formatter={(val) => {
               const prefix = budgetFilter === 'income' ? '+' : '−';
@@ -695,7 +695,7 @@ export function BudgetView({
             }}
           />
           <span className={`text-[19px] sm:text-[21px] font-semibold ${
-            budgetFilter === 'income' ? 'text-emerald-600/80 dark:text-emerald-400/80' : 'text-[#8C867C] dark:text-[#9CA6BC]'
+            budgetFilter === 'income' ? 'text-neutral-900 dark:text-white/80 dark:text-neutral-200 dark:text-white/80' : 'text-[#8C867C] dark:text-[#9CA6BC]'
           }`}>
             {config?.currency}
           </span>
@@ -727,7 +727,7 @@ export function BudgetView({
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.07] border border-[#E6E2D8] dark:border-white/[0.035] text-xs text-[#1C1917] dark:text-white transition-all cursor-pointer select-none active:scale-95"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
-                  <ArrowUpDown size={12} strokeWidth={2} className="text-[#05b862] shrink-0" />
+                  <ArrowUpDown size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white shrink-0" />
                   <span className="text-[#6E6961] dark:text-[#9CA6BC]/80">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
@@ -742,7 +742,7 @@ export function BudgetView({
                 </button>
                 <button 
                   onClick={onAddIncome} 
-                  className="text-xs font-medium text-emerald-600 dark:text-[#05b862] hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
+                  className="text-xs font-medium text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white hover:text-[#1C1917] dark:text-white 800 dark:hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
                 >
                   <Plus size={14} strokeWidth={2} />
                   <span>{t('newIncome')}</span>
@@ -787,7 +787,7 @@ export function BudgetView({
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.07] border border-[#E6E2D8] dark:border-white/[0.035] text-xs text-[#1C1917] dark:text-white transition-all cursor-pointer select-none active:scale-95"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
-                  <ArrowUpDown size={12} strokeWidth={2} className="text-[#05b862] shrink-0" />
+                  <ArrowUpDown size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white shrink-0" />
                   <span className="text-[#6E6961] dark:text-[#9CA6BC]/80">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
@@ -803,7 +803,7 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddFixedExpense} 
-                  className="text-xs font-medium text-emerald-600 dark:text-[#05b862] hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
+                  className="text-xs font-medium text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white hover:text-[#1C1917] dark:text-white 800 dark:hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
                 >
                   <Plus size={14} strokeWidth={2} />
                   <span>{t('newFixedExpense')}</span>
@@ -866,7 +866,7 @@ export function BudgetView({
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.07] border border-[#E6E2D8] dark:border-white/[0.035] text-xs text-[#1C1917] dark:text-white transition-all cursor-pointer select-none active:scale-95"
                 >
-                  <ArrowUpDown size={12} strokeWidth={2} className="text-[#05b862] shrink-0" />
+                  <ArrowUpDown size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white shrink-0" />
                   <span className="text-[#6E6961] dark:text-[#9CA6BC]/80">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
@@ -882,7 +882,7 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddMonthlySaving} 
-                  className="text-xs font-medium text-emerald-600 dark:text-[#05b862] hover:text-emerald-800 dark:hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
+                  className="text-xs font-medium text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white hover:text-[#1C1917] dark:text-white 800 dark:hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
                 >
                   <Plus size={14} strokeWidth={2} />
                   <span>{t('newMonthlySaving')}</span>
@@ -925,7 +925,7 @@ export function BudgetView({
                       </p>
                     </div>
                   </div>
-                  <div className="h-7 px-3 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 text-xs font-medium shrink-0 ml-3 flex items-center justify-center">
+                  <div className="h-7 px-3 rounded-full bg-[#1C1917] dark:bg-white/[0.12] 50 text-neutral-900 dark:text-white border border-[#1C1917] dark:border-white/20 200 dark:bg-[#1C1917] dark:bg-white/[0.16] dark:text-white dark:border-[#1C1917] dark:border-white/30 text-xs font-medium shrink-0 ml-3 flex items-center justify-center">
                     Lägg till
                   </div>
                 </button>

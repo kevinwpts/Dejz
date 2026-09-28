@@ -384,7 +384,7 @@ export function QuickExpenseWidget({
                 <button
                   type="button"
                   onClick={() => onAddIncome(selectedDate)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-neutral-800 dark:text-white/10 hover:bg-neutral-800 dark:text-white/20 text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white border border-neutral-800 dark:text-white/20 active:scale-95 transition-all cursor-pointer"
                   title={isEn ? 'Add income' : 'Lägg till inkomst'}
                 >
                   <Plus size={12} strokeWidth={2.8} />
@@ -498,7 +498,7 @@ export function QuickExpenseWidget({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.96 }}
             transition={{ duration: 0.2 }}
-            className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 text-xs font-semibold"
+            className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800 dark:text-white/15 text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white text-xs font-semibold"
           >
             <Check size={14} strokeWidth={2.5} className="shrink-0" />
             <div className="truncate flex-1">

@@ -79,7 +79,7 @@ export const AmountInput: React.FC<AmountInputProps> = ({
             }}
             placeholder={placeholder}
             className={`w-full bg-white/[0.035] focus:bg-white/[0.05] border ${
-              error ? 'border-rose-500/50 focus:border-rose-500' : 'border-white/[0.03] focus:border-[#05b862]/40'
+              error ? 'border-rose-500/50 focus:border-rose-500' : 'border-white/[0.03] focus:border-[#1C1917] dark:border-white/40'
             } rounded-[16px] pl-4 pr-12 py-3 font-amount font-semibold text-base sm:text-lg text-white outline-none transition-all placeholder-[#9CA6BC]/40`}
           />
           <span className="absolute right-4 text-xs font-normal text-[#9CA6BC] pointer-events-none">

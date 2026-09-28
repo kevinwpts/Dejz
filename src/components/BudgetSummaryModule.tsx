@@ -162,7 +162,7 @@ export function BudgetSummaryModule({
             </span>
             <span className={`px-2 py-0.5 rounded-full text-[10.5px] font-medium tracking-tight ${
               isPositive 
-                ? 'bg-emerald-500/[0.14] text-emerald-400 border border-emerald-500/20' 
+                ? 'bg-neutral-800 dark:text-white/[0.14] text-neutral-200 dark:text-white border border-neutral-800 dark:text-white/20' 
                 : 'bg-rose-500/[0.14] text-rose-400 border border-rose-500/20'
             }`}>
               {isPositive ? (t('surplus' as any) || 'Överskott') : (t('deficit' as any) || 'Underskott')}
@@ -171,7 +171,7 @@ export function BudgetSummaryModule({
 
           <div className="flex items-baseline gap-2">
             <span className={`text-4xl sm:text-5xl leading-none font-bold font-amount tabular-nums tracking-tight ${
-              isPositive ? 'text-emerald-400' : 'text-rose-400'
+              isPositive ? 'text-neutral-200 dark:text-white' : 'text-rose-400'
             }`}>
               {isPositive ? '+' : ''}{result.toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
             </span>
@@ -196,7 +196,7 @@ export function BudgetSummaryModule({
             <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] block mb-1 truncate">
               {t('income' as any) || 'Inkomster'}
             </span>
-            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-emerald-600 dark:text-emerald-400">
+            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white">
               +{formatAmount(Math.round(stats.totalIncome || 0), config.language)} <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC]">{config.currency || 'kr'}</span>
             </span>
           </div>
@@ -269,7 +269,7 @@ export function BudgetSummaryModule({
         <div className="w-full h-1.5 bg-black/5 dark:bg-white/[0.06] rounded-full overflow-hidden">
           <div 
             className={`h-full rounded-full transition-all duration-700 ease-out ${
-              budgetUsedPct > 90 ? "bg-rose-500" : "bg-emerald-600 dark:bg-emerald-400"
+              budgetUsedPct > 90 ? "bg-rose-500" : "bg-neutral-900 dark:text-white dark:bg-neutral-200 dark:text-white"
             }`} 
             style={{ width: `${Math.min(100, budgetUsedPct)}%` }}
           />

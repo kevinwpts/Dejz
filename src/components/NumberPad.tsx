@@ -129,7 +129,7 @@ export function NumberPad({
           className="h-9 flex items-center justify-center rounded-[12px] bg-white/[0.025] hover:bg-white/[0.05] text-[11px] sm:text-xs font-semibold text-white border border-white/[0.02] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
           title="Dela på 2"
         >
-          <span className="text-[#05b862]">÷</span>2
+          <span className="text-[#1C1917] dark:text-white">÷</span>2
         </button>
         <button
           type="button"
@@ -138,7 +138,7 @@ export function NumberPad({
           className="h-9 flex items-center justify-center rounded-[12px] bg-white/[0.025] hover:bg-white/[0.05] text-[11px] sm:text-xs font-semibold text-white border border-white/[0.02] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
           title="Dela på 3"
         >
-          <span className="text-[#05b862]">÷</span>3
+          <span className="text-[#1C1917] dark:text-white">÷</span>3
         </button>
         <button
           type="button"
@@ -147,7 +147,7 @@ export function NumberPad({
           className="h-9 flex items-center justify-center rounded-[12px] bg-white/[0.025] hover:bg-white/[0.05] text-[11px] sm:text-xs font-semibold text-white border border-white/[0.02] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
           title="Dela på 4"
         >
-          <span className="text-[#05b862]">÷</span>4
+          <span className="text-[#1C1917] dark:text-white">÷</span>4
         </button>
 
         {/* Math Operators: ÷, ×, −, + */}
@@ -155,7 +155,7 @@ export function NumberPad({
           type="button"
           onClick={() => handleOperator('÷')}
           disabled={!isValueValid}
-          className="h-9 flex items-center justify-center text-sm font-semibold bg-white/[0.025] text-[#05b862] rounded-[12px] border border-white/[0.02] hover:bg-white/[0.05] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
+          className="h-9 flex items-center justify-center text-sm font-semibold bg-white/[0.025] text-[#1C1917] dark:text-white rounded-[12px] border border-white/[0.02] hover:bg-white/[0.05] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
           title="Delat med (÷)"
         >
           ÷
@@ -164,7 +164,7 @@ export function NumberPad({
           type="button"
           onClick={() => handleOperator('×')}
           disabled={!isValueValid}
-          className="h-9 flex items-center justify-center text-sm font-semibold bg-white/[0.025] text-[#05b862] rounded-[12px] border border-white/[0.02] hover:bg-white/[0.05] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
+          className="h-9 flex items-center justify-center text-sm font-semibold bg-white/[0.025] text-[#1C1917] dark:text-white rounded-[12px] border border-white/[0.02] hover:bg-white/[0.05] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
           title="Gånger (×)"
         >
           ×
@@ -173,7 +173,7 @@ export function NumberPad({
           type="button"
           onClick={() => handleOperator('−')}
           disabled={!isValueValid}
-          className="h-9 flex items-center justify-center text-sm font-semibold bg-white/[0.025] text-[#05b862] rounded-[12px] border border-white/[0.02] hover:bg-white/[0.05] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
+          className="h-9 flex items-center justify-center text-sm font-semibold bg-white/[0.025] text-[#1C1917] dark:text-white rounded-[12px] border border-white/[0.02] hover:bg-white/[0.05] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
           title="Minus (−)"
         >
           −
@@ -182,7 +182,7 @@ export function NumberPad({
           type="button"
           onClick={() => handleOperator('+')}
           disabled={!isValueValid}
-          className="h-9 flex items-center justify-center text-sm font-semibold bg-white/[0.025] text-[#05b862] rounded-[12px] border border-white/[0.02] hover:bg-white/[0.05] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
+          className="h-9 flex items-center justify-center text-sm font-semibold bg-white/[0.025] text-[#1C1917] dark:text-white rounded-[12px] border border-white/[0.02] hover:bg-white/[0.05] transition-all active:scale-95 disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
           title="Plus (+)"
         >
           +

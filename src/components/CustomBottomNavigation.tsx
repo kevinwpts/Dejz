@@ -69,7 +69,7 @@ export function CustomBottomNavigation({
             onClick={() => {
               if (onPlusClick) onPlusClick();
             }}
-            className="w-11 h-11 sm:w-[46px] sm:h-[46px] rounded-full bg-[#05b862] hover:bg-[#049d53] active:scale-90 text-white flex items-center justify-center transition-all cursor-pointer shadow-md shadow-[#05b862]/25"
+            className="w-11 h-11 sm:w-[46px] sm:h-[46px] rounded-full bg-[#1C1917] dark:bg-white hover:bg-[#049d53] active:scale-90 text-white flex items-center justify-center transition-all cursor-pointer shadow-md shadow-[#05b862]/25"
             aria-label="Add transaction"
           >
             <Plus size={20} strokeWidth={2.5} />
@@ -122,7 +122,7 @@ function NavItem({
       title={label}
       className={`flex-1 h-full flex items-center justify-center py-2 px-1 transition-all duration-200 active:scale-90 cursor-pointer select-none rounded-2xl relative ${
         isActive
-          ? 'text-[#05b862]'
+          ? 'text-[#1C1917] dark:text-white'
           : 'text-[#8C867C] hover:text-[#1C1917] dark:text-[#C7CDDC]/60 dark:hover:text-[#C7CDDC]'
       }`}
     >

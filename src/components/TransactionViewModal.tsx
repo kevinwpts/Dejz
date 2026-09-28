@@ -158,7 +158,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 {t('amount')}
               </span>
               <div className="text-right">
-                <p className={`text-xl sm:text-2xl font-semibold font-amount tabular-nums ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)] dark:text-white'}`}>
+                <p className={`text-xl sm:text-2xl font-semibold font-amount tabular-nums ${isIncome ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white' : 'text-[var(--text-primary)] dark:text-white'}`}>
                   <span className="opacity-75 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
                   <span>{formatAmount(transaction.amount, config.language)}</span>
                   <span className="text-sm font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] ml-1.5 font-sans">{config.currency}</span>
