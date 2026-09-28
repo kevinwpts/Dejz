@@ -110,7 +110,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
         <button 
           type="button"
           onClick={onBack} 
-          className="flex items-center gap-1.5 text-xs font-medium text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-xs font-medium text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white transition-colors cursor-pointer"
         >
           <ChevronLeft size={16} strokeWidth={2} />
           <span>Tillbaka</span>
@@ -118,7 +118,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
         <button 
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="text-xs font-medium text-[#8B9CFF] hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
+          className="text-xs font-medium text-indigo-600 dark:text-[#8B9CFF] hover:text-indigo-800 dark:hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
         >
           <Plus size={14} strokeWidth={2} />
           <span>Lägg till konto</span>
@@ -128,14 +128,14 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
       <div className="space-y-6">
         {/* Total Balance directly against background */}
         <div className="py-2 text-left space-y-1.5">
-          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] block select-none">
+          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6E6961] dark:text-[#9CA6BC] block select-none">
             Totalt saldo
           </span>
           <div className="flex items-baseline gap-2">
-            <span className="text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums text-white tracking-tight">
+            <span className="text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums text-[#1C1917] dark:text-white tracking-tight">
               {totalBalance.toLocaleString('sv-SE')}
             </span>
-            <span className="text-[19px] sm:text-[21px] font-normal text-[#9CA6BC]">
+            <span className="text-[19px] sm:text-[21px] font-normal text-[#6E6961] dark:text-[#9CA6BC]">
               kr
             </span>
           </div>
@@ -143,19 +143,19 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
 
         {isLoading ? (
           <div className="flex justify-center p-8">
-            <div className="w-6 h-6 border-2 border-[#8B9CFF] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-6 h-6 border-2 border-indigo-600 dark:border-[#8B9CFF] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : accounts.length === 0 ? (
-          <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] p-8 flex flex-col items-center justify-center text-center border border-white/[0.025]">
-            <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.035] text-[#C7CDDC] flex items-center justify-center mb-3">
+          <div className="bg-[#FFFFFF] dark:bg-white/[0.035] rounded-[24px] p-8 flex flex-col items-center justify-center text-center border border-[#E6E2D8] dark:border-white/[0.025] shadow-xs dark:shadow-none">
+            <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.035] text-[#6E6961] dark:text-[#C7CDDC] flex items-center justify-center mb-3">
               <Wallet size={20} strokeWidth={1.75} />
             </div>
-            <h3 className="text-sm font-semibold text-white mb-1">Inga konton än</h3>
-            <p className="text-xs text-[#9CA6BC] max-w-xs mb-4">Lägg till ditt första konto för att hålla koll på dina saldon.</p>
+            <h3 className="text-sm font-semibold text-[#1C1917] dark:text-white mb-1">Inga konton än</h3>
+            <p className="text-xs text-[#6E6961] dark:text-[#9CA6BC] max-w-xs mb-4">Lägg till ditt första konto för att hålla koll på dina saldon.</p>
             <button
               type="button"
               onClick={() => setIsAddModalOpen(true)}
-              className="text-xs font-medium text-[#8B9CFF] hover:text-white transition-colors inline-flex items-center gap-1.5"
+              className="text-xs font-medium text-indigo-600 dark:text-[#8B9CFF] hover:text-indigo-800 dark:hover:text-white transition-colors inline-flex items-center gap-1.5"
             >
               <Plus size={14} strokeWidth={2} />
               <span>Lägg till konto</span>
@@ -164,26 +164,26 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
         ) : (
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
-              <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">
+              <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6E6961] dark:text-[#9CA6BC]">
                 Mina konton ({accounts.length})
               </span>
             </div>
 
-            <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.03] divide-y divide-white/[0.05] overflow-hidden">
+            <div className="bg-[#FFFFFF] dark:bg-white/[0.035] rounded-[24px] border border-[#E6E2D8] dark:border-white/[0.03] divide-y divide-[#EDE9DF] dark:divide-white/[0.05] overflow-hidden shadow-xs dark:shadow-none">
               {accounts.map(account => (
                 <div 
                   key={account.id}
                   onClick={() => handleOpenEdit(account)}
-                  className="p-3.5 sm:p-4 transition-colors cursor-pointer group flex items-center justify-between hover:bg-white/[0.03]"
+                  className="p-3.5 sm:p-4 transition-colors cursor-pointer group flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/[0.03]"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/[0.04] border border-white/[0.035] flex items-center justify-center text-[#C7CDDC] shrink-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/5 dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.035] flex items-center justify-center text-[#6E6961] dark:text-[#C7CDDC] shrink-0">
                       <Wallet size={16} strokeWidth={1.75} />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-[14px] sm:text-[14.5px] font-medium text-white truncate tracking-tight">{account.name}</h3>
-                      <p className="text-xs text-[#9CA6BC] mt-0.5">
-                        <span className="font-amount tabular-nums font-semibold text-white">{account.initialBalance.toLocaleString('sv-SE')}</span> <span className="text-[11px] font-normal text-[#9CA6BC]">kr</span>
+                      <h3 className="text-[14px] sm:text-[14.5px] font-medium text-[#1C1917] dark:text-white truncate tracking-tight">{account.name}</h3>
+                      <p className="text-xs text-[#6E6961] dark:text-[#9CA6BC] mt-0.5">
+                        <span className="font-amount tabular-nums font-semibold text-[#1C1917] dark:text-white">{account.initialBalance.toLocaleString('sv-SE')}</span> <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC]">kr</span>
                       </p>
                     </div>
                   </div>
@@ -191,12 +191,12 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
                     <button 
                       type="button"
                       onClick={(e) => handleDelete(account.id, e)}
-                      className="w-7 h-7 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] text-rose-400 flex items-center justify-center transition-colors cursor-pointer"
+                      className="w-7 h-7 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] text-rose-500 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer"
                       title="Radera konto"
                     >
                       <Trash2 size={13} />
                     </button>
-                    <ChevronLeft className="text-[#9CA6BC] rotate-180" size={16} />
+                    <ChevronLeft className="text-[#6E6961] dark:text-[#9CA6BC] rotate-180" size={16} />
                   </div>
                 </div>
               ))}
@@ -211,24 +211,24 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md p-0 sm:p-4"
+            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-md p-0 sm:p-4"
           >
             <motion.div 
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="w-full sm:max-w-md bg-[#12131D] sm:rounded-[24px] rounded-t-[28px] rounded-b-none overflow-hidden shadow-2xl flex flex-col border border-white/[0.08]"
+              className="w-full sm:max-w-md bg-[#FFFFFF] dark:bg-[#232323] sm:rounded-[24px] rounded-t-[28px] rounded-b-none overflow-hidden shadow-2xl flex flex-col border border-[#E6E2D8] dark:border-white/[0.08]"
               style={{ maxHeight: '90vh' }}
             >
-              <div className="flex items-center justify-between p-5 pb-4 border-b border-white/[0.06]">
-                <h2 className="text-base font-semibold text-white tracking-tight">
+              <div className="flex items-center justify-between p-5 pb-4 border-b border-[#E6E2D8] dark:border-white/[0.06]">
+                <h2 className="text-base font-semibold text-[#1C1917] dark:text-white tracking-tight">
                   {isEditing ? 'Redigera konto' : 'Lägg till konto'}
                 </h2>
                 <button 
                   type="button"
                   onClick={handleCloseModal}
-                  className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-[#9CA6BC] hover:text-white transition-all cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] flex items-center justify-center text-[#6E6961] hover:text-[#1C1917] dark:text-[#9CA6BC] dark:hover:text-white transition-all cursor-pointer"
                 >
                   <X size={16} />
                 </button>
@@ -236,24 +236,24 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
 
               <div className="p-5 space-y-4 overflow-y-auto">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] pl-0.5">Kontonamn</label>
+                  <label className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6E6961] dark:text-[#9CA6BC] pl-0.5">Kontonamn</label>
                   <input 
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="t.ex. SEB Lönekonto"
-                    className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-none focus:border-[#8B9CFF] transition-all placeholder-[#9CA6BC]/40"
+                    className="w-full bg-[#F0EDE6] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#1C1917] dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B9CFF] transition-all placeholder-[#8C867C] dark:placeholder-[#9CA6BC]/40"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] pl-0.5">Saldo (kr)</label>
+                  <label className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6E6961] dark:text-[#9CA6BC] pl-0.5">Saldo (kr)</label>
                   <input 
                     type="number"
                     value={initialBalance}
                     onChange={(e) => setInitialBalance(e.target.value)}
                     placeholder="0"
-                    className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-none focus:border-[#8B9CFF] transition-all placeholder-[#9CA6BC]/40 font-amount tabular-nums"
+                    className="w-full bg-[#F0EDE6] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm font-medium text-[#1C1917] dark:text-white focus:outline-none focus:border-indigo-500 dark:focus:border-[#8B9CFF] transition-all placeholder-[#8C867C] dark:placeholder-[#9CA6BC]/40 font-amount tabular-nums"
                   />
                 </div>
               </div>
@@ -262,7 +262,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
                 <button 
                   type="button"
                   onClick={handleSave}
-                  className="w-full bg-[#818cf8]/[0.22] hover:bg-[#818cf8]/[0.32] text-white border border-[#8B9CFF]/35 font-medium text-sm py-3 rounded-full transition-colors cursor-pointer"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white dark:bg-[#818cf8]/[0.22] dark:hover:bg-[#818cf8]/[0.32] dark:text-white border border-indigo-700 dark:border-[#8B9CFF]/35 font-medium text-sm py-3 rounded-full transition-colors cursor-pointer shadow-xs"
                 >
                   Spara konto
                 </button>

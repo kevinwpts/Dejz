@@ -38,7 +38,7 @@ export function SegmentedControl<T extends string = string>({
 
   return (
     <div
-      className={`bg-white/[0.03] border border-white/[0.025] flex items-center relative ${sizeStyles} ${
+      className={`bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.025] flex items-center relative ${sizeStyles} ${
         fullWidth ? 'w-full' : 'inline-flex'
       } ${className}`}
     >
@@ -54,15 +54,15 @@ export function SegmentedControl<T extends string = string>({
               fullWidth ? 'flex-1' : ''
             } ${
               isSelected
-                ? 'bg-[#818cf8]/[0.18] text-white border border-[#8B9CFF]/30 shadow-none'
-                : 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.03]'
+                ? 'bg-[#FFFFFF] text-indigo-700 border border-[#E6E2D8] shadow-xs dark:bg-[#818cf8]/[0.18] dark:text-white dark:border-[#8B9CFF]/30 dark:shadow-none'
+                : 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.03]'
             }`}
           >
             <span className="relative z-10 flex items-center justify-center gap-1.5">
               {option.icon && <span className="shrink-0">{option.icon}</span>}
               <span>{option.label}</span>
               {option.badge !== undefined && (
-                <span className="text-[10px] py-0.2 px-1.5 rounded-full bg-white/[0.06] text-[#9CA6BC]">
+                <span className="text-[10px] py-0.2 px-1.5 rounded-full bg-black/5 dark:bg-white/[0.06] text-[#6E6961] dark:text-[#9CA6BC]">
                   {option.badge}
                 </span>
               )}

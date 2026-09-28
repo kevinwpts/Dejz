@@ -667,7 +667,7 @@ export function TodayView({
       {/* 2. EXPANDING BOTTOM SHEET (Scroll-driven surface covering hero as user scrolls down) */}
       <div
         ref={sheetRef}
-        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#232323] rounded-t-[22px] sm:rounded-t-[24px] border-t border-white/[0.1] shadow-none min-h-[calc(100vh-8rem)] pt-1 pb-40 space-y-3 mt-1"
+        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#F7F5F0] dark:bg-[#232323] rounded-t-[22px] sm:rounded-t-[24px] border-t border-[#E6E2D8] dark:border-white/[0.1] shadow-none min-h-[calc(100vh-8rem)] pt-1 pb-40 space-y-3 mt-1"
       >
         {/* Visual Grab Handle / Sheet Indicator */}
         <div
@@ -676,7 +676,7 @@ export function TodayView({
           title={progress > 0.5 ? (lang === 'en' ? 'Click to show overview' : 'Klicka för att visa översikt') : (lang === 'en' ? 'Click to expand' : 'Klicka för att expandera')}
           aria-label="Expand or collapse sheet"
         >
-          <div className="w-10 h-1 rounded-full bg-white/20 group-hover:bg-white/40 transition-colors" />
+          <div className="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20 group-hover:bg-black/40 dark:group-hover:bg-white/40 transition-colors" />
         </div>
 
         {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
