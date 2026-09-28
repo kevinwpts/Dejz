@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Calendar as CalendarIcon, X } from 'lucide-react';
 
 interface UniversalPeriodSelectorProps {
   periods: any[];
@@ -28,10 +28,15 @@ export function UniversalPeriodSelector({
       )
     : -1;
 
+  const selectedPeriodItem = periods && currentIndex !== -1 ? periods[currentIndex] : null;
+  const actuallyIsCurrent = isCurrentPeriod !== undefined 
+    ? isCurrentPeriod 
+    : (selectedPeriodItem ? (selectedPeriodItem.isCurrent || false) : true);
+
   const canGoPrev = currentIndex > 0;
   const canGoNext = allowFuture
     ? (currentIndex !== -1 && currentIndex < periods.length - 1)
-    : (!isCurrentPeriod && currentIndex !== -1 && currentIndex < periods.length - 1);
+    : (!actuallyIsCurrent && currentIndex !== -1 && currentIndex < periods.length - 1);
 
   const handlePrevPeriod = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -103,6 +108,21 @@ export function UniversalPeriodSelector({
           <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate text-[#1C1917] dark:text-white">
             {month}
           </span>
+          {!actuallyIsCurrent && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onChange(new Date());
+              }}
+              className="p-0.5 hover:bg-black/10 dark:hover:bg-white/20 rounded-full transition-colors ml-0.5 cursor-pointer text-[#6E6961] dark:text-[#C7CDDC] hover:text-[#1C1917] dark:hover:text-white"
+              title="Återgå till aktuell period"
+              aria-label="Återgå till aktuell period"
+            >
+              <X size={12} strokeWidth={2.5} />
+            </button>
+          )}
         </div>
 
         <button 

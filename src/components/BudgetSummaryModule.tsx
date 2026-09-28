@@ -222,10 +222,10 @@ export function BudgetSummaryModule({
           SPENDERAT DENNA PERIOD
         </span>
         <div className="flex items-baseline justify-center gap-2">
-          <span className="text-[52px] sm:text-[64px] leading-none font-bold font-amount tabular-nums text-[#1C1917] dark:text-white tracking-normal">
+          <span className="text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums text-[#1C1917] dark:text-white tracking-normal">
             {formatAmount(Math.round(totalSpent), config.language)}
           </span>
-          <span className="text-[22px] sm:text-[26px] font-semibold text-[#8C867C] dark:text-[#9CA6BC]">
+          <span className="text-[19px] sm:text-[21px] font-semibold text-[#8C867C] dark:text-[#9CA6BC]">
             {config.currency || "kr"}
           </span>
         </div>
