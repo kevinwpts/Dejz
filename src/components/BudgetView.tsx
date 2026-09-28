@@ -754,7 +754,7 @@ export function BudgetView({
               </div>
 
               {sortedIncomes.length > 0 ? (
-                <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+                <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[18px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
                   {sortedIncomes.map((income) => (
                     <BudgetItem 
                       key={income.id}
@@ -831,7 +831,7 @@ export function BudgetView({
                           : freq}
                       </span>
                     </div>
-                    <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+                    <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[18px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
                       {items.map((expense) => (
                         <BudgetItem 
                           key={expense.id}
@@ -894,7 +894,7 @@ export function BudgetView({
               </div>
 
               {sortedSavings.length > 0 ? (
-                <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+                <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[18px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
                   {sortedSavings.map((saving) => (
                     <BudgetItem 
                       key={saving.id}
@@ -914,7 +914,7 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddMonthlySaving} 
-                  className="w-full bg-white/[0.04] p-4 sm:p-5 rounded-[22px] border border-white/[0.025] hover:bg-white/[0.06] transition-all flex items-center justify-between text-left group cursor-pointer"
+                  className="w-full bg-white/[0.04] p-4 sm:p-5 rounded-[18px] border border-white/[0.025] hover:bg-white/[0.06] transition-all flex items-center justify-between text-left group cursor-pointer"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/[0.035] flex items-center justify-center text-[#C7CDDC] shrink-0">

@@ -98,7 +98,7 @@ export function NotificationsView({
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="p-5 sm:p-6 rounded-[24px] bg-[var(--surface-color)] transition-all flex flex-col gap-4 relative shadow-xs"
+            className="p-5 sm:p-6 rounded-[18px] bg-[var(--surface-color)] transition-all flex flex-col gap-4 relative shadow-xs"
           >
             {/* Top status bar */}
             <div className="flex items-center justify-between gap-3">

@@ -107,7 +107,7 @@ export function AmountSelector({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`w-full max-w-sm ${modalBgClass} rounded-[28px] p-6 border border-[var(--border-color)] overflow-hidden shadow-2xl`}
+            className={`w-full max-w-sm ${modalBgClass} rounded-[22px] p-6 border border-[var(--border-color)] overflow-hidden shadow-2xl`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="pb-4">

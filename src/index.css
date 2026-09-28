@@ -58,25 +58,25 @@
 @theme {
   --color-black: #181818;
   --font-sans:
-    "Barlow Semi Condensed", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display:
-    "Barlow Semi Condensed", sans-serif;
+    "Barlow", sans-serif;
   --font-shoulders:
-    "Barlow Semi Condensed", sans-serif;
+    "Barlow", sans-serif;
   --font-barlow:
-    "Barlow", "Barlow Semi Condensed", sans-serif;
+    "Barlow", sans-serif;
   --font-barlow-standard:
     "Barlow", sans-serif;
   --font-amount:
-    "Barlow Semi Condensed", sans-serif;
+    "Barlow", sans-serif;
   --font-exo:
-    "Barlow Semi Condensed", sans-serif;
+    "Barlow", sans-serif;
   --font-logo:
-    "Barlow Semi Condensed", sans-serif;
+    "Barlow", sans-serif;
   --font-serif:
-    "Barlow Semi Condensed", sans-serif;
+    "Barlow", sans-serif;
   --font-mono:
-    "Barlow Semi Condensed", monospace;
+    "Barlow", monospace;
 
   --color-accent: var(--accent-color);
   --color-accent-hover: var(--accent-hover);
@@ -85,20 +85,27 @@
   --color-danger: var(--danger-color);
   --color-warning: var(--warning-color);
 
-  --radius-4xl: 32px;
-  --radius-3xl: 28px;
-  --radius-2xl: 24px;
-  --radius-xl: 20px;
-  --radius-lg: 16px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
+  --radius-4xl: 24px;
+  --radius-3xl: 22px;
+  --radius-2xl: 18px;
+  --radius-xl: 16px;
+  --radius-lg: 14px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
 
-  --shadow-2xs: var(--shadow-level-1);
-  --shadow-xs: var(--shadow-level-1);
-  --shadow-sm: var(--shadow-level-2);
-  --shadow-md: var(--shadow-level-3);
-  --shadow-lg: var(--shadow-level-3);
-  --shadow-xl: var(--shadow-level-3);
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --drop-shadow-xs: none;
+  --drop-shadow-sm: none;
+  --drop-shadow-md: none;
+  --drop-shadow-lg: none;
+  --drop-shadow-xl: none;
+  --drop-shadow-2xl: none;
 }
 
 body,
@@ -107,7 +114,7 @@ input,
 select,
 textarea {
   font-family: var(--font-sans);
-  letter-spacing: 0.012em;
+  letter-spacing: 0.005em;
   font-style: normal;
 }
 
@@ -128,7 +135,7 @@ textarea {
 }
 
 @utility font-barlow {
-  font-family: 'Barlow', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-family: var(--font-barlow) !important;
 }
 
 .font-barlow,
@@ -137,7 +144,7 @@ textarea {
 .font-barlow-standard *,
 [data-font="barlow"],
 [data-font="barlow"] * {
-  font-family: 'Barlow', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-family: var(--font-barlow) !important;
 }
 
 @utility font-shoulders {
@@ -152,29 +159,17 @@ textarea {
   font-family: var(--font-amount) !important;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
-  letter-spacing: 0.02em !important;
 }
 
 .font-amount {
   font-family: var(--font-amount) !important;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
-  letter-spacing: 0.02em !important;
 }
 
 .font-barlow .font-amount,
 .font-barlow-standard .font-amount {
-  font-family: var(--font-barlow-standard) !important;
-}
-
-/* Ensure no text is squeezed together since Big Shoulders is naturally condensed */
-.tracking-tight,
-.tracking-tighter {
-  letter-spacing: 0.015em !important;
-}
-
-.tracking-normal {
-  letter-spacing: 0.02em !important;
+  font-family: var(--font-amount) !important;
 }
 
 @utility no-scrollbar {
@@ -186,10 +181,10 @@ textarea {
 }
 
 :root {
-  /* Global Typography System - Barlow Semi Condensed Single Font */
-  --font-display: 'Barlow Semi Condensed', sans-serif;
-  --font-sans: 'Barlow Semi Condensed', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-amount: 'Barlow Semi Condensed', sans-serif;
+  /* Global Typography System - Barlow Unified Font */
+  --font-display: 'Barlow', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'Barlow', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-amount: 'Barlow', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   font-size: 100%;
   -webkit-font-smoothing: antialiased;
@@ -241,9 +236,9 @@ textarea {
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
-  --shadow-level-1: 0 1px 3px rgba(11, 10, 18, 0.02), 0 4px 12px rgba(11, 10, 18, 0.02);
-  --shadow-level-2: 0 4px 16px rgba(11, 10, 18, 0.04);
-  --shadow-level-3: 0 10px 30px rgba(11, 10, 18, 0.06);
+  --shadow-level-1: none;
+  --shadow-level-2: none;
+  --shadow-level-3: none;
 
   /* Brand Accents (Neutral Monochrome) */
   --accent-color: #0B0A12;
@@ -251,7 +246,7 @@ textarea {
   --accent-gradient: linear-gradient(145deg, #0B0A12 0%, #24222B 100%);
   --text-on-accent: #FFFFFF;
   --accent-soft: #F4F3F0;
-  --accent-glow: rgba(11, 10, 18, 0.05);
+  --accent-glow: none;
   --accent-secondary-color: #E5E3DE;
 
   /* Primary button states (Light mode) */
@@ -265,7 +260,7 @@ textarea {
   --card-bg: var(--surface-color);
   --bg-hover: #FFF7ED; /* Active hover is subtle orange */
 
-  --card-shadow: var(--shadow-level-1);
+  --card-shadow: none;
   --card-inner-stroke: none;
 
   --success-color: #16A34A;
@@ -276,7 +271,7 @@ textarea {
   --nav-active-color: #FF8A00;
   --nav-inactive-color: #6B7280;
   --nav-plus-bg: #0B0A12;
-  --nav-plus-shadow: 0 4px 14px rgba(11, 10, 18, 0.15);
+  --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -287,7 +282,7 @@ textarea {
 
   --date-active-bg: #FFF1E2;
   --date-active-color: #0B0A12;
-  --date-active-shadow: 0 2px 8px rgba(255, 138, 0, 0.1);
+  --date-active-shadow: none;
   --date-inactive-bg: #FFFFFF;
   --date-inactive-border: #E5E3DE;
   --date-inactive-color: #6B7280;
@@ -327,9 +322,9 @@ textarea {
   --remaining-today-gradient: #2b2b2b;
 
   /* Custom Elevation Levels - Dark Mode */
-  --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-level-2: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-level-3: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-level-1: none;
+  --shadow-level-2: none;
+  --shadow-level-3: none;
 
   --logo-color: #F9F8F6;
 
@@ -339,7 +334,7 @@ textarea {
   --accent-gradient: linear-gradient(135deg, #F9F8F6 0%, #EBEAE8 100%);
   --text-on-accent: #0B0A12;
   --accent-soft: #383838;
-  --accent-glow: rgba(249, 248, 246, 0.05);
+  --accent-glow: none;
   --accent-secondary-color: #333333;
 
   /* Primary button states (Dark mode) */
@@ -353,7 +348,7 @@ textarea {
   --card-bg: var(--surface-color);
   --bg-hover: #38230E; /* active brand subtle in dark mode */
 
-  --card-shadow: var(--shadow-level-2);
+  --card-shadow: none;
   --card-inner-stroke: none;
 
   --success-color: #16A34A;
@@ -364,7 +359,7 @@ textarea {
   --nav-active-color: #FF941A;
   --nav-inactive-color: #B5B2BC;
   --nav-plus-bg: #F9F8F6;
-  --nav-plus-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
+  --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
   --income-card-text: var(--text-primary);
@@ -375,7 +370,7 @@ textarea {
 
   --date-active-bg: #38230E;
   --date-active-color: #FF941A;
-  --date-active-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --date-active-shadow: none;
   --date-inactive-bg: var(--surface-color);
   --date-inactive-border: var(--border-color);
   --date-inactive-color: var(--text-secondary);
@@ -385,12 +380,12 @@ textarea {
 .glass-card {
   background: var(--surface-color) !important;
   border: 1px solid var(--border-color) !important;
-  box-shadow: var(--shadow-sm) !important;
+  box-shadow: none !important;
 }
 .dark .glass-card {
   background-color: var(--surface-color) !important;
   border: 1px solid var(--border-color) !important;
-  box-shadow: var(--shadow-level-2) !important;
+  box-shadow: none !important;
 }
 
 /* Glass-Navigation Utility */
@@ -399,14 +394,14 @@ textarea {
   backdrop-filter: blur(26px) !important;
   -webkit-backdrop-filter: blur(26px) !important;
   border: 1px solid rgba(255, 255, 255, 0.85) !important;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.07) !important;
+  box-shadow: none !important;
 }
 .dark .glass-nav {
   background: #242424 !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid var(--border-color) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.30) !important;
+  box-shadow: none !important;
 }
 
 @layer base {
@@ -549,84 +544,84 @@ textarea {
 
 @layer components {
   .module-surface {
-    @apply rounded-[24px];
+    @apply rounded-[18px];
     background: var(--surface-gradient);
     border: 1px solid var(--border-color);
-    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+    box-shadow: none;
   }
 
   .surface-card,
   .glass-card {
-    border-radius: 24px;
+    border-radius: 18px;
     background: var(--surface-gradient);
     border: 1px solid var(--border-color);
-    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+    box-shadow: none;
     position: relative;
     overflow: hidden;
   }
 
   .profile-card {
-    border-radius: 24px;
+    border-radius: 18px;
     background: var(--surface-gradient);
     border: 1px solid var(--border-color);
-    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+    box-shadow: none;
     position: relative;
     overflow: hidden;
     transition: all 0.2s ease;
   }
 
   .flat-card {
-    border-radius: 24px;
+    border-radius: 18px;
     background: var(--surface-gradient);
     border: 1px solid var(--border-color);
-    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+    box-shadow: none;
   }
 
   .surface-elevated {
-    border-radius: 24px;
+    border-radius: 18px;
     background: var(--surface-elevated-gradient);
     border: 1px solid var(--border-color);
-    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+    box-shadow: none;
   }
 
   .surface-solid {
-    border-radius: 24px;
+    border-radius: 18px;
     background: var(--surface-gradient);
     border: 1px solid var(--border-color);
-    box-shadow: var(--card-inner-stroke), var(--card-shadow);
+    box-shadow: none;
   }
 
   .surface-muted {
-    border-radius: 16px;
+    border-radius: 14px;
     background: var(--surface-muted);
     border: 1px solid var(--border-color);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    box-shadow: none;
   }
 
   .accent-button {
-    @apply inline-flex items-center justify-center font-semibold px-5 py-2.5 rounded-[14px] transition-all;
+    @apply inline-flex items-center justify-center font-semibold px-5 py-2.5 rounded-[12px] transition-all;
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
     border: none;
     font-size: 0.875rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: none;
   }
 
   .accent-button-full {
-    @apply inline-flex items-center justify-center font-semibold px-5 py-3.5 rounded-[14px] transition-all w-full;
+    @apply inline-flex items-center justify-center font-semibold px-5 py-3.5 rounded-[12px] transition-all w-full;
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
     border: none;
     font-size: 0.875rem;
     letter-spacing: 0.02em;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: none;
   }
 
   .accent-button:hover,
   .accent-button-full:hover {
     background: var(--btn-primary-hover);
     transform: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: none;
   }
 
   .accent-button:active,
@@ -650,14 +645,14 @@ textarea {
     background: var(--surface-gradient);
     border-color: var(--border-color);
     color: var(--text-primary);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    box-shadow: none;
   }
 
   .input-field:focus {
     outline: none;
     border-color: var(--accent-color);
     background: var(--surface-color);
-    box-shadow: 0 0 0 3px var(--accent-soft);
+    box-shadow: none;
   }
 
   .section-title {
@@ -768,3 +763,19 @@ html, body {
   overscroll-behavior-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
+
+/* UNIVERSAL SHADOW & GLOW ERADICATION */
+*, *::before, *::after {
+  --tw-shadow: 0 0 #0000 !important;
+  --tw-shadow-colored: 0 0 #0000 !important;
+  --tw-drop-shadow: none !important;
+}
+
+[class*="shadow-"],
+[class*="drop-shadow-"],
+[class*="glow"] {
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+

@@ -10,11 +10,10 @@ export function ToggleSwitch({ isOn, onToggle }: ToggleSwitchProps) {
   return (
     <button
       onClick={onToggle}
-      className={`w-[51px] h-[31px] rounded-full relative transition-colors duration-300 flex-shrink-0 border border-black/5 dark:border-white/5 ${isOn ? 'bg-[var(--accent-color)] dark:bg-white' : 'bg-[var(--surface-muted)]'}`}
-      style={{ boxShadow: isOn ? 'none' : 'inset 0 0 0 1px var(--border-color)' }}
+      className={`w-[51px] h-[31px] rounded-full relative transition-colors duration-300 flex-shrink-0 border ${isOn ? 'bg-[var(--accent-color)] dark:bg-white border-transparent' : 'bg-[var(--surface-muted)] border-[var(--border-color)]'}`}
     >
       <motion.div
-        className="absolute top-[1px] w-[27px] h-[27px] bg-white dark:bg-black rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.15),0_1px_1px_rgba(0,0,0,0.16),0_3px_1px_rgba(0,0,0,0.1)]"
+        className="absolute top-[1px] w-[27px] h-[27px] bg-white dark:bg-black rounded-full"
         animate={{ x: isOn ? 21 : 2 }}
         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
       />

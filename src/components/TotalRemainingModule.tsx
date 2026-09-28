@@ -24,7 +24,7 @@ export function TotalRemainingModule({ remaining, total, currency, language, onC
   return (
     <button 
       onClick={onClick}
-      className="flex-1 flex flex-col p-5 sm:p-6 bg-[var(--surface-color)] rounded-[22px] hover:scale-[1.005] active:scale-[0.99] transition-all overflow-hidden relative shadow-xs"
+      className="flex-1 flex flex-col p-5 sm:p-6 bg-[var(--surface-color)] rounded-[18px] hover:scale-[1.005] active:scale-[0.99] transition-all overflow-hidden relative shadow-xs"
     >
       <div className="flex items-center gap-2 mb-3">
         <div className="w-7 h-7 rounded-full bg-[var(--surface-muted)] flex items-center justify-center shrink-0 text-[var(--accent-color)]">

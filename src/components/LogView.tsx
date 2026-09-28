@@ -401,11 +401,11 @@ export function LogView({
                 <span className="text-xs font-medium text-[#9CA6BC] tracking-tight capitalize">
                   {new Date(date).toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
                 </span>
-                <span className="text-[11px] text-[#9CA6BC]/60 font-mono">
+                <span className="text-[11px] text-[#9CA6BC]/60 tabular-nums font-amount">
                   {dayTransactions.length} {dayTransactions.length === 1 ? 'st' : 'st'}
                 </span>
               </div>
-              <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+              <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[18px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
                 {dayTransactions.map((transaction: Transaction) => (
                   <TransactionItem 
                     key={transaction.id}

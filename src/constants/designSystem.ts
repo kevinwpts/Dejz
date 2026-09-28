@@ -5,13 +5,13 @@
 
 export const DS = {
   radius: {
-    xs: 'rounded-[8px]',
-    sm: 'rounded-[12px]',
-    md: 'rounded-[16px]',
-    lg: 'rounded-[20px]',
-    xl: 'rounded-[24px]',
-    '2xl': 'rounded-[28px]',
-    '3xl': 'rounded-[32px]',
+    xs: 'rounded-[6px]',
+    sm: 'rounded-[8px]',
+    md: 'rounded-[12px]',
+    lg: 'rounded-[14px]',
+    xl: 'rounded-[18px]',
+    '2xl': 'rounded-[22px]',
+    '3xl': 'rounded-[24px]',
     full: 'rounded-full',
   },
   heights: {

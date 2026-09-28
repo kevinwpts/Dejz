@@ -42,7 +42,7 @@ export function FeedbackModal({ onClose, onSubmit, t }: FeedbackModalProps) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--surface-color)] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border border-[var(--border-color)] relative shadow-2xl overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0"
+        className="bg-[var(--surface-color)] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border border-[var(--border-color)] relative shadow-2xl overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}

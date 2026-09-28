@@ -5260,7 +5260,7 @@ export default function App() {
                     disabled={isSubmittingQuick || isAudioTranscribing}
                     className={`absolute left-1.5 z-10 w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all cursor-pointer border select-none ${
                       isRecording
-                        ? "bg-rose-500 text-white border-rose-400 animate-pulse shadow-md shadow-rose-500/30 scale-105"
+                        ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
                         : isAudioTranscribing
                           ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
                           : "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border-rose-500/20 active:scale-95"

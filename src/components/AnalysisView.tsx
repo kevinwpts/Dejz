@@ -254,7 +254,7 @@ export function AnalysisView({
       />
 
       {/* Donut Chart Distribution Card */}
-      <div className="p-5 sm:p-6 rounded-[24px] border border-white/[0.02] bg-white/[0.025] backdrop-blur-[18px] shadow-none flex flex-col items-center relative overflow-hidden">
+      <div className="p-5 sm:p-6 rounded-[18px] border border-white/[0.02] bg-white/[0.025] backdrop-blur-[18px] shadow-none flex flex-col items-center relative overflow-hidden">
         <div className="flex items-center justify-between w-full mb-3 px-1">
           <span className="text-sm font-semibold text-white tracking-tight">{t('distribution')}</span>
           <span className="text-[11px] font-normal text-[#9CA6BC] tabular-nums">
@@ -330,7 +330,7 @@ export function AnalysisView({
                     fill={entry.color || COLORS[index % COLORS.length]} 
                     opacity={expandedCategory ? (expandedCategory === entry.name ? 1 : 0.25) : 0.9}
                     style={{ 
-                      transition: 'all 0.25s ease'
+                       transition: 'all 0.25s ease'
                     }}
                     strokeWidth={expandedCategory === entry.name ? 2 : 0}
                     stroke={expandedCategory === entry.name ? '#232323' : 'none'}
@@ -352,7 +352,7 @@ export function AnalysisView({
         </div>
 
         {categoryData.length > 0 ? (
-          <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[24px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+          <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[18px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
             {categoryData.map((item: any, index) => {
               const isExpanded = expandedCategory === item.name;
               const iconName = item.icon || getCategoryIconName(item.name);

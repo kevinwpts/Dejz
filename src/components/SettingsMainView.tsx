@@ -112,7 +112,7 @@ export function SettingsMainView({
       exit={{ opacity: 0, y: -10 }}
       className="space-y-4 max-w-md mx-auto"
     >
-      <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/30 rounded-[24px] bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 shadow-sm">
+      <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/30 rounded-[18px] bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 shadow-sm">
         <ListRow
           icon={<Calendar size={18} strokeWidth={1.5} />}
           title={t('salary')}

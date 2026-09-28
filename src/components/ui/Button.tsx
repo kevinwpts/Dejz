@@ -31,9 +31,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       'inline-flex items-center justify-center font-semibold transition-all duration-150 active:scale-[0.98] select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100';
 
     const sizeStyles = {
-      sm: 'text-xs py-2 px-4 rounded-full gap-1.5 h-[38px]',
-      md: 'text-xs sm:text-sm py-2.5 px-5 rounded-full gap-2 h-[46px]',
-      lg: 'text-sm sm:text-base py-3 px-6 rounded-full gap-2.5 h-[50px]',
+      sm: 'text-xs py-2 px-4 rounded-[10px] gap-1.5 h-[38px]',
+      md: 'text-xs sm:text-sm py-2.5 px-5 rounded-[12px] gap-2 h-[46px]',
+      lg: 'text-sm sm:text-base py-3 px-6 rounded-[14px] gap-2.5 h-[50px]',
     }[size];
 
     const variantStyles = {

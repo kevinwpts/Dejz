@@ -340,7 +340,7 @@ export function ReceiptCameraModal({
                 <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-xl" />
 
                 {/* Subtle animated scan sweep line */}
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#34d399] animate-[bounce_2.5s_infinite]" />
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-[bounce_2.5s_infinite]" />
               </div>
 
               {/* Guide hint */}
@@ -402,7 +402,7 @@ export function ReceiptCameraModal({
               type="button"
               onClick={handleConfirmPhoto}
               disabled={isProcessing}
-              className="flex-1 py-3.5 px-4 rounded-2xl bg-white hover:bg-white/90 active:scale-98 text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-white/10 transition-all cursor-pointer"
+              className="flex-1 py-3.5 px-4 rounded-2xl bg-white hover:bg-white/90 active:scale-98 text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <Check size={18} strokeWidth={2.6} />
               <span>{isEn ? 'Use receipt' : 'Använd kvitto'}</span>
@@ -426,7 +426,7 @@ export function ReceiptCameraModal({
               type="button"
               onClick={takePhoto}
               disabled={!isCameraReady || !!cameraError}
-              className="relative w-20 h-20 rounded-full border-[3.5px] border-white/80 p-1 flex items-center justify-center active:scale-90 transition-transform cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group shadow-lg shadow-black/50"
+              className="relative w-20 h-20 rounded-full border-[3.5px] border-white/80 p-1 flex items-center justify-center active:scale-90 transition-transform cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group"
               aria-label={isEn ? 'Take photo' : 'Ta bild'}
             >
               <div className="w-full h-full rounded-full bg-white group-hover:scale-95 transition-transform" />

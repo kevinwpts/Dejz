@@ -156,7 +156,7 @@ export function CategoryBottomSheetModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-[#232323] border-t border-white/[0.1] rounded-t-[32px] shadow-2xl max-h-[88vh] flex flex-col z-10 overflow-hidden font-sans text-white"
+            className="relative w-full max-w-lg bg-[#232323] border-t border-white/[0.1] rounded-t-[22px] shadow-2xl max-h-[88vh] flex flex-col z-10 overflow-hidden font-sans text-white"
           >
             {/* Top Grab Handle */}
             <div className="w-12 h-1.5 rounded-full bg-white/25 mx-auto mt-3 mb-1 shrink-0" />
@@ -164,7 +164,7 @@ export function CategoryBottomSheetModal({
             {/* Header: Category Identity & Close Button */}
             <div className="flex items-center justify-between px-5 pt-3 pb-4 border-b border-white/[0.05] shrink-0">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-2xl bg-white/[0.08] border border-white/[0.1] text-white flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.08] border border-white/[0.1] text-white flex items-center justify-center shrink-0">
                   {isEmojiString(iconKey) ? (
                     <span className="text-xl leading-none">{iconKey}</span>
                   ) : IconComponent ? (
