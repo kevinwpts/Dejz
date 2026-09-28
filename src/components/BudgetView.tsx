@@ -81,6 +81,7 @@ export function BudgetView({
 
   const [fixedSortBy, setFixedSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [incomeSortBy, setIncomeSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
+  const [savingSortBy, setSavingSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [confirmReset, setConfirmReset] = React.useState(false);
 
   React.useEffect(() => {
@@ -122,7 +123,21 @@ export function BudgetView({
     }
   }, [fixedExpenses, fixedSortBy]);
 
-  const sortedSavings = config?.monthlySavingsItems || [];
+  const sortedSavings = React.useMemo(() => {
+    const list = [...(config?.monthlySavingsItems || [])];
+    if (savingSortBy === 'day') {
+      return list.sort((a, b) => {
+        const dayA = typeof a.deductionDay === 'number' && a.deductionDay > 0 ? a.deductionDay : 999;
+        const dayB = typeof b.deductionDay === 'number' && b.deductionDay > 0 ? b.deductionDay : 999;
+        if (dayA !== dayB) return dayA - dayB;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+    } else if (savingSortBy === 'amount') {
+      return list.sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0));
+    } else {
+      return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
+  }, [config?.monthlySavingsItems, savingSortBy]);
 
   const getFixedSpentForCategory = (catName: string) => {
     return (fixedExpenses || [])
@@ -843,7 +858,31 @@ export function BudgetView({
           {/* Monthly Savings Section */}
           {budgetFilter === 'savings' && (
             <div className="space-y-4">
-              <div className="flex justify-end px-1">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+                {/* Single compact sort toggle button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (savingSortBy === 'day') setSavingSortBy('name');
+                    else if (savingSortBy === 'name') setSavingSortBy('amount');
+                    else setSavingSortBy('day');
+                  }}
+                  title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.035] text-xs text-white transition-all cursor-pointer select-none active:scale-95"
+                >
+                  <ArrowUpDown size={12} strokeWidth={2} className="text-[#8B9CFF] shrink-0" />
+                  <span className="text-[#9CA6BC]/80">
+                    {config.language === 'en' ? 'Sort:' : 'Sortera:'}
+                  </span>
+                  <span className="font-semibold text-white">
+                    {savingSortBy === 'day' 
+                      ? (config.language === 'en' ? 'Day' : 'Dragningsdag') 
+                      : savingSortBy === 'name' 
+                        ? (config.language === 'en' ? 'Name' : 'Namn') 
+                        : (config.language === 'en' ? 'Amount' : 'Belopp')}
+                  </span>
+                </button>
+
                 <button 
                   type="button"
                   onClick={onAddMonthlySaving} 
