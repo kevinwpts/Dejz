@@ -405,7 +405,7 @@ export function LogView({
                   {dayTransactions.length} {dayTransactions.length === 1 ? 'st' : 'st'}
                 </span>
               </div>
-              <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[18px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+              <div className="space-y-2.5">
                 {dayTransactions.map((transaction: Transaction) => (
                   <TransactionItem 
                     key={transaction.id}

@@ -446,7 +446,7 @@ export function AnalysisView({
                         className="overflow-hidden bg-black/[0.02] dark:bg-white/[0.015] border-t border-[#EDE9DF] dark:border-white/[0.03]"
                       >
                         {(categoryTransactions.length > 0 || categoryFixedExpenses.length > 0) ? (
-                          <div className="divide-y divide-[#EDE9DF] dark:divide-white/[0.035] overflow-hidden">
+                          <div className="space-y-2.5 p-2 overflow-hidden">
                             {categoryTransactions.map(t => {
                               let displayAmount = t.amount;
                               const transactionSplits = (t as any).splits;

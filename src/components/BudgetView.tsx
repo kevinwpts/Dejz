@@ -750,7 +750,7 @@ export function BudgetView({
               </div>
 
               {sortedIncomes.length > 0 ? (
-                <div className="bg-[#FFFFFF] dark:bg-white/[0.035] rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.025] divide-y divide-[#EDE9DF] dark:divide-white/[0.035] overflow-hidden">
+                <div className="space-y-2.5">
                   {sortedIncomes.map((income) => (
                     <BudgetItem 
                       key={income.id}
@@ -827,7 +827,7 @@ export function BudgetView({
                           : freq}
                       </span>
                     </div>
-                    <div className="bg-[#FFFFFF] dark:bg-white/[0.035] rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.025] divide-y divide-[#EDE9DF] dark:divide-white/[0.035] overflow-hidden">
+                    <div className="space-y-2.5">
                       {items.map((expense) => (
                         <BudgetItem 
                           key={expense.id}
@@ -890,7 +890,7 @@ export function BudgetView({
               </div>
 
               {sortedSavings.length > 0 ? (
-                <div className="bg-[#FFFFFF] dark:bg-white/[0.035] rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.025] divide-y divide-[#EDE9DF] dark:divide-white/[0.035] overflow-hidden">
+                <div className="space-y-2.5">
                   {sortedSavings.map((saving) => (
                     <BudgetItem 
                       key={saving.id}

@@ -68,7 +68,7 @@ export function CustomBottomNavigation({
             onClick={() => {
               if (onPlusClick) onPlusClick();
             }}
-            className="w-12 h-12 sm:w-[50px] sm:h-[50px] rounded-full active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-black/10 overflow-hidden bg-transparent"
+            className="w-10 h-10 sm:w-[42px] sm:h-[42px] rounded-full active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-black/10 overflow-hidden bg-transparent"
             aria-label="Add transaction"
           >
             <img src="/lagg_till.png" alt="Lägg till" className="w-full h-full object-cover" />

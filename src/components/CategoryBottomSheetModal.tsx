@@ -252,7 +252,7 @@ export function CategoryBottomSheetModal({
                 </div>
 
                 {displayTransactions.length > 0 ? (
-                  <div className="space-y-2 max-h-[360px] overflow-y-auto no-scrollbar pr-0.5">
+                  <div className="space-y-2.5 max-h-[360px] overflow-y-auto no-scrollbar pr-0.5">
                     {displayTransactions.map((tx) => (
                       <TransactionItem
                         key={tx.id}

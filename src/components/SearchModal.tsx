@@ -190,7 +190,7 @@ export function SearchModal({
                   </div>
 
                   {matchingTransactions.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {matchingTransactions.map(t => (
                         <TransactionItem 
                           key={t.id} 
