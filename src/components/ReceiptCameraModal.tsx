@@ -229,7 +229,12 @@ export function ReceiptCameraModal({
       )}
 
       {/* Top Header Controls */}
-      <div className="relative z-30 flex items-center justify-between px-5 pt-safe-top pt-4 pb-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
+      <div 
+        style={{
+          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 18px)',
+        }}
+        className="relative z-30 flex items-center justify-between px-5 pb-3 bg-gradient-to-b from-black/90 via-black/50 to-transparent"
+      >
         {/* Close Button */}
         <button
           type="button"
@@ -239,14 +244,14 @@ export function ReceiptCameraModal({
             onClose();
           }}
           disabled={isProcessing}
-          className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
+          className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 border border-white/20 text-white flex items-center justify-center backdrop-blur-xl transition-all cursor-pointer shadow-md"
           aria-label={isEn ? 'Close' : 'Stäng'}
         >
           <X size={20} strokeWidth={2.2} />
         </button>
 
         {/* Status / Title Pill */}
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md text-xs font-semibold tracking-wide">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 backdrop-blur-xl text-xs font-semibold tracking-wide shadow-md">
           <Camera size={14} className="text-white/80" />
           <span>{isEn ? 'Receipt Scanner' : 'Kvittoskanning'}</span>
         </div>
@@ -257,8 +262,8 @@ export function ReceiptCameraModal({
             <button
               type="button"
               onClick={toggleTorch}
-              className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-all cursor-pointer ${
-                torchOn ? 'bg-amber-400 text-black' : 'bg-white/10 hover:bg-white/20 text-white active:scale-95'
+              className={`w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-xl border border-white/20 transition-all cursor-pointer shadow-md ${
+                torchOn ? 'bg-amber-400 text-black border-amber-300' : 'bg-black/40 hover:bg-black/60 text-white active:scale-95'
               }`}
               aria-label={isEn ? 'Flashlight' : 'Ficklampa'}
             >
@@ -270,7 +275,7 @@ export function ReceiptCameraModal({
             <button
               type="button"
               onClick={toggleCamera}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
+              className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 border border-white/20 text-white flex items-center justify-center backdrop-blur-xl transition-all cursor-pointer shadow-md"
               aria-label={isEn ? 'Flip camera' : 'Vänd kamera'}
             >
               <SwitchCamera size={19} strokeWidth={2} />
@@ -372,7 +377,12 @@ export function ReceiptCameraModal({
       />
 
       {/* Bottom Controls Bar */}
-      <div className="relative z-30 px-6 pt-4 pb-safe-bottom pb-8 bg-gradient-to-t from-black via-black/85 to-transparent">
+      <div 
+        style={{
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
+        }}
+        className="relative z-30 px-6 pt-4 bg-gradient-to-t from-black via-black/85 to-transparent"
+      >
         {capturedImage ? (
           /* Retake or Use Photo buttons */
           <div className="flex items-center justify-between gap-4 max-w-sm mx-auto">
