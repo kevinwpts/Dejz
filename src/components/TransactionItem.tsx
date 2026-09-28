@@ -140,7 +140,7 @@ export function TransactionItem({
 
   return (
     <>
-      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[18px]'} select-none`}>
+      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[18px]'} select-none font-barlow`}>
         {/* Swipe Left Background Action: Delete */}
         {canSwipe && (
           <motion.div 

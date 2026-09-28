@@ -725,46 +725,12 @@ export function TodayView({
                 ))}
               </motion.div>
             ) : displayedFixedTransactions.length === 0 ? (
-              selectedCategoryFilter ? (
-                <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.05] text-center space-y-3">
-                  <p className="text-sm text-[#C7CDDC] font-medium">
-                    {categoryViewScope === 'day'
-                      ? (lang === 'en' 
-                          ? `No purchases in ${activeCategory?.name || selectedCategoryFilter} on this date.` 
-                          : `Inga köp i ${activeCategory?.name || selectedCategoryFilter} detta datum.`)
-                      : (lang === 'en' 
-                          ? `No purchases registered in ${activeCategory?.name || selectedCategoryFilter} this period.` 
-                          : `Inga köp registrerade i ${activeCategory?.name || selectedCategoryFilter} denna period.`)}
-                  </p>
-                  
-                  <div className="flex items-center justify-center gap-2 pt-1">
-                    {categoryViewScope === 'day' && periodCategoryTransactions.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setCategoryViewScope('period')}
-                        className="px-3.5 py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-xs font-bold text-white transition-all cursor-pointer"
-                      >
-                        {lang === 'en' ? `Show all ${periodCategoryTransactions.length} period purchases` : `Visa hela periodens ${periodCategoryTransactions.length} köp`}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => onAddTransaction(selectedDate)}
-                      className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-all cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Plus size={13} strokeWidth={2.5} />
-                      <span>{lang === 'en' ? 'Add expense' : 'Lägg till köp'}</span>
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <EmptyState
-                  title={isTodaySelected ? t("noTransactionsToday") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
-                  description={isTodaySelected ? t("addFirstTransaction") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
-                  onAction={() => onAddTransaction(selectedDate)}
-                  actionLabel={t("addExpense")}
-                />
-              )
+              <EmptyState
+                title={isTodaySelected ? t("noTransactionsToday") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
+                description={isTodaySelected ? t("addFirstTransaction") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
+                onAction={() => onAddTransaction(selectedDate)}
+                actionLabel={t("addExpense")}
+              />
             ) : null}
           </AnimatePresence>
 

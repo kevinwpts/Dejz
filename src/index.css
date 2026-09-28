@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@300;400;500;600;700;800;900&family=Barlow:wght@300;400;500;600;700;800;900&display=swap");
 
 /* Barlow Semi Condensed - Local High Performance Webfonts (Latin & Latin-Extended for Swedish å, ä, ö, Å, Ä, Ö) */
 @font-face {
@@ -64,7 +64,9 @@
   --font-shoulders:
     "Barlow Semi Condensed", sans-serif;
   --font-barlow:
-    "Barlow Semi Condensed", sans-serif;
+    "Barlow", "Barlow Semi Condensed", sans-serif;
+  --font-barlow-standard:
+    "Barlow", sans-serif;
   --font-amount:
     "Barlow Semi Condensed", sans-serif;
   --font-exo:
@@ -129,11 +131,19 @@ textarea {
 }
 
 @utility font-barlow {
-  font-family: var(--font-display) !important;
+  font-family: var(--font-barlow-standard) !important;
 }
 
 .font-barlow {
-  font-family: var(--font-display) !important;
+  font-family: var(--font-barlow-standard) !important;
+}
+
+@utility font-barlow-standard {
+  font-family: var(--font-barlow-standard) !important;
+}
+
+.font-barlow-standard {
+  font-family: var(--font-barlow-standard) !important;
 }
 
 @utility font-shoulders {
@@ -156,6 +166,11 @@ textarea {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
   letter-spacing: 0.02em !important;
+}
+
+.font-barlow .font-amount,
+.font-barlow-standard .font-amount {
+  font-family: var(--font-barlow-standard) !important;
 }
 
 /* Ensure no text is squeezed together since Big Shoulders is naturally condensed */
