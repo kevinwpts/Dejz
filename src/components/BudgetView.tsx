@@ -395,7 +395,7 @@ export function BudgetView({
               <button
                 type="button"
                 onClick={handleAutoDistribute}
-                className="text-[11px] font-bold text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white 300 hover:text-[#1C1917] dark:text-white 800 dark:hover:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-[#1C1917] dark:bg-white/[0.12] 50 dark:bg-neutral-800 dark:text-white/[0.08] border border-[#1C1917] dark:border-white/20 200 dark:border-neutral-800 dark:text-white/15 transition-all cursor-pointer active:scale-95"
+                className="text-[11px] font-bold text-[#1C1917] dark:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 border border-[#E6E2D8] dark:border-white/10 transition-all cursor-pointer active:scale-95"
               >
                 <Sparkles size={11} />
                 Fördela automatiskt
@@ -458,12 +458,12 @@ export function BudgetView({
                         }}
                         className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer flex items-center justify-center shrink-0 ${
                           cat.pinned 
-                            ? "bg-[#1C1917] dark:bg-white/[0.12] 50 dark:bg-neutral-800 dark:text-white/15 text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white border border-[#1C1917] dark:border-white/20 200 dark:border-neutral-800 dark:text-white/30" 
-                            : "bg-black/5 dark:bg-white/[0.02] text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white border border-transparent hover:border-[#E6E2D8] dark:hover:border-white/[0.05]"
+                            ? "bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border-transparent" 
+                            : "bg-black/5 dark:bg-white/[0.05] text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white border border-transparent hover:border-[#E6E2D8] dark:hover:border-white/[0.05]"
                         }`}
                         title={cat.pinned ? "Avfäst från Hem" : "Fäst på Hem"}
                       >
-                        <Pin size={12} className={cat.pinned ? "fill-neutral-900 dark:text-white dark:fill-neutral-200 dark:text-white" : ""} />
+                        <Pin size={12} className={cat.pinned ? "fill-current" : ""} />
                       </button>
 
                       {/* Reorder up/down buttons */}
@@ -925,7 +925,7 @@ export function BudgetView({
                       </p>
                     </div>
                   </div>
-                  <div className="h-7 px-3 rounded-full bg-[#1C1917] dark:bg-white/[0.12] 50 text-neutral-900 dark:text-white border border-[#1C1917] dark:border-white/20 200 dark:bg-[#1C1917] dark:bg-white/[0.16] dark:text-white dark:border-[#1C1917] dark:border-white/30 text-xs font-medium shrink-0 ml-3 flex items-center justify-center">
+                  <div className="h-7 px-3.5 rounded-full bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] hover:bg-neutral-800 dark:hover:bg-neutral-200 text-xs font-semibold shrink-0 ml-3 flex items-center justify-center transition-all shadow-xs">
                     Lägg till
                   </div>
                 </button>

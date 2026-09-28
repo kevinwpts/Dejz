@@ -788,7 +788,7 @@ export function TransactionModal({
               {/* Amount Input */}
               <div className="flex flex-col gap-2.5">
                 <div 
-                  className="bg-[var(--surface-muted)]/50 rounded-[18px] py-3.5 px-4 sm:py-4 sm:px-5 flex items-center justify-between transition-all border border-[var(--border-color)] group"
+                  className="bg-white dark:bg-white/[0.04] rounded-[18px] py-3.5 px-4 sm:py-4 sm:px-5 flex items-center justify-between transition-all border border-[#E6E2D8] dark:border-white/[0.08] group"
                 >
                   <div className="shrink-0 flex items-center min-w-[72px]">
                     {type === 'expense' && (
@@ -804,8 +804,8 @@ export function TransactionModal({
                         }}
                         className={`text-xs font-medium transition-all px-3 py-1 rounded-full border shadow-xs cursor-pointer ${
                           splits.length > 0 
-                            ? "bg-danger text-white border-transparent" 
-                            : "bg-accent/10 text-accent border-accent/20 hover:bg-accent/20"
+                            ? "bg-rose-500 text-white border-transparent" 
+                            : "bg-black/5 text-[#1C1917] dark:bg-white/10 dark:text-white border-transparent hover:bg-black/10 dark:hover:bg-white/20"
                         }`}
                       >
                         {splits.length > 0 ? "Avbryt" : "Splitta"}
@@ -826,11 +826,11 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[38px] sm:text-[44px] font-semibold text-center tracking-tighter leading-none placeholder-[var(--text-tertiary)]/30 cursor-default"
+                      className="w-full bg-transparent text-[#1C1917] dark:text-white outline-none font-amount text-[38px] sm:text-[44px] font-semibold text-center tracking-tighter leading-none placeholder-[#6E6961]/30 dark:placeholder-white/30 cursor-default"
                     />
                   </div>
                   <div className="shrink-0 flex items-center justify-end min-w-[72px]">
-                    <span className="text-xs font-semibold text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-3 py-1.5 rounded-full group-focus-within:bg-[var(--accent-color)]/20 transition-colors">
+                    <span className="text-xs font-semibold text-[#1C1917] dark:text-white bg-black/5 dark:bg-white/10 px-3 py-1.5 rounded-full transition-colors">
                       {currency}
                     </span>
                   </div>

@@ -288,7 +288,7 @@ export function LogView({
           <>
             <div className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] ${
               selectedDate || selectedPeriod
-                ? 'bg-[#1C1917] dark:bg-white/[0.12] 50 border-[#1C1917] dark:border-white/20 200 text-neutral-900 dark:text-white dark:bg-[#1C1917] dark:bg-white/[0.18] dark:border-[#1C1917] dark:border-white/35 dark:text-white shadow-none'
+                ? 'bg-white dark:bg-white/[0.06] border-[#1C1917]/20 dark:border-white/20 text-[#1C1917] dark:text-white shadow-2xs'
                 : 'bg-white border-[#E6E2D8] text-[#1C1917] dark:bg-white/[0.035] dark:border-white/[0.035] dark:text-[#C7CDDC]'
             }`}>
               <button
@@ -557,7 +557,7 @@ export function LogView({
                       {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                     </span>
                     {modalPeriod?.isCurrent && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#1C1917] dark:bg-white/[0.12] 50 dark:bg-[#1C1917] dark:bg-white/20 text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white tracking-tight">
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white tracking-tight">
                         {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
                       </span>
                     )}
@@ -657,14 +657,14 @@ export function LogView({
                         }}
                         className={`aspect-square w-full rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
                           isSelected 
-                            ? 'bg-neutral-900 dark:text-white text-white dark:bg-[#1C1917] dark:bg-white dark:text-[#1c1c1c] font-bold shadow-md z-10' 
+                            ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-bold shadow-xs z-10' 
                             : isToday
-                            ? 'bg-white dark:bg-white/[0.08] text-[#1C1917] dark:text-white border border-[#1C1917] dark:border-white/20 300 dark:border-[#1C1917] dark:border-white/50 font-semibold'
+                            ? 'bg-white dark:bg-white/[0.08] text-[#1C1917] dark:text-white border border-[#E6E2D8] dark:border-white/30 font-semibold'
                             : 'bg-transparent text-[#1C1917] dark:text-[#C7CDDC] hover:bg-black/5 dark:hover:bg-white/[0.06] hover:text-black dark:hover:text-white font-medium'
                         }`}
                       >
                         <span className={`text-[13px] sm:text-[14px] leading-none tabular-nums ${
-                          isSelected ? 'text-white dark:text-[#1c1c1c]' : isToday ? 'text-[#1C1917] dark:text-white font-bold' : 'text-[#1C1917] dark:text-[#C7CDDC]'
+                          isSelected ? 'text-white dark:text-[#1C1917]' : isToday ? 'text-[#1C1917] dark:text-white font-bold' : 'text-[#1C1917] dark:text-[#C7CDDC]'
                         }`}>
                           {dayNum}
                         </span>
@@ -672,10 +672,10 @@ export function LogView({
                         {/* Transaction Dots */}
                         <div className="flex items-center justify-center gap-0.5 pointer-events-none h-1 w-full">
                           {dayTx?.hasIncome && (
-                            <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white dark:bg-[#1C1917] dark:bg-white/[0.12] 900' : 'bg-neutral-900 dark:text-white dark:bg-neutral-200 dark:text-white'}`} />
+                            <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white dark:bg-[#1C1917]' : 'bg-emerald-500'}`} />
                           )}
                           {dayTx?.hasExpense && (
-                            <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white dark:bg-[#1c1c1c]' : 'bg-rose-500 dark:bg-[#1C1917] dark:bg-white'}`} />
+                            <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white dark:bg-[#1C1917]' : 'bg-rose-500'}`} />
                           )}
                         </div>
                       </button>

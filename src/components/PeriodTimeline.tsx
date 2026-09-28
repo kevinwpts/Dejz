@@ -267,9 +267,9 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-neutral-900 dark:text-white text-white dark:bg-white/[0.14] dark:text-white border border-neutral-900 dark:text-white dark:border-white/25 shadow-xs scale-105 font-bold z-10 opacity-100'
+                  ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border border-transparent shadow-xs scale-105 font-bold z-10 opacity-100'
                   : hasCategoryMatch
-                  ? 'bg-[#1C1917] dark:bg-white/[0.12] 50 text-[#1C1917] dark:text-white 800 border border-[#1C1917] dark:border-white/20 300 dark:bg-white/[0.08] dark:text-white dark:border-neutral-200 dark:text-white/40 hover:bg-[#1C1917] dark:bg-white/[0.12] 100 dark:hover:bg-white/[0.1] scale-100 opacity-100 ring-1 ring-neutral-200 dark:text-white/30'
+                  ? 'bg-black/5 text-[#1C1917] border border-[#1C1917]/20 dark:bg-white/[0.08] dark:text-white dark:border-white/20 hover:bg-black/10 dark:hover:bg-white/[0.1] scale-100 opacity-100'
                   : isRealToday
                   ? 'bg-white text-[#1C1917] border border-[#E6E2D8] dark:bg-white/[0.04] dark:text-[#C7CDDC] dark:border-white/[0.08] hover:bg-black/5 dark:hover:bg-white/[0.07] scale-95 opacity-90'
                   : categoryFilter
@@ -281,9 +281,9 @@ export function PeriodTimeline({
               <span
                 className={`text-[8.5px] sm:text-[9px] tracking-wider uppercase leading-none ${
                   isSelected
-                    ? 'text-white font-bold'
+                    ? 'text-white dark:text-[#1C1917] font-bold'
                     : hasCategoryMatch
-                    ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white font-bold'
+                    ? 'text-[#1C1917] dark:text-white font-bold'
                     : isRealToday
                     ? 'text-[#1C1917] dark:text-[#C7CDDC] font-semibold'
                     : 'text-[#6E6961] dark:text-[#9CA6BC]/70 font-medium'
@@ -299,7 +299,7 @@ export function PeriodTimeline({
 
               {/* Match Indicator Dot when filtering by category */}
               {hasCategoryMatch && !isSelected && (
-                <span className="w-1 h-1 rounded-full bg-neutral-200 dark:text-white absolute bottom-1 shadow-none" />
+                <span className="w-1 h-1 rounded-full bg-[#1C1917] dark:bg-white absolute bottom-1 shadow-none" />
               )}
             </button>
           );
@@ -307,7 +307,7 @@ export function PeriodTimeline({
 
         {/* Lön / Payday Box at the end of the timeline */}
         <div
-          className="flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl bg-neutral-800 dark:text-white/08 text-neutral-200 dark:text-white border border-neutral-800 dark:text-white/15 backdrop-blur-md select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5"
+          className="flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl bg-black/5 dark:bg-white/[0.04] text-[#1C1917] dark:text-white border border-[#E6E2D8] dark:border-white/[0.08] select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5"
         >
           <span className="text-[12px] leading-none">💰</span>
           <span className="text-[8px] sm:text-[8.5px] font-bold tracking-wider uppercase">

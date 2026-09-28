@@ -262,7 +262,7 @@ export function AccountsView({ onBack, userId, addToast }: AccountsViewProps) {
                 <button 
                   type="button"
                   onClick={handleSave}
-                  className="w-full bg-[#1C1917] dark:bg-white hover:bg-[#049d53] text-white font-medium text-sm py-3 rounded-full transition-colors cursor-pointer shadow-xs"
+                  className="w-full bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] hover:bg-neutral-800 dark:hover:bg-neutral-200 font-semibold text-sm py-3 rounded-full transition-all cursor-pointer active:scale-98 shadow-xs"
                 >
                   Spara konto
                 </button>

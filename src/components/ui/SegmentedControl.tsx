@@ -54,8 +54,8 @@ export function SegmentedControl<T extends string = string>({
               fullWidth ? 'flex-1' : ''
             } ${
               isSelected
-                ? 'bg-[#FFFFFF] text-neutral-900 dark:text-white border border-[#E6E2D8] shadow-xs dark:bg-[#1C1917] dark:bg-white/[0.18] dark:text-white dark:border-[#1C1917] dark:border-white/30 dark:shadow-none'
-                : 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.03]'
+                ? 'bg-white dark:bg-white text-[#1C1917] dark:text-[#1C1917] border border-[#E6E2D8] dark:border-transparent shadow-xs font-semibold'
+                : 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.05]'
             }`}
           >
             <span className="relative z-10 flex items-center justify-center gap-1.5">
