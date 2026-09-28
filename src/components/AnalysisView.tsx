@@ -207,7 +207,7 @@ export function AnalysisView({
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
-          <LayoutGrid size={13} strokeWidth={1.75} className={analysisFilter === 'all' ? 'text-[#1C1917] dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <LayoutGrid size={13} strokeWidth={1.75} className={analysisFilter === 'all' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('all' as TranslationKey)}</span>
         </button>
         <button
@@ -221,7 +221,7 @@ export function AnalysisView({
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
-          <TrendingUp size={13} strokeWidth={1.75} className={analysisFilter === 'variable' ? 'text-[#1C1917] dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <TrendingUp size={13} strokeWidth={1.75} className={analysisFilter === 'variable' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('variableExpenses' as TranslationKey)}</span>
         </button>
         <button
@@ -235,7 +235,7 @@ export function AnalysisView({
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
-          <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-[#1C1917] dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('fixedExpenses' as TranslationKey)}</span>
         </button>
       </div>

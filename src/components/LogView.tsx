@@ -372,14 +372,14 @@ export function LogView({
               onClick={() => setTypeFilter(type)}
               className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
                 isActive 
-                  ? 'bg-[#1C1917] dark:bg-white text-white font-semibold border-transparent shadow-xs' 
-                  : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
+                  ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs' 
+                  : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
               }`}
             >
-              {type === 'all' && <LayoutGrid size={13} strokeWidth={1.75} className={isActive ? 'text-neutral-900 dark:text-white dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
-              {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={1.75} className={isActive ? 'text-neutral-900 dark:text-white dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
-              {type === 'income' && <ArrowUpRight size={13} strokeWidth={1.75} className={isActive ? 'text-neutral-900 dark:text-white dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
-              {type === 'receipt' && <FileText size={13} strokeWidth={1.75} className={isActive ? 'text-neutral-900 dark:text-white dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
+              {type === 'all' && <LayoutGrid size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
+              {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
+              {type === 'income' && <ArrowUpRight size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
+              {type === 'receipt' && <FileText size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
               <span>{t(type as TranslationKey)}</span>
             </button>
           );

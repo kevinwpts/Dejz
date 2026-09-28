@@ -5297,9 +5297,9 @@ export default function App() {
                   <button
                     type="submit"
                     disabled={!plusQuickText.trim() || isSubmittingQuick || isAudioTranscribing || isRecording}
-                    className="absolute right-1.5 z-10 w-8.5 h-8.5 rounded-xl bg-neutral-900 dark:text-white hover:bg-neutral-900 dark:text-white text-white dark:bg-white/[0.06] dark:hover:bg-white/[0.12] disabled:opacity-20 active:scale-95 dark:text-white flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-neutral-900 dark:text-white dark:border-white/[0.05]"
+                    className="absolute right-1.5 z-10 w-8.5 h-8.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-[#1C1917] hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-neutral-900 dark:border-white"
                   >
-                    <Plus size={16} strokeWidth={2.2} className="text-white" />
+                    <Plus size={16} strokeWidth={2.2} />
                   </button>
                 </form>
 

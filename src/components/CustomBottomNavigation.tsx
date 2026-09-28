@@ -69,7 +69,7 @@ export function CustomBottomNavigation({
             onClick={() => {
               if (onPlusClick) onPlusClick();
             }}
-            className="w-11 h-11 sm:w-[46px] sm:h-[46px] rounded-full bg-[#1C1917] dark:bg-white hover:bg-[#049d53] active:scale-90 text-white flex items-center justify-center transition-all cursor-pointer shadow-md shadow-[#05b862]/25"
+            className="w-11 h-11 sm:w-[46px] sm:h-[46px] rounded-full bg-[#1C1917] dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-200 active:scale-90 text-white dark:text-[#1C1917] flex items-center justify-center transition-all cursor-pointer shadow-md shadow-black/10"
             aria-label="Add transaction"
           >
             <Plus size={20} strokeWidth={2.5} />

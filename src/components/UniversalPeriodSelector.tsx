@@ -130,7 +130,7 @@ export function UniversalPeriodSelector({
         onClick={handleCenterClick}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/[0.035] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.06] border border-[#E6E2D8] dark:border-white/[0.03] transition-all cursor-pointer group select-none"
       >
-        <CalendarIcon size={13} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover:text-neutral-900 dark:text-white dark:group-hover:text-[#1C1917] dark:text-white transition-colors" />
+        <CalendarIcon size={13} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors" />
         <span className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[#1C1917] dark:text-white">
           {month}
         </span>
@@ -153,7 +153,7 @@ export function UniversalPeriodSelector({
           className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
             canGoPrev 
               ? 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.05]' 
-              : 'text-[#6E6961]/30 dark:text-[#9CA6BC]/30 cursor-not-allowed'
+              : 'text-[#6E6961]/40 dark:text-[#9CA6BC]/40 cursor-not-allowed'
           }`}
           aria-label="Föregående period"
         >
@@ -167,10 +167,10 @@ export function UniversalPeriodSelector({
             className="flex flex-col items-center group/label px-4 py-1 rounded-2xl hover:bg-black/5 dark:hover:bg-white/[0.04] transition-all cursor-pointer"
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-lg sm:text-xl font-bold font-display uppercase tracking-wider text-[#1C1917] dark:text-white group-hover/label:text-neutral-900 dark:text-white dark:group-hover/label:text-[#1C1917] dark:text-white transition-colors">
+              <span className="text-lg sm:text-xl font-bold font-display uppercase tracking-wider text-[#1C1917] dark:text-white group-hover/label:text-[#1C1917] dark:group-hover/label:text-white transition-colors">
                 {month}
               </span>
-              <CalendarIcon size={14} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover/label:text-neutral-900 dark:text-white dark:group-hover/label:text-[#1C1917] dark:text-white transition-colors" />
+              <CalendarIcon size={14} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover/label:text-[#1C1917] dark:group-hover/label:text-white transition-colors" />
               <ChevronDown size={13} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover/label:text-[#1C1917] dark:group-hover/label:text-white transition-opacity" />
             </div>
             {dates && (
@@ -199,7 +199,7 @@ export function UniversalPeriodSelector({
           className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90 cursor-pointer ${
             canGoNext 
               ? 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.05]' 
-              : 'text-[#6E6961]/30 dark:text-[#9CA6BC]/30 cursor-not-allowed'
+              : 'text-[#6E6961]/40 dark:text-[#9CA6BC]/40 cursor-not-allowed'
           }`}
           aria-label="Nästa period"
         >
