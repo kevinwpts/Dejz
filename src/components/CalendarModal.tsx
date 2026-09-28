@@ -140,7 +140,7 @@ export function CalendarModal({
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                             isSelected 
-                              ? 'bg-emerald-100 text-emerald-600 dark:bg-[#05b862]/25 dark:text-[#05b862]' 
+                              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs' 
                               : 'bg-black/5 dark:bg-white/[0.04] text-[#6E6961] dark:text-[#9CA6BC]'
                           }`}>
                             <CalendarIcon size={15} strokeWidth={1.8} />

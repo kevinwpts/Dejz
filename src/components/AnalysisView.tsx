@@ -203,7 +203,7 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'all'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 shadow-none'
+              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
@@ -217,7 +217,7 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'variable'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 shadow-none'
+              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
@@ -231,7 +231,7 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'fixed'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 shadow-none'
+              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >

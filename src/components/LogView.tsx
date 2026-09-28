@@ -372,7 +372,7 @@ export function LogView({
               onClick={() => setTypeFilter(type)}
               className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
                 isActive 
-                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 shadow-none' 
+                  ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs' 
                   : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
               }`}
             >
@@ -596,7 +596,7 @@ export function LogView({
                   }}
                   className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                     selectedPeriod?.name === modalPeriod?.name && !selectedDate
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-[#05b862]/25 dark:text-[#05b862] dark:border-[#05b862]/40 shadow-sm'
+                      ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
                       : 'bg-[#FFFFFF] dark:bg-white/[0.03] text-[#1C1917] dark:text-[#C7CDDC] hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/[0.06] border-[#E6E2D8] dark:border-white/[0.05]'
                   }`}
                 >
@@ -613,7 +613,7 @@ export function LogView({
                   }}
                   className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                     selectedPeriod === null && selectedDate === null
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-[#05b862]/25 dark:text-[#05b862] dark:border-[#05b862]/40 shadow-sm'
+                      ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
                       : 'bg-[#FFFFFF] dark:bg-white/[0.03] text-[#1C1917] dark:text-[#C7CDDC] hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/[0.06] border-[#E6E2D8] dark:border-white/[0.05]'
                   }`}
                 >

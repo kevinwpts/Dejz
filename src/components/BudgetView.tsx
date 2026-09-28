@@ -641,7 +641,7 @@ export function BudgetView({
           onClick={() => setBudgetFilter('fixed')}
           className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'fixed'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 shadow-none'
+              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
@@ -652,7 +652,7 @@ export function BudgetView({
           onClick={() => setBudgetFilter('income')}
           className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'income'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 shadow-none'
+              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
@@ -663,7 +663,7 @@ export function BudgetView({
           onClick={() => setBudgetFilter('savings')}
           className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'savings'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 shadow-none'
+              ? 'bg-[#05b862] text-white font-semibold border-transparent shadow-xs'
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
