@@ -6,11 +6,6 @@ import {
   SlidersHorizontal,
   ChevronRight,
   LayoutGrid,
-  Plus,
-  X,
-  BarChart2,
-  Check,
-  Filter,
 } from "lucide-react";
 import {
   Transaction,
@@ -150,8 +145,8 @@ export function TodayView({
   }, [heroHeight]);
 
   const progress = Math.min(1, Math.max(0, scrollY / Math.max(1, heroHeight || 300)));
-  const heroOpacity = Math.max(0.25, 1 - progress * 0.75);
-  const heroScale = Math.max(0.96, 1 - progress * 0.04);
+  const _heroOpacity = Math.max(0.25, 1 - progress * 0.75);
+  const _heroScale = Math.max(0.96, 1 - progress * 0.04);
 
   const resolvedWidgets = useMemo(() => {
     return getResolvedHomeWidgets(config?.homeWidgets);
@@ -452,7 +447,7 @@ export function TodayView({
 
   if (!stats) return null;
 
-  const heroStickyTop = isDemoMode
+  const _heroStickyTop = isDemoMode
     ? 'top-[calc(7.2rem+env(safe-area-inset-top))]'
     : 'top-[calc(5rem+env(safe-area-inset-top))]';
 
@@ -784,7 +779,7 @@ export function TodayView({
       </div>
 
       {/* 5. LOWER SECTION: WIDGETS & MÅNADSPULS (Deep scrollable feed) */}
-      <div className="space-y-4 pt-6 border-t border-white/[0.06]">
+      <div className="space-y-4 pt-6">
         {hasActiveWidgets && (
           <div className="flex items-center justify-between px-1">
             <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC] select-none">

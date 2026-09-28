@@ -41,7 +41,7 @@ export function AnalysisView({
   periods,
   currentPeriodDate,
   onPeriodChange,
-  onOpenCalendarPicker
+  _onOpenCalendarPicker
 }: AnalysisViewProps) {
   const _paydaySetting = config.payday || 25;
   const _adjustment = config.paydayBeforeWeekend ? WeekendAdjustment.BEFORE : WeekendAdjustment.NONE;

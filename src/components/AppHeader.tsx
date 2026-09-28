@@ -38,7 +38,7 @@ export function AppHeader({
   const [isAtTop, setIsAtTop] = useState(true);
 
   const isProfileOrSettings = activeTab === "profile" || activeTab === "settings";
-  const useWhiteHeader = false;
+  const _useWhiteHeader = false;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,7 +75,7 @@ export function AppHeader({
 
   const displayTitle = (title || getFallbackTitle()).toUpperCase();
 
-  const isHomeAtTop = (activeTab === "today" || !activeTab) && isAtTop;
+  const _isHomeAtTop = (activeTab === "today" || !activeTab) && isAtTop;
 
   return (
     <header

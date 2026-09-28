@@ -19,6 +19,7 @@ import { useScrollLock } from '../hooks/useScrollLock';
 import { NumberPad } from './NumberPad';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { Button, IconButton, SegmentedControl } from './ui';
+import { ReceiptCameraModal } from './ReceiptCameraModal';
 
 interface TransactionModalProps {
   transaction: Transaction | null;
@@ -220,10 +221,9 @@ export function TransactionModal({
     return _date || new Date();
   });
 
-  const handleReceiptFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
 
+  const handleReceiptFile = async (file: File) => {
     console.log('[Receipt Scan] File selected by user:', {
       name: file.name,
       type: file.type,
@@ -237,6 +237,7 @@ export function TransactionModal({
     setIsUploadingReceipt(true);
     setIsScanningReceipt(true);
     setScanFeedback(null);
+    setIsCameraModalOpen(false);
 
     try {
       if (!isSupabaseConfigured) {
@@ -338,9 +339,15 @@ export function TransactionModal({
     } finally {
       setIsUploadingReceipt(false);
       setIsScanningReceipt(false);
-      if (e.target) {
-        e.target.value = '';
-      }
+    }
+  };
+
+  const handleReceiptFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await handleReceiptFile(file);
+    if (e.target) {
+      e.target.value = '';
     }
   };
   const originalMerchant = useRef(transaction?.merchant || '');
@@ -722,7 +729,7 @@ export function TransactionModal({
                     </div>
                   ) : !receiptUrl ? (
                     <div 
-                      onClick={() => !isScanningReceipt && !isUploadingReceipt && receiptInputRef.current?.click()}
+                      onClick={() => !isScanningReceipt && !isUploadingReceipt && setIsCameraModalOpen(true)}
                       className="relative overflow-hidden bg-[var(--surface-muted)]/40 hover:bg-[var(--surface-muted)]/60 rounded-[20px] border border-[var(--border-color)] p-4 flex items-center justify-between transition-all group cursor-pointer active:scale-[0.99]"
                     >
                       <div className="flex items-center gap-3.5">
@@ -735,19 +742,19 @@ export function TransactionModal({
                         </div>
                         <div>
                           <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">Skanna kvitto</h4>
-                          <p className="text-[11px] font-medium text-[var(--text-tertiary)] opacity-85 mt-0.5">Fotografera eller välj bild</p>
+                          <p className="text-[11px] font-medium text-[var(--text-tertiary)] opacity-85 mt-0.5">Fotografera med appens kamera</p>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          receiptInputRef.current?.click();
+                          setIsCameraModalOpen(true);
                         }}
                         disabled={isUploadingReceipt}
                         className="relative px-4 py-2 bg-[var(--text-primary)] hover:opacity-90 text-[var(--bg-color)] text-xs font-bold rounded-full shadow-sm active:scale-95 transition-all cursor-pointer select-none disabled:opacity-50"
                       >
-                        Välj kvitto
+                        Öppna kamera
                       </button>
                     </div>
                   ) : (
@@ -1366,6 +1373,14 @@ export function TransactionModal({
             setIsAddingCategory(false);
           }}
           t={t}
+        />
+
+        <ReceiptCameraModal
+          isOpen={isCameraModalOpen}
+          onClose={() => setIsCameraModalOpen(false)}
+          onCapture={handleReceiptFile}
+          isProcessing={isScanningReceipt}
+          language={currentLang}
         />
       </motion.div>
     </motion.div>

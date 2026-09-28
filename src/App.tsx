@@ -82,6 +82,7 @@ import { PullToRefresh } from "./components/PullToRefresh";
 import { Session } from "@supabase/supabase-js";
 import { ToastContainer, ToastMessage, ToastType } from "./components/Toast";
 import { ConfirmModal } from "./components/ConfirmModal";
+import { ReceiptCameraModal } from "./components/ReceiptCameraModal";
 
 import { LandingPage } from "./components/LandingPage";
 import { seedDemoData } from "./utils/demoData";
@@ -235,6 +236,7 @@ export default function App() {
   const plusQuickInputRef = useRef<HTMLInputElement>(null);
   const plusCameraInputRef = useRef<HTMLInputElement>(null);
   const [isScanningReceipt, setIsScanningReceipt] = useState(false);
+  const [isReceiptCameraOpen, setIsReceiptCameraOpen] = useState(false);
 
   const prepareReceiptImage = async (file: File): Promise<{ base64: string; mimeType: string }> => {
     try {
@@ -330,15 +332,11 @@ export default function App() {
 
   const handlePlusKvittoClick = () => {
     feedback.tap();
-    if (plusCameraInputRef.current) {
-      plusCameraInputRef.current.click();
-    }
+    setIsPlusMenuOpen(false);
+    setIsReceiptCameraOpen(true);
   };
 
-  const handlePlusCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleReceiptFileCaptured = async (file: File) => {
     setIsScanningReceipt(true);
     setPlusSuccessMsg({ text: config?.language === "en" ? "📷 Scanning receipt..." : "📷 Läser av kvitto..." });
     feedback.tap();
@@ -351,6 +349,7 @@ export default function App() {
 
       if (error || !data || !data.amount || Number(data.amount) <= 0) {
         setIsScanningReceipt(false);
+        setIsReceiptCameraOpen(false);
         setPlusSuccessMsg(null);
         setTransactionType("expense");
         setTargetDate(new Date());
@@ -373,6 +372,7 @@ export default function App() {
       });
 
       feedback.success();
+      setIsReceiptCameraOpen(false);
       setPlusSuccessMsg({
         text: config?.language === "en" 
           ? `Saved ${amount} ${config?.currency || "kr"} from ${merchant} ✨` 
@@ -384,14 +384,21 @@ export default function App() {
       }, 3500);
     } catch (err) {
       console.error("Auto receipt scan error:", err);
+      setIsReceiptCameraOpen(false);
       setTransactionType("expense");
       setTargetDate(new Date());
       setIsAddTransactionOpen(true);
       setIsPlusMenuOpen(false);
     } finally {
       setIsScanningReceipt(false);
-      if (e.target) e.target.value = "";
     }
+  };
+
+  const handlePlusCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await handleReceiptFileCaptured(file);
+    if (e.target) e.target.value = "";
   };
 
   const handlePlusQuickExpenseSubmit = async (e?: React.FormEvent) => {
@@ -4999,6 +5006,13 @@ export default function App() {
         )}
       </AnimatePresence>
       <AddToHomeScreenModal t={t} theme={config?.appIconTheme} language={(config?.language as string) || landingLanguage} />
+      <ReceiptCameraModal
+        isOpen={isReceiptCameraOpen}
+        onClose={() => setIsReceiptCameraOpen(false)}
+        onCapture={handleReceiptFileCaptured}
+        isProcessing={isScanningReceipt}
+        language={config?.language}
+      />
     </div>
   );
 }

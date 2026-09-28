@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ShoppingBag } from 'lucide-react';
 import { Transaction, Config } from '../types';
@@ -35,14 +35,13 @@ export function CategoryBottomSheetModal({
   onClose,
   categoryName,
   categoryData,
-  selectedDate,
+  selectedDate: _selectedDate,
   allTransactions = [],
   config,
   language = 'sv',
   onViewTransaction,
   onDeleteTransaction,
 }: CategoryBottomSheetModalProps) {
-  const [activeScope, setActiveScope] = useState<'period' | 'day'>('period');
   const isEn = language === 'en';
 
   // Body scroll lock
@@ -69,12 +68,9 @@ export function CategoryBottomSheetModal({
 
   const targetCategoryName = categoryName || categoryData?.name;
 
-  // Filter transactions for this category
-  const { periodTransactions, dayTransactions } = useMemo(() => {
-    if (!targetCategoryName) return { periodTransactions: [], dayTransactions: [] };
-
-    const normSelected = new Date(selectedDate);
-    normSelected.setHours(0, 0, 0, 0);
+  // Filter transactions for this category across the entire period
+  const periodTransactions = useMemo(() => {
+    if (!targetCategoryName) return [];
 
     const normCat = targetCategoryName.trim().toLowerCase();
 
@@ -85,25 +81,16 @@ export function CategoryBottomSheetModal({
       return txCat === normCat;
     });
 
-    const dayList = periodList.filter((tx) => {
-      const txDate = new Date(tx.date);
-      txDate.setHours(0, 0, 0, 0);
-      return txDate.getTime() === normSelected.getTime();
-    });
-
     // Sort descending by date
-    periodList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    dayList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return periodList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [targetCategoryName, allTransactions]);
 
-    return { periodTransactions: periodList, dayTransactions: dayList };
-  }, [targetCategoryName, allTransactions, selectedDate]);
-
-  const displayTransactions = activeScope === 'day' ? dayTransactions : periodTransactions;
+  const displayTransactions = periodTransactions;
 
   // Total sum calculation using tx.amount
   const totalDisplaySum = useMemo(() => {
-    return displayTransactions.reduce((acc, t) => acc + (t.amount || 0), 0);
-  }, [displayTransactions]);
+    return periodTransactions.reduce((acc, t) => acc + (t.amount || 0), 0);
+  }, [periodTransactions]);
 
   // Icon calculation
   const iconKey = categoryData?.iconName || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');
@@ -180,12 +167,6 @@ export function CategoryBottomSheetModal({
             <div className="flex-1 overflow-y-auto px-5 pt-4 pb-8 space-y-4 no-scrollbar">
               {/* Category Budget Status Card */}
               <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06] space-y-3">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-xs font-semibold text-[#9CA6BC] uppercase tracking-wider font-display">
-                    {isEn ? 'Remaining in budget' : 'Kvar i kategorin'}
-                  </span>
-                </div>
-
                 <div className="flex items-baseline justify-between gap-2">
                   <div className="flex items-baseline gap-1.5">
                     {categoryData?.hasBudget ? (
@@ -223,59 +204,25 @@ export function CategoryBottomSheetModal({
                 )}
               </div>
 
-              {/* Segmented Filter Pills: Valt Datum vs Hela Perioden */}
-              <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback.selection === 'function') feedback.selection();
-                      setActiveScope('period');
-                    }}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      activeScope === 'period'
-                        ? 'bg-white text-black shadow-xs'
-                        : 'text-[#9CA6BC] hover:text-white'
-                    }`}
-                  >
-                    {isEn ? 'Entire period' : 'Hela perioden'} ({periodTransactions.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback.selection === 'function') feedback.selection();
-                      setActiveScope('day');
-                    }}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      activeScope === 'day'
-                        ? 'bg-white text-black shadow-xs'
-                        : 'text-[#9CA6BC] hover:text-white'
-                    }`}
-                  >
-                    {isEn ? 'Selected date' : 'Valt datum'} ({dayTransactions.length})
-                  </button>
-                </div>
+              {/* Transactions List using standard TransactionItem */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#9CA6BC] font-display">
+                    {isEn ? 'Purchases this period' : 'Periodens utgifter'} ({periodTransactions.length})
+                  </span>
 
-                <span className="text-[11px] font-semibold text-[#9CA6BC]">
                   {totalDisplaySum > 0 && (
-                    <>
+                    <span className="text-[11px] font-semibold text-[#9CA6BC]">
                       {isEn ? 'Sum:' : 'Summa:'}{' '}
-                      <span className="font-bold text-white">
+                      <span className="font-bold text-white font-amount tabular-nums">
                         {formatAmount(totalDisplaySum, language)} kr
                       </span>
-                    </>
+                    </span>
                   )}
-                </span>
-              </div>
-
-              {/* Transactions List using standard TransactionItem */}
-              <div className="space-y-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#9CA6BC] font-display">
-                  {isEn ? 'Category Purchases' : 'Utgifter i kategorin'}
-                </span>
+                </div>
 
                 {displayTransactions.length > 0 ? (
-                  <div className="space-y-2 max-h-[340px] overflow-y-auto no-scrollbar pr-0.5">
+                  <div className="space-y-2 max-h-[360px] overflow-y-auto no-scrollbar pr-0.5">
                     {displayTransactions.map((tx) => (
                       <TransactionItem
                         key={tx.id}
@@ -283,16 +230,14 @@ export function CategoryBottomSheetModal({
                         config={config}
                         onView={onViewTransaction}
                         onDelete={onDeleteTransaction}
-                        showDate={activeScope === 'period'}
+                        showDate={true}
                       />
                     ))}
                   </div>
                 ) : (
                   <div className="py-6 px-4 text-center rounded-2xl bg-white/[0.02] border border-dashed border-white/[0.06] space-y-1">
                     <p className="text-xs font-semibold text-white/80">
-                      {activeScope === 'day'
-                        ? (isEn ? 'No expenses in this category on the selected date' : 'Inga utgifter i denna kategori på det valda datumet')
-                        : (isEn ? 'No expenses in this category during this period' : 'Inga utgifter registrerade i denna kategori under perioden')}
+                      {isEn ? 'No expenses in this category during this period' : 'Inga utgifter registrerade i denna kategori under perioden'}
                     </p>
                   </div>
                 )}
