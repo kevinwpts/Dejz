@@ -265,16 +265,16 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative backdrop-blur-md ${
+              className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-white/[0.14] text-white border border-white/25 shadow-none scale-105 font-bold z-10 opacity-100'
+                  ? 'bg-indigo-600 text-white dark:bg-white/[0.14] dark:text-white border border-indigo-700 dark:border-white/25 shadow-xs scale-105 font-bold z-10 opacity-100'
                   : hasCategoryMatch
-                  ? 'bg-white/[0.08] text-white border border-emerald-400/40 hover:bg-white/[0.1] scale-100 opacity-100 ring-1 ring-emerald-400/30'
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-white/[0.08] dark:text-white dark:border-emerald-400/40 hover:bg-emerald-100 dark:hover:bg-white/[0.1] scale-100 opacity-100 ring-1 ring-emerald-400/30'
                   : isRealToday
-                  ? 'bg-white/[0.04] text-[#C7CDDC] border border-white/[0.08] hover:bg-white/[0.07] scale-95 opacity-90'
+                  ? 'bg-white text-[#1C1917] border border-[#E6E2D8] dark:bg-white/[0.04] dark:text-[#C7CDDC] dark:border-white/[0.08] hover:bg-black/5 dark:hover:bg-white/[0.07] scale-95 opacity-90'
                   : categoryFilter
-                  ? 'bg-white/[0.015] text-[#9CA6BC]/40 hover:text-[#C7CDDC] hover:bg-white/[0.04] border border-white/[0.02] scale-95 opacity-50'
-                  : 'bg-white/[0.02] text-[#9CA6BC]/70 hover:text-[#C7CDDC] hover:bg-white/[0.045] border border-white/[0.025] scale-95 opacity-75'
+                  ? 'bg-white/40 text-[#6E6961]/50 hover:text-[#1C1917] dark:bg-white/[0.015] dark:text-[#9CA6BC]/40 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.04] border border-[#E6E2D8]/40 dark:border-white/[0.02] scale-95 opacity-60'
+                  : 'bg-white/60 text-[#6E6961] hover:text-[#1C1917] dark:bg-white/[0.02] dark:text-[#9CA6BC]/70 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.045] border border-[#E6E2D8] dark:border-white/[0.025] scale-95 opacity-85'
               }`}
             >
               {/* Day of Week */}
@@ -283,10 +283,10 @@ export function PeriodTimeline({
                   isSelected
                     ? 'text-white font-bold'
                     : hasCategoryMatch
-                    ? 'text-emerald-400 font-bold'
+                    ? 'text-emerald-700 dark:text-emerald-400 font-bold'
                     : isRealToday
-                    ? 'text-[#C7CDDC] font-semibold'
-                    : 'text-[#9CA6BC]/70 font-medium'
+                    ? 'text-[#1C1917] dark:text-[#C7CDDC] font-semibold'
+                    : 'text-[#6E6961] dark:text-[#9CA6BC]/70 font-medium'
                 }`}
               >
                 {isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}

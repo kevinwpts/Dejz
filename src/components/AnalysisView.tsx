@@ -203,11 +203,11 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'all'
-              ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
-              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
+              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-[#818cf8]/[0.16] dark:text-white dark:border-[#8B9CFF]/30 shadow-none'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
-          <LayoutGrid size={13} strokeWidth={1.75} className={analysisFilter === 'all' ? 'text-white' : 'text-[#9CA6BC]'} />
+          <LayoutGrid size={13} strokeWidth={1.75} className={analysisFilter === 'all' ? 'text-indigo-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('all' as TranslationKey)}</span>
         </button>
         <button
@@ -217,11 +217,11 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'variable'
-              ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
-              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
+              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-[#818cf8]/[0.16] dark:text-white dark:border-[#8B9CFF]/30 shadow-none'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
-          <TrendingUp size={13} strokeWidth={1.75} className={analysisFilter === 'variable' ? 'text-white' : 'text-[#9CA6BC]'} />
+          <TrendingUp size={13} strokeWidth={1.75} className={analysisFilter === 'variable' ? 'text-indigo-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('variableExpenses' as TranslationKey)}</span>
         </button>
         <button
@@ -231,11 +231,11 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'fixed'
-              ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none'
-              : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
+              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-[#818cf8]/[0.16] dark:text-white dark:border-[#8B9CFF]/30 shadow-none'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
-          <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-white' : 'text-[#9CA6BC]'} />
+          <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-indigo-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('fixedExpenses' as TranslationKey)}</span>
         </button>
       </div>
@@ -254,10 +254,10 @@ export function AnalysisView({
       />
 
       {/* Donut Chart Distribution Card */}
-      <div className="p-5 sm:p-6 rounded-[18px] border border-white/[0.02] bg-white/[0.025] backdrop-blur-[18px] shadow-none flex flex-col items-center relative overflow-hidden">
+      <div className="p-5 sm:p-6 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.02] bg-[#FFFFFF] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none flex flex-col items-center relative overflow-hidden">
         <div className="flex items-center justify-between w-full mb-3 px-1">
-          <span className="text-sm font-semibold text-white tracking-tight">{t('distribution')}</span>
-          <span className="text-[11px] font-normal text-[#9CA6BC] tabular-nums">
+          <span className="text-sm font-semibold text-[#1C1917] dark:text-white tracking-tight">{t('distribution')}</span>
+          <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] tabular-nums">
             {categoryData.filter(c => c.value > 0).length} {config.language === 'en' ? 'categories' : 'kategorier'}
           </span>
         </div>
@@ -273,13 +273,13 @@ export function AnalysisView({
                   exit={{ opacity: 0, scale: 0.92 }}
                   className="flex flex-col items-center text-center px-8"
                 >
-                  <span className="text-xs font-medium text-[#8B9CFF] mb-1 truncate max-w-[140px]">
+                  <span className="text-xs font-medium text-indigo-600 dark:text-[#8B9CFF] mb-1 truncate max-w-[140px]">
                     {expandedCategory}
                   </span>
-                  <span className="text-2xl sm:text-3xl font-semibold text-white font-amount tabular-nums leading-none">
+                  <span className="text-2xl sm:text-3xl font-semibold text-[#1C1917] dark:text-white font-amount tabular-nums leading-none">
                     {Math.round(categoryData.find(c => c.name === expandedCategory)?.value || 0).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
                   </span>
-                  <span className="text-[11px] font-normal text-[#9CA6BC] mt-1">
+                  <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] mt-1">
                     {config.currency}
                   </span>
                 </motion.div>
@@ -291,13 +291,13 @@ export function AnalysisView({
                   exit={{ opacity: 0 }}
                   className="flex flex-col items-center text-center"
                 >
-                  <span className="text-xs font-medium text-[#9CA6BC] mb-1">
+                  <span className="text-xs font-medium text-[#6E6961] dark:text-[#9CA6BC] mb-1">
                     {t('total')}
                   </span>
-                  <span className="text-2xl sm:text-3xl font-semibold text-white font-amount tabular-nums leading-none">
+                  <span className="text-2xl sm:text-3xl font-semibold text-[#1C1917] dark:text-white font-amount tabular-nums leading-none">
                     {Math.round(totalSpent).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
                   </span>
-                  <span className="text-[11px] font-normal text-[#9CA6BC] mt-1">
+                  <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] mt-1">
                     {config.currency}
                   </span>
                 </motion.div>
@@ -346,13 +346,13 @@ export function AnalysisView({
       {/* Categories Breakdown - Single Unified Cohesive List */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#9CA6BC]">
+          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6E6961] dark:text-[#9CA6BC]">
             {t('categories')} ({categoryData.length})
           </span>
         </div>
 
         {categoryData.length > 0 ? (
-          <div className="bg-white/[0.035] backdrop-blur-[18px] rounded-[18px] border border-white/[0.025] divide-y divide-white/[0.035] overflow-hidden">
+          <div className="bg-[#FFFFFF] dark:bg-white/[0.035] rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.025] divide-y divide-[#EDE9DF] dark:divide-white/[0.035] overflow-hidden">
             {categoryData.map((item: any, index) => {
               const isExpanded = expandedCategory === item.name;
               const iconName = item.icon || getCategoryIconName(item.name);
@@ -388,7 +388,7 @@ export function AnalysisView({
               return (
                 <div key={item.name} className="transition-colors">
                   <div 
-                    className="p-3.5 sm:p-4 min-h-[68px] flex flex-col justify-center group hover:bg-white/[0.03] transition-colors cursor-pointer"
+                    className="p-3.5 sm:p-4 min-h-[68px] flex flex-col justify-center group hover:bg-black/5 dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
                     onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
                   >
                     <div className="flex items-center justify-between gap-3 w-full">
@@ -411,10 +411,10 @@ export function AnalysisView({
                         </div>
 
                         <div className="min-w-0 flex-1 flex flex-col justify-center">
-                          <p className="text-[14px] sm:text-[14.5px] font-medium text-white leading-tight truncate tracking-tight">
+                          <p className="text-[14px] sm:text-[14.5px] font-medium text-[#1C1917] dark:text-white leading-tight truncate tracking-tight">
                             {item.name}
                           </p>
-                          <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden text-[#9CA6BC]">
+                          <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden text-[#6E6961] dark:text-[#9CA6BC]">
                             <span className="text-xs font-normal">
                               {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
                             </span>
@@ -424,12 +424,12 @@ export function AnalysisView({
 
                       <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
                         <div className="text-right flex flex-col items-end justify-center">
-                          <p className="text-[14px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-white leading-tight">
+                          <p className="text-[14px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
                             {formatAmount(Math.round(item.value), config.language)}
-                            <span className="text-[11px] font-normal text-[#9CA6BC] ml-1">{config.currency}</span>
+                            <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1">{config.currency}</span>
                           </p>
                         </div>
-                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[#8B9CFF]' : 'text-[#9CA6BC]'}`}>
+                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-indigo-600 dark:text-[#8B9CFF]' : 'text-[#6E6961] dark:text-[#9CA6BC]'}`}>
                           <ChevronDown size={16} strokeWidth={2} />
                         </div>
                       </div>
@@ -443,10 +443,10 @@ export function AnalysisView({
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden bg-white/[0.015] border-t border-white/[0.03]"
+                        className="overflow-hidden bg-black/[0.02] dark:bg-white/[0.015] border-t border-[#EDE9DF] dark:border-white/[0.03]"
                       >
                         {(categoryTransactions.length > 0 || categoryFixedExpenses.length > 0) ? (
-                          <div className="divide-y divide-white/[0.035] overflow-hidden">
+                          <div className="divide-y divide-[#EDE9DF] dark:divide-white/[0.035] overflow-hidden">
                             {categoryTransactions.map(t => {
                               let displayAmount = t.amount;
                               const transactionSplits = (t as any).splits;

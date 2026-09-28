@@ -209,7 +209,7 @@ export function ProfileView({
       className="space-y-5 w-full pb-12 font-sans"
     >
       {/* User Header Module */}
-      <div className="bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[24px] p-5 shadow-none flex items-center gap-4">
+      <div className="bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] p-5 shadow-none flex items-center gap-4">
         <div className="relative shrink-0">
           <label htmlFor="avatar-upload" className="cursor-pointer group block">
             <input 
@@ -228,7 +228,7 @@ export function ProfileView({
                 }
               }}
             />
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-[20px] flex items-center justify-center overflow-hidden relative bg-[var(--surface-muted)] dark:bg-white/[0.04] border border-[var(--border-color)]/60 dark:border-white/[0.04] group-hover:border-[var(--accent-color)]/50 transition-all duration-300 shadow-xs">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-[16px] flex items-center justify-center overflow-hidden relative bg-[var(--surface-muted)] dark:bg-white/[0.04] border border-[var(--border-color)]/60 dark:border-white/[0.04] group-hover:border-[var(--accent-color)]/50 transition-all duration-300 shadow-xs">
               {avatarUrl ? (
                 <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
               ) : (
@@ -272,7 +272,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('economy')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[24px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
+          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
             <SettingsMenuItem 
               icon={Calendar} 
               label={t('salary')} 
@@ -296,7 +296,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('appSettings')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[24px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
+          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
             <SettingsMenuItem 
               icon={SlidersHorizontal} 
               label={config.language === 'en' ? 'Allocate Budget' : 'Fördela budget'} 
@@ -361,7 +361,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('support')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[24px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
+          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
             <SettingsMenuItem icon={Mail} label={t('feedback')} onClick={onFeedbackClick} />
             <SettingsMenuItem icon={Download} label={t('exportData')} onClick={onExportData} />
             <SettingsMenuItem icon={Shield} label={t('privacyPolicy')} onClick={() => onLegalClick('privacy')} />
@@ -374,7 +374,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-danger px-1.5 opacity-70">
             {t('dangerZone')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[24px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
+          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
             {isDemoMode && (
               <div className="p-4 bg-[var(--surface-muted)]/50 dark:bg-white/[0.02] space-y-2.5">
                 <div className="flex items-center justify-between">

@@ -288,8 +288,8 @@ export function LogView({
           <>
             <div className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] ${
               selectedDate || selectedPeriod
-                ? 'bg-[#818cf8]/[0.18] border-[#8B9CFF]/35 text-white shadow-none'
-                : 'bg-white/[0.035] border-white/[0.035] text-[#C7CDDC]'
+                ? 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-[#818cf8]/[0.18] dark:border-[#8B9CFF]/35 dark:text-white shadow-none'
+                : 'bg-white border-[#E6E2D8] text-[#1C1917] dark:bg-white/[0.035] dark:border-white/[0.035] dark:text-[#C7CDDC]'
             }`}>
               <button
                 type="button"
@@ -297,8 +297,8 @@ export function LogView({
                 disabled={!canGoPrev}
                 className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
                   canGoPrev 
-                    ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.06]' 
-                    : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
+                    ? 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]' 
+                    : 'text-[#6E6961]/30 dark:text-[#9CA6BC] opacity-25 cursor-not-allowed'
                 }`}
                 aria-label={selectedDate ? 'Föregående dag' : 'Föregående period'}
                 title={selectedDate ? 'Föregående dag' : 'Föregående period'}
@@ -313,15 +313,15 @@ export function LogView({
                   setModalPeriod(initial);
                   setIsPeriodPickerOpen(true);
                 }}
-                className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full hover:bg-white/[0.05] transition-all cursor-pointer group min-w-0"
+                className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full hover:bg-black/5 dark:hover:bg-white/[0.05] transition-all cursor-pointer group min-w-0"
                 title={activeFilterLabel}
               >
                 <CalendarIcon 
                   size={13} 
                   strokeWidth={1.8} 
-                  className={selectedDate || selectedPeriod ? 'text-[#8B9CFF]' : 'text-[#9CA6BC] group-hover:text-white transition-colors'} 
+                  className={selectedDate || selectedPeriod ? 'text-indigo-600 dark:text-[#8B9CFF]' : 'text-[#6E6961] dark:text-[#9CA6BC] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors'} 
                 />
-                <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate">
+                <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate text-[#1C1917] dark:text-white">
                   {activeFilterLabel}
                 </span>
                 {selectedDate || selectedPeriod ? (
@@ -333,13 +333,13 @@ export function LogView({
                       setSelectedDate(null);
                       setSelectedPeriod(null);
                     }}
-                    className="p-0.5 hover:bg-white/20 rounded-full transition-colors ml-0.5 cursor-pointer"
+                    className="p-0.5 hover:bg-black/10 dark:hover:bg-white/20 rounded-full transition-colors ml-0.5 cursor-pointer"
                     title={getL10n('Rensa filter (visa alla)', 'Clear filter (show all)', 'Fjern filter', 'Ryd filter', 'Tyhjennä')}
                   >
-                    <X size={11} strokeWidth={2.5} className="text-[#C7CDDC] hover:text-white" />
+                    <X size={11} strokeWidth={2.5} className="text-[#6E6961] dark:text-[#C7CDDC] hover:text-[#1C1917] dark:hover:text-white" />
                   </span>
                 ) : (
-                  <ChevronDown size={12} strokeWidth={2} className="text-[#9CA6BC] group-hover:text-white transition-colors shrink-0" />
+                  <ChevronDown size={12} strokeWidth={2} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors shrink-0" />
                 )}
               </button>
 
@@ -349,8 +349,8 @@ export function LogView({
                 disabled={!canGoNext}
                 className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
                   canGoNext 
-                    ? 'text-[#9CA6BC] hover:text-white hover:bg-white/[0.06]' 
-                    : 'text-[#9CA6BC] opacity-25 cursor-not-allowed'
+                    ? 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]' 
+                    : 'text-[#6E6961]/30 dark:text-[#9CA6BC] opacity-25 cursor-not-allowed'
                 }`}
                 aria-label={selectedDate ? 'Nästa dag' : 'Nästa period'}
                 title={selectedDate ? 'Nästa dag' : 'Nästa period'}
@@ -359,7 +359,7 @@ export function LogView({
               </button>
             </div>
 
-            <div className="w-px h-4 bg-white/[0.08] mx-0.5 shrink-0" />
+            <div className="w-px h-4 bg-[#E6E2D8] dark:bg-white/[0.08] mx-0.5 shrink-0" />
           </>
         )}
 
@@ -372,14 +372,14 @@ export function LogView({
               onClick={() => setTypeFilter(type)}
               className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
                 isActive 
-                  ? 'bg-[#818cf8]/[0.16] text-white border border-[#8B9CFF]/30 shadow-none' 
-                  : 'text-[#9CA6BC] hover:text-[#C7CDDC] hover:bg-white/[0.03]'
+                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-[#818cf8]/[0.16] dark:text-white dark:border-[#8B9CFF]/30 shadow-none' 
+                  : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
               }`}
             >
-              {type === 'all' && <LayoutGrid size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
-              {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
-              {type === 'income' && <ArrowUpRight size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
-              {type === 'receipt' && <FileText size={13} strokeWidth={1.75} className={isActive ? 'text-white' : 'text-[#9CA6BC]'} />}
+              {type === 'all' && <LayoutGrid size={13} strokeWidth={1.75} className={isActive ? 'text-indigo-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
+              {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={1.75} className={isActive ? 'text-indigo-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
+              {type === 'income' && <ArrowUpRight size={13} strokeWidth={1.75} className={isActive ? 'text-indigo-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
+              {type === 'receipt' && <FileText size={13} strokeWidth={1.75} className={isActive ? 'text-indigo-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
               <span>{t(type as TranslationKey)}</span>
             </button>
           );

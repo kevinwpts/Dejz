@@ -96,7 +96,7 @@ export function AppHeader({
     <header
       className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out translate-y-0 opacity-100 ${
         !isAtTop || isProfileOrSettings
-          ? "bg-[#232323]/85 backdrop-blur-xl border-b border-white/[0.018] shadow-none"
+          ? "bg-[#F7F5F0]/90 dark:bg-[#232323]/85 backdrop-blur-xl border-b border-[#E6E2D8] dark:border-white/[0.018] shadow-none"
           : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >
@@ -106,7 +106,7 @@ export function AppHeader({
           {onBack ? (
             <button
               onClick={onBack}
-              className="flex items-center gap-1 group active:scale-95 transition-all py-0.5 -ml-1 pr-1 cursor-pointer text-white"
+              className="flex items-center gap-1 group active:scale-95 transition-all py-0.5 -ml-1 pr-1 cursor-pointer text-[var(--text-primary)]"
               aria-label="Tillbaka"
             >
               <ChevronLeft size={24} strokeWidth={2.4} className="shrink-0" />
@@ -114,7 +114,7 @@ export function AppHeader({
           ) : (
             <button
               onClick={() => onNavigate("profile")}
-              className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-white/[0.045] bg-white/[0.035] hover:bg-white/[0.07] text-slate-200 ${
+              className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-[#E6E2D8] dark:border-white/[0.045] bg-[#FFFFFF] dark:bg-white/[0.035] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.07] text-[var(--text-primary)] ${
                 activeTab === "profile" ? "ring-2 ring-indigo-400/50" : ""
               }`}
               aria-label="Profil"
@@ -128,7 +128,7 @@ export function AppHeader({
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <User size={18} strokeWidth={2} className="text-slate-300" />
+                <User size={18} strokeWidth={2} className="text-[var(--text-secondary)]" />
               )}
             </button>
           )}
@@ -137,15 +137,15 @@ export function AppHeader({
           <div className="min-w-0 text-left flex flex-col justify-center pl-1">
             {isHomeTab ? (
               <>
-                <h1 className="text-[17px] sm:text-[19px] font-extrabold font-display tracking-tight truncate select-none leading-tight text-white">
+                <h1 className="text-[17px] sm:text-[19px] font-extrabold font-display tracking-tight truncate select-none leading-tight text-[var(--text-primary)]">
                   {language === 'en' ? 'Hi' : 'Hej'} {userName || 'Kevin'}
                 </h1>
-                <p className="text-[11px] font-medium text-[#9CA6BC] leading-none mt-0.5 select-none truncate">
+                <p className="text-[11px] font-medium text-[var(--text-tertiary)] leading-none mt-0.5 select-none truncate">
                   {formattedDate}
                 </p>
               </>
             ) : (
-              <h1 className="text-[19px] sm:text-[22px] font-extrabold font-display uppercase tracking-[0.05em] truncate select-none leading-none text-white">
+              <h1 className="text-[19px] sm:text-[22px] font-extrabold font-display uppercase tracking-[0.05em] truncate select-none leading-none text-[var(--text-primary)]">
                 {displayTitle}
               </h1>
             )}
@@ -161,7 +161,7 @@ export function AppHeader({
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-white hover:bg-white/10"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-[var(--text-primary)] hover:bg-[#EDE9DF] dark:hover:bg-white/10"
               aria-label="Notiser"
               title="Notiser"
             >
@@ -187,7 +187,7 @@ export function AppHeader({
                 onNavigate("search");
               }
             }}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-white hover:bg-white/10"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[var(--text-primary)] hover:bg-[#EDE9DF] dark:hover:bg-white/10"
             aria-label={language === 'en' ? 'Search' : 'Sök'}
             title={language === 'en' ? 'Search' : 'Sök'}
           >
@@ -199,7 +199,7 @@ export function AppHeader({
             <button
               type="button"
               onClick={onOpenDejzi}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 hover:bg-white/[0.06]"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 hover:bg-[#EDE9DF] dark:hover:bg-white/[0.06]"
               aria-label="Dejzi sammanfattning"
               title="Dejzi sammanfattning"
             >

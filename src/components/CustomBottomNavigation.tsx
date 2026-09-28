@@ -41,7 +41,7 @@ export function CustomBottomNavigation({
   return (
     <div className="fixed bottom-[18px] sm:bottom-[22px] left-0 right-0 z-40 px-2.5 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
-        className="w-[94%] sm:w-[86%] max-w-[430px] sm:max-w-[450px] h-[64px] sm:h-[68px] rounded-[18px] px-2 sm:px-3 bg-[#242424] text-[#C7CDDC] backdrop-blur-[24px] flex items-center justify-between pointer-events-auto border border-white/[0.04]"
+        className="w-[94%] sm:w-[86%] max-w-[430px] sm:max-w-[450px] h-[64px] sm:h-[68px] rounded-[18px] px-2 sm:px-3 bg-white dark:bg-[#242424] text-[#6E6961] dark:text-[#C7CDDC] backdrop-blur-[24px] flex items-center justify-between pointer-events-auto border border-[#E6E2D8] dark:border-white/[0.04] shadow-lg shadow-black/[0.03] dark:shadow-none"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 28 }}
@@ -69,7 +69,7 @@ export function CustomBottomNavigation({
             onClick={() => {
               if (onPlusClick) onPlusClick();
             }}
-            className="w-11 h-11 sm:w-[46px] sm:h-[46px] rounded-full bg-[#8B9CFF] hover:bg-[#7a8be6] active:scale-90 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-lg shadow-[#8B9CFF]/20"
+            className="w-11 h-11 sm:w-[46px] sm:h-[46px] rounded-full bg-[#4F46E5] dark:bg-[#8B9CFF] hover:bg-[#4338CA] dark:hover:bg-[#7a8be6] active:scale-90 text-white dark:text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-[#4F46E5]/25 dark:shadow-[#8B9CFF]/20"
             aria-label="Add transaction"
           >
             <Plus size={20} strokeWidth={2.5} />
@@ -122,8 +122,8 @@ function NavItem({
       title={label}
       className={`flex-1 h-full flex items-center justify-center py-2 px-1 transition-all duration-200 active:scale-90 cursor-pointer select-none rounded-2xl relative ${
         isActive
-          ? 'text-[#8B9CFF]'
-          : 'text-[#C7CDDC]/60 hover:text-[#C7CDDC]'
+          ? 'text-[#4F46E5] dark:text-[#8B9CFF]'
+          : 'text-[#8C867C] hover:text-[#1C1917] dark:text-[#C7CDDC]/60 dark:hover:text-[#C7CDDC]'
       }`}
     >
       <Icon 

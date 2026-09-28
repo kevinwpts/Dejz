@@ -184,29 +184,29 @@ export function BudgetSummaryModule({
         {/* 3-column Airy Summary directly against background */}
         <div className="grid grid-cols-3 gap-3 px-1 py-1">
           <div>
-            <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
+            <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] block mb-1 truncate">
               {t('fixed' as any) || 'Fasta'}
             </span>
-            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-white">
-              −{formatAmount(Math.round(stats.totalFixedExpenses || stats.totalFixed || 0), config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-[#1C1917] dark:text-white">
+              −{formatAmount(Math.round(stats.totalFixedExpenses || stats.totalFixed || 0), config.language)} <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC]">{config.currency || 'kr'}</span>
             </span>
           </div>
 
           <div>
-            <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
+            <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] block mb-1 truncate">
               {t('income' as any) || 'Inkomster'}
             </span>
-            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-emerald-400">
-              +{formatAmount(Math.round(stats.totalIncome || 0), config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-emerald-600 dark:text-emerald-400">
+              +{formatAmount(Math.round(stats.totalIncome || 0), config.language)} <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC]">{config.currency || 'kr'}</span>
             </span>
           </div>
 
           <div>
-            <span className="text-[11px] font-normal text-[#9CA6BC] block mb-1 truncate">
+            <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] block mb-1 truncate">
               {t('monthlySavings' as any) || 'Sparande'}
             </span>
-            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-white">
-              −{formatAmount(Math.round(totalSavings), config.language)} <span className="text-[11px] font-normal text-[#9CA6BC]">{config.currency || 'kr'}</span>
+            <span className="text-sm sm:text-base font-semibold font-amount tabular-nums text-[#1C1917] dark:text-white">
+              −{formatAmount(Math.round(totalSavings), config.language)} <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC]">{config.currency || 'kr'}</span>
             </span>
           </div>
         </div>
@@ -218,14 +218,14 @@ export function BudgetSummaryModule({
     <div className="space-y-6 font-sans">
       {/* SPENDERAT DENNA PERIOD */}
       <div className="py-2 text-center space-y-1 flex flex-col items-center">
-        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#9CA6BC] block select-none font-display">
+        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#9CA6BC] block select-none font-display">
           SPENDERAT DENNA PERIOD
         </span>
         <div className="flex items-baseline justify-center gap-2">
-          <span className="text-[52px] sm:text-[64px] leading-none font-bold font-amount tabular-nums text-white tracking-normal">
+          <span className="text-[52px] sm:text-[64px] leading-none font-bold font-amount tabular-nums text-[#1C1917] dark:text-white tracking-normal">
             {formatAmount(Math.round(totalSpent), config.language)}
           </span>
-          <span className="text-[22px] sm:text-[26px] font-semibold text-[#9CA6BC]">
+          <span className="text-[22px] sm:text-[26px] font-semibold text-[#8C867C] dark:text-[#9CA6BC]">
             {config.currency || "kr"}
           </span>
         </div>
@@ -234,31 +234,31 @@ export function BudgetSummaryModule({
       {/* Grid for other indicators */}
       <div className="grid grid-cols-3 gap-3 pt-1">
         {/* Snitt per dag */}
-        <div className="bg-white/[0.035] border border-white/[0.02] p-3 sm:p-3.5 rounded-2xl flex flex-col justify-center text-left min-w-0">
-          <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-white leading-tight">
-            {formatAmount(dailyAvg, config.language)} <span className="text-xs font-normal text-[#9CA6BC]">{config.currency || "kr"}</span>
+        <div className="bg-[#FFFFFF] dark:bg-white/[0.035] border border-[#E6E2D8] dark:border-white/[0.02] p-3 sm:p-3.5 rounded-[14px] sm:rounded-[16px] flex flex-col justify-center text-left min-w-0">
+          <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
+            {formatAmount(dailyAvg, config.language)} <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC]">{config.currency || "kr"}</span>
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA6BC] mt-1 select-none truncate">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#9CA6BC] mt-1 select-none truncate">
             {config.language === 'en' ? 'Daily Average' : 'Snitt per dag'}
           </span>
         </div>
 
         {/* Största kategori */}
-        <div className="bg-white/[0.035] border border-white/[0.02] p-3 sm:p-3.5 rounded-2xl flex flex-col justify-center text-left min-w-0">
-          <div className="text-base sm:text-[17px] font-bold text-white truncate leading-tight capitalize">
-            {largestCategory.name ? largestCategory.name : <span className="text-[#9CA6BC] font-normal">—</span>}
+        <div className="bg-[#FFFFFF] dark:bg-white/[0.035] border border-[#E6E2D8] dark:border-white/[0.02] p-3 sm:p-3.5 rounded-[14px] sm:rounded-[16px] flex flex-col justify-center text-left min-w-0">
+          <div className="text-base sm:text-[17px] font-bold text-[#1C1917] dark:text-white truncate leading-tight capitalize">
+            {largestCategory.name ? largestCategory.name : <span className="text-[#8C867C] dark:text-[#9CA6BC] font-normal">—</span>}
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA6BC] mt-1 select-none truncate">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#9CA6BC] mt-1 select-none truncate">
             {config.language === 'en' ? 'Top Category' : 'Största kategori'}
           </span>
         </div>
 
         {/* Budget använd */}
-        <div className="bg-white/[0.035] border border-white/[0.02] p-3 sm:p-3.5 rounded-2xl flex flex-col justify-center text-left min-w-0">
-          <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-white leading-tight">
+        <div className="bg-[#FFFFFF] dark:bg-white/[0.035] border border-[#E6E2D8] dark:border-white/[0.02] p-3 sm:p-3.5 rounded-[14px] sm:rounded-[16px] flex flex-col justify-center text-left min-w-0">
+          <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
             {budgetUsedPct}%
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9CA6BC] mt-1 select-none truncate">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#9CA6BC] mt-1 select-none truncate">
             {config.language === 'en' ? 'Budget Used' : 'Budget använd'}
           </span>
         </div>
@@ -266,10 +266,10 @@ export function BudgetSummaryModule({
 
       {/* Clean progress bar for budget used */}
       <div className="pt-1">
-        <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-black/5 dark:bg-white/[0.06] rounded-full overflow-hidden">
           <div 
             className={`h-full rounded-full transition-all duration-700 ease-out ${
-              budgetUsedPct > 90 ? "bg-rose-500" : "bg-indigo-400"
+              budgetUsedPct > 90 ? "bg-rose-500" : "bg-indigo-600 dark:bg-indigo-400"
             }`} 
             style={{ width: `${Math.min(100, budgetUsedPct)}%` }}
           />

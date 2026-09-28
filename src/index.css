@@ -207,32 +207,32 @@ textarea {
   /* Dejz Official Brand Logo Color (Matches Accent / Ink) */
   --logo-color: #0B0A12;
 
-  /* Premium Light Theme (Dejz Design System) */
-  --bg-top-color: #FAFAF8;
-  --bg-color: #FAFAF8;
-  --bg-secondary: #FAFAF8;
-  --bg-gradient: linear-gradient(180deg, #FAFAF8 0%, #FAFAF8 100%);
+  /* Premium Warm Beige Light Theme (Dejz Minimalist Warm Edition) */
+  --bg-top-color: #F7F5F0;
+  --bg-color: #F7F5F0;
+  --bg-secondary: #F7F5F0;
+  --bg-gradient: linear-gradient(180deg, #F7F5F0 0%, #F7F5F0 100%);
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: #F4F3F0; /* Surface secondary */
-  --surface-tint: rgba(11, 10, 18, 0.01);
+  --surface-muted: #EFECE6; /* Warm Oat / Sand surface */
+  --surface-tint: rgba(28, 25, 23, 0.02);
 
-  --text-primary: #0B0A12;
-  --text-secondary: #6B7280;
-  --text-tertiary: #9CA3AF;
-  --text-inactive: #D1D5DB; /* Disabled */
+  --text-primary: #1C1917; /* Warm Deep Charcoal */
+  --text-secondary: #6E6961; /* Muted Taupe */
+  --text-tertiary: #8C867C; /* Soft Stone */
+  --text-inactive: #C4BFB5; /* Disabled */
 
-  --border-color: #E5E3DE;
-  --border-strong: #E5E3DE;
+  --border-color: #E6E2D8; /* Warm 1px Border */
+  --border-strong: #D8D3C8;
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: #F4F3F0;
+  --chip-bg: #EFECE6;
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #F4F3F0;
+  --card-nested-bg: #EFECE6;
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
@@ -240,37 +240,37 @@ textarea {
   --shadow-level-2: none;
   --shadow-level-3: none;
 
-  /* Brand Accents (Neutral Monochrome) */
-  --accent-color: #0B0A12;
-  --accent-hover: #24222B;
-  --accent-gradient: linear-gradient(145deg, #0B0A12 0%, #24222B 100%);
+  /* Brand Accents */
+  --accent-color: #1C1917;
+  --accent-hover: #2E2A27;
+  --accent-gradient: linear-gradient(145deg, #1C1917 0%, #2E2A27 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: #F4F3F0;
+  --accent-soft: #EFECE6;
   --accent-glow: none;
-  --accent-secondary-color: #E5E3DE;
+  --accent-secondary-color: #E6E2D8;
 
   /* Primary button states (Light mode) */
-  --btn-primary-bg: #0B0A12;
+  --btn-primary-bg: #1C1917;
   --btn-primary-text: #FFFFFF;
-  --btn-primary-hover: #24222B;
-  --btn-primary-pressed: #35323C;
+  --btn-primary-hover: #2E2A27;
+  --btn-primary-pressed: #44403C;
 
-  --modal-bg: rgba(255, 255, 255, 0.98);
+  --modal-bg: #F7F5F0;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #FFF7ED; /* Active hover is subtle orange */
+  --bg-hover: #EDE9DF;
 
   --card-shadow: none;
   --card-inner-stroke: none;
 
-  --success-color: #16A34A;
-  --danger-color: #EF4444;
-  --warning-color: #F59E0B;
-  --info-color: #3B82F6;
+  --success-color: #059669;
+  --danger-color: #DC2626;
+  --warning-color: #D97706;
+  --info-color: #4F46E5;
 
-  --nav-active-color: #FF8A00;
-  --nav-inactive-color: #6B7280;
-  --nav-plus-bg: #0B0A12;
+  --nav-active-color: #4F46E5;
+  --nav-inactive-color: #8C867C;
+  --nav-plus-bg: #4F46E5;
   --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
@@ -280,12 +280,12 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #FFF1E2;
-  --date-active-color: #0B0A12;
+  --date-active-bg: #EFECE6;
+  --date-active-color: #1C1917;
   --date-active-shadow: none;
   --date-inactive-bg: #FFFFFF;
-  --date-inactive-border: #E5E3DE;
-  --date-inactive-color: #6B7280;
+  --date-inactive-border: #E6E2D8;
+  --date-inactive-color: #6E6961;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;

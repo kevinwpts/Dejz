@@ -53,7 +53,8 @@ export function TransactionItem({
   useScrollLock(showConfirmModal);
 
   const x = useMotionValue(0);
-  const actionOpacity = useTransform(x, [-84, -20, 0], [1, 0.7, 0]);
+  const actionOpacity = useTransform(x, [-84, -36, -6, 0], [1, 0.9, 0, 0]);
+  const actionDisplay = useTransform(x, (val) => (val < -4 ? 'flex' : 'none'));
 
   const getLocale = () => {
     const lang = config?.language || 'sv';
@@ -77,41 +78,43 @@ export function TransactionItem({
   };
 
   const finalAmount = displayAmount !== undefined ? displayAmount : transaction.amount;
-  const amountColor = transaction.type === 'income' ? 'text-emerald-400' : 'text-white';
+  const amountColor = transaction.type === 'income' 
+    ? 'text-emerald-600 dark:text-emerald-400' 
+    : 'text-[var(--text-primary)] dark:text-white';
 
-  // Determine layout style classes with exact dark glass materials
+  // Determine layout style classes with solid opaque surfaces (prevents background bleed-through)
   let containerClasses = "";
   let paddingClasses = "px-[14px] sm:px-[16px] py-[12px] min-h-[66px]";
   if (squared) {
-    containerClasses = "bg-transparent rounded-none shadow-none border-b border-white/[0.04] last:border-none py-3 px-2";
+    containerClasses = "bg-[var(--surface-color)] dark:bg-[#252525] rounded-none shadow-none border-b border-[var(--border-color)]/60 dark:border-white/[0.04] last:border-none py-3 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
-    containerClasses = "bg-transparent hover:bg-white/[0.03] rounded-none shadow-none border-none transition-colors";
+    containerClasses = "bg-[var(--surface-color)] dark:bg-[#242424] hover:bg-[var(--surface-muted)] dark:hover:bg-[#282828] rounded-none shadow-none border-none transition-colors";
   } else if (variant === 'nested') {
-    containerClasses = "bg-white/[0.025] hover:bg-white/[0.05] shadow-none border border-white/[0.025] rounded-[18px] backdrop-blur-[16px]";
+    containerClasses = "bg-[var(--surface-muted)] dark:bg-[#272727] hover:bg-[var(--border-color)]/40 dark:hover:bg-[#2e2e2e] shadow-none border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px]";
   } else {
     const isTransparentGrouped = isGrouped && !variant;
     if (isTransparentGrouped) {
-      containerClasses = "bg-white/[0.03] hover:bg-white/[0.05] rounded-[18px] shadow-none border-none backdrop-blur-[16px]";
+      containerClasses = "bg-[var(--surface-color)] dark:bg-[#272727] hover:bg-[var(--surface-muted)] dark:hover:bg-[#2e2e2e] rounded-[18px] shadow-none border-none";
     } else {
-      containerClasses = "bg-white/[0.035] hover:bg-white/[0.055] border border-white/[0.02] rounded-[18px] backdrop-blur-[16px] shadow-none";
+      containerClasses = "bg-[var(--surface-color)] dark:bg-[#272727] hover:bg-[var(--surface-muted)] dark:hover:bg-[#2e2e2e] border border-[var(--border-color)] dark:border-white/[0.02] rounded-[18px] shadow-none";
     }
   }
 
-  // Neutral discreet category display with #9CA6BC (no pill background, no bright red/colored badge)
+  // Neutral discreet category display (no pill background, no bright red/colored badge)
   const renderCategoryBadge = (categoryName: string, amount?: number) => {
     const iconKey = getCategoryIconName(categoryName || '');
 
     return (
-      <div className="flex items-center gap-1.5 shrink-0 text-[#9CA6BC]">
+      <div className="flex items-center gap-1.5 shrink-0 text-[var(--text-secondary)] dark:text-[#9CA6BC]">
         {iconKey ? (
           <CategoryIcon 
             icon={iconKey} 
-            color="#9CA6BC" 
+            color="currentColor" 
             size="xs" 
           />
         ) : null}
-        <span className="text-[12px] font-medium text-[#9CA6BC] tracking-tight whitespace-nowrap">
+        <span className="text-[12px] font-medium text-[var(--text-secondary)] dark:text-[#9CA6BC] tracking-tight whitespace-nowrap">
           {capitalize(categoryName || '')}
           {amount !== undefined && <span className="ml-1 opacity-70">({formatAmount(amount, config?.language || 'sv')})</span>}
         </span>
@@ -147,7 +150,7 @@ export function TransactionItem({
         {/* Swipe Left Background Action: Delete */}
         {canSwipe && (
           <motion.div 
-            style={{ opacity: actionOpacity }}
+            style={{ opacity: actionOpacity, display: actionDisplay }}
             className="absolute inset-y-0 right-0 w-[84px] bg-rose-500 text-white flex items-center justify-center z-0 cursor-pointer"
           >
             <button
@@ -173,11 +176,12 @@ export function TransactionItem({
         <motion.div 
           data-font="barlow"
           drag={canSwipe ? "x" : false}
+          dragDirectionLock={true}
           dragMomentum={false}
           dragConstraints={{ left: -84, right: 0 }}
-          dragElastic={0.08}
+          dragElastic={0.06}
           animate={{ x: isOpen ? -84 : 0 }}
-          style={{ x, touchAction: canSwipe ? 'pan-y' : 'auto' }}
+          style={{ x, touchAction: 'pan-y' }}
           onDragEnd={handleDragEnd}
           onClick={(e) => {
             if (dragDistance > 6) {
@@ -205,19 +209,19 @@ export function TransactionItem({
             
             <div className="min-w-0 flex-1 flex flex-col justify-center">
               {/* Primary Merchant Name */}
-              <p className="text-[14px] sm:text-[14.5px] font-semibold text-white leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
+              <p className="text-[14px] sm:text-[14.5px] font-semibold text-[var(--text-primary)] dark:text-white leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
                 {merchantName}
               </p>
               
-              {/* Secondary Details (Category, Note, Paperclip) in #9CA6BC */}
-              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#9CA6BC]">
+              {/* Secondary Details (Category, Note, Paperclip) */}
+              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)] dark:text-[#9CA6BC]">
                 {hideCategoryBadge ? (
                   (transaction.timestamp || transaction.date) ? (
-                    <span className="text-[12px] font-normal text-[#9CA6BC] opacity-80 tabular-nums">
+                    <span className="text-[12px] font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] opacity-80 tabular-nums">
                       {new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
                     </span>
                   ) : isFixed ? (
-                    <span className="text-[11px] font-medium text-[#9CA6BC] opacity-80">
+                    <span className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[#9CA6BC] opacity-80">
                       {getL10n('Fast utgift', 'Fixed expense', 'Fast utgift', 'Fast udgift', 'Kiinteä kulu')}
                     </span>
                   ) : null
@@ -232,32 +236,32 @@ export function TransactionItem({
                 )}
 
                 {transaction.note && !isFixed && (
-                  <span className="text-[12px] font-normal text-[#9CA6BC]/80 truncate min-w-0 flex-1">
+                  <span className="text-[12px] font-normal text-[var(--text-secondary)]/80 dark:text-[#9CA6BC]/80 truncate min-w-0 flex-1">
                     {hideCategoryBadge ? `• ${transaction.note}` : `• ${transaction.note}`}
                   </span>
                 )}
                 {transaction.receiptUrl && (
-                  <Paperclip className="w-3 h-3 text-[#9CA6BC] opacity-75 shrink-0" />
+                  <Paperclip className="w-3 h-3 text-[var(--text-secondary)] dark:text-[#9CA6BC] opacity-75 shrink-0" />
                 )}
               </div>
             </div>
           </div>
           
-          {/* Primary Amount (Semibold 600) */}
+          {/* Primary Amount */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
             <p className={`text-[14.5px] sm:text-[15px] font-semibold whitespace-nowrap tracking-tight ${amountColor}`}>
               <span className="opacity-75 mr-0.5 text-[13px] font-semibold">{transaction.type === 'income' ? '+' : '−'}</span>
               <span className="font-amount tabular-nums font-semibold tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
-              <span className="text-[12px] font-normal text-[#9CA6BC] ml-1">{config?.currency || 'kr'}</span>
+              <span className="text-[12px] font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] ml-1">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixed ? (
-              <p className="text-[11px] font-normal text-[#9CA6BC]/75 mt-0.5 tabular-nums">
+              <p className="text-[11px] font-normal text-[var(--text-tertiary)] dark:text-[#9CA6BC]/75 mt-0.5 tabular-nums">
                 {showDate 
                   ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
                   : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}
               </p>
             ) : isFixed && (
-              <span className="text-[10px] font-normal text-[#9CA6BC] opacity-80 px-1.5 py-0.5 rounded-md mt-0.5 whitespace-nowrap">
+              <span className="text-[10px] font-normal text-[var(--text-tertiary)] dark:text-[#9CA6BC] opacity-80 px-1.5 py-0.5 rounded-md mt-0.5 whitespace-nowrap">
                 {getL10n(
                   transaction.type === 'income' ? 'Fast inkomst' : transaction.type === 'saving' ? 'Fast sparande' : 'Fast utgift',
                   transaction.type === 'income' ? 'Fixed income' : transaction.type === 'saving' ? 'Fixed savings' : 'Fixed expense',
@@ -286,7 +290,7 @@ export function TransactionItem({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 10 }}
               transition={{ duration: 0.16 }}
-              className="bg-[#232323] border border-white/[0.08] rounded-[24px] p-5 sm:p-6 w-full max-w-sm shadow-2xl space-y-4"
+              className="bg-[#FFFFFF] dark:bg-[#232323] border border-[#E6E2D8] dark:border-white/[0.08] rounded-[24px] p-5 sm:p-6 w-full max-w-sm shadow-2xl space-y-4"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3">
@@ -294,20 +298,20 @@ export function TransactionItem({
                   <AlertTriangle size={20} strokeWidth={2.2} />
                 </div>
                 <div>
-                  <h3 className="text-[16px] font-bold text-white tracking-tight">
+                  <h3 className="text-[16px] font-bold text-[#1C1917] dark:text-white tracking-tight">
                     {getL10n('Ta bort transaktion?', 'Delete transaction?')}
                   </h3>
-                  <p className="text-xs text-[#9CA6BC] mt-0.5">
+                  <p className="text-xs text-[#6E6961] dark:text-[#9CA6BC] mt-0.5">
                     {getL10n('Denna åtgärd går inte att ångra.', 'This action cannot be undone.')}
                   </p>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-between text-xs">
-                <span className="font-semibold text-white truncate max-w-[180px]">
+              <div className="p-3 rounded-xl bg-black/5 dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] flex items-center justify-between text-xs">
+                <span className="font-semibold text-[#1C1917] dark:text-white truncate max-w-[180px]">
                   {merchantName}
                 </span>
-                <span className="font-amount font-bold text-rose-500 tabular-nums">
+                <span className="font-amount font-bold text-rose-600 dark:text-rose-500 tabular-nums">
                   {formatAmount(finalAmount, config?.language || 'sv')} {config?.currency || 'kr'}
                 </span>
               </div>
@@ -319,7 +323,7 @@ export function TransactionItem({
                     setShowConfirmModal(false);
                     setIsOpen(false);
                   }}
-                  className="py-2.5 px-4 rounded-xl text-xs font-semibold text-white bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] transition-all cursor-pointer active:scale-95"
+                  className="py-2.5 px-4 rounded-xl text-xs font-semibold text-[#1C1917] dark:text-white bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] border border-[#E6E2D8] dark:border-white/[0.08] transition-all cursor-pointer active:scale-95"
                 >
                   {getL10n('Avbryt', 'Cancel')}
                 </button>

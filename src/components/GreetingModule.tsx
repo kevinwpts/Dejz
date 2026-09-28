@@ -73,32 +73,32 @@ export function GreetingModule({
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className="pt-3 sm:pt-5 pb-1 text-center flex flex-col items-center space-y-2"
       >
-        {/* Tracked Minimalist Uppercase Structural Label (Barlow Condensed) */}
-        <span className="text-[13px] sm:text-[14px] font-semibold uppercase tracking-[0.08em] text-[#9CA6BC] block select-none font-display">
+        {/* Tracked Minimalist Uppercase Structural Label */}
+        <span className="text-[13px] sm:text-[14px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)] dark:text-[#9CA6BC] block select-none font-display">
           {t('totalRemaining')}
         </span>
 
         <div className="flex flex-col items-center w-full">
-          {/* Primary Hero Amount (Barlow Condensed) */}
+          {/* Primary Hero Amount */}
           <div className="flex items-baseline gap-2">
             <AnimatedNumber 
               value={stats?.remainingPeriodCents || 0} 
               className={`text-[72px] sm:text-[84px] leading-[0.9] font-black font-amount tabular-nums tracking-normal ${
-                isNegative ? 'text-rose-400' : 'text-white'
+                isNegative ? 'text-rose-500 dark:text-rose-400' : 'text-[var(--text-primary)] dark:text-white'
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
-            {/* Currency label (Barlow Condensed) */}
+            {/* Currency label */}
             <span className={`text-[24px] sm:text-[28px] font-bold tracking-normal ${
-              isNegative ? 'text-rose-400/80' : 'text-white/80'
+              isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)] dark:text-white/80'
             }`}>
               {currency}
             </span>
           </div>
 
           {/* Days to salary */}
-          <div className="flex items-center gap-1.5 text-xs text-[#C7CDDC] font-medium mt-3 bg-white/[0.045] px-3 py-1 rounded-full border border-white/[0.06] shadow-none">
-            <Calendar size={13} className="text-[#9CA6BC]" />
+          <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] dark:text-[#C7CDDC] font-medium mt-3 bg-[var(--surface-color)] dark:bg-white/[0.045] px-3.5 py-1 rounded-full border border-[var(--border-color)] dark:border-white/[0.06] shadow-xs dark:shadow-none">
+            <Calendar size={13} className="text-[var(--text-tertiary)] dark:text-[#9CA6BC]" />
             <span>
               {effectiveRemainingDays} {isEn ? 'days until payday' : 'dagar till lön'}
             </span>

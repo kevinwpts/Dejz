@@ -47,19 +47,19 @@ export function CalendarModal({
             exit={{ opacity: 0, y: 40, scale: 0.98 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#232323] border-t sm:border border-white/[0.08] w-full max-w-md rounded-t-[22px] rounded-b-none sm:rounded-[22px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-white"
+            className="bg-[var(--bg-color)] dark:bg-[#232323] border-t sm:border border-[var(--border-color)] dark:border-white/[0.08] w-full max-w-md rounded-t-[22px] rounded-b-none sm:rounded-[22px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] dark:text-white"
           >
             {/* Header */}
-            <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.06] shrink-0">
+            <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-color)]/60 dark:border-white/[0.06] shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-white/[0.05] border border-white/[0.06] flex items-center justify-center text-[#8B9CFF]">
+                <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.05] border border-[var(--border-color)] dark:border-white/[0.06] flex items-center justify-center text-[#4F46E5] dark:text-[#8B9CFF]">
                   <CalendarIcon size={16} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <h3 className="text-[15px] font-bold text-white leading-tight">
+                  <h3 className="text-[15px] font-bold text-[var(--text-primary)] dark:text-white leading-tight">
                     {language === 'en' ? 'Select period' : 'Välj period'}
                   </h3>
-                  <p className="text-[11px] font-medium text-[#9CA6BC] opacity-80 mt-0.5">
+                  <p className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[#9CA6BC] opacity-80 mt-0.5">
                     {periodName || (language === 'en' ? 'Choose period for analysis' : 'Välj period för analys')}
                   </p>
                 </div>
@@ -74,7 +74,7 @@ export function CalendarModal({
                       onSelectDate(today);
                       if (onPeriodChange) onPeriodChange(today);
                     }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/[0.05] text-[11px] font-semibold text-white hover:bg-white/[0.1] border border-white/[0.06] transition-all active:scale-95 cursor-pointer"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.05] text-[11px] font-semibold text-[var(--text-primary)] dark:text-white hover:bg-[var(--border-color)] dark:hover:bg-white/[0.1] border border-[var(--border-color)] dark:border-white/[0.06] transition-all active:scale-95 cursor-pointer"
                   >
                     <RotateCcw size={12} strokeWidth={2} />
                     <span>{language === 'en' ? 'Current' : 'Nuvarande'}</span>
@@ -83,7 +83,7 @@ export function CalendarModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[#9CA6BC] hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                   aria-label="Stäng"
                 >
                   <X size={16} strokeWidth={2} />
@@ -93,7 +93,7 @@ export function CalendarModal({
 
             {/* Stepper with arrows inside modal */}
             {periods && onPeriodChange && currentPeriodDate && (
-              <div className="pt-3 pb-1 border-b border-white/[0.04]">
+              <div className="pt-3 pb-1 border-b border-[var(--border-color)]/60 dark:border-white/[0.04]">
                 <UniversalPeriodSelector
                   periods={periods}
                   currentDate={currentPeriodDate}
@@ -133,31 +133,31 @@ export function CalendarModal({
                         }}
                         className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer text-left border ${
                           isSelected
-                            ? 'bg-[#818cf8]/[0.16] border-[#8B9CFF]/35 text-white'
-                            : 'bg-white/[0.025] hover:bg-white/[0.05] border-white/[0.04] text-[#C7CDDC]'
+                            ? 'bg-[#4F46E5]/10 dark:bg-[#818cf8]/[0.16] border-[#4F46E5]/30 dark:border-[#8B9CFF]/35 text-[#4F46E5] dark:text-white'
+                            : 'bg-[var(--surface-color)] dark:bg-white/[0.025] hover:bg-[var(--surface-muted)] dark:hover:bg-white/[0.05] border-[var(--border-color)] dark:border-white/[0.04] text-[var(--text-secondary)] dark:text-[#C7CDDC]'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                             isSelected 
-                              ? 'bg-[#818cf8]/25 text-[#8B9CFF]' 
-                              : 'bg-white/[0.04] text-[#9CA6BC]'
+                              ? 'bg-indigo-100 text-indigo-600 dark:bg-[#818cf8]/25 dark:text-[#8B9CFF]' 
+                              : 'bg-black/5 dark:bg-white/[0.04] text-[#6E6961] dark:text-[#9CA6BC]'
                           }`}>
                             <CalendarIcon size={15} strokeWidth={1.8} />
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-[13.5px] font-semibold text-white tracking-tight truncate">
+                              <span className="text-[13.5px] font-semibold text-[#1C1917] dark:text-white tracking-tight truncate">
                                 {mPart}
                               </span>
                               {p.isCurrent && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#8B9CFF]/20 text-[#8B9CFF] tracking-tight">
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 dark:bg-[#8B9CFF]/20 dark:text-[#8B9CFF] tracking-tight">
                                   {language === 'en' ? 'Current' : 'Nuvarande'}
                                 </span>
                               )}
                             </div>
                             {dRange && (
-                              <div className="text-[11px] text-[#9CA6BC] truncate mt-0.5">
+                              <div className="text-[11px] text-[#6E6961] dark:text-[#9CA6BC] truncate mt-0.5">
                                 {dRange}
                               </div>
                             )}

@@ -156,25 +156,25 @@ export function CategoryBottomSheetModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-[#232323] border-t border-white/[0.1] rounded-t-[22px] shadow-2xl max-h-[88vh] flex flex-col z-10 overflow-hidden font-sans text-white"
+            className="relative w-full max-w-lg bg-[#F7F5F0] dark:bg-[#232323] border-t border-[#E6E2D8] dark:border-white/[0.1] rounded-t-[22px] shadow-2xl max-h-[88vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
           >
             {/* Top Grab Handle */}
-            <div className="w-12 h-1.5 rounded-full bg-white/25 mx-auto mt-3 mb-1 shrink-0" />
+            <div className="w-12 h-1.5 rounded-full bg-black/20 dark:bg-white/25 mx-auto mt-3 mb-1 shrink-0" />
 
             {/* Header: Category Identity & Close Button */}
-            <div className="flex items-center justify-between px-5 pt-3 pb-4 border-b border-white/[0.05] shrink-0">
+            <div className="flex items-center justify-between px-5 pt-3 pb-4 border-b border-[#E6E2D8] dark:border-white/[0.05] shrink-0">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-white/[0.08] border border-white/[0.1] text-white flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.1] text-[var(--text-primary)] flex items-center justify-center shrink-0">
                   {isEmojiString(iconKey) ? (
                     <span className="text-xl leading-none">{iconKey}</span>
                   ) : IconComponent ? (
-                    <IconComponent size={20} className="text-white" />
+                    <IconComponent size={20} className="text-[var(--text-primary)]" />
                   ) : (
-                    <ShoppingBag size={20} className="text-white" />
+                    <ShoppingBag size={20} className="text-[var(--text-primary)]" />
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold font-display uppercase tracking-wider text-white truncate">
+                  <h2 className="text-lg sm:text-xl font-bold font-display uppercase tracking-wider text-[#1C1917] dark:text-white truncate">
                     {targetCategoryName}
                   </h2>
                 </div>
@@ -186,7 +186,7 @@ export function CategoryBottomSheetModal({
                   if (typeof feedback.light === 'function') feedback.light();
                   onClose();
                 }}
-                className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-white/80 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.06] hover:bg-black/10 dark:hover:bg-white/[0.12] text-[#6E6961] dark:text-white/80 hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Stäng"
               >
                 <X size={17} strokeWidth={2.2} />
@@ -196,25 +196,25 @@ export function CategoryBottomSheetModal({
             {/* Scrollable Body Content */}
             <div className="flex-1 overflow-y-auto px-5 pt-4 pb-8 space-y-4 no-scrollbar">
               {/* Category Budget Status Card */}
-              <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06] space-y-3">
+              <div className="p-4 rounded-2xl bg-white dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] space-y-3">
                 <div className="flex items-baseline justify-between gap-2">
                   <div className="flex items-baseline gap-1.5">
                     {categoryData?.hasBudget ? (
                       categoryData.isOverBudget ? (
-                        <span className="text-2xl sm:text-3xl font-black text-rose-500 font-amount tabular-nums">
+                        <span className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-500 font-amount tabular-nums">
                           +{formatAmount(Math.abs(categoryData.remaining), language)} kr
                         </span>
                       ) : (
-                        <span className="text-2xl sm:text-3xl font-black text-white font-amount tabular-nums">
+                        <span className="text-2xl sm:text-3xl font-black text-[#1C1917] dark:text-white font-amount tabular-nums">
                           {formatAmount(categoryData.remaining, language)} kr
                         </span>
                       )
                     ) : (
-                      <span className="text-2xl sm:text-3xl font-black text-white font-amount tabular-nums">
+                      <span className="text-2xl sm:text-3xl font-black text-[#1C1917] dark:text-white font-amount tabular-nums">
                         {formatAmount(categoryData?.spent || 0, language)} kr
                       </span>
                     )}
-                    <span className="text-xs font-semibold text-[#9CA6BC]">
+                    <span className="text-xs font-semibold text-[#6E6961] dark:text-[#9CA6BC]">
                       {categoryData?.hasBudget
                         ? (categoryData.isOverBudget ? (isEn ? 'over' : 'över budget') : (isEn ? 'left' : 'kvar'))
                         : (isEn ? 'spent this period' : 'totalt spenderat')}
@@ -223,10 +223,10 @@ export function CategoryBottomSheetModal({
                 </div>
 
                 {categoryData?.hasBudget && (
-                  <div className="w-full h-2 bg-white/[0.08] rounded-full overflow-hidden mt-1">
+                  <div className="w-full h-2 bg-black/10 dark:bg-white/[0.08] rounded-full overflow-hidden mt-1">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        categoryData.isOverBudget ? 'bg-rose-500' : 'bg-white'
+                        categoryData.isOverBudget ? 'bg-rose-500' : 'bg-emerald-500 dark:bg-emerald-400'
                       }`}
                       style={{ width: `${spentPct}%` }}
                     />
@@ -237,14 +237,14 @@ export function CategoryBottomSheetModal({
               {/* Transactions List using standard TransactionItem */}
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#9CA6BC] font-display">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#6E6961] dark:text-[#9CA6BC] font-display">
                     {isEn ? 'Purchases this period' : 'Periodens utgifter'} ({periodTransactions.length})
                   </span>
 
                   {totalDisplaySum > 0 && (
-                    <span className="text-[11px] font-semibold text-[#9CA6BC]">
+                    <span className="text-[11px] font-semibold text-[#6E6961] dark:text-[#9CA6BC]">
                       {isEn ? 'Sum:' : 'Summa:'}{' '}
-                      <span className="font-bold text-white font-amount tabular-nums">
+                      <span className="font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
                         {formatAmount(totalDisplaySum, language)} kr
                       </span>
                     </span>
@@ -265,8 +265,8 @@ export function CategoryBottomSheetModal({
                     ))}
                   </div>
                 ) : (
-                  <div className="py-6 px-4 text-center rounded-2xl bg-white/[0.02] border border-dashed border-white/[0.06] space-y-1">
-                    <p className="text-xs font-semibold text-white/80">
+                  <div className="py-6 px-4 text-center rounded-2xl bg-white dark:bg-white/[0.02] border border-dashed border-[#E6E2D8] dark:border-white/[0.06] space-y-1">
+                    <p className="text-xs font-semibold text-[#6E6961] dark:text-white/80">
                       {isEn ? 'No expenses in this category during this period' : 'Inga utgifter registrerade i denna kategori under perioden'}
                     </p>
                   </div>

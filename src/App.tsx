@@ -1476,7 +1476,7 @@ export default function App() {
         document.body.classList.add("light");
       }
 
-      const themeColor = isDark ? "#232323" : "#FAFAF8";
+      const themeColor = isDark ? "#232323" : "#F7F5F0";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 

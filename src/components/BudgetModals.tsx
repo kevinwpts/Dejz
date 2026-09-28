@@ -82,7 +82,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-[#232323] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border-t sm:border border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-[var(--bg-color)] dark:bg-[#232323] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border-t sm:border border-[var(--border-color)] dark:border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -91,14 +91,14 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           onClick={onClose}
           className="w-full py-3 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
         >
-          <div className="w-10 h-1 bg-white/20 hover:bg-white/40 rounded-full transition-colors" />
+          <div className="w-10 h-1 bg-[var(--border-color)] dark:bg-white/20 hover:bg-[var(--text-secondary)] dark:hover:bg-white/40 rounded-full transition-colors" />
         </div>
 
         {/* Compact Header Section */}
-        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-white/[0.04]">
+        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]/60 dark:border-white/[0.04]">
           <div className="flex items-center gap-3 min-w-0">
             <TransactionLogo transaction={expenseCompatible as any} config={config} size="sm" />
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white truncate">
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
               {income.name}
             </h2>
           </div>
@@ -107,7 +107,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             <button 
               type="button"
               onClick={() => onEdit(income)} 
-              className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.04] hover:bg-[var(--border-color)]/50 dark:hover:bg-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer"
               title={t('edit')}
               aria-label={t('edit')}
             >
@@ -116,17 +116,17 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             <button 
               type="button"
               onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] flex items-center justify-center text-rose-400 transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] flex items-center justify-center text-rose-500 dark:text-rose-400 transition-colors cursor-pointer"
               title={t('delete')}
               aria-label={t('delete')}
             >
               <Trash2 size={14} strokeWidth={1.75} />
             </button>
-            <div className="w-px h-4 bg-white/10 mx-0.5" />
+            <div className="w-px h-4 bg-[var(--border-color)] dark:bg-white/10 mx-0.5" />
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.04] hover:bg-[var(--border-color)]/50 dark:hover:bg-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer"
               aria-label={t('close')}
             >
               <X size={16} strokeWidth={1.75} />
@@ -136,21 +136,21 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
 
         {/* Main Content Area: One Cohesive Detail Surface */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          <div className="bg-[#312f2f] rounded-[18px] border border-white/[0.05] divide-y divide-white/[0.05] overflow-hidden">
+          <div className="bg-[var(--surface-color)] dark:bg-[#312f2f] rounded-[18px] border border-[var(--border-color)] dark:border-white/[0.05] divide-y divide-[var(--border-color)]/50 dark:divide-white/[0.05] overflow-hidden shadow-xs dark:shadow-none">
             
             {/* Amount Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between">
-              <span className="text-xs font-normal text-[#9CA6BC]">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC]">
                 {t('amount')}
               </span>
               <div className="text-right">
-                <p className="text-xl sm:text-2xl font-semibold font-amount tabular-nums text-emerald-400">
+                <p className="text-xl sm:text-2xl font-semibold font-amount tabular-nums text-emerald-600 dark:text-emerald-400">
                   <span className="opacity-75 mr-1">+</span>
                   <span>{formatAmount(displayAmount, config.language)}</span>
-                  <span className="text-sm font-normal text-[#9CA6BC] ml-1.5 font-sans">{currency}</span>
+                  <span className="text-sm font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1.5 font-sans">{currency}</span>
                 </p>
                 {hasAdjustment && (
-                  <p className="text-[11px] font-normal text-[#9CA6BC] mt-0.5">
+                  <p className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] mt-0.5">
                     {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(income.amount, config.language)} {currency})
                   </p>
                 )}
@@ -159,22 +159,22 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
 
             {/* Merchant / Payer Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('merchant')}
               </span>
-              <span className="text-sm font-medium text-white text-right truncate">
+              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right truncate">
                 {income.name}
               </span>
             </div>
 
             {/* Category Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center justify-end gap-2">
                 <CategoryIcon icon={income.icon || '💰'} size="xs" />
-                <span className="text-sm font-medium text-white">
+                <span className="text-sm font-medium text-[#1C1917] dark:text-white">
                   {income.category || t('income')}
                 </span>
               </div>
@@ -182,20 +182,20 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
 
             {/* Type Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-sm font-medium text-white text-right">
+              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right">
                 {income.isVariable ? 'Varierande' : 'Fast belopp'}
               </span>
             </div>
 
             {/* Arrival Day Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('arrivalDay')}
               </span>
-              <span className="text-sm font-medium text-white text-right">
+              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right">
                 {income.deductionDay ? `${income.deductionDay}e` : '-'}
               </span>
             </div>
@@ -203,10 +203,10 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             {/* Note Row if exists */}
             {income.note && (
               <div className="p-4 sm:p-4.5 flex items-start justify-between gap-4">
-                <span className="text-xs font-normal text-[#9CA6BC] shrink-0 pt-0.5">
+                <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0 pt-0.5">
                   Notering
                 </span>
-                <span className="text-sm font-normal text-white text-right max-w-[65%] break-words">
+                <span className="text-sm font-normal text-[#1C1917] dark:text-white text-right max-w-[65%] break-words">
                   {income.note}
                 </span>
               </div>
@@ -729,7 +729,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[#232323] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border-t sm:border border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-[var(--bg-color)] dark:bg-[#232323] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border-t sm:border border-[var(--border-color)] dark:border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -738,14 +738,14 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           onClick={onClose}
           className="w-full py-3 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
         >
-          <div className="w-10 h-1 bg-white/20 hover:bg-white/40 rounded-full transition-colors" />
+          <div className="w-10 h-1 bg-[var(--border-color)] dark:bg-white/20 hover:bg-[var(--text-secondary)] dark:hover:bg-white/40 rounded-full transition-colors" />
         </div>
 
         {/* Compact Header Section */}
-        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-white/[0.04]">
+        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]/60 dark:border-white/[0.04]">
           <div className="flex items-center gap-3 min-w-0">
             <TransactionLogo transaction={expenseCompatible as any} config={config} size="sm" />
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-white truncate">
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
               {expense.name}
             </h2>
           </div>
@@ -754,7 +754,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             <button 
               type="button"
               onClick={() => onEdit(expense)} 
-              className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.04] hover:bg-[var(--border-color)]/50 dark:hover:bg-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer"
               title={t('edit')}
               aria-label={t('edit')}
             >
@@ -763,17 +763,17 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             <button 
               type="button"
               onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] flex items-center justify-center text-rose-400 transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] flex items-center justify-center text-rose-500 dark:text-rose-400 transition-colors cursor-pointer"
               title={t('delete')}
               aria-label={t('delete')}
             >
               <Trash2 size={14} strokeWidth={1.75} />
             </button>
-            <div className="w-px h-4 bg-white/10 mx-0.5" />
+            <div className="w-px h-4 bg-[var(--border-color)] dark:bg-white/10 mx-0.5" />
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.04] hover:bg-[var(--border-color)]/50 dark:hover:bg-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer"
               aria-label={t('close')}
             >
               <X size={16} strokeWidth={1.75} />
@@ -783,21 +783,21 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
         {/* Main Content Area: One Cohesive Detail Surface */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          <div className="bg-[#312f2f] rounded-[18px] border border-white/[0.05] divide-y divide-white/[0.05] overflow-hidden">
+          <div className="bg-[var(--surface-color)] dark:bg-[#312f2f] rounded-[18px] border border-[var(--border-color)] dark:border-white/[0.05] divide-y divide-[var(--border-color)]/50 dark:divide-white/[0.05] overflow-hidden shadow-xs dark:shadow-none">
             
             {/* Amount Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between">
-              <span className="text-xs font-normal text-[#9CA6BC]">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC]">
                 {t('amount')}
               </span>
               <div className="text-right">
-                <p className="text-xl sm:text-2xl font-semibold font-amount tabular-nums text-white">
+                <p className="text-xl sm:text-2xl font-semibold font-amount tabular-nums text-[#1C1917] dark:text-white">
                   <span className="opacity-75 mr-1">−</span>
                   <span>{formatAmount(displayAmount, config.language)}</span>
-                  <span className="text-sm font-normal text-[#9CA6BC] ml-1.5 font-sans">{currency}</span>
+                  <span className="text-sm font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1.5 font-sans">{currency}</span>
                 </p>
                 {hasAdjustment && (
-                  <p className="text-[11px] font-normal text-[#9CA6BC] mt-0.5">
+                  <p className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] mt-0.5">
                     {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
                   </p>
                 )}
@@ -806,22 +806,22 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
             {/* Merchant / Receiver Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('merchant')}
               </span>
-              <span className="text-sm font-medium text-white text-right truncate">
+              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right truncate">
                 {expense.name}
               </span>
             </div>
 
             {/* Category Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center justify-end gap-2">
                 <CategoryIcon icon={expense.icon || '🏠'} size="xs" />
-                <span className="text-sm font-medium text-white">
+                <span className="text-sm font-medium text-[#1C1917] dark:text-white">
                   {typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || '')}
                 </span>
               </div>
@@ -829,33 +829,33 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
             {/* Type Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-sm font-medium text-white text-right">
+              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right">
                 {expense.isVariable ? 'Varierande' : 'Fast belopp'}
               </span>
             </div>
 
             {/* Frequency Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('frequency')}
               </span>
-              <span className="text-sm font-medium text-white text-right">
+              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right">
                 {freqText}
               </span>
             </div>
 
             {/* Deduction Day Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('deductionDay')}
               </span>
-              <span className="text-sm font-medium text-white text-right">
+              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right">
                 {expense.deductionDay ? `${expense.deductionDay}e` : '-'}
                 {expense.frequency !== Frequency.MONTHLY && expense.startMonth !== undefined && (
-                  <span className="text-xs font-normal text-[#9CA6BC] ml-1">
+                  <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1">
                     ({new Date(2024, expense.startMonth, 1).toLocaleString('sv-SE', { month: 'short' })})
                   </span>
                 )}
@@ -864,12 +864,12 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
             {/* Payment Method Row */}
             <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#9CA6BC] shrink-0">
+              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('paymentMethod')}
               </span>
               <div className="flex items-center justify-end gap-2">
-                <PaymentIcon size={14} className="text-[#9CA6BC]" />
-                <span className="text-sm font-medium text-white">
+                <PaymentIcon size={14} className="text-[#6E6961] dark:text-[#9CA6BC]" />
+                <span className="text-sm font-medium text-[#1C1917] dark:text-white">
                   {methodStr || '-'}
                 </span>
               </div>
@@ -878,10 +878,10 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             {/* Note Row if exists */}
             {expense.note && (
               <div className="p-4 sm:p-4.5 flex items-start justify-between gap-4">
-                <span className="text-xs font-normal text-[#9CA6BC] shrink-0 pt-0.5">
+                <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0 pt-0.5">
                   Notering
                 </span>
-                <span className="text-sm font-normal text-white text-right max-w-[65%] break-words">
+                <span className="text-sm font-normal text-[#1C1917] dark:text-white text-right max-w-[65%] break-words">
                   {expense.note}
                 </span>
               </div>
@@ -1544,51 +1544,51 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             />
           </div>
 
-          <div className="bg-[#312f2f] p-5 rounded-[16px] border border-white/[0.05]">
-            <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1">{t('amount')}</p>
-            <p className="text-3xl font-semibold text-accent font-amount">
+          <div className="bg-[#FFFFFF] dark:bg-[#312f2f] p-5 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.05] shadow-xs dark:shadow-none">
+            <p className="text-xs font-medium text-[#6E6961] dark:text-[var(--text-secondary)] opacity-75 mb-1">{t('amount')}</p>
+            <p className="text-3xl font-semibold text-indigo-600 dark:text-indigo-400 font-amount">
               <span className="opacity-40 mr-1">→</span>
               <span className="font-amount">{formatAmount(saving.amount)}</span>
-              <span className="text-xl font-semibold text-[var(--text-secondary)] opacity-40 ml-2 font-sans">{currency}</span>
+              <span className="text-xl font-semibold text-[#8C867C] dark:text-[var(--text-secondary)] opacity-60 ml-2 font-sans">{currency}</span>
             </p>
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[#312f2f] p-4 rounded-[16px] border border-white/[0.05] col-span-2">
-              <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('savingsGoal') || 'Sparmål'}</p>
-              <p className="text-base font-medium text-[var(--text-primary)] break-words">{saving.name}</p>
+            <div className="bg-[#FFFFFF] dark:bg-[#312f2f] p-4 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.05] col-span-2 shadow-xs dark:shadow-none">
+              <p className="text-xs font-medium text-[#6E6961] dark:text-[var(--text-secondary)] opacity-75 mb-1.5">{t('savingsGoal') || 'Sparmål'}</p>
+              <p className="text-base font-medium text-[#1C1917] dark:text-white break-words">{saving.name}</p>
             </div>
 
-            <div className="bg-[#312f2f] p-4 rounded-[16px] border border-white/[0.05] col-span-2">
-              <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('type')}</p>
+            <div className="bg-[#FFFFFF] dark:bg-[#312f2f] p-4 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.05] col-span-2 shadow-xs dark:shadow-none">
+              <p className="text-xs font-medium text-[#6E6961] dark:text-[var(--text-secondary)] opacity-75 mb-1.5">{t('type')}</p>
               <div className="flex items-center gap-2.5">
                 <CategoryIcon 
                   icon={saving.icon || 'piggy-bank'} 
                   size="sm" 
                 />
-                <p className="text-base font-medium text-[var(--text-primary)] break-words">
+                <p className="text-base font-medium text-[#1C1917] dark:text-white break-words">
                   {t('monthlySavings')}
                 </p>
               </div>
             </div>
 
             {saving.deductionDay ? (
-              <div className="bg-[#312f2f] p-4 rounded-[16px] border border-white/[0.05]">
-                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('deductionDay')}</p>
-                <p className="text-base font-medium text-[var(--text-primary)]">{`${saving.deductionDay}e`}</p>
+              <div className="bg-[#FFFFFF] dark:bg-[#312f2f] p-4 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.05] shadow-xs dark:shadow-none">
+                <p className="text-xs font-medium text-[#6E6961] dark:text-[var(--text-secondary)] opacity-75 mb-1.5">{t('deductionDay')}</p>
+                <p className="text-base font-medium text-[#1C1917] dark:text-white">{`${saving.deductionDay}e`}</p>
               </div>
             ) : null}
 
             {saving.paymentMethod ? (
-              <div className="bg-[#312f2f] p-4 rounded-[16px] border border-white/[0.05]">
-                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-60 mb-1.5">{t('paymentMethod')}</p>
+              <div className="bg-[#FFFFFF] dark:bg-[#312f2f] p-4 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.05] shadow-xs dark:shadow-none">
+                <p className="text-xs font-medium text-[#6E6961] dark:text-[var(--text-secondary)] opacity-75 mb-1.5">{t('paymentMethod')}</p>
                 <div className="flex items-center gap-2">
                   {(() => {
                     const methodStr = typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : (saving.paymentMethod || '');
                     const PaymentIcon = getPaymentMethodIcon(methodStr);
-                    return <span className="text-[var(--text-secondary)]"><PaymentIcon size={16} /></span>;
+                    return <span className="text-[#6E6961] dark:text-[var(--text-secondary)]"><PaymentIcon size={16} /></span>;
                   })()}
-                  <p className="text-base font-medium text-[var(--text-primary)] break-words">
+                  <p className="text-base font-medium text-[#1C1917] dark:text-white break-words">
                     {typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : saving.paymentMethod}
                   </p>
                 </div>
