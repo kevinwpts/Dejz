@@ -109,6 +109,7 @@ import { CustomBottomNavigation } from "./components/CustomBottomNavigation";
 import { feedback } from "./utils/feedback";
 import { LOGO_URL } from "./constants";
 import { resolveLucideIcon, isEmojiString } from "./utils/icons";
+import { forceUnlockAllScroll } from "./hooks/useScrollLock";
 
 // --- Types ---
 
@@ -212,6 +213,11 @@ export default function App() {
     }
     return "today";
   });
+
+  useEffect(() => {
+    // Safety guard: ensure no lingering scroll lock persists across views or after fast modal closes
+    forceUnlockAllScroll();
+  }, [activeTab]);
   const [profileSection, setProfileSection] = useState<
     | "main"
     | "salary"

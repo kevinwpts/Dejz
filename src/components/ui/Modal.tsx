@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { IconButton } from './IconButton';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -26,16 +27,7 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   className = '',
 }) => {
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      const prevOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = prevOverflow;
-      };
-    }
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   // Handle ESC key
   useEffect(() => {

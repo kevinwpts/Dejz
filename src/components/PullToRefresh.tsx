@@ -30,14 +30,22 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
     if (!el) return;
 
     const onTouchStart = (e: TouchEvent) => {
-      if (window.scrollY <= 0) {
+      // Don't intercept touches if a modal is open or not at the very top of the page
+      if (document.body.style.overflow === 'hidden' || window.scrollY > 2) {
+        isPulling.current = false;
+        return;
+      }
+      if (window.scrollY <= 0 && e.touches.length === 1) {
         startY.current = e.touches[0].pageY;
         isPulling.current = true;
       }
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (!isPulling.current || isRefreshing) return;
+      if (!isPulling.current || isRefreshing || document.body.style.overflow === 'hidden') {
+        isPulling.current = false;
+        return;
+      }
       
       const currentY = e.touches[0].pageY;
       const diff = currentY - startY.current;
@@ -51,8 +59,8 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
           contentRef.current.style.transform = `translate3d(0, ${move}px, 0)`;
         }
         
-        // Prevent default scrolling when pulling
-        if (e.cancelable) e.preventDefault();
+        // Prevent default scrolling only when actively pulling down at the top
+        if (diff > 10 && e.cancelable) e.preventDefault();
       } else {
         isPulling.current = false;
         if (contentRef.current) {
@@ -63,7 +71,10 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
     };
 
     const onTouchEnd = async () => {
-      if (!isPulling.current || isRefreshing) return;
+      if (!isPulling.current || isRefreshing) {
+        isPulling.current = false;
+        return;
+      }
       isPulling.current = false;
       
       if (pullDistance.get() >= threshold) {
@@ -99,14 +110,16 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
       }
     };
 
-    el.addEventListener('touchstart', onTouchStart, { passive: false });
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
     el.addEventListener('touchmove', onTouchMove, { passive: false });
     el.addEventListener('touchend', onTouchEnd);
+    el.addEventListener('touchcancel', onTouchEnd);
 
     return () => {
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchmove', onTouchMove);
       el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
     };
   }, [isRefreshing, pullDistance, onRefresh]);
 

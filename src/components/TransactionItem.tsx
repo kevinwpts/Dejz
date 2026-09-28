@@ -7,6 +7,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
 import { Paperclip, Trash2, AlertTriangle } from 'lucide-react';
 import { feedback } from '../utils/feedback';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -48,6 +49,8 @@ export function TransactionItem({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [dragDistance, setDragDistance] = useState(0);
+
+  useScrollLock(showConfirmModal);
 
   const x = useMotionValue(0);
   const actionOpacity = useTransform(x, [-84, -20, 0], [1, 0.7, 0]);
@@ -170,11 +173,11 @@ export function TransactionItem({
         <motion.div 
           data-font="barlow"
           drag={canSwipe ? "x" : false}
-          dragDirectionLock
+          dragMomentum={false}
           dragConstraints={{ left: -84, right: 0 }}
-          dragElastic={0.12}
+          dragElastic={0.08}
           animate={{ x: isOpen ? -84 : 0 }}
-          style={{ x }}
+          style={{ x, touchAction: canSwipe ? 'pan-y' : 'auto' }}
           onDragEnd={handleDragEnd}
           onClick={(e) => {
             if (dragDistance > 6) {
@@ -271,7 +274,13 @@ export function TransactionItem({
       {/* Confirmation Modal before Delete */}
       <AnimatePresence>
         {showConfirmModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+            onClick={() => {
+              setShowConfirmModal(false);
+              setIsOpen(false);
+            }}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.94, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

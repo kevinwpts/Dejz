@@ -6,6 +6,7 @@ import { formatAmount } from '../utils/format';
 import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
 import { feedback } from '../utils/feedback';
 import { TransactionItem } from './TransactionItem';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface CategoryBottomSheetModalProps {
   isOpen: boolean;
@@ -46,16 +47,7 @@ export function CategoryBottomSheetModal({
 }: CategoryBottomSheetModalProps) {
   const isEn = language === 'en';
 
-  // Body scroll lock
-  useEffect(() => {
-    if (isOpen) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
-    }
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   // ESC key handler
   useEffect(() => {
