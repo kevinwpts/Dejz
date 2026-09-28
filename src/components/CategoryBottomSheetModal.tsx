@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Plus, SlidersHorizontal, BarChart2, Calendar, ShoppingBag, ArrowUpRight } from 'lucide-react';
+import { X, Calendar, ShoppingBag, ArrowUpRight } from 'lucide-react';
 import { Transaction } from '../types';
 import { formatAmount } from '../utils/format';
 import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
@@ -174,7 +174,7 @@ export function CategoryBottomSheetModal({
             </div>
 
             {/* Scrollable Body Content */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 no-scrollbar">
+            <div className="flex-1 overflow-y-auto px-5 pt-4 pb-8 space-y-4 no-scrollbar">
               {/* Category Budget Status Card */}
               <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06] space-y-3">
                 <div className="flex items-baseline justify-between">
@@ -332,57 +332,8 @@ export function CategoryBottomSheetModal({
                         ? (isEn ? 'No expenses in this category on the selected date' : 'Inga utgifter i denna kategori på det valda datumet')
                         : (isEn ? 'No expenses in this category during this period' : 'Inga utgifter registrerade i denna kategori under perioden')}
                     </p>
-                    <p className="text-[11px] text-[#9CA6BC]">
-                      {isEn ? 'Tap the button below to log a purchase' : 'Klicka på knappen nedan för att registrera ett köp'}
-                    </p>
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Bottom Actions Footer */}
-            <div className="p-4 sm:p-5 border-t border-white/[0.06] bg-[#232323] space-y-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof feedback.light === 'function') feedback.light();
-                  onClose();
-                  onAddTransaction('expense', { category: targetCategoryName });
-                }}
-                className="w-full py-3 px-4 rounded-xl bg-white hover:bg-white/90 text-black font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] cursor-pointer shadow-none"
-              >
-                <Plus size={16} strokeWidth={2.5} />
-                <span>
-                  {isEn ? `Add expense in ${targetCategoryName}` : `Registrera köp i ${targetCategoryName}`}
-                </span>
-              </button>
-
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof feedback.light === 'function') feedback.light();
-                    onClose();
-                    onNavigate('budget', 'category-budgets');
-                  }}
-                  className="w-full py-2.5 px-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.09] text-white font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-white/[0.04]"
-                >
-                  <SlidersHorizontal size={13} strokeWidth={2} />
-                  <span>{isEn ? 'Edit budget' : 'Justera budget'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof feedback.light === 'function') feedback.light();
-                    onClose();
-                    onNavigate('analysis');
-                  }}
-                  className="w-full py-2.5 px-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.09] text-white font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer border border-white/[0.04]"
-                >
-                  <BarChart2 size={13} strokeWidth={2} />
-                  <span>{isEn ? 'Full analysis' : 'Kategorianalys'}</span>
-                </button>
               </div>
             </div>
           </motion.div>
