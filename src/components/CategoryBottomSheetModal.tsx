@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Calendar, ShoppingBag, ArrowUpRight } from 'lucide-react';
-import { Transaction } from '../types';
+import { X, ShoppingBag } from 'lucide-react';
+import { Transaction, Config } from '../types';
 import { formatAmount } from '../utils/format';
 import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
 import { feedback } from '../utils/feedback';
+import { TransactionItem } from './TransactionItem';
 
 interface CategoryBottomSheetModalProps {
   isOpen: boolean;
@@ -21,10 +22,12 @@ interface CategoryBottomSheetModalProps {
   } | null;
   selectedDate: Date;
   allTransactions: Transaction[];
+  config: Config;
   language?: string;
   onViewTransaction: (transaction: Transaction) => void;
-  onAddTransaction: (type?: string, prefill?: any) => void;
-  onNavigate: (tab: string, section?: string) => void;
+  onDeleteTransaction?: (id: string) => void;
+  onAddTransaction?: (type?: string, prefill?: any) => void;
+  onNavigate?: (tab: string, section?: string) => void;
 }
 
 export function CategoryBottomSheetModal({
@@ -34,12 +37,12 @@ export function CategoryBottomSheetModal({
   categoryData,
   selectedDate,
   allTransactions = [],
+  config,
   language = 'sv',
   onViewTransaction,
-  onAddTransaction,
-  onNavigate,
+  onDeleteTransaction,
 }: CategoryBottomSheetModalProps) {
-  const [activeScope, setActiveScope] = useState<'day' | 'period'>('period');
+  const [activeScope, setActiveScope] = useState<'period' | 'day'>('period');
   const isEn = language === 'en';
 
   // Body scroll lock
@@ -96,6 +99,11 @@ export function CategoryBottomSheetModal({
   }, [targetCategoryName, allTransactions, selectedDate]);
 
   const displayTransactions = activeScope === 'day' ? dayTransactions : periodTransactions;
+
+  // Total sum calculation using tx.amount
+  const totalDisplaySum = useMemo(() => {
+    return displayTransactions.reduce((acc, t) => acc + (t.amount || 0), 0);
+  }, [displayTransactions]);
 
   // Icon calculation
   const iconKey = categoryData?.iconName || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');
@@ -266,64 +274,35 @@ export function CategoryBottomSheetModal({
                 </div>
 
                 <span className="text-[11px] font-semibold text-[#9CA6BC]">
-                  {displayTransactions.reduce((acc, t) => acc + (t.amountCents || 0), 0) > 0 && (
+                  {totalDisplaySum > 0 && (
                     <>
                       {isEn ? 'Sum:' : 'Summa:'}{' '}
                       <span className="font-bold text-white">
-                        {formatAmount(displayTransactions.reduce((acc, t) => acc + (t.amountCents || 0), 0), language)} kr
+                        {formatAmount(totalDisplaySum, language)} kr
                       </span>
                     </>
                   )}
                 </span>
               </div>
 
-              {/* Transactions List for this category */}
+              {/* Transactions List using standard TransactionItem */}
               <div className="space-y-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[#9CA6BC] font-display">
                   {isEn ? 'Category Purchases' : 'Utgifter i kategorin'}
                 </span>
 
                 {displayTransactions.length > 0 ? (
-                  <div className="space-y-1.5 max-h-[220px] overflow-y-auto no-scrollbar pr-0.5">
-                    {displayTransactions.map((tx) => {
-                      const txDate = new Date(tx.date);
-                      const dateFormatted = txDate.toLocaleDateString(language === 'en' ? 'en-US' : 'sv-SE', {
-                        day: 'numeric',
-                        month: 'short',
-                      });
-
-                      return (
-                        <div
-                          key={tx.id}
-                          onClick={() => {
-                            if (typeof feedback.light === 'function') feedback.light();
-                            onViewTransaction(tx);
-                          }}
-                          className="flex items-center justify-between p-3 rounded-xl bg-white/[0.035] hover:bg-white/[0.07] border border-white/[0.04] transition-all group cursor-pointer active:scale-[0.99]"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-7 h-7 rounded-lg bg-white/[0.06] text-white flex items-center justify-center shrink-0">
-                              <Calendar size={13} className="text-[#9CA6BC]" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-white transition-colors">
-                                {tx.merchant || tx.description || tx.category || (isEn ? 'Expense' : 'Utgift')}
-                              </p>
-                              <p className="text-[10.5px] font-medium text-[#9CA6BC]">
-                                {dateFormatted} {tx.note ? `• ${tx.note}` : ''}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 shrink-0 pl-2">
-                            <span className="text-xs sm:text-sm font-black text-white font-amount tabular-nums">
-                              {formatAmount(tx.amountCents || 0, language)} kr
-                            </span>
-                            <ArrowUpRight size={13} className="text-[#9CA6BC] opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div className="space-y-2 max-h-[340px] overflow-y-auto no-scrollbar pr-0.5">
+                    {displayTransactions.map((tx) => (
+                      <TransactionItem
+                        key={tx.id}
+                        transaction={tx}
+                        config={config}
+                        onView={onViewTransaction}
+                        onDelete={onDeleteTransaction}
+                        showDate={activeScope === 'period'}
+                      />
+                    ))}
                   </div>
                 ) : (
                   <div className="py-6 px-4 text-center rounded-2xl bg-white/[0.02] border border-dashed border-white/[0.06] space-y-1">

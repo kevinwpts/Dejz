@@ -1060,8 +1060,10 @@ export function TodayView({
         categoryData={categoryBudgetData.find(c => c.name.toLowerCase() === selectedCategoryModalName?.toLowerCase()) || null}
         selectedDate={selectedDate}
         allTransactions={allTransactions}
+        config={config}
         language={lang}
         onViewTransaction={onViewTransaction}
+        onDeleteTransaction={onDeleteTransaction}
         onAddTransaction={onAddTransaction}
         onNavigate={onNavigate}
       />
