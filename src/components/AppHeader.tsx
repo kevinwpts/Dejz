@@ -20,8 +20,8 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
-  userName: _userName,
-  date: _date,
+  userName,
+  date,
   avatarUrl,
   onNavigate,
   onOpenSearch,
@@ -32,13 +32,14 @@ export function AppHeader({
   onOpenNotifications,
   onOpenDejzi,
   isDemoMode,
-  language: _language = "sv",
+  language = "sv",
   activeTab,
 }: AppHeaderProps) {
   const [isAtTop, setIsAtTop] = useState(true);
 
   const isProfileOrSettings = activeTab === "profile" || activeTab === "settings";
   const _useWhiteHeader = false;
+  const isHomeTab = activeTab === "today" || !activeTab;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,23 +52,37 @@ export function AppHeader({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Compute date string
+  const formattedDate = React.useMemo(() => {
+    try {
+      const d = date || new Date();
+      const locale = language === 'en' ? 'en-US' : language === 'no' ? 'nb-NO' : language === 'da' ? 'da-DK' : 'sv-SE';
+      const weekday = new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(d);
+      const dayMonth = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(d);
+      const capWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+      return `${capWeekday}, ${dayMonth}`;
+    } catch {
+      return '';
+    }
+  }, [date, language]);
+
   // Compute uppercase display title for header
   const getFallbackTitle = () => {
     switch (activeTab) {
       case "today":
-        return _language === "en" ? "OVERVIEW" : "ÖVERBLICK";
+        return language === "en" ? "OVERVIEW" : "ÖVERBLICK";
       case "transactions":
-        return _language === "en" ? "TRANSACTIONS" : "TRANSAKTIONER";
+        return language === "en" ? "TRANSACTIONS" : "TRANSAKTIONER";
       case "analysis":
-        return _language === "en" ? "ANALYSIS" : "ANALYS";
+        return language === "en" ? "ANALYSIS" : "ANALYS";
       case "budget":
-        return _language === "en" ? "FINANCES" : "EKONOMI";
+        return language === "en" ? "FINANCES" : "EKONOMI";
       case "profile":
-        return _language === "en" ? "PROFILE" : "PROFIL";
+        return language === "en" ? "PROFILE" : "PROFIL";
       case "settings":
-        return _language === "en" ? "SETTINGS" : "INSTÄLLNINGAR";
+        return language === "en" ? "SETTINGS" : "INSTÄLLNINGAR";
       case "notifications":
-        return _language === "en" ? "NOTIFICATIONS" : "NOTISER";
+        return language === "en" ? "NOTIFICATIONS" : "NOTISER";
       default:
         return "DEJZ";
     }
@@ -75,7 +90,7 @@ export function AppHeader({
 
   const displayTitle = (title || getFallbackTitle()).toUpperCase();
 
-  const _isHomeAtTop = (activeTab === "today" || !activeTab) && isAtTop;
+  const _isHomeAtTop = isHomeTab && isAtTop;
 
   return (
     <header
@@ -86,8 +101,8 @@ export function AppHeader({
       }`}
     >
       <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2 relative`}>
-        {/* Left: Back button OR Profile Picture + Title right next to it */}
-        <div className="flex items-center gap-3 shrink-0 z-10">
+        {/* Left: Back button OR Profile Picture + Title/Greeting right next to it */}
+        <div className="flex items-center gap-3 shrink-0 z-10 min-w-0">
           {onBack ? (
             <button
               onClick={onBack}
@@ -119,10 +134,21 @@ export function AppHeader({
           )}
 
           {/* Title right next to profile picture */}
-          <div className="min-w-0 text-left flex items-center pl-1">
-            <h1 className="text-[19px] sm:text-[22px] font-extrabold font-display uppercase tracking-[0.05em] truncate select-none leading-none text-white">
-              {displayTitle}
-            </h1>
+          <div className="min-w-0 text-left flex flex-col justify-center pl-1">
+            {isHomeTab ? (
+              <>
+                <h1 className="text-[17px] sm:text-[19px] font-extrabold font-display uppercase tracking-[0.03em] truncate select-none leading-tight text-white">
+                  {language === 'en' ? 'Hi' : 'Hej'} {userName || 'Kevin'}
+                </h1>
+                <p className="text-[11px] font-medium text-[#9CA6BC] leading-none mt-0.5 select-none truncate">
+                  {formattedDate}
+                </p>
+              </>
+            ) : (
+              <h1 className="text-[19px] sm:text-[22px] font-extrabold font-display uppercase tracking-[0.05em] truncate select-none leading-none text-white">
+                {displayTitle}
+              </h1>
+            )}
           </div>
         </div>
 

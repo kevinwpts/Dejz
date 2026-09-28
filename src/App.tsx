@@ -3673,11 +3673,22 @@ export default function App() {
           }
           navTrigger={navTrigger}
           userName={
-            (
-              session?.user?.user_metadata?.full_name ||
-              session?.user?.email?.split("@")[0] ||
-              ""
-            ).split(" ")[0]
+            (() => {
+              const raw = (
+                profile?.full_name ||
+                session?.user?.user_metadata?.full_name ||
+                session?.user?.user_metadata?.name ||
+                ""
+              ).trim();
+              if (raw) return raw.split(" ")[0];
+              const email = session?.user?.email || "";
+              if (email.toLowerCase().startsWith("kevin")) return "Kevin";
+              if (email.includes("@")) {
+                const part = email.split("@")[0];
+                return part.charAt(0).toUpperCase() + part.slice(1);
+              }
+              return "Kevin";
+            })()
           }
           date={(() => {
             const d = new Date(targetDate || new Date());
