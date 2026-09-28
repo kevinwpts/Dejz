@@ -141,8 +141,13 @@ export function BudgetSummaryModule({
     <div className="space-y-6 font-sans">
       {/* SPENDERAT DENNA PERIOD */}
       <div className="py-2 text-center space-y-1 flex flex-col items-center">
-        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#9CA6BC] block select-none font-display">
+        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#9CA6BC] block select-none font-display flex items-center justify-center gap-2">
           {stats.isPastPeriod ? 'SPENDERAT FÖR PERIODEN' : 'SPENDERAT DENNA PERIOD'}
+          {stats.isPastPeriod && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] bg-black/5 dark:bg-white/[0.08] text-[#6E6961] dark:text-[#9CA6BC] font-medium uppercase tracking-wider">
+              Avslutad
+            </span>
+          )}
         </span>
         <div className="flex items-baseline justify-center gap-2">
           <span className="text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums text-[#1C1917] dark:text-white tracking-normal">
