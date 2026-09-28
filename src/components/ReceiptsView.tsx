@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, Search, Receipt, Calendar, Eye, ArrowUpRight, ArrowDownRight, Tag } from 'lucide-react';
+import { Search, Receipt, Calendar, Eye, ArrowUpRight, ArrowDownRight, Tag } from 'lucide-react';
 import { Transaction, Config } from '../types';
 
 interface ReceiptsViewProps {
@@ -11,7 +11,7 @@ interface ReceiptsViewProps {
 }
 
 export function ReceiptsView({
-  onBack,
+  onBack: _onBack,
   transactions,
   config,
   onViewTransaction
@@ -55,27 +55,6 @@ export function ReceiptsView({
       exit={{ opacity: 0, x: -20 }}
       className="space-y-6 pb-24"
     >
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onBack}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)] active:scale-95 transition-all shadow-sm"
-          id="receipts_view_back_btn"
-        >
-          <ChevronLeft size={20} strokeWidth={1.5} />
-        </button>
-        <div>
-          <h2 className="text-[22px] font-bold text-[var(--text-primary)] tracking-tight">
-            {config.language === 'sv' ? 'Mina kvitton' : 'My Receipts'}
-          </h2>
-          <p className="text-xs text-[var(--text-secondary)] font-medium opacity-60">
-            {config.language === 'sv' 
-              ? 'Här visas alla dina transaktioner där du har bifogat ett kvitto.' 
-              : 'Here are all your transactions with an attached receipt.'}
-          </p>
-        </div>
-      </div>
-
       {/* Stats Summary Panel */}
       {receiptTransactions.length > 0 && (
         <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-2xl bg-[var(--surface-color)] p-5 shadow-sm space-y-2">

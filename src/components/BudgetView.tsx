@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, ArrowLeft, Check, Sparkles, RotateCcw, Plus, Pin, ChevronUp, ChevronDown, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
+import { RefreshCw, Check, Sparkles, RotateCcw, Plus, Pin, ChevronUp, ChevronDown, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -307,22 +307,6 @@ export function BudgetView({
         transition={{ duration: 0.35 }}
         className="space-y-6 font-sans"
       >
-        {/* Top Header */}
-        <div className="flex items-center justify-between px-1">
-          <button
-            type="button"
-            onClick={handleCloseCategoryBudgets}
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#9CA6BC] hover:text-white transition-colors cursor-pointer"
-          >
-            <ArrowLeft size={16} strokeWidth={2} />
-            <span>Tillbaka</span>
-          </button>
-          <span className="text-sm font-semibold text-white">
-            Fördela vardagsbudget
-          </span>
-          <div className="w-12" />
-        </div>
-
         {/* Open Top Header - No card slop, directly on background */}
         <div className="px-1 py-3 space-y-5">
 

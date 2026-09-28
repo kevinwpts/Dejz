@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { User, Mail, LogOut, Camera, Unlink, MailCheck, Globe, Lock, ChevronLeft } from 'lucide-react';
+import { User, Mail, LogOut, Camera, Unlink, MailCheck, Globe, Lock } from 'lucide-react';
 
 import { ConfirmModal } from './ConfirmModal';
 import { PasswordChangeView } from './PasswordChangeView';
@@ -132,25 +132,6 @@ export function ManageAccountView({
         />
       ) : (
         <>
-          {/* Header with back */}
-          <div className="flex items-center gap-3">
-            <IconButton
-              icon={<ChevronLeft size={18} />}
-              onClick={onBack}
-              variant="muted"
-              size="sm"
-              aria-label="Tillbaka"
-            />
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)]">
-                {t('manageYourAccount' as any) || 'Hantera konto'}
-              </h2>
-              <p className="text-xs text-[var(--text-secondary)] opacity-80">
-                {user.email}
-              </p>
-            </div>
-          </div>
-
           {/* Profile Avatar Upload */}
           <div className="text-center py-2 flex flex-col items-center justify-center">
             <label htmlFor="avatar-manage" className="relative w-20 h-20 mb-2 block cursor-pointer group">

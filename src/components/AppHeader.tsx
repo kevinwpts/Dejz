@@ -137,7 +137,7 @@ export function AppHeader({
           <div className="min-w-0 text-left flex flex-col justify-center pl-1">
             {isHomeTab ? (
               <>
-                <h1 className="text-[17px] sm:text-[19px] font-extrabold font-display uppercase tracking-[0.03em] truncate select-none leading-tight text-white">
+                <h1 className="text-[17px] sm:text-[19px] font-extrabold font-display tracking-tight truncate select-none leading-tight text-white">
                   {language === 'en' ? 'Hi' : 'Hej'} {userName || 'Kevin'}
                 </h1>
                 <p className="text-[11px] font-medium text-[#9CA6BC] leading-none mt-0.5 select-none truncate">

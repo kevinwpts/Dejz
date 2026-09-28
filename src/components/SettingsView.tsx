@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, CreditCard, Tag, Plus, Check, Globe, RotateCcw, Palette, Sun, Moon, Monitor } from 'lucide-react';
+import { Calendar, Plus, Check, RotateCcw, Sun, Moon, Monitor } from 'lucide-react';
 import { Config, PaydayType, WeekendAdjustment } from '../types';
 import { getActualPayday } from '../utils/date';
 import { Language, TranslationKey, languageInfo } from '../i18n';
@@ -37,126 +37,9 @@ interface SettingsViewProps {
 }
 
 
-const sectionHeaders: Record<Language, Record<string, { title: string; subtitle?: string }>> = {
-  sv: {
-    appearance: {
-      title: "Hur vill du att appen ska se ut?",
-      subtitle: "Välj mellan automatiskt systemläge, ljust eller mörkt tema"
-    },
-    language: {
-      title: "Vilket språk ska appen vara i?",
-      subtitle: "Välj det språk du föredrar för gränssnitt och kategorier"
-    },
-    salary: {
-      title: "När får du din lön?",
-      subtitle: "Ställ in ditt månatliga lönedatum för att beräkna dina dagsbudgetar rätt"
-    },
-    categories: {
-      title: "Hantera dina kategorier",
-      subtitle: "Skapa och redigera dina utgifts- och inkomstkategorier"
-    },
-    paymentMethods: {
-      title: "Vilka betalningsmetoder använder du?",
-      subtitle: "Anpassa listan över betalsätt som visas när du registrerar köp"
-    }
-  },
-  en: {
-    appearance: {
-      title: "How would you like the app to look?",
-      subtitle: "Choose between automatic system mode, light or dark theme"
-    },
-    language: {
-      title: "Which language should the app be in?",
-      subtitle: "Choose your preferred language for interfaces and categories"
-    },
-    salary: {
-      title: "When do you get paid?",
-      subtitle: "Set up your monthly payday to calculate your daily budgets correctly"
-    },
-    categories: {
-      title: "Manage your categories",
-      subtitle: "Create and edit your expense and income categories"
-    },
-    paymentMethods: {
-      title: "Which payment methods do you use?",
-      subtitle: "Customize the list of payment options visible when registering purchases"
-    }
-  },
-  no: {
-    language: {
-      title: "Hvilket språk skal appen være på?",
-      subtitle: "Velg ditt foretrukne språk for grensesnitt og kategorier"
-    },
-    salary: {
-      title: "Når får du lønn?",
-      subtitle: "Konfigurer din månedlige lønningsdag for å beregne dagsbudsjettene dine riktig"
-    },
-    categories: {
-      title: "Administrer kategoriene dine",
-      subtitle: "Opprett og rediger dine utgifts- og inntektskategorier"
-    },
-    paymentMethods: {
-      title: "Hvilke betalingsmåter bruker du?",
-      subtitle: "Tilpass listen over betalingsmåter som vises når du registrerer kjøp"
-    }
-  },
-  da: {
-    language: {
-      title: "Hvilket sprog skal appen være på?",
-      subtitle: "Vælg dit foretrukne sprog til grænseflade og kategorier"
-    },
-    salary: {
-      title: "Hvornår får du løn?",
-      subtitle: "Indstil din månedlige lønningsdag for at beregne dine daglige budgetter korrekt"
-    },
-    categories: {
-      title: "Administrer dine kategorier",
-      subtitle: "Opret og rediger dine udgifts- og indkomstkategorier"
-    },
-    paymentMethods: {
-      title: "Hvilke betalingsmetoder bruger du?",
-      subtitle: "Tilpas listen over betalingsmetoder, der vises, når du registrerer køb"
-    }
-  },
-  fi: {
-    language: {
-      title: "Millä kielellä haluat käyttää sovellusta?",
-      subtitle: "Valitse haluamasi kieli käyttöliittymälle ja kategorioille"
-    },
-    salary: {
-      title: "Milloin saat palkkasi?",
-      subtitle: "Valitse kuukausittainen palkkapäiväsi päivittäisten budjettien laskemiseksi oikein"
-    },
-    categories: {
-      title: "Hallitse kategorioitasi",
-      subtitle: "Luo ja muokkaa meno- ja tulokategorioitasi"
-    },
-    paymentMethods: {
-      title: "Mitä maksutapoja käytät?",
-      subtitle: "Muokkaa maksutapojen luetteloa, joka näkyy ostoksia kirjattaessa"
-    }
-  }
-};
 
-const SectionHeading = ({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle?: string }) => (
-  <div className="max-w-md mx-auto mb-3 text-left select-none pt-1 pb-0.5 px-1">
-    <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center border border-[var(--accent-color)]/25 shrink-0 transition-transform duration-300 hover:rotate-6">
-        <Icon size={18} strokeWidth={2} />
-      </div>
-      <div>
-        <h3 className="text-[15px] font-bold text-[var(--text-primary)] tracking-tight leading-tight">
-          {title}
-        </h3>
-        {subtitle && (
-          <p className="text-[11px] font-medium text-[var(--text-secondary)] opacity-75 mt-0.5 leading-relaxed">
-            {subtitle}
-          </p>
-        )}
-      </div>
-    </div>
-  </div>
-);
+
+
 
 export function SettingsView({ 
   activeSection,
@@ -265,7 +148,6 @@ export function SettingsView({
   const _renderIconPicker = () => null;
 
   const renderSalarySettings = () => {
-    const header = sectionHeaders[config.language || 'sv']?.salary || sectionHeaders.sv.salary;
     // 1. Calculate next payday
     const getNextPayday = () => {
       const now = new Date();
@@ -307,7 +189,6 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 max-w-md mx-auto py-1">
-        <SectionHeading icon={Calendar} title={header.title} subtitle={header.subtitle} />
         {/* Next Payday Status Line — Minimalist and subtle */}
         <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)] px-1">
           <Calendar size={13} className="opacity-60" />
@@ -491,10 +372,8 @@ export function SettingsView({
   };
 
   const renderCategoriesSettings = () => {
-    const header = sectionHeaders[config.language || 'sv']?.categories || sectionHeaders.sv.categories;
     return (
       <div className="space-y-6 max-w-md mx-auto py-2">
-        <SectionHeading icon={Tag} title={header.title} subtitle={header.subtitle} />
         <div className="flex p-1 bg-[var(--bg-color)] rounded-2xl border-[0.5px] border-[var(--border-color)]">
           <button
             onClick={() => setCategoryTab('expense')}
@@ -526,7 +405,6 @@ export function SettingsView({
   };
 
   const renderPaymentMethodsSettings = () => {
-    const header = sectionHeaders[config.language || 'sv']?.paymentMethods || sectionHeaders.sv.paymentMethods;
     const methodsList = (config.paymentMethods || []).map((method) => {
       if (typeof method === 'string') {
         const found = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === (method as string).toLowerCase());
@@ -537,7 +415,6 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 max-w-md mx-auto py-1">
-        <SectionHeading icon={CreditCard} title={header.title} subtitle={header.subtitle} />
         <div className="grid grid-cols-3 gap-2.5">
           {methodsList.map((method, index) => (
             <button
@@ -585,7 +462,6 @@ export function SettingsView({
 
   const renderLanguageSettings = () => (
     <div className="space-y-4 max-w-md mx-auto py-1">
-      <SectionHeading icon={Globe} title={(sectionHeaders[config.language || 'sv']?.language || sectionHeaders.sv.language).title} subtitle={(sectionHeaders[config.language || 'sv']?.language || sectionHeaders.sv.language).subtitle} />
       <div className="flex flex-col gap-2">
         {Object.entries(languageInfo).map(([code, info]) => {
           const isSelected = config.language === code;
@@ -659,11 +535,6 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 max-w-md mx-auto py-1">
-        <SectionHeading 
-          icon={Palette} 
-          title={(sectionHeaders[config.language || 'sv']?.appearance || sectionHeaders.sv.appearance).title} 
-          subtitle={(sectionHeaders[config.language || 'sv']?.appearance || sectionHeaders.sv.appearance).subtitle} 
-        />
         <div className="flex flex-col gap-2.5">
           {options.map((opt) => {
             const isSelected = currentMode === opt.id;

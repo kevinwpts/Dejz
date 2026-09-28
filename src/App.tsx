@@ -3742,6 +3742,9 @@ export default function App() {
     if (activeTab === "transactions") return t("log");
     if (activeTab === "analysis") return t("analysis");
     if (activeTab === "budget") {
+      if (budgetSection === "allocate" || budgetSection === "category-budgets") {
+        return config?.language === 'en' ? 'Allocate Budget' : 'Fördela vardagsbudget';
+      }
       return budgetSection ? (config?.language === 'en' ? 'Budget' : 'Budget') : (config?.language === 'en' ? 'Finances' : 'Ekonomi');
     }
     if (activeTab === "settings") {
@@ -3751,6 +3754,7 @@ export default function App() {
         case "categories": return t("categories");
         case "paymentMethods": return t("paymentMethod");
         case "language": return t("language");
+        case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';
         default: return config?.language === 'en' ? 'Settings' : 'Inställningar';
       }
     }
@@ -3762,6 +3766,8 @@ export default function App() {
         case "paymentMethods": return t("paymentMethod");
         case "manageAccount": return t("manageAccount");
         case "language": return t("language");
+        case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';
+        case "receipts": return config?.language === 'en' ? 'Receipts' : 'Mina kvitton';
         case "notifications": return t("notifications");
         default: return t("profile");
       }
@@ -3992,7 +3998,10 @@ export default function App() {
                 session?.user?.user_metadata?.name ||
                 ""
               ).trim();
-              if (raw) return raw.split(" ")[0];
+              if (raw) {
+                const first = raw.split(" ")[0];
+                return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+              }
               const email = session?.user?.email || "";
               if (email.toLowerCase().startsWith("kevin")) return "Kevin";
               if (email.includes("@")) {
