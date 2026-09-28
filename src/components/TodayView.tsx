@@ -568,7 +568,7 @@ export function TodayView({
                                 </span>
                               )}
 
-                              <span className={`text-[10px] shrink-0 ${isSelected ? 'font-semibold text-white/80' : 'font-medium text-[#9CA6BC]'}`}>
+                              <span className="text-[10px] shrink-0 font-medium text-[#9CA6BC]">
                                 {cat.hasBudget 
                                   ? (cat.isOverBudget 
                                       ? (lang === 'en' ? 'over' : 'över') 
@@ -581,7 +581,7 @@ export function TodayView({
                               <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-0.5">
                                 <div 
                                   className={`h-full rounded-full transition-all duration-500 ${
-                                    cat.isOverBudget ? 'bg-rose-500' : isSelected ? 'bg-white' : 'bg-emerald-400'
+                                    cat.isOverBudget ? 'bg-rose-500' : 'bg-emerald-400'
                                   }`}
                                   style={{ width: `${spentPct}%` }} 
                                 />
