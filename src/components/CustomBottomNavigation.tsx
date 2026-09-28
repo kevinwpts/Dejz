@@ -5,7 +5,6 @@ import {
   History,
   BarChart3,
   WalletCards,
-  Plus,
 } from "lucide-react";
 import { Language, translations, TranslationKey } from "../i18n";
 
@@ -69,10 +68,10 @@ export function CustomBottomNavigation({
             onClick={() => {
               if (onPlusClick) onPlusClick();
             }}
-            className="w-11 h-11 sm:w-[46px] sm:h-[46px] rounded-full bg-[#1C1917] dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-200 active:scale-90 text-white dark:text-[#1C1917] flex items-center justify-center transition-all cursor-pointer shadow-md shadow-black/10"
+            className="w-12 h-12 sm:w-[50px] sm:h-[50px] rounded-full active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-black/10 overflow-hidden bg-transparent"
             aria-label="Add transaction"
           >
-            <Plus size={20} strokeWidth={2.5} />
+            <img src="/lagg_till.png" alt="Lägg till" className="w-full h-full object-cover" />
           </button>
         </div>
 
