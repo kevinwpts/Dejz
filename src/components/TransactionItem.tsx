@@ -140,7 +140,7 @@ export function TransactionItem({
 
   return (
     <>
-      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[18px]'} select-none font-barlow`}>
+      <div data-font="barlow" className={`relative overflow-hidden ${squared ? '' : 'rounded-[18px]'} select-none font-barlow`}>
         {/* Swipe Left Background Action: Delete */}
         {canSwipe && (
           <motion.div 
@@ -155,7 +155,7 @@ export function TransactionItem({
                 feedback.tap();
                 setShowConfirmModal(true);
               }}
-              className="w-full h-full flex flex-col items-center justify-center gap-1 text-white hover:bg-rose-600 active:scale-95 transition-all cursor-pointer select-none"
+              className="w-full h-full flex flex-col items-center justify-center gap-1 text-white hover:bg-rose-600 active:scale-95 transition-all cursor-pointer select-none font-barlow"
               aria-label={getL10n('Ta bort', 'Delete')}
             >
               <Trash2 size={19} strokeWidth={2.2} />
@@ -168,6 +168,7 @@ export function TransactionItem({
 
         {/* Foreground Draggable Transaction Card */}
         <motion.div 
+          data-font="barlow"
           drag={canSwipe ? "x" : false}
           dragDirectionLock
           dragConstraints={{ left: -84, right: 0 }}
@@ -191,7 +192,7 @@ export function TransactionItem({
               onView(transaction);
             }
           }}
-          className={`${paddingClasses} relative z-10 flex items-center justify-between gap-[12px] group transition-colors duration-150 ${containerClasses} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
+          className={`${paddingClasses} relative z-10 flex items-center justify-between gap-[12px] group transition-colors duration-150 font-barlow ${containerClasses} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
         >
           <div className="flex items-center gap-[12px] min-w-0 flex-1">
             {/* Real Logo in original color */}
