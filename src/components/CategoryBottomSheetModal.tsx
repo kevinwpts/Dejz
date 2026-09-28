@@ -160,11 +160,6 @@ export function CategoryBottomSheetModal({
                   <h2 className="text-lg sm:text-xl font-bold font-display uppercase tracking-wider text-white truncate">
                     {targetCategoryName}
                   </h2>
-                  <p className="text-[11.5px] font-medium text-[#9CA6BC]">
-                    {categoryData?.hasBudget
-                      ? (isEn ? `Budget: ${formatAmount(categoryData.budget, language)} kr` : `Budgetgräns: ${formatAmount(categoryData.budget, language)} kr`)
-                      : (isEn ? 'No budget limit set' : 'Ingen budgetgräns satt')}
-                  </p>
                 </div>
               </div>
 
@@ -189,9 +184,6 @@ export function CategoryBottomSheetModal({
                   <span className="text-xs font-semibold text-[#9CA6BC] uppercase tracking-wider font-display">
                     {isEn ? 'Remaining in budget' : 'Kvar i kategorin'}
                   </span>
-                  <span className="text-xs font-bold text-white/70">
-                    {spentPct}% {isEn ? 'spent' : 'använt'}
-                  </span>
                 </div>
 
                 <div className="flex items-baseline justify-between gap-2">
@@ -215,15 +207,6 @@ export function CategoryBottomSheetModal({
                       {categoryData?.hasBudget
                         ? (categoryData.isOverBudget ? (isEn ? 'over' : 'över budget') : (isEn ? 'left' : 'kvar'))
                         : (isEn ? 'spent this period' : 'totalt spenderat')}
-                    </span>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-xs font-bold text-white/80 tabular-nums">
-                      {formatAmount(categoryData?.spent || 0, language)} kr
-                    </span>
-                    <span className="text-[10.5px] text-[#9CA6BC] block">
-                      {isEn ? 'spent' : 'spenderat'}
                     </span>
                   </div>
                 </div>
