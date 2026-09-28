@@ -150,7 +150,7 @@ export function AnalysisView({
 
   const totalSpent = (analysisFilter === 'fixed' ? 0 : totalSpentInPeriod) + 
     (analysisFilter !== 'variable' ? totalFixed : 0);
-  const COLORS = ['#818cf8', '#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#14b8a6', '#f59e0b', '#64748b', '#8b5cf6'];
+  const COLORS = ['#05b862', '#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#14b8a6', '#f59e0b', '#64748b', '#8b5cf6'];
 
   const daysElapsed = useMemo(() => {
     if (!stats) return 0;
@@ -203,11 +203,11 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'all'
-              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-[#818cf8]/[0.16] dark:text-white dark:border-[#8B9CFF]/30 shadow-none'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 shadow-none'
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
-          <LayoutGrid size={13} strokeWidth={1.75} className={analysisFilter === 'all' ? 'text-indigo-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <LayoutGrid size={13} strokeWidth={1.75} className={analysisFilter === 'all' ? 'text-emerald-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('all' as TranslationKey)}</span>
         </button>
         <button
@@ -217,11 +217,11 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'variable'
-              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-[#818cf8]/[0.16] dark:text-white dark:border-[#8B9CFF]/30 shadow-none'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 shadow-none'
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
-          <TrendingUp size={13} strokeWidth={1.75} className={analysisFilter === 'variable' ? 'text-indigo-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <TrendingUp size={13} strokeWidth={1.75} className={analysisFilter === 'variable' ? 'text-emerald-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('variableExpenses' as TranslationKey)}</span>
         </button>
         <button
@@ -231,11 +231,11 @@ export function AnalysisView({
           }}
           className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             analysisFilter === 'fixed'
-              ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-[#818cf8]/[0.16] dark:text-white dark:border-[#8B9CFF]/30 shadow-none'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-[#05b862]/[0.16] dark:text-white dark:border-[#05b862]/30 shadow-none'
               : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-[#C7CDDC] dark:hover:bg-white/[0.03]'
           }`}
         >
-          <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-indigo-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-emerald-700 dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
           <span>{t('fixedExpenses' as TranslationKey)}</span>
         </button>
       </div>
@@ -273,7 +273,7 @@ export function AnalysisView({
                   exit={{ opacity: 0, scale: 0.92 }}
                   className="flex flex-col items-center text-center px-8"
                 >
-                  <span className="text-xs font-medium text-indigo-600 dark:text-[#8B9CFF] mb-1 truncate max-w-[140px]">
+                  <span className="text-xs font-medium text-emerald-600 dark:text-[#05b862] mb-1 truncate max-w-[140px]">
                     {expandedCategory}
                   </span>
                   <span className="text-2xl sm:text-3xl font-semibold text-[#1C1917] dark:text-white font-amount tabular-nums leading-none">
@@ -429,7 +429,7 @@ export function AnalysisView({
                             <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1">{config.currency}</span>
                           </p>
                         </div>
-                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-indigo-600 dark:text-[#8B9CFF]' : 'text-[#6E6961] dark:text-[#9CA6BC]'}`}>
+                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-emerald-600 dark:text-[#05b862]' : 'text-[#6E6961] dark:text-[#9CA6BC]'}`}>
                           <ChevronDown size={16} strokeWidth={2} />
                         </div>
                       </div>

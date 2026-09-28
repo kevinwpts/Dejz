@@ -24,7 +24,7 @@ export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: Onboard
           step === 'name' || step === 'age' || step === 'gender' ? 'bg-gradient-to-tr from-emerald-500/40 via-cyan-400/40 to-teal-400/30' :
           step === 'payday' ? 'bg-gradient-to-tr from-amber-500/45 via-yellow-400/40 to-orange-500/30' :
           step === 'income' ? 'bg-gradient-to-tr from-emerald-500/50 via-teal-400/40 to-green-500/30' :
-          step === 'expenses' ? 'bg-gradient-to-tr from-rose-500/45 via-purple-400/35 to-indigo-500/30' :
+          step === 'expenses' ? 'bg-gradient-to-tr from-rose-500/45 via-purple-400/35 to-emerald-500/30' :
           step === 'budget' ? 'bg-gradient-to-tr from-emerald-500/45 via-amber-400/35 to-cyan-500/30' :
           step === 'goals' ? 'bg-gradient-to-tr from-sky-500/45 via-cyan-400/40 to-blue-500/30' :
           step === 'midMonth' ? 'bg-gradient-to-tr from-amber-500/45 via-emerald-400/40 to-teal-400/30' :

@@ -54,7 +54,7 @@ export function SegmentedControl<T extends string = string>({
               fullWidth ? 'flex-1' : ''
             } ${
               isSelected
-                ? 'bg-[#FFFFFF] text-indigo-700 border border-[#E6E2D8] shadow-xs dark:bg-[#818cf8]/[0.18] dark:text-white dark:border-[#8B9CFF]/30 dark:shadow-none'
+                ? 'bg-[#FFFFFF] text-emerald-700 border border-[#E6E2D8] shadow-xs dark:bg-[#05b862]/[0.18] dark:text-white dark:border-[#05b862]/30 dark:shadow-none'
                 : 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.03]'
             }`}
           >

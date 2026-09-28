@@ -39,7 +39,7 @@ export function EmptyState({
         <button
           type="button"
           onClick={onAction}
-          className="mt-3.5 h-8 px-3.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-[#818cf8]/[0.16] dark:hover:bg-[#818cf8]/[0.24] text-indigo-700 dark:text-white border border-indigo-200 dark:border-[#8B9CFF]/30 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+          className="mt-3.5 h-8 px-3.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-[#05b862]/[0.16] dark:hover:bg-[#05b862]/[0.24] text-emerald-700 dark:text-white border border-emerald-200 dark:border-[#05b862]/30 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
         >
           {actionLabel}
         </button>

@@ -52,7 +52,7 @@ export function CalendarModal({
             {/* Header */}
             <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-color)]/60 dark:border-white/[0.06] shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.05] border border-[var(--border-color)] dark:border-white/[0.06] flex items-center justify-center text-[#4F46E5] dark:text-[#8B9CFF]">
+                <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.05] border border-[var(--border-color)] dark:border-white/[0.06] flex items-center justify-center text-[#05b862] dark:text-[#05b862]">
                   <CalendarIcon size={16} strokeWidth={1.8} />
                 </div>
                 <div>
@@ -133,14 +133,14 @@ export function CalendarModal({
                         }}
                         className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer text-left border ${
                           isSelected
-                            ? 'bg-[#4F46E5]/10 dark:bg-[#818cf8]/[0.16] border-[#4F46E5]/30 dark:border-[#8B9CFF]/35 text-[#4F46E5] dark:text-white'
+                            ? 'bg-[#05b862]/10 dark:bg-[#05b862]/[0.16] border-[#05b862]/30 dark:border-[#05b862]/35 text-[#05b862] dark:text-white'
                             : 'bg-[var(--surface-color)] dark:bg-white/[0.025] hover:bg-[var(--surface-muted)] dark:hover:bg-white/[0.05] border-[var(--border-color)] dark:border-white/[0.04] text-[var(--text-secondary)] dark:text-[#C7CDDC]'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                             isSelected 
-                              ? 'bg-indigo-100 text-indigo-600 dark:bg-[#818cf8]/25 dark:text-[#8B9CFF]' 
+                              ? 'bg-emerald-100 text-emerald-600 dark:bg-[#05b862]/25 dark:text-[#05b862]' 
                               : 'bg-black/5 dark:bg-white/[0.04] text-[#6E6961] dark:text-[#9CA6BC]'
                           }`}>
                             <CalendarIcon size={15} strokeWidth={1.8} />
@@ -151,7 +151,7 @@ export function CalendarModal({
                                 {mPart}
                               </span>
                               {p.isCurrent && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 dark:bg-[#8B9CFF]/20 dark:text-[#8B9CFF] tracking-tight">
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-[#05b862]/20 dark:text-[#05b862] tracking-tight">
                                   {language === 'en' ? 'Current' : 'Nuvarande'}
                                 </span>
                               )}
@@ -165,7 +165,7 @@ export function CalendarModal({
                         </div>
 
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-indigo-600 dark:bg-[#8B9CFF] flex items-center justify-center text-white dark:text-[#232323] shrink-0 ml-2">
+                          <div className="w-5 h-5 rounded-full bg-emerald-600 dark:bg-[#05b862] flex items-center justify-center text-white dark:text-[#232323] shrink-0 ml-2">
                             <Check size={12} strokeWidth={3} />
                           </div>
                         )}

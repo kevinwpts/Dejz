@@ -269,7 +269,7 @@ export function BudgetSummaryModule({
         <div className="w-full h-1.5 bg-black/5 dark:bg-white/[0.06] rounded-full overflow-hidden">
           <div 
             className={`h-full rounded-full transition-all duration-700 ease-out ${
-              budgetUsedPct > 90 ? "bg-rose-500" : "bg-indigo-600 dark:bg-indigo-400"
+              budgetUsedPct > 90 ? "bg-rose-500" : "bg-emerald-600 dark:bg-emerald-400"
             }`} 
             style={{ width: `${Math.min(100, budgetUsedPct)}%` }}
           />

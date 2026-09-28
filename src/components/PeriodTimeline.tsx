@@ -267,7 +267,7 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-indigo-600 text-white dark:bg-white/[0.14] dark:text-white border border-indigo-700 dark:border-white/25 shadow-xs scale-105 font-bold z-10 opacity-100'
+                  ? 'bg-emerald-600 text-white dark:bg-white/[0.14] dark:text-white border border-emerald-700 dark:border-white/25 shadow-xs scale-105 font-bold z-10 opacity-100'
                   : hasCategoryMatch
                   ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-white/[0.08] dark:text-white dark:border-emerald-400/40 hover:bg-emerald-100 dark:hover:bg-white/[0.1] scale-100 opacity-100 ring-1 ring-emerald-400/30'
                   : isRealToday

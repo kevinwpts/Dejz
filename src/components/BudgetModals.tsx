@@ -1546,7 +1546,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
 
           <div className="bg-[#FFFFFF] dark:bg-[#312f2f] p-5 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.05] shadow-xs dark:shadow-none">
             <p className="text-xs font-medium text-[#6E6961] dark:text-[var(--text-secondary)] opacity-75 mb-1">{t('amount')}</p>
-            <p className="text-3xl font-semibold text-indigo-600 dark:text-indigo-400 font-amount">
+            <p className="text-3xl font-semibold text-emerald-600 dark:text-emerald-400 font-amount">
               <span className="opacity-40 mr-1">→</span>
               <span className="font-amount">{formatAmount(saving.amount)}</span>
               <span className="text-xl font-semibold text-[#8C867C] dark:text-[var(--text-secondary)] opacity-60 ml-2 font-sans">{currency}</span>

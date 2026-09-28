@@ -60,7 +60,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         <div className="relative flex-shrink-0">
           <BudgetItemLogo item={item} type={type} config={config} />
           {item.isVariable && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#818cf8] border border-white dark:border-[#232323] rounded-full flex items-center justify-center z-10 select-none">
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#05b862] border border-white dark:border-[#232323] rounded-full flex items-center justify-center z-10 select-none">
               <span className="text-[8px] font-extrabold text-white leading-none flex items-center justify-center text-center -translate-y-[0.5px]">
                 {t('variableShort' as any)}
               </span>
