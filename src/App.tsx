@@ -4225,6 +4225,7 @@ export default function App() {
                 onDeleteTransaction={deleteTransaction}
                 t={t}
                 currentLang={config.language as Language}
+                isDemoMode={isDemoMode}
               />
             </div>
           )}
