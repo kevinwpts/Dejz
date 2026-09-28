@@ -9,6 +9,7 @@ interface PeriodTimelineProps {
   language?: string;
   stats?: any;
   isCurrentPeriod?: boolean;
+  categoryFilter?: string | null;
 }
 
 export function PeriodTimeline({
@@ -16,6 +17,7 @@ export function PeriodTimeline({
   selectedDate,
   onSelectDate,
   language = 'sv',
+  categoryFilter = null,
 }: PeriodTimelineProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
@@ -243,6 +245,11 @@ export function PeriodTimeline({
           const dayWeekday = dayDate.toLocaleDateString(locale, { weekday: 'short' });
           const dayWeekdayShort = dayWeekday.slice(0, 3);
 
+          // Check if day has transactions matching category filter
+          const hasCategoryMatch = categoryFilter && Array.isArray(day.transactions)
+            ? day.transactions.some((t: any) => t.category?.trim().toLowerCase() === categoryFilter.trim().toLowerCase())
+            : false;
+
           return (
             <button
               key={`${day.date}-${index}`}
@@ -261,8 +268,12 @@ export function PeriodTimeline({
               className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative backdrop-blur-md ${
                 isSelected
                   ? 'bg-white/[0.14] text-white border border-white/25 shadow-none scale-105 font-bold z-10 opacity-100'
+                  : hasCategoryMatch
+                  ? 'bg-white/[0.08] text-white border border-emerald-400/40 hover:bg-white/[0.1] scale-100 opacity-100 ring-1 ring-emerald-400/30'
                   : isRealToday
                   ? 'bg-white/[0.04] text-[#C7CDDC] border border-white/[0.08] hover:bg-white/[0.07] scale-95 opacity-90'
+                  : categoryFilter
+                  ? 'bg-white/[0.015] text-[#9CA6BC]/40 hover:text-[#C7CDDC] hover:bg-white/[0.04] border border-white/[0.02] scale-95 opacity-50'
                   : 'bg-white/[0.02] text-[#9CA6BC]/70 hover:text-[#C7CDDC] hover:bg-white/[0.045] border border-white/[0.025] scale-95 opacity-75'
               }`}
             >
@@ -271,6 +282,8 @@ export function PeriodTimeline({
                 className={`text-[8.5px] sm:text-[9px] tracking-wider uppercase leading-none ${
                   isSelected
                     ? 'text-white font-bold'
+                    : hasCategoryMatch
+                    ? 'text-emerald-400 font-bold'
                     : isRealToday
                     ? 'text-[#C7CDDC] font-semibold'
                     : 'text-[#9CA6BC]/70 font-medium'
@@ -283,6 +296,11 @@ export function PeriodTimeline({
               <span className="text-[13px] sm:text-[14px] leading-none font-bold tabular-nums font-amount">
                 {dayNumber}
               </span>
+
+              {/* Match Indicator Dot when filtering by category */}
+              {hasCategoryMatch && !isSelected && (
+                <span className="w-1 h-1 rounded-full bg-emerald-400 absolute bottom-1 shadow-none" />
+              )}
             </button>
           );
         })}

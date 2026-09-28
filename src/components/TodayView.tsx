@@ -6,6 +6,11 @@ import {
   SlidersHorizontal,
   ChevronRight,
   LayoutGrid,
+  Plus,
+  X,
+  BarChart2,
+  Check,
+  Filter,
 } from "lucide-react";
 import {
   Transaction,
@@ -104,6 +109,9 @@ export function TodayView({
   const heroRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const [heroHeight, setHeroHeight] = useState(300);
+
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
+  const [categoryViewScope, setCategoryViewScope] = useState<'day' | 'period'>('day');
 
   const lang = config?.language || 'sv';
 
@@ -399,6 +407,66 @@ export function TodayView({
       });
   }, [stats, config?.categories, fixedExpenses]);
 
+  const activeCategory = useMemo(() => {
+    if (!selectedCategoryFilter) return null;
+    return categoryBudgetData.find(
+      (c) => c.name.toLowerCase() === selectedCategoryFilter.toLowerCase()
+    ) || null;
+  }, [categoryBudgetData, selectedCategoryFilter]);
+
+  const periodCategoryTransactions = useMemo(() => {
+    if (!selectedCategoryFilter || !stats?.periodTransactions) return [];
+    return stats.periodTransactions.filter(
+      (t: Transaction) => t.category?.trim().toLowerCase() === selectedCategoryFilter.trim().toLowerCase() && t.type !== 'income'
+    );
+  }, [stats?.periodTransactions, selectedCategoryFilter]);
+
+  const rawDayTransactions = useMemo(() => {
+    return stats?.isPastPeriod
+      ? (stats.periodTransactions || [])
+      : (selectedDayData?.transactions || []);
+  }, [stats?.isPastPeriod, stats?.periodTransactions, selectedDayData?.transactions]);
+
+  const dayCategoryMatchesCount = useMemo(() => {
+    if (!selectedCategoryFilter) return 0;
+    return rawDayTransactions.filter(
+      (t: Transaction) => t.category?.trim().toLowerCase() === selectedCategoryFilter.trim().toLowerCase()
+    ).length;
+  }, [selectedCategoryFilter, rawDayTransactions]);
+
+  const displayedVariableTransactions = useMemo(() => {
+    if (!selectedCategoryFilter) {
+      return rawDayTransactions;
+    }
+    if (categoryViewScope === 'period') {
+      return periodCategoryTransactions;
+    }
+    return rawDayTransactions.filter(
+      (t: Transaction) => t.category?.trim().toLowerCase() === selectedCategoryFilter.trim().toLowerCase()
+    );
+  }, [selectedCategoryFilter, categoryViewScope, rawDayTransactions, periodCategoryTransactions]);
+
+  const displayedFixedTransactions = useMemo(() => {
+    if (!selectedCategoryFilter) {
+      return fixedTransactions;
+    }
+    if (categoryViewScope === 'period') {
+      return [];
+    }
+    return fixedTransactions.filter(
+      (t) => t.category?.trim().toLowerCase() === selectedCategoryFilter.trim().toLowerCase()
+    );
+  }, [selectedCategoryFilter, categoryViewScope, fixedTransactions]);
+
+  const handleCategoryClick = (catName: string) => {
+    if (selectedCategoryFilter?.toLowerCase() === catName.toLowerCase()) {
+      setSelectedCategoryFilter(null);
+    } else {
+      setSelectedCategoryFilter(catName);
+      setCategoryViewScope('day');
+    }
+  };
+
   useEffect(() => {
     const updateHeight = () => {
       if (heroRef.current) {
@@ -499,30 +567,50 @@ export function TodayView({
                         ? Math.min(100, Math.round((cat.spent / cat.budgetInKronor) * 100))
                         : 0;
 
+                      const isSelected = selectedCategoryFilter?.toLowerCase() === cat.name.toLowerCase();
+
                       return (
                         <motion.button
                           key={cat.name}
                           initial={{ opacity: 0, scale: 0.96, x: 8 }}
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.08 + index * 0.02 }}
-                          onClick={() => onNavigate("analysis")}
-                          className="flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white/[0.045] hover:bg-white/[0.08] text-white transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border border-white/[0.06] shadow-none"
+                          onClick={() => handleCategoryClick(cat.name)}
+                          className={`flex-shrink-0 flex flex-col justify-between p-3 sm:p-3.5 rounded-xl sm:rounded-2xl transition-all group text-left active:scale-[0.98] min-w-[128px] sm:min-w-[142px] max-w-[155px] cursor-pointer snap-start border shadow-none relative ${
+                            isSelected
+                              ? 'bg-white/[0.12] border-white/40 ring-2 ring-white/60 text-white'
+                              : selectedCategoryFilter
+                              ? 'bg-white/[0.025] border-white/[0.04] text-[#9CA6BC]/60 hover:bg-white/[0.06] hover:text-white'
+                              : 'bg-white/[0.045] hover:bg-white/[0.08] border-white/[0.06] text-white'
+                          }`}
                         >
-                          {/* Top Row: Neutral Icon + Category Name */}
+                          {/* Top Row: Neutral Icon + Category Name + Selected checkmark */}
                           <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
-                            <div className="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/[0.08] text-[#C7CDDC] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            <div className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform ${
+                              isSelected
+                                ? 'bg-white/20 border-white/30 text-white'
+                                : 'bg-white/[0.06] border-white/[0.08] text-[#C7CDDC]'
+                            }`}>
                               {isEmojiString(cat.iconName) ? (
                                 <span className="text-[12.5px] leading-none">{cat.iconName}</span>
                               ) : Icon ? (
-                                <Icon size={13.5} strokeWidth={2} className="text-[#C7CDDC]" />
+                                <Icon size={13.5} strokeWidth={2} className={isSelected ? 'text-white' : 'text-[#C7CDDC]'} />
                               ) : (
-                                <div className="w-1.5 h-1.5 rounded-full bg-[#C7CDDC]" />
+                                <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-[#C7CDDC]'}`} />
                               )}
                             </div>
 
-                            <span className="text-[11.5px] sm:text-xs font-bold text-[#C7CDDC] group-hover:text-white tracking-tight truncate flex-1">
+                            <span className={`text-[11.5px] sm:text-xs font-bold tracking-tight truncate flex-1 ${
+                              isSelected ? 'text-white' : 'text-[#C7CDDC] group-hover:text-white'
+                            }`}>
                               {cat.name}
                             </span>
+
+                            {isSelected && (
+                              <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center shrink-0 shadow-xs">
+                                <Check size={10} strokeWidth={3} />
+                              </div>
+                            )}
                           </div>
 
                           {/* Bottom Row: Amount Remaining & Progress Bar */}
@@ -544,7 +632,7 @@ export function TodayView({
                                 </span>
                               )}
 
-                              <span className="text-[10px] font-medium text-[#9CA6BC] shrink-0">
+                              <span className={`text-[10px] shrink-0 ${isSelected ? 'font-semibold text-white/80' : 'font-medium text-[#9CA6BC]'}`}>
                                 {cat.hasBudget 
                                   ? (cat.isOverBudget 
                                       ? (lang === 'en' ? 'over' : 'över') 
@@ -557,7 +645,7 @@ export function TodayView({
                               <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-0.5">
                                 <div 
                                   className={`h-full rounded-full transition-all duration-500 ${
-                                    cat.isOverBudget ? 'bg-rose-500' : 'bg-emerald-400'
+                                    cat.isOverBudget ? 'bg-rose-500' : isSelected ? 'bg-white' : 'bg-emerald-400'
                                   }`}
                                   style={{ width: `${spentPct}%` }} 
                                 />
@@ -649,22 +737,186 @@ export function TodayView({
               stats={stats}
               language={lang}
               isCurrentPeriod={isCurrentPeriod}
+              categoryFilter={selectedCategoryFilter}
             />
           </div>
         )}
 
-      {/* 4. SELECTED DAY'S TRANSACTIONS (Natural Swedish casing: Idag, 26 september) */}
+        {/* Category Quick Sheet / Drawer Banner when a category is selected */}
+        <AnimatePresence>
+          {activeCategory && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="p-4 rounded-2xl bg-white/[0.045] border border-white/[0.08] backdrop-blur-xl space-y-3 shadow-none -mt-1 mb-2"
+            >
+              {/* Category Header + Close filter */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-white/[0.08] border border-white/10 flex items-center justify-center text-white shrink-0">
+                    {isEmojiString(activeCategory.iconName) ? (
+                      <span className="text-sm leading-none">{activeCategory.iconName}</span>
+                    ) : ICON_MAP[activeCategory.iconName] ? (
+                      React.createElement(ICON_MAP[activeCategory.iconName], { size: 15, strokeWidth: 2, className: "text-white" })
+                    ) : (
+                      <div className="w-2 h-2 rounded-full bg-white" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-white tracking-tight truncate">
+                        {activeCategory.name}
+                      </h4>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-[#C7CDDC]">
+                        {lang === 'en' ? 'Category view' : 'Kategoriöversikt'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#9CA6BC] truncate">
+                      {periodCategoryTransactions.length} {lang === 'en' ? 'purchases in period' : 'köp denna period'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategoryFilter(null)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-xs font-medium text-[#C7CDDC] hover:text-white transition-all active:scale-95 cursor-pointer shrink-0 border border-white/[0.04]"
+                >
+                  <X size={13} strokeWidth={2.2} />
+                  <span>{lang === 'en' ? 'Show all' : 'Visa alla'}</span>
+                </button>
+              </div>
+
+              {/* Metrics Grid */}
+              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-white/[0.04]">
+                <div className="bg-white/[0.025] p-2.5 rounded-xl border border-white/[0.03]">
+                  <span className="text-[10px] font-medium text-[#9CA6BC] uppercase tracking-wider block">
+                    {lang === 'en' ? 'Spent' : 'Spenderat'}
+                  </span>
+                  <span className="text-xs sm:text-[13.5px] font-black text-white font-amount tabular-nums">
+                    {formatAmount(activeCategory.spent, lang)} kr
+                  </span>
+                </div>
+
+                <div className="bg-white/[0.025] p-2.5 rounded-xl border border-white/[0.03]">
+                  <span className="text-[10px] font-medium text-[#9CA6BC] uppercase tracking-wider block">
+                    {lang === 'en' ? 'Budget' : 'Budget'}
+                  </span>
+                  <span className="text-xs sm:text-[13.5px] font-black text-[#C7CDDC] font-amount tabular-nums">
+                    {formatAmount(activeCategory.budgetInKronor, lang)} kr
+                  </span>
+                </div>
+
+                <div className="bg-white/[0.025] p-2.5 rounded-xl border border-white/[0.03]">
+                  <span className="text-[10px] font-medium text-[#9CA6BC] uppercase tracking-wider block">
+                    {activeCategory.isOverBudget ? (lang === 'en' ? 'Over' : 'Över') : (lang === 'en' ? 'Remaining' : 'Kvar')}
+                  </span>
+                  <span className={`text-xs sm:text-[13.5px] font-black font-amount tabular-nums ${
+                    activeCategory.isOverBudget ? 'text-rose-400' : 'text-emerald-400'
+                  }`}>
+                    {activeCategory.isOverBudget ? '+' : ''}{formatAmount(activeCategory.isOverBudget ? Math.abs(activeCategory.remaining) : activeCategory.remaining, lang)} kr
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="w-full space-y-1">
+                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      activeCategory.isOverBudget ? 'bg-rose-500' : 'bg-emerald-400'
+                    }`}
+                    style={{ width: `${Math.min(100, Math.round((activeCategory.spent / activeCategory.budgetInKronor) * 100))}%` }}
+                  />
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-[#9CA6BC]">
+                  <span>{Math.round((activeCategory.spent / activeCategory.budgetInKronor) * 100)}% {lang === 'en' ? 'of budget used' : 'av budgeten använd'}</span>
+                  {activeCategory.isOverBudget && (
+                    <span className="text-rose-400 font-semibold">{lang === 'en' ? 'Over budget limit' : 'Över budgetgräns'}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Scope Switcher: Vald dag vs Hela perioden */}
+              <div className="flex items-center gap-1.5 p-1 bg-white/[0.03] rounded-xl border border-white/[0.04]">
+                <button
+                  type="button"
+                  onClick={() => setCategoryViewScope('day')}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center ${
+                    categoryViewScope === 'day'
+                      ? 'bg-white/15 text-white shadow-xs'
+                      : 'text-[#9CA6BC] hover:text-white'
+                  }`}
+                >
+                  {isTodaySelected 
+                    ? (lang === 'en' ? 'Today' : 'Idag') 
+                    : selectedDate.toLocaleDateString(lang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'short' })} ({dayCategoryMatchesCount})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCategoryViewScope('period')}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center ${
+                    categoryViewScope === 'period'
+                      ? 'bg-white/15 text-white shadow-xs'
+                      : 'text-[#9CA6BC] hover:text-white'
+                  }`}
+                >
+                  {lang === 'en' ? 'Whole Period' : 'Hela perioden'} ({periodCategoryTransactions.length})
+                </button>
+              </div>
+
+              {/* Quick Actions Footer */}
+              <div className="flex items-center gap-2 pt-1 border-t border-white/[0.04]">
+                <button
+                  type="button"
+                  onClick={() => onAddTransaction(selectedDate)}
+                  className="flex-1 py-2 px-3 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-xs font-bold text-white flex items-center justify-center gap-1.5 transition-all active:scale-98 cursor-pointer"
+                >
+                  <Plus size={13} strokeWidth={2.4} />
+                  <span>{lang === 'en' ? 'Add expense' : 'Registrera köp'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onNavigate("budget", "category-budgets")}
+                  className="flex-1 py-2 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs font-semibold text-[#C7CDDC] hover:text-white flex items-center justify-center gap-1.5 transition-all active:scale-98 cursor-pointer border border-white/[0.04]"
+                >
+                  <SlidersHorizontal size={13} strokeWidth={2} />
+                  <span>{lang === 'en' ? 'Adjust limit' : 'Justera budget'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onNavigate("analysis")}
+                  className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-[#C7CDDC] hover:text-white transition-all active:scale-98 cursor-pointer border border-white/[0.04]"
+                  title={lang === 'en' ? 'Category analysis' : 'Kategorianalys'}
+                >
+                  <BarChart2 size={14} strokeWidth={2} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+      {/* 4. TRANSACTIONS LIST */}
       <div className="space-y-4 pt-1">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-white">
-            {stats.isPastPeriod
-              ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
-              : selectedDate.toDateString() === new Date().toDateString()
-                ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
-                : selectedDate.toLocaleDateString(
-                    lang === "en" ? "en-US" : "sv-SE",
-                    { day: "numeric", month: "long" },
-                  )}
+          <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-white truncate max-w-[70%]">
+            {selectedCategoryFilter
+              ? (categoryViewScope === 'period'
+                  ? `${lang === 'en' ? 'All period purchases in' : 'Periodens alla köp i'} ${activeCategory?.name || selectedCategoryFilter}`
+                  : `${selectedDate.toDateString() === new Date().toDateString() ? (lang === 'en' ? 'Today' : 'Idag') : selectedDate.toLocaleDateString(lang === 'en' ? 'en-US' : 'sv-SE', { day: 'numeric', month: 'long' })} • ${activeCategory?.name || selectedCategoryFilter}`)
+              : (stats.isPastPeriod
+                  ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
+                  : selectedDate.toDateString() === new Date().toDateString()
+                    ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
+                    : selectedDate.toLocaleDateString(
+                        lang === "en" ? "en-US" : "sv-SE",
+                        { day: "numeric", month: "long" },
+                      ))}
           </h3>
           {!isTodaySelected && (
             <button
@@ -679,15 +931,9 @@ export function TodayView({
 
         <div className="space-y-4">
           <AnimatePresence mode="popLayout">
-            {(stats.isPastPeriod
-              ? stats.periodTransactions
-              : selectedDayData?.transactions
-            )?.length > 0 ? (
+            {displayedVariableTransactions.length > 0 ? (
               <motion.div className="space-y-2.5" key="transactions">
-                {(stats.isPastPeriod
-                  ? stats.periodTransactions || []
-                  : selectedDayData?.transactions || []
-                ).map((transaction: Transaction, index: number) => (
+                {displayedVariableTransactions.map((transaction: Transaction, index: number) => (
                   <motion.div
                     key={transaction.id}
                     initial={{ opacity: 0, x: -15 }}
@@ -706,24 +952,58 @@ export function TodayView({
                   </motion.div>
                 ))}
               </motion.div>
-            ) : fixedTransactions.length === 0 ? (
-              <EmptyState
-                title={isTodaySelected ? t("noTransactionsToday") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
-                description={isTodaySelected ? t("addFirstTransaction") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
-                onAction={() => onAddTransaction(selectedDate)}
-                actionLabel={t("addExpense")}
-              />
+            ) : displayedFixedTransactions.length === 0 ? (
+              selectedCategoryFilter ? (
+                <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.05] text-center space-y-3">
+                  <p className="text-sm text-[#C7CDDC] font-medium">
+                    {categoryViewScope === 'day'
+                      ? (lang === 'en' 
+                          ? `No purchases in ${activeCategory?.name || selectedCategoryFilter} on this date.` 
+                          : `Inga köp i ${activeCategory?.name || selectedCategoryFilter} detta datum.`)
+                      : (lang === 'en' 
+                          ? `No purchases registered in ${activeCategory?.name || selectedCategoryFilter} this period.` 
+                          : `Inga köp registrerade i ${activeCategory?.name || selectedCategoryFilter} denna period.`)}
+                  </p>
+                  
+                  <div className="flex items-center justify-center gap-2 pt-1">
+                    {categoryViewScope === 'day' && periodCategoryTransactions.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setCategoryViewScope('period')}
+                        className="px-3.5 py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-xs font-bold text-white transition-all cursor-pointer"
+                      >
+                        {lang === 'en' ? `Show all ${periodCategoryTransactions.length} period purchases` : `Visa hela periodens ${periodCategoryTransactions.length} köp`}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => onAddTransaction(selectedDate)}
+                      className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Plus size={13} strokeWidth={2.5} />
+                      <span>{lang === 'en' ? 'Add expense' : 'Lägg till köp'}</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <EmptyState
+                  title={isTodaySelected ? t("noTransactionsToday") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
+                  description={isTodaySelected ? t("addFirstTransaction") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
+                  onAction={() => onAddTransaction(selectedDate)}
+                  actionLabel={t("addExpense")}
+                />
+              )
             ) : null}
           </AnimatePresence>
 
           {/* Fixed transactions for the day (Natural Swedish casing) */}
-          {fixedTransactions.length > 0 && (
+          {displayedFixedTransactions.length > 0 && (
             <div className="space-y-2 pt-1">
               <h4 className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[#9CA6BC] px-1">
                 {lang === "en" ? "Fixed transactions" : "Fasta transaktioner"}
               </h4>
               <div className="space-y-2">
-                {fixedTransactions.map((item) => (
+                {displayedFixedTransactions.map((item) => (
                   <div
                     key={item.id}
                     onClick={() => {
