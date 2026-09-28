@@ -28,17 +28,35 @@ export function CategoryBudgetsWidget({
     .filter((c) => c.budget && c.budget > 0)
     .slice(0, 3)
     .map((cat) => {
-      // Calculate spent for this category in current period
+      const normCat = cat.name.trim().toLowerCase();
+      const periodStartMs = stats?.periodStart ? new Date(stats.periodStart).getTime() : 0;
+      const periodEndMs = stats?.periodEnd ? new Date(stats.periodEnd).getTime() + 86399999 : Infinity;
+
+      // Calculate spent for this category in current period with splits support
       const spent = allTransactions
         .filter((t) => {
-          if (!t.timestamp || t.type === 'income') return false;
-          if (stats?.periodStart && stats?.periodEnd) {
-            const tDate = new Date(t.timestamp);
-            if (tDate < stats.periodStart || tDate > stats.periodEnd) return false;
+          if (!t.timestamp || t.type === 'income' || t.isExcludedFromBudget || t.isInternalTransfer || t.isTransfer) return false;
+          if (t.timestamp < periodStartMs || t.timestamp > periodEndMs) return false;
+
+          const txCat = (t.category || '').trim().toLowerCase();
+          if (txCat === normCat) return true;
+
+          const splits = (t as any).splits;
+          if (splits && Array.isArray(splits) && splits.length > 0) {
+            return splits.some((s: any) => (s.category || '').trim().toLowerCase() === normCat);
           }
-          return t.category?.toLowerCase() === cat.name.toLowerCase();
+          return false;
         })
-        .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+        .reduce((sum, t) => {
+          const splits = (t as any).splits;
+          if (splits && Array.isArray(splits) && splits.length > 0) {
+            const splitSum = splits
+              .filter((s: any) => (s.category || '').trim().toLowerCase() === normCat)
+              .reduce((sSum: number, s: any) => sSum + (Number(s.amount) || 0), 0);
+            return sum + splitSum;
+          }
+          return sum + (Number(t.amount) || 0);
+        }, 0);
 
       const budget = Number(cat.budget) || 1;
       const progress = Math.min(100, Math.round((spent / budget) * 100));

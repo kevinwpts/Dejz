@@ -724,9 +724,40 @@ export default function App() {
           return { migrated, hasChanged };
         };
 
+        const LEGACY_EXPENSE_RENAMES: Record<string, { name: string; icon: string; color: string }> = {
+          'Shopping & Kläder': { name: 'Shopping', icon: 'shopping', color: '#ec4899' },
+          'Restaurang & Fika': { name: 'Restaurang', icon: 'utensils', color: '#f97316' },
+          'Streaming & Media': { name: 'Streaming', icon: 'tv', color: '#8b5cf6' },
+          'Boende & Hushåll': { name: 'Boende', icon: 'home', color: '#6366f1' },
+          'Transport & Pendling': { name: 'Transport', icon: 'car', color: '#0ea5e9' },
+          'Abonnemang & Tjänster': { name: 'Abonnemang', icon: 'smartphone', color: '#3b82f6' },
+          'Nöje & Fritid': { name: 'Nöjen', icon: 'drama', color: '#a855f7' },
+          'Träning & Hälsa': { name: 'Hälsa', icon: 'dumbbell', color: '#10b981' },
+          'Räkningar & Avgifter': { name: 'Räkningar', icon: 'receipt', color: '#64748b' },
+          'Resor & Semester': { name: 'Resor', icon: 'plane', color: '#06b6d4' },
+        };
+
         const migrateExpenseCategories = (categories: any[]) => {
-          const { migrated } = migrateCategories(categories);
-          let { hasChanged } = migrateCategories(categories);
+          const { migrated, hasChanged: iconChanged } = migrateCategories(categories);
+          let hasChanged = iconChanged;
+          const renamedPairs: { oldName: string; newName: string }[] = [];
+
+          for (let i = 0; i < migrated.length; i++) {
+            const cat = migrated[i];
+            const oldName = (cat.name || '').trim();
+            if (LEGACY_EXPENSE_RENAMES[oldName]) {
+              const target = LEGACY_EXPENSE_RENAMES[oldName];
+              migrated[i] = {
+                ...cat,
+                name: target.name,
+                icon: target.icon || cat.icon,
+                color: cat.color || target.color,
+              };
+              renamedPairs.push({ oldName, newName: target.name });
+              hasChanged = true;
+            }
+          }
+
           const hasInsurance = migrated.some(
             (c) =>
               (c.name || '').trim().toLowerCase() === "försäkringar" ||
@@ -740,7 +771,7 @@ export default function App() {
             const newCat = {
               name: "Försäkringar",
               icon: "shield",
-              color: "#0ea5e9",
+              color: "#0284c7",
             };
             if (ovrigtIdx !== -1) {
               migrated.splice(ovrigtIdx, 0, newCat);
@@ -749,16 +780,79 @@ export default function App() {
             }
             hasChanged = true;
           }
-          return { migrated, hasChanged };
+
+          const hasStreaming = migrated.some(
+            (c) =>
+              (c.name || '').trim().toLowerCase().includes("streaming") ||
+              (c.name || '').trim().toLowerCase().includes("stream"),
+          );
+          if (!hasStreaming && migrated.length > 0) {
+            const ovrigtIdx = migrated.findIndex(
+              (c) => (c.name || '').trim().toLowerCase() === "övrigt",
+            );
+            const newCat = {
+              name: "Streaming",
+              icon: "tv",
+              color: "#8b5cf6",
+            };
+            if (ovrigtIdx !== -1) {
+              migrated.splice(ovrigtIdx, 0, newCat);
+            } else {
+              migrated.push(newCat);
+            }
+            hasChanged = true;
+          }
+
+          const hasFika = migrated.some(
+            (c) => (c.name || '').trim().toLowerCase() === "fika",
+          );
+          if (!hasFika && migrated.length > 0) {
+            const restIdx = migrated.findIndex(
+              (c) => (c.name || '').trim().toLowerCase() === "restaurang",
+            );
+            const fikaCat = {
+              name: "Fika",
+              icon: "coffee",
+              color: "#d97706",
+            };
+            if (restIdx !== -1) {
+              migrated.splice(restIdx + 1, 0, fikaCat);
+            } else {
+              migrated.push(fikaCat);
+            }
+            hasChanged = true;
+          }
+
+          const hasAbonnemang = migrated.some(
+            (c) => (c.name || '').trim().toLowerCase().includes("abonnemang"),
+          );
+          if (!hasAbonnemang && migrated.length > 0) {
+            const ovrigtIdx = migrated.findIndex(
+              (c) => (c.name || '').trim().toLowerCase() === "övrigt",
+            );
+            const abonCat = {
+              name: "Abonnemang",
+              icon: "smartphone",
+              color: "#3b82f6",
+            };
+            if (ovrigtIdx !== -1) {
+              migrated.splice(ovrigtIdx, 0, abonCat);
+            } else {
+              migrated.push(abonCat);
+            }
+            hasChanged = true;
+          }
+
+          return { migrated, hasChanged, renamedPairs };
         };
 
-        const { migrated: migratedExpense, hasChanged: expenseChanged } =
+        const { migrated: migratedExpense, hasChanged: expenseChanged, renamedPairs: authRenamedPairs } =
           migrateExpenseCategories(dbSettings.categories || []);
         const { migrated: migratedIncome, hasChanged: incomeChanged } =
           migrateCategories(dbSettings.incomeCategories || []);
 
         if (expenseChanged || incomeChanged) {
-          console.log("[Migration] Migrated categories back to icons");
+          console.log("[Migration] Migrated categories back to clean standards");
           const updatedSettings = {
             ...dbSettings,
             categories: migratedExpense,
@@ -774,6 +868,12 @@ export default function App() {
             });
           dbSettings.categories = migratedExpense;
           dbSettings.incomeCategories = migratedIncome;
+
+          if (authRenamedPairs && authRenamedPairs.length > 0) {
+            for (const pair of authRenamedPairs) {
+              dataService.renameCategory(session.user.id, pair.oldName, pair.newName).catch(() => {});
+            }
+          }
         }
 
         let languageToUse = dbSettings.language;
@@ -1888,9 +1988,40 @@ export default function App() {
           return { migrated, hasChanged };
         };
 
+        const LEGACY_EXPENSE_RENAMES: Record<string, { name: string; icon: string; color: string }> = {
+          'Shopping & Kläder': { name: 'Shopping', icon: 'shopping', color: '#ec4899' },
+          'Restaurang & Fika': { name: 'Restaurang', icon: 'utensils', color: '#f97316' },
+          'Streaming & Media': { name: 'Streaming', icon: 'tv', color: '#8b5cf6' },
+          'Boende & Hushåll': { name: 'Boende', icon: 'home', color: '#6366f1' },
+          'Transport & Pendling': { name: 'Transport', icon: 'car', color: '#0ea5e9' },
+          'Abonnemang & Tjänster': { name: 'Abonnemang', icon: 'smartphone', color: '#3b82f6' },
+          'Nöje & Fritid': { name: 'Nöjen', icon: 'drama', color: '#a855f7' },
+          'Träning & Hälsa': { name: 'Hälsa', icon: 'dumbbell', color: '#10b981' },
+          'Räkningar & Avgifter': { name: 'Räkningar', icon: 'receipt', color: '#64748b' },
+          'Resor & Semester': { name: 'Resor', icon: 'plane', color: '#06b6d4' },
+        };
+
         const migrateExpenseCategories = (cats: any[]) => {
-          const { migrated } = migrateCategories(cats);
-          let { hasChanged } = migrateCategories(cats);
+          const { migrated, hasChanged: iconChanged } = migrateCategories(cats);
+          let hasChanged = iconChanged;
+          const renamedPairs: { oldName: string; newName: string }[] = [];
+
+          for (let i = 0; i < migrated.length; i++) {
+            const cat = migrated[i];
+            const oldName = (cat.name || '').trim();
+            if (LEGACY_EXPENSE_RENAMES[oldName]) {
+              const target = LEGACY_EXPENSE_RENAMES[oldName];
+              migrated[i] = {
+                ...cat,
+                name: target.name,
+                icon: target.icon || cat.icon,
+                color: cat.color || target.color,
+              };
+              renamedPairs.push({ oldName, newName: target.name });
+              hasChanged = true;
+            }
+          }
+
           const hasInsurance = migrated.some(
             (c) =>
               (c.name || '').trim().toLowerCase() === "försäkringar" ||
@@ -1904,7 +2035,7 @@ export default function App() {
             const newCat = {
               name: "Försäkringar",
               icon: "shield",
-              color: "#0ea5e9",
+              color: "#0284c7",
             };
             if (ovrigtIdx !== -1) {
               migrated.splice(ovrigtIdx, 0, newCat);
@@ -1913,7 +2044,70 @@ export default function App() {
             }
             hasChanged = true;
           }
-          return { migrated, hasChanged };
+
+          const hasStreaming = migrated.some(
+            (c) =>
+              (c.name || '').trim().toLowerCase().includes("streaming") ||
+              (c.name || '').trim().toLowerCase().includes("stream"),
+          );
+          if (!hasStreaming && migrated.length > 0) {
+            const ovrigtIdx = migrated.findIndex(
+              (c) => (c.name || '').trim().toLowerCase() === "övrigt",
+            );
+            const newCat = {
+              name: "Streaming",
+              icon: "tv",
+              color: "#8b5cf6",
+            };
+            if (ovrigtIdx !== -1) {
+              migrated.splice(ovrigtIdx, 0, newCat);
+            } else {
+              migrated.push(newCat);
+            }
+            hasChanged = true;
+          }
+
+          const hasFika = migrated.some(
+            (c) => (c.name || '').trim().toLowerCase() === "fika",
+          );
+          if (!hasFika && migrated.length > 0) {
+            const restIdx = migrated.findIndex(
+              (c) => (c.name || '').trim().toLowerCase() === "restaurang",
+            );
+            const fikaCat = {
+              name: "Fika",
+              icon: "coffee",
+              color: "#d97706",
+            };
+            if (restIdx !== -1) {
+              migrated.splice(restIdx + 1, 0, fikaCat);
+            } else {
+              migrated.push(fikaCat);
+            }
+            hasChanged = true;
+          }
+
+          const hasAbonnemang = migrated.some(
+            (c) => (c.name || '').trim().toLowerCase().includes("abonnemang"),
+          );
+          if (!hasAbonnemang && migrated.length > 0) {
+            const ovrigtIdx = migrated.findIndex(
+              (c) => (c.name || '').trim().toLowerCase() === "övrigt",
+            );
+            const abonCat = {
+              name: "Abonnemang",
+              icon: "smartphone",
+              color: "#3b82f6",
+            };
+            if (ovrigtIdx !== -1) {
+              migrated.splice(ovrigtIdx, 0, abonCat);
+            } else {
+              migrated.push(abonCat);
+            }
+            hasChanged = true;
+          }
+
+          return { migrated, hasChanged, renamedPairs };
         };
 
         const rawCategories = dbProfile.categories && dbProfile.categories.length > 0
@@ -1924,15 +2118,21 @@ export default function App() {
           ? dbProfile.income_categories
           : DEFAULT_INCOME_CATEGORIES;
 
-        const { migrated: migratedExpense, hasChanged: expenseChanged } =
+        const { migrated: migratedExpense, hasChanged: expenseChanged, renamedPairs: fetchRenamedPairs } =
           migrateExpenseCategories(rawCategories);
         const { migrated: migratedIncome, hasChanged: incomeChanged } =
           migrateCategories(rawIncomeCategories);
 
         if (expenseChanged || incomeChanged) {
-          console.log("[Migration fetchData] Migrated categories back to icons");
+          console.log("[Migration fetchData] Migrated categories back to clean standards");
           dbProfile.categories = migratedExpense;
           dbProfile.income_categories = migratedIncome;
+
+          if (fetchRenamedPairs && fetchRenamedPairs.length > 0) {
+            for (const pair of fetchRenamedPairs) {
+              dataService.renameCategory(session.user.id, pair.oldName, pair.newName).catch(() => {});
+            }
+          }
           
           // Async save migrated settings back
           dataService.saveSettings(session.user.id, {
@@ -3413,6 +3613,112 @@ export default function App() {
     });
   };
 
+  const handleRenameCategory = async (
+    type: "income" | "expense",
+    oldName: string,
+    newName: string,
+  ) => {
+    const trimmedOld = oldName.trim();
+    const trimmedNew = newName.trim();
+    if (
+      !trimmedOld ||
+      !trimmedNew ||
+      trimmedOld.toLowerCase() === trimmedNew.toLowerCase()
+    ) {
+      return;
+    }
+
+    // 1. Update in-memory transactions (both direct category and splits)
+    setTransactions((prev) => {
+      let anyTxChanged = false;
+      const next = prev.map((t) => {
+        let changed = false;
+        let newCat = t.category;
+        let newSplits = t.splits;
+
+        const isMatchingType =
+          type === "income" ? t.type === "income" : t.type !== "income";
+        if (
+          isMatchingType &&
+          (t.category || "").trim().toLowerCase() === trimmedOld.toLowerCase()
+        ) {
+          newCat = trimmedNew;
+          changed = true;
+        }
+
+        if (t.splits && Array.isArray(t.splits) && t.splits.length > 0) {
+          const nextSplits = t.splits.map((s: any) => {
+            if (
+              (s.category || "").trim().toLowerCase() ===
+              trimmedOld.toLowerCase()
+            ) {
+              changed = true;
+              return { ...s, category: trimmedNew };
+            }
+            return s;
+          });
+          if (changed) {
+            newSplits = nextSplits;
+          }
+        }
+
+        if (changed) {
+          anyTxChanged = true;
+          return { ...t, category: newCat, splits: newSplits };
+        }
+        return t;
+      });
+      return anyTxChanged ? next : prev;
+    });
+
+    // 2. Update fixed expenses in memory
+    if (type === "expense") {
+      setFixedExpenses((prev) =>
+        prev.map((e) =>
+          (e.category || "").trim().toLowerCase() === trimmedOld.toLowerCase()
+            ? { ...e, category: trimmedNew }
+            : e,
+        ),
+      );
+    }
+
+    // 3. Update incomes in memory
+    if (type === "income") {
+      setIncomes((prev) =>
+        prev.map((i) =>
+          (i.category || "").trim().toLowerCase() === trimmedOld.toLowerCase()
+            ? { ...i, category: trimmedNew }
+            : i,
+        ),
+      );
+    }
+
+    // 4. Update quickChoices in config if present
+    if (config?.quickChoices && config.quickChoices.length > 0) {
+      const updatedQC = config.quickChoices.map((qc) =>
+        (qc.category || "").trim().toLowerCase() === trimmedOld.toLowerCase()
+          ? { ...qc, category: trimmedNew }
+          : qc,
+      );
+      setConfig((prev) => (prev ? { ...prev, quickChoices: updatedQC } : prev));
+    }
+
+    // 5. Persist rename to database / local storage
+    const activeUserId = session?.user?.id || (isDemoMode ? "demo-user" : "");
+    if (activeUserId) {
+      try {
+        await dataService.renameCategory(
+          activeUserId,
+          type,
+          trimmedOld,
+          trimmedNew,
+        );
+      } catch (err) {
+        console.error("Failed to rename category in database:", err);
+      }
+    }
+  };
+
   const t = (key: TranslationKey, params?: Record<string, string | number>) => {
     const lang = (config?.language as Language) || landingLanguage;
     let translation = translations[lang]?.[key] || translations["sv"][key] || key;
@@ -4002,6 +4308,7 @@ export default function App() {
                 onClearTransactions={handleClearTransactions}
                 onResetAll={resetAll}
                 onTriggerProUpgradeModal={() => setIsProModalOpen(true)}
+                onRenameCategory={handleRenameCategory}
               />
             </div>
           )}
@@ -4032,6 +4339,7 @@ export default function App() {
                   }
                 }}
                 onNavigate={handleNavigate}
+                onRenameCategory={handleRenameCategory}
                 isDemoMode={isDemoMode}
                 onExitDemo={handleExitDemo}
                 onFeedbackClick={() => setIsFeedbackModalOpen(true)}

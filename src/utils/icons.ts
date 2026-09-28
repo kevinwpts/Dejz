@@ -930,24 +930,29 @@ export const resolveLucideIcon = (val: string | undefined | null): string => {
 
 export const getCategoryIconName = (categoryName: string): string => {
   const name = categoryName.toLowerCase();
-  if (name.includes('mat') || name.includes('fika') || name.includes('lunch') || name.includes('middag') || name.includes('restaurang')) return 'utensils';
-  if (name.includes('transport') || name.includes('pendel') || name.includes('buss') || name.includes('tåg') || name.includes('bil')) return 'car';
+  if (name.includes('streaming') || name.includes('media') || name.includes('tv') || name.includes('netflix') || name.includes('spotify')) return 'tv';
+  if (name.includes('fika') || name.includes('kaffe') || name.includes('café') || name.includes('kafé')) return 'coffee';
+  if (name.includes('dagligvaror') || name.includes('matbutik') || name.includes('livsmedel') || name.includes('supermarket')) return 'shoppingcart';
+  if (name.includes('restaurang') || name.includes('lunch') || name.includes('middag') || name.includes('utemat') || name.includes('mat')) return 'utensils';
+  if (name.includes('transport') || name.includes('pendel') || name.includes('buss') || name.includes('tåg') || name.includes('bil') || name.includes('drivmedel')) return 'car';
   if (name.includes('shopping') || name.includes('kläder') || name.includes('skor')) return 'shopping';
-  if (name.includes('nöje') || name.includes('bio') || name.includes('kultur') || name.includes('teater')) return 'drama';
-  if (name.includes('hem') || name.includes('boende') || name.includes('hyra')) return 'home';
-  if (name.includes('hälsa') || name.includes('apotek') || name.includes('tand') || name.includes('vård')) return 'health';
   if (name.includes('träning') || name.includes('gym') || name.includes('fitness') || name.includes('sport')) return 'dumbbell';
-  if (name.includes('abonnemang') || name.includes('prenumeration') || name.includes('streaming') || name.includes('tv')) return 'tv';
-  if (name.includes('räkningar') || name.includes('fasta utgifter') || name.includes('faktura')) return 'receipt';
+  if (name.includes('skönhet') || name.includes('frisör') || name.includes('klippning') || name.includes('egenvård')) return 'scissors';
+  if (name.includes('nöje') || name.includes('bio') || name.includes('kultur') || name.includes('teater') || name.includes('spel')) return 'drama';
+  if (name.includes('hem') || name.includes('boende') || name.includes('hyra') || name.includes('hushåll')) return 'home';
+  if (name.includes('hälsa') || name.includes('apotek') || name.includes('tand') || name.includes('vård')) return 'health';
+  if (name.includes('abonnemang') || name.includes('mobil') || name.includes('telefoni') || name.includes('tjänster')) return 'smartphone';
+  if (name.includes('räkningar') || name.includes('fasta utgifter') || name.includes('faktura') || name.includes('avgifter')) return 'receipt';
   if (name.includes('försäkring')) return 'shield';
   if (name.includes('resa') || name.includes('semester') || name.includes('flyg') || name.includes('hotell')) return 'plane';
   if (name.includes('familj') || name.includes('barn')) return 'baby';
-  if (name.includes('djur') || name.includes('hund') || name.includes('katt')) return 'dog';
+  if (name.includes('djur') || name.includes('hund') || name.includes('katt') || name.includes('husdjur')) return 'dog';
   if (name.includes('spargris') || name.includes('sparande') || name.includes('buffert')) return 'savings';
   if (name.includes('lön') || name.includes('inkomst')) return 'banknote';
   if (name.includes('investering') || name.includes('aktier') || name.includes('överskott')) return 'trending';
   if (name.includes('bidrag') || name.includes('gåva') || name.includes('present')) return 'gift';
   if (name.includes('swish') || name.includes('överföring')) return 'arrowdownup';
+  if (name.includes('övrigt') || name.includes('övriga') || name.includes('annat')) return 'package';
   if (name.includes('okategoriserat') || name.includes('uncategorized')) return 'tag';
   return 'tag';
 };

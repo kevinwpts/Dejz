@@ -25,6 +25,7 @@ interface SettingsMainViewProps {
   onClearTransactions: () => void;
   onResetAll: () => void;
   onTriggerProUpgradeModal?: () => void;
+  onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
   onNavigate: (tab: string, section?: string) => void;
   initialSection?: 'main' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance';
 }
@@ -48,6 +49,7 @@ export function SettingsMainView({
   onClearTransactions,
   onResetAll,
   onTriggerProUpgradeModal,
+  onRenameCategory,
   onNavigate,
   initialSection = 'main'
 }: SettingsMainViewProps) {
@@ -97,6 +99,7 @@ export function SettingsMainView({
           onClearTransactions={onClearTransactions}
           onResetAll={onResetAll}
           onTriggerProUpgradeModal={onTriggerProUpgradeModal}
+          onRenameCategory={onRenameCategory}
         />
       </motion.div>
     );

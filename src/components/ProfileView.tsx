@@ -49,8 +49,8 @@ interface ProfileViewProps {
   onCalculatorClick?: () => void;
   onTriggerProUpgradeModal?: () => void;
   isDemoMode?: boolean;
-  onExitDemo?: () => void;
   onViewTransaction: (t: Transaction) => void;
+  onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
 }
 
 export function ProfileView({ 
@@ -93,7 +93,8 @@ export function ProfileView({
   onTriggerProUpgradeModal,
   isDemoMode,
   onExitDemo,
-  onViewTransaction
+  onViewTransaction,
+  onRenameCategory,
 }: ProfileViewProps) {
   const [activePage, setActivePage] = useState<'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'pro' | 'receipts'>(initialSection as any);
 
@@ -145,6 +146,7 @@ export function ProfileView({
           onClearTransactions={onClearTransactions}
           onResetAll={onResetAll}
           onTriggerProUpgradeModal={onTriggerProUpgradeModal}
+          onRenameCategory={onRenameCategory}
         />
       </motion.div>
     );

@@ -33,6 +33,7 @@ interface SettingsViewProps {
   onClearTransactions: () => void;
   onResetAll: () => void;
   onTriggerProUpgradeModal?: () => void;
+  onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
 }
 
 
@@ -177,7 +178,8 @@ export function SettingsView({
   _onResetCompletedGoals,
   _onClearTransactions,
   _onResetAll,
-  onTriggerProUpgradeModal: _onTriggerProUpgradeModal
+  onTriggerProUpgradeModal: _onTriggerProUpgradeModal,
+  onRenameCategory,
 }: SettingsViewProps) {
   const [categoryTab, setCategoryTab] = useState<'expense' | 'income'>('expense');
 
@@ -222,6 +224,9 @@ export function SettingsView({
     const field = type === 'income' ? 'incomeCategories' : 'categories';
     const currentCategories = [...(config[field] || [])];
     
+    const oldName = categoryModalData.index !== undefined ? categoryModalData.name : null;
+    const newName = (data.name || '').trim();
+
     if (data.index !== undefined) {
       currentCategories[data.index] = { ...currentCategories[data.index], name: data.name, icon: data.icon, color: data.color };
     } else {
@@ -230,6 +235,10 @@ export function SettingsView({
     
     setConfig({ ...config, [field]: currentCategories });
     setIsCategoryModalOpen(false);
+
+    if (oldName && newName && oldName.trim().toLowerCase() !== newName.toLowerCase()) {
+      onRenameCategory?.(type, oldName.trim(), newName);
+    }
   };
 
   const handleDeleteCategory = (type: 'income' | 'expense', index: number) => {

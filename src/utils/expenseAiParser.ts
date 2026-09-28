@@ -34,32 +34,32 @@ const SWEDISH_BRAND_CATEGORIES: Record<string, { categoryKeyword: string; defaul
   'matsmart': { categoryKeyword: 'mat', defaultMerchant: 'Matsmart', icon: 'ShoppingCart' },
   'snabbgross': { categoryKeyword: 'mat', defaultMerchant: 'Snabbgross', icon: 'ShoppingCart' },
   'tempo': { categoryKeyword: 'mat', defaultMerchant: 'Tempo', icon: 'ShoppingCart' },
-  'espresso house': { categoryKeyword: 'mat', defaultMerchant: 'Espresso House', icon: 'Coffee' },
-  'starbucks': { categoryKeyword: 'mat', defaultMerchant: 'Starbucks', icon: 'Coffee' },
-  'waynes': { categoryKeyword: 'mat', defaultMerchant: "Wayne's Coffee", icon: 'Coffee' },
-  'bröd & salt': { categoryKeyword: 'mat', defaultMerchant: 'Bröd & Salt', icon: 'Coffee' },
-  'gateau': { categoryKeyword: 'mat', defaultMerchant: 'Gateau', icon: 'Coffee' },
-  'fabrique': { categoryKeyword: 'mat', defaultMerchant: 'Fabrique', icon: 'Coffee' },
-  'mcdonalds': { categoryKeyword: 'mat', defaultMerchant: "McDonald's", icon: 'Utensils' },
-  'donken': { categoryKeyword: 'mat', defaultMerchant: "McDonald's", icon: 'Utensils' },
-  'max': { categoryKeyword: 'mat', defaultMerchant: 'Max Burgers', icon: 'Utensils' },
-  'max burgers': { categoryKeyword: 'mat', defaultMerchant: 'Max Burgers', icon: 'Utensils' },
-  'burger king': { categoryKeyword: 'mat', defaultMerchant: 'Burger King', icon: 'Utensils' },
-  'bastard burgers': { categoryKeyword: 'mat', defaultMerchant: 'Bastard Burgers', icon: 'Utensils' },
-  'pinchos': { categoryKeyword: 'mat', defaultMerchant: 'Pinchos', icon: 'Utensils' },
-  'subway': { categoryKeyword: 'mat', defaultMerchant: 'Subway', icon: 'Utensils' },
-  'kfc': { categoryKeyword: 'mat', defaultMerchant: 'KFC', icon: 'Utensils' },
-  'foodora': { categoryKeyword: 'mat', defaultMerchant: 'Foodora', icon: 'Utensils' },
-  'wolt': { categoryKeyword: 'mat', defaultMerchant: 'Wolt', icon: 'Utensils' },
-  'uber eats': { categoryKeyword: 'mat', defaultMerchant: 'Uber Eats', icon: 'Utensils' },
-  'ubereats': { categoryKeyword: 'mat', defaultMerchant: 'Uber Eats', icon: 'Utensils' },
-  'chopchop': { categoryKeyword: 'mat', defaultMerchant: 'ChopChop', icon: 'Utensils' },
-  'kaffe': { categoryKeyword: 'mat', defaultMerchant: 'Kaffe', icon: 'Coffee' },
-  'lunch': { categoryKeyword: 'mat', defaultMerchant: 'Lunch', icon: 'Utensils' },
-  'middag': { categoryKeyword: 'mat', defaultMerchant: 'Middag', icon: 'Utensils' },
-  'fika': { categoryKeyword: 'mat', defaultMerchant: 'Fika', icon: 'Coffee' },
-  'pizza': { categoryKeyword: 'mat', defaultMerchant: 'Pizzeria', icon: 'Utensils' },
-  'sushi': { categoryKeyword: 'mat', defaultMerchant: 'Sushi', icon: 'Utensils' },
+  'espresso house': { categoryKeyword: 'fika', defaultMerchant: 'Espresso House', icon: 'Coffee' },
+  'starbucks': { categoryKeyword: 'fika', defaultMerchant: 'Starbucks', icon: 'Coffee' },
+  'waynes': { categoryKeyword: 'fika', defaultMerchant: "Wayne's Coffee", icon: 'Coffee' },
+  'bröd & salt': { categoryKeyword: 'fika', defaultMerchant: 'Bröd & Salt', icon: 'Coffee' },
+  'gateau': { categoryKeyword: 'fika', defaultMerchant: 'Gateau', icon: 'Coffee' },
+  'fabrique': { categoryKeyword: 'fika', defaultMerchant: 'Fabrique', icon: 'Coffee' },
+  'mcdonalds': { categoryKeyword: 'restaurang', defaultMerchant: "McDonald's", icon: 'Utensils' },
+  'donken': { categoryKeyword: 'restaurang', defaultMerchant: "McDonald's", icon: 'Utensils' },
+  'max': { categoryKeyword: 'restaurang', defaultMerchant: 'Max Burgers', icon: 'Utensils' },
+  'max burgers': { categoryKeyword: 'restaurang', defaultMerchant: 'Max Burgers', icon: 'Utensils' },
+  'burger king': { categoryKeyword: 'restaurang', defaultMerchant: 'Burger King', icon: 'Utensils' },
+  'bastard burgers': { categoryKeyword: 'restaurang', defaultMerchant: 'Bastard Burgers', icon: 'Utensils' },
+  'pinchos': { categoryKeyword: 'restaurang', defaultMerchant: 'Pinchos', icon: 'Utensils' },
+  'subway': { categoryKeyword: 'restaurang', defaultMerchant: 'Subway', icon: 'Utensils' },
+  'kfc': { categoryKeyword: 'restaurang', defaultMerchant: 'KFC', icon: 'Utensils' },
+  'foodora': { categoryKeyword: 'restaurang', defaultMerchant: 'Foodora', icon: 'Utensils' },
+  'wolt': { categoryKeyword: 'restaurang', defaultMerchant: 'Wolt', icon: 'Utensils' },
+  'uber eats': { categoryKeyword: 'restaurang', defaultMerchant: 'Uber Eats', icon: 'Utensils' },
+  'ubereats': { categoryKeyword: 'restaurang', defaultMerchant: 'Uber Eats', icon: 'Utensils' },
+  'chopchop': { categoryKeyword: 'restaurang', defaultMerchant: 'ChopChop', icon: 'Utensils' },
+  'kaffe': { categoryKeyword: 'fika', defaultMerchant: 'Kaffe', icon: 'Coffee' },
+  'lunch': { categoryKeyword: 'restaurang', defaultMerchant: 'Lunch', icon: 'Utensils' },
+  'middag': { categoryKeyword: 'restaurang', defaultMerchant: 'Middag', icon: 'Utensils' },
+  'fika': { categoryKeyword: 'fika', defaultMerchant: 'Fika', icon: 'Coffee' },
+  'pizza': { categoryKeyword: 'restaurang', defaultMerchant: 'Pizzeria', icon: 'Utensils' },
+  'sushi': { categoryKeyword: 'restaurang', defaultMerchant: 'Sushi', icon: 'Utensils' },
 
   // Transport & Drivmedel
   'sl': { categoryKeyword: 'transport', defaultMerchant: 'SL', icon: 'Bus' },
@@ -151,18 +151,18 @@ const SWEDISH_BRAND_CATEGORIES: Record<string, { categoryKeyword: string; defaul
   'plantagen': { categoryKeyword: 'boende', defaultMerchant: 'Plantagen', icon: 'Flower2' },
   'blomsterlandet': { categoryKeyword: 'boende', defaultMerchant: 'Blomsterlandet', icon: 'Flower2' },
 
-  // Nöje & Abonnemang
-  'spotify': { categoryKeyword: 'nöje', defaultMerchant: 'Spotify', icon: 'Music' },
-  'netflix': { categoryKeyword: 'nöje', defaultMerchant: 'Netflix', icon: 'Tv' },
-  'hbo': { categoryKeyword: 'nöje', defaultMerchant: 'HBO Max', icon: 'Tv' },
-  'hbo max': { categoryKeyword: 'nöje', defaultMerchant: 'HBO Max', icon: 'Tv' },
-  'viaplay': { categoryKeyword: 'nöje', defaultMerchant: 'Viaplay', icon: 'Tv' },
-  'disney': { categoryKeyword: 'nöje', defaultMerchant: 'Disney+', icon: 'Tv' },
-  'disney+': { categoryKeyword: 'nöje', defaultMerchant: 'Disney+', icon: 'Tv' },
-  'youtube': { categoryKeyword: 'nöje', defaultMerchant: 'YouTube Premium', icon: 'Tv' },
-  'storytel': { categoryKeyword: 'nöje', defaultMerchant: 'Storytel', icon: 'BookOpen' },
-  'bookbeat': { categoryKeyword: 'nöje', defaultMerchant: 'BookBeat', icon: 'BookOpen' },
-  'nextory': { categoryKeyword: 'nöje', defaultMerchant: 'Nextory', icon: 'BookOpen' },
+  // Streaming, Media & Abonnemang
+  'spotify': { categoryKeyword: 'streaming', defaultMerchant: 'Spotify', icon: 'Music' },
+  'netflix': { categoryKeyword: 'streaming', defaultMerchant: 'Netflix', icon: 'Tv' },
+  'hbo': { categoryKeyword: 'streaming', defaultMerchant: 'HBO Max', icon: 'Tv' },
+  'hbo max': { categoryKeyword: 'streaming', defaultMerchant: 'HBO Max', icon: 'Tv' },
+  'viaplay': { categoryKeyword: 'streaming', defaultMerchant: 'Viaplay', icon: 'Tv' },
+  'disney': { categoryKeyword: 'streaming', defaultMerchant: 'Disney+', icon: 'Tv' },
+  'disney+': { categoryKeyword: 'streaming', defaultMerchant: 'Disney+', icon: 'Tv' },
+  'youtube': { categoryKeyword: 'streaming', defaultMerchant: 'YouTube Premium', icon: 'Tv' },
+  'storytel': { categoryKeyword: 'streaming', defaultMerchant: 'Storytel', icon: 'BookOpen' },
+  'bookbeat': { categoryKeyword: 'streaming', defaultMerchant: 'BookBeat', icon: 'BookOpen' },
+  'nextory': { categoryKeyword: 'streaming', defaultMerchant: 'Nextory', icon: 'BookOpen' },
   'filmstaden': { categoryKeyword: 'nöje', defaultMerchant: 'Filmstaden', icon: 'Film' },
   'bio': { categoryKeyword: 'nöje', defaultMerchant: 'Bio', icon: 'Film' },
   'steam': { categoryKeyword: 'nöje', defaultMerchant: 'Steam', icon: 'Gamepad2' },
@@ -257,10 +257,44 @@ function findBestUserCategory(keyword: string, categories: Category[], defaultCa
   if (partial) return partial.name;
 
   // Specific semantic fallbacks
-  if (normKey.includes('mat') || normKey.includes('livsmedel') || normKey.includes('restaurang') || normKey.includes('fika')) {
+  if (normKey.includes('fika') || normKey.includes('kaffe') || normKey.includes('café') || normKey.includes('kafé')) {
+    const fikaCat = categories.find(c => {
+      const n = normalize(c.name);
+      return n.includes('fika') || n.includes('kaffe') || n.includes('café') || n.includes('kafé');
+    });
+    if (fikaCat) return fikaCat.name;
+    const restCat = categories.find(c => normalize(c.name).includes('restaurang') || normalize(c.name).includes('mat'));
+    if (restCat) return restCat.name;
+  }
+
+  if (normKey.includes('restaurang') || normKey.includes('lunch') || normKey.includes('middag') || normKey.includes('utemat')) {
+    const restCat = categories.find(c => {
+      const n = normalize(c.name);
+      return n.includes('restaurang') || n.includes('lunch') || n.includes('utemat') || n.includes('mat');
+    });
+    if (restCat) return restCat.name;
+  }
+
+  if (normKey.includes('streaming') || normKey.includes('media') || normKey.includes('film') || normKey.includes('musik') || normKey.includes('ljudbok')) {
+    const streamCat = categories.find(c => {
+      const n = normalize(c.name);
+      return n.includes('stream') || n.includes('media') || n.includes('tv');
+    });
+    if (streamCat) return streamCat.name;
+  }
+
+  if (normKey.includes('abonnemang') || normKey.includes('telefon') || normKey.includes('mobil') || normKey.includes('bredband') || normKey.includes('fiber')) {
+    const abonCat = categories.find(c => {
+      const n = normalize(c.name);
+      return n.includes('abonnemang') || n.includes('mobil') || n.includes('tele') || n.includes('räkning');
+    });
+    if (abonCat) return abonCat.name;
+  }
+
+  if (normKey.includes('mat') || normKey.includes('livsmedel') || normKey.includes('dagligvaror')) {
     const matCat = categories.find(c => {
       const n = normalize(c.name);
-      return n.includes('mat') || n.includes('livsmedel') || n.includes('groceries') || n.includes('food') || n.includes('vardag');
+      return n.includes('mat') || n.includes('livsmedel') || n.includes('dagligvaror') || n.includes('groceries') || n.includes('food');
     });
     if (matCat) return matCat.name;
   }
@@ -281,10 +315,10 @@ function findBestUserCategory(keyword: string, categories: Category[], defaultCa
     if (shopCat) return shopCat.name;
   }
 
-  if (normKey.includes('nöje') || normKey.includes('fritid') || normKey.includes('abonnemang') || normKey.includes('underhållning')) {
+  if (normKey.includes('nöje') || normKey.includes('nöjen') || normKey.includes('fritid') || normKey.includes('underhållning')) {
     const nojeCat = categories.find(c => {
       const n = normalize(c.name);
-      return n.includes('nöje') || n.includes('fritid') || n.includes('abonnemang') || n.includes('kul');
+      return n.includes('nöje') || n.includes('fritid') || n.includes('kul');
     });
     if (nojeCat) return nojeCat.name;
   }
@@ -303,6 +337,14 @@ function findBestUserCategory(keyword: string, categories: Category[], defaultCa
       return n.includes('hälsa') || n.includes('trän') || n.includes('apotek') || n.includes('skönhet');
     });
     if (healthCat) return healthCat.name;
+  }
+
+  if (normKey.includes('räkning') || normKey.includes('faktura') || normKey.includes('avgift') || normKey.includes('lån')) {
+    const billCat = categories.find(c => {
+      const n = normalize(c.name);
+      return n.includes('räkning') || n.includes('faktura') || n.includes('avgift') || n.includes('lån');
+    });
+    if (billCat) return billCat.name;
   }
 
   return categories[0]?.name || defaultCategory;

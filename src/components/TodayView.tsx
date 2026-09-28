@@ -331,23 +331,50 @@ export function TodayView({
   const categoryBudgetData = useMemo(() => {
     if (!stats || !config?.categories || config.categories.length === 0) return [];
 
+    const periodStartMs = stats?.periodStart ? new Date(stats.periodStart).getTime() : 0;
+    const periodEndMs = stats?.periodEnd ? new Date(stats.periodEnd).getTime() + 86399999 : Infinity;
+
+    // Filter transactions strictly within the current period
+    const currentPeriodTransactions = (stats.periodTransactions || (allTransactions || []).filter((t: any) => {
+      if (!t.timestamp) return false;
+      return t.timestamp >= periodStartMs && t.timestamp <= periodEndMs;
+    }));
+
     const pool = config.categories;
 
     return pool
       .map((cat: any, index: number) => {
         const name = cat.name;
-        const spent = stats.periodTransactions
-          ? stats.periodTransactions
-              .filter((t: any) => t.category?.toLowerCase() === name.toLowerCase() && t.type !== "income")
-              .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0)
-          : 0;
+        const normName = name.trim().toLowerCase();
+
+        // Calculate variable spent with splits support (identical to AnalysisView)
+        const spent = currentPeriodTransactions
+          .filter((t: any) => {
+            if (t.type === "income" || t.isExcludedFromBudget || t.isInternalTransfer || t.isTransfer) return false;
+            if ((t.category || "").trim().toLowerCase() === normName) return true;
+            const splits = (t as any).splits;
+            if (splits && Array.isArray(splits) && splits.length > 0) {
+              return splits.some((s: any) => (s.category || "").trim().toLowerCase() === normName);
+            }
+            return false;
+          })
+          .reduce((sum: number, t: any) => {
+            const splits = (t as any).splits;
+            if (splits && Array.isArray(splits) && splits.length > 0) {
+              const splitSum = splits
+                .filter((s: any) => (s.category || "").trim().toLowerCase() === normName)
+                .reduce((sSum: number, s: any) => sSum + (Number(s.amount) || 0), 0);
+              return sum + splitSum;
+            }
+            return sum + (Number(t.amount) || 0);
+          }, 0);
 
         const budgetValue = cat.budget !== undefined && cat.budget !== null 
           ? Number(String(cat.budget).replace(/[^0-9.]/g, "")) 
           : 0;
         
         const fixedSpent = (fixedExpenses || [])
-          .filter((e) => e.category?.trim().toLowerCase() === name.trim().toLowerCase())
+          .filter((e) => e.category?.trim().toLowerCase() === normName)
           .reduce((sum, e) => {
             const amount = (e.isVariable && e.periodOverrides && stats?.periodId && e.periodOverrides[stats.periodId] !== undefined)
               ? e.periodOverrides[stats.periodId]
@@ -593,20 +620,14 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.08 + categoryBudgetData.length * 0.02 }}
                       onClick={() => onNavigate("budget", "category-budgets")}
-                      className="flex-shrink-0 flex flex-col justify-between p-3 rounded-xl sm:rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] text-[#C7CDDC] hover:text-white transition-all group text-left active:scale-[0.98] min-w-[115px] max-w-[125px] cursor-pointer snap-start border border-dashed border-white/15 shadow-none"
+                      className="flex-shrink-0 flex flex-col justify-center items-center p-3 rounded-xl sm:rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] text-[#C7CDDC] hover:text-white transition-all group text-center active:scale-[0.98] min-w-[95px] max-w-[110px] cursor-pointer snap-start border border-dashed border-white/15 shadow-none"
                     >
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.05] text-[#C7CDDC] border border-white/[0.07] shrink-0">
-                          <SlidersHorizontal size={13} strokeWidth={2} />
-                        </div>
-                        <span className="text-[11.5px] font-semibold text-[#C7CDDC] truncate">
-                          {lang === "en" ? "Manage" : "Hantera"}
-                        </span>
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.05] text-[#C7CDDC] border border-white/[0.07] mb-2 group-hover:scale-105 transition-transform">
+                        <SlidersHorizontal size={13} strokeWidth={2} />
                       </div>
-                      <div className="flex items-center justify-between text-[10px] font-medium text-[#9CA6BC]">
-                        <span>{lang === "en" ? "Edit limits" : "Justera"}</span>
-                        <span>→</span>
-                      </div>
+                      <span className="text-[11.5px] font-semibold text-[#C7CDDC] group-hover:text-white truncate">
+                        {lang === "en" ? "Manage" : "Hantera"}
+                      </span>
                     </motion.button>
                   </div>
                 ) : (
@@ -1021,6 +1042,7 @@ export function TodayView({
         categoryData={categoryBudgetData.find(c => c.name.toLowerCase() === selectedCategoryModalName?.toLowerCase()) || null}
         selectedDate={selectedDate}
         allTransactions={allTransactions}
+        stats={stats}
         config={config}
         language={lang}
         onViewTransaction={onViewTransaction}

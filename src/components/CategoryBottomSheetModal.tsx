@@ -22,6 +22,7 @@ interface CategoryBottomSheetModalProps {
   } | null;
   selectedDate: Date;
   allTransactions: Transaction[];
+  stats?: any;
   config: Config;
   language?: string;
   onViewTransaction: (transaction: Transaction) => void;
@@ -37,6 +38,7 @@ export function CategoryBottomSheetModal({
   categoryData,
   selectedDate: _selectedDate,
   allTransactions = [],
+  stats,
   config,
   language = 'sv',
   onViewTransaction,
@@ -68,29 +70,65 @@ export function CategoryBottomSheetModal({
 
   const targetCategoryName = categoryName || categoryData?.name;
 
-  // Filter transactions for this category across the entire period
+  // Filter transactions for this category strictly within the current period
   const periodTransactions = useMemo(() => {
     if (!targetCategoryName) return [];
 
     const normCat = targetCategoryName.trim().toLowerCase();
+    const periodStartMs = stats?.periodStart ? new Date(stats.periodStart).getTime() : null;
+    const periodEndMs = stats?.periodEnd ? new Date(stats.periodEnd).getTime() + 86399999 : null;
 
     const periodList = allTransactions.filter((tx) => {
+      if (!tx) return false;
       if (tx.isExcludedFromBudget || tx.isInternalTransfer || tx.isTransfer) return false;
       if (tx.type === 'income') return false;
+
+      // Period filter: strictly within current period
+      if (periodStartMs !== null && periodEndMs !== null) {
+        const txTime = tx.timestamp || (tx.date ? new Date(tx.date).getTime() : 0);
+        if (txTime < periodStartMs || txTime > periodEndMs) {
+          return false;
+        }
+      }
+
       const txCat = (tx.category || '').trim().toLowerCase();
-      return txCat === normCat;
+      if (txCat === normCat) return true;
+
+      // Handle split transactions
+      const splits = (tx as any).splits;
+      if (splits && Array.isArray(splits) && splits.length > 0) {
+        return splits.some((s: any) => (s.category || '').trim().toLowerCase() === normCat);
+      }
+
+      return false;
     });
 
-    // Sort descending by date
-    return periodList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [targetCategoryName, allTransactions]);
+    // Sort descending by timestamp / date
+    return periodList.sort((a, b) => {
+      const timeA = a.timestamp || (a.date ? new Date(a.date).getTime() : 0);
+      const timeB = b.timestamp || (b.date ? new Date(b.date).getTime() : 0);
+      return timeB - timeA;
+    });
+  }, [targetCategoryName, allTransactions, stats?.periodStart, stats?.periodEnd]);
 
   const displayTransactions = periodTransactions;
 
-  // Total sum calculation using tx.amount
+  // Total sum calculation: if split, add split amount for this category, else tx.amount
   const totalDisplaySum = useMemo(() => {
-    return periodTransactions.reduce((acc, t) => acc + (t.amount || 0), 0);
-  }, [periodTransactions]);
+    if (!targetCategoryName) return 0;
+    const normCat = targetCategoryName.trim().toLowerCase();
+
+    return periodTransactions.reduce((acc, t) => {
+      const splits = (t as any).splits;
+      if (splits && Array.isArray(splits) && splits.length > 0) {
+        const splitAmount = splits
+          .filter((s: any) => (s.category || '').trim().toLowerCase() === normCat)
+          .reduce((sSum: number, s: any) => sSum + (Number(s.amount) || 0), 0);
+        return acc + splitAmount;
+      }
+      return acc + (Number(t.amount) || 0);
+    }, 0);
+  }, [periodTransactions, targetCategoryName]);
 
   // Icon calculation
   const iconKey = categoryData?.iconName || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');

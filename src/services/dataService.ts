@@ -3,6 +3,20 @@ import { Config, Income, FixedExpense, Transaction } from '../types';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { seedDemoData } from '../utils/demoData';
 
+function extractMissingColumn(error: any): string | null {
+  if (!error) return null;
+  const msg = error.message || '';
+  // PostgREST schema cache: Could not find the 'column_name' column of 'table_name' in the schema cache
+  const postgrestMatch = msg.match(/Could not find the ['"]([^'"]+)['"] column/i);
+  if (postgrestMatch && postgrestMatch[1]) return postgrestMatch[1];
+
+  // Postgres 42703: column "column_name" of relation "table_name" does not exist
+  const postgresMatch = msg.match(/column ['"]([^'"]+)['"]/i);
+  if (postgresMatch && postgresMatch[1]) return postgresMatch[1];
+
+  return null;
+}
+
 export const dataService = {
   // --- User Settings ---
   async getSettings(userId: string): Promise<Config | null> {    // Get settings from profiles table
@@ -187,12 +201,12 @@ export const dataService = {
     
     // Robust fallback if user's Supabase profiles table is missing newly added columns
     let attempts = 0;
-    while (error && (error as any).code === '42703' && attempts < 35) {
+    while (error && attempts < 35) {
       attempts++;
-      const match = error.message?.match(/column "([^"]+)"/);
-      if (match && match[1] && match[1] in payload) {
-        console.warn(`[Supabase saveSettings] Column "${match[1]}" missing. Stripping and retrying UPDATE (${attempts}/35)...`);
-        delete payload[match[1]];
+      const missingCol = extractMissingColumn(error);
+      if (missingCol && missingCol in payload) {
+        console.warn(`[Supabase saveSettings] Column "${missingCol}" missing. Stripping and retrying UPDATE (${attempts}/35)...`);
+        delete payload[missingCol];
         const retryResult = await supabase.from('profiles').update(payload).eq('id', userId);
         error = retryResult.error;
       } else {
@@ -208,12 +222,12 @@ export const dataService = {
       upsertError = upsertResult.error;
       
       let upsertAttempts = 0;
-      while (upsertError && (upsertError as any).code === '42703' && upsertAttempts < 35) {
+      while (upsertError && upsertAttempts < 35) {
         upsertAttempts++;
-        const match = upsertError.message?.match(/column "([^"]+)"/);
-        if (match && match[1] && match[1] in payload) {
-          console.warn(`[Supabase saveSettings] Column "${match[1]}" missing. Stripping and retrying UPSERT (${upsertAttempts}/35)...`);
-          delete payload[match[1]];
+        const missingCol = extractMissingColumn(upsertError);
+        if (missingCol && missingCol in payload) {
+          console.warn(`[Supabase saveSettings] Column "${missingCol}" missing. Stripping and retrying UPSERT (${upsertAttempts}/35)...`);
+          delete payload[missingCol];
           const retryResult = await supabase.from('profiles').upsert(payload);
           upsertError = retryResult.error;
         } else {
@@ -446,18 +460,24 @@ export const dataService = {
       period_overrides: income.periodOverrides || {},
       note: income.note && income.note.trim() ? income.note.trim() : null
     };
-    const { error } = await supabase
-      .from('income_sources')
-      .upsert(payload);
-    
-    if (error) {
-      if (error.code === '42703' || error.message?.includes('note')) {
-        delete payload.note;
-        const retry = await supabase.from('income_sources').upsert(payload);
-        if (retry.error) throw retry.error;
-      } else {
-        throw error;
+
+    const currentPayload = { ...payload };
+    let attempts = 0;
+    while (attempts < 5) {
+      attempts++;
+      const { error } = await supabase
+        .from('income_sources')
+        .upsert(currentPayload);
+      
+      if (!error) return;
+
+      const missingCol = extractMissingColumn(error) || (error.message?.includes('note') ? 'note' : null);
+      if (missingCol && missingCol in currentPayload) {
+        console.warn(`[Supabase income_sources] Column "${missingCol}" missing in schema. Stripping and retrying...`);
+        delete currentPayload[missingCol];
+        continue;
       }
+      throw error;
     }
   },
 
@@ -497,14 +517,17 @@ export const dataService = {
       category: e.category,
       logo: e.logo,
       deductionDay: e.deduction_day,
-      startMonth: e.start_month,
+      startMonth: e.start_month !== undefined && e.start_month !== null 
+        ? e.start_month 
+        : (e.period_overrides?._start_month !== undefined && e.period_overrides?._start_month !== null ? Number(e.period_overrides._start_month) : undefined),
       isVariable: e.is_variable,
       periodOverrides: e.period_overrides || {},
       note: e.note || undefined
     }));
   },
 
-  async saveFixedExpense(userId: string, expense: FixedExpense) {    if (userId === 'demo-user') {
+  async saveFixedExpense(userId: string, expense: FixedExpense) {
+    if (userId === 'demo-user') {
       const saved = localStorage.getItem('demo_fixed');
       const list: FixedExpense[] = saved ? JSON.parse(saved) : [];
       const targetId = expense.id && expense.id.startsWith('demo-') ? expense.id : `demo-exp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -518,6 +541,12 @@ export const dataService = {
       localStorage.setItem('demo_fixed', JSON.stringify(list));
       return;
     }
+
+    const periodOverrides = {
+      ...(expense.periodOverrides || {}),
+      ...(expense.startMonth !== undefined && expense.startMonth !== null ? { _start_month: expense.startMonth } : {})
+    };
+
     const payload: any = {
       id: expense.id,
       user_id: userId,
@@ -529,28 +558,29 @@ export const dataService = {
       category: expense.category,
       logo: expense.logo,
       deduction_day: expense.deductionDay,
-      start_month: expense.startMonth,
+      start_month: expense.startMonth !== undefined ? expense.startMonth : null,
       is_variable: expense.isVariable,
-      period_overrides: expense.periodOverrides || {},
+      period_overrides: periodOverrides,
       note: expense.note && expense.note.trim() ? expense.note.trim() : null
     };
-    const { error } = await supabase
-      .from('fixed_expenses')
-      .upsert(payload);
-    
-    if (error) {
-      if (error.code === '42703') {
-        const match = error.message?.match(/column "([^"]+)"/);
-        if (match && match[1] && match[1] in payload) {
-          delete payload[match[1]];
-          const retry = await supabase.from('fixed_expenses').upsert(payload);
-          if (retry.error) throw retry.error;
-        } else {
-          throw error;
-        }
-      } else {
-        throw error;
+
+    const currentPayload = { ...payload };
+    let attempts = 0;
+    while (attempts < 5) {
+      attempts++;
+      const { error } = await supabase
+        .from('fixed_expenses')
+        .upsert(currentPayload);
+      
+      if (!error) return;
+
+      const missingCol = extractMissingColumn(error);
+      if (missingCol && missingCol in currentPayload) {
+        console.warn(`[Supabase fixed_expenses] Column "${missingCol}" missing in schema. Stripping and retrying...`);
+        delete currentPayload[missingCol];
+        continue;
       }
+      throw error;
     }
   },
 
@@ -698,5 +728,175 @@ export const dataService = {
         currentAmount: allocated
       };
     });
+  },
+
+  async renameCategory(userId: string, type: 'income' | 'expense', oldName: string, newName: string): Promise<void> {
+    const trimmedOld = oldName.trim();
+    const trimmedNew = newName.trim();
+    if (!trimmedOld || !trimmedNew || trimmedOld.toLowerCase() === trimmedNew.toLowerCase()) return;
+
+    if (userId.startsWith('demo-')) {
+      // 1. Transactions in localStorage
+      const savedTx = localStorage.getItem('demo_transactions');
+      if (savedTx) {
+        try {
+          const txList: Transaction[] = JSON.parse(savedTx);
+          let txChanged = false;
+          const updatedList = txList.map((t) => {
+            let changed = false;
+            let newCat = t.category;
+            let newSplits = t.splits;
+
+            const isMatchingType = type === 'income' ? t.type === 'income' : t.type !== 'income';
+            if (isMatchingType && (t.category || '').trim().toLowerCase() === trimmedOld.toLowerCase()) {
+              newCat = trimmedNew;
+              changed = true;
+            }
+
+            if (t.splits && Array.isArray(t.splits)) {
+              const nextSplits = t.splits.map((s: any) => {
+                if ((s.category || '').trim().toLowerCase() === trimmedOld.toLowerCase()) {
+                  changed = true;
+                  return { ...s, category: trimmedNew };
+                }
+                return s;
+              });
+              if (changed) {
+                newSplits = nextSplits;
+              }
+            }
+
+            if (changed) {
+              txChanged = true;
+              return { ...t, category: newCat, splits: newSplits };
+            }
+            return t;
+          });
+          if (txChanged) {
+            localStorage.setItem('demo_transactions', JSON.stringify(updatedList));
+          }
+        } catch (e) {
+          console.error('Error updating demo_transactions:', e);
+        }
+      }
+
+      // 2. Fixed expenses in localStorage
+      if (type === 'expense') {
+        const savedFixed = localStorage.getItem('demo_fixed');
+        if (savedFixed) {
+          try {
+            const fixedList: FixedExpense[] = JSON.parse(savedFixed);
+            const updated = fixedList.map((e) =>
+              (e.category || '').trim().toLowerCase() === trimmedOld.toLowerCase()
+                ? { ...e, category: trimmedNew }
+                : e
+            );
+            localStorage.setItem('demo_fixed', JSON.stringify(updated));
+          } catch (e) {
+            console.error('Error updating demo_fixed:', e);
+          }
+        }
+      }
+
+      // 3. Incomes in localStorage
+      if (type === 'income') {
+        const savedIncomes = localStorage.getItem('demo_incomes');
+        if (savedIncomes) {
+          try {
+            const incList: Income[] = JSON.parse(savedIncomes);
+            const updated = incList.map((i) =>
+              (i.category || '').trim().toLowerCase() === trimmedOld.toLowerCase()
+                ? { ...i, category: trimmedNew }
+                : i
+            );
+            localStorage.setItem('demo_incomes', JSON.stringify(updated));
+          } catch (e) {
+            console.error('Error updating demo_incomes:', e);
+          }
+        }
+      }
+
+      // 4. Quick choices in demo_settings
+      const savedSettings = localStorage.getItem('demo_settings');
+      if (savedSettings) {
+        try {
+          const cfg = JSON.parse(savedSettings);
+          if (cfg.quickChoices) {
+            cfg.quickChoices = cfg.quickChoices.map((qc: any) =>
+              (qc.category || '').trim().toLowerCase() === trimmedOld.toLowerCase()
+                ? { ...qc, category: trimmedNew }
+                : qc
+            );
+            localStorage.setItem('demo_settings', JSON.stringify(cfg));
+          }
+        } catch (e) {
+          console.error('Error updating demo_settings quickChoices:', e);
+        }
+      }
+
+      return;
+    }
+
+    // Real Supabase persistence
+    try {
+      const txTypeFilter = type === 'income' ? 'income' : 'expense';
+
+      // 1. Update transactions with matching category
+      await supabase
+        .from('transactions')
+        .update({ category: trimmedNew })
+        .eq('user_id', userId)
+        .eq('type', txTypeFilter)
+        .ilike('category', trimmedOld);
+
+      // 2. Update splits inside transactions if present
+      const { data: splitRows } = await supabase
+        .from('transactions')
+        .select('id, splits')
+        .eq('user_id', userId)
+        .not('splits', 'is', null);
+
+      if (splitRows && splitRows.length > 0) {
+        for (const row of splitRows) {
+          if (Array.isArray(row.splits)) {
+            let splitChanged = false;
+            const updatedSplits = row.splits.map((s: any) => {
+              if ((s.category || '').trim().toLowerCase() === trimmedOld.toLowerCase()) {
+                splitChanged = true;
+                return { ...s, category: trimmedNew };
+              }
+              return s;
+            });
+            if (splitChanged) {
+              await supabase
+                .from('transactions')
+                .update({ splits: updatedSplits })
+                .eq('id', row.id);
+            }
+          }
+        }
+      }
+
+      // 3. Fixed expenses
+      if (type === 'expense') {
+        await supabase
+          .from('fixed_expenses')
+          .update({ category: trimmedNew })
+          .eq('user_id', userId)
+          .ilike('category', trimmedOld);
+      }
+
+      // 4. Income sources
+      if (type === 'income') {
+        await supabase
+          .from('income_sources')
+          .update({ category: trimmedNew })
+          .eq('user_id', userId)
+          .ilike('category', trimmedOld);
+      }
+    } catch (err) {
+      console.error('Error renaming category in Supabase:', err);
+      throw err;
+    }
   }
 };
