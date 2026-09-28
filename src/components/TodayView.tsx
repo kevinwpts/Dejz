@@ -560,13 +560,13 @@ export function TodayView({
                               {isEmojiString(cat.iconName) ? (
                                 <span className="text-[12.5px] leading-none">{cat.iconName}</span>
                               ) : Icon ? (
-                                <Icon size={13.5} strokeWidth={2} className="text-[#6E6961] group-hover:text-[#1C1917] dark:text-[#C7CDDC] dark:group-hover:text-white" />
+                                <Icon size={14} strokeWidth={1.7} className="text-[#6E6961] group-hover:text-[#1C1917] dark:text-[#C7CDDC] dark:group-hover:text-white" />
                               ) : (
                                 <div className="w-1.5 h-1.5 rounded-full bg-[#8C867C] dark:bg-[#C7CDDC]" />
                               )}
                             </div>
 
-                            <span className="text-[11.5px] sm:text-xs font-bold tracking-tight truncate flex-1 text-[#1C1917] dark:text-[#C7CDDC] dark:group-hover:text-white">
+                            <span className="text-[11.5px] sm:text-xs font-semibold tracking-tight truncate flex-1 text-[#1C1917] dark:text-[#C7CDDC] dark:group-hover:text-white">
                               {cat.name}
                             </span>
                           </div>
@@ -576,16 +576,16 @@ export function TodayView({
                             <div className="flex items-baseline justify-between gap-1">
                               {cat.hasBudget ? (
                                 cat.isOverBudget ? (
-                                  <span className="text-[13px] sm:text-[14px] font-black text-rose-600 dark:text-rose-400 font-amount tabular-nums">
+                                  <span className="text-[13px] sm:text-[14px] font-bold text-rose-600 dark:text-rose-400 font-amount tabular-nums">
                                     +{formatAmount(Math.abs(cat.remaining), lang)} kr
                                   </span>
                                 ) : (
-                                  <span className="text-[13px] sm:text-[14px] font-black text-[#1C1917] dark:text-white font-amount tabular-nums">
+                                  <span className="text-[13px] sm:text-[14px] font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
                                     {formatAmount(cat.remaining, lang)} kr
                                   </span>
                                 )
                               ) : (
-                                <span className="text-[13px] sm:text-[14px] font-black text-[#1C1917] dark:text-white font-amount tabular-nums">
+                                <span className="text-[13px] sm:text-[14px] font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
                                   {formatAmount(cat.spent, lang)} kr
                                 </span>
                               )}
@@ -623,7 +623,7 @@ export function TodayView({
                       className="flex-shrink-0 flex flex-col justify-center items-center p-3 rounded-xl sm:rounded-2xl bg-[#FFFFFF] dark:bg-white/[0.03] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#C7CDDC] hover:text-[#1C1917] dark:hover:text-white transition-all group text-center active:scale-[0.98] min-w-[95px] max-w-[110px] cursor-pointer snap-start border border-dashed border-[#E6E2D8] dark:border-white/15 shadow-none"
                     >
                       <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#F7F5F0] dark:bg-white/[0.05] text-[#6E6961] dark:text-[#C7CDDC] border border-[#E6E2D8] dark:border-white/[0.07] mb-2 group-hover:scale-105 transition-transform">
-                        <SlidersHorizontal size={13} strokeWidth={2} />
+                        <SlidersHorizontal size={13} strokeWidth={1.75} />
                       </div>
                       <span className="text-[11.5px] font-semibold text-[#1C1917] dark:text-[#C7CDDC] group-hover:text-black dark:group-hover:text-white truncate">
                         {lang === "en" ? "Manage" : "Hantera"}
@@ -638,7 +638,7 @@ export function TodayView({
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-[#F7F5F0] dark:bg-white/[0.06] border border-[#E6E2D8] dark:border-white/[0.08] flex items-center justify-center text-[#6E6961] dark:text-[#C7CDDC] transition-colors">
-                        <SlidersHorizontal size={15} strokeWidth={2} />
+                        <SlidersHorizontal size={15} strokeWidth={1.75} />
                       </div>
                       <div>
                         <p className="text-xs sm:text-sm font-bold text-[#1C1917] dark:text-white leading-snug">

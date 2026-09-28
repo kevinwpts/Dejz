@@ -83,14 +83,14 @@ export function GreetingModule({
           <div className="flex items-baseline gap-2">
             <AnimatedNumber 
               value={stats?.remainingPeriodCents || 0} 
-              className={`text-[72px] sm:text-[84px] leading-[0.9] font-black font-amount tabular-nums tracking-normal ${
+              className={`text-[68px] sm:text-[80px] leading-[0.92] font-bold font-amount tabular-nums tracking-tight ${
                 isNegative ? 'text-rose-500 dark:text-rose-400' : 'text-[var(--text-primary)] dark:text-white'
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
             {/* Currency label */}
-            <span className={`text-[24px] sm:text-[28px] font-bold tracking-normal ${
-              isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)] dark:text-white/80'
+            <span className={`text-[22px] sm:text-[26px] font-semibold tracking-tight ${
+              isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)] dark:text-[#9CA6BC]'
             }`}>
               {currency}
             </span>
