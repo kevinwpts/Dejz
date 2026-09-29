@@ -282,7 +282,7 @@ export function LogView({
   return (
     <div className="space-y-6 font-sans">
       {/* Top Filter Bar: Period/Day Selector with Left/Right Arrows + Type Filters */}
-      <div className="sticky top-[calc(env(safe-area-inset-top))] z-30 bg-[#F5F2EC] dark:bg-[#0B0A12] py-2 -mx-2 px-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar shadow-sm">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
         {/* Period / Day Selector with Left & Right Arrows */}
         {periods && periods.length > 0 && (
           <>
@@ -687,6 +687,7 @@ export function LogView({
           </div>
         )}
       </AnimatePresence>
+      <div className="h-24" />
     </div>
   );
 }
