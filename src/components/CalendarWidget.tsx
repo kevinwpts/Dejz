@@ -10,7 +10,7 @@ interface CalendarWidgetProps {
   showFixedInCalendar?: boolean;
 }
 
-export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelectedDate, t, showFixedInCalendar: _showFixedInCalendar }: CalendarWidgetProps) {
+export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelectedDate, t, showFixedInCalendar = true }: CalendarWidgetProps) {
   const today = new Date();
 
   return (
@@ -36,6 +36,7 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
           const isToday = dayDate.toDateString() === today.toDateString();
           const hasIncome = day.income > 0;
           const hasSpend = day.spend > 0;
+          const hasFixed = showFixedInCalendar && day.hasFixedItems;
 
           return (
             <button
@@ -67,6 +68,9 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
                 )}
                 {hasSpend && (
                   <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/80' : 'bg-[var(--accent-color)]/60'}`} />
+                )}
+                {hasFixed && !hasIncome && !hasSpend && (
+                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/80' : 'bg-[var(--accent-color)]/70'}`} />
                 )}
               </div>
             </button>

@@ -639,6 +639,7 @@ export function TodayView({
               stats={stats}
               language={lang}
               isCurrentPeriod={isCurrentPeriod}
+              showFixedInCalendar={config?.showFixedExpensesInCalendar}
             />
           </div>
         )}

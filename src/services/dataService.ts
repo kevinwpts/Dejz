@@ -62,7 +62,7 @@ export const dataService = {
       notifications: profileData.notifications,
       securityLock: profileData.security_lock,
       darkMode: (profileData.dark_mode !== undefined && profileData.dark_mode !== null) ? profileData.dark_mode : true,
-      themeMode: profileData.theme_mode || 'system',
+      themeMode: profileData.theme_mode || localSavedConfig?.themeMode || 'system',
       quickChoices: profileData.quick_choices || [],
       savingsPot: profileData.savings_pot || 0,
       savingsGoals: profileData.savings_goals || [],

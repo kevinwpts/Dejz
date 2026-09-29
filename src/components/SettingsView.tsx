@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Check, Sun, Moon, Monitor } from 'lucide-react';
-import { Config, WeekendAdjustment, PaydayType } from '../types';
+import { Config } from '../types';
 import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
 import { DEFAULT_PAYMENT_METHODS } from '../constants';
@@ -10,7 +10,6 @@ import { ConfirmModal } from './ConfirmModal';
 import { CategoryIcon } from './CategoryIcon';
 import { Button, Modal } from './ui';
 import { ToggleSwitch } from './ToggleSwitch';
-import { getActualPayday } from '../utils/date';
 
 interface SettingsViewProps {
   activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance';
@@ -82,29 +81,6 @@ export function SettingsView({
 
   const [pendingPayday, setPendingPayday] = useState<number | null>(null);
   const [isPaydayModalOpen, setIsPaydayModalOpen] = useState(false);
-
-  const nextPaydayDate = React.useMemo(() => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const paydaySetting = config.payday || 25;
-    const paydayType = config.paydayType || PaydayType.TWENTY_FIFTH;
-    const adjustment = config.paydayBeforeWeekend ? WeekendAdjustment.BEFORE : WeekendAdjustment.NONE;
-
-    let payday = getActualPayday(year, month, paydayType, paydaySetting, adjustment);
-    if (payday < now) {
-      const nextMonth = month === 11 ? 0 : month + 1;
-      const nextYear = month === 11 ? year + 1 : year;
-      payday = getActualPayday(nextYear, nextMonth, paydayType, paydaySetting, adjustment);
-    }
-    return payday;
-  }, [config.payday, config.paydayType, config.paydayBeforeWeekend]);
-
-  const formattedNextPayday = nextPaydayDate.toLocaleDateString(
-    config.language === 'en' ? 'en-US' : 'sv-SE',
-    { day: 'numeric', month: 'long' }
-  );
 
   const handleUpdatePayday = (day: number) => {
     if (day === config.payday) return;
@@ -388,10 +364,8 @@ export function SettingsView({
                     <span className="text-base">›</span>
                   </div>
                 </button>
-                <p className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] pl-1 font-medium">
-                  {config.language === 'en' ? `Next planned payday: ${formattedNextPayday}` : `Nästa planerade lön: ${formattedNextPayday}`}
-                </p>
               </div>
+
 
               {/* Weekend Handling Row */}
               <div className="pt-3 border-t border-[#E6E2D8] dark:border-[#383838]">

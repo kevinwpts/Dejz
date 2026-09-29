@@ -3407,27 +3407,36 @@ export default function App() {
       return true;
     }
 
-    // 2. If subview is active in budget, profile or settings, go back to main section
-    if (activeTab === 'budget' && budgetSection) {
-      feedback.tap();
-      setNavTrigger((prev) => prev + 1);
-      setBudgetSection(null);
-      return true;
-    }
+    // 2. If subview is active in budget, profile or settings, pop from navHistory or go back to main section
+    if (
+      (activeTab === 'budget' && budgetSection) ||
+      (activeTab === 'profile' && profileSection !== 'main') ||
+      (activeTab === 'settings' && settingsSection !== 'main')
+    ) {
+      if (navHistory.length > 0) {
+        feedback.tap();
+        setNavTrigger((prev) => prev + 1);
+        const nextStack = [...navHistory];
+        const previous = nextStack.pop();
+        setNavHistory(nextStack);
+        if (previous) {
+          setActiveTab(previous.tab);
+          if (previous.tab === "profile") {
+            setProfileSection(previous.section || "main");
+          } else if (previous.tab === "settings") {
+            setSettingsSection(previous.section || "main");
+          } else if (previous.tab === "budget") {
+            setBudgetSection(previous.section || null);
+          }
+          return true;
+        }
+      }
 
-    if (activeTab === 'profile' && profileSection !== 'main') {
       feedback.tap();
       setNavTrigger((prev) => prev + 1);
-      setActiveTab('profile');
-      setProfileSection('main');
-      return true;
-    }
-
-    if (activeTab === 'settings' && settingsSection !== 'main') {
-      feedback.tap();
-      setNavTrigger((prev) => prev + 1);
-      setActiveTab('settings');
-      setSettingsSection('main');
+      if (activeTab === 'budget') setBudgetSection(null);
+      else if (activeTab === 'profile') setProfileSection('main');
+      else if (activeTab === 'settings') setSettingsSection('main');
       return true;
     }
 
@@ -3881,7 +3890,7 @@ export default function App() {
       switch (settingsSection) {
         case "salary": return t("salary");
         case "categories": return t("categories");
-        case "paymentMethods": return t("paymentMethod");
+        case "paymentMethods": return t("paymentMethods");
         case "language": return t("language");
         case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';
         default: return config?.language === 'en' ? 'Settings' : 'Inställningar';
@@ -3892,7 +3901,7 @@ export default function App() {
       switch (profileSection) {
         case "salary": return t("salary");
         case "categories": return t("categories");
-        case "paymentMethods": return t("paymentMethod");
+        case "paymentMethods": return t("paymentMethods");
         case "manageAccount": return t("manageAccount");
         case "language": return t("language");
         case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';

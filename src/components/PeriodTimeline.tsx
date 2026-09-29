@@ -10,6 +10,7 @@ interface PeriodTimelineProps {
   stats?: any;
   isCurrentPeriod?: boolean;
   categoryFilter?: string | null;
+  showFixedInCalendar?: boolean;
 }
 
 export function PeriodTimeline({
@@ -18,6 +19,7 @@ export function PeriodTimeline({
   onSelectDate,
   language = 'sv',
   categoryFilter = null,
+  showFixedInCalendar = true,
 }: PeriodTimelineProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
@@ -297,9 +299,11 @@ export function PeriodTimeline({
                 {dayNumber}
               </span>
 
-              {/* Match Indicator Dot when filtering by category */}
-              {hasCategoryMatch && !isSelected && (
-                <span className="w-1 h-1 rounded-full bg-[#1C1917] dark:bg-white absolute bottom-1 shadow-none" />
+              {/* Fixed Item or Category Match Indicator Dot */}
+              {((showFixedInCalendar && day.hasFixedItems) || (hasCategoryMatch && !isSelected)) && (
+                <span className={`w-1 h-1 rounded-full absolute bottom-1 shadow-none ${
+                  isSelected ? 'bg-white dark:bg-[#1C1917]' : 'bg-[var(--accent-color)]'
+                }`} />
               )}
             </button>
           );
