@@ -412,7 +412,7 @@ export function TodayView({
       : (selectedDayData?.transactions || []);
   }, [stats?.isPastPeriod, stats?.periodTransactions, selectedDayData?.transactions]);
 
-  const displayedFixedTransactions = fixedTransactions;
+  const displayedFixedTransactions = (config?.showFixedExpensesInCalendar ?? true) ? fixedTransactions : [];
 
   useEffect(() => {
     const updateHeight = () => {
