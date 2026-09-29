@@ -10,9 +10,9 @@ interface BudgetSummaryModuleProps {
   fixedExpenses: any[];
   t: (key: TranslationKey) => string;
   totalSpentOverride?: number;
-  dailyAvgOverride?: number;
   largestCategoryOverride?: { name: string; amount: number };
   budgetUsedPctOverride?: number;
+  remainingBudgetOverride?: number;
 }
 
 export function BudgetSummaryModule({ 
@@ -21,9 +21,9 @@ export function BudgetSummaryModule({
   transactions, 
   fixedExpenses, 
   totalSpentOverride,
-  dailyAvgOverride,
   largestCategoryOverride,
-  budgetUsedPctOverride
+  budgetUsedPctOverride,
+  remainingBudgetOverride
 }: BudgetSummaryModuleProps) {
   const filteredExpenses = useMemo(() => {
     if (!stats || !transactions) return [];
@@ -60,33 +60,6 @@ export function BudgetSummaryModule({
   }, [filteredExpenses, fixedExpenses, stats?.periodId]);
 
   const totalSpent = totalSpentOverride !== undefined ? totalSpentOverride : (totalSpentInPeriod + totalFixed);
-
-  const daysElapsed = useMemo(() => {
-    if (!stats) return 0;
-    const now = new Date();
-    const realToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startMidnight = new Date(stats.periodStart.getFullYear(), stats.periodStart.getMonth(), stats.periodStart.getDate()).getTime();
-    const endMidnight = new Date(stats.periodEnd.getFullYear(), stats.periodEnd.getMonth(), stats.periodEnd.getDate()).getTime();
-    const oneDay = 24 * 60 * 60 * 1000;
-    
-    if (realToday.getTime() > endMidnight) return Math.round((endMidnight - startMidnight) / oneDay) + 1;
-    if (realToday.getTime() < startMidnight) return 0;
-    return Math.round((realToday.getTime() - startMidnight) / oneDay);
-  }, [stats?.periodStart, stats?.periodEnd]);
-
-  const daysRemaining = useMemo(() => {
-    if (!stats) return 1;
-    const now = new Date();
-    const realToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const endMidnight = new Date(stats.periodEnd.getFullYear(), stats.periodEnd.getMonth(), stats.periodEnd.getDate()).getTime();
-    const oneDay = 24 * 60 * 60 * 1000;
-    const diff = Math.ceil((endMidnight - realToday.getTime()) / oneDay) + 1;
-    return Math.max(1, diff);
-  }, [stats?.periodEnd]);
-
-  const dailyAvg = dailyAvgOverride !== undefined ? dailyAvgOverride : (daysElapsed > 0 ? Math.round(totalSpent / daysElapsed) : 0);
-  const _remainingPerDay = stats ? Math.round(stats.remainingPeriodCents / daysRemaining) : 0;
-  const disposablePot = stats ? stats.disposablePot : 0;
 
   const localLargestCategory = useMemo(() => {
     const categoryMap: { [key: string]: number } = {};
@@ -132,20 +105,46 @@ export function BudgetSummaryModule({
 
   const largestCategory = largestCategoryOverride !== undefined ? largestCategoryOverride : localLargestCategory;
 
-  const budgetUsedPct = budgetUsedPctOverride !== undefined ? budgetUsedPctOverride : ((stats && stats.totalIncome > 0) ? Math.round((totalSpent / stats.totalIncome) * 100) : 0);
-  const _budgetLeftPct = stats ? Math.max(0, Math.min(100, Math.round((stats.remainingPeriodCents / Math.max(1, disposablePot + (stats.totalExtraIncomeUpToToday || 0))) * 100))) : 0;
+  const isPastPeriod = useMemo(() => {
+    if (!stats) return false;
+    if (stats.isPastPeriod) return true;
+    if (stats.periodEnd) {
+      const now = new Date();
+      const endMidnight = new Date(stats.periodEnd.getFullYear(), stats.periodEnd.getMonth(), stats.periodEnd.getDate(), 23, 59, 59, 999).getTime();
+      return now.getTime() > endMidnight;
+    }
+    return false;
+  }, [stats]);
+
+  const effectiveBudget = useMemo(() => {
+    if (!stats) return 0;
+    if (stats.totalIncome > 0) return stats.totalIncome;
+    return (stats.disposablePot || 0) + (stats.totalFixed || 0);
+  }, [stats]);
+
+  const remainingBudget = remainingBudgetOverride !== undefined 
+    ? remainingBudgetOverride 
+    : (effectiveBudget - totalSpent);
+
+  const budgetUsedPct = budgetUsedPctOverride !== undefined 
+    ? budgetUsedPctOverride 
+    : (effectiveBudget > 0 ? Math.round((totalSpent / effectiveBudget) * 100) : 0);
 
   if (!stats) return null;
 
+  const isOverBudget = remainingBudget < 0;
+
   return (
     <div className="space-y-6 font-sans">
-      {/* SPENDERAT DENNA PERIOD */}
+      {/* HUVUDBELOPP */}
       <div className="py-2 text-center space-y-1 flex flex-col items-center">
         <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#A8A8A8] block select-none font-display flex items-center justify-center gap-2">
-          {stats.isPastPeriod ? 'SPENDERAT FÖR PERIODEN' : 'SPENDERAT DENNA PERIOD'}
-          {stats.isPastPeriod && (
+          {isPastPeriod 
+            ? (config.language === 'en' ? 'TOTAL SPENT' : 'TOTALT SPENDERAT')
+            : (config.language === 'en' ? 'SPENT SO FAR' : 'SPENDERAT HITTILLS')}
+          {isPastPeriod && (
             <span className="px-2 py-0.5 rounded-full text-[10px] bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8] font-semibold uppercase tracking-wider">
-              Avslutad
+              {config.language === 'en' ? 'Completed' : 'Avslutad'}
             </span>
           )}
         </span>
@@ -159,47 +158,63 @@ export function BudgetSummaryModule({
         </div>
       </div>
 
-      {/* Grid for other indicators */}
-      <div className="grid grid-cols-3 gap-3 pt-1">
-        {/* Snitt per dag */}
-        <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
+      {/* Grid med 3 KPI-kort */}
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-3 pt-1">
+        {/* Kort 1: Kvar att spendera / Kvar vid periodens slut / Över budget vid slut */}
+        <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-between text-left min-w-0 min-h-[78px]">
           <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
-            {formatAmount(dailyAvg, config.language)} <span className="text-xs font-normal text-[#6E6961] dark:text-[#A8A8A8]">{config.currency || "kr"}</span>
+            {formatAmount(Math.round(isOverBudget && isPastPeriod ? Math.abs(remainingBudget) : Math.max(0, remainingBudget)), config.language)}{' '}
+            <span className="text-xs font-normal text-[#6E6961] dark:text-[#A8A8A8]">
+              {config.currency || "kr"}
+            </span>
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1 select-none truncate">
-            {config.language === 'en' ? 'Daily Average' : 'Snitt per dag'}
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1.5 select-none truncate">
+            {isPastPeriod ? (
+              isOverBudget 
+                ? (config.language === 'en' ? 'OVER BUDGET AT END' : 'ÖVER BUDGET VID SLUT')
+                : (config.language === 'en' ? 'LEFT AT PERIOD END' : 'KVAR VID PERIODENS SLUT')
+            ) : (
+              config.language === 'en' ? 'LEFT TO SPEND' : 'KVAR ATT SPENDERA'
+            )}
           </span>
         </div>
 
-        {/* Största kategori */}
-        <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
-          <div className="text-base sm:text-[17px] font-bold text-[#1C1917] dark:text-white truncate leading-tight capitalize">
-            {largestCategory.name ? largestCategory.name : <span className="text-[#8C867C] dark:text-[#A8A8A8] font-normal">—</span>}
+        {/* Kort 2: Största kategori (Snygg layout utan ful trunkering) */}
+        <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-between text-left min-w-0 min-h-[78px]">
+          <div className="min-w-0">
+            <div className="text-xs sm:text-[13px] font-bold text-[#1C1917] dark:text-white truncate leading-tight capitalize">
+              {largestCategory.name ? largestCategory.name : <span className="text-[#8C867C] dark:text-[#A8A8A8] font-normal">—</span>}
+            </div>
+            <div className="text-[11px] sm:text-xs font-medium font-amount tabular-nums text-[#6E6961] dark:text-[#A8A8A8] mt-0.5 truncate">
+              {largestCategory.name && largestCategory.amount > 0 
+                ? `${formatAmount(Math.round(largestCategory.amount), config.language)} ${config.currency || "kr"}`
+                : <span className="opacity-0">0 kr</span>}
+            </div>
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1 select-none truncate">
-            {config.language === 'en' ? 'Top Category' : 'Största kategori'}
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1.5 select-none truncate">
+            {config.language === 'en' ? 'TOP CATEGORY' : 'STÖRSTA KATEGORI'}
           </span>
         </div>
 
-        {/* Budget använd */}
-        <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
+        {/* Kort 3: Av budgeten använd */}
+        <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-between text-left min-w-0 min-h-[78px]">
           <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
             {budgetUsedPct}%
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1 select-none truncate">
-            {config.language === 'en' ? 'Budget Used' : 'Budget använd'}
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1.5 select-none truncate">
+            {config.language === 'en' ? 'OF BUDGET USED' : 'AV BUDGETEN ANVÄND'}
           </span>
         </div>
       </div>
 
-      {/* Clean progress bar for budget used */}
+      {/* Progressbar för budgetutfall */}
       <div className="pt-1">
         <div className="w-full h-1.5 bg-black/5 dark:bg-white/[0.06] rounded-full overflow-hidden">
           <div 
             className={`h-full rounded-full transition-all duration-700 ease-out ${
-              budgetUsedPct > 90 ? "bg-rose-500" : "bg-[#1C1917] dark:bg-white"
+              budgetUsedPct > 100 ? "bg-rose-500" : "bg-[#1C1917] dark:bg-white"
             }`} 
-            style={{ width: `${Math.min(100, budgetUsedPct)}%` }}
+            style={{ width: `${Math.min(100, Math.max(0, budgetUsedPct))}%` }}
           />
         </div>
       </div>

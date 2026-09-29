@@ -187,20 +187,33 @@ export function AnalysisView({
     (analysisFilter !== 'variable' ? totalFixed : 0);
   const COLORS = ['#05b862', '#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#14b8a6', '#f59e0b', '#64748b', '#8b5cf6'];
 
-  const daysElapsed = useMemo(() => {
+  const effectiveBudget = useMemo(() => {
     if (!stats) return 0;
-    const now = new Date();
-    const realToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startMidnight = new Date(stats.periodStart.getFullYear(), stats.periodStart.getMonth(), stats.periodStart.getDate()).getTime();
-    const endMidnight = new Date(stats.periodEnd.getFullYear(), stats.periodEnd.getMonth(), stats.periodEnd.getDate()).getTime();
-    const oneDay = 24 * 60 * 60 * 1000;
-    
-    if (realToday.getTime() > endMidnight) return Math.round((endMidnight - startMidnight) / oneDay) + 1;
-    if (realToday.getTime() < startMidnight) return 0;
-    return Math.round((realToday.getTime() - startMidnight) / oneDay);
-  }, [stats?.periodStart, stats?.periodEnd]);
+    if (analysisFilter === 'variable') {
+      return stats.disposablePot || 0;
+    }
+    if (analysisFilter === 'fixed') {
+      return stats.totalFixed || 0;
+    }
+    // 'all'
+    if (stats.totalIncome > 0) return stats.totalIncome;
+    return (stats.disposablePot || 0) + (stats.totalFixed || 0);
+  }, [stats, analysisFilter]);
 
-  const dailyAvg = daysElapsed > 0 ? Math.round(totalSpent / daysElapsed) : 0;
+  const remainingBudget = useMemo(() => {
+    if (!stats) return 0;
+    if (analysisFilter === 'variable') {
+      return (stats.disposablePot || 0) - totalSpent;
+    }
+    if (analysisFilter === 'fixed') {
+      return (stats.totalFixed || 0) - totalSpent;
+    }
+    // 'all'
+    if (stats.totalIncome > 0) {
+      return stats.totalIncome - totalSpent;
+    }
+    return (stats.disposablePot || 0) + (stats.totalFixed || 0) - totalSpent;
+  }, [stats, analysisFilter, totalSpent]);
 
   const largestCategory = useMemo(() => {
     if (categoryData.length === 0) return { name: "", amount: 0 };
@@ -208,7 +221,9 @@ export function AnalysisView({
     return { name: first.name, amount: first.value };
   }, [categoryData]);
 
-  const budgetUsedPct = stats.totalIncome > 0 ? Math.round((totalSpent / stats.totalIncome) * 100) : 0;
+  const budgetUsedPct = effectiveBudget > 0 
+    ? Math.round((totalSpent / effectiveBudget) * 100) 
+    : (stats.totalIncome > 0 ? Math.round((totalSpent / stats.totalIncome) * 100) : 0);
 
   if (!stats) return null;
 
@@ -280,9 +295,9 @@ export function AnalysisView({
         fixedExpenses={fixedExpenses}
         t={t}
         totalSpentOverride={totalSpent}
-        dailyAvgOverride={dailyAvg}
         largestCategoryOverride={largestCategory}
         budgetUsedPctOverride={budgetUsedPct}
+        remainingBudgetOverride={remainingBudget}
       />
 
       {/* Donut Chart Distribution Card */}
