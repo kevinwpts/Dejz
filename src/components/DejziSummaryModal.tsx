@@ -18,7 +18,7 @@ export function DejziAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
 
   return (
     <div className={`relative ${sizeClasses} flex items-center justify-center shrink-0`}>
-      <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/25 via-neutral-200 dark:text-white/20 to-cyan-400/25 rounded-full blur-xs animate-pulse" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/25 via-yellow-400/20 to-cyan-400/25 rounded-full blur-xs animate-pulse" />
       <motion.div
         animate={{ y: [0, -2, 0], rotate: [0, 1.5, -1.5, 0] }}
         transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -296,8 +296,8 @@ export function DejziSummaryModal({
 
             {/* Dejzi Proactive Tip */}
             {dejziInfo?.actionTip && (
-              <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-neutral-800 dark:text-white/10 text-[#1C1917] dark:text-white 800 dark:text-[#1C1917] dark:text-white 300 text-xs font-medium">
-                <Zap size={14} className="shrink-0 text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white mt-0.5" />
+              <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-black/5 dark:bg-white/[0.06] text-[#1C1917] dark:text-white text-xs font-medium border border-[#E6E2D8] dark:border-[#383838]">
+                <Zap size={14} className="shrink-0 text-[#1C1917] dark:text-white mt-0.5" />
                 <span>{dejziInfo.actionTip}</span>
               </div>
             )}

@@ -288,13 +288,13 @@ export function ReceiptCameraModal({
       <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-black">
         {/* Error Fallback */}
         {cameraError ? (
-          <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-3xl bg-[#232323] border border-white/10 space-y-4">
+          <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-3xl bg-[#242424] border border-[#383838] space-y-4">
             <div className="w-14 h-14 mx-auto rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
               <AlertCircle size={28} />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-base font-bold text-white">
-                {isEn ? 'Camera Unavailable' : 'Kameran är inte tillgänglig'}
+                {isEn ? 'Camera unavailable' : 'Kameran är inte tillgänglig'}
               </h3>
               <p className="text-xs text-[#A8A8A8] leading-relaxed">
                 {cameraError}
@@ -303,7 +303,7 @@ export function ReceiptCameraModal({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full py-3 px-4 rounded-xl bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-white/90 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 rounded-xl bg-white text-black font-bold text-xs hover:bg-neutral-200 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <ImageIcon size={16} />
               <span>{isEn ? 'Choose photo from library' : 'Välj bild från galleri'}</span>
@@ -340,7 +340,7 @@ export function ReceiptCameraModal({
                 <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-xl" />
 
                 {/* Subtle animated scan sweep line */}
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-neutral-200 dark:text-white to-transparent animate-[bounce_2.5s_infinite]" />
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/60 to-transparent animate-[bounce_2.5s_infinite]" />
               </div>
 
               {/* Guide hint */}

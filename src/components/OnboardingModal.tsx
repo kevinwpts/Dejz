@@ -1164,7 +1164,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                                 ({formatAmount(Math.abs(remainingKr), config.language)} {config.currency || 'kr'})
                               </span>
                               {remainingPct === 0 && (
-                                <span className="text-[9.5px] font-bold text-neutral-800 dark:text-white uppercase tracking-tight bg-neutral-800 dark:text-white/10 px-1.5 py-0.5 rounded-md">
+                                <span className="text-[9.5px] font-bold text-[#1C1917] dark:text-white uppercase tracking-tight bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded-md">
                                   100% klart
                                 </span>
                               )}

@@ -187,7 +187,7 @@ export function CategoryBottomSheetModal({
                   if (typeof feedback.light === 'function') feedback.light();
                   onClose();
                 }}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.06] hover:bg-black/10 dark:hover:bg-white/[0.12] text-[#6E6961] dark:text-white/80 hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Stäng"
               >
                 <X size={17} strokeWidth={2.2} />

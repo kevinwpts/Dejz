@@ -86,7 +86,7 @@ export function CancelSubscriptionModal({
 
   const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[220] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm">
         {/* Backdrop click */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -103,19 +103,22 @@ export function CancelSubscriptionModal({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg bg-[var(--surface-color)] rounded-t-[28px] sm:rounded-[28px] border border-[var(--border-color)] shadow-2xl max-h-[90vh] flex flex-col z-10 overflow-hidden"
+          className="relative w-full max-w-lg bg-white dark:bg-[#242424] rounded-t-[28px] sm:rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden"
         >
+          {/* Drag Handle */}
+          <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
+
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[var(--border-color)]/60 shrink-0">
+          <div className="flex items-center justify-between px-5 pt-3 sm:pt-5 pb-4 border-b border-[#E6E2D8] dark:border-[#383838] shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
                 <ShieldAlert size={18} strokeWidth={2.2} />
               </div>
               <div>
-                <h3 className="text-[16px] font-bold text-[var(--text-primary)] tracking-tight">
-                  {isEn ? 'Cancel Subscription / Contract' : 'Säg upp abonnemang & avtal'}
+                <h3 className="text-base font-bold text-[#1C1917] dark:text-white tracking-tight">
+                  {isEn ? 'Cancel subscription / contract' : 'Säg upp abonnemang & avtal'}
                 </h3>
-                <p className="text-[11.5px] text-[var(--text-secondary)]">
+                <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8]">
                   {isEn ? 'Direct link and step-by-step guide' : 'Direktlänk och steg-för-steg-guide'}
                 </p>
               </div>
@@ -124,26 +127,26 @@ export function CancelSubscriptionModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] hover:bg-[var(--surface-muted)]/80 text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Stäng"
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           </div>
 
           {/* Body */}
           <div className="p-5 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
             {/* Target Item Card */}
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--surface-muted)]/60 border border-[var(--border-color)]">
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#F6F4EE] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-[#383838]">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-[var(--surface-color)] flex items-center justify-center shrink-0 border border-[var(--border-color)]/80 overflow-hidden [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full">
+                <div className="w-10 h-10 rounded-full bg-white dark:bg-[#242424] flex items-center justify-center shrink-0 border border-[#E6E2D8] dark:border-[#383838] overflow-hidden [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full">
                   <BudgetItemLogo item={expense} type="expense" config={config} />
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-[15px] font-bold text-[var(--text-primary)] truncate">
+                  <h4 className="text-[15px] font-bold text-[#1C1917] dark:text-white truncate">
                     {expense.name}
                   </h4>
-                  <p className="text-xs text-[var(--text-secondary)]">
+                  <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8]">
                     {typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || (isEn ? 'Fixed expense' : 'Fast utgift'))}
                   </p>
                 </div>
@@ -153,7 +156,7 @@ export function CancelSubscriptionModal({
                 <span className="text-sm font-bold font-amount text-rose-500">
                   -{expense.amount} {config.currency || 'kr'}
                 </span>
-                <span className="block text-[10.5px] text-[var(--text-secondary)]">
+                <span className="block text-[10.5px] text-[#6E6961] dark:text-[#A8A8A8]">
                   /{isEn ? 'mo' : 'mån'}
                 </span>
               </div>
@@ -161,11 +164,11 @@ export function CancelSubscriptionModal({
 
             {loading ? (
               <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="w-10 h-10 rounded-full border-3 border-[var(--accent-color)] border-t-transparent animate-spin" />
-                <p className="text-sm font-semibold text-[var(--text-primary)]">
+                <div className="w-8 h-8 rounded-full border-2 border-[#1C1917] dark:border-white border-t-transparent animate-spin" />
+                <p className="text-sm font-semibold text-[#1C1917] dark:text-white">
                   {isEn ? 'Searching for cancellation portal and guide...' : 'Hittar officiell uppsägningslänk och villkor...'}
                 </p>
-                <p className="text-xs text-[var(--text-secondary)]">
+                <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8]">
                   {isEn ? 'Scanning direct links & customer service...' : 'Söker efter direktlänk till kontoinställningar...'}
                 </p>
               </div>
@@ -176,7 +179,7 @@ export function CancelSubscriptionModal({
                   <a
                     href={`tel:${details.phoneNumber.replace(/\s+/g, '')}`}
                     onClick={() => feedback.tap()}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full py-3.5 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-none flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Phone size={17} strokeWidth={2.4} />
                     <span>{isEn ? `Call Kundservice: ${details.phoneNumber}` : `Ring kundservice: ${details.phoneNumber}`}</span>
@@ -185,7 +188,7 @@ export function CancelSubscriptionModal({
                   <a
                     href={`mailto:${details.supportEmail}?subject=${encodeURIComponent(`Uppsägning av abonnemang - ${expense.name}`)}`}
                     onClick={() => feedback.tap()}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full py-3.5 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-none flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Mail size={17} strokeWidth={2.4} />
                     <span>{isEn ? `Email Cancellation: ${details.supportEmail}` : `Skicka uppsägning: ${details.supportEmail}`}</span>
@@ -194,28 +197,28 @@ export function CancelSubscriptionModal({
                   <button
                     type="button"
                     onClick={handleOpenLink}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-sm shadow-md hover:opacity-95 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full py-3.5 px-4 rounded-2xl bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-bold text-sm shadow-none hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <ExternalLink size={17} strokeWidth={2.4} />
-                    <span>{isEn ? 'Open Cancellation Portal' : 'Öppna uppsägningssidan'}</span>
+                    <span>{isEn ? 'Open cancellation portal' : 'Öppna uppsägningssidan'}</span>
                   </button>
                 )}
 
                 {/* Step-by-Step Instructions */}
                 {details.steps && details.steps.length > 0 && (
-                  <div className="p-4 rounded-2xl bg-[var(--surface-color)] border border-[var(--border-color)]/80 space-y-3">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-                      <HelpCircle size={14} className="text-[var(--accent-color)]" />
+                  <div className="p-4 rounded-2xl bg-[#F6F4EE] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-[#383838] space-y-3">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#1C1917] dark:text-white tracking-tight">
+                      <HelpCircle size={14} className="text-[#1C1917] dark:text-white" />
                       <span>{isEn ? 'How to cancel step-by-step' : 'Så här säger du upp avtalet'}</span>
                     </div>
 
                     <ol className="space-y-2.5">
                       {details.steps.map((step, idx) => (
-                        <li key={idx} className="flex items-start gap-2.5 text-xs text-[var(--text-secondary)] leading-relaxed">
-                          <span className="w-5 h-5 rounded-full bg-[var(--surface-muted)] text-[var(--text-primary)] font-bold text-[10.5px] flex items-center justify-center shrink-0 mt-0.5 border border-[var(--border-color)]/70">
+                        <li key={idx} className="flex items-start gap-2.5 text-xs text-[#6E6961] dark:text-[#A8A8A8] leading-relaxed">
+                          <span className="w-5 h-5 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white font-bold text-[10.5px] flex items-center justify-center shrink-0 mt-0.5 border border-[#E6E2D8] dark:border-[#383838]">
                             {idx + 1}
                           </span>
-                          <span className="text-[var(--text-primary)]/90">{step}</span>
+                          <span className="text-[#1C1917] dark:text-white">{step}</span>
                         </li>
                       ))}
                     </ol>
@@ -253,7 +256,7 @@ export function CancelSubscriptionModal({
                       href={details.supportUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent-color)] underline inline-flex items-center gap-1 transition-colors"
+                      className="text-xs text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white underline inline-flex items-center gap-1 transition-colors"
                     >
                       <span>{isEn ? 'Read full cancellation policy' : 'Läs fullständiga uppsägningsvillkor'}</span>
                       <ExternalLink size={11} />
@@ -265,7 +268,7 @@ export function CancelSubscriptionModal({
 
             {/* Confirm Delete Section */}
             {onDeleteExpense && (
-              <div className="pt-2 border-t border-[var(--border-color)]/60">
+              <div className="pt-2 border-t border-[#E6E2D8] dark:border-[#383838]">
                 {!showConfirmDelete ? (
                   <button
                     type="button"
@@ -284,14 +287,14 @@ export function CancelSubscriptionModal({
                       <button
                         type="button"
                         onClick={() => setShowConfirmDelete(false)}
-                        className="py-2 px-3 rounded-lg bg-[var(--surface-color)] text-[var(--text-primary)] text-xs font-medium border border-[var(--border-color)] cursor-pointer"
+                        className="py-2 px-3 rounded-lg bg-white dark:bg-[#242424] text-[#1C1917] dark:text-white text-xs font-medium border border-[#E6E2D8] dark:border-[#383838] cursor-pointer"
                       >
                         {isEn ? 'Keep in budget' : 'Behåll'}
                       </button>
                       <button
                         type="button"
                         onClick={handleConfirmCancelAndDelete}
-                        className="py-2 px-3 rounded-lg bg-rose-600 text-white text-xs font-bold shadow-xs hover:bg-rose-500 cursor-pointer"
+                        className="py-2 px-3 rounded-lg bg-rose-600 text-white text-xs font-bold shadow-none hover:bg-rose-500 cursor-pointer"
                       >
                         {isEn ? 'Yes, remove' : 'Ja, ta bort'}
                       </button>
@@ -303,11 +306,11 @@ export function CancelSubscriptionModal({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-[var(--border-color)]/60 bg-[var(--surface-color)] flex justify-end shrink-0 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
+          <div className="p-4 border-t border-[#E6E2D8] dark:border-[#383838] bg-white dark:bg-[#242424] flex justify-end shrink-0 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[var(--surface-muted)] hover:bg-[var(--surface-muted)]/80 text-[var(--text-primary)] text-sm font-semibold border border-[var(--border-color)] active:scale-95 transition-all cursor-pointer"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#1C1917] dark:text-white text-sm font-semibold border border-[#E6E2D8] dark:border-[#383838] active:scale-95 transition-all cursor-pointer"
             >
               {isEn ? 'Close' : 'Stäng'}
             </button>

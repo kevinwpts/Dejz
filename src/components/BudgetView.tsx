@@ -7,6 +7,7 @@ import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
+import { Pill } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 
@@ -348,13 +349,13 @@ export function BudgetView({
               {isOverAllocated ? (
                 <>
                   <span className="text-rose-600 dark:text-rose-400">{formatAmount(totalAllocated, config.language)} kr</span>
-                  <span className="text-[#6E6961] dark:text-white/60 text-lg sm:text-xl font-medium"> fördelat av </span>
+                  <span className="text-[#6E6961] dark:text-[#A8A8A8] text-lg sm:text-xl font-medium"> fördelat av </span>
                   <span>{formatAmount(totalIncomeSum, config.language)} kr</span>
                 </>
               ) : (
                 <>
-                  <span className="text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white">{formatAmount(totalAllocated, config.language)} kr</span>
-                  <span className="text-[#6E6961] dark:text-white/60 text-lg sm:text-xl font-medium"> fördelat av </span>
+                  <span className="text-[#1C1917] dark:text-white">{formatAmount(totalAllocated, config.language)} kr</span>
+                  <span className="text-[#6E6961] dark:text-[#A8A8A8] text-lg sm:text-xl font-medium"> fördelat av </span>
                   <span>{formatAmount(totalIncomeSum, config.language)} kr</span>
                 </>
               )}
@@ -364,7 +365,7 @@ export function BudgetView({
                 ⚠️ Du har fördelat {formatAmount(Math.abs(remainingToAllocate), config.language)} kr mer än din inkomst ({formatAmount(totalIncomeSum, config.language)} kr)
               </span>
             ) : (
-              <span className="text-xs font-semibold tracking-wide text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white block mt-1">
+              <span className="text-xs font-semibold tracking-wide text-[#6E6961] dark:text-[#A8A8A8] block mt-1">
                 ✓ {formatAmount(remainingToAllocate, config.language)} kr kvar att fördela av din inkomst ({formatAmount(totalIncomeSum, config.language)} kr)
               </span>
             )}
@@ -374,7 +375,7 @@ export function BudgetView({
           <div className="w-full h-1.5 bg-black/5 dark:bg-white/[0.06] rounded-full overflow-hidden">
             <div 
               className={`h-full rounded-full transition-all duration-300 ${
-                isOverAllocated ? "bg-rose-500" : "bg-neutral-900 dark:text-white dark:bg-neutral-200 dark:text-white"
+                isOverAllocated ? "bg-rose-500" : "bg-[#1C1917] dark:bg-white"
               }`}
               style={{ width: `${Math.min(100, Math.round((totalAllocated / (totalIncomeSum || 1)) * 100))}%` }}
             />
@@ -637,47 +638,35 @@ export function BudgetView({
     >
       {/* Budget Filter Segmented Control */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
-        <button
+        <Pill
+          active={budgetFilter === 'fixed'}
           onClick={() => setBudgetFilter('fixed')}
-          className={`flex items-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
-            budgetFilter === 'fixed'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
-              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
-          }`}
+          icon={<Calendar size={13} strokeWidth={2} />}
         >
-          <Calendar size={13} strokeWidth={2} />
           {t('fixedExpenses' as TranslationKey) || 'Fasta utgifter'}
-        </button>
-        <button
+        </Pill>
+        <Pill
+          active={budgetFilter === 'income'}
           onClick={() => setBudgetFilter('income')}
-          className={`flex items-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
-            budgetFilter === 'income'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
-              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
-          }`}
+          icon={<ArrowDownLeft size={13} strokeWidth={2} />}
         >
-          <ArrowDownLeft size={13} strokeWidth={2} />
           {t('incomes' as TranslationKey) || 'Inkomster'}
-        </button>
-        <button
+        </Pill>
+        <Pill
+          active={budgetFilter === 'savings'}
           onClick={() => setBudgetFilter('savings')}
-          className={`flex items-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
-            budgetFilter === 'savings'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
-              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
-          }`}
+          icon={<PiggyBank size={13} strokeWidth={2} />}
         >
-          <PiggyBank size={13} strokeWidth={2} />
           {t('monthlySavings' as TranslationKey) || 'Sparande'}
-        </button>
+        </Pill>
       </div>
 
       {/* Overview Hero Section - Dynamic based on filter */}
       <div className="py-2 text-center space-y-1.5 flex flex-col items-center">
-        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#A8A8A8] block select-none font-display">
-          {budgetFilter === 'fixed' && (config?.language === 'en' ? 'TOTAL FIXED EXPENSES' : 'TOTALA FASTA UTGIFTER')}
-          {budgetFilter === 'income' && (config?.language === 'en' ? 'TOTAL INCOME' : 'TOTALA INKOMSTER')}
-          {budgetFilter === 'savings' && (config?.language === 'en' ? 'TOTAL SAVINGS' : 'TOTALT SPARANDE')}
+        <span className="text-[13px] sm:text-[14px] font-bold tracking-tight text-[#6E6961] dark:text-[#A8A8A8] block select-none font-display">
+          {budgetFilter === 'fixed' && (config?.language === 'en' ? 'Total fixed expenses' : 'Totala fasta utgifter')}
+          {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
+          {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
         </span>
         <div className="flex items-baseline justify-center gap-2">
           <AnimatedNumber 
@@ -686,17 +675,13 @@ export function BudgetView({
               budgetFilter === 'income' ? totalIncomeSum :
               totalSavingsSum
             )} 
-            className={`text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums tracking-normal ${
-              budgetFilter === 'income' ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white' : 'text-[#1C1917] dark:text-white'
-            }`}
+            className="text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums tracking-normal text-[#1C1917] dark:text-white"
             formatter={(val) => {
               const prefix = budgetFilter === 'income' ? '+' : '−';
               return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
-          <span className={`text-[19px] sm:text-[21px] font-semibold ${
-            budgetFilter === 'income' ? 'text-neutral-900 dark:text-white/80 dark:text-neutral-200 dark:text-white/80' : 'text-[#8C867C] dark:text-[#A8A8A8]'
-          }`}>
+          <span className="text-[19px] sm:text-[21px] font-semibold text-[#8C867C] dark:text-[#A8A8A8]">
             {config?.currency}
           </span>
         </div>

@@ -18,6 +18,7 @@ import { Transaction, Config } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
+import { Pill } from './ui';
 import { useScrollLock } from '../hooks/useScrollLock';
 
 interface LogViewProps {
@@ -366,22 +367,19 @@ export function LogView({
         {/* Type Filters (Alla, Utgift, Inkomst) */}
         {(['all', 'expense', 'income'] as const).map(type => {
           const isActive = typeFilter === type;
+          const icon = type === 'all' ? <LayoutGrid size={13} strokeWidth={2} /> :
+                       type === 'expense' ? <ArrowDownLeft size={13} strokeWidth={2} /> :
+                       type === 'income' ? <ArrowUpRight size={13} strokeWidth={2} /> :
+                       <FileText size={13} strokeWidth={2} />;
           return (
-            <button
+            <Pill
               key={type}
+              active={isActive}
               onClick={() => setTypeFilter(type)}
-              className={`flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
-                isActive 
-                  ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none' 
-                  : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
-              }`}
+              icon={icon}
             >
-              {type === 'all' && <LayoutGrid size={13} strokeWidth={2} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
-              {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={2} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
-              {type === 'income' && <ArrowUpRight size={13} strokeWidth={2} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
-              {type === 'receipt' && <FileText size={13} strokeWidth={2} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
-              <span>{t(type as TranslationKey)}</span>
-            </button>
+              {t(type as TranslationKey)}
+            </Pill>
           );
         })}
       </div>
@@ -533,8 +531,8 @@ export function LogView({
                   disabled={!canModalGoPrev}
                   className={`p-2 rounded-xl transition-all cursor-pointer ${
                     canModalGoPrev
-                      ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-neutral-900 dark:text-white dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] active:scale-90'
-                      : 'text-[#6E6961]/30 dark:text-white/20 cursor-not-allowed'
+                      ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] active:scale-90'
+                      : 'text-[#6E6961]/30 dark:text-[#A8A8A8]/30 cursor-not-allowed'
                   }`}
                   aria-label="Föregående period"
                   title="Föregående period"
@@ -553,7 +551,7 @@ export function LogView({
                   title={getL10n('Välj hela perioden', 'Select full period')}
                 >
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-bold text-[#1C1917] dark:text-white tracking-tight truncate capitalize group-hover:text-neutral-900 dark:text-white dark:group-hover:text-[#1C1917] dark:text-white transition-colors">
+                    <span className="text-sm font-bold text-[#1C1917] dark:text-white tracking-tight truncate capitalize transition-colors">
                       {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                     </span>
                     {modalPeriod?.isCurrent && (
@@ -575,8 +573,8 @@ export function LogView({
                   disabled={!canModalGoNext}
                   className={`p-2 rounded-xl transition-all cursor-pointer ${
                     canModalGoNext
-                      ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-neutral-900 dark:text-white dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] active:scale-90'
-                      : 'text-[#6E6961]/30 dark:text-white/20 cursor-not-allowed'
+                      ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] active:scale-90'
+                      : 'text-[#6E6961]/30 dark:text-[#A8A8A8]/30 cursor-not-allowed'
                   }`}
                   aria-label="Nästa period"
                   title="Nästa period"

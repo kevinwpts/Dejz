@@ -21,14 +21,14 @@ export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: Onboard
         }}
         transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
         className={`absolute inset-0 rounded-full blur-2xl pointer-events-none ${
-          step === 'name' || step === 'age' || step === 'gender' ? 'bg-gradient-to-tr from-neutral-800 dark:text-white/40 via-cyan-400/40 to-teal-400/30' :
+          step === 'name' || step === 'age' || step === 'gender' ? 'bg-gradient-to-tr from-cyan-500/40 via-cyan-400/40 to-teal-400/30' :
           step === 'payday' ? 'bg-gradient-to-tr from-amber-500/45 via-yellow-400/40 to-orange-500/30' :
-          step === 'income' ? 'bg-gradient-to-tr from-neutral-800 dark:text-white/50 via-teal-400/40 to-green-500/30' :
-          step === 'expenses' ? 'bg-gradient-to-tr from-rose-500/45 via-purple-400/35 to-neutral-800 dark:text-white/30' :
-          step === 'budget' ? 'bg-gradient-to-tr from-neutral-800 dark:text-white/45 via-amber-400/35 to-cyan-500/30' :
+          step === 'income' ? 'bg-gradient-to-tr from-emerald-500/40 via-teal-400/40 to-green-500/30' :
+          step === 'expenses' ? 'bg-gradient-to-tr from-rose-500/45 via-purple-400/35 to-pink-500/30' :
+          step === 'budget' ? 'bg-gradient-to-tr from-indigo-500/40 via-amber-400/35 to-cyan-500/30' :
           step === 'goals' ? 'bg-gradient-to-tr from-sky-500/45 via-cyan-400/40 to-blue-500/30' :
-          step === 'midMonth' ? 'bg-gradient-to-tr from-amber-500/45 via-neutral-200 dark:text-white/40 to-teal-400/30' :
-          'bg-gradient-to-tr from-neutral-800 dark:text-white/50 via-amber-400/40 to-cyan-400/40'
+          step === 'midMonth' ? 'bg-gradient-to-tr from-amber-500/45 via-yellow-400/30 to-teal-400/30' :
+          'bg-gradient-to-tr from-emerald-500/40 via-amber-400/40 to-cyan-400/40'
         }`}
       />
 

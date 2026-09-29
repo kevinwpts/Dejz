@@ -115,7 +115,7 @@ export function AppHeader({
             <button
               onClick={() => onNavigate("profile")}
               className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-[#E6E2D8] dark:border-white/[0.045] bg-[#FFFFFF] dark:bg-white/[0.035] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.07] text-[var(--text-primary)] ${
-                activeTab === "profile" ? "ring-2 ring-neutral-200 dark:text-white/50" : ""
+                activeTab === "profile" ? "ring-2 ring-[#1C1917] dark:ring-white" : ""
               }`}
               aria-label="Profil"
               title="Profil"
