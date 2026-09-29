@@ -7,7 +7,7 @@ import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
-import { Pill } from './ui';
+import { FilterSelectButton, FilterMenuModal } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 
@@ -58,6 +58,7 @@ export function BudgetView({
   const [editingCategoryName, setEditingCategoryName] = React.useState<string | null>(null);
   const [inlineInputValue, setInlineInputValue] = React.useState<string>("");
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
+  const [isBudgetFilterModalOpen, setIsBudgetFilterModalOpen] = React.useState(false);
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
   });
@@ -636,29 +637,51 @@ export function BudgetView({
       transition={{ duration: 0.35 }}
       className="space-y-7 font-sans"
     >
-      {/* Budget Filter Segmented Control */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
-        <Pill
-          active={budgetFilter === 'fixed'}
-          onClick={() => setBudgetFilter('fixed')}
-          icon={<Calendar size={13} strokeWidth={2} />}
-        >
-          {t('fixedExpenses' as TranslationKey) || 'Fasta utgifter'}
-        </Pill>
-        <Pill
-          active={budgetFilter === 'income'}
-          onClick={() => setBudgetFilter('income')}
-          icon={<ArrowDownLeft size={13} strokeWidth={2} />}
-        >
-          {t('incomes' as TranslationKey) || 'Inkomster'}
-        </Pill>
-        <Pill
-          active={budgetFilter === 'savings'}
-          onClick={() => setBudgetFilter('savings')}
-          icon={<PiggyBank size={13} strokeWidth={2} />}
-        >
-          {t('monthlySavings' as TranslationKey) || 'Sparande'}
-        </Pill>
+      {/* Budget Filter Single Selector Button */}
+      <div className="w-full">
+        <FilterSelectButton
+          icon={
+            budgetFilter === 'fixed' ? <Calendar size={15} strokeWidth={2} /> :
+            budgetFilter === 'income' ? <ArrowDownLeft size={15} strokeWidth={2} /> :
+            <PiggyBank size={15} strokeWidth={2} />
+          }
+          value={
+            budgetFilter === 'fixed' ? (t('fixedExpenses' as TranslationKey) || (config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter')) :
+            budgetFilter === 'income' ? (t('incomes' as TranslationKey) || (config?.language === 'en' ? 'Income' : 'Inkomster')) :
+            (t('monthlySavings' as TranslationKey) || (config?.language === 'en' ? 'Monthly savings' : 'Månadssparande'))
+          }
+          onClick={() => setIsBudgetFilterModalOpen(true)}
+          className="w-full"
+        />
+
+        <FilterMenuModal
+          isOpen={isBudgetFilterModalOpen}
+          onClose={() => setIsBudgetFilterModalOpen(false)}
+          title={config?.language === 'en' ? 'Select section' : 'Välj budgetkategori'}
+          subtitle={config?.language === 'en' ? 'Switch between fixed expenses, income and savings' : 'Växla mellan fasta utgifter, inkomster och sparande'}
+          selectedId={budgetFilter}
+          onSelect={(id) => setBudgetFilter(id as 'fixed' | 'income' | 'savings')}
+          options={[
+            {
+              id: 'fixed',
+              label: config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter',
+              subtitle: config?.language === 'en' ? 'Recurring rent, bills and subscriptions' : 'Återkommande hyra, räkningar och abonnemang',
+              icon: <Calendar size={16} strokeWidth={2} />,
+            },
+            {
+              id: 'income',
+              label: config?.language === 'en' ? 'Income' : 'Inkomster',
+              subtitle: config?.language === 'en' ? 'Salary, benefits and extra income' : 'Lön, bidrag och extra inkomster',
+              icon: <ArrowDownLeft size={16} strokeWidth={2} />,
+            },
+            {
+              id: 'savings',
+              label: config?.language === 'en' ? 'Monthly savings' : 'Månadssparande',
+              subtitle: config?.language === 'en' ? 'Savings goals and auto savings' : 'Målsparande och automatiskt sparande',
+              icon: <PiggyBank size={16} strokeWidth={2} />,
+            },
+          ]}
+        />
       </div>
 
       {/* Overview Hero Section - Dynamic based on filter */}

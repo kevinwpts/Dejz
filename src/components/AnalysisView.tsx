@@ -7,7 +7,7 @@ import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
 import { BudgetSummaryModule } from './BudgetSummaryModule';
-import { UniversalPeriodSelector } from './UniversalPeriodSelector';
+import { FilterSelectButton, FilterMenuModal } from './ui';
 import { formatAmount } from '../utils/format';
 import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
 import { getEmojiSolidColor } from '../utils/ui';
@@ -41,7 +41,7 @@ export function AnalysisView({
   periods,
   currentPeriodDate,
   onPeriodChange,
-  _onOpenCalendarPicker
+  onOpenCalendarPicker
 }: AnalysisViewProps) {
   const _paydaySetting = config.payday || 25;
   const _adjustment = config.paydayBeforeWeekend ? WeekendAdjustment.BEFORE : WeekendAdjustment.NONE;
@@ -53,6 +53,71 @@ export function AnalysisView({
 
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('all');
+  const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+  const periodOptions = useMemo(() => {
+    if (!periods || periods.length === 0) {
+      return [
+        {
+          id: 'current',
+          label: stats?.periodName?.split('(')[0]?.trim() || (config.language === 'en' ? 'Current period' : 'Aktuell period'),
+          subtitle: stats?.periodName?.includes('(') ? stats.periodName.split('(')[1]?.replace(')', '').trim() : undefined,
+          icon: <Calendar size={16} strokeWidth={2} />,
+          badge: config.language === 'en' ? 'Current' : 'Nu',
+        }
+      ];
+    }
+    return periods
+      .filter(p => !p.isFuture || p.isCurrent)
+      .map(p => {
+        const [title, sub] = p.name?.includes('(')
+          ? p.name.split('(').map((s: string) => s.replace(')', '').trim())
+          : [p.name, ''];
+        return {
+          id: p.date ? new Date(p.date).toISOString() : p.name,
+          date: p.date,
+          label: title,
+          subtitle: sub || undefined,
+          icon: <Calendar size={16} strokeWidth={2} />,
+          badge: p.isCurrent ? (config.language === 'en' ? 'Current' : 'Nu') : undefined,
+        };
+      });
+  }, [periods, stats?.periodName, config.language]);
+
+  const selectedPeriodId = useMemo(() => {
+    if (!currentPeriodDate || !periods) return 'current';
+    const found = periods.find(p => p.date && new Date(p.date).getMonth() === new Date(currentPeriodDate).getMonth() && new Date(p.date).getFullYear() === new Date(currentPeriodDate).getFullYear());
+    return found ? (found.date ? new Date(found.date).toISOString() : found.name) : 'current';
+  }, [currentPeriodDate, periods]);
+
+  const handlePeriodSelect = (id: string) => {
+    const found = periodOptions.find(o => o.id === id);
+    if (found && (found as any).date && onPeriodChange) {
+      onPeriodChange(new Date((found as any).date));
+    }
+  };
+
+  const filterOptions = useMemo(() => [
+    {
+      id: 'all' as const,
+      label: t('all' as TranslationKey) || (config.language === 'en' ? 'All expenses' : 'Alla utgifter'),
+      subtitle: config.language === 'en' ? 'Variable and fixed expenses' : 'Både rörliga och fasta kostnader',
+      icon: <LayoutGrid size={16} strokeWidth={2} />,
+    },
+    {
+      id: 'variable' as const,
+      label: t('variableExpenses' as TranslationKey) || (config.language === 'en' ? 'Variable expenses' : 'Rörliga utgifter'),
+      subtitle: config.language === 'en' ? 'Purchases, groceries, daily spending' : 'Köp, mat och vardagskostnader',
+      icon: <TrendingUp size={16} strokeWidth={2} />,
+    },
+    {
+      id: 'fixed' as const,
+      label: t('fixedExpenses' as TranslationKey) || (config.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter'),
+      subtitle: config.language === 'en' ? 'Rent, bills and recurring contracts' : 'Hyra, räkningar och abonnemang',
+      icon: <Calendar size={16} strokeWidth={2} />,
+    },
+  ], [config.language, t]);
 
   const filteredExpenses = useMemo(() => {
     if (!stats || !transactions) return [];
@@ -179,65 +244,71 @@ export function AnalysisView({
 
   return (
     <div className="space-y-6 sm:space-y-7 font-sans">
-      {/* Analysis Filter - Clean horizontal row directly on background */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
-        {periods && onPeriodChange && currentPeriodDate && (
-          <>
-            <UniversalPeriodSelector
-              periods={periods}
-              currentDate={currentPeriodDate}
-              onChange={onPeriodChange}
-              periodName={stats.periodName}
-              isCurrentPeriod={stats.isCurrentPeriod}
-              variant="header"
-              allowFuture={false}
-            />
-            <div className="w-px h-4 bg-white/[0.08] mx-0.5 shrink-0" />
-          </>
-        )}
+      {/* Top Selectors: Period (Left) & Content Filter (Right) */}
+      <div className="flex items-center gap-2 w-full">
+        {/* Left: Period Button */}
+        <FilterSelectButton
+          icon={<Calendar size={15} strokeWidth={2} />}
+          value={stats.periodName?.split('(')[0]?.trim() || (config.language === 'en' ? 'Period' : 'Period')}
+          onClick={() => setIsPeriodModalOpen(true)}
+          className="flex-[1.25] min-w-0"
+        />
 
-        <button
-          onClick={() => {
-            setAnalysisFilter('all');
+        {/* Right: Content Filter Button */}
+        <FilterSelectButton
+          icon={
+            analysisFilter === 'all' ? <LayoutGrid size={15} strokeWidth={2} /> :
+            analysisFilter === 'variable' ? <TrendingUp size={15} strokeWidth={2} /> :
+            <Calendar size={15} strokeWidth={2} />
+          }
+          value={
+            analysisFilter === 'all' ? (t('all' as TranslationKey) || (config.language === 'en' ? 'All' : 'Alla')) :
+            analysisFilter === 'variable' ? (config.language === 'en' ? 'Variable' : 'Rörliga') :
+            (config.language === 'en' ? 'Fixed' : 'Fasta')
+          }
+          onClick={() => setIsFilterModalOpen(true)}
+          className="flex-1 min-w-0"
+        />
+
+        {/* Period Selector Modal */}
+        <FilterMenuModal
+          isOpen={isPeriodModalOpen}
+          onClose={() => setIsPeriodModalOpen(false)}
+          title={config.language === 'en' ? 'Select period' : 'Välj period'}
+          subtitle={config.language === 'en' ? 'View analysis for selected month or period' : 'Visa analys för vald månad eller period'}
+          selectedId={selectedPeriodId}
+          onSelect={handlePeriodSelect}
+          options={periodOptions}
+          footerNode={
+            onOpenCalendarPicker ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPeriodModalOpen(false);
+                  onOpenCalendarPicker();
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#1C1917] dark:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <Calendar size={14} />
+                <span>{config.language === 'en' ? 'Open custom date picker' : 'Öppna kalender / välj datum'}</span>
+              </button>
+            ) : undefined
+          }
+        />
+
+        {/* Content Filter Modal */}
+        <FilterMenuModal
+          isOpen={isFilterModalOpen}
+          onClose={() => setIsFilterModalOpen(false)}
+          title={config.language === 'en' ? 'Filter spending' : 'Filtrera utgifter'}
+          subtitle={config.language === 'en' ? 'Choose which expenses to include in analysis' : 'Välj vilka kostnader som ska visas i analysen'}
+          selectedId={analysisFilter}
+          onSelect={(id) => {
+            setAnalysisFilter(id as 'all' | 'variable' | 'fixed');
             setExpandedCategory(null);
           }}
-          className={`flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
-            analysisFilter === 'all'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
-              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
-          }`}
-        >
-          <LayoutGrid size={13} strokeWidth={2} className={analysisFilter === 'all' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />
-          <span>{t('all' as TranslationKey)}</span>
-        </button>
-        <button
-          onClick={() => {
-            setAnalysisFilter('variable');
-            setExpandedCategory(null);
-          }}
-          className={`flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
-            analysisFilter === 'variable'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
-              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
-          }`}
-        >
-          <TrendingUp size={13} strokeWidth={2} className={analysisFilter === 'variable' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />
-          <span>{t('variableExpenses' as TranslationKey)}</span>
-        </button>
-        <button
-          onClick={() => {
-            setAnalysisFilter('fixed');
-            setExpandedCategory(null);
-          }}
-          className={`flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
-            analysisFilter === 'fixed'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
-              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
-          }`}
-        >
-          <Calendar size={13} strokeWidth={2} className={analysisFilter === 'fixed' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />
-          <span>{t('fixedExpenses' as TranslationKey)}</span>
-        </button>
+          options={filterOptions}
+        />
       </div>
 
       {/* Budget Summary Metrics */}

@@ -7,7 +7,6 @@ import {
   FileText, 
   LayoutGrid, 
   Calendar as CalendarIcon, 
-  ChevronDown, 
   ChevronLeft,
   ChevronRight,
   X, 
@@ -18,7 +17,7 @@ import { Transaction, Config } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
-import { Pill } from './ui';
+import { FilterSelectButton, FilterMenuModal } from './ui';
 import { useScrollLock } from '../hooks/useScrollLock';
 
 interface LogViewProps {
@@ -45,6 +44,7 @@ export function LogView({
   periods
 }: LogViewProps) {
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'receipt'>('all');
+  const [isTypeFilterModalOpen, setIsTypeFilterModalOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isPeriodPickerOpen, setIsPeriodPickerOpen] = useState(false);
@@ -73,53 +73,11 @@ export function LogView({
     return en;
   };
 
-  // Chronological list of past and current periods (earliest to latest) for arrow navigation
+  // Chronological list of past and current periods (earliest to latest)
   const chronologicalPeriods = useMemo(() => {
     if (!periods || periods.length === 0) return [];
     return periods.filter(p => !p.isFuture || p.isCurrent);
   }, [periods]);
-
-  const currentIndex = useMemo(() => {
-    if (!selectedPeriod || chronologicalPeriods.length === 0) return -1;
-    return chronologicalPeriods.findIndex(p => p.name === selectedPeriod.name);
-  }, [selectedPeriod, chronologicalPeriods]);
-
-  const canGoPrev = selectedDate !== null || (chronologicalPeriods.length > 0 && (selectedPeriod === null || currentIndex > 0));
-  const canGoNext = selectedDate !== null || selectedPeriod !== null;
-
-  const handlePrev = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (selectedDate) {
-      const prev = new Date(selectedDate);
-      prev.setDate(prev.getDate() - 1);
-      setSelectedDate(prev);
-      return;
-    }
-    if (chronologicalPeriods.length === 0) return;
-    if (selectedPeriod === null) {
-      setSelectedPeriod(chronologicalPeriods[chronologicalPeriods.length - 1]);
-    } else if (currentIndex > 0) {
-      setSelectedPeriod(chronologicalPeriods[currentIndex - 1]);
-    }
-  };
-
-  const handleNext = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (selectedDate) {
-      const next = new Date(selectedDate);
-      next.setDate(next.getDate() + 1);
-      setSelectedDate(next);
-      return;
-    }
-    if (chronologicalPeriods.length === 0 || selectedPeriod === null) return;
-    if (currentIndex < chronologicalPeriods.length - 1) {
-      setSelectedPeriod(chronologicalPeriods[currentIndex + 1]);
-    } else {
-      setSelectedPeriod(null);
-    }
-  };
 
   const selectedMonthName = useMemo(() => {
     if (!selectedPeriod?.name) return '';
@@ -282,106 +240,73 @@ export function LogView({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Top Filter Bar: Period/Day Selector with Left/Right Arrows + Type Filters */}
-      <div className="sticky top-[calc(env(safe-area-inset-top))] z-30 bg-[#F5F2EC] dark:bg-[#0B0A12] py-2 -mx-2 px-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar shadow-sm">
-        {/* Period / Day Selector with Left & Right Arrows */}
-        {periods && periods.length > 0 && (
-          <>
-            <div className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] ${
-              selectedDate || selectedPeriod
-                ? 'bg-white dark:bg-white/[0.06] border-[#1C1917]/20 dark:border-white/20 text-[#1C1917] dark:text-white shadow-2xs'
-                : 'bg-white border-[#E6E2D8] text-[#1C1917] dark:bg-white/[0.035] dark:border-white/[0.035] dark:text-[#A8A8A8]'
-            }`}>
-              <button
-                type="button"
-                onClick={handlePrev}
-                disabled={!canGoPrev}
-                className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
-                  canGoPrev 
-                    ? 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]' 
-                    : 'text-[#6E6961]/30 dark:text-[#A8A8A8] opacity-25 cursor-not-allowed'
-                }`}
-                aria-label={selectedDate ? 'Föregående dag' : 'Föregående period'}
-                title={selectedDate ? 'Föregående dag' : 'Föregående period'}
-              >
-                <ChevronLeft size={15} strokeWidth={2} />
-              </button>
+      {/* Top Selectors: Period (Left) & Type Filter (Right) */}
+      <div className="flex items-center gap-2 w-full">
+        {/* Left: Period Button */}
+        <FilterSelectButton
+          icon={<CalendarIcon size={15} strokeWidth={2} />}
+          value={activeFilterLabel || getL10n('Alla perioder', 'All periods')}
+          onClick={() => {
+            const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
+            setModalPeriod(initial);
+            setIsPeriodPickerOpen(true);
+          }}
+          className="flex-[1.25] min-w-0"
+        />
 
-              <button
-                type="button"
-                onClick={() => {
-                  const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
-                  setModalPeriod(initial);
-                  setIsPeriodPickerOpen(true);
-                }}
-                className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full hover:bg-black/5 dark:hover:bg-white/[0.05] transition-all cursor-pointer group min-w-0"
-                title={activeFilterLabel}
-              >
-                <CalendarIcon 
-                  size={13} 
-                  strokeWidth={1.8} 
-                  className={selectedDate || selectedPeriod ? 'text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white' : 'text-[#6E6961] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors'} 
-                />
-                <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate text-[#1C1917] dark:text-white">
-                  {activeFilterLabel}
-                </span>
-                {selectedDate || selectedPeriod ? (
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedDate(null);
-                      setSelectedPeriod(null);
-                    }}
-                    className="p-0.5 hover:bg-black/10 dark:hover:bg-white/20 rounded-full transition-colors ml-0.5 cursor-pointer"
-                    title={getL10n('Rensa filter (visa alla)', 'Clear filter (show all)', 'Fjern filter', 'Ryd filter', 'Tyhjennä')}
-                  >
-                    <X size={11} strokeWidth={2.5} className="text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white" />
-                  </span>
-                ) : (
-                  <ChevronDown size={12} strokeWidth={2} className="text-[#6E6961] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors shrink-0" />
-                )}
-              </button>
+        {/* Right: Type Filter Button */}
+        <FilterSelectButton
+          icon={
+            typeFilter === 'all' ? <LayoutGrid size={15} strokeWidth={2} /> :
+            typeFilter === 'expense' ? <ArrowDownLeft size={15} strokeWidth={2} /> :
+            typeFilter === 'income' ? <ArrowUpRight size={15} strokeWidth={2} /> :
+            <FileText size={15} strokeWidth={2} />
+          }
+          value={
+            typeFilter === 'all' ? (t('all' as TranslationKey) || (config.language === 'en' ? 'All' : 'Alla')) :
+            typeFilter === 'expense' ? (t('expense' as TranslationKey) || (config.language === 'en' ? 'Expenses' : 'Utgifter')) :
+            typeFilter === 'income' ? (t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster')) :
+            (t('receipt' as TranslationKey) || (config.language === 'en' ? 'Receipts' : 'Kvitton'))
+          }
+          onClick={() => setIsTypeFilterModalOpen(true)}
+          className="flex-1 min-w-0"
+        />
 
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={!canGoNext}
-                className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
-                  canGoNext 
-                    ? 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]' 
-                    : 'text-[#6E6961]/30 dark:text-[#A8A8A8] opacity-25 cursor-not-allowed'
-                }`}
-                aria-label={selectedDate ? 'Nästa dag' : 'Nästa period'}
-                title={selectedDate ? 'Nästa dag' : 'Nästa period'}
-              >
-                <ChevronRight size={15} strokeWidth={2} />
-              </button>
-            </div>
-
-            <div className="w-px h-4 bg-[#E6E2D8] dark:bg-white/[0.08] mx-0.5 shrink-0" />
-          </>
-        )}
-
-        {/* Type Filters (Alla, Utgift, Inkomst) */}
-        {(['all', 'expense', 'income'] as const).map(type => {
-          const isActive = typeFilter === type;
-          const icon = type === 'all' ? <LayoutGrid size={13} strokeWidth={2} /> :
-                       type === 'expense' ? <ArrowDownLeft size={13} strokeWidth={2} /> :
-                       type === 'income' ? <ArrowUpRight size={13} strokeWidth={2} /> :
-                       <FileText size={13} strokeWidth={2} />;
-          return (
-            <Pill
-              key={type}
-              active={isActive}
-              onClick={() => setTypeFilter(type)}
-              icon={icon}
-            >
-              {t(type as TranslationKey)}
-            </Pill>
-          );
-        })}
+        {/* Type Filter Modal */}
+        <FilterMenuModal
+          isOpen={isTypeFilterModalOpen}
+          onClose={() => setIsTypeFilterModalOpen(false)}
+          title={getL10n('Filtrera transaktioner', 'Filter transactions', 'Filtrer transaksjoner', 'Filtrer transaktioner', 'Suodata tapahtumia')}
+          subtitle={getL10n('Välj vilka typer av transaktioner som ska visas', 'Choose transaction types to display')}
+          selectedId={typeFilter}
+          onSelect={(id) => setTypeFilter(id as 'all' | 'expense' | 'income' | 'receipt')}
+          options={[
+            {
+              id: 'all',
+              label: t('all' as TranslationKey) || (config.language === 'en' ? 'All transactions' : 'Alla transaktioner'),
+              subtitle: getL10n('Visa alla utgifter och inkomster', 'Show all income and expenses'),
+              icon: <LayoutGrid size={16} strokeWidth={2} />,
+            },
+            {
+              id: 'expense',
+              label: t('expense' as TranslationKey) || (config.language === 'en' ? 'Expenses' : 'Utgifter'),
+              subtitle: getL10n('Endast utgifter och köp', 'Only expense transactions'),
+              icon: <ArrowDownLeft size={16} strokeWidth={2} />,
+            },
+            {
+              id: 'income',
+              label: t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster'),
+              subtitle: getL10n('Endast inkomster och insättningar', 'Only income deposits'),
+              icon: <ArrowUpRight size={16} strokeWidth={2} />,
+            },
+            {
+              id: 'receipt',
+              label: t('receipt' as TranslationKey) || (config.language === 'en' ? 'Receipts' : 'Kvitton'),
+              subtitle: getL10n('Endast transaktioner med kvitto', 'Only transactions with receipt image'),
+              icon: <FileText size={16} strokeWidth={2} />,
+            },
+          ]}
+        />
       </div>
 
       {/* Transactions List */}
