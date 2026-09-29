@@ -2280,20 +2280,17 @@ export default function App() {
     const actualToday = new Date();
     actualToday.setHours(0, 0, 0, 0);
 
-    let earliest = now;
+    let registrationDate: Date | null = null;
     if (session?.user?.created_at) {
       const d = new Date(session.user.created_at);
-      if (!isNaN(d.getTime()) && d < earliest) earliest = d;
+      if (!isNaN(d.getTime())) registrationDate = d;
     }
-    if (profile?.created_at) {
+    if (!registrationDate && profile?.created_at) {
       const d = new Date(profile.created_at);
-      if (!isNaN(d.getTime()) && d < earliest) earliest = d;
+      if (!isNaN(d.getTime())) registrationDate = d;
     }
-    if (transactions && transactions.length > 0) {
-      const minTxTime = Math.min(...transactions.map(t => t.timestamp));
-      const d = new Date(minTxTime);
-      if (!isNaN(d.getTime()) && d < earliest) earliest = d;
-    }
+
+    const earliest = registrationDate || now;
 
     const nowYear = now.getFullYear();
     const nowMonth = now.getMonth();
@@ -2319,6 +2316,10 @@ export default function App() {
 
       let start = tempBounds.start;
       let end = tempBounds.end;
+
+      if (registrationDate && end < registrationDate) {
+        continue;
+      }
       let name = getPeriodName(
         start,
         end,

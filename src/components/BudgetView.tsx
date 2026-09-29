@@ -429,7 +429,7 @@ export function BudgetView({
 
         {/* Continuous Category List */}
         <div className="space-y-3">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-[#6E6961] dark:text-[var(--text-secondary)] px-1 opacity-60 block">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-[#6E6961] dark:text-[var(--text-secondary)] px-1 opacity-50 block">
             Kategorier ({config.categories?.length || 0})
           </span>
           
@@ -444,170 +444,180 @@ export function BudgetView({
               return (
                 <div 
                   key={cat.name}
-                  className={`p-4 transition-all flex flex-col gap-3 ${
+                  className={`p-4 transition-all flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 ${
                     catBudget === 0 ? "opacity-65 hover:opacity-100" : "opacity-100"
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-3 w-full">
-                    {/* Left: Icon & Name & Fixed label */}
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {/* Pin button */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePinCategory(cat.name);
-                        }}
-                        className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer flex items-center justify-center shrink-0 ${
-                          cat.pinned 
-                            ? "bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border-transparent" 
-                            : "bg-black/5 dark:bg-white/[0.05] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white border border-transparent hover:border-[#E6E2D8] dark:hover:border-white/[0.05]"
-                        }`}
-                        title={cat.pinned ? "Avfäst från Hem" : "Fäst på Hem"}
-                      >
-                        <Pin size={12} className={cat.pinned ? "fill-current" : ""} />
-                      </button>
+                  {/* Top Level on mobile / Left side on desktop */}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {/* Pin button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePinCategory(cat.name);
+                      }}
+                      className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer flex items-center justify-center shrink-0 ${
+                        cat.pinned 
+                          ? "bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border-transparent" 
+                          : "bg-black/5 dark:bg-white/[0.05] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white border border-transparent hover:border-[#E6E2D8] dark:hover:border-white/[0.05]"
+                      }`}
+                      title={cat.pinned ? "Avfäst från Hem" : "Fäst på Hem"}
+                    >
+                      <Pin size={12} className={cat.pinned ? "fill-current" : ""} />
+                    </button>
 
-                      {/* Reorder up/down buttons */}
-                      {cat.pinned && (
-                        <div className="flex flex-col gap-0.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              movePinnedCategory(cat.name, "up");
-                            }}
-                            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer active:scale-75"
-                          >
-                            <ChevronUp size={11} strokeWidth={2.5} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              movePinnedCategory(cat.name, "down");
-                            }}
-                            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer active:scale-75"
-                          >
-                            <ChevronDown size={11} strokeWidth={2.5} />
-                          </button>
-                        </div>
+                    {/* Reorder up/down buttons */}
+                    {cat.pinned && (
+                      <div className="flex flex-col gap-0.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            movePinnedCategory(cat.name, "up");
+                          }}
+                          className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer active:scale-75"
+                        >
+                          <ChevronUp size={11} strokeWidth={2.5} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            movePinnedCategory(cat.name, "down");
+                          }}
+                          className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer active:scale-75"
+                        >
+                          <ChevronDown size={11} strokeWidth={2.5} />
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="w-9 h-9 rounded-xl bg-black/5 dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.035] text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
+                      {isEmojiString(iconName) ? (
+                        <span className="text-base leading-none">{iconName}</span>
+                      ) : Icon ? (
+                        <Icon size={16} strokeWidth={1.8} className="text-[#1C1917] dark:text-white" />
+                      ) : (
+                        <div className="w-2 h-2 rounded-full bg-[#1C1917] dark:bg-white" />
                       )}
+                    </div>
 
-                      <div className="w-9 h-9 rounded-xl bg-black/5 dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.035] text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
-                        {isEmojiString(iconName) ? (
-                          <span className="text-base leading-none">{iconName}</span>
-                        ) : Icon ? (
-                          <Icon size={16} strokeWidth={1.8} className="text-[#1C1917] dark:text-white" />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-[#1C1917] dark:bg-white" />
-                        )}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <span className="text-[13.5px] font-semibold text-[#1C1917] dark:text-white truncate block tracking-tight">
-                          {cat.name}
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[13.5px] font-semibold text-[#1C1917] dark:text-white truncate block tracking-tight">
+                        {cat.name}
+                      </span>
+                      {fixedSpent > 0 && (
+                        <span className="text-[11px] font-medium text-[#6E6961] dark:text-[#A8A8A8] opacity-80 block truncate mt-0.5">
+                          {formatAmount(fixedSpent, config.language)} kr fast
                         </span>
-                        {fixedSpent > 0 && (
-                          <span className="text-[11px] font-medium text-[#6E6961] dark:text-[#A8A8A8] opacity-80 block truncate mt-0.5">
-                            {formatAmount(fixedSpent, config.language)} kr fast
-                          </span>
-                        )}
-                      </div>
+                      )}
                     </div>
+                  </div>
 
-                    {/* Right: Plus, Minus, and Editable/Tappable amount */}
-                    <div className="flex items-center gap-2.5 shrink-0 select-none">
-                      {/* Minus button */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const currentAmount = Math.max(Number(cat.budget) || 0, fixedSpent);
-                          const newAmount = Math.max(fixedSpent, currentAmount - 100);
-                          const updatedCategories = (config.categories || []).map((c) => {
-                            if (c.name === cat.name) {
-                              return { ...c, budget: newAmount > 0 ? newAmount : undefined };
-                            }
-                            return c;
-                          });
-                          setConfig({ ...config, categories: updatedCategories });
-                        }}
-                        className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0 text-lg font-bold"
-                      >
-                        −
-                      </button>
-
-                      {/* Tappable/Editable amount in the middle */}
-                      <div className="w-24 flex justify-center items-center">
-                        {isEditingThis ? (
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            autoFocus
-                            value={inlineInputValue}
-                            onBlur={() => {
-                              const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
-                              const updatedCategories = (config.categories || []).map((c) => {
-                                if (c.name === cat.name) {
-                                  return { ...c, budget: finalVal > 0 ? finalVal : null };
-                                }
-                                return c;
-                              });
-                              setConfig({ ...config, categories: updatedCategories });
-                              setEditingCategoryName(null);
-                            }}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, "");
-                              setInlineInputValue(val);
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.currentTarget.blur();
+                  {/* Bottom Level on mobile / Right side on desktop: Budget controls or "Ange budget" */}
+                  <div className="flex items-center justify-end sm:justify-start gap-2.5 shrink-0 select-none pl-11 sm:pl-0">
+                    {catBudget > 0 ? (
+                      <>
+                        {/* Minus button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const currentAmount = Math.max(Number(cat.budget) || 0, fixedSpent);
+                            const newAmount = Math.max(fixedSpent, currentAmount - 100);
+                            const updatedCategories = (config.categories || []).map((c) => {
+                              if (c.name === cat.name) {
+                                return { ...c, budget: newAmount > 0 ? newAmount : undefined };
                               }
-                            }}
-                            className="w-full h-8 px-1.5 rounded-lg bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
-                          />
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditingCategoryName(cat.name);
-                              setInlineInputValue(catBudget > 0 ? String(catBudget) : "");
-                            }}
-                            className={`px-2.5 py-1.5 rounded-xl border transition-all text-xs font-bold font-amount tabular-nums text-center w-full hover:bg-black/5 dark:hover:bg-white/[0.05] cursor-pointer ${
-                              catBudget > 0 
-                                ? "bg-black/5 dark:bg-white/[0.04] text-[#1C1917] dark:text-white border-[#E6E2D8] dark:border-white/[0.06]" 
-                                : "bg-transparent text-[#6E6961] dark:text-[var(--text-secondary)] opacity-60 border-transparent hover:border-[#E6E2D8] dark:hover:border-white/[0.04]"
-                            }`}
-                          >
-                            {catBudget > 0 ? `${formatAmount(catBudget, config.language)} kr` : "Ange budget"}
-                          </button>
-                        )}
-                      </div>
+                              return c;
+                            });
+                            setConfig({ ...config, categories: updatedCategories });
+                          }}
+                          className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0 text-base font-bold"
+                        >
+                          −
+                        </button>
 
-                      {/* Plus button */}
+                        {/* Tappable/Editable amount in the middle */}
+                        <div className="w-28 sm:w-24 flex justify-center items-center">
+                          {isEditingThis ? (
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              autoFocus
+                              value={inlineInputValue}
+                              onBlur={() => {
+                                const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
+                                const updatedCategories = (config.categories || []).map((c) => {
+                                  if (c.name === cat.name) {
+                                    return { ...c, budget: finalVal > 0 ? finalVal : null };
+                                  }
+                                  return c;
+                                });
+                                setConfig({ ...config, categories: updatedCategories });
+                                setEditingCategoryName(null);
+                              }}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, "");
+                                setInlineInputValue(val);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.currentTarget.blur();
+                                }
+                              }}
+                              className="w-full h-9 px-2 rounded-xl bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingCategoryName(cat.name);
+                                setInlineInputValue(catBudget > 0 ? String(catBudget) : "");
+                              }}
+                              className="px-3 py-2 rounded-xl border transition-all text-xs font-bold font-amount tabular-nums text-center w-full bg-black/5 dark:bg-white/[0.04] text-[#1C1917] dark:text-white border-[#E6E2D8] dark:border-white/[0.06] hover:bg-black/10 dark:hover:bg-white/[0.08] cursor-pointer"
+                            >
+                              {formatAmount(catBudget, config.language)} kr
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Plus button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const currentAmount = Number(cat.budget) || 0;
+                            const newAmount = currentAmount + 100;
+                            const updatedCategories = (config.categories || []).map((c) => {
+                              if (c.name === cat.name) {
+                                return { ...c, budget: newAmount };
+                              }
+                              return c;
+                            });
+                            setConfig({ ...config, categories: updatedCategories });
+                          }}
+                          className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0 text-base font-bold"
+                        >
+                          +
+                        </button>
+                      </>
+                    ) : (
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const currentAmount = Number(cat.budget) || 0;
-                          const newAmount = currentAmount + 100;
-                          const updatedCategories = (config.categories || []).map((c) => {
-                            if (c.name === cat.name) {
-                              return { ...c, budget: newAmount };
-                            }
-                            return c;
-                          });
-                          setConfig({ ...config, categories: updatedCategories });
+                          setEditingCategoryName(cat.name);
+                          setInlineInputValue("");
                         }}
-                        className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0 text-lg font-bold"
+                        className="px-4 py-2 rounded-xl bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[#1C1917] dark:text-white text-xs font-semibold border border-[#E6E2D8] dark:border-white/[0.06] transition-all cursor-pointer active:scale-95"
                       >
-                        +
+                        Ange budget
                       </button>
-                    </div>
+                    )}
                   </div>
                 </div>
               );

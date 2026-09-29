@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Check, Sun, Moon, Monitor } from 'lucide-react';
-import { Config } from '../types';
+import { Config, WeekendAdjustment, PaydayType } from '../types';
 import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
 import { DEFAULT_PAYMENT_METHODS } from '../constants';
@@ -8,7 +8,9 @@ import { CategoryModal } from './CategoryModal';
 import { PaymentMethodModal } from './BudgetModals';
 import { ConfirmModal } from './ConfirmModal';
 import { CategoryIcon } from './CategoryIcon';
-import { Button } from './ui';
+import { Button, Modal } from './ui';
+import { ToggleSwitch } from './ToggleSwitch';
+import { getActualPayday } from '../utils/date';
 
 interface SettingsViewProps {
   activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance';
@@ -79,6 +81,30 @@ export function SettingsView({
   const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<{ type: 'income' | 'expense', index: number, category: any } | null>(null);
 
   const [pendingPayday, setPendingPayday] = useState<number | null>(null);
+  const [isPaydayModalOpen, setIsPaydayModalOpen] = useState(false);
+
+  const nextPaydayDate = React.useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const paydaySetting = config.payday || 25;
+    const paydayType = config.paydayType || PaydayType.TWENTY_FIFTH;
+    const adjustment = config.paydayBeforeWeekend ? WeekendAdjustment.BEFORE : WeekendAdjustment.NONE;
+
+    let payday = getActualPayday(year, month, paydayType, paydaySetting, adjustment);
+    if (payday < now) {
+      const nextMonth = month === 11 ? 0 : month + 1;
+      const nextYear = month === 11 ? year + 1 : year;
+      payday = getActualPayday(nextYear, nextMonth, paydayType, paydaySetting, adjustment);
+    }
+    return payday;
+  }, [config.payday, config.paydayType, config.paydayBeforeWeekend]);
+
+  const formattedNextPayday = nextPaydayDate.toLocaleDateString(
+    config.language === 'en' ? 'en-US' : 'sv-SE',
+    { day: 'numeric', month: 'long' }
+  );
 
   const handleUpdatePayday = (day: number) => {
     if (day === config.payday) return;
@@ -359,27 +385,51 @@ export function SettingsView({
         </div>
       </div>
 
-      <div>
+       <div>
         {activeSection === 'salary' && (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-[#242424] p-5 rounded-[20px] border border-[#E6E2D8] dark:border-[#383838] space-y-4">
+            <div className="bg-white dark:bg-[#242424] p-5 rounded-[20px] border border-[#E6E2D8] dark:border-[#383838] space-y-5">
               <h2 className="text-sm font-bold text-[#1C1917] dark:text-white">Lönedag & Period</h2>
-              <div className="space-y-3">
-                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">Lönedag i månad</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {[25, 26, 27, 28, 30, 1, 5, 10, 15, 20].map((day) => (
-                    <button
-                      key={day}
-                      onClick={() => handleUpdatePayday(day)}
-                      className={`py-2.5 rounded-[12px] text-xs font-bold transition-all cursor-pointer ${
-                        config.payday === day
-                          ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917]'
-                          : 'bg-[#F7F5F0] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-black/10'
-                      }`}
-                    >
-                      {day}
-                    </button>
-                  ))}
+              
+              {/* Payday Setting Row */}
+              <div className="space-y-1.5">
+                <button
+                  onClick={() => setIsPaydayModalOpen(true)}
+                  className="w-full flex items-center justify-between p-4 rounded-[16px] bg-[#F7F5F0] dark:bg-[#2D2D2D] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer text-left"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">Lönedag</span>
+                    <span className="text-sm font-bold text-[#1C1917] dark:text-white mt-0.5">
+                      {config.language === 'en' ? `The ${config.payday}` : `Den ${config.payday}:e`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
+                    <span>Ändra</span>
+                    <span className="text-base">›</span>
+                  </div>
+                </button>
+                <p className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] pl-1 font-medium">
+                  {config.language === 'en' ? `Next planned payday: ${formattedNextPayday}` : `Nästa planerade lön: ${formattedNextPayday}`}
+                </p>
+              </div>
+
+              {/* Weekend Handling Row */}
+              <div className="pt-3 border-t border-[#E6E2D8] dark:border-[#383838]">
+                <div className="flex items-center justify-between p-1">
+                  <div className="flex flex-col pr-4">
+                    <span className="text-xs font-semibold text-[#1C1917] dark:text-white">
+                      {config.language === 'en' ? 'Pay early if payday is on a weekend' : 'Helghantering'}
+                    </span>
+                    <span className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] mt-0.5">
+                      {config.language === 'en' ? 'Get paid the Friday before if payday is a weekend' : 'Få lön fredagen innan om lönedagen är helg'}
+                    </span>
+                  </div>
+                  <ToggleSwitch
+                    isOn={!!config.paydayBeforeWeekend}
+                    onToggle={() => {
+                      setConfig({ ...config, paydayBeforeWeekend: !config.paydayBeforeWeekend });
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -515,6 +565,36 @@ export function SettingsView({
           t={t}
         />
       )}
+
+      <Modal
+        isOpen={isPaydayModalOpen}
+        onClose={() => setIsPaydayModalOpen(false)}
+        title={config.language === 'en' ? 'Choose payday' : 'Välj lönedag'}
+        subtitle={config.language === 'en' ? 'Select the day of the month you receive your salary' : 'Välj vilken dag i månaden du får lön'}
+        size="sm"
+      >
+        <div className="grid grid-cols-5 sm:grid-cols-7 gap-2.5 py-2">
+          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
+            const isSelected = config.payday === day;
+            return (
+              <button
+                key={day}
+                onClick={() => {
+                  handleUpdatePayday(day);
+                  setIsPaydayModalOpen(false);
+                }}
+                className={`py-3 rounded-[14px] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
+                  isSelected
+                    ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-md scale-105'
+                    : 'bg-[#F7F5F0] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/10'
+                }`}
+              >
+                {day}
+              </button>
+            );
+          })}
+        </div>
+      </Modal>
     </div>
   );
 }
