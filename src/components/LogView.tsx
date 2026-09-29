@@ -405,28 +405,31 @@ export function LogView({
       <AnimatePresence>
         {isPeriodPickerOpen && (
           <div 
-            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/65 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm"
             onClick={() => setIsPeriodPickerOpen(false)}
           >
             <motion.div
-              initial={{ opacity: 0, y: 40, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 40, scale: 0.98 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 27, stiffness: 320 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#FFFFFF] dark:bg-[#232323] border-t sm:border border-[#E6E2D8] dark:border-white/[0.08] w-full max-w-md rounded-t-[28px] rounded-b-none sm:rounded-[24px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[88vh] flex flex-col overflow-hidden text-[#1C1917] dark:text-white"
+              className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#242424] rounded-t-[28px] sm:rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl max-h-[85dvh] flex flex-col z-10 overflow-hidden pb-[max(1.25rem,env(safe-area-inset-bottom,0px))]"
             >
+              {/* Mobile Drag Handle */}
+              <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
+
               {/* Header */}
-              <div className="flex items-center justify-between pb-3.5 border-b border-[#E6E2D8] dark:border-white/[0.06] shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.05] border border-[#E6E2D8] dark:border-white/[0.06] flex items-center justify-center text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white">
+              <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-[#E6E2D8] dark:border-[#383838] shrink-0">
+                <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                  <div className="w-8 h-8 rounded-xl bg-black/5 dark:bg-white/10 border border-[#E6E2D8] dark:border-[#383838] flex items-center justify-center text-[#1C1917] dark:text-white shrink-0">
                     <CalendarIcon size={16} strokeWidth={1.8} />
                   </div>
-                  <div>
-                    <h3 className="text-[15px] font-bold text-[#1C1917] dark:text-white leading-tight">
+                  <div className="min-w-0">
+                    <h3 className="text-base font-bold text-[#1C1917] dark:text-white tracking-tight truncate">
                       {getL10n('Välj dag eller period', 'Select day or period', 'Velg dag eller periode', 'Vælg dag eller periode', 'Valitse päivä tai jakso')}
                     </h3>
-                    <p className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] mt-0.5">
+                    <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8] truncate mt-0.5">
                       {getL10n(
                         'Klicka på ett datum eller visa en hel period', 
                         'Click a date or view an entire period',
@@ -441,10 +444,10 @@ export function LogView({
                 <button
                   type="button"
                   onClick={() => setIsPeriodPickerOpen(false)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
                   aria-label="Stäng"
                 >
-                  <X size={16} strokeWidth={2} />
+                  <X size={16} strokeWidth={2.2} />
                 </button>
               </div>
 
