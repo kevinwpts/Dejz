@@ -692,10 +692,10 @@ export function TodayView({
               </motion.div>
             ) : displayedFixedTransactions.length === 0 ? (
               <EmptyState
-                title={isTodaySelected ? t("noTransactionsToday") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
-                description={isTodaySelected ? t("addFirstTransaction") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
+                title={isTodaySelected ? (lang === "en" ? "No transactions recorded yet" : "Inga transaktioner registrerade än") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
+                description={isTodaySelected ? (lang === "en" ? "Add an expense or income to track today's spending." : "Lägg till en utgift eller inkomst för att hålla koll på dagsbudgeten.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
                 onAction={() => onAddTransaction(selectedDate)}
-                actionLabel={t("addExpense")}
+                actionLabel={`+ ${t("addExpense")}`}
               />
             ) : null}
           </AnimatePresence>
@@ -703,7 +703,7 @@ export function TodayView({
           {/* Fixed transactions for the day (Natural Swedish casing) */}
           {displayedFixedTransactions.length > 0 && (
             <div className="space-y-2 pt-1">
-              <h4 className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[#6E6961] dark:text-[#9CA6BC] px-1">
+              <h4 className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] px-1">
                 {lang === "en" ? "Fixed transactions" : "Fasta transaktioner"}
               </h4>
               <div className="space-y-2">
@@ -729,7 +729,7 @@ export function TodayView({
                         <p className="text-xs sm:text-[13.5px] font-semibold text-[#1C1917] dark:text-white truncate">
                           {item.merchant}
                         </p>
-                        <p className="text-[11px] font-normal text-[#8C867C] dark:text-[#9CA6BC] truncate mt-0.5">
+                        <p className="text-[11px] font-normal text-[#8C867C] dark:text-[#A8A8A8] truncate mt-0.5">
                           {item.category}
                         </p>
                       </div>

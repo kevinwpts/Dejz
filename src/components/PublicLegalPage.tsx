@@ -512,7 +512,7 @@ function SwedishTermsOfService() {
   return (
     <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6">
       <header className="border-b border-[var(--border-color)] pb-6 space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 border border-blue-500/20 mb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-[#F9F8F6] border border-[#E6E2D8] dark:border-white/10 mb-2">
           <FileText size={12} />
           Officiella användarvillkor
         </div>
@@ -621,7 +621,7 @@ function EnglishTermsOfService() {
   return (
     <article className="prose prose-slate max-w-none text-[var(--text-secondary)] space-y-6">
       <header className="border-b border-[var(--border-color)] pb-6 space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 border border-blue-500/20 mb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-[#F9F8F6] border border-[#E6E2D8] dark:border-white/10 mb-2">
           <FileText size={12} />
           Official Terms of Service
         </div>

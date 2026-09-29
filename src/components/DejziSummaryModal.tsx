@@ -274,7 +274,7 @@ export function DejziSummaryModal({
               {/* Totalt kvar i perioden */}
               <div className="p-3.5 rounded-2xl bg-[var(--surface-muted)]/70 border border-[var(--border-color)]/60 flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
-                  <Wallet size={13} className="text-blue-500" />
+                  <Wallet size={13} className="text-[var(--text-secondary)]" />
                   <span>{isEn ? 'Total left' : 'Totalt kvar'}</span>
                 </div>
                 <span className={`text-base font-extrabold font-amount tabular-nums ${(stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-primary)]'}`}>
@@ -285,7 +285,7 @@ export function DejziSummaryModal({
               {/* Grundbudget per dag */}
               <div className="p-3.5 rounded-2xl bg-[var(--surface-muted)]/70 border border-[var(--border-color)]/60 flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
-                  <TrendingUp size={13} className="text-purple-500" />
+                  <TrendingUp size={13} className="text-[var(--text-secondary)]" />
                   <span>{isEn ? 'Daily budget' : 'Budget / dag'}</span>
                 </div>
                 <span className="text-base font-extrabold font-amount tabular-nums text-[var(--text-primary)]">

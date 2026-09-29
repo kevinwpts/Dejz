@@ -459,7 +459,7 @@ export function BudgetView({
                         className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer flex items-center justify-center shrink-0 ${
                           cat.pinned 
                             ? "bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border-transparent" 
-                            : "bg-black/5 dark:bg-white/[0.05] text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white border border-transparent hover:border-[#E6E2D8] dark:hover:border-white/[0.05]"
+                            : "bg-black/5 dark:bg-white/[0.05] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white border border-transparent hover:border-[#E6E2D8] dark:hover:border-white/[0.05]"
                         }`}
                         title={cat.pinned ? "Avfäst från Hem" : "Fäst på Hem"}
                       >
@@ -475,7 +475,7 @@ export function BudgetView({
                               e.stopPropagation();
                               movePinnedCategory(cat.name, "up");
                             }}
-                            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer active:scale-75"
+                            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer active:scale-75"
                           >
                             <ChevronUp size={11} strokeWidth={2.5} />
                           </button>
@@ -485,7 +485,7 @@ export function BudgetView({
                               e.stopPropagation();
                               movePinnedCategory(cat.name, "down");
                             }}
-                            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer active:scale-75"
+                            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer active:scale-75"
                           >
                             <ChevronDown size={11} strokeWidth={2.5} />
                           </button>
@@ -507,7 +507,7 @@ export function BudgetView({
                           {cat.name}
                         </span>
                         {fixedSpent > 0 && (
-                          <span className="text-[11px] font-medium text-[#6E6961] dark:text-[#9CA6BC] opacity-80 block truncate mt-0.5">
+                          <span className="text-[11px] font-medium text-[#6E6961] dark:text-[#A8A8A8] opacity-80 block truncate mt-0.5">
                             {formatAmount(fixedSpent, config.language)} kr fast
                           </span>
                         )}
@@ -531,7 +531,7 @@ export function BudgetView({
                           });
                           setConfig({ ...config, categories: updatedCategories });
                         }}
-                        className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#9CA6BC] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0 text-lg font-bold"
+                        className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0 text-lg font-bold"
                       >
                         −
                       </button>
@@ -601,7 +601,7 @@ export function BudgetView({
                           });
                           setConfig({ ...config, categories: updatedCategories });
                         }}
-                        className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#9CA6BC] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0 text-lg font-bold"
+                        className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0 text-lg font-bold"
                       >
                         +
                       </button>
@@ -642,7 +642,7 @@ export function BudgetView({
           className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'fixed'
               ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#A8A8A8] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
           <Calendar size={13} />
@@ -653,7 +653,7 @@ export function BudgetView({
           className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'income'
               ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#A8A8A8] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
           <ArrowDownLeft size={13} />
@@ -664,7 +664,7 @@ export function BudgetView({
           className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
             budgetFilter === 'savings'
               ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
+              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#A8A8A8] dark:hover:text-white dark:hover:bg-white/[0.06]'
           }`}
         >
           <PiggyBank size={13} />
@@ -674,7 +674,7 @@ export function BudgetView({
 
       {/* Overview Hero Section - Dynamic based on filter */}
       <div className="py-2 text-center space-y-1.5 flex flex-col items-center">
-        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#9CA6BC] block select-none font-display">
+        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#A8A8A8] block select-none font-display">
           {budgetFilter === 'fixed' && (config?.language === 'en' ? 'TOTAL FIXED EXPENSES' : 'TOTALA FASTA UTGIFTER')}
           {budgetFilter === 'income' && (config?.language === 'en' ? 'TOTAL INCOME' : 'TOTALA INKOMSTER')}
           {budgetFilter === 'savings' && (config?.language === 'en' ? 'TOTAL SAVINGS' : 'TOTALT SPARANDE')}
@@ -695,7 +695,7 @@ export function BudgetView({
             }}
           />
           <span className={`text-[19px] sm:text-[21px] font-semibold ${
-            budgetFilter === 'income' ? 'text-neutral-900 dark:text-white/80 dark:text-neutral-200 dark:text-white/80' : 'text-[#8C867C] dark:text-[#9CA6BC]'
+            budgetFilter === 'income' ? 'text-neutral-900 dark:text-white/80 dark:text-neutral-200 dark:text-white/80' : 'text-[#8C867C] dark:text-[#A8A8A8]'
           }`}>
             {config?.currency}
           </span>
@@ -728,7 +728,7 @@ export function BudgetView({
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white shrink-0" />
-                  <span className="text-[#6E6961] dark:text-[#9CA6BC]/80">
+                  <span className="text-[#6E6961] dark:text-[#A8A8A8]/80">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
                   <span className="font-semibold text-[#1C1917] dark:text-white">
@@ -767,7 +767,12 @@ export function BudgetView({
                   ))}
                 </div>
               ) : (
-                <EmptyState title={t('noDataAvailable')} />
+                <EmptyState 
+                  title={config.language === 'en' ? 'No income added yet' : 'Ingen inkomst inlagd än'} 
+                  description={config.language === 'en' ? 'Add your salary or other regular income to calculate your daily budget.' : 'Lägg in din lön eller andra inkomster för att räkna ut din dagsbudget.'}
+                  actionLabel={`+ ${t('newIncome')}`}
+                  onAction={onAddIncome}
+                />
               )}
             </div>
           )}
@@ -788,7 +793,7 @@ export function BudgetView({
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white shrink-0" />
-                  <span className="text-[#6E6961] dark:text-[#9CA6BC]/80">
+                  <span className="text-[#6E6961] dark:text-[#A8A8A8]/80">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
                   <span className="font-semibold text-[#1C1917] dark:text-white">
@@ -821,7 +826,7 @@ export function BudgetView({
                 ).map(([freq, items]) => (
                   <div key={freq} className="space-y-2">
                     <div className="flex items-center gap-3 px-1 pt-1">
-                      <span className="text-xs font-medium text-[#6E6961] dark:text-[#9CA6BC]">
+                      <span className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8]">
                         {Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq) 
                           ? t(`freq_${Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq)!.toLowerCase()}` as TranslationKey)
                           : freq}
@@ -846,7 +851,12 @@ export function BudgetView({
                   </div>
                 ))
               ) : (
-                <EmptyState title={t('noDataAvailable')} />
+                <EmptyState 
+                  title={config.language === 'en' ? 'No fixed expenses added yet' : 'Inga fasta utgifter inlagda än'} 
+                  description={config.language === 'en' ? 'Add rent, bills, and subscriptions to track upcoming payments.' : 'Lägg in hyra, räkningar och abonnemang för att få full koll på fasta kostnader.'}
+                  actionLabel={`+ ${t('newFixedExpense')}`}
+                  onAction={onAddFixedExpense}
+                />
               )}
             </div>
           )}
@@ -867,7 +877,7 @@ export function BudgetView({
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.07] border border-[#E6E2D8] dark:border-white/[0.035] text-xs text-[#1C1917] dark:text-white transition-all cursor-pointer select-none active:scale-95"
                 >
                   <ArrowUpDown size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white shrink-0" />
-                  <span className="text-[#6E6961] dark:text-[#9CA6BC]/80">
+                  <span className="text-[#6E6961] dark:text-[#A8A8A8]/80">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
                   <span className="font-semibold text-[#1C1917] dark:text-white">
@@ -920,8 +930,8 @@ export function BudgetView({
                       <p className="text-sm font-semibold text-[#1C1917] dark:text-white tracking-tight leading-tight">
                         Migrera månadssparande
                       </p>
-                      <p className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] mt-1">
-                        Lägg till sparande på <span className="font-amount tabular-nums font-semibold text-[#1C1917] dark:text-white">{formatAmount(config.monthlySavings)}</span> <span className="text-xs text-[#6E6961] dark:text-[#9CA6BC]">{config.currency}</span>
+                      <p className="text-xs font-normal text-[#6E6961] dark:text-[#A8A8A8] mt-1">
+                        Lägg till sparande på <span className="font-amount tabular-nums font-semibold text-[#1C1917] dark:text-white">{formatAmount(config.monthlySavings)}</span> <span className="text-xs text-[#6E6961] dark:text-[#A8A8A8]">{config.currency}</span>
                       </p>
                     </div>
                   </div>
@@ -932,7 +942,7 @@ export function BudgetView({
               ) : (
                 <EmptyState 
                   title={config.language === 'en' ? 'No monthly savings added yet' : 'Inget månadssparande inlagt än'} 
-                  description={config.language === 'en' ? 'Add recurring monthly savings to reserve money automatically.' : 'Lägg in fast månadssparande för att automatiskt avsätta pengar varje månad.'}
+                  description={config.language === 'en' ? 'Add recurring monthly savings to reserve money automatically each month.' : 'Lägg in fast månadssparande för att automatiskt avsätta pengar varje månad.'}
                   actionLabel={`+ ${t('newMonthlySaving')}`}
                   onAction={onAddMonthlySaving}
                 />

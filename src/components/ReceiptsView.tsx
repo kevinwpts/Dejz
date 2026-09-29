@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Receipt, Calendar, Eye, ArrowUpRight, ArrowDownRight, Tag } from 'lucide-react';
+import { Search, Receipt, Calendar, Eye, ArrowUpRight, ArrowDownRight, Tag, FileText } from 'lucide-react';
 import { Transaction, Config } from '../types';
+import { EmptyState } from './EmptyState';
 
 interface ReceiptsViewProps {
   onBack: () => void;
@@ -179,27 +180,19 @@ export function ReceiptsView({
             </AnimatePresence>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center p-12 border border-dashed border-[var(--border-color)]/80 rounded-2xl bg-[var(--surface-color)]/30 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-[var(--surface-color)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] shadow-sm">
-              <Receipt size={28} strokeWidth={1.2} />
-            </div>
-            <div className="max-w-xs space-y-1">
-              <h3 className="font-bold text-sm text-[var(--text-primary)]">
-                {receiptTransactions.length === 0 
-                  ? (config.language === 'sv' ? 'Inga kvitton ännu' : 'No receipts yet')
-                  : (config.language === 'sv' ? 'Inga träffar' : 'No matches found')}
-              </h3>
-              <p className="text-[11px] font-semibold text-[var(--text-secondary)] leading-relaxed opacity-60">
-                {receiptTransactions.length === 0
-                  ? (config.language === 'sv' 
-                      ? 'Ladda upp eller fotografera ett kvitto när du registrerar en transaktion så sparas det här.' 
-                      : 'Attach or capture a receipt when recording a transaction to save it here.')
-                  : (config.language === 'sv' 
-                      ? 'Din sökning matchade inga kvitton. Testa att söka på något annat!' 
-                      : 'Your search did not match any receipts. Try searching for something else!')}
-              </p>
-            </div>
-          </div>
+          <EmptyState
+            icon={FileText}
+            title={receiptTransactions.length === 0 
+              ? (config.language === 'sv' ? 'Inga kvitton sparade än' : 'No receipts saved yet')
+              : (config.language === 'sv' ? 'Inga träffar' : 'No matches found')}
+            description={receiptTransactions.length === 0
+              ? (config.language === 'sv' 
+                  ? 'Fotografera eller ladda upp kvitton när du registrerar ett köp så samlas de här.' 
+                  : 'Take a photo or upload receipts when logging a purchase to collect them here.')
+              : (config.language === 'sv' 
+                  ? 'Din sökning matchade inga kvitton. Testa att söka på något annat.' 
+                  : 'Your search did not match any receipts. Try searching for something else.')}
+          />
         )}
       </div>
     </motion.div>

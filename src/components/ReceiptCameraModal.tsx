@@ -296,7 +296,7 @@ export function ReceiptCameraModal({
               <h3 className="text-base font-bold text-white">
                 {isEn ? 'Camera Unavailable' : 'Kameran är inte tillgänglig'}
               </h3>
-              <p className="text-xs text-[#9CA6BC] leading-relaxed">
+              <p className="text-xs text-[#A8A8A8] leading-relaxed">
                 {cameraError}
               </p>
             </div>
@@ -360,7 +360,7 @@ export function ReceiptCameraModal({
             <p className="text-sm font-bold text-white tracking-wide">
               {isEn ? 'Reading receipt details…' : 'Läser av kvittot…'}
             </p>
-            <p className="text-xs text-[#9CA6BC]">
+            <p className="text-xs text-[#A8A8A8]">
               {isEn ? 'Extracting merchant & amount' : 'Analyserar butik, belopp och datum'}
             </p>
           </div>

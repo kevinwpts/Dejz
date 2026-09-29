@@ -282,14 +282,14 @@ export function LogView({
   return (
     <div className="space-y-6 font-sans">
       {/* Top Filter Bar: Period/Day Selector with Left/Right Arrows + Type Filters */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
+      <div className="sticky top-[calc(env(safe-area-inset-top))] z-30 bg-[#F5F2EC] dark:bg-[#0B0A12] py-2 -mx-2 px-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar shadow-sm">
         {/* Period / Day Selector with Left & Right Arrows */}
         {periods && periods.length > 0 && (
           <>
             <div className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] ${
               selectedDate || selectedPeriod
                 ? 'bg-white dark:bg-white/[0.06] border-[#1C1917]/20 dark:border-white/20 text-[#1C1917] dark:text-white shadow-2xs'
-                : 'bg-white border-[#E6E2D8] text-[#1C1917] dark:bg-white/[0.035] dark:border-white/[0.035] dark:text-[#C7CDDC]'
+                : 'bg-white border-[#E6E2D8] text-[#1C1917] dark:bg-white/[0.035] dark:border-white/[0.035] dark:text-[#A8A8A8]'
             }`}>
               <button
                 type="button"
@@ -297,8 +297,8 @@ export function LogView({
                 disabled={!canGoPrev}
                 className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
                   canGoPrev 
-                    ? 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]' 
-                    : 'text-[#6E6961]/30 dark:text-[#9CA6BC] opacity-25 cursor-not-allowed'
+                    ? 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]' 
+                    : 'text-[#6E6961]/30 dark:text-[#A8A8A8] opacity-25 cursor-not-allowed'
                 }`}
                 aria-label={selectedDate ? 'Föregående dag' : 'Föregående period'}
                 title={selectedDate ? 'Föregående dag' : 'Föregående period'}
@@ -319,7 +319,7 @@ export function LogView({
                 <CalendarIcon 
                   size={13} 
                   strokeWidth={1.8} 
-                  className={selectedDate || selectedPeriod ? 'text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors'} 
+                  className={selectedDate || selectedPeriod ? 'text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white' : 'text-[#6E6961] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors'} 
                 />
                 <span className="text-xs sm:text-[13px] font-semibold tracking-tight truncate text-[#1C1917] dark:text-white">
                   {activeFilterLabel}
@@ -336,10 +336,10 @@ export function LogView({
                     className="p-0.5 hover:bg-black/10 dark:hover:bg-white/20 rounded-full transition-colors ml-0.5 cursor-pointer"
                     title={getL10n('Rensa filter (visa alla)', 'Clear filter (show all)', 'Fjern filter', 'Ryd filter', 'Tyhjennä')}
                   >
-                    <X size={11} strokeWidth={2.5} className="text-[#6E6961] dark:text-[#C7CDDC] hover:text-[#1C1917] dark:hover:text-white" />
+                    <X size={11} strokeWidth={2.5} className="text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white" />
                   </span>
                 ) : (
-                  <ChevronDown size={12} strokeWidth={2} className="text-[#6E6961] dark:text-[#9CA6BC] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors shrink-0" />
+                  <ChevronDown size={12} strokeWidth={2} className="text-[#6E6961] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors shrink-0" />
                 )}
               </button>
 
@@ -349,8 +349,8 @@ export function LogView({
                 disabled={!canGoNext}
                 className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
                   canGoNext 
-                    ? 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]' 
-                    : 'text-[#6E6961]/30 dark:text-[#9CA6BC] opacity-25 cursor-not-allowed'
+                    ? 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06]' 
+                    : 'text-[#6E6961]/30 dark:text-[#A8A8A8] opacity-25 cursor-not-allowed'
                 }`}
                 aria-label={selectedDate ? 'Nästa dag' : 'Nästa period'}
                 title={selectedDate ? 'Nästa dag' : 'Nästa period'}
@@ -373,13 +373,13 @@ export function LogView({
               className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
                 isActive 
                   ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs' 
-                  : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
+                  : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#A8A8A8] dark:hover:text-white dark:hover:bg-white/[0.06]'
               }`}
             >
-              {type === 'all' && <LayoutGrid size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
-              {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
-              {type === 'income' && <ArrowUpRight size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
-              {type === 'receipt' && <FileText size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />}
+              {type === 'all' && <LayoutGrid size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
+              {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
+              {type === 'income' && <ArrowUpRight size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
+              {type === 'receipt' && <FileText size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
               <span>{t(type as TranslationKey)}</span>
             </button>
           );
@@ -398,10 +398,10 @@ export function LogView({
               className="space-y-2"
             >
               <div className="px-1 flex items-center justify-between">
-                <span className="text-xs font-medium text-[#9CA6BC] tracking-tight capitalize">
+                <span className="text-xs font-medium text-[#A8A8A8] tracking-tight capitalize">
                   {new Date(date).toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
                 </span>
-                <span className="text-[11px] text-[#9CA6BC]/60 tabular-nums font-amount">
+                <span className="text-[11px] text-[#A8A8A8]/60 tabular-nums font-amount">
                   {dayTransactions.length} {dayTransactions.length === 1 ? 'st' : 'st'}
                 </span>
               </div>
@@ -503,7 +503,7 @@ export function LogView({
                     <h3 className="text-[15px] font-bold text-[#1C1917] dark:text-white leading-tight">
                       {getL10n('Välj dag eller period', 'Select day or period', 'Velg dag eller periode', 'Vælg dag eller periode', 'Valitse päivä tai jakso')}
                     </h3>
-                    <p className="text-[11px] text-[#6E6961] dark:text-[#9CA6BC] mt-0.5">
+                    <p className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] mt-0.5">
                       {getL10n(
                         'Klicka på ett datum eller visa en hel period', 
                         'Click a date or view an entire period',
@@ -518,7 +518,7 @@ export function LogView({
                 <button
                   type="button"
                   onClick={() => setIsPeriodPickerOpen(false)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[#6E6961] hover:text-[#1C1917] dark:text-[#9CA6BC] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                   aria-label="Stäng"
                 >
                   <X size={16} strokeWidth={2} />
@@ -533,7 +533,7 @@ export function LogView({
                   disabled={!canModalGoPrev}
                   className={`p-2 rounded-xl transition-all cursor-pointer ${
                     canModalGoPrev
-                      ? 'text-[#1C1917] dark:text-[#C7CDDC] hover:text-neutral-900 dark:text-white dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] active:scale-90'
+                      ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-neutral-900 dark:text-white dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] active:scale-90'
                       : 'text-[#6E6961]/30 dark:text-white/20 cursor-not-allowed'
                   }`}
                   aria-label="Föregående period"
@@ -563,7 +563,7 @@ export function LogView({
                     )}
                   </div>
                   {modalPeriod?.name?.includes('(') && (
-                    <span className="text-[11px] text-[#6E6961] dark:text-[#9CA6BC] font-medium truncate mt-0.5">
+                    <span className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] font-medium truncate mt-0.5">
                       {modalPeriod.name.split('(')[1]?.replace(')', '').trim()}
                     </span>
                   )}
@@ -575,7 +575,7 @@ export function LogView({
                   disabled={!canModalGoNext}
                   className={`p-2 rounded-xl transition-all cursor-pointer ${
                     canModalGoNext
-                      ? 'text-[#1C1917] dark:text-[#C7CDDC] hover:text-neutral-900 dark:text-white dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] active:scale-90'
+                      ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-neutral-900 dark:text-white dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] active:scale-90'
                       : 'text-[#6E6961]/30 dark:text-white/20 cursor-not-allowed'
                   }`}
                   aria-label="Nästa period"
@@ -597,7 +597,7 @@ export function LogView({
                   className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                     selectedPeriod?.name === modalPeriod?.name && !selectedDate
                       ? 'bg-[#1C1917] dark:bg-white text-white font-semibold border-transparent shadow-xs'
-                      : 'bg-[#FFFFFF] dark:bg-white/[0.03] text-[#1C1917] dark:text-[#C7CDDC] hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/[0.06] border-[#E6E2D8] dark:border-white/[0.05]'
+                      : 'bg-[#FFFFFF] dark:bg-white/[0.03] text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/[0.06] border-[#E6E2D8] dark:border-white/[0.05]'
                   }`}
                 >
                   <Layers size={13} strokeWidth={2} />
@@ -614,7 +614,7 @@ export function LogView({
                   className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                     selectedPeriod === null && selectedDate === null
                       ? 'bg-[#1C1917] dark:bg-white text-white font-semibold border-transparent shadow-xs'
-                      : 'bg-[#FFFFFF] dark:bg-white/[0.03] text-[#1C1917] dark:text-[#C7CDDC] hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/[0.06] border-[#E6E2D8] dark:border-white/[0.05]'
+                      : 'bg-[#FFFFFF] dark:bg-white/[0.03] text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/[0.06] border-[#E6E2D8] dark:border-white/[0.05]'
                   }`}
                 >
                   <RotateCcw size={13} strokeWidth={2} />
@@ -627,7 +627,7 @@ export function LogView({
                 {/* Weekday headers */}
                 <div className="grid grid-cols-7 gap-1 mb-2 text-center">
                   {weekdayNames.map((d, i) => (
-                    <div key={i} className="text-center text-[10.5px] font-semibold text-[#6E6961] dark:text-[#9CA6BC] uppercase tracking-wider py-0.5">
+                    <div key={i} className="text-center text-[10.5px] font-semibold text-[#6E6961] dark:text-[#A8A8A8] uppercase tracking-wider py-0.5">
                       {d}
                     </div>
                   ))}
@@ -660,11 +660,11 @@ export function LogView({
                             ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-bold shadow-xs z-10' 
                             : isToday
                             ? 'bg-white dark:bg-white/[0.08] text-[#1C1917] dark:text-white border border-[#E6E2D8] dark:border-white/30 font-semibold'
-                            : 'bg-transparent text-[#1C1917] dark:text-[#C7CDDC] hover:bg-black/5 dark:hover:bg-white/[0.06] hover:text-black dark:hover:text-white font-medium'
+                            : 'bg-transparent text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.06] hover:text-black dark:hover:text-white font-medium'
                         }`}
                       >
                         <span className={`text-[13px] sm:text-[14px] leading-none tabular-nums ${
-                          isSelected ? 'text-white dark:text-[#1C1917]' : isToday ? 'text-[#1C1917] dark:text-white font-bold' : 'text-[#1C1917] dark:text-[#C7CDDC]'
+                          isSelected ? 'text-white dark:text-[#1C1917]' : isToday ? 'text-[#1C1917] dark:text-white font-bold' : 'text-[#1C1917] dark:text-[#A8A8A8]'
                         }`}>
                           {dayNum}
                         </span>
@@ -687,7 +687,6 @@ export function LogView({
           </div>
         )}
       </AnimatePresence>
-      <div className="h-24" />
     </div>
   );
 }

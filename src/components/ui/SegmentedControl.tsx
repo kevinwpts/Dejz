@@ -55,14 +55,14 @@ export function SegmentedControl<T extends string = string>({
             } ${
               isSelected
                 ? 'bg-white dark:bg-white text-[#1C1917] dark:text-[#1C1917] border border-[#E6E2D8] dark:border-transparent shadow-xs font-semibold'
-                : 'text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.05]'
+                : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.05]'
             }`}
           >
             <span className="relative z-10 flex items-center justify-center gap-1.5">
               {option.icon && <span className="shrink-0">{option.icon}</span>}
               <span>{option.label}</span>
               {option.badge !== undefined && (
-                <span className="text-[10px] py-0.2 px-1.5 rounded-full bg-black/5 dark:bg-white/[0.06] text-[#6E6961] dark:text-[#9CA6BC]">
+                <span className="text-[10px] py-0.2 px-1.5 rounded-full bg-black/5 dark:bg-white/[0.06] text-[#6E6961] dark:text-[#A8A8A8]">
                   {option.badge}
                 </span>
               )}

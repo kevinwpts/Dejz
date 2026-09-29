@@ -354,10 +354,10 @@ textarea {
   --success-color: #16A34A;
   --danger-color: #EF4444;
   --warning-color: #F59E0B;
-  --info-color: #3B82F6;
+  --info-color: #F9F8F6;
 
   --nav-active-color: #FF941A;
-  --nav-inactive-color: #B5B2BC;
+  --nav-inactive-color: #A8A8A8;
   --nav-plus-bg: #F9F8F6;
   --nav-plus-shadow: none;
 
