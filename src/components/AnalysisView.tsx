@@ -8,6 +8,7 @@ import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
 import { BudgetSummaryModule } from './BudgetSummaryModule';
 import { FilterSelectButton, FilterMenuModal } from './ui';
+import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { formatAmount } from '../utils/format';
 import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
 import { getEmojiSolidColor } from '../utils/ui';
@@ -41,7 +42,7 @@ export function AnalysisView({
   periods,
   currentPeriodDate,
   onPeriodChange,
-  onOpenCalendarPicker
+  _onOpenCalendarPicker
 }: AnalysisViewProps) {
   const _paydaySetting = config.payday || 25;
   const _adjustment = config.paydayBeforeWeekend ? WeekendAdjustment.BEFORE : WeekendAdjustment.NONE;
@@ -55,48 +56,6 @@ export function AnalysisView({
   const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('all');
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-
-  const periodOptions = useMemo(() => {
-    if (!periods || periods.length === 0) {
-      return [
-        {
-          id: 'current',
-          label: stats?.periodName?.split('(')[0]?.trim() || (config.language === 'en' ? 'Current period' : 'Aktuell period'),
-          subtitle: stats?.periodName?.includes('(') ? stats.periodName.split('(')[1]?.replace(')', '').trim() : undefined,
-          icon: <Calendar size={16} strokeWidth={2} />,
-          badge: config.language === 'en' ? 'Current' : 'Nu',
-        }
-      ];
-    }
-    return periods
-      .filter(p => !p.isFuture || p.isCurrent)
-      .map(p => {
-        const [title, sub] = p.name?.includes('(')
-          ? p.name.split('(').map((s: string) => s.replace(')', '').trim())
-          : [p.name, ''];
-        return {
-          id: p.date ? new Date(p.date).toISOString() : p.name,
-          date: p.date,
-          label: title,
-          subtitle: sub || undefined,
-          icon: <Calendar size={16} strokeWidth={2} />,
-          badge: p.isCurrent ? (config.language === 'en' ? 'Current' : 'Nu') : undefined,
-        };
-      });
-  }, [periods, stats?.periodName, config.language]);
-
-  const selectedPeriodId = useMemo(() => {
-    if (!currentPeriodDate || !periods) return 'current';
-    const found = periods.find(p => p.date && new Date(p.date).getMonth() === new Date(currentPeriodDate).getMonth() && new Date(p.date).getFullYear() === new Date(currentPeriodDate).getFullYear());
-    return found ? (found.date ? new Date(found.date).toISOString() : found.name) : 'current';
-  }, [currentPeriodDate, periods]);
-
-  const handlePeriodSelect = (id: string) => {
-    const found = periodOptions.find(o => o.id === id);
-    if (found && (found as any).date && onPeriodChange) {
-      onPeriodChange(new Date((found as any).date));
-    }
-  };
 
   const filterOptions = useMemo(() => [
     {
@@ -271,29 +230,20 @@ export function AnalysisView({
         />
 
         {/* Period Selector Modal */}
-        <FilterMenuModal
+        <PeriodSelectorModal
           isOpen={isPeriodModalOpen}
           onClose={() => setIsPeriodModalOpen(false)}
-          title={config.language === 'en' ? 'Select period' : 'Välj period'}
-          subtitle={config.language === 'en' ? 'View analysis for selected month or period' : 'Visa analys för vald månad eller period'}
-          selectedId={selectedPeriodId}
-          onSelect={handlePeriodSelect}
-          options={periodOptions}
-          footerNode={
-            onOpenCalendarPicker ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setIsPeriodModalOpen(false);
-                  onOpenCalendarPicker();
-                }}
-                className="w-full py-2.5 px-3 rounded-xl bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#1C1917] dark:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
-              >
-                <Calendar size={14} />
-                <span>{config.language === 'en' ? 'Open custom date picker' : 'Öppna kalender / välj datum'}</span>
-              </button>
-            ) : undefined
-          }
+          periods={periods || []}
+          selectedPeriod={periods?.find(p => p.date && currentPeriodDate && new Date(p.date).getMonth() === new Date(currentPeriodDate).getMonth() && new Date(p.date).getFullYear() === new Date(currentPeriodDate).getFullYear()) || null}
+          selectedDate={null}
+          onSelectPeriod={(p) => {
+            if (p.date && onPeriodChange) {
+              onPeriodChange(new Date(p.date));
+            }
+          }}
+          onSelectDate={() => {}}
+          showCalendarOption={false}
+          currentLang={config.language}
         />
 
         {/* Content Filter Modal */}
