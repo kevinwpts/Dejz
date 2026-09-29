@@ -431,7 +431,7 @@ export function BudgetView({
             Kategorier ({config.categories?.length || 0})
           </span>
           
-          <div className="overflow-hidden border border-[#E6E2D8] dark:border-white/[0.04] rounded-[22px] bg-[#FFFFFF] dark:bg-[#2b2b2b] shadow-xs dark:shadow-none divide-y divide-[#EDE9DF] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[18px] bg-[#FFFFFF] dark:bg-[#272727] shadow-none border-none divide-y divide-[#EDE9DF]/50 dark:divide-white/[0.04]">
             {sortedCategoriesForManage.map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
@@ -920,10 +920,10 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddMonthlySaving} 
-                  className="w-full bg-[#FFFFFF] dark:bg-white/[0.04] p-4 sm:p-5 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.025] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.06] transition-all flex items-center justify-between text-left group cursor-pointer"
+                  className="w-full bg-[#FFFFFF] dark:bg-[#272727] p-4 sm:p-5 rounded-[18px] border-none shadow-none hover:bg-black/[0.02] dark:hover:bg-[#2e2e2e] transition-all flex items-center justify-between text-left group cursor-pointer"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.035] flex items-center justify-center text-[#6E6961] dark:text-[#C7CDDC] shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/[0.04] border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] shrink-0">
                       <RefreshCw size={17} strokeWidth={1.75} />
                     </div>
                     <div className="min-w-0">

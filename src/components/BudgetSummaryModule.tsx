@@ -162,31 +162,31 @@ export function BudgetSummaryModule({
       {/* Grid for other indicators */}
       <div className="grid grid-cols-3 gap-3 pt-1">
         {/* Snitt per dag */}
-        <div className="bg-[#FFFFFF] dark:bg-white/[0.035] border border-[#E6E2D8] dark:border-white/[0.02] p-3 sm:p-3.5 rounded-[14px] sm:rounded-[16px] flex flex-col justify-center text-left min-w-0">
+        <div className="bg-[#FFFFFF] dark:bg-[#272727] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
           <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
-            {formatAmount(dailyAvg, config.language)} <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC]">{config.currency || "kr"}</span>
+            {formatAmount(dailyAvg, config.language)} <span className="text-xs font-normal text-[#6E6961] dark:text-[#A8A8A8]">{config.currency || "kr"}</span>
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#9CA6BC] mt-1 select-none truncate">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1 select-none truncate">
             {config.language === 'en' ? 'Daily Average' : 'Snitt per dag'}
           </span>
         </div>
 
         {/* Största kategori */}
-        <div className="bg-[#FFFFFF] dark:bg-white/[0.035] border border-[#E6E2D8] dark:border-white/[0.02] p-3 sm:p-3.5 rounded-[14px] sm:rounded-[16px] flex flex-col justify-center text-left min-w-0">
+        <div className="bg-[#FFFFFF] dark:bg-[#272727] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
           <div className="text-base sm:text-[17px] font-bold text-[#1C1917] dark:text-white truncate leading-tight capitalize">
-            {largestCategory.name ? largestCategory.name : <span className="text-[#8C867C] dark:text-[#9CA6BC] font-normal">—</span>}
+            {largestCategory.name ? largestCategory.name : <span className="text-[#8C867C] dark:text-[#A8A8A8] font-normal">—</span>}
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#9CA6BC] mt-1 select-none truncate">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1 select-none truncate">
             {config.language === 'en' ? 'Top Category' : 'Största kategori'}
           </span>
         </div>
 
         {/* Budget använd */}
-        <div className="bg-[#FFFFFF] dark:bg-white/[0.035] border border-[#E6E2D8] dark:border-white/[0.02] p-3 sm:p-3.5 rounded-[14px] sm:rounded-[16px] flex flex-col justify-center text-left min-w-0">
+        <div className="bg-[#FFFFFF] dark:bg-[#272727] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
           <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
             {budgetUsedPct}%
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#9CA6BC] mt-1 select-none truncate">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1 select-none truncate">
             {config.language === 'en' ? 'Budget Used' : 'Budget använd'}
           </span>
         </div>

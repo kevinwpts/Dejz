@@ -376,15 +376,15 @@ textarea {
   --date-inactive-color: var(--text-secondary);
 }
 
-/* Glass-Card Surface Utility (harmonized with theme tokens) */
+/* Glass-Card Surface Utility (harmonized with theme tokens - borderless clean) */
 .glass-card {
   background: var(--surface-color) !important;
-  border: 1px solid var(--border-color) !important;
+  border: none !important;
   box-shadow: none !important;
 }
 .dark .glass-card {
   background-color: var(--surface-color) !important;
-  border: 1px solid var(--border-color) !important;
+  border: none !important;
   box-shadow: none !important;
 }
 
@@ -546,7 +546,7 @@ textarea {
   .module-surface {
     @apply rounded-[18px];
     background: var(--surface-gradient);
-    border: 1px solid var(--border-color);
+    border: none;
     box-shadow: none;
   }
 
@@ -554,7 +554,7 @@ textarea {
   .glass-card {
     border-radius: 18px;
     background: var(--surface-gradient);
-    border: 1px solid var(--border-color);
+    border: none;
     box-shadow: none;
     position: relative;
     overflow: hidden;
@@ -563,7 +563,7 @@ textarea {
   .profile-card {
     border-radius: 18px;
     background: var(--surface-gradient);
-    border: 1px solid var(--border-color);
+    border: none;
     box-shadow: none;
     position: relative;
     overflow: hidden;
@@ -573,28 +573,28 @@ textarea {
   .flat-card {
     border-radius: 18px;
     background: var(--surface-gradient);
-    border: 1px solid var(--border-color);
+    border: none;
     box-shadow: none;
   }
 
   .surface-elevated {
     border-radius: 18px;
     background: var(--surface-elevated-gradient);
-    border: 1px solid var(--border-color);
+    border: none;
     box-shadow: none;
   }
 
   .surface-solid {
     border-radius: 18px;
     background: var(--surface-gradient);
-    border: 1px solid var(--border-color);
+    border: none;
     box-shadow: none;
   }
 
   .surface-muted {
     border-radius: 14px;
     background: var(--surface-muted);
-    border: 1px solid var(--border-color);
+    border: none;
     box-shadow: none;
   }
 

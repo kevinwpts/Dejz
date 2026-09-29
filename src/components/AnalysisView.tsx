@@ -254,10 +254,10 @@ export function AnalysisView({
       />
 
       {/* Donut Chart Distribution Card */}
-      <div className="p-5 sm:p-6 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.02] bg-[#FFFFFF] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none flex flex-col items-center relative overflow-hidden">
+      <div className="p-5 sm:p-6 rounded-[18px] border-none bg-[#FFFFFF] dark:bg-[#272727] shadow-none flex flex-col items-center relative overflow-hidden">
         <div className="flex items-center justify-between w-full mb-3 px-1">
           <span className="text-sm font-semibold text-[#1C1917] dark:text-white tracking-tight">{t('distribution')}</span>
-          <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] tabular-nums">
+          <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#A8A8A8] tabular-nums">
             {categoryData.filter(c => c.value > 0).length} {config.language === 'en' ? 'categories' : 'kategorier'}
           </span>
         </div>
@@ -279,7 +279,7 @@ export function AnalysisView({
                   <span className="text-2xl sm:text-3xl font-semibold text-[#1C1917] dark:text-white font-amount tabular-nums leading-none">
                     {Math.round(categoryData.find(c => c.name === expandedCategory)?.value || 0).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
                   </span>
-                  <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] mt-1">
+                  <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#A8A8A8] mt-1">
                     {config.currency}
                   </span>
                 </motion.div>
@@ -291,13 +291,13 @@ export function AnalysisView({
                   exit={{ opacity: 0 }}
                   className="flex flex-col items-center text-center"
                 >
-                  <span className="text-xs font-medium text-[#6E6961] dark:text-[#9CA6BC] mb-1">
+                  <span className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8] mb-1">
                     {t('total')}
                   </span>
                   <span className="text-2xl sm:text-3xl font-semibold text-[#1C1917] dark:text-white font-amount tabular-nums leading-none">
                     {Math.round(totalSpent).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
                   </span>
-                  <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] mt-1">
+                  <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#A8A8A8] mt-1">
                     {config.currency}
                   </span>
                 </motion.div>
@@ -346,13 +346,13 @@ export function AnalysisView({
       {/* Categories Breakdown - Single Unified Cohesive List */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6E6961] dark:text-[#9CA6BC]">
+          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6E6961] dark:text-[#A8A8A8]">
             {t('categories')} ({categoryData.length})
           </span>
         </div>
 
         {categoryData.length > 0 ? (
-          <div className="bg-[#FFFFFF] dark:bg-white/[0.035] rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.025] divide-y divide-[#EDE9DF] dark:divide-white/[0.035] overflow-hidden">
+          <div className="bg-[#FFFFFF] dark:bg-[#272727] rounded-[18px] border-none shadow-none divide-y divide-[#EDE9DF]/50 dark:divide-white/[0.035] overflow-hidden">
             {categoryData.map((item: any, index) => {
               const isExpanded = expandedCategory === item.name;
               const iconName = item.icon || getCategoryIconName(item.name);

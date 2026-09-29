@@ -19,9 +19,9 @@ export function EmptyState({
   className = '',
 }: EmptyStateProps) {
   return (
-    <div className={`bg-[#FFFFFF] dark:bg-white/[0.035] border border-[#E6E2D8] dark:border-white/[0.025] backdrop-blur-[18px] rounded-[18px] p-6 sm:p-7 flex flex-col items-center justify-center text-center shadow-none ${className}`}>
+    <div className={`bg-[#FFFFFF] dark:bg-[#272727] rounded-[18px] p-6 sm:p-7 flex flex-col items-center justify-center text-center shadow-none border-none ${className}`}>
       {Icon && (
-        <div className="w-10 h-10 rounded-full bg-[#F7F5F0] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.035] flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] mb-3">
+        <div className="w-10 h-10 rounded-full bg-[#F7F5F0] dark:bg-white/[0.04] border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] mb-3">
           <Icon size={18} strokeWidth={1.75} />
         </div>
       )}

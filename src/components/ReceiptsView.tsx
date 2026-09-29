@@ -108,12 +108,12 @@ export function ReceiptsView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={() => onViewTransaction(item)}
-                  className="group flex items-center justify-between p-4 bg-[var(--surface-color)] border border-[var(--border-color)]/60 rounded-2xl shadow-sm hover:border-accent/40 active:scale-[0.99] transition-all cursor-pointer"
+                  className="group flex items-center justify-between p-4 bg-[var(--surface-color)] dark:bg-[#272727] rounded-[18px] shadow-none border-none hover:bg-black/[0.02] dark:hover:bg-[#2e2e2e] active:scale-[0.99] transition-all cursor-pointer"
                   id={`receipt_item_${item.id}`}
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     {/* Receipt thumbnail / Icon wrapper */}
-                    <div className="w-12 h-12 rounded-xl border border-[var(--border-color)]/80 overflow-hidden relative shrink-0 bg-[var(--bg-color)] flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl border-none overflow-hidden relative shrink-0 bg-[var(--bg-color)] flex items-center justify-center">
                       {item.receiptUrl ? (
                         <>
                           <img

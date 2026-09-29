@@ -97,8 +97,8 @@ export function GreetingModule({
           </div>
 
           {/* Days to salary */}
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] dark:text-[#C7CDDC] font-medium mt-3 bg-[var(--surface-color)] dark:bg-white/[0.045] px-3.5 py-1 rounded-full border border-[var(--border-color)] dark:border-white/[0.06] shadow-xs dark:shadow-none">
-            <Calendar size={13} className="text-[var(--text-tertiary)] dark:text-[#9CA6BC]" />
+          <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] dark:text-[#A8A8A8] font-medium mt-3 bg-[var(--surface-color)] dark:bg-white/[0.045] px-3.5 py-1.5 rounded-full border-none shadow-none">
+            <Calendar size={13} className="text-[var(--text-tertiary)] dark:text-[#A8A8A8]" />
             <span>
               {effectiveRemainingDays} {isEn ? 'days until payday' : 'dagar till lön'}
             </span>
