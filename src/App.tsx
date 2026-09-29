@@ -2269,7 +2269,32 @@ export default function App() {
     const p = [];
     const now = new Date();
     const actualToday = new Date();
-    for (let i = -24; i <= 24; i++) {
+
+    let earliest = now;
+    if (session?.user?.created_at) {
+      const d = new Date(session.user.created_at);
+      if (!isNaN(d.getTime()) && d < earliest) earliest = d;
+    }
+    if (profile?.created_at) {
+      const d = new Date(profile.created_at);
+      if (!isNaN(d.getTime()) && d < earliest) earliest = d;
+    }
+    if (transactions && transactions.length > 0) {
+      const minTxTime = Math.min(...transactions.map(t => t.timestamp));
+      const d = new Date(minTxTime);
+      if (!isNaN(d.getTime()) && d < earliest) earliest = d;
+    }
+
+    const nowYear = now.getFullYear();
+    const nowMonth = now.getMonth();
+    const earliestYear = earliest.getFullYear();
+    const earliestMonth = earliest.getMonth();
+
+    const monthDiff = (nowYear - earliestYear) * 12 + (nowMonth - earliestMonth);
+    const startOffset = -Math.max(0, monthDiff);
+    const endOffset = 24;
+
+    for (let i = startOffset; i <= endOffset; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
       const { start, end } = getPeriodBoundaries(
         d,
@@ -2291,9 +2316,8 @@ export default function App() {
         isFuture: actualToday < start,
       });
     }
-    console.log("Periods:", p);
     return p;
-  }, [paydayType, paydaySetting, adjustment, config?.language]);
+  }, [paydayType, paydaySetting, adjustment, config?.language, session?.user?.created_at, profile?.created_at, transactions]);
 
   const calculateStats = useCallback(
     (targetDate: Date) => {
