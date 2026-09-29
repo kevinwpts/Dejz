@@ -196,8 +196,7 @@ export function AnalysisView({
       return stats.totalFixed || 0;
     }
     // 'all'
-    if (stats.totalIncome > 0) return stats.totalIncome;
-    return (stats.disposablePot || 0) + (stats.totalFixed || 0);
+    return stats.disposablePot || 0;
   }, [stats, analysisFilter]);
 
   const remainingBudget = useMemo(() => {
@@ -209,10 +208,10 @@ export function AnalysisView({
       return (stats.totalFixed || 0) - totalSpent;
     }
     // 'all'
-    if (stats.totalIncome > 0) {
-      return stats.totalIncome - totalSpent;
+    if (stats.remainingPeriodCents !== undefined) {
+      return stats.remainingPeriodCents;
     }
-    return (stats.disposablePot || 0) + (stats.totalFixed || 0) - totalSpent;
+    return (stats.disposablePot || 0) - totalSpent;
   }, [stats, analysisFilter, totalSpent]);
 
   const largestCategory = useMemo(() => {
@@ -221,9 +220,16 @@ export function AnalysisView({
     return { name: first.name, amount: first.value };
   }, [categoryData]);
 
-  const budgetUsedPct = effectiveBudget > 0 
-    ? Math.round((totalSpent / effectiveBudget) * 100) 
-    : (stats.totalIncome > 0 ? Math.round((totalSpent / stats.totalIncome) * 100) : 0);
+  const budgetUsedPct = useMemo(() => {
+    if (!stats) return 0;
+    if (analysisFilter === 'all') {
+      const pot = stats.disposablePot || 0;
+      if (pot <= 0) return 0;
+      const spent = pot - remainingBudget;
+      return Math.max(0, Math.round((spent / pot) * 100));
+    }
+    return effectiveBudget > 0 ? Math.round((totalSpent / effectiveBudget) * 100) : 0;
+  }, [stats, analysisFilter, effectiveBudget, remainingBudget, totalSpent]);
 
   if (!stats) return null;
 
