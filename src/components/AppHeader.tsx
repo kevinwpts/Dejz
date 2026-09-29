@@ -106,10 +106,10 @@ export function AppHeader({
           {onBack ? (
             <button
               onClick={onBack}
-              className="flex items-center gap-1 group active:scale-95 transition-all py-0.5 -ml-1 pr-1 cursor-pointer text-[var(--text-primary)]"
+              className="w-10 h-10 rounded-[14px] bg-[#EFECE6] dark:bg-[#2D2D2D] flex items-center justify-center text-[#1C1917] dark:text-white hover:bg-black/15 dark:hover:bg-white/10 active:scale-95 transition-all cursor-pointer shrink-0"
               aria-label="Tillbaka"
             >
-              <ChevronLeft size={24} strokeWidth={2.4} className="shrink-0" />
+              <ChevronLeft size={20} strokeWidth={2.2} />
             </button>
           ) : (
             <button

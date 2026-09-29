@@ -40,7 +40,7 @@ interface SettingsViewProps {
 
 export function SettingsView({ 
   activeSection,
-  onBack,
+  onBack: _onBack,
   config, 
   setConfig, 
   t, 
@@ -365,26 +365,6 @@ export function SettingsView({
 
   return (
     <div className="space-y-6 font-sans pb-12">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#E6E2D8] dark:border-[#383838]">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="w-10 h-10 rounded-[14px] bg-[#EFECE6] dark:bg-[#2D2D2D] flex items-center justify-center text-[#1C1917] dark:text-white hover:bg-black/10 transition-colors cursor-pointer"
-            aria-label={t('back')}
-          >
-            ←
-          </button>
-          <h1 className="text-xl font-bold text-[#1C1917] dark:text-white tracking-tight">
-            {activeSection === 'salary' && t('salary')}
-            {activeSection === 'categories' && t('categories')}
-            {activeSection === 'paymentMethods' && (config.language === 'en' ? 'Payment methods' : 'Betalmetoder')}
-            {activeSection === 'language' && t('language')}
-            {activeSection === 'appearance' && (config.language === 'en' ? 'Appearance' : 'Utseende')}
-          </h1>
-        </div>
-      </div>
-
        <div>
         {activeSection === 'salary' && (
           <div className="space-y-6">
