@@ -51,6 +51,7 @@ interface ProfileViewProps {
   isDemoMode?: boolean;
   onViewTransaction: (t: Transaction) => void;
   onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
+  onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
 }
 
 export function ProfileView({ 
@@ -95,6 +96,7 @@ export function ProfileView({
   onExitDemo,
   onViewTransaction,
   onRenameCategory,
+  onMigrateAndDeleteCategory,
 }: ProfileViewProps) {
   const [activePage, setActivePage] = useState<'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'pro' | 'receipts'>(initialSection as any);
 
@@ -147,6 +149,7 @@ export function ProfileView({
           onResetAll={onResetAll}
           onTriggerProUpgradeModal={onTriggerProUpgradeModal}
           onRenameCategory={onRenameCategory}
+          onMigrateAndDeleteCategory={onMigrateAndDeleteCategory}
         />
       </motion.div>
     );

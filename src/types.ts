@@ -33,6 +33,7 @@ export enum SortOrder {
 }
 
 export interface Category {
+  id: string;
   name: string;
   icon: string;
   color?: string;
@@ -197,6 +198,7 @@ export interface Transaction {
   id: string;
   amount: number;
   category: string;
+  categoryId?: string;
   tags: string[];
   note?: string;
   merchant?: string;

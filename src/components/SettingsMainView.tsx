@@ -26,12 +26,14 @@ interface SettingsMainViewProps {
   onResetAll: () => void;
   onTriggerProUpgradeModal?: () => void;
   onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
+  transactions?: any[];
+  onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
   onNavigate: (tab: string, section?: string) => void;
   initialSection?: 'main' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance';
 }
 
 export function SettingsMainView({
-  _onBack,
+  onBack: _onBack,
   config,
   setConfig,
   t,
@@ -50,6 +52,8 @@ export function SettingsMainView({
   onResetAll,
   onTriggerProUpgradeModal,
   onRenameCategory,
+  transactions,
+  onMigrateAndDeleteCategory,
   onNavigate,
   initialSection = 'main'
 }: SettingsMainViewProps) {
@@ -100,6 +104,8 @@ export function SettingsMainView({
           onResetAll={onResetAll}
           onTriggerProUpgradeModal={onTriggerProUpgradeModal}
           onRenameCategory={onRenameCategory}
+          transactions={transactions}
+          onMigrateAndDeleteCategory={onMigrateAndDeleteCategory}
         />
       </motion.div>
     );
@@ -114,37 +120,41 @@ export function SettingsMainView({
     >
       <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/30 rounded-[18px] bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 shadow-sm">
         <ListRow
-          icon={<Calendar size={18} strokeWidth={1.5} />}
+          icon={<Calendar size={18} strokeWidth={2} />}
           title={t('salary')}
-          subtitle={t('settings_salary_desc')}
+          subtitle={config.payday ? `${config.payday}:e i varje månad` : 'Ej angivet'}
           onClick={() => handleSectionClick('salary')}
+          showChevron
         />
         <ListRow
-          icon={<Tag size={18} strokeWidth={1.5} />}
+          icon={<Tag size={18} strokeWidth={2} />}
           title={t('categories')}
-          subtitle={t('settings_categories_desc')}
+          subtitle={`${(config.categories || []).length} ${t('expenses').toLowerCase()}, ${(config.incomeCategories || []).length} ${t('incomes').toLowerCase()}`}
           onClick={() => handleSectionClick('categories')}
+          showChevron
         />
         <ListRow
-          icon={<CreditCard size={18} strokeWidth={1.5} />}
-          title={t('paymentMethod')}
-          subtitle={t('settings_payment_methods_desc')}
+          icon={<CreditCard size={18} strokeWidth={2} />}
+          title={config?.language === 'en' ? 'Payment methods' : 'Betalmetoder'}
+          subtitle={`${(config.paymentMethods || []).length} ${config?.language === 'en' ? 'methods' : 'metoder'}`}
           onClick={() => handleSectionClick('paymentMethods')}
+          showChevron
         />
         <ListRow
-          icon={<Globe size={18} strokeWidth={1.5} />}
+          icon={<Globe size={18} strokeWidth={2} />}
           title={t('language')}
-          subtitle={t('settings_language_desc')}
+          subtitle={config.language === 'en' ? 'English' : 'Svenska'}
           onClick={() => handleSectionClick('language')}
+          showChevron
         />
         <ListRow
-          icon={<Palette size={18} strokeWidth={1.5} />}
-          title={t('appearance' as any) || 'Utseende'}
-          subtitle={t('settings_appearance_desc' as any) || 'Välj ljust, mörkt eller systemläge'}
+          icon={<Palette size={18} strokeWidth={2} />}
+          title={config?.language === 'en' ? 'Appearance' : 'Utseende'}
+          subtitle={config.themeMode === 'light' ? 'Ljust' : config.themeMode === 'dark' ? 'Mörkt' : 'System'}
           onClick={() => handleSectionClick('appearance')}
+          showChevron
         />
       </Card>
     </motion.div>
   );
 }
-

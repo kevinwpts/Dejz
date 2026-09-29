@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Plus, Check, RotateCcw, Sun, Moon, Monitor } from 'lucide-react';
-import { Config, PaydayType, WeekendAdjustment } from '../types';
-import { getActualPayday } from '../utils/date';
-import { Language, TranslationKey, languageInfo } from '../i18n';
+import { Plus, Check, Sun, Moon, Monitor } from 'lucide-react';
+import { Config } from '../types';
+import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
-import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES, DEFAULT_PAYMENT_METHODS } from '../constants';
+import { DEFAULT_PAYMENT_METHODS } from '../constants';
 import { CategoryModal } from './CategoryModal';
 import { PaymentMethodModal } from './BudgetModals';
 import { ConfirmModal } from './ConfirmModal';
-import { CategoryTile } from './CategoryTile';
 import { CategoryIcon } from './CategoryIcon';
+import { Button } from './ui';
 
 interface SettingsViewProps {
   activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance';
@@ -18,51 +16,50 @@ interface SettingsViewProps {
   config: Config;
   setConfig: (config: Config) => void;
   t: (key: TranslationKey) => string;
-  onSecurityClick: () => void;
-  subscriptionStatus: string | null;
-  onFeedbackClick: () => void;
-  onExportData: () => void;
-  onLegalClick: (type: 'privacy' | 'terms' | 'cookies' | 'contact') => void;
-  profile: any;
-  userId: string;
-  session: any;
-  onRefresh: () => void;
-  onNavigateToProfile: () => void;
-  onResetSavingsPot: () => void;
-  onResetCompletedGoals: () => void;
-  onClearTransactions: () => void;
-  onResetAll: () => void;
+  onSecurityClick?: () => void;
+  subscriptionStatus?: string | null;
+  onFeedbackClick?: () => void;
+  onExportData?: () => void;
+  onLegalClick?: (type: 'privacy' | 'terms' | 'cookies' | 'contact') => void;
+  profile?: any;
+  userId?: string;
+  session?: any;
+  onRefresh?: () => void;
+  onNavigateToProfile?: () => void;
+  onResetSavingsPot?: () => void;
+  onResetCompletedGoals?: () => void;
+  onClearTransactions?: () => void;
+  onResetAll?: () => void;
   onTriggerProUpgradeModal?: () => void;
   onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
+  transactions?: any[];
+  onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
 }
-
-
-
-
-
 
 export function SettingsView({ 
   activeSection,
-  _onBack,
+  onBack,
   config, 
   setConfig, 
   t, 
-  _onSecurityClick, 
+  onSecurityClick: _onSecurityClick, 
   subscriptionStatus: _subscriptionStatus,
-  _onFeedbackClick,
-  _onExportData,
-  _onLegalClick,
+  onFeedbackClick: _onFeedbackClick,
+  onExportData: _onExportData,
+  onLegalClick: _onLegalClick,
   profile: _profile,
-  _userId,
+  userId: _userId,
   session: _session,
-  _onRefresh,
+  onRefresh: _onRefresh,
   onNavigateToProfile: _onNavigateToProfile,
-  _onResetSavingsPot,
-  _onResetCompletedGoals,
-  _onClearTransactions,
-  _onResetAll,
+  onResetSavingsPot: _onResetSavingsPot,
+  onResetCompletedGoals: _onResetCompletedGoals,
+  onClearTransactions: _onClearTransactions,
+  onResetAll: _onResetAll,
   onTriggerProUpgradeModal: _onTriggerProUpgradeModal,
   onRenameCategory,
+  transactions = [],
+  onMigrateAndDeleteCategory,
 }: SettingsViewProps) {
   const [categoryTab, setCategoryTab] = useState<'expense' | 'income'>('expense');
 
@@ -71,24 +68,18 @@ export function SettingsView({
     window.scrollTo(0, 0);
   }, [activeSection]);
 
-  // Code removed
-
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
   const [paymentMethodModalData, setPaymentMethodModalData] = useState<{ index?: number, name: string } | null>(null);
   const [categoryModalData, setCategoryModalData] = useState<{ type: 'income' | 'expense', index?: number, name: string, icon: string, color?: string } | null>(null);
-  const [resetConfirmType, setResetConfirmType] = useState<'expense' | 'income' | null>(null);
+
+  // Deletion migration modal state
+  const [deleteMigrationData, setDeleteMigrationData] = useState<{ type: 'income' | 'expense', category: any, count: number } | null>(null);
+  const [targetMigrationId, setTargetMigrationId] = useState<string>('');
+  const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<{ type: 'income' | 'expense', index: number, category: any } | null>(null);
 
   const handleUpdatePayday = (day: number) => {
     setConfig({ ...config, payday: day });
-  };
-
-  const handleUpdatePaydayType = (type: PaydayType) => {
-    setConfig({ ...config, paydayType: type });
-  };
-
-  const handleUpdateWeekendHandling = (enabled: boolean) => {
-    setConfig({ ...config, paydayBeforeWeekend: enabled });
   };
 
   const handleEditCategory = (type: 'income' | 'expense', index: number, name: string, icon: string, color?: string) => {
@@ -113,7 +104,8 @@ export function SettingsView({
     if (data.index !== undefined) {
       currentCategories[data.index] = { ...currentCategories[data.index], name: data.name, icon: data.icon, color: data.color };
     } else {
-      currentCategories.push({ name: data.name, icon: data.icon, color: data.color });
+      const newId = 'cat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+      currentCategories.push({ id: newId, name: data.name, icon: data.icon, color: data.color });
     }
     
     setConfig({ ...config, [field]: currentCategories });
@@ -127,246 +119,58 @@ export function SettingsView({
   const handleDeleteCategory = (type: 'income' | 'expense', index: number) => {
     const field = type === 'income' ? 'incomeCategories' : 'categories';
     const currentCategories = config[field] || [];
-    const newCategories = currentCategories.filter((_, i) => i !== index);
-    
-    setConfig({
-      ...config,
-      [field]: newCategories
-    });
-  };
+    const cat = currentCategories[index];
+    if (!cat) return;
 
-  const handleResetPaymentMethods = () => {
-    setConfig({
-      ...config,
-      paymentMethods: DEFAULT_PAYMENT_METHODS
-    });
-  };
-
-  const isExpenseDefault = JSON.stringify(config.categories) === JSON.stringify(DEFAULT_EXPENSE_CATEGORIES);
-  const isIncomeDefault = JSON.stringify(config.incomeCategories) === JSON.stringify(DEFAULT_INCOME_CATEGORIES);
-
-  const _renderIconPicker = () => null;
-
-  const renderSalarySettings = () => {
-    // 1. Calculate next payday
-    const getNextPayday = () => {
-      const now = new Date();
-      const paydaySetting = config.payday || 25;
-      const paydayType = config.paydayType || PaydayType.TWENTY_FIFTH;
-      const adjustment = config.paydayBeforeWeekend ? WeekendAdjustment.BEFORE : WeekendAdjustment.NONE;
-
-      let targetPayday = getActualPayday(now.getFullYear(), now.getMonth(), paydayType, paydaySetting, adjustment);
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const paydayStart = new Date(targetPayday.getFullYear(), targetPayday.getMonth(), targetPayday.getDate());
-
-      if (todayStart >= paydayStart) {
-        const nextMonth = now.getMonth() + 1;
-        const targetYear = now.getFullYear() + (nextMonth > 11 ? 1 : 0);
-        const targetMonth = nextMonth % 12;
-        targetPayday = getActualPayday(targetYear, targetMonth, paydayType, paydaySetting, adjustment);
-      }
-      return targetPayday;
-    };
-
-    const nextPayday = getNextPayday();
-    const lang = config.language === 'en' ? 'en-US' : config.language === 'da' ? 'da-DK' : config.language === 'no' ? 'no-NO' : config.language === 'fi' ? 'fi-FI' : 'sv-SE';
-    
-    // Format payday name elegantly
-    const formattedDate = nextPayday.toLocaleDateString(lang, {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-    const capitalizedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-
-    const paydayOptions = [
-      { type: PaydayType.FIRST_DAY, label: t('firstDayOfMonth') },
-      { type: PaydayType.LAST_DAY, label: t('lastDayOfMonth') },
-      { type: PaydayType.TWENTY_FIFTH, label: t('twentyFifth') },
-      { type: PaydayType.CUSTOM, label: t('customDay') }
-    ];
-
-    return (
-      <div className="space-y-4 w-full py-1">
-        {/* Next Payday Status Line — Minimalist and subtle */}
-        <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)] px-1">
-          <Calendar size={13} className="opacity-60" />
-          <span>
-            {config.language === 'en' ? 'Next planned payday: ' : 'Nästa planerade lönedag: '}
-            <strong className="text-[var(--text-primary)] font-semibold">{capitalizedDate}</strong>
-          </span>
-        </div>
-
-        {/* Pure & Simple Modular list stacked vertically ("under varandra") */}
-        <div className="flex flex-col gap-2">
-          {paydayOptions.map((option) => {
-            const isSelected = config.paydayType === option.type;
-            return (
-              <button
-                key={option.type}
-                onClick={() => handleUpdatePaydayType(option.type)}
-                className={`w-full flex items-center justify-between py-3.5 px-4 rounded-[20px] border backdrop-blur-xl transition-all active:scale-[0.98] cursor-pointer relative ${
-                  isSelected 
-                    ? 'bg-accent/10 border-[var(--accent-color)] text-[var(--text-primary)] shadow-xs' 
-                    : 'bg-[var(--surface-color)] border-[var(--border-color)]/50 text-[var(--text-primary)] hover:border-[var(--border-color)]'
-                }`}
-              >
-                <span className="text-[13.5px] font-semibold tracking-tight leading-snug">{option.label}</span>
-                <div className="relative flex items-center justify-center flex-shrink-0">
-                  {isSelected ? (
-                    <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
-                      <Check size={11} strokeWidth={3} />
-                    </div>
-                  ) : (
-                    <div className="w-5 h-5 rounded-full border border-[var(--border-color)]/60 opacity-60" />
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Calendar-like Grid Selector cleanly placed directly under the options */}
-        <AnimatePresence mode="popLayout">
-          {config.paydayType === PaydayType.CUSTOM && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="overflow-hidden"
-            >
-              <div className="bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 rounded-[24px] p-4.5 mt-2 space-y-3 shadow-sm">
-                <p className="text-[11px] text-[var(--text-secondary)] text-center font-semibold uppercase tracking-wider opacity-75">
-                  {config.language === 'en' ? 'Select date of the month:' : 'Välj datum i månaden:'}
-                </p>
-                <div className="grid grid-cols-7 gap-1 px-1 justify-items-center max-w-[280px] mx-auto">
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
-                    const isDaySelected = config.payday === day;
-                    return (
-                      <button
-                        key={day}
-                        onClick={() => handleUpdatePayday(day)}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all relative ${
-                          isDaySelected
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)] font-bold shadow-sm'
-                            : 'text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
-                        }`}
-                      >
-                        {day}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Weekend handling row, following the same list style */}
-        <div className="border-b border-[var(--border-color)]/30 pb-5 pt-1 px-1 flex items-center justify-between gap-6">
-          <div className="space-y-0.5">
-            <span className="text-sm font-medium text-[var(--text-primary)] block">
-              {t('weekendHandling')}
-            </span>
-            <span className="text-xs text-[var(--text-secondary)] opacity-80 leading-normal block">
-              {config.language === 'en' 
-                ? 'Get paid Friday if payday falls on a weekend' 
-                : 'Få lön på fredagen om lönedagen är en helgdag'}
-            </span>
-          </div>
-
-          <button 
-            onClick={() => handleUpdateWeekendHandling(!config.paydayBeforeWeekend)}
-            className={`w-10 h-6 rounded-full relative transition-colors duration-200 flex-shrink-0 outline-none cursor-pointer ${
-              config.paydayBeforeWeekend ? 'bg-[#05B862]' : 'bg-[#EFECE6] dark:bg-[#2D2D2D]'
-            }`}
-          >
-            <motion.div 
-              layout
-              className="w-4 h-4 bg-white rounded-full absolute top-1 left-1 shadow-xs" 
-              animate={{ x: config.paydayBeforeWeekend ? 16 : 0 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            />
-          </button>
-        </div>
-      </div>
-    );
+    const affected = transactions.filter(t => t.categoryId === cat.id || (t.category && cat.name && t.category.trim().toLowerCase() === cat.name.trim().toLowerCase()));
+    if (affected.length > 0) {
+      const otherCats = currentCategories.filter(c => c.id !== cat.id);
+      const ovrigt = otherCats.find(c => c.id === 'ovrigt' || c.name.toLowerCase() === 'övrigt') || otherCats[0];
+      setTargetMigrationId(ovrigt?.id || otherCats[0]?.id || '');
+      setDeleteMigrationData({ type, category: cat, count: affected.length });
+    } else {
+      setDeleteConfirmIndex({ type, index, category: cat });
+    }
   };
 
   const renderCategoryList = (type: 'expense' | 'income') => {
-    const field = type === 'expense' ? 'categories' : 'incomeCategories';
-    const defaultCategories = type === 'expense' ? DEFAULT_EXPENSE_CATEGORIES : DEFAULT_INCOME_CATEGORIES;
-    const defaultNames = defaultCategories.map(c => c.name);
-    
-    const allCategories = (config[field] || []).map((cat, index) => ({ ...cat, originalIndex: index })).filter(cat => cat && typeof cat.name === 'string' && cat.name.trim() !== '');
-    
-    const standardCats = allCategories.filter(c => defaultNames.includes(c.name));
-    const customCats = allCategories.filter(c => !defaultNames.includes(c.name));
-
-    const renderCat = (cat: any) => {
-      const index = cat.originalIndex;
-      
-      return (
-        <CategoryTile
-          key={index}
-          name={cat.name}
-          icon={cat.icon}
-          color={cat.color}
-          onClick={() => handleEditCategory(type, index, cat.name, cat.icon, cat.color)}
-        />
-      );
-    };
-
-    const isDefault = type === 'expense' ? isExpenseDefault : isIncomeDefault;
+    const field = type === 'income' ? 'incomeCategories' : 'categories';
+    const list = config[field] || [];
 
     return (
-      <div className="space-y-4">
-        <div className="surface-card overflow-hidden relative p-4 space-y-6">
-          {standardCats.length > 0 && (
-            <div>
-              <div className="px-1 mb-3 text-xs font-semibold text-[var(--text-secondary)]">
-                Standardkategorier
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {standardCats.map(renderCat)}
-              </div>
-            </div>
-          )}
-          {customCats.length > 0 && (
-            <div>
-              <div className="px-1 mb-3 text-xs font-semibold text-[var(--text-secondary)]">
-                Egna kategorier
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {customCats.map(renderCat)}
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="mt-4">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
+            {list.length} {t('categories').toLowerCase()}
+          </span>
           <button
             onClick={() => handleAddCategory(type)}
-            className="w-full flex items-center justify-center gap-2 h-[48px] bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] rounded-[14px] font-bold text-sm hover:opacity-90 transition-all active:scale-[0.98] cursor-pointer"
+            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-[#EFECE6] dark:bg-[#2D2D2D] px-3 py-1.5 rounded-[10px] hover:bg-black/10 transition-colors cursor-pointer"
           >
-            <Plus size={16} strokeWidth={2.5} />
+            <Plus size={14} strokeWidth={2} />
             {t('newCategory')}
           </button>
         </div>
 
-        {!isDefault && (
-          <div className="mt-4">
-            <button
-              onClick={() => setResetConfirmType(type)}
-              className="w-full flex items-center justify-center gap-2 h-[44px] rounded-[14px] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#EFECE6] dark:hover:bg-[#2D2D2D] hover:text-[#1C1917] dark:hover:text-white transition-all active:scale-[0.98] cursor-pointer"
+        <div className="bg-white dark:bg-[#242424] rounded-[18px] border border-[#E6E2D8] dark:border-[#383838] overflow-hidden divide-y divide-[#E6E2D8]/50 dark:divide-[#383838]/50 shadow-xs">
+          {list.map((cat: any, index: number) => (
+            <div
+              key={cat.id || index}
+              onClick={() => handleEditCategory(type, index, cat.name, cat.icon, cat.color)}
+              className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-[#F7F5F0]/50 dark:hover:bg-[#2D2D2D]/50 transition-colors cursor-pointer"
             >
-              <RotateCcw size={14} strokeWidth={2} />
-              <span className="text-xs font-bold tracking-wide">{t('resetToDefaultCategories')}</span>
-            </button>
-          </div>
-        )}
+              <div className="flex items-center gap-3">
+                <CategoryIcon icon={cat.icon} color={cat.color} size="md" />
+                <span className="text-sm font-semibold text-[#1C1917] dark:text-white">
+                  {cat.name}
+                </span>
+              </div>
+              <span className="text-xs font-medium text-[#8C867C] dark:text-[#A8A8A8]">
+                Redigera →
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
@@ -414,184 +218,175 @@ export function SettingsView({
     });
 
     return (
-      <div className="space-y-4 w-full py-1">
-        <div className="grid grid-cols-3 gap-2.5">
-          {methodsList.map((method, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                setPaymentMethodModalData({ index, name: method.name });
-                setIsPaymentMethodModalOpen(true);
-              }}
-              className="relative bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[14px] p-2.5 flex flex-col items-center gap-1.5 hover:bg-[var(--surface-muted)] transition-all cursor-pointer active:scale-95"
-            >
-              <div className="w-8.5 h-8.5 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center">
-                <CategoryIcon icon={method.icon} color={method.color} size="sm" />
-              </div>
-              <span className="text-[11px] font-medium tracking-tight text-center line-clamp-2 leading-snug break-words hyphens-auto opacity-90 w-full px-0.5">
-                {method.name}
-              </span>
-            </button>
-          ))}
+      <div className="space-y-6 w-full py-2">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
+            {methodsList.length} betalmetodsval
+          </span>
           <button
             onClick={() => {
               setPaymentMethodModalData({ name: '' });
               setIsPaymentMethodModalOpen(true);
             }}
-            className="border-2 border-dashed border-[var(--border-color)] rounded-[14px] p-2.5 flex flex-col items-center justify-center gap-1.5 hover:border-[var(--accent-color)] text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-all cursor-pointer active:scale-95 min-h-[72px]"
+            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-[#EFECE6] dark:bg-[#2D2D2D] px-3 py-1.5 rounded-[10px] hover:bg-black/10 transition-colors cursor-pointer"
           >
-            <Plus size={16} />
-            <span className="text-[11px] font-medium tracking-tight text-center">Ny</span>
+            <Plus size={14} strokeWidth={2} />
+            Ny betalmetod
           </button>
         </div>
 
-        <div className="pt-1">
-          <button 
-            onClick={handleResetPaymentMethods}
-            className="w-full h-10 flex items-center justify-center gap-2 p-2.5 bg-[var(--surface-color)] border border-[var(--border-color)]/20 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-[0.98] group cursor-pointer"
-          >
-            <RotateCcw size={12} strokeWidth={2} className="opacity-75" />
-            <span className="text-xs font-semibold tracking-wide">
-              {config.language === 'en' ? "Reset to standard" : "Återställ till standard"}
-            </span>
-          </button>
+        <div className="bg-white dark:bg-[#242424] rounded-[18px] border border-[#E6E2D8] dark:border-[#383838] overflow-hidden divide-y divide-[#E6E2D8]/50 dark:divide-[#383838]/50 shadow-xs">
+          {methodsList.map((method: any, index: number) => (
+            <div
+              key={method.name || index}
+              onClick={() => {
+                setPaymentMethodModalData({ index, name: method.name });
+                setIsPaymentMethodModalOpen(true);
+              }}
+              className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-[#F7F5F0]/50 dark:hover:bg-[#2D2D2D]/50 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <CategoryIcon icon={method.icon} color={method.color} size="md" />
+                <span className="text-sm font-semibold text-[#1C1917] dark:text-white">
+                  {method.name}
+                </span>
+              </div>
+              <span className="text-xs font-medium text-[#8C867C] dark:text-[#A8A8A8]">
+                Redigera →
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     );
   };
 
-  const renderLanguageSettings = () => (
-    <div className="space-y-4 w-full py-1">
-      <div className="flex flex-col gap-2">
-        {Object.entries(languageInfo).map(([code, info]) => {
-          const isSelected = config.language === code;
-          return (
-            <button
-               key={code}
-               onClick={() => setConfig({ ...config, language: code as Language })}
-               className={`w-full flex items-center justify-between py-3.5 px-4 rounded-[20px] border backdrop-blur-xl transition-all active:scale-[0.98] cursor-pointer relative ${
-                 isSelected 
-                   ? 'bg-[var(--accent-color)]/10 border-[var(--accent-color)] text-[var(--text-primary)] shadow-xs' 
-                   : 'bg-[var(--surface-color)] border-[var(--border-color)]/50 text-[var(--text-primary)] hover:border-[var(--border-color)]'
-               }`}
-             >
-               <div className="flex items-center gap-3">
-                 <LanguageFlag language={code as Language} size="md" />
-                 <span className="text-[13.5px] font-semibold tracking-tight leading-snug">{info.label}</span>
-               </div>
-               <div className="relative flex items-center justify-center flex-shrink-0">
-                 {isSelected ? (
-                   <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
-                     <Check size={11} strokeWidth={3} />
-                   </div>
-                 ) : (
-                   <div className="w-5 h-5 rounded-full border border-[var(--border-color)]/60 opacity-60" />
-                 )}
-               </div>
-             </button>
-           );
-         })}
-       </div>
-    </div>
-  );
-
-  const renderAppearanceSettings = () => {
-    const currentMode = config.themeMode || 'system';
-
-    const options: { id: 'system' | 'light' | 'dark'; label: string; desc: string; icon: any }[] = [
-      {
-        id: 'system',
-        label: t('themeSystem' as any) || 'System',
-        desc: t('themeSystemDesc' as any) || 'Följer enhetens automatiska läge',
-        icon: Monitor
-      },
-      {
-        id: 'light',
-        label: t('themeLight' as any) || 'Ljust läge',
-        desc: t('themeLightDesc' as any) || 'Klassiskt ljust utseende',
-        icon: Sun
-      },
-      {
-        id: 'dark',
-        label: t('themeDark' as any) || 'Mörkt läge',
-        desc: t('themeDarkDesc' as any) || 'Mörkt och behagligt för ögonen',
-        icon: Moon
-      }
+  const renderLanguageSettings = () => {
+    const languages: { code: Language; label: string }[] = [
+      { code: 'sv', label: 'Svenska' },
+      { code: 'en', label: 'English' },
     ];
 
-    const handleSelectMode = (mode: 'system' | 'light' | 'dark') => {
-      const isDark = mode === 'dark' 
-        ? true 
-        : mode === 'light' 
-        ? false 
-        : (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-      setConfig({
-        ...config,
-        themeMode: mode,
-        darkMode: isDark
-      });
-    };
-
     return (
-      <div className="space-y-4 w-full py-1">
-        <div className="flex flex-col gap-2.5">
-          {options.map((opt) => {
-            const isSelected = currentMode === opt.id;
-            const Icon = opt.icon;
-            return (
-              <button
-                key={opt.id}
-                onClick={() => handleSelectMode(opt.id)}
-                className={`w-full flex items-center justify-between p-4 rounded-[18px] transition-all active:scale-[0.98] cursor-pointer relative text-left border-none shadow-none ${
-                  isSelected 
-                    ? 'bg-white dark:bg-[#242424] ring-2 ring-[#05B862] text-[#1C1917] dark:text-white' 
-                    : 'bg-white dark:bg-[#242424] text-[#1C1917] dark:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
-                }`}
-              >
-                <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                    isSelected ? 'bg-[#05B862] text-white' : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8]'
-                  }`}>
-                    <Icon size={20} strokeWidth={2} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold tracking-tight">{opt.label}</span>
-                      {opt.id === 'system' && (
-                        <span className="text-[10px] font-bold bg-[#E8F8F0] dark:bg-[#0D2E1F] text-[#05B862] px-2 py-0.5 rounded-full">
-                          Förvalt
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8] font-medium mt-0.5 truncate">{opt.desc}</p>
-                  </div>
+      <div className="space-y-4 w-full py-2">
+        <div className="bg-white dark:bg-[#242424] rounded-[18px] border border-[#E6E2D8] dark:border-[#383838] overflow-hidden divide-y divide-[#E6E2D8]/50 dark:divide-[#383838]/50 shadow-xs">
+          {languages.map((l) => (
+            <div
+              key={l.code}
+              onClick={() => {
+                setConfig({ ...config, language: l.code });
+              }}
+              className="flex items-center justify-between p-4 hover:bg-[#F7F5F0]/50 dark:hover:bg-[#2D2D2D]/50 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <LanguageFlag code={l.code} size="md" />
+                <span className="text-sm font-semibold text-[#1C1917] dark:text-white">
+                  {l.label}
+                </span>
+              </div>
+              {config.language === l.code && (
+                <div className="w-6 h-6 rounded-full bg-[#1C1917] dark:bg-white flex items-center justify-center text-white dark:text-[#1C1917]">
+                  <Check size={14} strokeWidth={2.5} />
                 </div>
-                <div className="relative flex items-center justify-center flex-shrink-0 ml-3">
-                  {isSelected ? (
-                    <div className="w-5 h-5 rounded-full bg-[#05B862] flex items-center justify-center text-white shadow-xs">
-                      <Check size={12} strokeWidth={3} />
-                    </div>
-                  ) : (
-                    <div className="w-5 h-5 rounded-full border border-[#E6E2D8] dark:border-[#383838]" />
-                  )}
-                </div>
-              </button>
-            );
-          })}
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderAppearanceSettings = () => {
+    return (
+      <div className="space-y-6 w-full py-2">
+        <div className="space-y-3">
+          <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-1">
+            Utseendeläge
+          </label>
+          <div className="grid grid-cols-3 gap-2.5">
+            {[
+              { id: 'system', label: 'System', icon: <Monitor size={18} /> },
+              { id: 'light', label: 'Ljust', icon: <Sun size={18} /> },
+              { id: 'dark', label: 'Mörkt', icon: <Moon size={18} /> },
+            ].map((mode) => {
+              const isSelected = config.themeMode === mode.id || (!config.themeMode && mode.id === 'system');
+              return (
+                <button
+                  key={mode.id}
+                  onClick={() => {
+                    const isDark = mode.id === 'dark' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                    setConfig({ ...config, themeMode: mode.id as any, darkMode: isDark });
+                  }}
+                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[16px] border transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border-transparent shadow-md'
+                      : 'bg-white dark:bg-[#242424] text-[#1C1917] dark:text-white border-[#E6E2D8] dark:border-[#383838] hover:border-black/20'
+                  }`}
+                >
+                  {mode.icon}
+                  <span className="text-xs font-bold">{mode.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="space-y-6">
-      <div key={activeSection}>
-          {activeSection === 'appearance' && renderAppearanceSettings()}
-          {activeSection === 'salary' && renderSalarySettings()}
-          {activeSection === 'categories' && renderCategoriesSettings()}
-          {activeSection === 'paymentMethods' && renderPaymentMethodsSettings()}
-          {activeSection === 'language' && renderLanguageSettings()}
+    <div className="space-y-6 font-sans pb-12">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-4 border-b border-[#E6E2D8] dark:border-[#383838]">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="w-10 h-10 rounded-[14px] bg-[#EFECE6] dark:bg-[#2D2D2D] flex items-center justify-center text-[#1C1917] dark:text-white hover:bg-black/10 transition-colors cursor-pointer"
+            aria-label={t('back')}
+          >
+            ←
+          </button>
+          <h1 className="text-xl font-bold text-[#1C1917] dark:text-white tracking-tight">
+            {activeSection === 'salary' && t('salary')}
+            {activeSection === 'categories' && t('categories')}
+            {activeSection === 'paymentMethods' && (config.language === 'en' ? 'Payment methods' : 'Betalmetoder')}
+            {activeSection === 'language' && t('language')}
+            {activeSection === 'appearance' && (config.language === 'en' ? 'Appearance' : 'Utseende')}
+          </h1>
+        </div>
+      </div>
+
+      <div>
+        {activeSection === 'salary' && (
+          <div className="space-y-6">
+            <div className="bg-white dark:bg-[#242424] p-5 rounded-[20px] border border-[#E6E2D8] dark:border-[#383838] space-y-4">
+              <h2 className="text-sm font-bold text-[#1C1917] dark:text-white">Lönedag & Period</h2>
+              <div className="space-y-3">
+                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">Lönedag i månad</label>
+                <div className="grid grid-cols-5 gap-2">
+                  {[25, 26, 27, 28, 30, 1, 5, 10, 15, 20].map((day) => (
+                    <button
+                      key={day}
+                      onClick={() => handleUpdatePayday(day)}
+                      className={`py-2.5 rounded-[12px] text-xs font-bold transition-all cursor-pointer ${
+                        config.payday === day
+                          ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917]'
+                          : 'bg-[#F7F5F0] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-black/10'
+                      }`}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'categories' && renderCategoriesSettings()}
+        {activeSection === 'paymentMethods' && renderPaymentMethodsSettings()}
+        {activeSection === 'language' && renderLanguageSettings()}
+        {activeSection === 'appearance' && renderAppearanceSettings()}
       </div>
 
       <CategoryModal
@@ -602,6 +397,7 @@ export function SettingsView({
         onSave={handleSaveCategoryModal}
         onDelete={(index) => {
           handleDeleteCategory(categoryModalData!.type, index);
+          setIsCategoryModalOpen(false);
         }}
         t={t}
       />
@@ -612,48 +408,91 @@ export function SettingsView({
         initialName={paymentMethodModalData?.name}
         initialIcon={paymentMethodModalData?.index !== undefined ? config.paymentMethods[paymentMethodModalData.index].icon : 'credit-card'}
         initialColor={paymentMethodModalData?.index !== undefined ? config.paymentMethods[paymentMethodModalData.index].color : '#6366f1'}
-        onSave={(name, icon, color) => {
+        onSave={(data) => {
+          const methods = [...(config.paymentMethods || [])];
           if (paymentMethodModalData?.index !== undefined) {
-            const currentMethods = [...(config.paymentMethods || [])];
-            currentMethods[paymentMethodModalData.index] = { name, icon, color };
-            setConfig({ ...config, paymentMethods: currentMethods });
+            methods[paymentMethodModalData.index] = data;
           } else {
-            setConfig({ ...config, paymentMethods: [...(config.paymentMethods || []), { name, icon, color }] });
+            methods.push(data);
           }
+          setConfig({ ...config, paymentMethods: methods });
           setIsPaymentMethodModalOpen(false);
         }}
-        onDelete={() => {
-          if (paymentMethodModalData?.index !== undefined) {
-            setConfig({
-              ...config,
-              paymentMethods: config.paymentMethods.filter((_, i) => i !== paymentMethodModalData.index)
-            });
-          }
+        onDelete={paymentMethodModalData?.index !== undefined ? () => {
+          const methods = [...(config.paymentMethods || [])].filter((_, i) => i !== paymentMethodModalData.index);
+          setConfig({ ...config, paymentMethods: methods });
           setIsPaymentMethodModalOpen(false);
-        }}
+        } : undefined}
         t={t}
       />
 
-      <ConfirmModal
-        isOpen={!!resetConfirmType}
-        title={t('resetCategoriesConfirmTitle')}
-        message={t('resetCategoriesConfirmMessage')}
-        confirmText={t('resetCategoriesConfirmButton')}
-        cancelText={t('cancel')}
-        variant="danger"
-        onConfirm={() => {
-          if (resetConfirmType) {
-            setConfig({
-              ...config,
-              [resetConfirmType === 'expense' ? 'categories' : 'incomeCategories']:
-                resetConfirmType === 'expense' ? DEFAULT_EXPENSE_CATEGORIES : DEFAULT_INCOME_CATEGORIES
-            });
-            setResetConfirmType(null);
-          }
-        }}
-        onCancel={() => setResetConfirmType(null)}
-        t={t}
-      />
+      {/* Category Deletion Migration Modal */}
+      {deleteMigrationData && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#242424] w-full max-w-sm rounded-[24px] p-6 relative border border-[#E6E2D8] dark:border-[#383838] shadow-2xl font-sans">
+            <h3 className="text-lg font-bold text-[#1C1917] dark:text-white mb-2">
+              Ta bort {deleteMigrationData.category.name}?
+            </h3>
+            <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8] mb-4 leading-relaxed">
+              Kategorin används av {deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till innan den tas bort.
+            </p>
+            <div className="space-y-4 mb-6">
+              <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">Flytta transaktioner till:</label>
+              <select
+                value={targetMigrationId}
+                onChange={(e) => setTargetMigrationId(e.target.value)}
+                className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-3 text-sm font-semibold text-[#1C1917] dark:text-white outline-none"
+              >
+                {(deleteMigrationData.type === 'income' ? (config.incomeCategories || []) : (config.categories || []))
+                  .filter(c => c.id !== deleteMigrationData.category.id)
+                  .map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              <Button
+                onClick={() => {
+                  onMigrateAndDeleteCategory?.(deleteMigrationData.type, deleteMigrationData.category.id, targetMigrationId);
+                  setDeleteMigrationData(null);
+                }}
+                variant="danger"
+                fullWidth
+              >
+                Flytta & ta bort
+              </Button>
+              <Button
+                onClick={() => setDeleteMigrationData(null)}
+                variant="ghost"
+                fullWidth
+              >
+                Avbryt
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirmIndex && (
+        <ConfirmModal
+          isOpen={!!deleteConfirmIndex}
+          title={`Ta bort ${deleteConfirmIndex.category.name}?`}
+          message="Är du säker på att du vill ta bort denna kategori? Den används inte av några transaktioner."
+          confirmText="Ta bort"
+          onConfirm={() => {
+            const field = deleteConfirmIndex.type === 'income' ? 'incomeCategories' : 'categories';
+            const currentCategories = config[field] || [];
+            const newCategories = currentCategories.filter((_, i) => i !== deleteConfirmIndex.index);
+            setConfig({ ...config, [field]: newCategories });
+            setDeleteConfirmIndex(null);
+          }}
+          onCancel={() => setDeleteConfirmIndex(null)}
+          variant="danger"
+          t={t}
+        />
+      )}
     </div>
   );
 }

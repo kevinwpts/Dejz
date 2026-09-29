@@ -3749,6 +3749,61 @@ export default function App() {
     }
   };
 
+  const handleMigrateAndDeleteCategory = async (
+    type: "income" | "expense",
+    deleteCatId: string,
+    migrateToCatId?: string,
+  ) => {
+    if (!config) return;
+    const field = type === "income" ? "incomeCategories" : "categories";
+    const categories = config[field] || [];
+    const deleteCat = categories.find((c: any) => c.id === deleteCatId);
+    if (!deleteCat) return;
+
+    let targetCat = categories.find((c: any) => c.id === migrateToCatId);
+    if (!targetCat) {
+      targetCat =
+        categories.find(
+          (c: any) => c.id === "ovrigt" || c.name.toLowerCase() === "övrigt",
+        ) || categories.find((c: any) => c.id !== deleteCatId);
+    }
+
+    setTransactions((prev) =>
+      prev.map((t) => {
+        const isMatch =
+          t.categoryId === deleteCatId ||
+          (t.category &&
+            deleteCat.name &&
+            t.category.trim().toLowerCase() === deleteCat.name.trim().toLowerCase());
+        if (isMatch && targetCat) {
+          return {
+            ...t,
+            categoryId: targetCat.id,
+            category: targetCat.name,
+          };
+        }
+        return t;
+      }),
+    );
+
+    const newCategories = categories.filter((c: any) => c.id !== deleteCatId);
+    const newConfig = {
+      ...config,
+      [field]: newCategories,
+    };
+
+    setConfig(newConfig);
+
+    const activeUserId = session?.user?.id || (isDemoMode ? "demo-user" : "");
+    if (activeUserId) {
+      try {
+        await dataService.saveSettings(activeUserId, newConfig);
+      } catch (err) {
+        console.error("Failed to save settings after category deletion:", err);
+      }
+    }
+  };
+
   const t = (key: TranslationKey, params?: Record<string, string | number>) => {
     const lang = (config?.language as Language) || landingLanguage;
     let translation = translations[lang]?.[key] || translations["sv"][key] || key;
@@ -4348,6 +4403,8 @@ export default function App() {
                 onResetAll={resetAll}
                 onTriggerProUpgradeModal={() => setIsProModalOpen(true)}
                 onRenameCategory={handleRenameCategory}
+                transactions={transactions}
+                onMigrateAndDeleteCategory={handleMigrateAndDeleteCategory}
               />
             </div>
           )}
@@ -4445,6 +4502,7 @@ export default function App() {
                 onResetAll={resetAll}
                 addToast={addToast}
                 transactions={transactions}
+                onMigrateAndDeleteCategory={handleMigrateAndDeleteCategory}
                 incomes={incomes}
                 fixedExpenses={fixedExpenses}
                 setCurrentPeriodDate={setCurrentPeriodDate}
