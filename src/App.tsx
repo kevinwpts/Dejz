@@ -909,6 +909,7 @@ export default function App() {
           securityLock: dbSettings.securityLock,
           darkMode:
             (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? dbSettings.darkMode : false,
+          themeMode: dbSettings.themeMode || 'system',
           quickChoices: dbSettings.quickChoices || [],
           savingsPot: dbSettings.savingsPot || 0,
           savingsGoals: dbSettings.savingsGoals || [],
