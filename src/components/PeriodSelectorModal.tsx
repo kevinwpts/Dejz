@@ -42,7 +42,9 @@ export function PeriodSelectorModal({
 
   if (!isOpen) return null;
 
-  const chronologicalPeriods = periods ? periods.filter(p => !p.isFuture || p.isCurrent) : [];
+  const chronologicalPeriods = periods 
+    ? periods.filter(p => !p.isFuture || p.isCurrent).slice().reverse() 
+    : [];
 
   return createPortal(
     <AnimatePresence>
