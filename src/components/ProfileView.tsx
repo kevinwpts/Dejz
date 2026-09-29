@@ -302,7 +302,7 @@ export function ProfileView({
           <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
             <SettingsMenuItem 
               icon={SlidersHorizontal} 
-              label={config.language === 'en' ? 'Allocate Budget' : 'Fördela budget'} 
+              label={'Budget'} 
               iconBgColor="bg-accent/10"
               iconTextColor="text-[var(--accent-color)]"
               onClick={() => onNavigate('budget', 'allocate')} 

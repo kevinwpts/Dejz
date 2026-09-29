@@ -336,7 +336,6 @@ export function LogView({
                     config={config}
                     onView={onViewTransaction}
                     onDelete={onDeleteTransaction}
-                    variant="transparent"
                   />
                 ))}
               </div>

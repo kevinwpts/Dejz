@@ -3882,7 +3882,7 @@ export default function App() {
     if (activeTab === "analysis") return t("analysis");
     if (activeTab === "budget") {
       if (budgetSection === "allocate" || budgetSection === "category-budgets") {
-        return config?.language === 'en' ? 'Allocate Budget' : 'Fördela vardagsbudget';
+        return 'Budget';
       }
       return budgetSection ? (config?.language === 'en' ? 'Budget' : 'Budget') : (config?.language === 'en' ? 'Finances' : 'Ekonomi');
     }

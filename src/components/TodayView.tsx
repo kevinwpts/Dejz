@@ -523,8 +523,8 @@ export function TodayView({
                           onClick={() => handleCategoryClick(cat.name)}
                           className="flex-shrink-0 flex flex-col justify-between py-2.5 px-3 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] text-[#1C1917] dark:text-white transition-all group cursor-pointer snap-start border-none shadow-none relative min-w-[130px]"
                         >
-                          {/* Top Row: Icon, Name and Amount */}
-                          <div className="flex items-center justify-between gap-2.5 w-full">
+                          {/* Top Row: Icon and Name */}
+                          <div className="flex items-center gap-2 w-full mb-1">
                             <div className="flex items-center gap-2 min-w-0">
                               {/* Mini Icon */}
                               <div className="w-6 h-6 rounded-lg bg-[#F7F5F0] dark:bg-white/[0.06] border-none text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
@@ -538,22 +538,24 @@ export function TodayView({
                               </div>
 
                               {/* Name */}
-                              <span className="text-xs font-semibold tracking-tight truncate text-[#1C1917] dark:text-white max-w-[85px]">
+                              <span className="text-xs font-semibold tracking-tight truncate text-[#1C1917] dark:text-white">
                                 {cat.name}
                               </span>
                             </div>
+                          </div>
 
-                            {/* Amount */}
-                            <span className={`text-xs font-bold tabular-nums tracking-tight shrink-0 ${
+                          {/* Amount between category and bar */}
+                          <div className="mb-2">
+                            <span className={`text-xs font-bold tabular-nums tracking-tight ${
                               cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[#6E6961] dark:text-[#9CA6BC]'
                             }`}>
-                              {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} kr` : `${formatAmount(cat.spent, lang)} kr`}
+                              {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} kr ${lang === 'en' ? 'left' : 'kvar'}` : `${formatAmount(cat.spent, lang)} kr`}
                             </span>
                           </div>
 
                           {/* Progress Bar under the info */}
                           {cat.hasBudget && (
-                            <div className="w-full h-1 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden mt-2">
+                            <div className="w-full h-1 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
                               <div 
                                 className={`h-full rounded-full transition-all duration-500 ${
                                   cat.isOverBudget ? 'bg-rose-500' : 'bg-neutral-900 dark:bg-white'
