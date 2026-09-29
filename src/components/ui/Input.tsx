@@ -32,7 +32,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] flex items-center justify-between"
+            className="text-xs font-semibold text-[var(--text-secondary)] flex items-center justify-between"
           >
             <span>{label}</span>
           </label>
@@ -40,7 +40,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative flex items-center w-full">
           {icon && (
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] dark:text-[#71717A] pointer-events-none flex items-center justify-center">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none flex items-center justify-center">
               {icon}
             </div>
           )}
@@ -55,12 +55,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 : 'border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white'
             } rounded-[14px] ${icon ? 'pl-10' : 'px-4'} ${
               iconRight ? 'pr-10' : 'px-4'
-            } font-semibold text-sm text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+            } font-semibold text-sm text-[#1C1917] dark:text-white outline-none transition-all placeholder-[var(--text-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
             {...props}
           />
 
           {iconRight && (
-            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] dark:text-[#71717A] flex items-center justify-center">
+            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] flex items-center justify-center">
               {iconRight}
             </div>
           )}
@@ -73,7 +73,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
 
         {helperText && !error && (
-          <p className="text-xs font-normal text-[#8C867C] dark:text-[#71717A] mt-0.5">
+          <p className="text-xs font-normal text-[var(--text-tertiary)] mt-0.5">
             {helperText}
           </p>
         )}

@@ -521,7 +521,7 @@ export function TodayView({
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                           onClick={() => handleCategoryClick(cat.name)}
-                          className="flex-shrink-0 flex flex-col justify-between py-2.5 px-3 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] text-[#1C1917] dark:text-white transition-all group cursor-pointer snap-start border-none shadow-none relative min-w-[130px]"
+                          className="flex-shrink-0 flex flex-col justify-between py-2.5 px-3 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] text-[#1C1917] dark:text-white transition-all group cursor-pointer snap-start border-none shadow-none relative min-w-[118px]"
                         >
                           {/* Top Row: Icon and Name */}
                           <div className="flex items-center gap-2 w-full mb-1">

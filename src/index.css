@@ -308,8 +308,8 @@ textarea {
   --surface-tint: rgba(255, 255, 255, 0.01);
 
   --text-primary: #F9F8F6;
-  --text-secondary: #A8A8A8;
-  --text-tertiary: #737373;
+  --text-secondary: #C0BCB2;
+  --text-tertiary: #948E84;
   --text-inactive: #525252;
 
   --border-color: #333333;
@@ -789,4 +789,10 @@ html, body {
   filter: none !important;
   text-shadow: none !important;
 }
+
+::placeholder {
+  color: var(--text-tertiary);
+  opacity: 1;
+}
+
 

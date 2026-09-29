@@ -12,34 +12,34 @@ interface OnboardingCharacterArtProps {
 
 export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: OnboardingCharacterArtProps) {
   return (
-    <div className="relative w-36 h-36 mx-auto flex items-center justify-center select-none py-1 overflow-visible">
+    <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto flex items-center justify-center select-none py-1 overflow-visible">
       {/* Dynamic Ambient Background Glow */}
       <motion.div
         animate={{
-          scale: [1, 1.22, 1],
-          opacity: [0.45, 0.75, 0.45],
+          scale: [1, 1.18, 1],
+          opacity: [0.4, 0.65, 0.4],
         }}
         transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-        className={`absolute inset-0 rounded-full blur-2xl pointer-events-none ${
-          step === 'name' || step === 'age' || step === 'gender' ? 'bg-gradient-to-tr from-cyan-500/40 via-cyan-400/40 to-teal-400/30' :
-          step === 'payday' ? 'bg-gradient-to-tr from-amber-500/45 via-yellow-400/40 to-orange-500/30' :
-          step === 'income' ? 'bg-gradient-to-tr from-emerald-500/40 via-teal-400/40 to-green-500/30' :
-          step === 'expenses' ? 'bg-gradient-to-tr from-rose-500/45 via-purple-400/35 to-pink-500/30' :
-          step === 'budget' ? 'bg-gradient-to-tr from-indigo-500/40 via-amber-400/35 to-cyan-500/30' :
-          step === 'goals' ? 'bg-gradient-to-tr from-sky-500/45 via-cyan-400/40 to-blue-500/30' :
-          step === 'midMonth' ? 'bg-gradient-to-tr from-amber-500/45 via-yellow-400/30 to-teal-400/30' :
-          'bg-gradient-to-tr from-emerald-500/40 via-amber-400/40 to-cyan-400/40'
+        className={`absolute inset-0 rounded-full blur-xl pointer-events-none ${
+          step === 'name' || step === 'age' || step === 'gender' ? 'bg-gradient-to-tr from-cyan-500/35 via-cyan-400/30 to-teal-400/25' :
+          step === 'payday' ? 'bg-gradient-to-tr from-amber-500/40 via-yellow-400/30 to-orange-500/25' :
+          step === 'income' ? 'bg-gradient-to-tr from-emerald-500/35 via-teal-400/30 to-green-500/25' :
+          step === 'expenses' ? 'bg-gradient-to-tr from-rose-500/40 via-purple-400/30 to-pink-500/25' :
+          step === 'budget' ? 'bg-gradient-to-tr from-indigo-500/35 via-amber-400/30 to-cyan-500/25' :
+          step === 'goals' ? 'bg-gradient-to-tr from-sky-500/40 via-cyan-400/35 to-blue-500/25' :
+          step === 'midMonth' ? 'bg-gradient-to-tr from-amber-500/40 via-yellow-400/25 to-teal-400/25' :
+          'bg-gradient-to-tr from-emerald-500/35 via-amber-400/35 to-cyan-400/35'
         }`}
       />
 
       {/* Floating Mascot Character Container */}
       <motion.div
         animate={{
-          y: [0, -7, 0],
+          y: [0, -5, 0],
           rotate: [0, 1.2, -1.2, 0],
         }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className="relative w-32 h-32 flex items-center justify-center overflow-visible"
+        className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center overflow-visible"
       >
         {/* Render Step-Specific Character Artwork */}
         {(step === 'name' || step === 'age' || step === 'gender') && <CharacterWelcome />}

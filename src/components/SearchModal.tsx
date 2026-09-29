@@ -109,11 +109,11 @@ export function SearchModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.98 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="bg-white dark:bg-[#242424] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[26px] border-0 sm:border border-[#E6E2D8] dark:border-[#383838] shadow-2xl flex flex-col overflow-hidden"
+            className="bg-[var(--bg-color)] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[26px] border-0 sm:border border-[#E6E2D8] dark:border-[#383838] shadow-2xl flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Search Bar */}
-            <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-[#E6E2D8] dark:border-[#383838] flex items-center gap-2.5 shrink-0 bg-white dark:bg-[#242424]">
+            <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-[#E6E2D8] dark:border-[#383838] flex items-center gap-2.5 shrink-0 bg-[var(--bg-color)]">
               <div className="flex-1 relative flex items-center bg-[#F7F5F0] dark:bg-[#2D2D2D] rounded-full border border-[#E6E2D8] dark:border-[#383838] px-3.5 h-[44px] transition-all focus-within:border-[#1C1917] dark:focus-within:border-white shadow-none">
                 <Search size={18} className="text-[#8C867C] dark:text-[#71717A] shrink-0 mr-2.5" />
                 <input 

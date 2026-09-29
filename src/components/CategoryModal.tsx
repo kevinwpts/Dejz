@@ -226,6 +226,7 @@ export function CategoryModal({
           onClose={() => setShowIconPicker(false)}
           selectedIcon={icon}
           onSelectIcon={(newIcon) => setIcon(newIcon)}
+          categoryName={name}
           t={t}
         />
       </motion.div>

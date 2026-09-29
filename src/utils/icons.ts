@@ -1303,7 +1303,7 @@ export const ALL_ICONS_LIST: IconItem[] = [
   { key: 'wheat', name: 'Spannmål / Bageri', category: 'food', keywords: ['mjöl', 'bröd', 'bageri', 'spannmål', 'frukost'] },
 
   // Transport & Fordon
-  { key: 'car', name: 'Bil', category: 'transport', keywords: ['bil', 'fordon', 'körning', 'car', 'parkering', 'volvo', 'leasing'] },
+  { key: 'car', name: 'Bil', category: 'transport', keywords: ['bil', 'bilar', 'fordon', 'körning', 'car', 'parkering', 'volvo', 'leasing', 'bensin', 'bränsle', 'bilresa'] },
   { key: 'carfront', name: 'Bil framifrån', category: 'transport', keywords: ['bil', 'fordon', 'garage', 'parkering', 'tull', 'biltull'] },
   { key: 'cartaxifront', name: 'Taxi / Skjuts', category: 'transport', keywords: ['taxi', 'uber', 'bolt', 'skjuts', 'transport'] },
   { key: 'bus', name: 'Buss / Pendel', category: 'transport', keywords: ['buss', 'sl', 'västtrafik', 'skånetrafiken', 'pendel', 'kollektivtrafik'] },
@@ -1400,20 +1400,20 @@ export const ALL_ICONS_LIST: IconItem[] = [
   { key: 'medal', name: 'Medalj / Lopp', category: 'sports', keywords: ['medalj', 'maraton', 'löptävling', 'prestation', 'midnattsloppet'] },
   { key: 'award', name: 'Pris / Utmärkelse', category: 'sports', keywords: ['pris', 'utmärkelse', 'stipendium'] },
   { key: 'crown', name: 'VIP / Guld', category: 'sports', keywords: ['krona', 'vip', 'lyx', 'premium', 'vinnare'] },
-  { key: 'target', name: 'Mål / Fokus', category: 'sports', keywords: ['mål', 'dart', 'skytte', 'fokus', 'träff', 'sport'] },
+  { key: 'target', name: 'Mål / Fokus', category: 'sports', keywords: ['boll', 'bollar', 'fotboll', 'fotbollar', 'basketboll', 'tennisboll', 'volleyboll', 'rugbyboll', 'biljardboll', 'bowlingboll', 'sportboll', 'klot', 'mål', 'dart', 'skytte', 'fokus', 'träff', 'sport'] },
 
-  // Hälsa & Vård
-  { key: 'health', name: 'Läkare / Vård', category: 'health', keywords: ['läkare', 'vårdcentral', 'doktor', 'sjukvård', 'hälsa', 'kry', 'doktor.se'] },
+   // Hälsa & Vård
+  { key: 'health', name: 'Läkare / Vård', category: 'health', keywords: ['läkare', 'vårdcentral', 'doktor', 'sjukvård', 'hälsa', 'kry', 'doktor.se', 'medicin'] },
   { key: 'heart', name: 'Hälsa / Hjärtat', category: 'health', keywords: ['hälsa', 'hjärta', 'kärlek', 'välgörenhet', 'apotekhjärtat'] },
   { key: 'heartpulse', name: 'Puls & Kondition', category: 'health', keywords: ['puls', 'kondition', 'hälsa', 'kontroll', 'blodtryck'] },
   { key: 'activity', name: 'Aktivitet / Hälsa', category: 'health', keywords: ['aktivitet', 'steg', 'hälsa', 'mätning', 'apple health'] },
-  { key: 'cross', name: 'Apotek / Medicin', category: 'health', keywords: ['apotek', 'medicin', 'apotea', 'kronans', 'recept', 'hjärtat'] },
-  { key: 'pill', name: 'Piller / Vitaminer', category: 'health', keywords: ['tabletter', 'piller', 'vitaminer', 'tillskott', 'kosttillskott'] },
-  { key: 'syringe', name: 'Vaccin / Provtagning', category: 'health', keywords: ['vaccin', 'spruta', 'blodprov', 'behandling', 'tbe'] },
+  { key: 'cross', name: 'Apotek / Medicin', category: 'health', keywords: ['apotek', 'medicin', 'apotea', 'kronans', 'recept', 'hjärtat', 'nässpray', 'spray', 'förkylning', 'näsa'] },
+  { key: 'pill', name: 'Piller / Vitaminer', category: 'health', keywords: ['tabletter', 'piller', 'vitaminer', 'tillskott', 'kosttillskott', 'medicin', 'nässpray', 'förkylning'] },
+  { key: 'syringe', name: 'Vaccin / Provtagning', category: 'health', keywords: ['vaccin', 'spruta', 'blodprov', 'behandling', 'tbe', 'medicin'] },
   { key: 'hearthandshake', name: 'Omsorg / Terapi', category: 'health', keywords: ['omsorg', 'stöd', 'terapi', 'psykolog', 'hjälp', 'kurator'] },
   { key: 'shield', name: 'Försäkring / Skydd', category: 'health', keywords: ['försäkring', 'if', 'trygghansa', 'länsförsäkringar', 'folksam', 'skydd'] },
   { key: 'umbrella', name: 'Trygghet / Skyddsnät', category: 'health', keywords: ['paraply', 'väder', 'trygghet', 'skydd', 'a-kassa'] },
-  { key: 'thermometer', name: 'Feber / Kontroll', category: 'health', keywords: ['feber', 'termometer', 'sjuk', 'vård'] },
+  { key: 'thermometer', name: 'Feber / Kontroll', category: 'health', keywords: ['feber', 'termometer', 'sjuk', 'vård', 'förkylning', 'nässpray'] },
 
   // Ekonomi & Sparande
   { key: 'wallet', name: 'Plånbok / Fickpengar', category: 'finance', keywords: ['plånbok', 'fickpengar', 'kontanter', 'budget'] },
@@ -1588,6 +1588,67 @@ export const suggestIcon = (name: string): string => {
   if (n.includes('frisör') || n.includes('klipp')) return 'scissors';
   
   return 'receipt'; // Default
+};
+
+export const calculateRelevanceScore = (item: IconItem, searchQuery: string): number => {
+  if (!searchQuery || !searchQuery.trim()) return 1;
+  const q = searchQuery.toLowerCase().trim();
+  const nameLower = item.name.toLowerCase();
+  const keyLower = item.key.toLowerCase();
+  const keywords = item.keywords.map(k => k.toLowerCase());
+
+  let score = 0;
+  const normalize = (str: string) => str.replace(/(ar|er|n|s|r)$/g, '');
+  const qNorm = normalize(q);
+
+  // 1. Exact matches
+  if (nameLower === q || keyLower === q || keywords.includes(q)) {
+    score += 150;
+  }
+
+  // 2. Starts with query
+  if (nameLower.startsWith(q) || keyLower.startsWith(q) || keywords.some(k => k.startsWith(q))) {
+    score += 90;
+  }
+
+  // 3. Inclusion
+  if (nameLower.includes(q) || keyLower.includes(q)) {
+    score += 60;
+  }
+
+  for (const kw of keywords) {
+    const kwNorm = normalize(kw);
+    if (kw.includes(q) || q.includes(kw) || kwNorm.includes(qNorm) || qNorm.includes(kwNorm)) {
+      score += 80;
+    }
+  }
+
+  // 4. Token matching
+  const tokens = q.split(/\s+/).filter(Boolean);
+  for (const token of tokens) {
+    const tokenNorm = normalize(token);
+    if (nameLower.includes(token) || keyLower.includes(token)) {
+      score += 30;
+    }
+    for (const kw of keywords) {
+      if (kw.includes(token) || normalize(kw).includes(tokenNorm) || tokenNorm.includes(normalize(kw))) {
+        score += 40;
+      }
+    }
+  }
+
+  return score;
+};
+
+export const getSuggestedIconsForQuery = (query: string, limit = 6): IconItem[] => {
+  if (!query || !query.trim()) return [];
+  const scored = ALL_ICONS_LIST.map(item => ({
+    item,
+    score: calculateRelevanceScore(item, query)
+  }));
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.filter(s => s.score > 0).slice(0, limit).map(s => s.item);
 };
 
 export const suggestCategory = (

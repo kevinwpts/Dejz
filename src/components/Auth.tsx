@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { createFreshTestAccount } from '../utils/demoData';
-import { Mail, Lock, ChevronLeft, Sparkles, KeyRound, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, ChevronLeft, Sparkles, CheckCircle2 } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { DejzLogo } from './DejzLogo';
 import { Button, Input, IconButton, SegmentedControl, Divider } from './ui';
@@ -88,6 +88,14 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
       return;
     }
 
+    if (isRegistering && password.length < 6) {
+      const message = 'Lösenordet måste vara minst 6 tecken långt.';
+      setError(message);
+      onShowToast(message, 'error');
+      setLoading(false);
+      return;
+    }
+
     try {
       if (isRegistering) {
         const { data, error } = await supabase.auth.signUp({
@@ -137,7 +145,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
     }
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
+  const handleSocialLogin = async (provider: 'google') => {
     try {
       let inIframe = false;
       try {
@@ -151,10 +159,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
         options: {
           redirectTo: window.location.origin,
           skipBrowserRedirect: inIframe,
-          queryParams: provider === 'google' ? {
+          queryParams: {
             prompt: 'select_account',
             access_type: 'offline',
-          } : undefined,
+          },
         },
       });
       if (error) throw error;
@@ -171,8 +179,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
     } catch (err: any) {
       let msg = err.message || t('error');
       if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
-        const pName = provider === 'facebook' ? 'Facebook' : 'Google';
-        msg = `${pName}-inloggning är inte aktiverad i din Supabase-instrumentpanel ännu.`;
+        msg = `Google-inloggning är inte aktiverad i din Supabase-instrumentpanel ännu.`;
       }
       setError(msg);
       onShowToast(msg, 'error');
@@ -181,11 +188,6 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
 
   return (
     <div className="min-h-dvh flex items-center justify-center p-4 sm:p-6 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))]">
-      {/* Subtle Ambient Glow */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-40 dark:opacity-100">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[340px] sm:w-[480px] h-[340px] sm:h-[480px] bg-gradient-to-tr from-black/[0.03] via-black/[0.015] to-transparent dark:from-white/[0.04] dark:via-white/[0.02] blur-[120px] rounded-full pointer-events-none" />
-      </div>
-
       <div
         className="w-full max-w-[420px] bg-[var(--surface-color)] p-6 sm:p-8 rounded-[28px] border border-[var(--border-color)] shadow-xs relative z-10"
       >
@@ -266,10 +268,6 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
               </div>
 
-              <div className="w-12 h-12 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[16px] flex items-center justify-center mb-3">
-                <KeyRound size={22} />
-              </div>
-
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1 text-center">
                 {t('forgotPasswordTitle' as any)}
               </h1>
@@ -289,29 +287,15 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 error={error}
               />
 
-              <div className="space-y-2 pt-1">
+              <div className="pt-1">
                 <Button
                   type="submit"
                   loading={loading}
                   variant="primary"
                   fullWidth
                   size="lg"
-                  icon={<KeyRound size={16} />}
                 >
                   {t('sendResetLink' as any)}
-                </Button>
-
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setIsForgotPassword(false);
-                    setError(null);
-                  }}
-                  variant="ghost"
-                  fullWidth
-                  size="md"
-                >
-                  {t('cancelAndLogin' as any)}
                 </Button>
               </div>
             </form>
@@ -451,20 +435,6 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 }
               >
                 {t('continueWithGoogle' as any)}
-              </Button>
-
-              <Button 
-                type="button"
-                onClick={() => handleSocialLogin('facebook')}
-                variant="secondary"
-                fullWidth
-                icon={
-                  <svg className="w-4 h-4 shrink-0 text-[#1877F2]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                }
-              >
-                {t('continueWithFacebook' as any)}
               </Button>
             </div>
 
