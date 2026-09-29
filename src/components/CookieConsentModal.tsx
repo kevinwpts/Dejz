@@ -44,23 +44,23 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-[150] pointer-events-auto"
         >
-          <div className="bg-[var(--surface-color)]/95 backdrop-blur-2xl border border-[var(--border-color)] rounded-[24px] p-5 sm:p-6 shadow-2xl space-y-4 relative">
+          <div className="bg-white/95 dark:bg-[#242424]/95 backdrop-blur-2xl border border-[#E6E2D8] dark:border-[#383838] rounded-[24px] p-5 sm:p-6 shadow-2xl space-y-4 relative">
             <button
               onClick={handleDismiss}
-              className="absolute top-4 right-4 w-7 h-7 rounded-[8px] bg-[var(--surface-muted)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors flex items-center justify-center shrink-0"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-colors flex items-center justify-center shrink-0 cursor-pointer"
               title={t('close') || 'Stäng'}
             >
-              <X size={15} />
+              <X size={15} strokeWidth={2} />
             </button>
             <div className="flex items-start gap-3 pr-6">
-              <div className="w-10 h-10 rounded-[10px] bg-[var(--accent-color)]/10 flex items-center justify-center shrink-0 text-[var(--accent-color)]">
-                <Cookie size={22} />
+              <div className="w-10 h-10 rounded-[12px] bg-[#EFECE6] dark:bg-[#2D2D2D] flex items-center justify-center shrink-0 text-[#1C1917] dark:text-white">
+                <Cookie size={20} />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
+                <h3 className="text-base font-bold text-[#1C1917] dark:text-white tracking-tight">
                   {t('cookieConsentTitle')}
                 </h3>
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8] leading-relaxed">
                   {t('cookieConsentDesc')}{' '}
                   <button
                     onClick={onOpenPrivacyPolicy}

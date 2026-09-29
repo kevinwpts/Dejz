@@ -42,20 +42,20 @@ export function FeedbackModal({ onClose, onSubmit, t }: FeedbackModalProps) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--surface-color)] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border border-[var(--border-color)] relative shadow-2xl overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0"
+        className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] relative shadow-2xl overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-[var(--border-color)] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
         
         <div className="p-6 sm:p-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#1C1917] dark:text-white">
                 {t('sendFeedback')}
               </h2>
-              <p className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wide mt-1 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)]"></span>
+              <p className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] tracking-wide mt-1 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#05B862]"></span>
                 {t('helpUsImprove')}
               </p>
             </div>
@@ -70,14 +70,14 @@ export function FeedbackModal({ onClose, onSubmit, t }: FeedbackModalProps) {
 
           <div className="space-y-5">
             <div className="relative">
-              <div className="absolute left-4 top-4 text-[var(--text-secondary)] pointer-events-none">
+              <div className="absolute left-4 top-4 text-[#8C867C] dark:text-[#71717A] pointer-events-none">
                 <MessageSquare size={18} />
               </div>
               <textarea 
                 value={message} 
                 onChange={(e) => setMessage(e.target.value)} 
                 placeholder={t('feedbackPlaceholder')} 
-                className="w-full h-32 bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border border-[var(--border-color)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 rounded-[16px] px-4 py-3.5 pl-11 text-xs sm:text-sm font-medium text-[var(--text-primary)] shadow-xs outline-none transition-all placeholder-[var(--text-secondary)]/40 resize-none" 
+                className="w-full h-32 bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 py-3.5 pl-11 text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] resize-none" 
               />
             </div>
 

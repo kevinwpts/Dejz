@@ -5,6 +5,7 @@ import { AppNotification, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItemLogo } from './BudgetItem';
 import { formatAmount } from '../utils/format';
+import { EmptyState } from './EmptyState';
 
 interface NotificationsViewProps {
   notifications: AppNotification[];
@@ -33,19 +34,17 @@ export function NotificationsView({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.2 }}
-        className="py-16 px-4 text-center flex flex-col items-center justify-center space-y-3"
+        className="py-12 px-2"
       >
-        <div className="w-14 h-14 rounded-2xl bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center mb-4">
-          <Check size={28} strokeWidth={2.5} />
-        </div>
-        <h3 className="text-base font-semibold text-[var(--text-primary)] tracking-tight">
-          {t('noNotifications')}
-        </h3>
-        <p className="text-xs text-[var(--text-secondary)] max-w-xs leading-relaxed mt-1">
-          {config.language === 'en'
-            ? 'All your variable bills and expenses are up to date for this period.'
-            : 'Alla dina varierande räkningar och utgifter är uppdaterade för denna period.'}
-        </p>
+        <EmptyState
+          icon={Check}
+          title={t('noNotifications')}
+          description={
+            config.language === 'en'
+              ? 'All your variable bills and expenses are up to date for this period.'
+              : 'Alla dina varierande räkningar och utgifter är uppdaterade för denna period.'
+          }
+        />
       </motion.div>
     );
   }

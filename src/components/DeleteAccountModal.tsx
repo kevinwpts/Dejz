@@ -51,42 +51,42 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm, t, isSocialUser
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="bg-[var(--surface-solid)] w-full max-w-sm rounded-xl p-8 relative border-[0.5px] border-[var(--border-color)] pt-[env(safe-area-inset-top)]"
+        className="bg-white dark:bg-[#242424] w-full max-w-sm rounded-[24px] p-6 sm:p-8 relative border border-[#E6E2D8] dark:border-[#383838] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="absolute right-4 top-4">
           <IconButton 
             icon={<X size={18} />}
             onClick={onClose}
-            variant="ghost"
+            variant="muted"
             size="sm"
             aria-label={t('close')}
           />
         </div>
 
         <div className="text-center">
-          <div className="w-16 h-16 bg-danger/10 text-danger rounded-[12px] flex items-center justify-center mx-auto mb-6">
-            <AlertCircle size={32} />
+          <div className="w-14 h-14 bg-rose-500/10 text-rose-500 rounded-[16px] flex items-center justify-center mx-auto mb-5 border border-rose-500/20 shadow-xs">
+            <AlertCircle size={28} />
           </div>
 
-          <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)] mb-2">
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#1C1917] dark:text-white mb-2">
             {t('deleteAccount')}
           </h2>
-          <p className="text-sm font-semibold text-[var(--text-secondary)] mb-6 leading-relaxed">
+          <p className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8] mb-5 leading-relaxed">
             {t('deleteAccountConfirm')}
           </p>
 
           <div className="space-y-4">
             {!isSocialUser && (
-              <div className="space-y-2 text-left">
-                <label className="text-xs font-semibold text-[var(--text-secondary)] ml-1">
+              <div className="space-y-1.5 text-left">
+                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
                   {t('password')}
                 </label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[var(--surface-muted)] border border-transparent rounded-[22px] px-6 py-4 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-danger/20 shadow-sm outline-none transition-all placeholder-[var(--text-secondary)]/30"
+                  className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
                   placeholder={t('password')}
                 />
               </div>

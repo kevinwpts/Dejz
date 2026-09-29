@@ -70,7 +70,7 @@ export function ResetPasswordModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[28px] p-6 sm:p-7 w-full max-w-md shadow-2xl relative"
+          className="bg-white dark:bg-[#242424] border border-[#E6E2D8] dark:border-[#383838] rounded-[24px] p-6 sm:p-7 w-full max-w-md shadow-2xl relative"
         >
           <div className="absolute top-5 right-5">
             <IconButton
@@ -84,14 +84,14 @@ export function ResetPasswordModal({
 
           {success ? (
             <div className="text-center py-6 space-y-4">
-              <div className="w-14 h-14 bg-neutral-800 dark:text-white/10 text-neutral-800 dark:text-white rounded-full flex items-center justify-center mx-auto border border-neutral-800 dark:text-white/20">
+              <div className="w-14 h-14 bg-[#E8F8F0] dark:bg-[#0D2E1F] text-[#05B862] rounded-full flex items-center justify-center mx-auto border border-[#05B862]/20">
                 <CheckCircle2 size={30} />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xl font-bold text-[var(--text-primary)]">
+                <h3 className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white">
                   Lösenord uppdaterat!
                 </h3>
-                <p className="text-xs text-[var(--text-secondary)]">
+                <p className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8]">
                   Ditt nya lösenord har sparats och du kan nu fortsätta använda appen.
                 </p>
               </div>
@@ -99,10 +99,10 @@ export function ResetPasswordModal({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1 text-left pr-8">
-                <div className="w-10 h-10 rounded-[14px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center mb-3">
+                <div className="w-10 h-10 rounded-[14px] bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white flex items-center justify-center mb-3">
                   <Lock size={20} />
                 </div>
-                <h3 className="text-xl font-bold text-[var(--text-primary)]">
+                <h3 className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white">
                   Välj ett nytt lösenord
                 </h3>
                 <p className="text-xs text-[var(--text-secondary)]">

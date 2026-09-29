@@ -156,33 +156,32 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
-        
         onClick={onClose}
-        className="absolute inset-0 bg-black/60"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
       <motion.div
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="relative w-full max-w-lg bg-[var(--surface-solid)] max-h-[90vh] rounded-t-[22px] rounded-b-none sm:rounded-[22px] border-t sm:border border-[var(--border-color)] overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-2xl"
+        className="relative w-full max-w-lg bg-white dark:bg-[#242424] max-h-[90vh] rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E6E2D8] dark:border-[#383838] overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-2xl"
       >
             {/* Header */}
-            <div className="p-6 border-b border-[var(--border-color)] flex items-center justify-between shrink-0">
+            <div className="p-6 border-b border-[#E6E2D8] dark:border-[#383838] flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[10px] bg-[var(--surface-color)] flex items-center justify-center border border-[var(--border-color)]">
+                <div className="w-10 h-10 rounded-[12px] bg-[#F7F5F0] dark:bg-[#2D2D2D] flex items-center justify-center border border-[#E6E2D8] dark:border-[#383838]">
                   {getIcon()}
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-[var(--text-primary)]">{getTitle()}</h2>
-                  <p className="text-[10px] font-semibold text-[var(--text-secondary)] tracking-wide opacity-50">Juridisk information</p>
+                  <h2 className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white">{getTitle()}</h2>
+                  <p className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">Juridisk information</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="w-9 h-9 rounded-[8px] bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)] transition-all"
+                className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer"
               >
-                <X size={18} />
+                <X size={16} strokeWidth={2} />
               </button>
             </div>
 

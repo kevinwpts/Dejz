@@ -19,30 +19,25 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     },
     ref
   ) => {
-    const baseStyles = 'overflow-hidden transition-all duration-200';
+    const baseStyles = 'overflow-hidden transition-all duration-150 border-none shadow-none';
 
     const variantStyles = {
-      default:
-        'bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] shadow-none',
-      hero:
-        'bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] border border-[var(--border-color)]/70 dark:border-white/[0.03] rounded-[20px] shadow-none',
-      nested:
-        'bg-[var(--surface-muted)]/80 dark:bg-white/[0.02] backdrop-blur-md border border-[var(--border-color)]/40 dark:border-white/[0.02] rounded-[14px]',
-      flat:
-        'bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-md border border-[var(--border-color)]/50 dark:border-white/[0.025] rounded-[18px]',
-      elevated:
-        'bg-[var(--surface-elevated)] dark:bg-white/[0.035] backdrop-blur-[18px] border border-[var(--border-color)]/70 dark:border-white/[0.035] rounded-[20px] shadow-none',
+      default: 'bg-white dark:bg-[#242424] rounded-[18px]',
+      hero: 'bg-white dark:bg-[#242424] rounded-[18px]',
+      nested: 'bg-[#EFECE6] dark:bg-[#2D2D2D] rounded-[14px]',
+      flat: 'bg-white dark:bg-[#242424] rounded-[18px]',
+      elevated: 'bg-white dark:bg-[#242424] rounded-[18px]',
     }[variant];
 
     const paddingStyles = {
       none: 'p-0',
       sm: 'p-3.5 sm:p-4',
-      md: 'p-5 sm:p-6',
-      lg: 'p-6 sm:p-8',
+      md: 'p-4 sm:p-5',
+      lg: 'p-6 sm:p-7',
     }[padding];
 
     const interactiveStyles = interactive
-      ? 'cursor-pointer hover:border-[var(--accent-color)]/30 active:scale-[0.99] select-none'
+      ? 'cursor-pointer hover:bg-[#EDE9DF] dark:hover:bg-[#333333] active:scale-[0.99] select-none'
       : '';
 
     return (

@@ -38,7 +38,7 @@ export function SegmentedControl<T extends string = string>({
 
   return (
     <div
-      className={`bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.025] flex items-center relative ${sizeStyles} ${
+      className={`bg-[#EFECE6] dark:bg-[#2D2D2D] flex items-center relative ${sizeStyles} ${
         fullWidth ? 'w-full' : 'inline-flex'
       } ${className}`}
     >
@@ -50,23 +50,27 @@ export function SegmentedControl<T extends string = string>({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`relative flex items-center justify-center gap-1.5 font-medium transition-all select-none cursor-pointer z-10 ${itemSizeStyles} ${
+            className={`relative flex items-center justify-center gap-1.5 font-bold transition-all select-none cursor-pointer z-10 ${itemSizeStyles} ${
               fullWidth ? 'flex-1' : ''
             } ${
               isSelected
-                ? 'bg-white dark:bg-white text-[#1C1917] dark:text-[#1C1917] border border-[#E6E2D8] dark:border-transparent shadow-xs font-semibold'
-                : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.05]'
+                ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
+                : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
             }`}
           >
-            <span className="relative z-10 flex items-center justify-center gap-1.5">
-              {option.icon && <span className="shrink-0">{option.icon}</span>}
-              <span>{option.label}</span>
-              {option.badge !== undefined && (
-                <span className="text-[10px] py-0.2 px-1.5 rounded-full bg-black/5 dark:bg-white/[0.06] text-[#6E6961] dark:text-[#A8A8A8]">
-                  {option.badge}
-                </span>
-              )}
-            </span>
+            {option.icon && <span className="shrink-0">{option.icon}</span>}
+            <span>{option.label}</span>
+            {option.badge !== undefined && (
+              <span
+                className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${
+                  isSelected
+                    ? 'bg-white/20 text-white dark:bg-black/10 dark:text-[#1C1917]'
+                    : 'bg-black/5 dark:bg-white/10 text-[#6E6961] dark:text-[#A8A8A8]'
+                }`}
+              >
+                {option.badge}
+              </span>
+            )}
           </button>
         );
       })}

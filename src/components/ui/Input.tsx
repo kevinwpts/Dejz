@@ -32,7 +32,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-[12px] sm:text-[13px] font-medium text-[#9CA6BC] flex items-center justify-between"
+            className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] flex items-center justify-between"
           >
             <span>{label}</span>
           </label>
@@ -40,7 +40,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative flex items-center w-full">
           {icon && (
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9CA6BC] pointer-events-none flex items-center justify-center">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] dark:text-[#71717A] pointer-events-none flex items-center justify-center">
               {icon}
             </div>
           )}
@@ -49,31 +49,33 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             disabled={disabled}
-            className={`w-full bg-white/[0.035] hover:bg-white/[0.05] focus:bg-white/[0.05] border ${
-              error ? 'border-rose-500/50 focus:border-rose-500' : 'border-white/[0.03] focus:border-[#1C1917] dark:border-white/40'
-            } rounded-[16px] ${icon ? 'pl-10' : 'pl-4'} ${
-              iconRight ? 'pr-10' : 'pr-4'
-            } py-3 font-medium text-xs sm:text-sm text-white outline-none transition-all placeholder-[#9CA6BC]/40 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+            className={`w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border ${
+              error
+                ? 'border-rose-500 focus:border-rose-500'
+                : 'border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white'
+            } rounded-[14px] ${icon ? 'pl-10' : 'px-4'} ${
+              iconRight ? 'pr-10' : 'px-4'
+            } font-semibold text-sm text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
             {...props}
           />
 
           {iconRight && (
-            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center">
+            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] dark:text-[#71717A] flex items-center justify-center">
               {iconRight}
             </div>
           )}
         </div>
 
         {error && (
-          <span className="text-[11px] font-medium text-rose-400 pl-1 flex items-center gap-1">
+          <p className="text-xs font-medium text-rose-600 dark:text-rose-400 mt-0.5">
             {error}
-          </span>
+          </p>
         )}
 
         {helperText && !error && (
-          <span className="text-[11px] font-normal text-[#9CA6BC] opacity-80 pl-1">
+          <p className="text-xs font-normal text-[#8C867C] dark:text-[#71717A] mt-0.5">
             {helperText}
-          </span>
+          </p>
         )}
       </div>
     );

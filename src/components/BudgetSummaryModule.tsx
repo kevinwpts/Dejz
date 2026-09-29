@@ -141,10 +141,10 @@ export function BudgetSummaryModule({
     <div className="space-y-6 font-sans">
       {/* SPENDERAT DENNA PERIOD */}
       <div className="py-2 text-center space-y-1 flex flex-col items-center">
-        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#9CA6BC] block select-none font-display flex items-center justify-center gap-2">
+        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#A8A8A8] block select-none font-display flex items-center justify-center gap-2">
           {stats.isPastPeriod ? 'SPENDERAT FÖR PERIODEN' : 'SPENDERAT DENNA PERIOD'}
           {stats.isPastPeriod && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] bg-black/5 dark:bg-white/[0.08] text-[#6E6961] dark:text-[#9CA6BC] font-medium uppercase tracking-wider">
+            <span className="px-2 py-0.5 rounded-full text-[10px] bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8] font-semibold uppercase tracking-wider">
               Avslutad
             </span>
           )}
@@ -153,7 +153,7 @@ export function BudgetSummaryModule({
           <span className="text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums text-[#1C1917] dark:text-white tracking-normal">
             {formatAmount(Math.round(totalSpent), config.language)}
           </span>
-          <span className="text-[19px] sm:text-[21px] font-semibold text-[#8C867C] dark:text-[#9CA6BC]">
+          <span className="text-[19px] sm:text-[21px] font-semibold text-[#8C867C] dark:text-[#A8A8A8]">
             {config.currency || "kr"}
           </span>
         </div>
@@ -162,7 +162,7 @@ export function BudgetSummaryModule({
       {/* Grid for other indicators */}
       <div className="grid grid-cols-3 gap-3 pt-1">
         {/* Snitt per dag */}
-        <div className="bg-[#FFFFFF] dark:bg-[#272727] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
+        <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
           <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
             {formatAmount(dailyAvg, config.language)} <span className="text-xs font-normal text-[#6E6961] dark:text-[#A8A8A8]">{config.currency || "kr"}</span>
           </div>
@@ -172,7 +172,7 @@ export function BudgetSummaryModule({
         </div>
 
         {/* Största kategori */}
-        <div className="bg-[#FFFFFF] dark:bg-[#272727] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
+        <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
           <div className="text-base sm:text-[17px] font-bold text-[#1C1917] dark:text-white truncate leading-tight capitalize">
             {largestCategory.name ? largestCategory.name : <span className="text-[#8C867C] dark:text-[#A8A8A8] font-normal">—</span>}
           </div>
@@ -182,7 +182,7 @@ export function BudgetSummaryModule({
         </div>
 
         {/* Budget använd */}
-        <div className="bg-[#FFFFFF] dark:bg-[#272727] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
+        <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-center text-left min-w-0">
           <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
             {budgetUsedPct}%
           </div>
@@ -197,7 +197,7 @@ export function BudgetSummaryModule({
         <div className="w-full h-1.5 bg-black/5 dark:bg-white/[0.06] rounded-full overflow-hidden">
           <div 
             className={`h-full rounded-full transition-all duration-700 ease-out ${
-              budgetUsedPct > 90 ? "bg-rose-500" : "bg-neutral-900 dark:text-white dark:bg-neutral-200 dark:text-white"
+              budgetUsedPct > 90 ? "bg-rose-500" : "bg-[#1C1917] dark:bg-white"
             }`} 
             style={{ width: `${Math.min(100, budgetUsedPct)}%` }}
           />

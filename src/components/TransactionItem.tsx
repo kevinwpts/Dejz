@@ -35,7 +35,7 @@ export function TransactionItem({
   onClick, 
   displayAmount,
   showAllCategories,
-  isGrouped,
+  isGrouped: _isGrouped,
   variant,
   hideCategoryBadge,
   showDate
@@ -79,26 +79,21 @@ export function TransactionItem({
 
   const finalAmount = displayAmount !== undefined ? displayAmount : transaction.amount;
   const amountColor = transaction.type === 'income' 
-    ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white' 
-    : 'text-[var(--text-primary)] dark:text-white';
+    ? 'text-[#1C1917] dark:text-white' 
+    : 'text-[#1C1917] dark:text-white';
 
   // Determine layout style classes with solid opaque surfaces (prevents background bleed-through)
   let containerClasses = "";
-  let paddingClasses = "px-[14px] sm:px-[16px] py-[12px] min-h-[66px]";
+  let paddingClasses = "px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px]";
   if (squared) {
-    containerClasses = "bg-[var(--surface-color)] dark:bg-[#252525] rounded-none shadow-none border-b border-[var(--border-color)]/60 dark:border-white/[0.04] last:border-none py-3 px-2";
+    containerClasses = "bg-white dark:bg-[#242424] rounded-none shadow-none border-b border-[#E6E2D8]/60 dark:border-white/[0.04] last:border-none py-3 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
-    containerClasses = "bg-[var(--surface-color)] dark:bg-[#242424] hover:bg-[var(--surface-muted)] dark:hover:bg-[#282828] rounded-none shadow-none border-none transition-colors";
+    containerClasses = "bg-transparent hover:bg-[#EDE9DF] dark:hover:bg-[#333333] rounded-none shadow-none border-none transition-colors";
   } else if (variant === 'nested') {
-    containerClasses = "bg-[var(--surface-muted)] dark:bg-[#272727] hover:bg-[var(--border-color)]/40 dark:hover:bg-[#2e2e2e] shadow-none border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px]";
+    containerClasses = "bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] shadow-none border-none rounded-[14px]";
   } else {
-    const isTransparentGrouped = isGrouped && !variant;
-    if (isTransparentGrouped) {
-      containerClasses = "bg-[var(--surface-color)] dark:bg-[#272727] hover:bg-[var(--surface-muted)] dark:hover:bg-[#2e2e2e] rounded-[18px] shadow-none border-none";
-    } else {
-      containerClasses = "bg-[var(--surface-color)] dark:bg-[#272727] hover:bg-[var(--surface-muted)] dark:hover:bg-[#2e2e2e] border border-[var(--border-color)] dark:border-white/[0.02] rounded-[18px] shadow-none";
-    }
+    containerClasses = "bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] rounded-[18px] shadow-none border-none";
   }
 
   // Neutral discreet category display (no pill background, no bright red/colored badge)
@@ -106,7 +101,7 @@ export function TransactionItem({
     const iconKey = getCategoryIconName(categoryName || '');
 
     return (
-      <div className="flex items-center gap-1.5 shrink-0 text-[var(--text-secondary)] dark:text-[#9CA6BC]">
+      <div className="flex items-center gap-1.5 shrink-0 text-[#6E6961] dark:text-[#A8A8A8]">
         {iconKey ? (
           <CategoryIcon 
             icon={iconKey} 

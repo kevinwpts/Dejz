@@ -431,7 +431,7 @@ export function BudgetView({
             Kategorier ({config.categories?.length || 0})
           </span>
           
-          <div className="overflow-hidden rounded-[18px] bg-[#FFFFFF] dark:bg-[#272727] shadow-none border-none divide-y divide-[#EDE9DF]/50 dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[18px] bg-white dark:bg-[#242424] shadow-none border-none divide-y divide-[#EDE9DF]/50 dark:divide-white/[0.04]">
             {sortedCategoriesForManage.map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
@@ -565,7 +565,7 @@ export function BudgetView({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-full h-8 px-1.5 rounded-lg bg-white dark:bg-white/[0.08] border border-neutral-800 dark:text-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                            className="w-full h-8 px-1.5 rounded-lg bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
                           />
                         ) : (
                           <button
@@ -639,35 +639,35 @@ export function BudgetView({
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
         <button
           onClick={() => setBudgetFilter('fixed')}
-          className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
             budgetFilter === 'fixed'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#A8A8A8] dark:hover:text-white dark:hover:bg-white/[0.06]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
+              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
           }`}
         >
-          <Calendar size={13} />
+          <Calendar size={13} strokeWidth={2} />
           {t('fixedExpenses' as TranslationKey) || 'Fasta utgifter'}
         </button>
         <button
           onClick={() => setBudgetFilter('income')}
-          className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
             budgetFilter === 'income'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#A8A8A8] dark:hover:text-white dark:hover:bg-white/[0.06]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
+              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
           }`}
         >
-          <ArrowDownLeft size={13} />
+          <ArrowDownLeft size={13} strokeWidth={2} />
           {t('incomes' as TranslationKey) || 'Inkomster'}
         </button>
         <button
           onClick={() => setBudgetFilter('savings')}
-          className={`flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
             budgetFilter === 'savings'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#A8A8A8] dark:hover:text-white dark:hover:bg-white/[0.06]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
+              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
           }`}
         >
-          <PiggyBank size={13} />
+          <PiggyBank size={13} strokeWidth={2} />
           {t('monthlySavings' as TranslationKey) || 'Sparande'}
         </button>
       </div>
@@ -724,14 +724,14 @@ export function BudgetView({
                     else if (incomeSortBy === 'name') setIncomeSortBy('amount');
                     else setIncomeSortBy('day');
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.07] border border-[#E6E2D8] dark:border-white/[0.035] text-xs text-[#1C1917] dark:text-white transition-all cursor-pointer select-none active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] border-none text-xs text-[#1C1917] dark:text-white transition-all cursor-pointer select-none active:scale-95"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white shrink-0" />
-                  <span className="text-[#6E6961] dark:text-[#A8A8A8]/80">
+                  <span className="text-[#6E6961] dark:text-[#A8A8A8]">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
-                  <span className="font-semibold text-[#1C1917] dark:text-white">
+                  <span className="font-bold text-[#1C1917] dark:text-white">
                     {incomeSortBy === 'day' 
                       ? (config.language === 'en' ? 'Day' : 'Ankomstdag')
                       : incomeSortBy === 'name'
@@ -742,9 +742,9 @@ export function BudgetView({
                 </button>
                 <button 
                   onClick={onAddIncome} 
-                  className="text-xs font-medium text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white hover:text-[#1C1917] dark:text-white 800 dark:hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
+                  className="h-8 px-3.5 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] text-xs font-bold text-[#1C1917] dark:text-white transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95"
                 >
-                  <Plus size={14} strokeWidth={2} />
+                  <Plus size={13} strokeWidth={2.5} />
                   <span>{t('newIncome')}</span>
                 </button>
               </div>
@@ -789,14 +789,14 @@ export function BudgetView({
                     else if (fixedSortBy === 'name') setFixedSortBy('amount');
                     else setFixedSortBy('day');
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.07] border border-[#E6E2D8] dark:border-white/[0.035] text-xs text-[#1C1917] dark:text-white transition-all cursor-pointer select-none active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] border-none text-xs text-[#1C1917] dark:text-white transition-all cursor-pointer select-none active:scale-95"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white shrink-0" />
-                  <span className="text-[#6E6961] dark:text-[#A8A8A8]/80">
+                  <span className="text-[#6E6961] dark:text-[#A8A8A8]">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
-                  <span className="font-semibold text-[#1C1917] dark:text-white">
+                  <span className="font-bold text-[#1C1917] dark:text-white">
                     {fixedSortBy === 'day' 
                       ? (config.language === 'en' ? 'Day' : 'Dragningsdag')
                       : fixedSortBy === 'name'
@@ -808,9 +808,9 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddFixedExpense} 
-                  className="text-xs font-medium text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white hover:text-[#1C1917] dark:text-white 800 dark:hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
+                  className="h-8 px-3.5 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] text-xs font-bold text-[#1C1917] dark:text-white transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95"
                 >
-                  <Plus size={14} strokeWidth={2} />
+                  <Plus size={13} strokeWidth={2.5} />
                   <span>{t('newFixedExpense')}</span>
                 </button>
               </div>
@@ -874,13 +874,13 @@ export function BudgetView({
                     else setSavingSortBy('day');
                   }}
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.07] border border-[#E6E2D8] dark:border-white/[0.035] text-xs text-[#1C1917] dark:text-white transition-all cursor-pointer select-none active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] border-none text-xs text-[#1C1917] dark:text-white transition-all cursor-pointer select-none active:scale-95"
                 >
                   <ArrowUpDown size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white shrink-0" />
-                  <span className="text-[#6E6961] dark:text-[#A8A8A8]/80">
+                  <span className="text-[#6E6961] dark:text-[#A8A8A8]">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
-                  <span className="font-semibold text-[#1C1917] dark:text-white">
+                  <span className="font-bold text-[#1C1917] dark:text-white">
                     {savingSortBy === 'day' 
                       ? (config.language === 'en' ? 'Day' : 'Dragningsdag') 
                       : savingSortBy === 'name' 
@@ -892,9 +892,9 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddMonthlySaving} 
-                  className="text-xs font-medium text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white hover:text-[#1C1917] dark:text-white 800 dark:hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 py-1 px-1"
+                  className="h-8 px-3.5 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] text-xs font-bold text-[#1C1917] dark:text-white transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95"
                 >
-                  <Plus size={14} strokeWidth={2} />
+                  <Plus size={13} strokeWidth={2.5} />
                   <span>{t('newMonthlySaving')}</span>
                 </button>
               </div>
@@ -920,7 +920,7 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddMonthlySaving} 
-                  className="w-full bg-[#FFFFFF] dark:bg-[#272727] p-4 sm:p-5 rounded-[18px] border-none shadow-none hover:bg-black/[0.02] dark:hover:bg-[#2e2e2e] transition-all flex items-center justify-between text-left group cursor-pointer"
+                  className="w-full bg-white dark:bg-[#242424] p-4 sm:p-5 rounded-[18px] border-none shadow-none hover:bg-[#EDE9DF] dark:hover:bg-[#333333] transition-all flex items-center justify-between text-left group cursor-pointer"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/[0.04] border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] shrink-0">

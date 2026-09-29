@@ -38,7 +38,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="text-[12px] font-semibold text-[var(--text-secondary)]"
+            className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]"
           >
             {label}
           </label>
@@ -46,7 +46,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 
         <div className="relative flex items-center w-full">
           {icon && (
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none flex items-center justify-center">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] dark:text-[#71717A] pointer-events-none flex items-center justify-center">
               {icon}
             </div>
           )}
@@ -54,35 +54,37 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
-            className={`w-full bg-[var(--surface-muted)] focus:bg-[var(--surface-color)] border ${
-              error ? 'border-danger/60 focus:border-danger' : 'border-[var(--border-color)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20'
-            } rounded-[16px] ${icon ? 'pl-10' : 'pl-4'} pr-10 py-3 font-semibold text-xs sm:text-sm text-[var(--text-primary)] outline-none transition-all cursor-pointer appearance-none ${className}`}
+            className={`w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border ${
+              error
+                ? 'border-rose-500 focus:border-rose-500'
+                : 'border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white'
+            } rounded-[14px] ${icon ? 'pl-10' : 'px-4'} pr-10 font-semibold text-sm text-[#1C1917] dark:text-white outline-none transition-all cursor-pointer appearance-none ${className}`}
             {...props}
           >
             {options
               ? options.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="bg-[var(--surface-color)] text-[var(--text-primary)]">
+                  <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
                 ))
               : children}
           </select>
 
-          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-secondary)]">
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] dark:text-[#71717A] pointer-events-none flex items-center justify-center">
             <ChevronDown size={16} />
           </div>
         </div>
 
         {error && (
-          <span className="text-[11px] font-semibold text-danger pl-1">
+          <p className="text-xs font-medium text-rose-600 dark:text-rose-400 mt-0.5">
             {error}
-          </span>
+          </p>
         )}
 
         {helperText && !error && (
-          <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-75 pl-1">
+          <p className="text-xs font-normal text-[#8C867C] dark:text-[#71717A] mt-0.5">
             {helperText}
-          </span>
+          </p>
         )}
       </div>
     );

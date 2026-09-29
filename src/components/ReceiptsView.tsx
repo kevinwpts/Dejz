@@ -58,20 +58,20 @@ export function ReceiptsView({
     >
       {/* Stats Summary Panel */}
       {receiptTransactions.length > 0 && (
-        <div className="overflow-hidden border border-[var(--border-color)]/60 rounded-2xl bg-[var(--surface-color)] p-5 shadow-sm space-y-2">
+        <div className="overflow-hidden rounded-[18px] bg-white dark:bg-[#242424] p-5 border-none shadow-none space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-70">
+            <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
               {config.language === 'sv' ? 'Sammanställning' : 'Summary'}
             </span>
-            <span className="text-[11px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full">
+            <span className="text-[11px] font-bold text-[#05B862] bg-[#05B862]/10 px-2 py-0.5 rounded-full">
               {filteredTransactions.length} {config.language === 'sv' ? 'stycken' : 'items'}
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[var(--text-primary)] tracking-tight font-amount tabular-nums">
+            <span className="text-3xl font-extrabold text-[#1C1917] dark:text-white tracking-tight font-amount tabular-nums">
               {formatAmount(totalAmount)}
             </span>
-            <span className="text-xs font-semibold text-[var(--text-secondary)] opacity-50">
+            <span className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8]">
               {config.language === 'sv' ? 'totalt belopp' : 'total amount'}
             </span>
           </div>
@@ -81,7 +81,7 @@ export function ReceiptsView({
       {/* Search Input */}
       {receiptTransactions.length > 0 && (
         <div className="relative">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[var(--text-secondary)] opacity-50">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#8C867C] dark:text-[#71717A]">
             <Search size={18} strokeWidth={1.5} />
           </div>
           <input
@@ -89,7 +89,7 @@ export function ReceiptsView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={config.language === 'sv' ? 'Sök köpställe, kategori eller belopp...' : 'Search merchant, category, or amount...'}
-            className="w-full pl-11 pr-4 py-3 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-2xl text-sm font-semibold placeholder-[var(--text-secondary)]/50 focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent shadow-sm transition-all text-[var(--text-primary)]"
+            className="w-full h-[44px] pl-11 pr-4 bg-white dark:bg-[#242424] border border-[#E6E2D8] dark:border-[#383838] rounded-full text-xs font-semibold placeholder-[#8C867C] dark:placeholder-[#71717A] focus:outline-none focus:border-[#1C1917] dark:focus:border-white shadow-none transition-all text-[#1C1917] dark:text-white"
             id="receipts_search_input"
           />
         </div>
@@ -108,7 +108,7 @@ export function ReceiptsView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={() => onViewTransaction(item)}
-                  className="group flex items-center justify-between p-4 bg-[var(--surface-color)] dark:bg-[#272727] rounded-[18px] shadow-none border-none hover:bg-black/[0.02] dark:hover:bg-[#2e2e2e] active:scale-[0.99] transition-all cursor-pointer"
+                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-[#242424] rounded-[18px] shadow-none border-none hover:bg-[#EDE9DF] dark:hover:bg-[#333333] active:scale-[0.99] transition-all cursor-pointer"
                   id={`receipt_item_${item.id}`}
                 >
                   <div className="flex items-center gap-4 min-w-0">

@@ -201,13 +201,13 @@ export function AnalysisView({
             setAnalysisFilter('all');
             setExpandedCategory(null);
           }}
-          className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
             analysisFilter === 'all'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
+              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
           }`}
         >
-          <LayoutGrid size={13} strokeWidth={1.75} className={analysisFilter === 'all' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <LayoutGrid size={13} strokeWidth={2} className={analysisFilter === 'all' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />
           <span>{t('all' as TranslationKey)}</span>
         </button>
         <button
@@ -215,13 +215,13 @@ export function AnalysisView({
             setAnalysisFilter('variable');
             setExpandedCategory(null);
           }}
-          className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
             analysisFilter === 'variable'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
+              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
           }`}
         >
-          <TrendingUp size={13} strokeWidth={1.75} className={analysisFilter === 'variable' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <TrendingUp size={13} strokeWidth={2} className={analysisFilter === 'variable' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />
           <span>{t('variableExpenses' as TranslationKey)}</span>
         </button>
         <button
@@ -229,13 +229,13 @@ export function AnalysisView({
             setAnalysisFilter('fixed');
             setExpandedCategory(null);
           }}
-          className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
             analysisFilter === 'fixed'
-              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs'
-              : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#9CA6BC] dark:hover:text-white dark:hover:bg-white/[0.06]'
+              ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none'
+              : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
           }`}
         >
-          <Calendar size={13} strokeWidth={1.75} className={analysisFilter === 'fixed' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#9CA6BC]'} />
+          <Calendar size={13} strokeWidth={2} className={analysisFilter === 'fixed' ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />
           <span>{t('fixedExpenses' as TranslationKey)}</span>
         </button>
       </div>
@@ -254,7 +254,7 @@ export function AnalysisView({
       />
 
       {/* Donut Chart Distribution Card */}
-      <div className="p-5 sm:p-6 rounded-[18px] border-none bg-[#FFFFFF] dark:bg-[#272727] shadow-none flex flex-col items-center relative overflow-hidden">
+      <div className="p-5 sm:p-6 rounded-[18px] border-none bg-white dark:bg-[#242424] shadow-none flex flex-col items-center relative overflow-hidden">
         <div className="flex items-center justify-between w-full mb-3 px-1">
           <span className="text-sm font-semibold text-[#1C1917] dark:text-white tracking-tight">{t('distribution')}</span>
           <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#A8A8A8] tabular-nums">
@@ -352,7 +352,7 @@ export function AnalysisView({
         </div>
 
         {categoryData.length > 0 ? (
-          <div className="bg-[#FFFFFF] dark:bg-[#272727] rounded-[18px] border-none shadow-none divide-y divide-[#EDE9DF]/50 dark:divide-white/[0.035] overflow-hidden">
+          <div className="bg-white dark:bg-[#242424] rounded-[18px] border-none shadow-none divide-y divide-[#EDE9DF]/50 dark:divide-white/[0.035] overflow-hidden">
             {categoryData.map((item: any, index) => {
               const isExpanded = expandedCategory === item.name;
               const iconName = item.icon || getCategoryIconName(item.name);
@@ -388,7 +388,7 @@ export function AnalysisView({
               return (
                 <div key={item.name} className="transition-colors">
                   <div 
-                    className="p-3.5 sm:p-4 min-h-[68px] flex flex-col justify-center group hover:bg-black/5 dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
+                    className="p-3.5 sm:p-4 min-h-[68px] flex flex-col justify-center group hover:bg-[#EDE9DF] dark:hover:bg-[#333333] transition-colors cursor-pointer"
                     onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
                   >
                     <div className="flex items-center justify-between gap-3 w-full">

@@ -77,12 +77,12 @@ export function CategoryModal({
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-[var(--bg-color)] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-[var(--border-color)] shadow-2xl"
+          className="bg-white dark:bg-[#242424] w-full max-w-sm rounded-[24px] overflow-hidden flex flex-col relative border border-[#E6E2D8] dark:border-[#383838] shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          <div className="flex items-center justify-between p-4 border-b border-[#E6E2D8] dark:border-[#383838]">
+            <h2 className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-white tracking-tight">
               {isEdit ? t('edit') : t('newCategory')}
             </h2>
             <div className="flex items-center gap-2">
@@ -130,8 +130,8 @@ export function CategoryModal({
 
             {/* Inputs */}
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[var(--text-secondary)] ml-1">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
                   Namn
                 </label>
                 <input 
@@ -148,7 +148,7 @@ export function CategoryModal({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSave();
                   }}
-                  className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[12px] px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs transition-all outline-none"
+                  className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
                 />
               </div>
 

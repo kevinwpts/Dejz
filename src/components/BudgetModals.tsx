@@ -330,14 +330,14 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border-t sm:border border-[var(--border-color)] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
+        className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E6E2D8] dark:border-[#383838] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-[var(--border-color)]/60 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
         {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[var(--border-color)]">
+        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[#E6E2D8] dark:border-[#383838]">
           <div className="flex justify-start">
             <button
               key="icon"
@@ -438,7 +438,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 {t('incomePayerLabel')}
               </label>
               {autoLogo && !manualSelectionThisSession && name !== originalName.current && (
-                <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full animate-pulse">
+                <span className="text-[10px] font-bold text-[#05B862] bg-[#E8F8F0] dark:bg-[#0D2E1F] px-2 py-0.5 rounded-full animate-pulse">
                   Auto
                 </span>
               )}
@@ -450,72 +450,72 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 placeholder={t('incomePayerPlaceholder')} 
-                className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40" 
+                className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white" 
               />
               {name && (
                 <button 
                   type="button"
                   onClick={() => setName('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1 cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] hover:text-[#1C1917] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
                 >
-                  <X size={18} strokeWidth={2} />
+                  <X size={16} strokeWidth={2} />
                 </button>
               )}
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">Egen notering</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">Egen notering</label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Skriv en notering..."
-              className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40 min-h-[100px] resize-none"
+              className="w-full bg-[#F7F5F0] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 py-3 border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white min-h-[90px] resize-none"
             />
           </div>
 
           {/* Arrival Day */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('arrivalDay')}</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('arrivalDay')}</label>
             <div className="relative">
               <select
                 value={deductionDay}
                 onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                   <option key={day} value={day}>{day}</option>
                 ))}
               </select>
-              <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+              <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#8C867C] dark:text-[#71717A]" />
             </div>
           </div>
 
-          <div className={`grid gap-4 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            <div className="space-y-2">
-              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('frequency')}</label>
+          <div className={`grid gap-3 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('frequency')}</label>
               <div className="relative">
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
                     <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
                   ))}
                 </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#8C867C] dark:text-[#71717A]" />
               </div>
             </div>
 
             {frequency !== Frequency.MONTHLY && (
-              <div className="space-y-2">
-                <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('startMonthLabel')}</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('startMonthLabel')}</label>
                 <div className="relative">
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                    className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
@@ -1046,14 +1046,14 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border-t sm:border border-[var(--border-color)] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
+        className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E6E2D8] dark:border-[#383838] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-[var(--border-color)]/60 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
         {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[var(--border-color)]">
+        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[#E6E2D8] dark:border-[#383838]">
           <div className="flex justify-start">
             <button
               key="icon"
@@ -1154,7 +1154,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 {t('fixedExpenseLabel')}
               </label>
               {autoLogo && !manualSelectionThisSession && name !== originalName.current && (
-                <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full animate-pulse">
+                <span className="text-[10px] font-bold text-[#05B862] bg-[#E8F8F0] dark:bg-[#0D2E1F] px-2 py-0.5 rounded-full animate-pulse">
                   Auto
                 </span>
               )}
@@ -1166,54 +1166,54 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 placeholder={t('fixedExpensePlaceholder')} 
-                className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40" 
+                className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white" 
               />
               {name && (
                 <button 
                   type="button"
                   onClick={() => setName('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1 cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] hover:text-[#1C1917] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
                 >
-                  <X size={18} strokeWidth={2} />
+                  <X size={16} strokeWidth={2} />
                 </button>
               )}
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">Egen notering</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">Egen notering</label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Skriv en notering..."
-              className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40 min-h-[100px] resize-none"
+              className="w-full bg-[#F7F5F0] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 py-3 border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white min-h-[90px] resize-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('deductionDay')}</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('deductionDay')}</label>
               <div className="relative">
                 <select
                   value={deductionDay}
                   onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                     <option key={day} value={day}>{day}</option>
                   ))}
                 </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#8C867C] dark:text-[#71717A]" />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('paymentMethod')}</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('paymentMethod')}</label>
               <div className="relative">
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(paymentMethods || []).map((method, idx) => {
                     const methodName = typeof method === 'string' ? method : method?.name || '';
@@ -1222,36 +1222,36 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     );
                   })}
                 </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#8C867C] dark:text-[#71717A]" />
               </div>
             </div>
           </div>
 
-          <div className={`grid gap-4 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            <div className="space-y-2">
-              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('frequency')}</label>
+          <div className={`grid gap-3 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('frequency')}</label>
               <div className="relative">
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
                     <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
                   ))}
                 </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#8C867C] dark:text-[#71717A]" />
               </div>
             </div>
 
             {frequency !== Frequency.MONTHLY && (
-              <div className="space-y-2">
-                <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('startMonthLabel')}</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('startMonthLabel')}</label>
                 <div className="relative">
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                    className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
@@ -1718,14 +1718,14 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border-t sm:border border-[var(--border-color)] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
+        className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E6E2D8] dark:border-[#383838] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-[var(--border-color)]/60 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
         {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[var(--border-color)]">
+        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[#E6E2D8] dark:border-[#383838]">
           <div className="flex justify-start">
             <button
               key="icon"
@@ -1838,62 +1838,62 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 placeholder={t('savingsGoalPlaceholder')} 
-                className="w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40" 
+                className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white" 
               />
               {name && (
                 <button 
                   type="button"
                   onClick={() => setName('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1 cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] hover:text-[#1C1917] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
                 >
-                  <X size={18} strokeWidth={2} />
+                  <X size={16} strokeWidth={2} />
                 </button>
               )}
             </div>
           </div>
 
           {/* Deduction Day */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('deductionDay') || 'Dragningsdag'}</label>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('deductionDay') || 'Dragningsdag'}</label>
             <div className="relative">
               <select
                 value={deductionDay}
                 onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                   <option key={day} value={day}>{day}</option>
                 ))}
               </select>
-              <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+              <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#8C867C] dark:text-[#71717A]" />
             </div>
           </div>
 
-          <div className={`grid gap-4 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            <div className="space-y-2">
-              <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('frequency')}</label>
+          <div className={`grid gap-3 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('frequency')}</label>
               <div className="relative">
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
                     <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
                   ))}
                 </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#8C867C] dark:text-[#71717A]" />
               </div>
             </div>
 
             {frequency !== Frequency.MONTHLY && (
-              <div className="space-y-2">
-                <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1 block">{t('startMonthLabel')}</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('startMonthLabel')}</label>
                 <div className="relative">
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                    className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
@@ -2075,11 +2075,11 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-[var(--bg-color)] w-full max-w-sm rounded-[22px] overflow-hidden flex flex-col relative border border-[var(--border-color)] shadow-2xl"
+          className="bg-white dark:bg-[#242424] w-full max-w-sm rounded-[24px] overflow-hidden flex flex-col relative border border-[#E6E2D8] dark:border-[#383838] shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">
+          <div className="flex items-center justify-between p-4 border-b border-[#E6E2D8] dark:border-[#383838]">
+            <h2 className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-white tracking-tight">
               {initialName ? t('edit') : 'Ny betalningsmetod'}
             </h2>
             <div className="flex items-center gap-2">

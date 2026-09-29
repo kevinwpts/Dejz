@@ -7,6 +7,7 @@ import {
   ALL_ICONS_LIST,
   resolveLucideIcon
 } from '../utils/icons';
+import { EmptyState } from './EmptyState';
 
 interface IconPickerModalProps {
   isOpen: boolean;
@@ -71,24 +72,24 @@ export function IconPickerModal({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.94, opacity: 0, y: 16 }}
           transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-          className="bg-[var(--bg-secondary)] w-full max-w-lg rounded-[28px] border border-[var(--border-color)] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+          className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[var(--border-color)] shrink-0">
+          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[#E6E2D8] dark:border-[#383838] shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-2xl bg-accent/15 text-accent flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-2xl bg-[#05B862]/15 text-[#05B862] flex items-center justify-center shrink-0">
                 <Sparkles size={18} />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-[var(--text-primary)] tracking-tight">
+                <h3 className="text-base font-bold text-[#1C1917] dark:text-white tracking-tight">
                   Välj ikon
                 </h3>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="w-9 h-9 flex items-center justify-center bg-[var(--surface-muted)] hover:bg-[var(--border-color)] rounded-full transition-colors text-[var(--text-secondary)] cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] rounded-full transition-colors text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white cursor-pointer"
               aria-label="Stäng"
             >
               <X size={18} strokeWidth={2} />
@@ -100,19 +101,19 @@ export function IconPickerModal({
             <div className="relative">
               <Search 
                 size={16} 
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none opacity-60" 
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] dark:text-[#71717A] pointer-events-none" 
               />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Sök bland över 200+ stilrena ikoner..."
-                className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] focus:border-accent/40 rounded-[14px] pl-9.5 pr-9 py-2.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50 focus:outline-none transition-all"
+                className="w-full h-[44px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white rounded-[14px] pl-9.5 pr-9 text-xs font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] focus:outline-none transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-[4px] bg-[var(--surface-muted)] hover:bg-[var(--surface-hover)] flex items-center justify-center text-xs text-[var(--text-secondary)] transition-colors cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#EFECE6] dark:bg-[#383838] hover:bg-[#EDE9DF] dark:hover:bg-[#444444] flex items-center justify-center text-xs text-[#6E6961] dark:text-[#A8A8A8] transition-colors cursor-pointer"
                 >
                   <X size={12} />
                 </button>
@@ -158,14 +159,12 @@ export function IconPickerModal({
           {/* Icons Grid */}
           <div className="flex-1 overflow-y-auto px-4 py-2 custom-scrollbar">
             {filteredIcons.length === 0 ? (
-              <div className="py-14 text-center space-y-2">
-                <p className="text-sm font-medium text-[var(--text-primary)]">
-                  Inga ikoner hittades
-                </p>
-                <p className="text-xs text-[var(--text-secondary)] opacity-70">
-                  Prova söka på något annat, t.ex. &quot;fika&quot;, &quot;bil&quot;, &quot;lön&quot;, &quot;gym&quot;
-                </p>
-              </div>
+              <EmptyState
+                icon={Search}
+                title="Inga ikoner hittades"
+                description='Prova söka på något annat, t.ex. "fika", "bil", "lön", "gym"'
+                className="my-4"
+              />
             ) : (
               <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 sm:gap-2.5 pb-6">
                 {filteredIcons.map(item => {

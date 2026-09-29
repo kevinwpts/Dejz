@@ -156,18 +156,18 @@ export function AppHeader({
         <div className="flex-1" />
   
         {/* Right Actions: Notifications + Search Icon (between notifications and dejzi) + Dejzi Coach */}
-        <div className="flex items-center gap-0.5 sm:gap-1 shrink-0 z-10">
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 z-10">
           {/* 1. Notisikonen */}
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-[var(--text-primary)] hover:bg-[#EDE9DF] dark:hover:bg-white/10"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-[#1C1917] dark:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]"
               aria-label="Notiser"
               title="Notiser"
             >
               <Bell
-                size={20}
-                strokeWidth={2.2}
+                size={19}
+                strokeWidth={2}
               />
               {notificationCount > 0 && (
                 <span className="absolute top-1 right-1 min-w-[15px] h-[15px] px-0.5 rounded-full bg-rose-500 text-white text-[8.5px] font-bold flex items-center justify-center leading-none shadow-xs">
@@ -187,11 +187,11 @@ export function AppHeader({
                 onNavigate("search");
               }
             }}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[var(--text-primary)] hover:bg-[#EDE9DF] dark:hover:bg-white/10"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[#1C1917] dark:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]"
             aria-label={language === 'en' ? 'Search' : 'Sök'}
             title={language === 'en' ? 'Search' : 'Sök'}
           >
-            <Search size={19} strokeWidth={2.2} />
+            <Search size={19} strokeWidth={2} />
           </button>
 
           {/* 3. Dejzi */}
@@ -199,7 +199,7 @@ export function AppHeader({
             <button
               type="button"
               onClick={onOpenDejzi}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 hover:bg-[#EDE9DF] dark:hover:bg-white/[0.06]"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 hover:bg-[#EDE9DF] dark:hover:bg-[#333333]"
               aria-label="Dejzi sammanfattning"
               title="Dejzi sammanfattning"
             >

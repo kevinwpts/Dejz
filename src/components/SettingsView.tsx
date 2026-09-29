@@ -279,13 +279,13 @@ export function SettingsView({
 
           <button 
             onClick={() => handleUpdateWeekendHandling(!config.paydayBeforeWeekend)}
-            className={`w-10 h-6 rounded-full relative transition-colors duration-200 flex-shrink-0 outline-none ${
-              config.paydayBeforeWeekend ? 'bg-[var(--accent-color)] dark:bg-white' : 'bg-[var(--surface-muted)]'
+            className={`w-10 h-6 rounded-full relative transition-colors duration-200 flex-shrink-0 outline-none cursor-pointer ${
+              config.paydayBeforeWeekend ? 'bg-[#05B862]' : 'bg-[#EFECE6] dark:bg-[#2D2D2D]'
             }`}
           >
             <motion.div 
               layout
-              className="w-4 h-4 bg-white dark:bg-black rounded-full absolute top-1 left-1" 
+              className="w-4 h-4 bg-white rounded-full absolute top-1 left-1 shadow-xs" 
               animate={{ x: config.paydayBeforeWeekend ? 16 : 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             />
@@ -349,21 +349,21 @@ export function SettingsView({
         <div className="mt-4">
           <button
             onClick={() => handleAddCategory(type)}
-            className="w-full flex items-center justify-center gap-2 p-3.5 bg-[var(--accent-color)]/10 rounded-xl text-[var(--accent-color)] font-semibold text-xs hover:bg-[var(--accent-color)]/15 transition-all active:scale-[0.98] h-11"
+            className="w-full flex items-center justify-center gap-2 h-[48px] bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] rounded-[14px] font-bold text-sm hover:opacity-90 transition-all active:scale-[0.98] cursor-pointer"
           >
-            <Plus size={15} />
+            <Plus size={16} strokeWidth={2.5} />
             {t('newCategory')}
           </button>
         </div>
 
         {!isDefault && (
-          <div className="mt-6 pt-6">
+          <div className="mt-4">
             <button
               onClick={() => setResetConfirmType(type)}
-              className="w-full flex items-center justify-center gap-2 p-3.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-color)] transition-all active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 h-[44px] rounded-[14px] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#EFECE6] dark:hover:bg-[#2D2D2D] hover:text-[#1C1917] dark:hover:text-white transition-all active:scale-[0.98] cursor-pointer"
             >
-              <RotateCcw size={14} />
-              <span className="text-xs font-semibold tracking-wide">{t('resetToDefaultCategories')}</span>
+              <RotateCcw size={14} strokeWidth={2} />
+              <span className="text-xs font-bold tracking-wide">{t('resetToDefaultCategories')}</span>
             </button>
           </div>
         )}
@@ -374,23 +374,23 @@ export function SettingsView({
   const renderCategoriesSettings = () => {
     return (
       <div className="space-y-6 w-full py-2">
-        <div className="flex p-1 bg-[var(--bg-color)] rounded-2xl border-[0.5px] border-[var(--border-color)]">
+        <div className="flex p-1 bg-[#EFECE6] dark:bg-[#2D2D2D] rounded-[14px]">
           <button
             onClick={() => setCategoryTab('expense')}
-            className={`flex-1 py-2.5 text-xs font-semibold rounded-xl transition-all ${
+            className={`flex-1 py-2 text-xs font-bold rounded-[10px] transition-all cursor-pointer ${
               categoryTab === 'expense'
-                ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] '
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
+                : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
             }`}
           >
             {t('expenses')}
           </button>
           <button
             onClick={() => setCategoryTab('income')}
-            className={`flex-1 py-2.5 text-xs font-semibold rounded-xl transition-all ${
+            className={`flex-1 py-2 text-xs font-bold rounded-[10px] transition-all cursor-pointer ${
               categoryTab === 'income'
-                ? 'bg-success text-[var(--text-on-accent)] '
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
+                : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
             }`}
           >
             {t('incomes')}
@@ -543,15 +543,15 @@ export function SettingsView({
               <button
                 key={opt.id}
                 onClick={() => handleSelectMode(opt.id)}
-                className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all active:scale-[0.98] cursor-pointer relative text-left ${
+                className={`w-full flex items-center justify-between p-4 rounded-[18px] transition-all active:scale-[0.98] cursor-pointer relative text-left border-none shadow-none ${
                   isSelected 
-                    ? 'bg-[var(--accent-color)]/10 border-[var(--accent-color)] text-[var(--text-primary)] shadow-xs' 
-                    : 'bg-[var(--surface-color)] border-[var(--border-color)]/50 text-[var(--text-primary)] hover:border-[var(--border-color)]'
+                    ? 'bg-white dark:bg-[#242424] ring-2 ring-[#05B862] text-[#1C1917] dark:text-white' 
+                    : 'bg-white dark:bg-[#242424] text-[#1C1917] dark:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
                 }`}
               >
                 <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                  <div className={`w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 transition-colors ${
-                    isSelected ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)]' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                    isSelected ? 'bg-[#05B862] text-white' : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8]'
                   }`}>
                     <Icon size={20} strokeWidth={2} />
                   </div>
@@ -559,21 +559,21 @@ export function SettingsView({
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold tracking-tight">{opt.label}</span>
                       {opt.id === 'system' && (
-                        <span className="text-[10px] font-semibold bg-[var(--accent-color)]/15 text-[var(--accent-color)] px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold bg-[#E8F8F0] dark:bg-[#0D2E1F] text-[#05B862] px-2 py-0.5 rounded-full">
                           Förvalt
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-[var(--text-secondary)] opacity-80 mt-0.5 truncate">{opt.desc}</p>
+                    <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8] font-medium mt-0.5 truncate">{opt.desc}</p>
                   </div>
                 </div>
                 <div className="relative flex items-center justify-center flex-shrink-0 ml-3">
                   {isSelected ? (
-                    <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
+                    <div className="w-5 h-5 rounded-full bg-[#05B862] flex items-center justify-center text-white shadow-xs">
                       <Check size={12} strokeWidth={3} />
                     </div>
                   ) : (
-                    <div className="w-5 h-5 rounded-full border border-[var(--border-color)]/70 opacity-60" />
+                    <div className="w-5 h-5 rounded-full border border-[#E6E2D8] dark:border-[#383838]" />
                   )}
                 </div>
               </button>

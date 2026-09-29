@@ -53,15 +53,15 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   return (
     <div 
       onClick={onClick}
-      className="px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px] flex items-center justify-between gap-3 group transition-colors bg-[#FFFFFF] dark:bg-[#272727] hover:bg-black/[0.02] dark:hover:bg-[#2e2e2e] rounded-[18px] shadow-none border-none cursor-pointer"
+      className="px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px] flex items-center justify-between gap-3 group transition-colors bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] rounded-[18px] shadow-none border-none cursor-pointer"
     >
       {/* Left side: Logo + Name + Category */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="relative flex-shrink-0">
           <BudgetItemLogo item={item} type={type} config={config} />
           {item.isVariable && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#1C1917] dark:bg-white border border-white dark:border-[#232323] rounded-full flex items-center justify-center z-10 select-none">
-              <span className="text-[8px] font-extrabold text-white leading-none flex items-center justify-center text-center -translate-y-[0.5px]">
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#1C1917] dark:bg-white border border-white dark:border-[#242424] rounded-full flex items-center justify-center z-10 select-none">
+              <span className="text-[8px] font-extrabold text-white dark:text-[#1C1917] leading-none flex items-center justify-center text-center -translate-y-[0.5px]">
                 {t('variableShort' as any)}
               </span>
             </div>
@@ -70,14 +70,14 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           <p 
-            className="text-[14px] sm:text-[14.5px] font-medium text-[#1C1917] dark:text-white leading-tight truncate tracking-tight group-hover:text-[#1C1917] dark:group-hover:text-white"
+            className="text-[14px] sm:text-[14.5px] font-semibold text-[#1C1917] dark:text-white leading-tight truncate tracking-tight"
             title={displayName}
           >
             {displayName}
           </p>
-          <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden text-[#6E6961] dark:text-[#9CA6BC]">
+          <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden text-[#6E6961] dark:text-[#A8A8A8]">
             {!isSaving && item.category && (
-              <div className="inline-flex items-center gap-1 shrink-0 max-w-full text-[#6E6961] dark:text-[#9CA6BC]">
+              <div className="inline-flex items-center gap-1 shrink-0 max-w-full text-[#6E6961] dark:text-[#A8A8A8]">
                 {(() => {
                   const searchCategory = (item.category || '').trim().toLowerCase();
                   const category = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
@@ -109,11 +109,11 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         <p className={`text-[14px] sm:text-[14.5px] font-semibold whitespace-nowrap tracking-tight ${type === 'income' ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white' : 'text-[#1C1917] dark:text-white'}`}>
           <span className="opacity-75 mr-0.5 text-[13px] font-semibold">{type === 'income' ? '+' : '−'}</span>
           <span className="font-amount tabular-nums font-semibold tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
-          <span className="text-[12px] font-normal text-[#8C867C] dark:text-[#9CA6BC] ml-1">{currency}</span>
+          <span className="text-[12px] font-normal text-[#8C867C] dark:text-[#A8A8A8] ml-1">{currency}</span>
         </p>
 
         {/* Right-aligned deduction metadata under amount */}
-        <div className="flex flex-col items-end gap-0.5 mt-0.5 justify-end max-w-full overflow-hidden text-[#8C867C] dark:text-[#9CA6BC]">
+        <div className="flex flex-col items-end gap-0.5 mt-0.5 justify-end max-w-full overflow-hidden text-[#8C867C] dark:text-[#A8A8A8]">
           {(dayString || paymentString) && (
             <span className="text-[11px] font-normal tracking-tight truncate">
               {dayString && <span>{dayString}</span>}

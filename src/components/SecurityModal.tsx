@@ -72,7 +72,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast, _userEmail }: Secu
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
@@ -80,25 +80,25 @@ export function SecurityModal({ isOpen, onClose, t, addToast, _userEmail }: Secu
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="bg-[var(--surface-solid)] w-full max-w-sm rounded-xl p-8 relative border-[0.5px] border-[var(--border-color)]"
+            className="bg-white dark:bg-[#242424] w-full max-w-sm rounded-[24px] p-6 sm:p-8 relative border border-[#E6E2D8] dark:border-[#383838] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
           <div className="absolute right-4 top-4">
             <IconButton 
               icon={<X size={18} />}
               onClick={onClose}
-              variant="ghost"
+              variant="muted"
               size="sm"
               aria-label={t('close')}
             />
           </div>
 
         <div className="text-center">
-          <div className="w-16 h-16 bg-accent/10 text-accent rounded-[12px] flex items-center justify-center mx-auto mb-6">
-            <Lock size={32} />
+          <div className="w-14 h-14 bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white rounded-[16px] flex items-center justify-center mx-auto mb-5 border border-[#E6E2D8] dark:border-[#383838]">
+            <Lock size={28} />
           </div>
 
-          <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)] mb-6">
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#1C1917] dark:text-white mb-5">
             {t('security')}
           </h2>
 

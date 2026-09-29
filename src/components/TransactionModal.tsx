@@ -632,14 +632,14 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border-t sm:border border-[var(--border-color)] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
+        className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E6E2D8] dark:border-[#383838] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-[var(--border-color)] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
         {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[var(--border-color)]">
+        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[#E6E2D8] dark:border-[#383838]">
           <div className="flex justify-start">
             <button
               type="button"
@@ -679,7 +679,7 @@ export function TransactionModal({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="text-lg font-semibold tracking-tight text-[var(--text-primary)] text-center truncate px-2"
+                  className="text-base sm:text-lg font-bold tracking-tight text-[#1C1917] dark:text-white text-center truncate px-2"
                 >
                   {transaction ? t('edit') : (type === 'income' ? t('newIncome') : t('newExpense'))}
                 </motion.h2>
@@ -845,12 +845,10 @@ export function TransactionModal({
               </div>
 
               {/* Merchant Input & Quick Icons */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-1">
-                    {type === 'income' ? t('incomeSource') : t('merchant')}
-                  </label>
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
+                  {type === 'income' ? t('incomeSource') : t('merchant')}
+                </label>
                 <div className="relative group">
                   <input 
                     ref={merchantInputRef}
@@ -858,22 +856,22 @@ export function TransactionModal({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className={`w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40`}
+                    className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white"
                   />
                   {merchant && (
                     <button 
                       onClick={() => setMerchant('')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] hover:text-[#1C1917] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
                     >
-                      <X size={18} strokeWidth={2} />
+                      <X size={16} strokeWidth={2} />
                     </button>
                   )}
                 </div>
               </div>
 
               {/* Note Input */}
-              <div className="space-y-2">
-                <label className="text-[11px] font-medium text-[var(--text-secondary)] ml-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
                   {t('ownNote')}
                 </label>
                 <div className="relative group">
@@ -883,16 +881,16 @@ export function TransactionModal({
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                    className={`w-full bg-[var(--surface-muted)]/50 text-[15px] font-medium text-[var(--text-primary)] outline-none transition-all placeholder-[var(--text-tertiary)]/30 rounded-[16px] px-4 py-3.5 border border-[var(--border-color)] focus:border-accent/40 ${
-                      validationError === 'note' ? 'border-danger/30 bg-danger/5' : ''
+                    className={`w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border ${
+                      validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white'
                     }`}
                   />
                   {note && (
                     <button 
                       onClick={() => setNote('')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] hover:text-[#1C1917] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
                     >
-                      <X size={18} strokeWidth={2} />
+                      <X size={16} strokeWidth={2} />
                     </button>
                   )}
                 </div>

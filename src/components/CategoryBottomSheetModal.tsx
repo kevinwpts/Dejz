@@ -6,6 +6,7 @@ import { formatAmount } from '../utils/format';
 import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
 import { feedback } from '../utils/feedback';
 import { TransactionItem } from './TransactionItem';
+import { EmptyState } from './EmptyState';
 import { useScrollLock } from '../hooks/useScrollLock';
 
 interface CategoryBottomSheetModalProps {
@@ -156,10 +157,10 @@ export function CategoryBottomSheetModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-[#F7F5F0] dark:bg-[#232323] border-t border-[#E6E2D8] dark:border-white/[0.1] rounded-t-[22px] shadow-2xl max-h-[88vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
+            className="relative w-full max-w-lg bg-white dark:bg-[#242424] border-t border-[#E6E2D8] dark:border-[#383838] rounded-t-[28px] shadow-2xl max-h-[88vh] flex flex-col z-10 overflow-hidden font-sans text-[#1C1917] dark:text-white"
           >
             {/* Top Grab Handle */}
-            <div className="w-12 h-1.5 rounded-full bg-black/20 dark:bg-white/25 mx-auto mt-3 mb-1 shrink-0" />
+            <div className="w-10 h-1 rounded-full bg-[#D6D1C7] dark:bg-[#3D3D3D] mx-auto mt-3 mb-1 shrink-0" />
 
             {/* Header: Category Identity & Close Button */}
             <div className="flex items-center justify-between px-5 pt-3 pb-4 border-b border-[#E6E2D8] dark:border-white/[0.05] shrink-0">
@@ -265,11 +266,11 @@ export function CategoryBottomSheetModal({
                     ))}
                   </div>
                 ) : (
-                  <div className="py-6 px-4 text-center rounded-2xl bg-white dark:bg-white/[0.02] border border-dashed border-[#E6E2D8] dark:border-white/[0.06] space-y-1">
-                    <p className="text-xs font-semibold text-[#6E6961] dark:text-white/80">
-                      {isEn ? 'No expenses in this category during this period' : 'Inga utgifter registrerade i denna kategori under perioden'}
-                    </p>
-                  </div>
+                  <EmptyState
+                    title={isEn ? 'No expenses in this category' : 'Inga utgifter i denna kategori'}
+                    description={isEn ? 'No expenses recorded in this category during the selected period.' : 'Inga utgifter registrerade i denna kategori under den valda perioden.'}
+                    className="py-6"
+                  />
                 )}
               </div>
             </div>

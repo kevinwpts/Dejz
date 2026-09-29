@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, X } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { TransactionItem } from './TransactionItem';
+import { EmptyState } from './EmptyState';
 import { useScrollLock } from '../hooks/useScrollLock';
 
 interface SearchModalProps {
@@ -108,13 +109,13 @@ export function SearchModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.98 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="bg-[var(--bg-color)] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[26px] border-0 sm:border border-[var(--border-color)] shadow-2xl flex flex-col overflow-hidden"
+            className="bg-white dark:bg-[#242424] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[26px] border-0 sm:border border-[#E6E2D8] dark:border-[#383838] shadow-2xl flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Search Bar */}
-            <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-[var(--border-color)] flex items-center gap-2.5 shrink-0 bg-[var(--surface-color)]">
-              <div className="flex-1 relative flex items-center bg-[var(--surface-muted)] rounded-full border border-[var(--border-color)] px-3.5 h-11 transition-all focus-within:border-[var(--accent-color)] focus-within:bg-[var(--surface-color)] shadow-2xs">
-                <Search size={18} className="text-[var(--text-secondary)] opacity-60 shrink-0 mr-2.5" />
+            <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-[#E6E2D8] dark:border-[#383838] flex items-center gap-2.5 shrink-0 bg-white dark:bg-[#242424]">
+              <div className="flex-1 relative flex items-center bg-[#F7F5F0] dark:bg-[#2D2D2D] rounded-full border border-[#E6E2D8] dark:border-[#383838] px-3.5 h-[44px] transition-all focus-within:border-[#1C1917] dark:focus-within:border-white shadow-none">
+                <Search size={18} className="text-[#8C867C] dark:text-[#71717A] shrink-0 mr-2.5" />
                 <input 
                   ref={inputRef}
                   autoFocus
@@ -129,7 +130,7 @@ export function SearchModal({
                     "Søg transaktion, butik, kategori...",
                     "Etsi tilitapahtumaa, kauppaa, kategoriaa..."
                   )}
-                  className="w-full h-full bg-transparent text-[15px] font-medium text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 outline-none"
+                  className="w-full h-full bg-transparent text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none"
                 />
                 {query && (
                   <button 
@@ -138,7 +139,7 @@ export function SearchModal({
                       setQuery('');
                       inputRef.current?.focus();
                     }}
-                    className="w-6 h-6 rounded-full bg-[var(--border-color)]/60 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center cursor-pointer transition-colors shrink-0 active:scale-90"
+                    className="w-6 h-6 rounded-full bg-[#EFECE6] dark:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 active:scale-90"
                     title={getL10n("Rensa", "Clear", "Tøm", "Ryd", "Tyhjennä")}
                   >
                     <X size={13} strokeWidth={2.5} />
@@ -205,29 +206,23 @@ export function SearchModal({
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-10 px-4 bg-[var(--surface-color)] rounded-[20px] border border-[var(--border-color)]">
-                      <div className="w-11 h-11 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] opacity-60 flex items-center justify-center mx-auto mb-2.5">
-                        <Search size={20} />
-                      </div>
-                      <p className="text-[14px] font-semibold text-[var(--text-primary)]">
-                        {getL10n(
-                          `Inga resultat för "${query}"`,
-                          `No results for "${query}"`,
-                          `Ingen resultater for "${query}"`,
-                          `Ingen resultater for "${query}"`,
-                          `Ei tuloksia haulle "${query}"`
-                        )}
-                      </p>
-                      <p className="text-[12px] font-medium text-[var(--text-secondary)] opacity-70 mt-0.5">
-                        {getL10n(
-                          'Testa att söka på butiksnamn, kategori eller belopp',
-                          'Try searching for merchant, category or amount',
-                          'Prøv å søke etter butikk, kategori eller beløp',
-                          'Prøv at søge efter butik, kategori eller beløb',
-                          'Kokeile hakea kaupan nimeä, kategoriaa tai summaa'
-                        )}
-                      </p>
-                    </div>
+                    <EmptyState
+                      icon={Search}
+                      title={getL10n(
+                        `Inga resultat för "${query}"`,
+                        `No results for "${query}"`,
+                        `Ingen resultater for "${query}"`,
+                        `Ingen resultater for "${query}"`,
+                        `Ei tuloksia haulle "${query}"`
+                      )}
+                      description={getL10n(
+                        'Testa att söka på butiksnamn, kategori eller belopp',
+                        'Try searching for merchant, category or amount',
+                        'Prøv å søke etter butikk, kategori eller beløp',
+                        'Prøv at søge efter butik, kategori eller beløb',
+                        'Kokeile hakea kaupan nimeä, kategoriaa tai summaa'
+                      )}
+                    />
                   )}
                 </div>
               )}

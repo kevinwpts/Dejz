@@ -19,8 +19,8 @@ export interface ListRowProps {
 
 export const ListRow: React.FC<ListRowProps> = ({
   icon,
-  iconBg = 'bg-[var(--surface-muted)]',
-  iconColor = 'text-[var(--text-primary)]',
+  iconBg = 'bg-[#EFECE6] dark:bg-[#2D2D2D]',
+  iconColor = 'text-[#1C1917] dark:text-white',
   title,
   subtitle,
   value,
@@ -36,30 +36,30 @@ export const ListRow: React.FC<ListRowProps> = ({
   return (
     <div
       onClick={isClickable ? onClick : undefined}
-      className={`flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[14px] transition-colors select-none ${
+      className={`bg-white dark:bg-[#242424] p-3.5 sm:p-4 rounded-[18px] border-none shadow-none flex items-center justify-between transition-all select-none ${
         isClickable
-          ? 'cursor-pointer hover:bg-[var(--surface-muted)]/70 active:scale-[0.99]'
+          ? 'cursor-pointer hover:bg-[#EDE9DF] dark:hover:bg-[#333333] active:scale-[0.99]'
           : ''
       } ${disabled ? 'opacity-40 pointer-events-none' : ''} ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 pr-2">
         {icon && (
           <div
-            className={`w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
+            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
           >
             {icon}
           </div>
         )}
         <div className="min-w-0 flex flex-col justify-center">
           <div
-            className={`text-[13px] sm:text-sm font-semibold truncate ${
-              destructive ? 'text-danger' : 'text-[var(--text-primary)]'
+            className={`text-sm font-semibold truncate ${
+              destructive ? 'text-rose-600 dark:text-rose-400' : 'text-[#1C1917] dark:text-white'
             }`}
           >
             {title}
           </div>
           {subtitle && (
-            <div className="text-[11px] sm:text-[11.5px] text-[var(--text-secondary)] font-medium truncate mt-0.5">
+            <div className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8] truncate mt-0.5">
               {subtitle}
             </div>
           )}
@@ -68,13 +68,16 @@ export const ListRow: React.FC<ListRowProps> = ({
 
       <div className="flex items-center gap-2 shrink-0">
         {value && (
-          <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] font-amount tabular-nums">
+          <div className="text-sm font-bold font-amount tabular-nums text-[#1C1917] dark:text-white">
             {value}
-          </span>
+          </div>
         )}
         {rightElement}
         {showChevron && (
-          <ChevronRight size={14} strokeWidth={2} className="text-[var(--text-secondary)] opacity-50 shrink-0" />
+          <ChevronRight
+            size={16}
+            className="text-[#8C867C] dark:text-[#71717A] ml-1 shrink-0"
+          />
         )}
       </div>
     </div>

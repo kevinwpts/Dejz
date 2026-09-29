@@ -93,21 +93,20 @@ export function CalculatorModal({ _isOpen, onClose, _t }: CalculatorModalProps) 
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
     >
           <div
-            
             onClick={onClose}
-            className="absolute inset-0 bg-black/60"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
           <motion.div
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative bg-[var(--surface-solid)] w-full max-w-[320px] rounded-[24px] overflow-hidden border border-[var(--border-color)] overscroll-contain shadow-2xl"
+            className="relative bg-white dark:bg-[#242424] w-full max-w-[320px] rounded-[24px] overflow-hidden border border-[#E6E2D8] dark:border-[#383838] overscroll-contain shadow-2xl"
           >
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Kalkylator</h3>
-                <button onClick={onClose} className="w-8 h-8 flex items-center justify-center hover:bg-[var(--surface-muted)] rounded-full text-[var(--text-secondary)] transition-colors cursor-pointer">
+                <h3 className="text-base font-bold text-[#1C1917] dark:text-white">Kalkylator</h3>
+                <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] rounded-full text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-colors cursor-pointer">
                   <X size={16} strokeWidth={2} />
                 </button>
               </div>

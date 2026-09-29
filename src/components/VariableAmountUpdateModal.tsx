@@ -71,22 +71,22 @@ export function VariableAmountUpdateModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 26, stiffness: 220 }}
-            className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border-t sm:border border-[var(--border-color)] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0"
+            className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E6E2D8] dark:border-[#383838] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Handle on Mobile */}
-            <div className="w-10 h-1 bg-[var(--border-color)]/60 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+            <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
             {/* Clean Header */}
-            <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[var(--border-color)]/30">
-               <div className="w-10 h-10 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-full flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
+            <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[#E6E2D8] dark:border-[#383838]">
+               <div className="w-10 h-10 bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-full flex items-center justify-center shadow-none shrink-0 overflow-hidden">
                  <BudgetItemLogo item={item} type={item.budgetType === 'income' ? 'income' : 'expense'} config={config} />
                </div>
                <div className="flex flex-col items-center overflow-hidden px-2 text-center">
-                 <h2 className="text-lg font-semibold text-[var(--text-primary)] truncate tracking-tight">
+                 <h2 className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-white truncate tracking-tight">
                    {item.name}
                  </h2>
-                 <span className="text-xs font-medium text-accent">
+                 <span className="text-xs font-semibold text-[#05B862]">
                    {periodName ? `${periodName}` : (item.budgetType === 'income' ? (config.language === 'en' ? 'Income' : 'Inkomst') : t('fixedExpense'))}
                  </span>
                </div>

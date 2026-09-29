@@ -74,7 +74,7 @@ export function GreetingModule({
         className="pt-3 sm:pt-5 pb-1 text-center flex flex-col items-center space-y-2"
       >
         {/* Tracked Minimalist Uppercase Structural Label */}
-        <span className="text-[13px] sm:text-[14px] font-semibold uppercase tracking-[0.08em] text-[var(--text-tertiary)] dark:text-[#9CA6BC] block select-none font-display">
+        <span className="text-[13px] sm:text-[14px] font-semibold uppercase tracking-[0.08em] text-[#8C867C] dark:text-[#A8A8A8] block select-none font-display">
           {t('totalRemaining')}
         </span>
 
@@ -84,21 +84,21 @@ export function GreetingModule({
             <AnimatedNumber 
               value={stats?.remainingPeriodCents || 0} 
               className={`text-[68px] sm:text-[80px] leading-[0.92] font-bold font-amount tabular-nums tracking-tight ${
-                isNegative ? 'text-rose-500 dark:text-rose-400' : 'text-[var(--text-primary)] dark:text-white'
+                isNegative ? 'text-rose-500 dark:text-rose-400' : 'text-[#1C1917] dark:text-white'
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
             {/* Currency label */}
             <span className={`text-[22px] sm:text-[26px] font-semibold tracking-tight ${
-              isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)] dark:text-[#9CA6BC]'
+              isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[#6E6961] dark:text-[#A8A8A8]'
             }`}>
               {currency}
             </span>
           </div>
 
           {/* Days to salary */}
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] dark:text-[#A8A8A8] font-medium mt-3 bg-[var(--surface-color)] dark:bg-white/[0.045] px-3.5 py-1.5 rounded-full border-none shadow-none">
-            <Calendar size={13} className="text-[var(--text-tertiary)] dark:text-[#A8A8A8]" />
+          <div className="flex items-center gap-1.5 text-xs text-[#6E6961] dark:text-[#A8A8A8] font-medium mt-3 bg-white dark:bg-[#242424] px-3.5 py-1.5 rounded-full border-none shadow-none">
+            <Calendar size={13} className="text-[#8C867C] dark:text-[#A8A8A8]" />
             <span>
               {effectiveRemainingDays} {isEn ? 'days until payday' : 'dagar till lön'}
             </span>

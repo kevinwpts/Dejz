@@ -521,7 +521,7 @@ export function TodayView({
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                           onClick={() => handleCategoryClick(cat.name)}
-                          className="flex-shrink-0 flex flex-col justify-between py-2 px-3 rounded-xl bg-white dark:bg-[#272727] hover:bg-black/[0.02] dark:hover:bg-[#2e2e2e] text-[var(--text-primary)] transition-all group cursor-pointer snap-start border-none shadow-none relative min-w-[130px]"
+                          className="flex-shrink-0 flex flex-col justify-between py-2.5 px-3 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] text-[#1C1917] dark:text-white transition-all group cursor-pointer snap-start border-none shadow-none relative min-w-[130px]"
                         >
                           {/* Top Row: Icon, Name and Amount */}
                           <div className="flex items-center justify-between gap-2.5 w-full">
@@ -584,10 +584,10 @@ export function TodayView({
                   <button
                     type="button"
                     onClick={() => onNavigate("budget", "category-budgets")}
-                    className="w-full p-4 rounded-[18px] bg-[#FFFFFF] dark:bg-[#272727] hover:bg-black/[0.02] dark:hover:bg-[#2e2e2e] border-none text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
+                    className="w-full p-4 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] border-none text-[#1C1917] dark:text-white shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-[#F7F5F0] dark:bg-white/[0.06] border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] transition-colors">
+                      <div className="w-9 h-9 rounded-xl bg-[#EFECE6] dark:bg-[#2D2D2D] border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] transition-colors">
                         <SlidersHorizontal size={15} strokeWidth={1.75} />
                       </div>
                       <div>
@@ -719,10 +719,10 @@ export function TodayView({
                         onViewFixedExpense(item.originalItem);
                       }
                     }}
-                    className="flex items-center justify-between px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px] rounded-[18px] bg-[#FFFFFF] dark:bg-[#272727] hover:bg-black/[0.02] dark:hover:bg-[#2e2e2e] transition-all cursor-pointer shadow-none border-none group"
+                    className="flex items-center justify-between px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px] rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] transition-all cursor-pointer shadow-none border-none group"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-[#F7F5F0] dark:bg-white/[0.04] border-none flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-[#EFECE6] dark:bg-[#2D2D2D] border-none flex items-center justify-center shrink-0">
                         <BudgetItemLogo item={item.originalItem} type={item.type as any} config={config} />
                       </div>
                       <div className="min-w-0">
@@ -736,7 +736,7 @@ export function TodayView({
                     </div>
                     <div className="text-right">
                       <span className={`text-xs sm:text-sm font-semibold font-amount tabular-nums ${
-                        item.type === "income" ? "text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white" : "text-[#1C1917] dark:text-white"
+                        item.type === "income" ? "text-[#1C1917] dark:text-white" : "text-[#1C1917] dark:text-white"
                       }`}>
                         {item.type === "income" ? "+" : "−"}{formatAmount(item.amount, lang)} {config?.currency || 'kr'}
                       </span>

@@ -370,16 +370,16 @@ export function LogView({
             <button
               key={type}
               onClick={() => setTypeFilter(type)}
-              className={`flex items-center justify-center gap-1.5 h-8 sm:h-9 px-3 sm:px-3.5 rounded-full text-xs sm:text-[13px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-95 ${
                 isActive 
-                  ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white font-semibold border-transparent shadow-xs' 
-                  : 'text-[#6E6961] hover:text-[#1C1917] hover:bg-black/5 dark:text-[#A8A8A8] dark:hover:text-white dark:hover:bg-white/[0.06]'
+                  ? 'bg-[#1C1917] dark:bg-white dark:text-[#1C1917] text-white shadow-none border-none' 
+                  : 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]'
               }`}
             >
-              {type === 'all' && <LayoutGrid size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
-              {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
-              {type === 'income' && <ArrowUpRight size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
-              {type === 'receipt' && <FileText size={13} strokeWidth={1.75} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
+              {type === 'all' && <LayoutGrid size={13} strokeWidth={2} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
+              {type === 'expense' && <ArrowDownLeft size={13} strokeWidth={2} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
+              {type === 'income' && <ArrowUpRight size={13} strokeWidth={2} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
+              {type === 'receipt' && <FileText size={13} strokeWidth={2} className={isActive ? 'text-white dark:text-[#1C1917]' : 'text-[#6E6961] dark:text-[#A8A8A8]'} />}
               <span>{t(type as TranslationKey)}</span>
             </button>
           );

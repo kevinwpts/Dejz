@@ -119,14 +119,14 @@ export function SavingsGoalModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-            className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border-t sm:border border-[var(--border-color)] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0"
+            className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E6E2D8] dark:border-[#383838] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Handle on Mobile */}
-            <div className="w-10 h-1 bg-[var(--border-color)]/60 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+            <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
             {/* Header Section */}
-            <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[var(--border-color)]/30">
+            <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[#E6E2D8] dark:border-[#383838]">
               <div className="flex justify-start">
                 <button
                   key="icon"
@@ -150,7 +150,7 @@ export function SavingsGoalModal({
                 </button>
               </div>
               <div className="flex justify-center overflow-hidden">
-                <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)] text-center truncate px-2">
+                <h2 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1917] dark:text-white text-center truncate px-2">
                   {editingGoal ? t('editSavingsGoal') : t('newSavingsGoal')}
                 </h2>
               </div>
@@ -168,8 +168,8 @@ export function SavingsGoalModal({
             {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
                 <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium text-[var(--text-secondary)] ml-1">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
                       {t('whatAreYouSavingFor')}
                     </label>
                     <div className="relative group">
@@ -178,18 +178,18 @@ export function SavingsGoalModal({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder={t('savingGoalExample')}
-                        className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[12px] px-4 py-3.5 text-sm font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] outline-none transition-all"
+                        className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <label className="text-xs font-medium text-[var(--text-secondary)] ml-1">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
                       Målbelopp
                     </label>
                     <div 
                       onClick={() => amountInputRef.current?.focus()}
-                      className="bg-[var(--surface-muted)] rounded-[14px] py-6 px-6 flex items-center justify-between active:bg-[var(--surface-color)] transition-all cursor-pointer select-none border border-[var(--border-color)] focus-within:border-accent/40 focus-within:bg-[var(--surface-color)] group"
+                      className="bg-[#F7F5F0] dark:bg-[#2D2D2D] rounded-[14px] py-6 px-6 flex items-center justify-between transition-all cursor-pointer select-none border border-[#E6E2D8] dark:border-[#383838] focus-within:border-[#1C1917] dark:focus-within:border-white group"
                     >
                       <div className="flex-1 flex justify-center translate-x-4">
                         <input
@@ -199,10 +199,10 @@ export function SavingsGoalModal({
                           value={targetAmount}
                           onChange={(e) => setTargetAmount(formatAmount(e.target.value))}
                           placeholder="0"
-                          className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-5xl font-bold text-center"
+                          className="w-full bg-transparent text-[#1C1917] dark:text-white outline-none font-amount text-5xl font-bold text-center"
                         />
                       </div>
-                      <span className="text-xs font-semibold text-accent bg-accent/10 px-3 py-1.5 rounded-full shrink-0 ml-4 group-focus-within:bg-accent/20 transition-colors">
+                      <span className="text-xs font-bold text-white bg-[#05B862] px-3 py-1.5 rounded-full shrink-0 ml-4 transition-colors">
                         {currency}
                       </span>
                     </div>
