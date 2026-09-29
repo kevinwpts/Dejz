@@ -2238,16 +2238,25 @@ export default function App() {
     ? WeekendAdjustment.BEFORE
     : WeekendAdjustment.NONE;
 
-  const { start: currentPeriodStart, end: currentPeriodEnd } = useMemo(
-    () =>
-      getPeriodBoundaries(
-        currentPeriodDate,
-        paydayType,
-        paydaySetting,
-        adjustment,
-      ),
-    [currentPeriodDate, paydayType, paydaySetting, adjustment],
-  );
+  const { start: currentPeriodStart, end: currentPeriodEnd } = useMemo(() => {
+    const tempBounds = getPeriodBoundaries(
+      currentPeriodDate,
+      paydayType,
+      paydaySetting,
+      adjustment,
+    );
+    const pId = getPeriodId(tempBounds.start);
+    const actualToday = new Date();
+    actualToday.setHours(0, 0, 0, 0);
+
+    if (config?.lockedPeriods?.[pId] && new Date(config.lockedPeriods[pId].end) < actualToday) {
+      return {
+        start: new Date(config.lockedPeriods[pId].start),
+        end: new Date(config.lockedPeriods[pId].end),
+      };
+    }
+    return tempBounds;
+  }, [currentPeriodDate, paydayType, paydaySetting, adjustment, config?.lockedPeriods]);
 
   const currentPeriodId = useMemo(
     () => getPeriodId(currentPeriodStart),
@@ -2269,6 +2278,7 @@ export default function App() {
     const p = [];
     const now = new Date();
     const actualToday = new Date();
+    actualToday.setHours(0, 0, 0, 0);
 
     let earliest = now;
     if (session?.user?.created_at) {
@@ -2294,30 +2304,60 @@ export default function App() {
     const startOffset = -Math.max(0, monthDiff);
     const endOffset = 24;
 
+    const newLockedPeriods = { ...(config?.lockedPeriods || {}) };
+    let hasNewLocks = false;
+
     for (let i = startOffset; i <= endOffset; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-      const { start, end } = getPeriodBoundaries(
+      const tempBounds = getPeriodBoundaries(
         d,
         paydayType,
         paydaySetting,
         adjustment,
       );
+      const pId = getPeriodId(tempBounds.start);
+
+      let start = tempBounds.start;
+      let end = tempBounds.end;
+      let name = getPeriodName(
+        start,
+        end,
+        paydayType,
+        config?.language || "sv-SE",
+      );
+
+      if (newLockedPeriods[pId]) {
+        start = new Date(newLockedPeriods[pId].start);
+        end = new Date(newLockedPeriods[pId].end);
+        name = newLockedPeriods[pId].name;
+      } else if (end < actualToday) {
+        newLockedPeriods[pId] = {
+          start: start.toISOString(),
+          end: end.toISOString(),
+          name,
+        };
+        hasNewLocks = true;
+      }
+
       p.push({
         date: new Date(d.getFullYear(), d.getMonth(), 1),
         start,
         end,
-        name: getPeriodName(
-          start,
-          end,
-          paydayType,
-          config?.language || "sv-SE",
-        ),
+        name,
         isCurrent: actualToday >= start && actualToday <= end,
         isFuture: actualToday < start,
+        periodId: pId,
       });
     }
+
+    if (hasNewLocks && config && session?.user?.id) {
+      const updatedConfig = { ...config, lockedPeriods: newLockedPeriods };
+      setConfig(updatedConfig);
+      dataService.saveSettings(session.user.id, updatedConfig).catch(() => {});
+    }
+
     return p;
-  }, [paydayType, paydaySetting, adjustment, config?.language, session?.user?.created_at, profile?.created_at, transactions]);
+  }, [paydayType, paydaySetting, adjustment, config?.language, session?.user?.created_at, profile?.created_at, transactions, config?.lockedPeriods, session?.user?.id]);
 
   const calculateStats = useCallback(
     (targetDate: Date) => {
@@ -2341,12 +2381,21 @@ export default function App() {
           ? WeekendAdjustment.BEFORE
           : WeekendAdjustment.NONE;
 
-        const { start: periodStart, end: periodEnd } = getPeriodBoundaries(
+        const tempBounds = getPeriodBoundaries(
           referenceDate,
           paydayType,
           paydaySetting,
           adjustment,
         );
+        const pId = getPeriodId(tempBounds.start);
+        let periodStart = tempBounds.start;
+        let periodEnd = tempBounds.end;
+
+        if (config.lockedPeriods?.[pId] && new Date(config.lockedPeriods[pId].end) < actualToday) {
+          periodStart = new Date(config.lockedPeriods[pId].start);
+          periodEnd = new Date(config.lockedPeriods[pId].end);
+        }
+
         const isFuturePeriod = periodStart > actualToday;
         const isPastPeriod = periodEnd < actualToday;
         const periodName = getPeriodName(

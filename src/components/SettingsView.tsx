@@ -78,8 +78,11 @@ export function SettingsView({
   const [targetMigrationId, setTargetMigrationId] = useState<string>('');
   const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<{ type: 'income' | 'expense', index: number, category: any } | null>(null);
 
+  const [pendingPayday, setPendingPayday] = useState<number | null>(null);
+
   const handleUpdatePayday = (day: number) => {
-    setConfig({ ...config, payday: day });
+    if (day === config.payday) return;
+    setPendingPayday(day);
   };
 
   const handleEditCategory = (type: 'income' | 'expense', index: number, name: string, icon: string, color?: string) => {
@@ -490,6 +493,25 @@ export function SettingsView({
           }}
           onCancel={() => setDeleteConfirmIndex(null)}
           variant="danger"
+          t={t}
+        />
+      )}
+
+      {pendingPayday !== null && (
+        <ConfirmModal
+          isOpen={pendingPayday !== null}
+          title={`Ändra lönedag till den ${pendingPayday}:e?`}
+          message="Din aktuella period anpassas efter din nästa lön. Tidigare perioder och din historik påverkas inte."
+          confirmText="Ändra lönedag"
+          cancelText="Avbryt"
+          variant="info"
+          onConfirm={() => {
+            if (pendingPayday !== null) {
+              setConfig({ ...config, payday: pendingPayday });
+            }
+            setPendingPayday(null);
+          }}
+          onCancel={() => setPendingPayday(null)}
           t={t}
         />
       )}

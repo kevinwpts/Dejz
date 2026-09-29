@@ -116,6 +116,7 @@ export interface Config {
   userAgeGroup?: string;
   userGender?: string;
   homeWidgets?: HomeWidgetConfig[];
+  lockedPeriods?: Record<string, { start: string; end: string; name: string }>;
 }
 
 export type HomeWidgetId =
