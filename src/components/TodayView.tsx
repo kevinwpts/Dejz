@@ -5,7 +5,6 @@ import {
   RotateCcw,
   SlidersHorizontal,
   ChevronRight,
-  LayoutGrid,
 } from "lucide-react";
 import {
   Transaction,
@@ -13,7 +12,6 @@ import {
   Income,
   FixedExpense,
   Frequency,
-  HomeWidgetConfig,
 } from "../types";
 import { TranslationKey } from "../i18n";
 import { TransactionItem } from "./TransactionItem";
@@ -21,13 +19,6 @@ import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { BudgetItemLogo } from "./BudgetItem";
 import { PeriodTimeline } from "./PeriodTimeline";
-import { MonthlyPulseWidget } from "./widgets/MonthlyPulseWidget";
-import { SavingsGoalsWidget } from "./widgets/SavingsGoalsWidget";
-import { DailySummaryWidget } from "./widgets/DailySummaryWidget";
-import { CategoryBudgetsWidget } from "./widgets/CategoryBudgetsWidget";
-import { RecentReceiptsWidget } from "./widgets/RecentReceiptsWidget";
-import { WidgetManagerModal } from "./widgets/WidgetManagerModal";
-import { getResolvedHomeWidgets } from "../utils/widgetRegistry";
 import { ICON_MAP, getCategoryIconName, isEmojiString } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
@@ -82,8 +73,8 @@ export function TodayView({
   onViewTransaction,
   onDeleteTransaction,
   onNavigate,
-  attentionItems = [],
-  onEditAttentionItem,
+  attentionItems: _attentionItems = [],
+  onEditAttentionItem: _onEditAttentionItem,
   _transactions,
   allTransactions = [],
   t,
@@ -100,8 +91,6 @@ export function TodayView({
   onUpdateConfig,
   onOpenCalculator,
 }: TodayViewProps) {
-  const [isWidgetManagerOpen, setIsWidgetManagerOpen] = useState(false);
-  const [isCustomizing, setIsCustomizing] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -147,26 +136,6 @@ export function TodayView({
   const progress = Math.min(1, Math.max(0, scrollY / Math.max(1, heroHeight || 300)));
   const _heroOpacity = Math.max(0.25, 1 - progress * 0.75);
   const _heroScale = Math.max(0.96, 1 - progress * 0.04);
-
-  const resolvedWidgets = useMemo(() => {
-    return getResolvedHomeWidgets(config?.homeWidgets);
-  }, [config?.homeWidgets]);
-
-  const hasActiveWidgets = useMemo(() => {
-    return resolvedWidgets.some((w) => w.enabled);
-  }, [resolvedWidgets]);
-
-  const handleRemoveWidget = (widgetId: string) => {
-    if (!onUpdateConfig) return;
-    const current = getResolvedHomeWidgets(config?.homeWidgets);
-    const updated = current.map((w) => (w.id === widgetId ? { ...w, enabled: false } : w));
-    onUpdateConfig({ ...config, homeWidgets: updated });
-  };
-
-  const handleSaveWidgets = (updatedWidgets: HomeWidgetConfig[]) => {
-    if (!onUpdateConfig) return;
-    onUpdateConfig({ ...config, homeWidgets: updatedWidgets });
-  };
 
   const normalizedSelectedDate = useMemo(() => {
     const d = new Date(selectedDate || new Date());
@@ -662,7 +631,7 @@ export function TodayView({
 
         {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
         {calendarDays && calendarDays.length > 0 && (
-          <div className={`sticky ${timelineStickyTop} z-20 bg-[#F7F5F0]/95 dark:bg-[#232323]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-0 pb-2.5 border-b border-[#E6E2D8] dark:border-white/[0.03] transition-all`}>
+          <div className={`sticky ${timelineStickyTop} z-20 bg-[#F7F5F0]/95 dark:bg-[#232323]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-0 pb-2.5 transition-all`}>
             <PeriodTimeline
               calendarDays={calendarDays}
               selectedDate={normalizedSelectedDate}
@@ -780,237 +749,8 @@ export function TodayView({
         </div>
       </div>
 
-      {/* 5. LOWER SECTION: WIDGETS & MÅNADSPULS (Deep scrollable feed) */}
-      <div className="space-y-4 pt-6">
-        {hasActiveWidgets && (
-          <div className="flex items-center justify-between px-1">
-            <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6E6961] dark:text-[#9CA6BC] select-none">
-              {lang === 'en' ? 'Widgets & Insights' : 'Widgets & insikter'}
-            </span>
-            <button
-              type="button"
-              onClick={() => setIsWidgetManagerOpen(true)}
-              className="text-xs font-medium text-[#6E6961] dark:text-[#9CA6BC] hover:text-[#1C1917] dark:hover:text-white transition-colors cursor-pointer flex items-center gap-1"
-            >
-              <span>{lang === 'en' ? 'Customize' : 'Anpassa'}</span>
-              <LayoutGrid size={13} />
-            </button>
-          </div>
-        )}
-
-        {/* Customization Bar if active */}
-        {isCustomizing && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="flex items-center justify-between p-3.5 rounded-2xl bg-[#FFFFFF] dark:bg-white/[0.045] border border-[#E6E2D8] dark:border-white/[0.08] backdrop-blur-[20px] shadow-xs"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-[14px]">🛠️</span>
-              <div>
-                <p className="text-xs font-bold text-[#1C1917] dark:text-white">
-                  {lang === 'en' ? 'Edit widgets mode' : 'Redigeringsläge aktivt'}
-                </p>
-                <p className="text-[11px] text-[#8C867C] dark:text-[#C7CDDC]/80">
-                  {lang === 'en' ? 'Click Remove on cards or Add to manage.' : 'Klicka på Ta bort på korten eller Lägg till fler.'}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setIsWidgetManagerOpen(true)}
-                className="px-3 py-1 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 text-xs font-bold shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer"
-              >
-                {lang === 'en' ? '+ Add' : '+ Lägg till'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsCustomizing(false)}
-                className="px-3 py-1 rounded-xl bg-black/5 dark:bg-white/[0.08] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/[0.14] text-xs font-medium border border-[#E6E2D8] dark:border-white/[0.08] active:scale-95 transition-all cursor-pointer"
-              >
-                {lang === 'en' ? 'Done' : 'Klar'}
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        <AnimatePresence mode="popLayout">
-          {resolvedWidgets.map((widgetConfig) => {
-            if (!widgetConfig.enabled) return null;
-
-            if (widgetConfig.id === 'attention_items' && attentionItems.length > 0) {
-              return (
-                <motion.div
-                  key="attention_items"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="p-4 rounded-2xl bg-[#FFFFFF] dark:bg-white/[0.035] border border-[#E6E2D8] dark:border-white/[0.07] backdrop-blur-[18px] shadow-none space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#1C1917] dark:text-white">
-                        {lang === 'en' ? 'Attention required' : 'Kräver åtgärd'}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-300 text-[10px] font-bold">
-                        {attentionItems.length}
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      {attentionItems.map((item, idx) => (
-                        <div
-                          key={idx}
-                          onClick={() => onEditAttentionItem?.(item)}
-                          className="flex items-center justify-between p-2.5 rounded-xl bg-black/5 dark:bg-white/[0.02] hover:bg-black/10 dark:hover:bg-white/[0.05] transition-all cursor-pointer border border-[#E6E2D8] dark:border-white/[0.04]"
-                        >
-                          <span className="text-xs text-[#1C1917] dark:text-[#C7CDDC]">{item.name}</span>
-                          <span className="text-xs font-bold text-amber-600 dark:text-amber-400 font-amount tabular-nums">
-                            {formatAmount(item.amount, lang)} {config?.currency || 'kr'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            }
-
-            if (widgetConfig.id === 'monthly_pulse') {
-              return (
-                <motion.div
-                  key="monthly_pulse"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <MonthlyPulseWidget
-                    stats={stats}
-                    config={config}
-                    language={lang}
-                    onNavigate={onNavigate}
-                    onRemove={() => handleRemoveWidget('monthly_pulse')}
-                    isCustomizing={isCustomizing}
-                  />
-                </motion.div>
-              );
-            }
-
-            if (widgetConfig.id === 'savings_goals') {
-              return (
-                <motion.div
-                  key="savings_goals"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <SavingsGoalsWidget
-                    config={config}
-                    onNavigate={onNavigate}
-                    onRemove={() => handleRemoveWidget('savings_goals')}
-                    isCustomizing={isCustomizing}
-                  />
-                </motion.div>
-              );
-            }
-
-            if (widgetConfig.id === 'daily_summary') {
-              return (
-                <motion.div
-                  key="daily_summary"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <DailySummaryWidget
-                    config={config}
-                    stats={stats}
-                    selectedDate={selectedDate}
-                    onRemove={() => handleRemoveWidget('daily_summary')}
-                    isCustomizing={isCustomizing}
-                  />
-                </motion.div>
-              );
-            }
-
-            if (widgetConfig.id === 'category_budgets') {
-              return (
-                <motion.div
-                  key="category_budgets"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <CategoryBudgetsWidget
-                    config={config}
-                    allTransactions={allTransactions}
-                    stats={stats}
-                    onNavigate={onNavigate}
-                    onRemove={() => handleRemoveWidget('category_budgets')}
-                    isCustomizing={isCustomizing}
-                  />
-                </motion.div>
-              );
-            }
-
-            if (widgetConfig.id === 'recent_receipts') {
-              return (
-                <motion.div
-                  key="recent_receipts"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <RecentReceiptsWidget
-                    config={config}
-                    allTransactions={allTransactions}
-                    onNavigate={onNavigate}
-                    onViewTransaction={onViewTransaction}
-                    onRemove={() => handleRemoveWidget('recent_receipts')}
-                    isCustomizing={isCustomizing}
-                  />
-                </motion.div>
-              );
-            }
-
-            return null;
-          })}
-        </AnimatePresence>
-
-        {/* Manage Widgets Footer Bar */}
-        <div className="flex items-center justify-center gap-2 pt-2">
-          <button
-            type="button"
-            onClick={() => setIsWidgetManagerOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/[0.045] hover:bg-white/[0.07] text-[#C7CDDC] hover:text-white border border-white/[0.07] backdrop-blur-[20px] text-xs font-semibold transition-all shadow-2xs active:scale-95 cursor-pointer"
-          >
-            <LayoutGrid size={13} strokeWidth={1.75} className="text-[#C7CDDC]" />
-            <span>{lang === 'en' ? 'Manage widgets' : 'Hantera widgets'}</span>
-          </button>
-        </div>
-      </div>
-
       {/* Close 2. EXPANDING BOTTOM SHEET */}
       </div>
-
-      {/* Widget Manager Modal */}
-      <WidgetManagerModal
-        isOpen={isWidgetManagerOpen}
-        onClose={() => setIsWidgetManagerOpen(false)}
-        config={config}
-        onSaveWidgets={handleSaveWidgets}
-        stats={stats}
-        selectedDate={selectedDate}
-        allTransactions={allTransactions}
-        attentionItems={attentionItems}
-      />
 
       {/* Category Quick View Bottom Sheet Modal */}
       <CategoryBottomSheetModal
