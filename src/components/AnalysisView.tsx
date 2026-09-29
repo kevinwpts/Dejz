@@ -52,6 +52,17 @@ export function AnalysisView({
     return { start: stats.periodStart, end: stats.periodEnd };
   }, [stats?.periodStart, stats?.periodEnd]);
 
+  const currentPeriod = useMemo(() => {
+    if (!periods || periods.length === 0) return null;
+    const refTime = currentPeriodDate ? new Date(currentPeriodDate).getTime() : Date.now();
+    return periods.find(p => {
+      if (!p.start || !p.end) return false;
+      const start = new Date(p.start).getTime();
+      const end = new Date(p.end).getTime() + 86399999;
+      return refTime >= start && refTime <= end;
+    }) || periods.find(p => p.isCurrent) || null;
+  }, [periods, currentPeriodDate]);
+
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('all');
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
@@ -234,7 +245,7 @@ export function AnalysisView({
           isOpen={isPeriodModalOpen}
           onClose={() => setIsPeriodModalOpen(false)}
           periods={periods || []}
-          selectedPeriod={periods?.find(p => p.date && currentPeriodDate && new Date(p.date).getMonth() === new Date(currentPeriodDate).getMonth() && new Date(p.date).getFullYear() === new Date(currentPeriodDate).getFullYear()) || null}
+          selectedPeriod={currentPeriod}
           selectedDate={null}
           onSelectPeriod={(p) => {
             if (p.date && onPeriodChange) {
