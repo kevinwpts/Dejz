@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, Check, Sparkles, RotateCcw, Plus, Pin, ChevronUp, ChevronDown, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
+import { RefreshCw, Check, Sparkles, RotateCcw, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -259,76 +259,12 @@ export function BudgetView({
   
 
 
-  const togglePinCategory = (categoryName: string) => {
-    const cats = config.categories || [];
-    const target = cats.find(c => c.name === categoryName);
-    if (!target) return;
-
-    const isPinned = !target.pinned;
-    
-    let nextOrder = 0;
-    if (isPinned) {
-      const pinnedCats = cats.filter(c => c.pinned);
-      nextOrder = pinnedCats.length > 0 ? Math.max(...pinnedCats.map(c => c.pinOrder || 0)) + 1 : 0;
-    }
-
-    const updated = cats.map(c => {
-      if (c.name === categoryName) {
-        return { ...c, pinned: isPinned, pinOrder: isPinned ? nextOrder : undefined };
-      }
-      return c;
-    });
-
-    setConfig({ ...config, categories: updated });
-  };
-
-  const movePinnedCategory = (categoryName: string, direction: "up" | "down") => {
-    const cats = [...(config.categories || [])];
-    const pinnedCats = cats
-      .filter(c => c.pinned)
-      .sort((a, b) => (a.pinOrder || 0) - (b.pinOrder || 0));
-
-    const index = pinnedCats.findIndex(c => c.name === categoryName);
-    if (index === -1) return;
-
-    if (direction === "up" && index > 0) {
-      const current = pinnedCats[index];
-      const prev = pinnedCats[index - 1];
-      const tempOrder = current.pinOrder || 0;
-      current.pinOrder = prev.pinOrder || 0;
-      prev.pinOrder = tempOrder;
-    } else if (direction === "down" && index < pinnedCats.length - 1) {
-      const current = pinnedCats[index];
-      const next = pinnedCats[index + 1];
-      const tempOrder = current.pinOrder || 0;
-      current.pinOrder = next.pinOrder || 0;
-      next.pinOrder = tempOrder;
-    }
-
-    const updated = cats.map(c => {
-      const match = pinnedCats.find(p => p.name === c.name);
-      if (match) {
-        return { ...c, pinned: true, pinOrder: match.pinOrder };
-      }
-      return c;
-    });
-
-    setConfig({ ...config, categories: updated });
-  };
-
   const sortedCategoriesForManage = [...(config.categories || [])].sort((a, b) => {
-    if (a.pinned && !b.pinned) return -1;
-    if (!a.pinned && b.pinned) return 1;
-    if (a.pinned && b.pinned) {
-      return (a.pinOrder || 0) - (b.pinOrder || 0);
-    }
-
     const aFixed = Math.round(getFixedSpentForCategory(a.name));
     const bFixed = Math.round(getFixedSpentForCategory(b.name));
     if (bFixed !== aFixed) {
       return bFixed - aFixed;
     }
-
     return (a.name || "").localeCompare(b.name || "");
   });
 
@@ -444,67 +380,24 @@ export function BudgetView({
               return (
                 <div 
                   key={cat.name}
-                  className={`p-4 transition-all flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 ${
-                    catBudget === 0 ? "opacity-65 hover:opacity-100" : "opacity-100"
+                  className={`py-3 px-3.5 sm:px-4 transition-all flex items-center justify-between gap-3 ${
+                    catBudget === 0 ? "opacity-75 hover:opacity-100" : "opacity-100"
                   }`}
                 >
-                  {/* Top Level on mobile / Left side on desktop */}
+                  {/* Left: Icon, Name, Fixed text */}
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    {/* Pin button */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        togglePinCategory(cat.name);
-                      }}
-                      className={`p-2 rounded-xl transition-all active:scale-90 cursor-pointer flex items-center justify-center shrink-0 ${
-                        cat.pinned 
-                          ? "bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border-transparent" 
-                          : "bg-black/5 dark:bg-white/[0.05] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white border border-transparent hover:border-[#E6E2D8] dark:hover:border-white/[0.05]"
-                      }`}
-                      title={cat.pinned ? "Avfäst från Hem" : "Fäst på Hem"}
-                    >
-                      <Pin size={12} className={cat.pinned ? "fill-current" : ""} />
-                    </button>
-
-                    {/* Reorder up/down buttons */}
-                    {cat.pinned && (
-                      <div className="flex flex-col gap-0.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            movePinnedCategory(cat.name, "up");
-                          }}
-                          className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer active:scale-75"
-                        >
-                          <ChevronUp size={11} strokeWidth={2.5} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            movePinnedCategory(cat.name, "down");
-                          }}
-                          className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/[0.06] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-all cursor-pointer active:scale-75"
-                        >
-                          <ChevronDown size={11} strokeWidth={2.5} />
-                        </button>
-                      </div>
-                    )}
-
-                    <div className="w-9 h-9 rounded-xl bg-black/5 dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.035] text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.035] text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
                       {isEmojiString(iconName) ? (
-                        <span className="text-base leading-none">{iconName}</span>
+                        <span className="text-sm leading-none">{iconName}</span>
                       ) : Icon ? (
-                        <Icon size={16} strokeWidth={1.8} className="text-[#1C1917] dark:text-white" />
+                        <Icon size={15} strokeWidth={1.8} className="text-[#1C1917] dark:text-white" />
                       ) : (
                         <div className="w-2 h-2 rounded-full bg-[#1C1917] dark:bg-white" />
                       )}
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <span className="text-[13.5px] font-semibold text-[#1C1917] dark:text-white truncate block tracking-tight">
+                      <span className="text-[13px] sm:text-[13.5px] font-semibold text-[#1C1917] dark:text-white truncate block tracking-tight">
                         {cat.name}
                       </span>
                       {fixedSpent > 0 && (
@@ -515,10 +408,10 @@ export function BudgetView({
                     </div>
                   </div>
 
-                  {/* Bottom Level on mobile / Right side on desktop: Budget controls or "Ange budget" */}
-                  <div className="flex items-center justify-end sm:justify-start gap-2.5 shrink-0 select-none pl-11 sm:pl-0">
+                  {/* Right: Amount + Minus/Plus OR "Ange budget" */}
+                  <div className="flex items-center gap-2 shrink-0 select-none">
                     {catBudget > 0 ? (
-                      <>
+                      <div className="flex items-center gap-1.5">
                         {/* Minus button */}
                         <button
                           type="button"
@@ -534,56 +427,54 @@ export function BudgetView({
                             });
                             setConfig({ ...config, categories: updatedCategories });
                           }}
-                          className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0 text-base font-bold"
+                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
                         >
                           −
                         </button>
 
-                        {/* Tappable/Editable amount in the middle */}
-                        <div className="w-28 sm:w-24 flex justify-center items-center">
-                          {isEditingThis ? (
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
-                              autoFocus
-                              value={inlineInputValue}
-                              onBlur={() => {
-                                const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
-                                const updatedCategories = (config.categories || []).map((c) => {
-                                  if (c.name === cat.name) {
-                                    return { ...c, budget: finalVal > 0 ? finalVal : null };
-                                  }
-                                  return c;
-                                });
-                                setConfig({ ...config, categories: updatedCategories });
-                                setEditingCategoryName(null);
-                              }}
-                              onChange={(e) => {
-                                const val = e.target.value.replace(/\D/g, "");
-                                setInlineInputValue(val);
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.currentTarget.blur();
+                        {/* Direct editable amount or button */}
+                        {isEditingThis ? (
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            autoFocus
+                            value={inlineInputValue}
+                            onBlur={() => {
+                              const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
+                              const updatedCategories = (config.categories || []).map((c) => {
+                                if (c.name === cat.name) {
+                                  return { ...c, budget: finalVal > 0 ? finalVal : null };
                                 }
-                              }}
-                              className="w-full h-9 px-2 rounded-xl bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
-                            />
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingCategoryName(cat.name);
-                                setInlineInputValue(catBudget > 0 ? String(catBudget) : "");
-                              }}
-                              className="px-3 py-2 rounded-xl border transition-all text-xs font-bold font-amount tabular-nums text-center w-full bg-black/5 dark:bg-white/[0.04] text-[#1C1917] dark:text-white border-[#E6E2D8] dark:border-white/[0.06] hover:bg-black/10 dark:hover:bg-white/[0.08] cursor-pointer"
-                            >
-                              {formatAmount(catBudget, config.language)} kr
-                            </button>
-                          )}
-                        </div>
+                                return c;
+                              });
+                              setConfig({ ...config, categories: updatedCategories });
+                              setEditingCategoryName(null);
+                            }}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, "");
+                              setInlineInputValue(val);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                            className="w-20 h-7 px-1.5 rounded-lg bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                          />
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingCategoryName(cat.name);
+                              setInlineInputValue(catBudget > 0 ? String(catBudget) : "");
+                            }}
+                            className="px-2 py-1 rounded-lg transition-all text-xs font-bold font-amount tabular-nums text-center text-[#1C1917] dark:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] cursor-pointer"
+                          >
+                            {formatAmount(catBudget, config.language)} kr
+                          </button>
+                        )}
 
                         {/* Plus button */}
                         <button
@@ -600,23 +491,54 @@ export function BudgetView({
                             });
                             setConfig({ ...config, categories: updatedCategories });
                           }}
-                          className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0 text-base font-bold"
+                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
                         >
                           +
                         </button>
-                      </>
+                      </div>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingCategoryName(cat.name);
-                          setInlineInputValue("");
-                        }}
-                        className="px-4 py-2 rounded-xl bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[#1C1917] dark:text-white text-xs font-semibold border border-[#E6E2D8] dark:border-white/[0.06] transition-all cursor-pointer active:scale-95"
-                      >
-                        Ange budget
-                      </button>
+                      isEditingThis ? (
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          autoFocus
+                          value={inlineInputValue}
+                          onBlur={() => {
+                            const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
+                            const updatedCategories = (config.categories || []).map((c) => {
+                              if (c.name === cat.name) {
+                                return { ...c, budget: finalVal > 0 ? finalVal : null };
+                              }
+                              return c;
+                            });
+                            setConfig({ ...config, categories: updatedCategories });
+                            setEditingCategoryName(null);
+                          }}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            setInlineInputValue(val);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          className="w-24 h-7 px-1.5 rounded-lg bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingCategoryName(cat.name);
+                            setInlineInputValue("");
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[#1C1917] dark:text-white text-xs font-semibold border border-[#E6E2D8] dark:border-white/[0.06] transition-all cursor-pointer active:scale-95"
+                        >
+                          Ange budget
+                        </button>
+                      )
                     )}
                   </div>
                 </div>
