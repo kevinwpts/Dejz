@@ -143,50 +143,24 @@ const QUICK_PAYDAYS = [25, 27, 30, 1];
 const SAVINGS_PRESETS = [0, 1000, 2000, 3000, 5000];
 
 function getStep6DynamicContent(daysSince: number, isEn: boolean) {
-  if (daysSince >= 1 && daysSince <= 3) {
-    return {
-      tagText: isEn
-        ? (daysSince === 1 ? 'You got paid 1 day ago' : `You got paid ${daysSince} days ago`)
-        : (daysSince === 1 ? 'Du fick lön för 1 dag sedan' : `Du fick lön för ${daysSince} dagar sedan`),
-      headline: isEn
-        ? 'Roughly how much have you spent since then?'
-        : 'Ungefär hur mycket har du spenderat sedan dess?',
-      explanationPrimary: isEn
-        ? 'You only do this once. After this, Dejz keeps track for you.'
-        : 'Det här gör du bara en gång. Därefter håller Dejz koll åt dig.',
-      explanationSecondary: null,
-    };
-  }
+  const days = Math.max(1, daysSince);
+  const isSingular = days === 1;
 
-  if (daysSince >= 4 && daysSince <= 14) {
-    return {
-      tagText: isEn
-        ? `You are ${daysSince} days into your pay period`
-        : `Du är ${daysSince} dagar in i din löneperiod`,
-      headline: isEn
-        ? 'Roughly how much have you spent since payday?'
-        : 'Ungefär hur mycket har du spenderat sedan du fick lön?',
-      explanationPrimary: isEn
-        ? 'You only do this once. After this, Dejz keeps track for you.'
-        : 'Det här gör du bara en gång. Därefter håller Dejz koll åt dig.',
-      explanationSecondary: null,
-    };
-  }
+  const headline = isEn
+    ? (isSingular
+        ? 'You are 1 day into your pay period. How much have you spent since payday?'
+        : `You are ${days} days into your pay period. How much have you spent since payday?`)
+    : (isSingular
+        ? 'Du är 1 dag in i din löneperiod. Hur mycket har du spenderat sedan du fick lön?'
+        : `Du är ${days} dagar in i din löneperiod. Hur mycket har du spenderat sedan du fick lön?`);
 
-  // 15+ days
+  const helpText = isEn
+    ? "It doesn't need to be exact. You only do this once."
+    : 'Det behöver inte vara exakt. Det här gör du bara en gång.';
+
   return {
-    tagText: isEn
-      ? `You are already ${daysSince} days into the period`
-      : `Du är redan ${daysSince} dagar in i perioden`,
-    headline: isEn
-      ? 'Roughly how much have you spent since payday?'
-      : 'Ungefär hur mycket har du spenderat sedan du fick lön?',
-    explanationPrimary: isEn
-      ? "It doesn't need to be exact. Make a reasonable estimate."
-      : 'Det behöver inte vara exakt. Gör en rimlig uppskattning.',
-    explanationSecondary: isEn
-      ? 'You only do this once. After this, Dejz keeps track for you.'
-      : 'Det här gör du bara en gång. Därefter håller Dejz koll åt dig.',
+    headline,
+    helpText,
   };
 }
 
@@ -282,14 +256,51 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     );
   }, [presetSearch]);
 
+  // Lock body scroll and prevent background scroll while onboarding is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      window.scrollTo({ top: 0, behavior: 'instant' as any });
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        window.scrollTo({ top: 0, behavior: 'instant' as any });
+      };
+    }
+  }, [isOpen]);
+
   const popularPresets = useMemo(() => {
     const topIds = [
       'hyra-bostad',
+      'bostadslan-ranta',
+      'elavtal',
+      'hemforsakring',
+      'mobilabonnemang',
+      'bredband-hemma',
       'spotify-individual',
       'netflix-standard',
-      'elavtal',
-      'mobilabonnemang',
-      'sl-manadskort'
+      'sl-manadskort',
+      'csn-aterbetalning',
+      'bilforsakring',
+      'sats-gym',
+      'nordic-wellness',
+      'fitness24seven',
+      'akassa-unionen',
+      'youtube-premium',
+      'disney-plus',
+      'max-hbo',
+      'viaplay-film-serier',
+      'storytel-ljudbok',
+      'bookbeat',
+      'icloud-storage',
+      'chatgpt-plus',
+      'hedvig-hemforsakring',
+      'lansforsakringar-hem',
+      'vasttrafik-period',
+      'skanetrafiken-period',
+      'parkering-boende',
+      'friskis-svettis',
+      'djurforsakring-agria',
     ];
     return topIds
       .map(id => SWEDISH_EXPENSE_PRESETS.find(p => p.id === id))
@@ -383,7 +394,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     } else if (step === 'payday') {
       setStep('income');
     } else if (step === 'income') {
-      if (incomes.length === 0) return;
       setStep('expenses');
     } else if (step === 'expenses') {
       setStep('goals');
@@ -879,8 +889,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       <div className="pt-1">
                         <button 
                           onClick={handleNext}
-                          disabled={incomes.length === 0}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
                         >
                           <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
@@ -934,65 +943,67 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         )}
                       </div>
 
-                      {/* Presets Grid: 2 Columns for high readability, no text truncation */}
-                      {presetSearch.trim() && filteredPresets.length === 0 ? (
-                        <div className="p-3 text-center bg-[var(--surface-color)] rounded-[14px] border border-[var(--border-color)]">
-                          <p className="text-xs text-[var(--text-secondary)] font-medium">
-                            {s.noPresetsFound}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-2 gap-2 p-0.5">
-                          {(presetSearch.trim() ? filteredPresets : popularPresets).map((preset) => {
-                            const isAdded = fixedExpenses.some(
-                              e => e.name.trim().toLowerCase() === preset.name.trim().toLowerCase()
-                            );
-                            const mockTx = {
-                              id: preset.id,
-                              amount: preset.defaultAmount,
-                              merchant: preset.name,
-                              category: preset.category,
-                              type: 'expense' as const,
-                              timestamp: Date.now(),
-                            };
-                            return (
-                              <button
-                                key={preset.id}
-                                type="button"
-                                onClick={() => handleTogglePreset(preset)}
-                                className={`p-2.5 rounded-[16px] flex items-center justify-between gap-2 text-left transition-all cursor-pointer border relative min-h-[54px] ${
-                                  isAdded 
-                                    ? 'bg-[#E8F8F0] dark:bg-[#E8F8F0] border-[#05B862] shadow-2xs' 
-                                    : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border-[var(--border-color)] shadow-2xs'
-                                }`}
-                              >
-                                <div className="flex items-center gap-2 min-w-0 flex-1">
-                                  <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center shrink-0">
-                                    <TransactionLogo transaction={mockTx} config={config} size="sm" />
+                      {/* Presets Grid: Scrollable box showing ~6 cards at a time, scrollable for all 30 */}
+                      <div className="max-h-[196px] overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">
+                        {presetSearch.trim() && filteredPresets.length === 0 ? (
+                          <div className="p-3 text-center bg-[var(--surface-color)] rounded-[14px] border border-[var(--border-color)]">
+                            <p className="text-xs text-[var(--text-secondary)] font-medium">
+                              {s.noPresetsFound}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-2 p-0.5">
+                            {(presetSearch.trim() ? filteredPresets : popularPresets).map((preset) => {
+                              const isAdded = fixedExpenses.some(
+                                e => e.name.trim().toLowerCase() === preset.name.trim().toLowerCase()
+                              );
+                              const mockTx = {
+                                id: preset.id,
+                                amount: preset.defaultAmount,
+                                merchant: preset.name,
+                                category: preset.category,
+                                type: 'expense' as const,
+                                timestamp: Date.now(),
+                              };
+                              return (
+                                <button
+                                  key={preset.id}
+                                  type="button"
+                                  onClick={() => handleTogglePreset(preset)}
+                                  className={`p-2.5 rounded-[16px] flex items-center justify-between gap-2 text-left transition-all cursor-pointer border relative min-h-[54px] ${
+                                    isAdded 
+                                      ? 'bg-[#E8F8F0] dark:bg-[#E8F8F0] border-[#05B862] shadow-2xs' 
+                                      : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border-[var(--border-color)] shadow-2xs'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center shrink-0">
+                                      <TransactionLogo transaction={mockTx} config={config} size="sm" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className={`text-xs font-bold leading-tight break-words ${
+                                        isAdded ? 'text-[#1C1917]' : 'text-[var(--text-primary)]'
+                                      }`}>
+                                        {preset.name}
+                                      </p>
+                                      <p className={`text-[10.5px] font-amount font-semibold mt-0.5 ${
+                                        isAdded ? 'text-[#44403C]' : 'text-[var(--text-secondary)]'
+                                      }`}>
+                                        {formatAmount(preset.defaultAmount, lang)} kr
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className={`text-xs font-bold leading-tight break-words ${
-                                      isAdded ? 'text-[#1C1917]' : 'text-[var(--text-primary)]'
-                                    }`}>
-                                      {preset.name}
-                                    </p>
-                                    <p className={`text-[10.5px] font-amount font-semibold mt-0.5 ${
-                                      isAdded ? 'text-[#44403C]' : 'text-[var(--text-secondary)]'
-                                    }`}>
-                                      {formatAmount(preset.defaultAmount, lang)} kr
-                                    </p>
+                                  <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                                    isAdded ? 'bg-white text-[#05B862] border border-[#05B862]/30 shadow-2xs' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
+                                  }`}>
+                                    {isAdded ? <Check size={11} strokeWidth={3} className="text-[#05B862]" /> : <Plus size={11} />}
                                   </div>
-                                </div>
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                                  isAdded ? 'bg-white text-[#05B862] border border-[#05B862]/30 shadow-2xs' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
-                                }`}>
-                                  {isAdded ? <Check size={11} strokeWidth={3} className="text-[#05B862]" /> : <Plus size={11} />}
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
 
                       {/* Added Fixed Expenses List - Natural height without internal scroll */}
                       {fixedExpenses.length > 0 && (
@@ -1135,32 +1146,15 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           <>
                             <div className="text-center pb-2 sm:pb-2.5">
                               <OnboardingCharacterArt step="midMonth" days={daysSincePayday} payday={payday} />
-                              
-                              {/* Sekundär tidsindikator */}
-                              <p className="mt-4 sm:mt-5 text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                                {content.tagText}
-                              </p>
 
-                              {/* Huvudfråga */}
-                              <h3 className="mt-2 text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                              {/* Kombinerad huvudrubrik */}
+                              <h3 className="mt-4 sm:mt-5 text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight max-w-[360px] mx-auto leading-snug">
                                 {content.headline}
                               </h3>
-
-                              {/* Förklaring */}
-                              <div className="mt-2 space-y-1">
-                                <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[320px] mx-auto leading-relaxed">
-                                  {content.explanationPrimary}
-                                </p>
-                                {content.explanationSecondary && (
-                                  <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] font-normal max-w-[320px] mx-auto leading-relaxed">
-                                    {content.explanationSecondary}
-                                  </p>
-                                )}
-                              </div>
                             </div>
 
-                            {/* Enkelt beloppsfält: användaren anger ungefär spenderat belopp */}
-                            <div className="space-y-3">
+                            {/* Enkelt beloppsfält med sekundär hjälptext */}
+                            <div className="space-y-2">
                               <div className="relative">
                                 <input
                                   type="number"
@@ -1173,6 +1167,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                                   {config.currency || 'kr'}
                                 </span>
                               </div>
+                              <p className="text-center text-xs text-[var(--text-secondary)] font-medium">
+                                {content.helpText}
+                              </p>
                             </div>
 
                             <div className="pt-1">
