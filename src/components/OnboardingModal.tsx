@@ -66,9 +66,7 @@ const texts = {
     midMonthTitle: 'Kvar till nästa lön',
     midMonthDaysText: (days: number) => `${days} ${days === 1 ? 'dag' : 'dagar'} till nästa lön`,
     midMonthQuestion: 'Hur mycket har du kvar just nu?',
-    estimatedPrefix: 'Dejz beräknar att du har',
-    estimatedSuffix: 'kvar',
-    useEstimatedAction: 'Använd beloppet',
+    midMonthDesc: 'Ange ungefär hur mycket du har kvar att spendera fram till nästa lön. Det blir din startpunkt i Dejz.',
     dailyRateText: (daily: string) => `≈ ${daily} kr per dag`,
     
     // Step 7
@@ -124,9 +122,7 @@ const texts = {
     midMonthTitle: 'Remaining to Payday',
     midMonthDaysText: (days: number) => `${days} ${days === 1 ? 'day' : 'days'} to next payday`,
     midMonthQuestion: 'How much do you have left right now?',
-    estimatedPrefix: 'Dejz estimates you have',
-    estimatedSuffix: 'left',
-    useEstimatedAction: 'Use amount',
+    midMonthDesc: 'Enter roughly how much you have left to spend until your next payday. This will be your starting point in Dejz.',
     dailyRateText: (daily: string) => `≈ ${daily} per day`,
     
     // Step 7
@@ -304,9 +300,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     return isEn ? `${targetDate.getDate()} ${mName}` : `${payday}:e ${mName}`;
   }, [payday, isEn]);
 
-  // For Step 6 mid-month input and daily rate calculation
-  const activeAmountForRemainingDays = midMonthSpent.trim() !== '' ? Math.max(0, Number(midMonthSpent) || 0) : monthlyDisposablePot;
-  const dailyRate = Math.round(activeAmountForRemainingDays / daysUntilPayday);
+  // For Step 6 mid-month input and daily rate calculation: computed from user-entered start amount
+  const hasEnteredMidMonthAmount = midMonthSpent.trim() !== '' && !isNaN(Number(midMonthSpent));
+  const userEnteredMidMonthAmount = hasEnteredMidMonthAmount ? Math.max(0, Number(midMonthSpent)) : null;
+  const userDailyRate = userEnteredMidMonthAmount !== null ? Math.round(userEnteredMidMonthAmount / daysUntilPayday) : 0;
 
   const handleNext = () => {
     if (step === 'name') {
@@ -369,8 +366,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
         initialSpent = forceInitialSpent;
       } else if (midMonthSpent.trim() !== '') {
         const targetAmount = Math.max(0, Number(midMonthSpent) || 0);
-        const pot = Math.max(0, totalIncome - totalFixed - totalMonthlySavings);
-        initialSpent = Math.max(0, pot - targetAmount);
+        initialSpent = Math.max(0, monthlyDisposablePot - targetAmount);
       }
 
       const finalGoals = savingsGoals.length > 0 
@@ -1014,6 +1010,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         <h3 className="mt-2 text-xl font-bold text-[var(--text-primary)] tracking-tight">
                           {s.midMonthQuestion}
                         </h3>
+                        <p className="mt-1.5 text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[320px] mx-auto leading-relaxed">
+                          {s.midMonthDesc}
+                        </p>
                       </div>
 
                       {/* Main Remaining Amount Input */}
@@ -1023,7 +1022,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             type="number"
                             value={midMonthSpent}
                             onChange={(e) => setMidMonthSpent(e.target.value)}
-                            placeholder={monthlyDisposablePot > 0 ? monthlyDisposablePot.toString() : '0'}
+                            placeholder="0"
                             className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[20px] px-4 py-3.5 pr-14 text-center text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-tertiary)]"
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
@@ -1031,32 +1030,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           </span>
                         </div>
 
-                        {/* Simplified Daily Rate: ≈ 879 kr per dag (visuellt sekundärt) */}
-                        {activeAmountForRemainingDays > 0 && (
+                        {/* Dagsbelopp: visas först när användaren har angett ett belopp */}
+                        {hasEnteredMidMonthAmount && userEnteredMidMonthAmount !== null && userEnteredMidMonthAmount > 0 && (
                           <div className="text-center">
                             <p className="text-xs font-medium text-[var(--text-secondary)] font-amount tabular-nums">
-                              {s.dailyRateText(formatAmount(dailyRate, lang))}
+                              {s.dailyRateText(formatAmount(userDailyRate, lang))}
                             </p>
                           </div>
                         )}
-
-                        {/* Calculated Reference Area: Dejz beräknar att du har 21 973 kr kvar + Använd beloppet */}
-                        <div className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] p-3 sm:p-3.5 flex items-center justify-between gap-3 shadow-2xs">
-                          <p className="text-xs text-[var(--text-secondary)] font-medium leading-snug min-w-0">
-                            {s.estimatedPrefix}{' '}
-                            <strong className="text-[var(--text-primary)] font-amount font-bold">
-                              {formatAmount(monthlyDisposablePot, lang)} {config.currency || 'kr'}
-                            </strong>{' '}
-                            {s.estimatedSuffix}
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => setMidMonthSpent(monthlyDisposablePot.toString())}
-                            className="px-3 py-1.5 rounded-[12px] bg-[var(--surface-muted)] hover:bg-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] border border-[var(--border-color)] transition-all cursor-pointer active:scale-95 shrink-0"
-                          >
-                            {s.useEstimatedAction}
-                          </button>
-                        </div>
                       </div>
 
                       <div className="pt-1">
