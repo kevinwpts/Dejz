@@ -608,39 +608,6 @@ export default function App() {
 
   const tabScrollPositions = useRef<Record<string, number>>({});
 
-  // Continuously record scroll position for current active tab (ignore while onboarding)
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          if (activeTab && !isOnboarding) {
-            tabScrollPositions.current[activeTab] = window.scrollY;
-          }
-          setIsAtTop(window.scrollY <= 10);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [activeTab, isOnboarding]);
-
-  // When exiting onboarding, always start at the very top of Home
-  useEffect(() => {
-    if (!isOnboarding) {
-      tabScrollPositions.current['today'] = 0;
-      window.scrollTo({ top: 0, behavior: 'instant' as any });
-      const t1 = setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' as any }), 50);
-      const t2 = setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' as any }), 150);
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-      };
-    }
-  }, [isOnboarding]);
-
   // Instantly restore previous scroll position when switching to any tab
   useLayoutEffect(() => {
     const savedY = tabScrollPositions.current[activeTab] ?? 0;
@@ -1417,6 +1384,39 @@ export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [showWelcome, setShowWelcome] = useState(true);
   const [isOnboarding, setIsOnboarding] = useState(false);
+
+  // Continuously record scroll position for current active tab (ignore while onboarding)
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (activeTab && !isOnboarding) {
+            tabScrollPositions.current[activeTab] = window.scrollY;
+          }
+          setIsAtTop(window.scrollY <= 10);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [activeTab, isOnboarding]);
+
+  // When exiting onboarding, always start at the very top of Home
+  useEffect(() => {
+    if (!isOnboarding) {
+      tabScrollPositions.current['today'] = 0;
+      window.scrollTo({ top: 0, behavior: 'instant' as any });
+      const t1 = setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' as any }), 50);
+      const t2 = setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' as any }), 150);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    }
+  }, [isOnboarding]);
 
   const [initialIsRegistering, setInitialIsRegistering] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
