@@ -33,6 +33,7 @@ import {
 import { useVoiceExpense } from "./hooks/useVoiceExpense";
 import { parseQuickExpense } from "./utils/expenseAiParser";
 import { SmartInput } from "./components/ui";
+import { applyThemeColor } from "./utils/theme";
 
 
 import { CalendarModal } from './components/CalendarModal';
@@ -1491,6 +1492,9 @@ export default function App() {
         document.body.classList.add("light");
       }
 
+      const userThemeHex = config?.themeColor || '#635BFF';
+      applyThemeColor(userThemeHex, isDark);
+
       const themeColor = isDark ? "#232323" : "#F2EFE8";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
@@ -1524,7 +1528,7 @@ export default function App() {
         return () => mediaQuery.removeListener(handleSystemThemeChange);
       }
     }
-  }, [config?.themeMode, config?.darkMode]);
+  }, [config?.themeMode, config?.darkMode, config?.themeColor]);
 
   // --- URL Routing & Language Subpath Sync ---
   useEffect(() => {

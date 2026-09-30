@@ -102,7 +102,7 @@ export function GreetingModule({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full bg-white dark:bg-[#242424] rounded-[20px] p-[20px] border border-[#E2DDD4] dark:border-[#383838] shadow-none mb-[24px] select-none"
+        className="w-full bg-white/88 dark:bg-[#242424]/90 backdrop-blur-[2px] rounded-[20px] p-[20px] border border-[#E2DDD4]/80 dark:border-[#383838] shadow-none mb-[24px] select-none"
       >
         {/* UPPER PART */}
         <div className="flex items-start justify-between gap-4">
@@ -129,9 +129,9 @@ export function GreetingModule({
             </div>
           </div>
 
-          {/* Top Right: 52 x 52 px circle with soft purple bg and purple wallet outline icon */}
-          <div className="w-[52px] h-[52px] rounded-full bg-[#F3F0FF] dark:bg-[#2B2342] flex items-center justify-center shrink-0">
-            <Wallet size={24} className="text-[#635BFF] dark:text-[#9B93FF]" strokeWidth={1.75} />
+          {/* Top Right: 52 x 52 px circle with soft theme bg and theme wallet outline icon */}
+          <div className="w-[52px] h-[52px] rounded-full bg-[var(--accent-soft)] flex items-center justify-center shrink-0">
+            <Wallet size={24} className="text-[var(--accent-color)]" strokeWidth={1.75} />
           </div>
         </div>
 

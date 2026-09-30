@@ -454,12 +454,21 @@ export function TodayView({
 
   return (
     <div className="relative font-sans">
-      {/* SOLID FLAT BACKGROUND LAYER (Seamless app neutral dark gray) */}
+      {/* SOLID FLAT BACKGROUND LAYER (Seamless app neutral canvas) */}
       <div 
         className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-colors duration-300"
         style={{
           height: '100vh',
           backgroundColor: 'var(--bg-color)',
+        }}
+      />
+
+      {/* SUBTLE THEME TINT GRADIENT ON UPPER HOME */}
+      <div 
+        className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-opacity duration-500"
+        style={{
+          height: '65vh',
+          background: 'linear-gradient(180deg, var(--user-home-bg-from, rgba(99, 91, 255, 0.08)) 0%, var(--user-home-bg-to, rgba(99, 91, 255, 0.015)) 100%)',
         }}
       />
 
@@ -513,7 +522,7 @@ export function TodayView({
                   <button
                     type="button"
                     onClick={() => onNavigate("budget", "category-budgets")}
-                    className="text-xs font-medium text-[#635BFF] dark:text-[#7C75FF] hover:opacity-80 transition-opacity cursor-pointer active:scale-95 touch-manipulation py-0.5 px-1"
+                    className="text-xs font-medium text-[var(--accent-color)] hover:opacity-80 transition-opacity cursor-pointer active:scale-95 touch-manipulation py-0.5 px-1"
                   >
                     {lang === 'en' ? 'Manage' : 'Hantera'}
                   </button>

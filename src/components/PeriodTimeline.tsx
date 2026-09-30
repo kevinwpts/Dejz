@@ -269,7 +269,7 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-[#635BFF] text-white border-transparent shadow-xs scale-105 font-medium z-10 opacity-100'
+                  ? 'bg-[var(--accent-color)] text-white border-transparent shadow-xs scale-105 font-medium z-10 opacity-100'
                   : hasCategoryMatch
                   ? 'bg-black/5 text-[#1C1917] border border-[#1C1917]/20 dark:bg-white/[0.08] dark:text-white dark:border-white/20 hover:bg-black/10 dark:hover:bg-white/[0.1] scale-100 opacity-100'
                   : isRealToday
@@ -302,7 +302,7 @@ export function PeriodTimeline({
               {/* Fixed Item or Category Match Indicator Dot */}
               {((showFixedInCalendar && day.hasFixedItems) || (hasCategoryMatch && !isSelected)) && (
                 <span className={`w-1 h-1 rounded-full absolute bottom-1 shadow-none ${
-                  isSelected ? 'bg-white' : 'bg-[#635BFF]'
+                  isSelected ? 'bg-white' : 'bg-[var(--accent-color)]'
                 }`} />
               )}
             </button>

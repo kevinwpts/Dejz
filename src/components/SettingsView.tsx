@@ -301,6 +301,14 @@ export function SettingsView({
     );
   };
 
+  const THEME_COLOR_OPTIONS = [
+    { id: 'dejz', name: 'Dejz', hex: '#635BFF' },
+    { id: 'blue', name: 'Blå', hex: '#3B82F6' },
+    { id: 'green', name: 'Grön', hex: '#16B878' },
+    { id: 'pink', name: 'Rosa', hex: '#EC5F8D' },
+    { id: 'orange', name: 'Orange', hex: '#F59E42' },
+  ];
+
   const renderAppearanceSettings = () => {
     return (
       <div className="space-y-6 w-full py-2">
@@ -330,6 +338,46 @@ export function SettingsView({
                 >
                   {mode.icon}
                   <span className="text-xs font-bold">{mode.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Temafärg */}
+        <div className="space-y-3 pt-2">
+          <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-1">
+            Temafärg
+          </label>
+          <div className="grid grid-cols-5 gap-2 sm:gap-3">
+            {THEME_COLOR_OPTIONS.map((theme) => {
+              const currentHex = (config.themeColor || '#635BFF').toLowerCase();
+              const isSelected = currentHex === theme.hex.toLowerCase();
+
+              return (
+                <button
+                  key={theme.id}
+                  type="button"
+                  onClick={() => {
+                    setConfig({ ...config, themeColor: theme.hex });
+                  }}
+                  className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[16px] border transition-all cursor-pointer active:scale-95 ${
+                    isSelected
+                      ? 'bg-white dark:bg-[#242424] border-[var(--accent-color)] shadow-xs'
+                      : 'bg-white/60 dark:bg-[#242424]/60 border-[#E6E2D8] dark:border-[#383838] hover:border-black/20 dark:hover:border-white/20'
+                  }`}
+                >
+                  <div
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white transition-transform"
+                    style={{ backgroundColor: theme.hex }}
+                  >
+                    {isSelected && <Check size={15} strokeWidth={2.5} />}
+                  </div>
+                  <span className={`text-[11px] font-medium tracking-tight truncate w-full text-center ${
+                    isSelected ? 'text-[#1C1917] dark:text-white font-semibold' : 'text-[#6E6961] dark:text-[#A8A8A8]'
+                  }`}>
+                    {theme.name}
+                  </span>
                 </button>
               );
             })}
