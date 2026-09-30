@@ -545,16 +545,18 @@ export function AnalysisView({
                                   className="flex items-center justify-between p-3 rounded-[12px] bg-white dark:bg-[#242424] hover:bg-[var(--surface-muted)] dark:hover:bg-[#333333] transition-colors cursor-pointer border border-[#E2DDD4]/60 dark:border-[#383838]"
                                 >
                                   <div className="min-w-0">
-                                    <p className="text-[14px] font-medium text-[#211F1C] dark:text-white truncate">
+                                    <p className="text-[15px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight">
                                       {fe.name}
                                     </p>
-                                    <p className="text-[12px] text-[#6D6962] dark:text-[#A8A8A8]">
+                                    <p className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5 tracking-tight">
                                       {isEn ? 'Fixed expense' : 'Fast utgift'}
                                     </p>
                                   </div>
-                                  <span className="text-[14px] font-medium text-[#211F1C] dark:text-white tabular-nums">
-                                    {formatAmount(Math.round(fe.amount), config.language)} {config.currency}
-                                  </span>
+                                  <p className="text-[15px] font-medium whitespace-nowrap tracking-tight text-[#211F1C] dark:text-white pl-2">
+                                    <span className="opacity-75 mr-0.5">−</span>
+                                    <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(fe.amount), config.language)}</span>
+                                    <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px]">{config.currency}</span>
+                                  </p>
                                 </div>
                               ))}
                             </div>

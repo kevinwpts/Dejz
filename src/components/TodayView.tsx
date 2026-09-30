@@ -721,26 +721,29 @@ export function TodayView({
                         onViewFixedExpense(item.originalItem);
                       }
                     }}
-                    className="flex items-center justify-between px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px] rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] transition-all cursor-pointer shadow-none border-none group"
+                    className="flex items-center justify-between px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[64px] rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] transition-all cursor-pointer shadow-none border border-[#E2DDD4] dark:border-[#383838] group"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-[var(--surface-muted)] dark:bg-[#2D2D2D] border-none flex items-center justify-center shrink-0">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="flex-shrink-0">
                         <BudgetItemLogo item={item.originalItem} type={item.type as any} config={config} />
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-xs sm:text-[13.5px] font-semibold text-[#1C1917] dark:text-white truncate">
+                      <div className="min-w-0 flex-1 flex flex-col justify-center">
+                        <p className="text-[15px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight">
                           {item.merchant}
                         </p>
-                        <p className="text-[11px] font-normal text-[#8C867C] dark:text-[#A8A8A8] truncate mt-0.5">
+                        <p className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5 tracking-tight">
                           {item.category}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <span className={`text-xs sm:text-sm font-semibold font-amount tabular-nums ${
-                        item.type === "income" ? "text-[#1C1917] dark:text-white" : "text-[#1C1917] dark:text-white"
-                      }`}>
-                        {item.type === "income" ? "+" : "−"}{formatAmount(item.amount, lang)} {config?.currency || 'kr'}
+                    <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
+                      <p className="text-[15px] font-medium whitespace-nowrap tracking-tight text-[#211F1C] dark:text-white">
+                        <span className="opacity-75 mr-0.5">{item.type === "income" ? "+" : "−"}</span>
+                        <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(item.amount, lang)}</span>
+                        <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px]">{config?.currency || 'kr'}</span>
+                      </p>
+                      <span className="text-[12px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap">
+                        {item.type === 'income' ? (lang === 'en' ? 'Fixed income' : 'Fast inkomst') : (lang === 'en' ? 'Fixed expense' : 'Fast utgift')}
                       </span>
                     </div>
                   </div>

@@ -70,14 +70,14 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           <p 
-            className="text-[14px] sm:text-[14.5px] font-semibold text-[#1C1917] dark:text-white leading-tight truncate tracking-tight"
+            className="text-[15px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight"
             title={displayName}
           >
             {displayName}
           </p>
-          <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden text-[#6E6961] dark:text-[#A8A8A8]">
+          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#6D6962] dark:text-[#A8A8A8]">
             {!isSaving && item.category && (
-              <div className="inline-flex items-center gap-1 shrink-0 max-w-full text-[#6E6961] dark:text-[#A8A8A8]">
+              <div className="inline-flex items-center gap-1 shrink-0 max-w-full text-[#6D6962] dark:text-[#A8A8A8]">
                 {(() => {
                   const searchCategory = (item.category || '').trim().toLowerCase();
                   const category = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
@@ -95,7 +95,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                   }
                   return null;
                 })()}
-                <span className="text-xs font-normal tracking-tight whitespace-nowrap truncate max-w-[130px] sm:max-w-[180px]">
+                <span className="text-[13px] font-normal tracking-tight whitespace-nowrap truncate max-w-[130px] sm:max-w-[180px] text-[#6D6962] dark:text-[#A8A8A8]">
                   {capitalize(item.category || '')}
                 </span>
               </div>
@@ -105,17 +105,17 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
       </div>
       
       {/* Right side: Amount + Deduction metadata */}
-      <div className="flex flex-col items-end justify-center shrink-0 max-w-[46%] sm:max-w-[42%] text-right pl-1">
-        <p className={`text-[14px] sm:text-[14.5px] font-medium whitespace-nowrap tracking-tight ${type === 'income' ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white' : 'text-[#1C1917] dark:text-white'}`}>
-          <span className="opacity-75 mr-0.5 text-[13px] font-medium">{type === 'income' ? '+' : '−'}</span>
+      <div className="flex flex-col items-end justify-center shrink-0 max-w-[46%] sm:max-w-[42%] text-right pl-2">
+        <p className="text-[15px] font-medium whitespace-nowrap tracking-tight text-[#211F1C] dark:text-white">
+          <span className="opacity-75 mr-0.5">{type === 'income' ? '+' : '−'}</span>
           <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
-          <span className="text-[12px] font-normal text-[#8C867C] dark:text-[#A8A8A8] ml-1">{currency}</span>
+          <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px]">{currency}</span>
         </p>
 
         {/* Right-aligned deduction metadata under amount */}
-        <div className="flex flex-col items-end gap-0.5 mt-0.5 justify-end max-w-full overflow-hidden text-[#8C867C] dark:text-[#A8A8A8]">
+        <div className="flex flex-col items-end gap-0.5 mt-0.5 justify-end max-w-full overflow-hidden text-[#777168] dark:text-[#71717A]">
           {(dayString || paymentString) && (
-            <span className="text-[11px] font-normal tracking-tight truncate">
+            <span className="text-[12px] font-normal tracking-tight truncate tabular-nums">
               {dayString && <span>{dayString}</span>}
               {dayString && paymentString && <span className="mx-1 opacity-50">·</span>}
               {paymentString && <span className="truncate max-w-[70px] sm:max-w-[100px]">{paymentString}</span>}
