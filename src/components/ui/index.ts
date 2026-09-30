@@ -14,4 +14,7 @@ export * from './FilterSelectButton';
 export * from './FilterMenuModal';
 export * from './SmartInput';
 export * from './SelectionRow';
+export * from './BottomSheetHeader';
+export * from './MerchantLogo';
+
 
