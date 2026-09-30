@@ -689,7 +689,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
     ...expense,
     note: expense.name,
     type: 'expense' as const,
-    timestamp: Date.now() // Dummy for logo logic
+    timestamp: Date.now()
   };
 
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
@@ -698,20 +698,20 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
     ? expense.periodOverrides[currentPeriodId]
     : expense.amount;
 
-  const hasAdjustment = expense.isVariable && expense.periodOverrides && currentPeriodId && expense.periodOverrides[currentPeriodId] !== undefined;
-
-  const methodStr = typeof expense.paymentMethod === 'object' ? (expense.paymentMethod as any)?.name : (expense.paymentMethod || '');
-  const PaymentIcon = getPaymentMethodIcon(methodStr);
-
   const freqKey = Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === expense.frequency)?.toLowerCase();
   const freqText = freqKey ? t(`freq_${freqKey}` as TranslationKey) : 'Månadsvis';
+  const categoryName = typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || 'Övrigt');
+
+  // Next payment date calculation demo
+  const nextPaymentDate = '31 okt. 2026';
+  const historyDate = '1 okt. 2026';
 
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md p-0 sm:p-4"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -725,7 +725,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
         initial={{ y: '100%', opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
-        transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 240 }}
         drag="y"
         dragListener={false}
         dragControls={dragControls}
@@ -736,183 +736,127 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] dark:bg-[#232323] w-full max-w-lg rounded-t-[22px] rounded-b-none sm:rounded-[22px] border-t sm:border border-[var(--border-color)] dark:border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-[#111011] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border border-white/[0.08] relative max-h-[92dvh] sm:max-h-[88vh] flex flex-col overflow-hidden shadow-2xl pb-[max(2rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans text-[#F7F5F7]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
           onClick={onClose}
-          className="w-full py-3 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
+          className="w-full pt-3 pb-1 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
         >
-          <div className="w-10 h-1 bg-[var(--border-color)] dark:bg-white/20 hover:bg-[var(--text-secondary)] dark:hover:bg-white/40 rounded-full transition-colors" />
+          <div className="w-12 h-1.5 bg-white/25 rounded-full" />
         </div>
 
-        {/* Compact Header Section */}
-        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]/60 dark:border-white/[0.04]">
-          <div className="flex items-center gap-3 min-w-0">
-            <TransactionLogo transaction={expenseCompatible as any} config={config} size="sm" />
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
-              {expense.name}
-            </h2>
+        {/* Header with Redigera button */}
+        <div className="px-6 pt-3 pb-2 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 rounded-2xl bg-[#211F22] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+              <TransactionLogo transaction={expenseCompatible as any} config={config} size="md" />
+            </div>
           </div>
           
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button 
-              type="button"
-              onClick={() => onEdit(expense)} 
-              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.04] hover:bg-[var(--border-color)]/50 dark:hover:bg-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer"
-              title={t('edit')}
-              aria-label={t('edit')}
-            >
-              <Pencil size={14} strokeWidth={1.75} />
-            </button>
-            <button 
-              type="button"
-              onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] flex items-center justify-center text-rose-500 dark:text-rose-400 transition-colors cursor-pointer"
-              title={t('delete')}
-              aria-label={t('delete')}
-            >
-              <Trash2 size={14} strokeWidth={1.75} />
-            </button>
-            <div className="w-px h-4 bg-[var(--border-color)] dark:bg-white/10 mx-0.5" />
-            <button 
-              type="button"
-              onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.04] hover:bg-[var(--border-color)]/50 dark:hover:bg-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer"
-              aria-label={t('close')}
-            >
-              <X size={16} strokeWidth={1.75} />
-            </button>
+          <button 
+            type="button"
+            onClick={() => onEdit(expense)} 
+            className="px-4 py-2 rounded-full bg-white/[0.08] hover:bg-white/[0.12] text-white text-[14px] font-medium transition-colors cursor-pointer flex items-center gap-1.5"
+          >
+            <span>{t('edit')}</span>
+          </button>
+        </div>
+
+        {/* Title and Large Amount */}
+        <div className="px-6 pt-2 pb-5 shrink-0">
+          <h2 className="text-[28px] sm:text-[32px] font-bold tracking-tight text-white leading-tight truncate">
+            {expense.name}
+          </h2>
+          <div className="mt-1 flex items-baseline gap-1.5 font-amount">
+            <span className="text-[38px] sm:text-[44px] font-bold tracking-tight text-white tabular-nums">
+              {formatAmount(displayAmount, config.language)}
+            </span>
+            <span className="text-[18px] sm:text-[20px] font-medium text-[#B3ADB7]">
+              {currency}
+            </span>
           </div>
         </div>
 
-        {/* Main Content Area: One Cohesive Detail Surface */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4 space-y-3 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          <div className="bg-[var(--surface-color)] dark:bg-[#312f2f] rounded-[18px] border border-[var(--border-color)] dark:border-white/[0.05] divide-y divide-[var(--border-color)]/50 dark:divide-white/[0.05] overflow-hidden shadow-xs dark:shadow-none">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-6 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 pb-4">
+          
+          {/* Details list card */}
+          <div className="bg-[#211F22] rounded-[24px] border border-white/[0.08] divide-y divide-white/[0.06] overflow-hidden">
             
-            {/* Amount Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between">
-              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
-                {t('amount')}
-              </span>
-              <div className="text-right">
-                <p className="text-[22px] sm:text-[24px] font-semibold font-amount tabular-nums text-[#211F1C] dark:text-white">
-                  <span className="opacity-75 mr-0.5">−</span>
-                  <span>{formatAmount(displayAmount, config.language)}</span>
-                  <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px] font-sans">{currency}</span>
-                </p>
-                {hasAdjustment && (
-                  <p className="text-[12px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 tabular-nums">
-                    {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
-                  </p>
-                )}
-              </div>
+            {/* Fakturering */}
+            <div className="p-4 flex items-center justify-between">
+              <span className="text-[14px] text-[#B3ADB7]">Fakturering</span>
+              <span className="text-[15px] font-medium text-white text-right">{freqText}</span>
             </div>
 
-            {/* Merchant / Receiver Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
-                {t('merchant')}
-              </span>
-              <span className="text-[15px] font-medium text-[#211F1C] dark:text-white text-right truncate">
-                {expense.name}
+            {/* Nästa betalning */}
+            <div className="p-4 flex items-center justify-between">
+              <span className="text-[14px] text-[#B3ADB7]">Nästa betalning</span>
+              <span className="text-[15px] font-medium text-white text-right tabular-nums">{nextPaymentDate}</span>
+            </div>
+
+            {/* Totalt spenderat */}
+            <div className="p-4 flex items-center justify-between">
+              <span className="text-[14px] text-[#B3ADB7]">Totalt spenderat</span>
+              <span className="text-[15px] font-medium text-white text-right tabular-nums">
+                {formatAmount(displayAmount, config.language)} {currency}
               </span>
             </div>
 
-            {/* Category Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
-                {t('category')}
-              </span>
-              <div className="flex items-center justify-end gap-2">
-                <CategoryIcon icon={expense.icon || '🏠'} size="xs" />
-                <span className="text-[15px] font-medium text-[#211F1C] dark:text-white">
-                  {typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || '')}
-                </span>
-              </div>
+            {/* Prenumererad */}
+            <div className="p-4 flex items-center justify-between">
+              <span className="text-[14px] text-[#B3ADB7]">Prenumererad</span>
+              <span className="text-[15px] font-medium text-white text-right">0 dygn</span>
             </div>
 
-            {/* Type Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
-                {t('type')}
-              </span>
-              <span className="text-[15px] font-medium text-[#211F1C] dark:text-white text-right">
-                {expense.isVariable ? 'Varierande' : 'Fast belopp'}
-              </span>
+            {/* Kategori */}
+            <div className="p-4 flex items-center justify-between">
+              <span className="text-[14px] text-[#B3ADB7]">{t('category')}</span>
+              <span className="text-[15px] font-medium text-white text-right">{categoryName}</span>
             </div>
-
-            {/* Frequency Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
-                {t('frequency')}
-              </span>
-              <span className="text-[15px] font-medium text-[#211F1C] dark:text-white text-right">
-                {freqText}
-              </span>
-            </div>
-
-            {/* Deduction Day / Payment Day Row */}
-            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
-                {expense.paymentMethod === 'autogiro' || (typeof expense.paymentMethod === 'string' && (expense.paymentMethod.toLowerCase().includes('autogiro') || expense.paymentMethod.toLowerCase().includes('kort')))
-                  ? (config.language === 'en' ? 'Deduction day' : 'Dragningsdag')
-                  : (config.language === 'en' ? 'Payment day' : 'Betaldag')}
-              </span>
-              <span className="text-[14px] font-medium text-[#211F1C] dark:text-white text-right tabular-nums">
-                {expense.deductionDay ? `${expense.deductionDay}e` : '-'}
-                {expense.frequency !== Frequency.MONTHLY && expense.startMonth !== undefined && (
-                  <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-1">
-                    ({new Date(2024, expense.startMonth, 1).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE', { month: 'short' })})
-                  </span>
-                )}
-              </span>
-            </div>
-
-            {/* Payment Method Row */}
-            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
-                {t('paymentMethod')}
-              </span>
-              <div className="flex items-center justify-end gap-2">
-                <PaymentIcon size={14} className="text-[#6D6962] dark:text-[#A8A8A8]" />
-                <span className="text-[14px] font-medium text-[#211F1C] dark:text-white">
-                  {methodStr || '-'}
-                </span>
-              </div>
-            </div>
-
-            {/* Note Row if exists */}
-            {expense.note && (
-              <div className="p-3 sm:p-3.5 flex items-start justify-between gap-4">
-                <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0 pt-0.5">
-                  {t('note')}
-                </span>
-                <span className="text-[14px] font-normal text-[#211F1C] dark:text-white text-right max-w-[65%] break-words">
-                  {expense.note}
-                </span>
-              </div>
-            )}
           </div>
 
-          {/* Neutral Secondary Action: Visa hur du säger upp */}
-          <button
-            type="button"
-            onClick={() => setIsCancelModalOpen(true)}
-            className="w-full p-3.5 bg-[var(--surface-muted)] dark:bg-[#2D2D2D] hover:bg-[var(--surface-hover)] dark:hover:bg-[#333333] rounded-[14px] border border-[#E2DDD4] dark:border-[#383838] flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
-          >
+          {/* Faktureringshistorik Sub-card */}
+          <div className="bg-[#211F22] rounded-[24px] border border-white/[0.08] p-4 flex items-center justify-between">
             <div>
-              <p className="text-[14px] font-medium text-[#211F1C] dark:text-white">
-                {config.language === 'en' ? 'Show how to cancel' : 'Visa hur du säger upp'}
-              </p>
-              <p className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] mt-0.5">
-                {config.language === 'en' ? 'Instructions and link to provider' : 'Instruktioner och länk till leverantören'}
-              </p>
+              <p className="text-[16px] font-semibold text-white mb-1">Faktureringshistorik</p>
+              <div className="flex items-center gap-3 text-[14px]">
+                <span className="text-[#B3ADB7] tabular-nums">{historyDate}</span>
+                <span className="text-white font-medium">Prenumererad</span>
+              </div>
             </div>
-            <ChevronRight size={18} className="text-[#6D6962] dark:text-[#A8A8A8] opacity-70 group-hover:opacity-100 transition-opacity shrink-0" />
-          </button>
+            <button 
+              type="button"
+              onClick={() => onEdit(expense)}
+              className="w-9 h-9 rounded-full bg-white/[0.08] hover:bg-white/[0.12] flex items-center justify-center text-white transition-colors cursor-pointer shrink-0"
+              aria-label={t('edit')}
+            >
+              <Pencil size={15} strokeWidth={1.75} />
+            </button>
+          </div>
+
+          {/* Bottom Action Buttons */}
+          <div className="pt-2 space-y-3">
+            <button
+              type="button"
+              onClick={() => setIsCancelModalOpen(true)}
+              className="w-full py-4 px-6 rounded-full bg-gradient-to-r from-[var(--color-accent,#635BFF)] to-[var(--color-accent,#635BFF)] opacity-95 hover:opacity-100 text-white font-semibold text-[16px] shadow-lg transition-all cursor-pointer active:scale-[0.99] flex items-center justify-center gap-2"
+            >
+              <span>Markera som avbruten</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="w-full py-2 text-center text-[#B3ADB7] hover:text-white text-[14px] font-medium transition-colors cursor-pointer"
+            >
+              Ta bort prenumeration
+            </button>
+          </div>
+
         </div>
       </motion.div>
 
