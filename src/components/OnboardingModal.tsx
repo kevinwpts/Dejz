@@ -1,19 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, Search, X, PiggyBank, ArrowDownRight, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, Search, X, PiggyBank, ArrowDownRight, ArrowUpRight, ShieldCheck, Receipt } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
-import { Config, Frequency, Category } from '../types';
+import { Config, Frequency, Category, FixedExpense, Income, SavingsGoal, PaydayType, WeekendAdjustment } from '../types';
 import { formatAmount } from '../utils/format';
+import { getPeriodBoundaries } from '../utils/date';
 import { FixedExpenseModal, IncomeModal } from './BudgetModals';
 import { useScrollLock } from '../hooks/useScrollLock';
-import { FixedExpense, Income, SavingsGoal } from '../types';
 import { BudgetItem } from './BudgetItem';
 import { TransactionLogo } from './TransactionLogo';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
 import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 import { parseIncomePrompt } from '../utils/incomeAiParser';
 import { SmartInput } from './ui';
+import { ToggleSwitch } from './ToggleSwitch';
 
 export type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
 
@@ -40,6 +41,8 @@ const texts = {
     paydayDesc: 'Det avgör din ekonomiska period.',
     customDay: 'Annan dag',
     everyMonth: ':e varje månad',
+    paydayBeforeWeekendTitle: 'Lön tidigare vid helg',
+    paydayBeforeWeekendDesc: 'Om din lönedag infaller på en helg räknar Dejz med att lönen kommer föregående vardag.',
     
     // Step 3
     incomeTitle: 'Månadsinkomst',
@@ -63,11 +66,7 @@ const texts = {
     savingsDesc: 'Vi räknar bort det innan vi visar vad du har kvar att använda.',
     
     // Step 6
-    midMonthTitle: 'Kvar till nästa lön',
-    midMonthDaysText: (days: number) => `${days} ${days === 1 ? 'dag' : 'dagar'} till nästa lön`,
-    midMonthQuestion: 'Hur mycket har du kvar just nu?',
-    midMonthDesc: 'Ange ungefär hur mycket du har kvar att spendera fram till nästa lön. Det blir din startpunkt i Dejz.',
-    dailyRateText: (daily: string) => `≈ ${daily} kr per dag`,
+    midMonthTitle: 'Start i perioden',
     
     // Step 7
     summaryTitle: 'Din plan',
@@ -76,6 +75,7 @@ const texts = {
     incomeLabel: 'Inkomst',
     fixedCostsLabel: 'Fasta kostnader',
     savingsLabel: 'Månadssparande',
+    spentSoFarLabel: 'Spenderat hittills',
     freeSpendLabel: 'Kvar att använda',
     openDejz: 'Öppna Dejz',
     
@@ -96,6 +96,8 @@ const texts = {
     paydayDesc: 'This determines your financial period.',
     customDay: 'Other day',
     everyMonth: 'th of every month',
+    paydayBeforeWeekendTitle: 'Pay early if weekend',
+    paydayBeforeWeekendDesc: 'If your payday falls on a weekend, Dejz counts it as arriving on the previous weekday.',
     
     // Step 3
     incomeTitle: 'Monthly Income',
@@ -119,11 +121,7 @@ const texts = {
     savingsDesc: 'We deduct it before showing what you have available to spend.',
     
     // Step 6
-    midMonthTitle: 'Remaining to Payday',
-    midMonthDaysText: (days: number) => `${days} ${days === 1 ? 'day' : 'days'} to next payday`,
-    midMonthQuestion: 'How much do you have left right now?',
-    midMonthDesc: 'Enter roughly how much you have left to spend until your next payday. This will be your starting point in Dejz.',
-    dailyRateText: (daily: string) => `≈ ${daily} per day`,
+    midMonthTitle: 'Start of period',
     
     // Step 7
     summaryTitle: 'Your Plan',
@@ -132,6 +130,7 @@ const texts = {
     incomeLabel: 'Income',
     fixedCostsLabel: 'Fixed Expenses',
     savingsLabel: 'Monthly Savings',
+    spentSoFarLabel: 'Spent so far',
     freeSpendLabel: 'Available to spend',
     openDejz: 'Open Dejz',
     
@@ -142,6 +141,54 @@ const texts = {
 
 const QUICK_PAYDAYS = [25, 27, 30, 1];
 const SAVINGS_PRESETS = [0, 1000, 2000, 3000, 5000];
+
+function getStep6DynamicContent(daysSince: number, isEn: boolean) {
+  if (daysSince >= 1 && daysSince <= 3) {
+    return {
+      tagText: isEn
+        ? (daysSince === 1 ? 'You got paid 1 day ago' : `You got paid ${daysSince} days ago`)
+        : (daysSince === 1 ? 'Du fick lön för 1 dag sedan' : `Du fick lön för ${daysSince} dagar sedan`),
+      headline: isEn
+        ? 'Roughly how much have you spent since then?'
+        : 'Ungefär hur mycket har du spenderat sedan dess?',
+      explanationPrimary: isEn
+        ? 'You only do this once. After this, Dejz keeps track for you.'
+        : 'Det här gör du bara en gång. Därefter håller Dejz koll åt dig.',
+      explanationSecondary: null,
+    };
+  }
+
+  if (daysSince >= 4 && daysSince <= 14) {
+    return {
+      tagText: isEn
+        ? `You are ${daysSince} days into your pay period`
+        : `Du är ${daysSince} dagar in i din löneperiod`,
+      headline: isEn
+        ? 'Roughly how much have you spent since payday?'
+        : 'Ungefär hur mycket har du spenderat sedan du fick lön?',
+      explanationPrimary: isEn
+        ? 'You only do this once. After this, Dejz keeps track for you.'
+        : 'Det här gör du bara en gång. Därefter håller Dejz koll åt dig.',
+      explanationSecondary: null,
+    };
+  }
+
+  // 15+ days
+  return {
+    tagText: isEn
+      ? `You are already ${daysSince} days into the period`
+      : `Du är redan ${daysSince} dagar in i perioden`,
+    headline: isEn
+      ? 'Roughly how much have you spent since payday?'
+      : 'Ungefär hur mycket har du spenderat sedan du fick lön?',
+    explanationPrimary: isEn
+      ? "It doesn't need to be exact. Make a reasonable estimate."
+      : 'Det behöver inte vara exakt. Gör en rimlig uppskattning.',
+    explanationSecondary: isEn
+      ? 'You only do this once. After this, Dejz keeps track for you.'
+      : 'Det här gör du bara en gång. Därefter håller Dejz koll åt dig.',
+  };
+}
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -155,6 +202,7 @@ interface OnboardingModalProps {
     savingsGoals: { title: string; targetAmount: number; icon?: string; logo?: string; deadline?: string }[];
     initialSpent: number;
     payday: number;
+    paydayBeforeWeekend: boolean;
     userAgeGroup?: string;
     userGender?: string;
     categories?: Category[];
@@ -173,6 +221,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
   const [fullName, setFullName] = useState('');
   const [payday, setPayday] = useState(25);
   const [isCustomDayActive, setIsCustomDayActive] = useState(false);
+  const [paydayBeforeWeekend, setPaydayBeforeWeekend] = useState<boolean>(
+    config.paydayBeforeWeekend !== undefined ? config.paydayBeforeWeekend : true
+  );
   const [midMonthSpent, setMidMonthSpent] = useState<string>('');
   
   // Lists State
@@ -263,47 +314,65 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     return Math.max(0, Number(monthlySavingsInput) || 0);
   }, [savingsGoals, monthlySavingsInput]);
 
-  // Exact economic calculation for the monthly plan (Source of Truth)
-  const calculatedLeftToUse = totalIncome - totalFixed - totalMonthlySavings;
-  const monthlyDisposablePot = Math.max(0, calculatedLeftToUse);
-
-  const daysUntilPayday = useMemo(() => {
+  // Calculate period boundaries and days since actual payday with weekend adjustment
+  const currentPeriod = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const currentDay = today.getDate();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth();
 
-    let targetDate = new Date(currentYear, currentMonth, payday);
-    if (currentDay >= payday) {
-      targetDate = new Date(currentYear, currentMonth + 1, payday);
+    const paydayType = payday === 25 
+      ? PaydayType.TWENTY_FIFTH 
+      : (payday === 1 ? PaydayType.FIRST_DAY : PaydayType.CUSTOM);
+    const adjustment = paydayBeforeWeekend 
+      ? WeekendAdjustment.BEFORE 
+      : WeekendAdjustment.NONE;
+
+    const { start, end } = getPeriodBoundaries(today, paydayType, payday, adjustment);
+    
+    const startDate = new Date(start);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const diffMs = today.getTime() - startDate.getTime();
+    const daysSince = Math.max(0, Math.round(diffMs / (1000 * 60 * 60 * 24)));
+
+    // Next payday date (day after period end)
+    const nextPayday = new Date(end);
+    nextPayday.setDate(nextPayday.getDate() + 1);
+    nextPayday.setHours(0, 0, 0, 0);
+    const daysUntilNext = Math.max(1, Math.round((nextPayday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+
+    return {
+      daysSincePayday: daysSince,
+      daysUntilNextPayday: daysUntilNext,
+      startDate,
+      nextPaydayDate: nextPayday,
+    };
+  }, [payday, paydayBeforeWeekend]);
+
+  const daysSincePayday = currentPeriod.daysSincePayday;
+
+  // Auto-skip Step 6 if 0 days into the period (payday)
+  useEffect(() => {
+    if (step === 'midMonth' && daysSincePayday === 0) {
+      setMidMonthSpent('0');
+      setStep('summary');
     }
-    const diffMs = targetDate.getTime() - today.getTime();
-    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-    return Math.max(1, diffDays);
-  }, [payday]);
+  }, [step, daysSincePayday]);
+
+  const initialSpentAmount = midMonthSpent.trim() !== '' && daysSincePayday > 0 
+    ? Math.max(0, Number(midMonthSpent) || 0) 
+    : 0;
+
+  // Exact economic calculation for the monthly plan (Source of Truth)
+  // Inkomst − fasta kostnader − månadssparande − spenderat hittills = kvar att använda
+  const calculatedLeftToUse = totalIncome - totalFixed - totalMonthlySavings - initialSpentAmount;
 
   const nextPaydayFormatted = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const currentDay = today.getDate();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth();
-
-    let targetDate = new Date(currentYear, currentMonth, payday);
-    if (currentDay >= payday) {
-      targetDate = new Date(currentYear, currentMonth + 1, payday);
-    }
+    const targetDate = currentPeriod.nextPaydayDate;
     const monthNamesSv = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
     const monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const mName = isEn ? monthNamesEn[targetDate.getMonth()] : monthNamesSv[targetDate.getMonth()];
-    return isEn ? `${targetDate.getDate()} ${mName}` : `${payday}:e ${mName}`;
-  }, [payday, isEn]);
-
-  // For Step 6 mid-month input and daily rate calculation: computed from user-entered start amount
-  const hasEnteredMidMonthAmount = midMonthSpent.trim() !== '' && !isNaN(Number(midMonthSpent));
-  const userEnteredMidMonthAmount = hasEnteredMidMonthAmount ? Math.max(0, Number(midMonthSpent)) : null;
-  const userDailyRate = userEnteredMidMonthAmount !== null ? Math.round(userEnteredMidMonthAmount / daysUntilPayday) : 0;
+    return isEn ? `${targetDate.getDate()} ${mName}` : `${targetDate.getDate()}:e ${mName}`;
+  }, [currentPeriod.nextPaydayDate, isEn]);
 
   const handleNext = () => {
     if (step === 'name') {
@@ -317,7 +386,12 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     } else if (step === 'expenses') {
       setStep('goals');
     } else if (step === 'goals') {
-      setStep('midMonth');
+      if (daysSincePayday === 0) {
+        setMidMonthSpent('0');
+        setStep('summary');
+      } else {
+        setStep('midMonth');
+      }
     } else if (step === 'midMonth') {
       setStep('summary');
     }
@@ -329,7 +403,13 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
     else if (step === 'expenses') setStep('income');
     else if (step === 'goals') setStep('expenses');
     else if (step === 'midMonth') setStep('goals');
-    else if (step === 'summary') setStep('midMonth');
+    else if (step === 'summary') {
+      if (daysSincePayday === 0) {
+        setStep('goals');
+      } else {
+        setStep('midMonth');
+      }
+    }
   };
 
   const handleSavingsChange = (val: string) => {
@@ -364,9 +444,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
       let initialSpent = 0;
       if (forceInitialSpent !== undefined) {
         initialSpent = forceInitialSpent;
+      } else if (daysSincePayday === 0) {
+        initialSpent = 0;
       } else if (midMonthSpent.trim() !== '') {
-        const targetAmount = Math.max(0, Number(midMonthSpent) || 0);
-        initialSpent = Math.max(0, monthlyDisposablePot - targetAmount);
+        initialSpent = Math.max(0, Number(midMonthSpent) || 0);
       }
 
       const finalGoals = savingsGoals.length > 0 
@@ -384,6 +465,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
         savingsGoals: finalGoals,
         initialSpent,
         payday,
+        paydayBeforeWeekend,
         categories: config.categories,
       });
     } catch (err: any) {
@@ -669,6 +751,24 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             </div>
                           </motion.div>
                         )}
+
+                        {/* Lön tidigare vid helg toggle */}
+                        <div className="pt-3 border-t border-[var(--border-color)]">
+                          <div className="flex items-center justify-between p-1">
+                            <div className="flex flex-col pr-4 text-left">
+                              <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)]">
+                                {s.paydayBeforeWeekendTitle}
+                              </span>
+                              <span className="text-[11px] sm:text-xs text-[var(--text-secondary)] mt-0.5 leading-relaxed">
+                                {s.paydayBeforeWeekendDesc}
+                              </span>
+                            </div>
+                            <ToggleSwitch
+                              isOn={paydayBeforeWeekend}
+                              onToggle={() => setPaydayBeforeWeekend((prev) => !prev)}
+                            />
+                          </div>
+                        </div>
                       </div>
 
                       <div className="pt-1">
@@ -992,7 +1092,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                     </motion.div>
                   )}
 
-                  {/* STEP 6: Kvar till nästa lön */}
+                  {/* STEP 6: Dynamisk start i perioden */}
                   {step === 'midMonth' && (
                     <motion.div
                       key="midMonth"
@@ -1002,53 +1102,64 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       transition={{ duration: 0.2 }}
                       className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="text-center pb-2 sm:pb-2.5">
-                        <OnboardingCharacterArt step="midMonth" days={daysUntilPayday} payday={payday} />
-                        <p className="mt-4 sm:mt-5 text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                          {s.midMonthDaysText(daysUntilPayday)}
-                        </p>
-                        <h3 className="mt-2 text-xl font-bold text-[var(--text-primary)] tracking-tight">
-                          {s.midMonthQuestion}
-                        </h3>
-                        <p className="mt-1.5 text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[320px] mx-auto leading-relaxed">
-                          {s.midMonthDesc}
-                        </p>
-                      </div>
+                      {(() => {
+                        const content = getStep6DynamicContent(daysSincePayday, isEn);
+                        return (
+                          <>
+                            <div className="text-center pb-2 sm:pb-2.5">
+                              <OnboardingCharacterArt step="midMonth" days={daysSincePayday} payday={payday} />
+                              
+                              {/* Sekundär tidsindikator */}
+                              <p className="mt-4 sm:mt-5 text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
+                                {content.tagText}
+                              </p>
 
-                      {/* Main Remaining Amount Input */}
-                      <div className="space-y-3">
-                        <div className="relative">
-                          <input
-                            type="number"
-                            value={midMonthSpent}
-                            onChange={(e) => setMidMonthSpent(e.target.value)}
-                            placeholder="0"
-                            className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[20px] px-4 py-3.5 pr-14 text-center text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-tertiary)]"
-                          />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
-                            {config.currency || 'kr'}
-                          </span>
-                        </div>
+                              {/* Huvudfråga */}
+                              <h3 className="mt-2 text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                                {content.headline}
+                              </h3>
 
-                        {/* Dagsbelopp: visas först när användaren har angett ett belopp */}
-                        {hasEnteredMidMonthAmount && userEnteredMidMonthAmount !== null && userEnteredMidMonthAmount > 0 && (
-                          <div className="text-center">
-                            <p className="text-xs font-medium text-[var(--text-secondary)] font-amount tabular-nums">
-                              {s.dailyRateText(formatAmount(userDailyRate, lang))}
-                            </p>
-                          </div>
-                        )}
-                      </div>
+                              {/* Förklaring */}
+                              <div className="mt-2 space-y-1">
+                                <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[320px] mx-auto leading-relaxed">
+                                  {content.explanationPrimary}
+                                </p>
+                                {content.explanationSecondary && (
+                                  <p className="text-[11px] sm:text-xs text-[var(--text-tertiary)] font-normal max-w-[320px] mx-auto leading-relaxed">
+                                    {content.explanationSecondary}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
 
-                      <div className="pt-1">
-                        <button 
-                          onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
-                        >
-                          <span>{s.next}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
-                        </button>
-                      </div>
+                            {/* Enkelt beloppsfält: användaren anger ungefär spenderat belopp */}
+                            <div className="space-y-3">
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  value={midMonthSpent}
+                                  onChange={(e) => setMidMonthSpent(e.target.value)}
+                                  placeholder="0"
+                                  className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[20px] px-4 py-3.5 pr-14 text-center text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-tertiary)]"
+                                />
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
+                                  {config.currency || 'kr'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="pt-1">
+                              <button 
+                                onClick={handleNext}
+                                className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer hover:opacity-95"
+                              >
+                                <span>{s.next}</span>
+                                <ArrowRight size={16} strokeWidth={2.5} />
+                              </button>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </motion.div>
                   )}
 
@@ -1074,7 +1185,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </div>
                       </div>
 
-                      {/* Clean Breakdown Card: No '+' on income, minus on expenses and savings */}
+                      {/* Clean Breakdown Card: Inkomst − fasta kostnader − månadssparande − spenderat hittills = kvar att använda */}
                       <div className="p-4 rounded-[22px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs space-y-2.5 text-left">
                         {/* Income */}
                         <div className="flex items-center justify-between">
@@ -1108,6 +1219,19 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                             −{formatAmount(totalMonthlySavings, lang)} {config.currency || 'kr'}
                           </span>
                         </div>
+
+                        {/* Spenderat hittills (visas om användaren angett ett spenderat belopp i pågående period) */}
+                        {initialSpentAmount > 0 && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
+                              <Receipt size={14} className="text-orange-500" />
+                              {s.spentSoFarLabel}
+                            </span>
+                            <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
+                              −{formatAmount(initialSpentAmount, lang)} {config.currency || 'kr'}
+                            </span>
+                          </div>
+                        )}
 
                         <div className="h-px bg-[var(--border-color)] my-1" />
 

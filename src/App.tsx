@@ -4712,6 +4712,7 @@ export default function App() {
                 ...config,
                 darkMode: (config?.darkMode !== undefined && config?.darkMode !== null) ? config.darkMode : true,
                 payday: data.payday || 25,
+                paydayBeforeWeekend: data.paydayBeforeWeekend !== undefined ? data.paydayBeforeWeekend : (config?.paydayBeforeWeekend !== undefined ? config.paydayBeforeWeekend : true),
                 initialSpent: data.initialSpent,
                 savingsGoals: mappedSavingsGoals,
                 userAgeGroup: data.userAgeGroup || config?.userAgeGroup,
