@@ -728,21 +728,21 @@ export function TodayView({
                         <BudgetItemLogo item={item.originalItem} type={item.type as any} config={config} />
                       </div>
                       <div className="min-w-0 flex-1 flex flex-col justify-center">
-                        <p className="text-[15px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight">
+                        <p className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight">
                           {item.merchant}
                         </p>
-                        <p className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5 tracking-tight">
+                        <p className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5 tracking-tight">
                           {item.category}
                         </p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-                      <p className="text-[15px] font-medium whitespace-nowrap tracking-tight text-[#211F1C] dark:text-white">
+                      <p className="text-[14px] font-medium whitespace-nowrap tracking-tight text-[#211F1C] dark:text-white">
                         <span className="opacity-75 mr-0.5">{item.type === "income" ? "+" : "−"}</span>
                         <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(item.amount, lang)}</span>
-                        <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px]">{config?.currency || 'kr'}</span>
+                        <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[2.5px]">{config?.currency || 'kr'}</span>
                       </p>
-                      <span className="text-[12px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap">
+                      <span className="text-[11.5px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap">
                         {item.type === 'income' ? (lang === 'en' ? 'Fixed income' : 'Fast inkomst') : (lang === 'en' ? 'Fixed expense' : 'Fast utgift')}
                       </span>
                     </div>

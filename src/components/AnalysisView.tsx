@@ -370,10 +370,10 @@ export function AnalysisView({
       {/* HORISONTELLT STAPELDIAGRAM (FÖRDELNING) */}
       <div className="bg-white dark:bg-[#242424] rounded-[20px] p-4 sm:p-5 border border-[#E2DDD4] dark:border-[#383838] shadow-none space-y-4">
         <div className="flex items-center justify-between px-0.5">
-          <h2 className="text-[20px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
+          <h2 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
             {isEn ? 'Distribution' : 'Fördelning'}
           </h2>
-          <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
+          <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
             {categoryData.filter(c => c.value > 0).length} {isEn ? 'categories' : 'kategorier'}
           </span>
         </div>
@@ -394,7 +394,7 @@ export function AnalysisView({
                   }}
                   className={`space-y-1.5 transition-all ${item.isOther ? '' : 'cursor-pointer hover:opacity-90'}`}
                 >
-                  <div className="flex items-center justify-between text-[14px] gap-2">
+                  <div className="flex items-center justify-between text-[13px] gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <CategoryIcon icon={item.icon} color={item.color} size="xs" />
                       <span className={`font-normal truncate ${isSelected ? 'text-[#635BFF] dark:text-[#7C75FF] font-medium' : 'text-[#211F1C] dark:text-white'}`}>
@@ -402,10 +402,10 @@ export function AnalysisView({
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0 tabular-nums">
-                      <span className="font-medium text-[#211F1C] dark:text-white">
+                      <span className="font-medium text-[#211F1C] dark:text-white text-[13.5px]">
                         {formatAmount(Math.round(item.value), config.language)} {config.currency}
                       </span>
-                      <span className="font-normal text-[#6D6962] dark:text-[#A8A8A8] text-[13px]">
+                      <span className="font-normal text-[#6D6962] dark:text-[#A8A8A8] text-[12px]">
                         ({item.pct}%)
                       </span>
                     </div>
@@ -426,7 +426,7 @@ export function AnalysisView({
             })}
           </div>
         ) : (
-          <div className="py-8 text-center text-[14px] text-[#6D6962] dark:text-[#A8A8A8]">
+          <div className="py-8 text-center text-[13px] text-[#6D6962] dark:text-[#A8A8A8]">
             {isEn ? 'No spending recorded for this period' : 'Inga utgifter registrerade för denna period'}
           </div>
         )}
@@ -435,7 +435,7 @@ export function AnalysisView({
       {/* FULLSTÄNDIG KATEGORILISTA */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-[20px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
+          <h3 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
             {t('categories')} ({categoryData.length})
           </h3>
         </div>
@@ -483,10 +483,10 @@ export function AnalysisView({
                         <CategoryIcon icon={item.icon} color={item.color} size="md" />
 
                         <div className="min-w-0 flex-1 flex flex-col justify-center">
-                          <p className="text-[16px] font-medium text-[#211F1C] dark:text-white leading-tight truncate tracking-tight">
+                          <p className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-tight truncate tracking-tight">
                             {item.name}
                           </p>
-                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[14px] text-[#6D6962] dark:text-[#A8A8A8]">
+                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[12px] text-[#6D6962] dark:text-[#A8A8A8]">
                             <span>
                               {totalItemCount} {isEn ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
                             </span>
@@ -496,9 +496,9 @@ export function AnalysisView({
 
                       <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
                         <div className="text-right flex flex-col items-end justify-center">
-                          <p className="text-[16px] font-medium font-amount tabular-nums text-[#211F1C] dark:text-white leading-tight">
+                          <p className="text-[14px] font-medium font-amount tabular-nums text-[#211F1C] dark:text-white leading-tight">
                             {formatAmount(Math.round(item.value), config.language)}
-                            <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-1">{config.currency}</span>
+                            <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[2.5px]">{config.currency}</span>
                           </p>
                         </div>
                         <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[#211F1C] dark:text-white' : 'text-[#6D6962] dark:text-[#A8A8A8]'}`}>
@@ -545,17 +545,17 @@ export function AnalysisView({
                                   className="flex items-center justify-between p-3 rounded-[12px] bg-white dark:bg-[#242424] hover:bg-[var(--surface-muted)] dark:hover:bg-[#333333] transition-colors cursor-pointer border border-[#E2DDD4]/60 dark:border-[#383838]"
                                 >
                                   <div className="min-w-0">
-                                    <p className="text-[15px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight">
+                                    <p className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight">
                                       {fe.name}
                                     </p>
-                                    <p className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5 tracking-tight">
+                                    <p className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5 tracking-tight">
                                       {isEn ? 'Fixed expense' : 'Fast utgift'}
                                     </p>
                                   </div>
-                                  <p className="text-[15px] font-medium whitespace-nowrap tracking-tight text-[#211F1C] dark:text-white pl-2">
+                                  <p className="text-[14px] font-medium whitespace-nowrap tracking-tight text-[#211F1C] dark:text-white pl-2">
                                     <span className="opacity-75 mr-0.5">−</span>
                                     <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(fe.amount), config.language)}</span>
-                                    <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px]">{config.currency}</span>
+                                    <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[2.5px]">{config.currency}</span>
                                   </p>
                                 </div>
                               ))}
@@ -563,7 +563,7 @@ export function AnalysisView({
                           )}
 
                           {totalItemCount === 0 && (
-                            <div className="py-4 text-center text-[14px] text-[#6D6962] dark:text-[#A8A8A8]">
+                            <div className="py-4 text-center text-[13px] text-[#6D6962] dark:text-[#A8A8A8]">
                               {isEn ? 'No transactions in this category' : 'Inga transaktioner i denna kategori'}
                             </div>
                           )}
