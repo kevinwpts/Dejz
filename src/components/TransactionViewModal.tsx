@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
 import { X, Pencil, Trash2, Tag, Receipt, Repeat } from 'lucide-react';
@@ -53,12 +54,14 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
   const merchantName = typeof transaction.merchant === 'object' ? (transaction.merchant as any)?.name : (transaction.merchant || (typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category));
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -301,6 +304,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           t={t}
         />
       )}
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { X, ChevronDown, Calendar, Plus, Camera, Trash2, Check, Loader2 } from 'lucide-react';
@@ -613,12 +614,14 @@ export function TransactionModal({
 
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -1332,6 +1335,7 @@ export function TransactionModal({
           language={currentLang}
         />
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }

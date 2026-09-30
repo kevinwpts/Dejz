@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { AlertCircle } from 'lucide-react';
 import { useScrollLock } from '../hooks/useScrollLock';
@@ -29,7 +30,7 @@ export function ConfirmModal({
   t
 }: ConfirmModalProps) {
   useScrollLock(isOpen);
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const displayConfirmText = confirmText || (t ? t('confirm') : 'Bekräfta');
   const displayCancelText = cancelText || (t ? t('cancel') : 'Avbryt');
@@ -38,12 +39,12 @@ export function ConfirmModal({
   const iconColor = isDanger ? 'text-danger' : 'text-[var(--accent-color)]';
   const iconBg = isDanger ? 'bg-danger/10 border-danger/20' : 'bg-[var(--accent-color)]/10 border-[var(--accent-color)]/20';
 
-  return (
+  return createPortal(
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={onCancel}
     >
       <motion.div
@@ -84,6 +85,7 @@ export function ConfirmModal({
           </div>
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }
