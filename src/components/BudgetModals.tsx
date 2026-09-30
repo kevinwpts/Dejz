@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 
 import { X, Check, Trash2, ChevronDown, Receipt, PiggyBank, Banknote, Pencil, ShieldAlert, ChevronRight } from 'lucide-react';
@@ -782,11 +783,11 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
         </div>
 
         {/* Main Content Area: One Cohesive Detail Surface */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4 space-y-3 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
           <div className="bg-[var(--surface-color)] dark:bg-[#312f2f] rounded-[18px] border border-[var(--border-color)] dark:border-white/[0.05] divide-y divide-[var(--border-color)]/50 dark:divide-white/[0.05] overflow-hidden shadow-xs dark:shadow-none">
             
             {/* Amount Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between">
+            <div className="p-3 sm:p-3.5 flex items-center justify-between">
               <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC]">
                 {t('amount')}
               </span>
@@ -805,7 +806,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             </div>
 
             {/* Merchant / Receiver Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
+            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
               <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('merchant')}
               </span>
@@ -815,7 +816,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             </div>
 
             {/* Category Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
+            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
               <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('category')}
               </span>
@@ -828,7 +829,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             </div>
 
             {/* Type Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
+            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
               <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('type')}
               </span>
@@ -838,7 +839,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             </div>
 
             {/* Frequency Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
+            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
               <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('frequency')}
               </span>
@@ -848,7 +849,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             </div>
 
             {/* Deduction Day Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
+            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
               <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('deductionDay')}
               </span>
@@ -863,7 +864,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             </div>
 
             {/* Payment Method Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
+            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
               <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
                 {t('paymentMethod')}
               </span>
@@ -877,7 +878,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
             {/* Note Row if exists */}
             {expense.note && (
-              <div className="p-4 sm:p-4.5 flex items-start justify-between gap-4">
+              <div className="p-3 sm:p-3.5 flex items-start justify-between gap-4">
                 <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0 pt-0.5">
                   Notering
                 </span>
@@ -981,6 +982,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showIconSelector, setShowIconSelector] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isCategorySelectorOpen, setIsCategorySelectorOpen] = useState(false);
   
   const amountInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -1285,26 +1287,88 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* Category */}
-          <div className="space-y-4 pt-4 border-t border-[var(--border-color)]/30">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-[11px] font-medium text-[var(--text-secondary)] ml-1">{t('category')}</h3>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {(categories || []).map(cat => {
-                const isActive = category === cat.name;
-                return (
-                  <CategoryTile
-                    key={cat.name}
-                    name={cat.name}
-                    icon={cat.icon}
-                    color={cat.color}
-                    isActive={isActive}
-                    onClick={() => setCategory(cat.name)}
-                  />
-                );
-              })}
-            </div>
+          <div className="space-y-1.5 pt-2">
+            <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5 block">{t('category')}</label>
+            <button
+              type="button"
+              onClick={() => setIsCategorySelectorOpen(true)}
+              className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 flex items-center justify-between text-sm font-semibold text-[#1C1917] dark:text-white transition-all cursor-pointer hover:border-[#1C1917] dark:hover:border-white"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <CategoryIcon icon={categories.find(c => c.name === category)?.icon || '🏠'} size="xs" />
+                <span className="truncate">{category || (config?.language === 'en' ? 'Select category' : 'Välj kategori')}</span>
+              </div>
+              <ChevronRight size={16} className="text-[#8C867C] dark:text-[#71717A] shrink-0" />
+            </button>
           </div>
+
+          {/* Category Selector Bottom Sheet Modal */}
+          {isCategorySelectorOpen && createPortal(
+            <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategorySelectorOpen(false)} />
+              <motion.div
+                initial={{ y: '100%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: '100%', opacity: 0 }}
+                className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#242424] rounded-t-[28px] sm:rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl max-h-[80dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
+                <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-[#E6E2D8] dark:border-[#383838] shrink-0">
+                  <h3 className="text-base font-bold text-[#1C1917] dark:text-white tracking-tight">{t('category')}</h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsCategorySelectorOpen(false)}
+                    className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <X size={16} strokeWidth={2.2} />
+                  </button>
+                </div>
+                <div className="p-3 overflow-y-auto space-y-1 shrink min-h-0 custom-scrollbar">
+                  {(categories || []).map(cat => {
+                    const isSelected = category === cat.name;
+                    const iconName = cat.icon || '🏠';
+                    const Icon = ICON_MAP[iconName];
+                    return (
+                      <button
+                        key={cat.name}
+                        type="button"
+                        onClick={() => {
+                          setCategory(cat.name);
+                          setIsCategorySelectorOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all cursor-pointer text-left ${
+                          isSelected ? 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white font-bold' : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: cat.color || '#1C1917', color: '#fff' }}
+                          >
+                            {isEmojiString(iconName) ? (
+                              <span className="text-sm">{iconName}</span>
+                            ) : Icon ? (
+                              <Icon size={14} strokeWidth={2} />
+                            ) : (
+                              <span>🏠</span>
+                            )}
+                          </div>
+                          <span className="text-sm font-medium">{cat.name}</span>
+                        </div>
+                        {isSelected && (
+                          <div className="w-5 h-5 rounded-full bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] flex items-center justify-center shrink-0">
+                            <Check size={12} strokeWidth={3} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </div>,
+            document.body
+          )}
 
           {expense && (
             <div className="pt-1">
