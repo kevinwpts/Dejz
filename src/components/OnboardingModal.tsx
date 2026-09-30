@@ -546,7 +546,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
               </div>
 
               {/* Content Body: Question / Action */}
-              <div className="flex-1 flex flex-col justify-center py-1">
+              <div className="flex-1 flex flex-col justify-start sm:justify-center py-1">
                 <AnimatePresence mode="wait">
                   {/* STEP 1: Vad heter du? */}
                   {step === 'name' && (
@@ -556,11 +556,11 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -16 }}
                       transition={{ duration: 0.2 }}
-                      className="space-y-4 my-auto"
+                      className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="space-y-2">
+                      <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="name" />
-                        <div className="text-center">
+                        <div className="mt-5 sm:mt-6 text-center">
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
                             {s.nameQuestion}
                           </h3>
@@ -607,11 +607,11 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -16 }}
                       transition={{ duration: 0.2 }}
-                      className="space-y-4 my-auto"
+                      className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="space-y-2">
+                      <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="payday" payday={payday} />
-                        <div className="space-y-0.5 text-center">
+                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
                             {s.paydayQuestion}
                           </h3>
@@ -701,11 +701,11 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -16 }}
                       transition={{ duration: 0.2 }}
-                      className="space-y-4 my-auto"
+                      className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="space-y-2">
+                      <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="income" />
-                        <div className="space-y-0.5 text-center">
+                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
                             {s.incomeQuestion}
                           </h3>
@@ -715,7 +715,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </div>
                       </div>
 
-                      <div className="space-y-2.5 max-h-[36vh] overflow-y-auto pr-0.5 no-scrollbar">
+                      <div className="space-y-3 max-h-[36vh] overflow-y-auto pr-0.5 no-scrollbar">
                         {/* Direct, clean AI Natural Language Input Area */}
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-1.5 px-0.5">
@@ -821,16 +821,18 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -16 }}
                       transition={{ duration: 0.2 }}
-                      className="space-y-3.5 my-auto"
+                      className="space-y-6 sm:space-y-7 my-0 sm:my-auto flex flex-col flex-1 pb-0"
                     >
-                      <div className="space-y-1 text-center">
+                      <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="expenses" />
-                        <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
-                          {s.expensesQuestion}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                          {s.expensesDesc}
-                        </p>
+                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
+                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                            {s.expensesQuestion}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
+                            {s.expensesDesc}
+                          </p>
+                        </div>
                       </div>
 
                       {/* Search Bar */}
@@ -864,7 +866,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           </p>
                         </div>
                       ) : (
-                        <div className="grid grid-cols-2 gap-2 max-h-[24vh] overflow-y-auto no-scrollbar p-0.5">
+                        <div className="grid grid-cols-2 gap-2 p-0.5">
                           {(presetSearch.trim() ? filteredPresets : popularPresets).map((preset) => {
                             const isAdded = fixedExpenses.some(
                               e => e.name.trim().toLowerCase() === preset.name.trim().toLowerCase()
@@ -914,9 +916,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </div>
                       )}
 
-                      {/* Added Fixed Expenses List */}
+                      {/* Added Fixed Expenses List - Natural height without internal scroll */}
                       {fixedExpenses.length > 0 && (
-                        <div className="space-y-1.5 pt-1 border-t border-[var(--border-color)]/60 max-h-[16vh] overflow-y-auto pr-0.5 no-scrollbar">
+                        <div className="space-y-1.5 pt-2 border-t border-[var(--border-color)]/60">
                           {fixedExpenses.map((exp, i) => (
                             <BudgetItem
                               key={i}
@@ -935,8 +937,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </div>
                       )}
 
-                      {/* Action Buttons */}
-                      <div className="pt-1 space-y-2">
+                      {/* Create Custom Expense Button */}
+                      <div>
                         <button 
                           type="button"
                           onClick={() => {
@@ -948,10 +950,16 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           <Plus size={14} />
                           <span>{s.customExpense}</span>
                         </button>
+                      </div>
 
+                      {/* Bottom spacing clearance so the last expense and custom button can be scrolled completely above the sticky Next button */}
+                      <div className="h-6 sm:h-2 shrink-0" aria-hidden="true" />
+
+                      {/* Sticky Next Button at bottom on mobile */}
+                      <div className="sticky bottom-0 -mx-4 px-4 sm:-mx-0 sm:px-0 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-gradient-to-t from-[var(--bg-color)] via-[var(--bg-color)]/95 to-transparent z-20 shrink-0 mt-auto">
                         <button 
                           onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs hover:opacity-95"
+                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:opacity-95"
                         >
                           <span>{s.next}</span>
                           <ArrowRight size={16} strokeWidth={2.5} />
@@ -968,11 +976,11 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -16 }}
                       transition={{ duration: 0.2 }}
-                      className="space-y-4 my-auto"
+                      className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="space-y-2">
+                      <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="goals" />
-                        <div className="space-y-0.5 text-center">
+                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
                             {s.savingsQuestion}
                           </h3>
@@ -1039,11 +1047,11 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -16 }}
                       transition={{ duration: 0.2 }}
-                      className="space-y-4 my-auto"
+                      className="space-y-6 sm:space-y-7 my-auto"
                     >
-                      <div className="space-y-2 text-center">
+                      <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="midMonth" days={daysUntilPayday} payday={payday} />
-                        <div className="space-y-1">
+                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
                           <span className="inline-block px-2.5 py-0.5 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-[11px] font-bold">
                             {s.midMonthDaysBadge(daysUntilPayday, payday)}
                           </span>
@@ -1104,7 +1112,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                     </motion.div>
                   )}
 
-                  {/* STEP 7: Din personliga plan */}
+                  {/* STEP 7: Din plan */}
                   {step === 'summary' && (
                     <motion.div
                       key="summary"
@@ -1112,17 +1120,18 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.96 }}
                       transition={{ duration: 0.25 }}
-                      className="space-y-4 my-auto text-center"
+                      className="space-y-6 sm:space-y-7 my-auto text-center"
                     >
-                      <OnboardingCharacterArt step="summary" />
-
-                      <div className="space-y-0.5">
-                        <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
-                          {s.summaryQuestion}
-                        </h3>
-                        <p className="text-xs font-medium text-[var(--text-secondary)]">
-                          {s.untilPayday(nextPaydayFormatted)}
-                        </p>
+                      <div className="text-center pb-2 sm:pb-2.5">
+                        <OnboardingCharacterArt step="summary" />
+                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
+                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                            {s.summaryQuestion}
+                          </h3>
+                          <p className="text-xs font-medium text-[var(--text-secondary)]">
+                            {s.untilPayday(nextPaydayFormatted)}
+                          </p>
+                        </div>
                       </div>
 
                       {/* Clean Breakdown Card: No '+' on income, minus on expenses and savings */}
