@@ -91,13 +91,15 @@ export function AppHeader({
 
   return (
     <header
-      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-200 ease-in-out ${
+      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top,0px))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-200 ease-in-out ${
+        isDemoMode ? '' : 'pt-[env(safe-area-inset-top,0px)]'
+      } ${
         !isAtTop || isProfileOrSettings
           ? "bg-[#F2EFE8]/95 dark:bg-[#181818]/95 backdrop-blur-md border-b border-[#E2DDD4] dark:border-[#383838]"
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className={`max-w-xl mx-auto px-4 h-16 ${isDemoMode ? '' : 'pt-[env(safe-area-inset-top)]'} flex justify-between items-center w-full gap-2 relative`}>
+      <div className="max-w-xl mx-auto px-4 h-14 sm:h-16 flex justify-between items-center w-full gap-2 relative">
         {/* Left: Back button OR Profile Picture + Title/Greeting */}
         <div className="flex items-center gap-2.5 shrink-0 z-10 min-w-0">
           {onBack ? (

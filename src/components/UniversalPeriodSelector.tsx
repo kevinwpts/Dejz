@@ -161,7 +161,7 @@ export function UniversalPeriodSelector({
 
   const containerClasses = variant === 'modal' 
     ? 'mb-2 transition-all'
-    : 'sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-30 mb-5 transition-all';
+    : 'sticky top-[calc(3.75rem+env(safe-area-inset-top,0px))] z-30 mb-5 transition-all';
 
   return (
     <div className={containerClasses}>

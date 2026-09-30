@@ -4257,7 +4257,7 @@ export default function App() {
       )}
 
             <PullToRefresh onRefresh={handleRefresh}>
-        <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top))]' : 'pt-[calc(5rem+env(safe-area-inset-top))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
+        <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top,0px))]' : 'pt-[calc(5rem+env(safe-area-inset-top,0px))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
           {stats && (
             <div style={{ display: activeTab === "today" ? "block" : "none" }}>
               <TodayView

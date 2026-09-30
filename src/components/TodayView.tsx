@@ -445,12 +445,12 @@ export function TodayView({
   if (!stats) return null;
 
   const _heroStickyTop = isDemoMode
-    ? 'top-[calc(7.2rem+env(safe-area-inset-top))]'
-    : 'top-[calc(5rem+env(safe-area-inset-top))]';
+    ? 'top-[calc(7.2rem+env(safe-area-inset-top,0px))]'
+    : 'top-[calc(4.75rem+env(safe-area-inset-top,0px))]';
 
   const timelineStickyTop = isDemoMode
-    ? 'top-[calc(6.8rem+env(safe-area-inset-top))]'
-    : 'top-[calc(4.4rem+env(safe-area-inset-top))]';
+    ? 'top-[calc(6.8rem+env(safe-area-inset-top,0px))]'
+    : 'top-[calc(4.25rem+env(safe-area-inset-top,0px))]';
 
   return (
     <div className="relative font-sans">
@@ -469,8 +469,8 @@ export function TodayView({
         className="fixed left-0 right-0 z-10 pointer-events-auto"
         style={{
           top: isDemoMode 
-            ? 'calc(7.2rem + env(safe-area-inset-top))' 
-            : 'calc(5rem + env(safe-area-inset-top))',
+            ? 'calc(7.2rem + env(safe-area-inset-top, 0px))' 
+            : 'calc(4.75rem + env(safe-area-inset-top, 0px))',
         }}
       >
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
