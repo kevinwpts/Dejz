@@ -78,6 +78,43 @@ export const getPeriodId = (start: Date) => {
   return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`;
 };
 
+/**
+ * Formats a date with weekday, day, and month adhering to Swedish grammatical standards
+ * (capitalized first letter of weekday, lowercase month name: "Onsdag 30 september").
+ * In English: "Wednesday, September 30" (or with options).
+ */
+export const formatFullDate = (
+  date: Date | string | number,
+  language: string = 'sv-SE',
+  options?: { includeYear?: boolean }
+): string => {
+  const d = typeof date === 'object' && date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return '';
+
+  const locale =
+    language === 'en' || language === 'en-US'
+      ? 'en-US'
+      : language === 'no' || language === 'nb-NO'
+      ? 'nb-NO'
+      : language === 'da' || language === 'da-DK'
+      ? 'da-DK'
+      : language === 'fi' || language === 'fi-FI'
+      ? 'fi-FI'
+      : 'sv-SE';
+
+  const raw = d.toLocaleDateString(locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    ...(options?.includeYear ? { year: 'numeric' } : {})
+  });
+
+  // Capitalize ONLY the initial letter of the string (the weekday).
+  // In Swedish, weekday and month names are lowercase in running text, so only
+  // the first letter of the heading should be capitalized ("Onsdag 30 september").
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+};
+
 export const isVariableItemDue = (
   deductionDay: number = 1,
   periodStart?: Date,

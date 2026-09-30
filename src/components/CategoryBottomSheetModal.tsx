@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ShoppingBag } from 'lucide-react';
 import { Transaction, Config } from '../types';
@@ -132,12 +133,12 @@ export function CategoryBottomSheetModal({
     return Math.min(100, Math.round((categoryData.spent / categoryData.budget) * 100));
   }, [categoryData]);
 
-  if (!targetCategoryName) return null;
+  if (!targetCategoryName || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center pointer-events-auto">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center pointer-events-auto p-0 sm:p-4">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -148,7 +149,7 @@ export function CategoryBottomSheetModal({
               if (typeof feedback.light === 'function') feedback.light();
               onClose();
             }}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm cursor-pointer"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
           />
 
           {/* Bottom Sheet Drawer */}
@@ -157,13 +158,13 @@ export function CategoryBottomSheetModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#242424] border-t border-[#E6E2D8] dark:border-[#383838] rounded-t-[28px] shadow-2xl max-h-[88vh] flex flex-col z-10 overflow-hidden font-sans text-[#1C1917] dark:text-white"
+            className="relative w-full max-w-lg bg-white dark:bg-[#242424] border-t sm:border border-[#E6E2D8] dark:border-[#383838] rounded-t-[28px] sm:rounded-[26px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[#1C1917] dark:text-white"
           >
             {/* Top Grab Handle */}
-            <div className="w-10 h-1 rounded-full bg-[#D6D1C7] dark:bg-[#3D3D3D] mx-auto mt-3 mb-1 shrink-0" />
+            <div className="w-10 h-1 rounded-full bg-[#D6D1C7] dark:bg-[#3D3D3D] mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
             {/* Header: Category Identity & Close Button */}
-            <div className="flex items-center justify-between px-5 pt-3 pb-4 border-b border-[#E6E2D8] dark:border-white/[0.05] shrink-0">
+            <div className="flex items-center justify-between px-5 sm:px-6 pt-3 pb-3 border-b border-[#E6E2D8] dark:border-white/[0.06] shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.1] text-[var(--text-primary)] flex items-center justify-center shrink-0">
                   {isEmojiString(iconKey) ? (
@@ -175,7 +176,7 @@ export function CategoryBottomSheetModal({
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold font-display uppercase tracking-wider text-[#1C1917] dark:text-white truncate">
+                  <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[#1C1917] dark:text-white truncate">
                     {targetCategoryName}
                   </h2>
                 </div>
@@ -195,39 +196,44 @@ export function CategoryBottomSheetModal({
             </div>
 
             {/* Scrollable Body Content */}
-            <div className="flex-1 overflow-y-auto px-5 pt-4 pb-8 space-y-4 no-scrollbar">
-              {/* Category Budget Status Card */}
-              <div className="p-4 rounded-2xl bg-white dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] space-y-3">
-                <div className="flex items-baseline justify-between gap-2">
+            <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0">
+              {/* Category Budget Status Card - Ultra-compact, clean & lightweight */}
+              <div className="py-2.5 px-3.5 rounded-xl bg-[#F7F5F0] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] shrink-0 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-baseline gap-1.5">
                     {categoryData?.hasBudget ? (
                       categoryData.isOverBudget ? (
-                        <span className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-500 font-amount tabular-nums">
+                        <span className="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-500 font-amount tabular-nums">
                           +{formatAmount(Math.abs(categoryData.remaining), language)} kr
                         </span>
                       ) : (
-                        <span className="text-2xl sm:text-3xl font-black text-[#1C1917] dark:text-white font-amount tabular-nums">
+                        <span className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
                           {formatAmount(categoryData.remaining, language)} kr
                         </span>
                       )
                     ) : (
-                      <span className="text-2xl sm:text-3xl font-black text-[#1C1917] dark:text-white font-amount tabular-nums">
+                      <span className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
                         {formatAmount(categoryData?.spent || 0, language)} kr
                       </span>
                     )}
-                    <span className="text-xs font-semibold text-[#6E6961] dark:text-[#9CA6BC]">
+                    <span className="text-xs font-medium text-[#6E6961] dark:text-[#9CA6BC]">
                       {categoryData?.hasBudget
-                        ? (categoryData.isOverBudget ? (isEn ? 'over' : 'över budget') : (isEn ? 'left' : 'kvar'))
-                        : (isEn ? 'spent this period' : 'totalt spenderat')}
+                        ? (categoryData.isOverBudget ? (isEn ? 'over budget' : 'över budget') : (isEn ? 'left' : 'kvar'))
+                        : (isEn ? 'spent' : 'totalt spenderat')}
                     </span>
                   </div>
+                  {categoryData?.hasBudget && (
+                    <span className="text-xs font-semibold text-[#8C867C] dark:text-[#A8A8A8] tabular-nums">
+                      {spentPct}%
+                    </span>
+                  )}
                 </div>
 
                 {categoryData?.hasBudget && (
-                  <div className="w-full h-2 bg-black/10 dark:bg-white/[0.08] rounded-full overflow-hidden mt-1">
+                  <div className="w-full h-1 bg-black/10 dark:bg-white/[0.08] rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        categoryData.isOverBudget ? 'bg-rose-500' : 'bg-neutral-800 dark:text-white dark:bg-neutral-200 dark:text-white'
+                        categoryData.isOverBudget ? 'bg-rose-500' : 'bg-[#1C1917] dark:bg-white'
                       }`}
                       style={{ width: `${spentPct}%` }}
                     />
@@ -235,9 +241,9 @@ export function CategoryBottomSheetModal({
                 )}
               </div>
 
-              {/* Transactions List using standard TransactionItem */}
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center justify-between">
+              {/* Transactions List: Expanded natural space for Periodens utgifter */}
+              <div className="space-y-2 flex-1 flex flex-col min-h-0 pt-0.5">
+                <div className="flex items-center justify-between shrink-0 pb-0.5">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#6E6961] dark:text-[#9CA6BC] font-display">
                     {isEn ? 'Purchases this period' : 'Periodens utgifter'} ({periodTransactions.length})
                   </span>
@@ -253,7 +259,7 @@ export function CategoryBottomSheetModal({
                 </div>
 
                 {displayTransactions.length > 0 ? (
-                  <div className="space-y-2.5 max-h-[360px] overflow-y-auto no-scrollbar pr-0.5">
+                  <div className="space-y-2.5 overflow-y-auto no-scrollbar pr-0.5 flex-1">
                     {displayTransactions.map((tx) => (
                       <TransactionItem
                         key={tx.id}
@@ -277,6 +283,7 @@ export function CategoryBottomSheetModal({
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

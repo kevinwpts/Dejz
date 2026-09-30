@@ -4,11 +4,6 @@ import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 
-interface DynamicInsight {
-  type: 'positive' | 'warning' | 'neutral';
-  text: string;
-}
-
 interface GreetingModuleProps {
   userName?: string;
   availableForD: number;
@@ -38,7 +33,6 @@ interface GreetingModuleProps {
   allTransactions?: any[];
   children?: React.ReactNode;
   categoryBudgets?: React.ReactNode;
-  dynamicInsight?: DynamicInsight | null;
 }
 
 export function GreetingModule({
@@ -51,7 +45,6 @@ export function GreetingModule({
   periodEnd,
   children,
   categoryBudgets,
-  dynamicInsight
 }: GreetingModuleProps) {
   const isEn = language === 'en';
 
@@ -72,7 +65,7 @@ export function GreetingModule({
 
   const isNegative = (stats?.remainingPeriodCents || 0) < 0;
 
-  // Period interval using Dejz existing period dates (e.g. "25 sep – 24 okt")
+  // Period interval using Dejz existing period dates (e.g. "24 sep – 22 okt")
   const periodIntervalText = useMemo(() => {
     const start = stats?.periodStart || periodStart;
     const end = stats?.periodEnd || periodEnd;
@@ -92,28 +85,20 @@ export function GreetingModule({
     return `${formatDate(startDate)} \u2013 ${formatDate(endDate)}`;
   }, [stats?.periodStart, stats?.periodEnd, periodStart, periodEnd, isEn]);
 
-  // Days remaining (e.g. "23 dagar kvar")
+  // Days remaining: always "X dagar kvar till lön" / "X days left until payday"
   const daysRemainingText = useMemo(() => {
     if (stats?.isPastPeriod) {
       return isEn ? 'Period ended' : 'Perioden avslutad';
     }
     const days = effectiveRemainingDays;
     if (days === 1) {
-      return isEn ? '1 day left' : '1 dag kvar';
+      return isEn ? '1 day left until payday' : '1 dag kvar till lön';
     }
-    return isEn ? `${days} days left` : `${days} dagar kvar`;
+    return isEn ? `${days} days left until payday` : `${days} dagar kvar till lön`;
   }, [stats?.isPastPeriod, effectiveRemainingDays, isEn]);
 
-  // Daily rate based on kvar att spendera / remaining days (e.g. "305 kr/dag")
-  const dailyRateText = useMemo(() => {
-    const remainingCents = stats?.remainingPeriodCents || 0;
-    const days = Math.max(1, effectiveRemainingDays);
-    const dailyAmount = remainingCents > 0 ? Math.round(remainingCents / days) : 0;
-    return `${formatAmount(dailyAmount, language)} ${currency}/${isEn ? 'day' : 'dag'}`;
-  }, [stats?.remainingPeriodCents, effectiveRemainingDays, language, currency, isEn]);
-
   return (
-    <div className="flex flex-col gap-3 sm:gap-4 font-sans relative">
+    <div className="flex flex-col gap-3.5 sm:gap-4 font-sans relative">
       {/* 1. HERO OVERVIEW: Minimalist, clear visual hierarchy */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -144,8 +129,8 @@ export function GreetingModule({
         </div>
 
         {/* Cohesive Secondary Metadata Directly Under Amount:
-            25 sep – 24 okt
-            23 dagar kvar · 305 kr/dag
+            24 sep – 22 okt
+            23 dagar kvar till lön
         */}
         <div className="flex flex-col items-center gap-0.5 mt-2 select-none">
           {periodIntervalText && (
@@ -154,26 +139,12 @@ export function GreetingModule({
             </p>
           )}
           <p className="text-xs sm:text-[13px] font-medium text-[#8C867C] dark:text-[#A8A8A8] tabular-nums tracking-tight">
-            {daysRemainingText} <span aria-hidden="true" className="mx-1 opacity-70">·</span> {dailyRateText}
+            {daysRemainingText}
           </p>
         </div>
       </motion.div>
 
-      {/* 2. DYNAMIC INSIGHT: Single concise insight when relevant data exists */}
-      {dynamicInsight && (
-        <div className="flex items-center justify-center -mt-0.5 mb-0.5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.035] dark:bg-white/[0.045] text-[12px] sm:text-[13px] font-medium text-[#57534E] dark:text-[#C7CDDC]">
-            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-              dynamicInsight.type === 'positive' 
-                ? 'bg-emerald-500 dark:bg-emerald-400' 
-                : 'bg-amber-500 dark:bg-amber-400'
-            }`} />
-            <span>{dynamicInsight.text}</span>
-          </div>
-        </div>
-      )}
-
-      {/* 3. DINA BUDGETAR CAROUSEL */}
+      {/* 2. DINA BUDGETAR CAROUSEL */}
       {categoryBudgets}
 
       {children}

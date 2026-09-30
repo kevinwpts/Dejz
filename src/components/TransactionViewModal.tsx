@@ -10,6 +10,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { getCategoryIconName } from '../utils/icons';
+import { formatFullDate } from '../utils/date';
 
 interface TransactionViewModalProps {
   transaction: Transaction;
@@ -41,13 +42,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
   };
 
   const date = new Date(transaction.timestamp);
-  const rawFormattedDate = date.toLocaleDateString(getLocale(), {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
-  const formattedDate = rawFormattedDate ? rawFormattedDate.charAt(0).toUpperCase() + rawFormattedDate.slice(1) : '';
+  const formattedDate = formatFullDate(transaction.timestamp, config.language, { includeYear: true });
   const formattedTime = date.toLocaleTimeString(getLocale(), {
     hour: '2-digit',
     minute: '2-digit'
@@ -99,103 +94,76 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full transition-colors" />
         </div>
 
-        {/* Compact Header Section */}
-        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[#E6E2D8] dark:border-[#383838]">
-          <div className="flex items-center gap-3 min-w-0">
-            <TransactionLogo transaction={transaction} config={config} size="sm" />
-            <h2 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1917] dark:text-white truncate">
-              {merchantName}
-            </h2>
-          </div>
+        {/* Header with Navigation and Actions */}
+        <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[#E6E2D8] dark:border-white/[0.06]">
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            aria-label={t('close')}
+          >
+            <X size={17} strokeWidth={2.2} />
+          </button>
           
           <div className="flex items-center gap-1.5 shrink-0">
             <button 
               type="button"
               onClick={() => onDuplicate(transaction)} 
-              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.04] hover:bg-[var(--border-color)]/50 dark:hover:bg-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
               title={t('duplicate')}
               aria-label={t('duplicate')}
             >
-              <Repeat size={14} strokeWidth={1.75} />
+              <Repeat size={14} strokeWidth={1.8} />
             </button>
             <button 
               type="button"
               onClick={() => onEdit(transaction)} 
-              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.04] hover:bg-[var(--border-color)]/50 dark:hover:bg-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
               title={t('edit')}
               aria-label={t('edit')}
             >
-              <Pencil size={14} strokeWidth={1.75} />
+              <Pencil size={14} strokeWidth={1.8} />
             </button>
             <button 
               type="button"
               onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] flex items-center justify-center text-rose-500 dark:text-rose-400 transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.18] flex items-center justify-center text-rose-600 dark:text-rose-400 transition-colors cursor-pointer"
               title={t('delete')}
               aria-label={t('delete')}
             >
-              <Trash2 size={14} strokeWidth={1.75} />
-            </button>
-            <div className="w-px h-4 bg-[var(--border-color)] dark:bg-white/10 mx-0.5" />
-            <button 
-              type="button"
-              onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-white/[0.04] hover:bg-[var(--border-color)]/50 dark:hover:bg-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors cursor-pointer"
-              aria-label={t('close')}
-            >
-              <X size={16} strokeWidth={1.75} />
+              <Trash2 size={14} strokeWidth={1.8} />
             </button>
           </div>
         </div>
 
-        {/* Main Content Area: One Cohesive Detail Surface */}
+        {/* Main Content Area: Modern Consumer App Presentation */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          <div className="bg-[var(--surface-color)] dark:bg-[#312f2f] rounded-[18px] border border-[var(--border-color)] dark:border-white/[0.05] divide-y divide-[var(--border-color)]/50 dark:divide-white/[0.05] overflow-hidden shadow-xs dark:shadow-none">
-            
-            {/* Amount Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between">
-              <span className="text-xs font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC]">
-                {t('amount')}
-              </span>
-              <div className="text-right">
-                <p className={`text-xl sm:text-2xl font-semibold font-amount tabular-nums ${isIncome ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white' : 'text-[var(--text-primary)] dark:text-white'}`}>
-                  <span className="opacity-75 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
-                  <span>{formatAmount(transaction.amount, config.language)}</span>
-                  <span className="text-sm font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] ml-1.5 font-sans">{config.currency}</span>
-                </p>
-              </div>
+          {/* Hero Section: Logo, Merchant, Prominent Amount, and Swedish Formatted Date */}
+          <div className="flex flex-col items-center text-center pt-2 pb-2">
+            <div className="w-14 h-14 rounded-2xl bg-black/5 dark:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.1] flex items-center justify-center shadow-xs overflow-hidden">
+              <TransactionLogo transaction={transaction} config={config} size="md" />
             </div>
 
-            {/* Merchant / Store Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] shrink-0">
-                {t('merchant')}
-              </span>
-              <span className="text-sm font-medium text-[var(--text-primary)] dark:text-white text-right truncate">
-                {merchantName}
-              </span>
-            </div>
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#1C1917] dark:text-white mt-3 truncate max-w-full px-4">
+              {merchantName}
+            </h2>
 
-            {/* Date Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] shrink-0">
-                {t('date')}
-              </span>
-              <div className="text-right">
-                <span className="text-sm font-medium text-[var(--text-primary)] dark:text-white capitalize block">
-                  {formattedDate}
-                </span>
-                {formattedTime && (
-                  <span className="text-[11px] font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] mt-0.5 block tabular-nums">
-                    {formattedTime}
-                  </span>
-                )}
-              </div>
-            </div>
+            <p className={`text-[36px] sm:text-[42px] font-black font-amount tabular-nums tracking-tight leading-tight mt-1 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-white'}`}>
+              <span className="opacity-70 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
+              <span>{formatAmount(transaction.amount, config.language)}</span>
+              <span className="text-xl sm:text-2xl font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-1.5 font-sans">{config.currency}</span>
+            </p>
 
-            {/* Category Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] shrink-0">
+            <p className="text-xs sm:text-[13px] font-medium text-[#8C867C] dark:text-[#A8A8A8] mt-1.5 select-none tabular-nums">
+              {formattedDate}{formattedTime ? ` · ${formattedTime}` : ''}
+            </p>
+          </div>
+
+          {/* Details Section: Clean, Lightweight, and Non-Administrative */}
+          <div className="bg-[#F7F5F0] dark:bg-white/[0.04] rounded-2xl p-4 space-y-3.5 border border-[#E6E2D8] dark:border-white/[0.06]">
+            {/* Category */}
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] shrink-0">
                 {t('category')}
               </span>
               <div className="text-right">
@@ -211,8 +179,8 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       return (
                         <div key={split.id || idx} className="flex items-center justify-end gap-2">
                           {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />}
-                          <span className="text-sm font-medium text-[var(--text-primary)] dark:text-white">{splitCatName}</span>
-                          <span className="text-xs text-[var(--text-secondary)] dark:text-[#9CA6BC]">({formatAmount(split.amount, config.language)} {config.currency})</span>
+                          <span className="text-xs sm:text-sm font-semibold text-[#1C1917] dark:text-white">{splitCatName}</span>
+                          <span className="text-xs text-[#6E6961] dark:text-[#A8A8A8]">({formatAmount(split.amount, config.language)} {config.currency})</span>
                         </div>
                       );
                     })}
@@ -229,7 +197,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       if (!iconKey) return null;
                       return <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />;
                     })()}
-                    <span className="text-sm font-medium text-[var(--text-primary)] dark:text-white">
+                    <span className="text-xs sm:text-sm font-semibold text-[#1C1917] dark:text-white">
                       {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}
                     </span>
                   </div>
@@ -237,16 +205,19 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               </div>
             </div>
 
-            {/* Note Row if exists */}
+            {/* Note if exists */}
             {transaction.note && (
-              <div className="p-4 sm:p-4.5 flex items-start justify-between gap-4">
-                <span className="text-xs font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] shrink-0 pt-0.5">
-                  {t('ownNote')}
-                </span>
-                <span className="text-sm font-normal text-[var(--text-primary)] dark:text-white text-right max-w-[65%] break-words">
-                  {transaction.note}
-                </span>
-              </div>
+              <>
+                <div className="h-px bg-[#E6E2D8] dark:bg-white/[0.06]" />
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] shrink-0 pt-0.5">
+                    {t('ownNote')}
+                  </span>
+                  <span className="text-xs sm:text-sm font-medium text-[#1C1917] dark:text-white text-right max-w-[70%] break-words">
+                    {transaction.note}
+                  </span>
+                </div>
+              </>
             )}
           </div>
 
@@ -300,8 +271,15 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
       {showDeleteConfirm && (
         <ConfirmModal
           isOpen={showDeleteConfirm}
-          title={t('delete')}
-          message={t('deleteConfirm')}
+          title={config.language === 'en' ? "Delete transaction?" : "Radera transaktion?"}
+          message={
+            config.language === 'en'
+              ? `Do you want to delete the transaction of ${formatAmount(transaction.amount, config.language)} ${config.currency}?`
+              : `Vill du radera transaktionen på ${formatAmount(transaction.amount, config.language)} ${config.currency}?`
+          }
+          confirmText={config.language === 'en' ? "Delete" : "Radera"}
+          cancelText={config.language === 'en' ? "Cancel" : "Avbryt"}
+          variant="danger"
           onConfirm={() => {
             onDelete(transaction.id);
             onClose();

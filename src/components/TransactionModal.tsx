@@ -16,9 +16,9 @@ import { suggestIcon, suggestCategory } from '../utils/icons';
 import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
-import { NumberPad } from './NumberPad';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
-import { Button, IconButton, SegmentedControl } from './ui';
+import { formatFullDate } from '../utils/date';
+import { Button, SegmentedControl } from './ui';
 import { ReceiptCameraModal } from './ReceiptCameraModal';
 
 interface TransactionModalProps {
@@ -187,23 +187,23 @@ export function TransactionModal({
   prefill
 }: TransactionModalProps) {
   useScrollLock(true);
-  const getLocale = () => {
-    const lang = currentLang || 'sv';
-    const mapping: Record<string, string> = {
-      sv: 'sv-SE',
-      en: 'en-US',
-      no: 'no-NO',
-      da: 'da-DK',
-      fi: 'fi-FI'
-    };
-    return mapping[lang] || 'sv-SE';
-  };
   const [amount, setAmount] = useState(formatAmount(transaction?.amount?.toString() || prefill?.amount?.toString() || ''));
   const [splits, setSplits] = useState<TransactionSplit[]>(transaction?.splits || []);
   const [category, setCategory] = useState(transaction?.category || prefill?.category || (categories && categories.length > 0 ? categories[0].name : ''));
-  const [hasManuallySelectedCategory, setHasManuallySelectedCategory] = useState(!!prefill?.category);
   const [isCategorySelectorOpen, setIsCategorySelectorOpen] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
+
+  const displayedCategories = useMemo(() => {
+    if (isCategorySelectorOpen) return categories;
+    const top = categories.slice(0, 5);
+    if (category && !top.some(c => c.name.toLowerCase() === category.toLowerCase())) {
+      const selected = categories.find(c => c.name.toLowerCase() === category.toLowerCase());
+      if (selected) {
+        return [...categories.slice(0, 4), selected];
+      }
+    }
+    return top;
+  }, [categories, isCategorySelectorOpen, category]);
   const [note, setNote] = useState(transaction?.note || prefill?.note || '');
   const [merchant, setMerchant] = useState(transaction?.merchant || prefill?.name || '');
   const [icon, setIcon] = useState(transaction?.icon || 'none');
@@ -681,24 +681,28 @@ export function TransactionModal({
                   exit={{ opacity: 0, y: -10 }}
                   className="text-base sm:text-lg font-bold tracking-tight text-[#1C1917] dark:text-white text-center truncate px-2"
                 >
-                  {transaction ? t('edit') : (type === 'income' ? t('newIncome') : t('newExpense'))}
+                  {transaction 
+                    ? (currentLang === 'en' ? 'Edit transaction' : (type === 'income' ? 'Redigera inkomst' : 'Redigera transaktion'))
+                    : (type === 'income' ? t('newIncome') : t('newExpense'))
+                  }
                 </motion.h2>
               )}
             </AnimatePresence>
           </div>
           <div className="flex justify-end">
-            <IconButton 
-              icon={<X size={18} strokeWidth={2} />} 
+            <button 
+              type="button"
               onClick={onClose} 
-              variant="muted" 
-              size="sm" 
+              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
               aria-label={t('close')}
-            />
+            >
+              <X size={17} strokeWidth={2.2} />
+            </button>
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="shrink overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
+        {/* Main Content Area: Clean, Compact, Consumer App Presentation */}
+        <div className="shrink overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
               {/* Hidden file input for camera/photo library */}
               <input 
                 ref={receiptInputRef}
@@ -786,9 +790,9 @@ export function TransactionModal({
               )}
 
               {/* Amount Input */}
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2">
                 <div 
-                  className="bg-white dark:bg-white/[0.04] rounded-[18px] py-3.5 px-4 sm:py-4 sm:px-5 flex items-center justify-between transition-all border border-[#E6E2D8] dark:border-white/[0.08] group"
+                  className="bg-[#F7F5F0] dark:bg-white/[0.04] rounded-2xl py-3 px-4 sm:py-3.5 sm:px-5 flex items-center justify-between transition-all border border-[#E6E2D8] dark:border-white/[0.06] group"
                 >
                   <div className="shrink-0 flex items-center min-w-[72px]">
                     {type === 'expense' && (
@@ -802,13 +806,13 @@ export function TransactionModal({
                             setSplits([]);
                           }
                         }}
-                        className={`text-xs font-medium transition-all px-3 py-1 rounded-full border shadow-xs cursor-pointer ${
+                        className={`text-xs font-semibold transition-all px-3 py-1.5 rounded-full border cursor-pointer active:scale-95 ${
                           splits.length > 0 
                             ? "bg-rose-500 text-white border-transparent" 
-                            : "bg-black/5 text-[#1C1917] dark:bg-white/10 dark:text-white border-transparent hover:bg-black/10 dark:hover:bg-white/20"
+                            : "bg-[#EFECE6] dark:bg-white/10 text-[#1C1917] dark:text-white border-transparent hover:bg-[#EDE9DF] dark:hover:bg-white/20"
                         }`}
                       >
-                        {splits.length > 0 ? "Avbryt" : "Splitta"}
+                        {splits.length > 0 ? (currentLang === 'en' ? 'Cancel' : 'Avbryt') : (currentLang === 'en' ? 'Split' : 'Splitta')}
                       </button>
                     )}
                   </div>
@@ -816,7 +820,7 @@ export function TransactionModal({
                     <input
                       ref={amountInputRef}
                       type="text"
-                      inputMode="none"
+                      inputMode="decimal"
                       value={amount}
                       onChange={(e) => setAmount(formatAmount(e.target.value))}
                       onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
@@ -826,22 +830,15 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[#1C1917] dark:text-white outline-none font-amount text-[38px] sm:text-[44px] font-semibold text-center tracking-tighter leading-none placeholder-[#6E6961]/30 dark:placeholder-white/30 cursor-default"
+                      className="w-full bg-transparent text-[#1C1917] dark:text-white outline-none font-amount text-[38px] sm:text-[44px] font-bold text-center tracking-tight leading-none placeholder-[#6E6961]/30 dark:placeholder-white/30 cursor-text select-text"
                     />
                   </div>
                   <div className="shrink-0 flex items-center justify-end min-w-[72px]">
-                    <span className="text-xs font-semibold text-[#1C1917] dark:text-white bg-black/5 dark:bg-white/10 px-3 py-1.5 rounded-full transition-colors">
+                    <span className="text-xs font-semibold text-[#1C1917] dark:text-white bg-black/5 dark:bg-white/10 px-3 py-1.5 rounded-full transition-colors font-sans">
                       {currency}
                     </span>
                   </div>
                 </div>
-
-                {/* Built-in On-Screen Keypad with Math & Quick Splits */}
-                <NumberPad 
-                  value={amount} 
-                  onChange={setAmount} 
-                  currency={currency} 
-                />
               </div>
 
               {/* Merchant Input & Quick Icons */}
@@ -1057,19 +1054,21 @@ export function TransactionModal({
               )}
 
                   {/* Category Selection */}
-                  <div className={`space-y-4 pt-6 border-t border-[var(--border-color)]/30 mt-6 ${splits.length > 0 ? 'hidden' : ''}`}>
+                  <div className={`space-y-2.5 pt-3 border-t border-[#E6E2D8] dark:border-white/[0.06] ${splits.length > 0 ? 'hidden' : ''}`}>
                     <div className="flex items-center justify-between px-1">
-                      <h3 className="text-[11px] font-medium text-[var(--text-secondary)] ml-1">{t('category')}</h3>
+                      <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">{t('category')}</label>
                       <button 
+                        type="button"
                         onClick={() => setIsCategorySelectorOpen(!isCategorySelectorOpen)}
-                        className="text-[11px] font-semibold text-accent hover:opacity-80 transition-opacity flex items-center gap-1.5"
+                        className="text-xs font-semibold text-[#1C1917] dark:text-white hover:opacity-80 transition-opacity flex items-center gap-1 cursor-pointer"
                       >
-                        {isCategorySelectorOpen ? t('close') : t('all')} <ChevronDown size={14} strokeWidth={2} className={`transition-transform duration-300 ${isCategorySelectorOpen ? 'rotate-180' : ''}`} />
+                        <span>{isCategorySelectorOpen ? (currentLang === 'en' ? 'Show fewer' : 'Visa färre') : (currentLang === 'en' ? 'Show all' : 'Visa alla')}</span>
+                        <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform duration-200 ${isCategorySelectorOpen ? 'rotate-180' : ''}`} />
                       </button>
                     </div>
                     
-                    <div className="grid grid-cols-3 gap-3">
-                      {(isCategorySelectorOpen ? categories : categories.slice(0, 5)).map(cat => {
+                    <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+                      {displayedCategories.map(cat => {
                         const isActive = category === cat.name;
                         return (
                           <CategoryTile
@@ -1085,89 +1084,89 @@ export function TransactionModal({
                           />
                         );
                       })}
-                        {isCategorySelectorOpen ? (
-                          <button
-                            type="button"
-                            onClick={() => setIsAddingCategory(true)}
-                            className="flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 min-h-[88px] rounded-[16px] bg-[var(--surface-muted)]/50 text-[var(--text-primary)] hover:bg-[var(--surface-color)] transition-all group border border-[var(--border-color)] border-solid cursor-pointer"
-                          >
-                            <div className="w-10 h-10 rounded-[10px] bg-[var(--surface-color)] border border-[var(--border-color)] flex items-center justify-center transition-all group-hover:scale-105">
-                              <Plus size={20} strokeWidth={2.5} />
-                            </div>
-                            <span className="text-[11.5px] font-medium tracking-tight text-center line-clamp-2 leading-snug break-words opacity-90 w-full px-0.5">
-                              {t('newCategory')}
-                            </span>
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => setIsCategorySelectorOpen(true)}
-                            className="flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 min-h-[88px] rounded-[16px] bg-[var(--surface-muted)]/50 text-[var(--text-tertiary)] hover:bg-[var(--surface-color)] hover:text-[var(--text-secondary)] transition-all group border border-[var(--border-color)] cursor-pointer"
-                          >
-                            <div className="w-10 h-10 rounded-[10px] bg-[var(--bg-color)] border border-[var(--border-color)] flex items-center justify-center group-hover:bg-[var(--text-primary)] group-hover:text-[var(--bg-color)] transition-all shadow-inner">
-                              <Plus size={20} strokeWidth={2.5} />
-                            </div>
-                            <span className="text-[11.5px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
-                              {t('more')}
-                            </span>
-                          </button>
-                        )}
+                      {isCategorySelectorOpen ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingCategory(true)}
+                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-[#F7F5F0] dark:bg-white/[0.04] text-[#1C1917] dark:text-white hover:bg-black/5 dark:hover:bg-white/[0.08] transition-all group border border-[#E6E2D8] dark:border-white/[0.06] cursor-pointer"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.08] flex items-center justify-center transition-all group-hover:scale-105">
+                            <Plus size={18} strokeWidth={2.2} />
+                          </div>
+                          <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
+                            {t('newCategory')}
+                          </span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setIsCategorySelectorOpen(true)}
+                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-[#F7F5F0] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[#1C1917] dark:hover:text-white transition-all group border border-[#E6E2D8] dark:border-white/[0.06] cursor-pointer"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.08] flex items-center justify-center group-hover:bg-[#1C1917] group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-all">
+                            <Plus size={18} strokeWidth={2.2} />
+                          </div>
+                          <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
+                            {currentLang === 'en' ? 'More' : 'Fler'}
+                          </span>
+                        </button>
+                      )}
                     </div>
                   </div>
             
                   {/* Date Selection */}
-                  <div className="space-y-4 pt-2">
-                    <div className="flex items-center justify-between ml-2 mr-1">
-                      <h3 className="text-[11px] font-medium text-[var(--text-secondary)]">{t('date')}</h3>
+                  <div className="space-y-2.5 pt-3 border-t border-[#E6E2D8] dark:border-white/[0.06]">
+                    <div className="flex items-center justify-between px-1">
+                      <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">{t('date')}</label>
                       {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
                        new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
-                        <span className="text-[11px] font-semibold text-[var(--text-primary)]">
-                          {new Date(selectedDate).toLocaleDateString(getLocale(), {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
+                        <span className="text-xs font-semibold text-[#1C1917] dark:text-white tabular-nums">
+                          {formatFullDate(selectedDate, currentLang)}
                         </span>
                       )}
                     </div>
                     <div className="flex gap-2">
                       <button
+                        type="button"
                         onClick={() => {
                           setSelectedDate(new Date());
                           setShowFullCalendar(false);
                         }}
-                        className={`flex-1 py-3.5 rounded-[16px] text-[12px] font-semibold tracking-tight transition-all flex items-center justify-center gap-2 ${
+                        className={`flex-1 py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-xs'
-                            : 'bg-[var(--surface-muted)]/50 text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
+                            ? 'bg-[#1C1917] text-white dark:bg-white dark:text-black shadow-xs'
+                            : 'bg-[#F7F5F0] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.06]'
                         }`}
                       >
                         {t('todayLabel')}
                       </button>
                       <button
+                        type="button"
                         onClick={() => {
                           const yesterday = new Date();
                           yesterday.setDate(yesterday.getDate() - 1);
                           setSelectedDate(yesterday);
                           setShowFullCalendar(false);
                         }}
-                        className={`flex-1 py-3.5 rounded-[16px] text-[12px] font-semibold tracking-tight transition-all flex items-center justify-center gap-2 ${
+                        className={`flex-1 py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
-                            ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-xs'
-                            : 'bg-[var(--surface-muted)]/50 text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
+                            ? 'bg-[#1C1917] text-white dark:bg-white dark:text-black shadow-xs'
+                            : 'bg-[#F7F5F0] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.06]'
                         }`}
                       >
                         {t('yesterdayLabel')}
                       </button>
                       <button
+                        type="button"
                         onClick={() => setShowFullCalendar(!showFullCalendar)}
-                        className={`w-14 py-3.5 rounded-[16px] transition-all flex items-center justify-center ${
+                        className={`w-12 py-3 rounded-xl transition-all flex items-center justify-center cursor-pointer ${
                           showFullCalendar 
-                            ? 'bg-accent text-[var(--text-on-accent)] shadow-xs' 
-                            : 'bg-[var(--surface-muted)]/50 text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
+                            ? 'bg-[#1C1917] text-white dark:bg-white dark:text-black shadow-xs' 
+                            : 'bg-[#F7F5F0] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.06]'
                         }`}
+                        title={t('chooseDate')}
                       >
-                        <Calendar size={20} strokeWidth={2} />
+                        <Calendar size={18} strokeWidth={2} />
                       </button>
                     </div>
 
@@ -1258,8 +1257,8 @@ export function TransactionModal({
                   )}
           </div>
 
-          {/* Register Button */}
-          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-[var(--border-color)] bg-[var(--bg-color)]">
+          {/* Register / Save Button */}
+          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-[#E6E2D8] dark:border-white/[0.06] bg-white dark:bg-[#242424]">
             <Button 
               disabled={!isSplitsValid}
               onClick={() => {
@@ -1285,7 +1284,9 @@ export function TransactionModal({
               size="lg"
               icon={<Check size={18} strokeWidth={2.5} />}
             >
-              {type === 'income' ? (t('registerIncome' as any) || 'Registrera inkomst') : (t('registerExpense' as any) || 'Registrera utgift')}
+              {transaction 
+                ? (currentLang === 'en' ? 'Save changes' : 'Spara ändringar')
+                : (type === 'income' ? (t('registerIncome' as any) || 'Registrera inkomst') : (t('registerExpense' as any) || 'Registrera utgift'))}
             </Button>
           </div>
 
@@ -1313,13 +1314,14 @@ export function TransactionModal({
                     <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
                     <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
-                  <IconButton 
-                    icon={<X size={16} strokeWidth={1.5} />}
+                  <button
+                    type="button"
                     onClick={() => setShowIconSelector(false)}
-                    variant="muted"
-                    size="sm"
+                    className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                     aria-label={t('close')}
-                  />
+                  >
+                    <X size={16} strokeWidth={2} />
+                  </button>
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 min-h-0">
                   <IconSelector

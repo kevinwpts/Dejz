@@ -14,7 +14,7 @@ interface ConfirmModalProps {
   onConfirm: () => void;
   onCancel: () => void;
   variant?: 'danger' | 'info';
-  t: (key: TranslationKey) => string;
+  t?: (key: TranslationKey) => string;
 }
 
 export function ConfirmModal({ 
@@ -31,8 +31,8 @@ export function ConfirmModal({
   useScrollLock(isOpen);
   if (!isOpen) return null;
 
-  const displayConfirmText = confirmText || t('confirm');
-  const displayCancelText = cancelText || t('cancel');
+  const displayConfirmText = confirmText || (t ? t('confirm') : 'Bekräfta');
+  const displayCancelText = cancelText || (t ? t('cancel') : 'Avbryt');
 
   const isDanger = variant === 'danger';
   const iconColor = isDanger ? 'text-danger' : 'text-[var(--accent-color)]';
@@ -43,7 +43,7 @@ export function ConfirmModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={onCancel}
     >
       <motion.div

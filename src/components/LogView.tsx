@@ -19,6 +19,7 @@ import { EmptyState } from './EmptyState';
 import { FilterSelectButton, FilterMenuModal } from './ui';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { formatFullDate } from '../utils/date';
 
 interface LogViewProps {
   transactions: Transaction[];
@@ -321,11 +322,17 @@ export function LogView({
               className="space-y-2"
             >
               <div className="px-1 flex items-center justify-between">
-                <span className="text-xs font-medium text-[#A8A8A8] tracking-tight capitalize">
-                  {new Date(date).toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
+                <span className="text-xs font-medium text-[var(--text-secondary)] tracking-tight">
+                  {formatFullDate(date, currentLang)}
                 </span>
-                <span className="text-[11px] text-[#A8A8A8]/60 tabular-nums font-amount">
-                  {dayTransactions.length} {dayTransactions.length === 1 ? 'st' : 'st'}
+                <span className="text-[11px] font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
+                  {dayTransactions.length} {getL10n(
+                    dayTransactions.length === 1 ? 'transaktion' : 'transaktioner',
+                    dayTransactions.length === 1 ? 'transaction' : 'transactions',
+                    dayTransactions.length === 1 ? 'transaksjon' : 'transaksjoner',
+                    dayTransactions.length === 1 ? 'transaktion' : 'transaktioner',
+                    dayTransactions.length === 1 ? 'tapahtuma' : 'tapahtumaa'
+                  )}
                 </span>
               </div>
               <div className="space-y-2.5">

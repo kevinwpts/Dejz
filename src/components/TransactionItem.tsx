@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'motion/react';
+import { motion, useMotionValue, useTransform } from 'motion/react';
 import { Transaction, Config } from '../types';
 import { TransactionLogo } from './TransactionLogo';
 import { formatAmount, capitalize } from '../utils/format';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
-import { Paperclip, Trash2, AlertTriangle } from 'lucide-react';
+import { Paperclip, Trash2 } from 'lucide-react';
 import { feedback } from '../utils/feedback';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { ConfirmModal } from './ConfirmModal';
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -47,7 +48,6 @@ export function TransactionItem({
 
   const [isOpen, setIsOpen] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [dragDistance, setDragDistance] = useState(0);
 
   useScrollLock(showConfirmModal);
@@ -124,7 +124,6 @@ export function TransactionItem({
 
   const handleDeleteConfirm = () => {
     if (!onDelete || !transaction.id) return;
-    setIsDeleting(true);
     feedback.success();
     setShowConfirmModal(false);
     onDelete(transaction.id);
@@ -271,71 +270,25 @@ export function TransactionItem({
       </div>
 
       {/* Confirmation Modal before Delete */}
-      <AnimatePresence>
-        {showConfirmModal && (
-          <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
-            onClick={() => {
-              setShowConfirmModal(false);
-              setIsOpen(false);
-            }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 10 }}
-              transition={{ duration: 0.16 }}
-              className="bg-[#FFFFFF] dark:bg-[#232323] border border-[#E6E2D8] dark:border-white/[0.08] rounded-[24px] p-5 sm:p-6 w-full max-w-sm shadow-2xl space-y-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                  <AlertTriangle size={20} strokeWidth={2.2} />
-                </div>
-                <div>
-                  <h3 className="text-[16px] font-bold text-[#1C1917] dark:text-white tracking-tight">
-                    {getL10n('Ta bort transaktion?', 'Delete transaction?')}
-                  </h3>
-                  <p className="text-xs text-[#6E6961] dark:text-[#9CA6BC] mt-0.5">
-                    {getL10n('Denna åtgärd går inte att ångra.', 'This action cannot be undone.')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-black/5 dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] flex items-center justify-between text-xs">
-                <span className="font-semibold text-[#1C1917] dark:text-white truncate max-w-[180px]">
-                  {merchantName}
-                </span>
-                <span className="font-amount font-bold text-rose-600 dark:text-rose-500 tabular-nums">
-                  {formatAmount(finalAmount, config?.language || 'sv')} {config?.currency || 'kr'}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5 pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowConfirmModal(false);
-                    setIsOpen(false);
-                  }}
-                  className="py-2.5 px-4 rounded-xl text-xs font-semibold text-[#1C1917] dark:text-white bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] border border-[#E6E2D8] dark:border-white/[0.08] transition-all cursor-pointer active:scale-95"
-                >
-                  {getL10n('Avbryt', 'Cancel')}
-                </button>
-                <button
-                  type="button"
-                  disabled={isDeleting}
-                  onClick={handleDeleteConfirm}
-                  className="py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-rose-500 hover:bg-rose-600 shadow-sm transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5"
-                >
-                  <Trash2 size={14} />
-                  <span>{getL10n('Ta bort', 'Delete')}</span>
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {showConfirmModal && (
+        <ConfirmModal
+          isOpen={showConfirmModal}
+          title={config?.language === 'en' ? 'Delete transaction?' : 'Radera transaktion?'}
+          message={
+            config?.language === 'en'
+              ? `Do you want to delete the transaction of ${formatAmount(finalAmount, config?.language || 'sv')} ${config?.currency || 'kr'}?`
+              : `Vill du radera transaktionen på ${formatAmount(finalAmount, config?.language || 'sv')} ${config?.currency || 'kr'}?`
+          }
+          confirmText={config?.language === 'en' ? 'Delete' : 'Radera'}
+          cancelText={config?.language === 'en' ? 'Cancel' : 'Avbryt'}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => {
+            setShowConfirmModal(false);
+            setIsOpen(false);
+          }}
+          variant="danger"
+        />
+      )}
     </>
   );
 }

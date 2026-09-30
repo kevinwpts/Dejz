@@ -24,7 +24,7 @@ export function CategoryTile({
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 min-h-[88px] rounded-[16px] transition-all relative group cursor-pointer select-none ${
+      className={`flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] transition-all relative group cursor-pointer select-none ${
         isActive
           ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border-2 border-[var(--accent-color)] shadow-xs scale-[1.02]'
           : 'bg-[var(--surface-muted)]/50 text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
@@ -33,10 +33,10 @@ export function CategoryTile({
       <CategoryIcon
         icon={icon}
         color={color}
-        size="md"
+        size="sm"
         isActive={isActive}
       />
-      <span className="text-[11.5px] font-medium tracking-tight text-center line-clamp-2 leading-snug break-words hyphens-auto opacity-90 w-full px-0.5 min-h-[2.4em] flex items-center justify-center">
+      <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 leading-tight break-words opacity-90 w-full px-0.5">
         {displayName}
       </span>
     </button>

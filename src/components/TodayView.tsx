@@ -414,66 +414,6 @@ export function TodayView({
 
   const displayedFixedTransactions = (config?.showFixedExpensesInCalendar ?? true) ? fixedTransactions : [];
 
-  const dynamicInsight = useMemo(() => {
-    if (!stats) return null;
-
-    const totalDays = stats.totalDaysInPeriod || calendarDays.length || 0;
-    const daysElapsed = stats.daysElapsed !== undefined ? stats.daysElapsed : 0;
-    const disposablePot = stats.disposablePot || 0;
-    const totalSpent = stats.totalSpentInPeriod !== undefined ? stats.totalSpentInPeriod : 0;
-
-    // 1. Pacing vs plan: linear progression over period
-    if (daysElapsed >= 1 && totalDays > 0 && disposablePot > 0 && !stats.isPastPeriod) {
-      const plannedSpendToDate = Math.round((daysElapsed / totalDays) * disposablePot);
-      const diff = plannedSpendToDate - totalSpent;
-
-      // Meaningful variance (at least 50 kr)
-      if (Math.abs(diff) >= 50) {
-        if (diff > 0) {
-          return {
-            type: 'positive' as const,
-            text: lang === 'en'
-              ? `You're ${formatAmount(diff, lang)} ${config?.currency || 'kr'} under your plan so far`
-              : `Du ligger ${formatAmount(diff, lang)} ${config?.currency || 'kr'} under din plan hittills`,
-          };
-        } else {
-          return {
-            type: 'warning' as const,
-            text: lang === 'en'
-              ? `You're ${formatAmount(Math.abs(diff), lang)} ${config?.currency || 'kr'} over your plan so far`
-              : `Du ligger ${formatAmount(Math.abs(diff), lang)} ${config?.currency || 'kr'} över din plan hittills`,
-          };
-        }
-      }
-    }
-
-    // 2. Over-budget category alert (if any category has exceeded budget by >= 50 kr)
-    if (categoryBudgetData && categoryBudgetData.length > 0 && !stats.isPastPeriod) {
-      const overBudgetCat = categoryBudgetData.find((c) => c.isOverBudget && c.remaining <= -50);
-      if (overBudgetCat) {
-        const overAmount = Math.abs(overBudgetCat.remaining);
-        return {
-          type: 'warning' as const,
-          text: lang === 'en'
-            ? `${formatAmount(overAmount, lang)} ${config?.currency || 'kr'} over budget in ${overBudgetCat.name}`
-            : `${formatAmount(overAmount, lang)} ${config?.currency || 'kr'} över budget i ${overBudgetCat.name}`,
-        };
-      }
-    }
-
-    // 3. Past period completion
-    if (stats.isPastPeriod && stats.remainingPeriodCents !== undefined && stats.remainingPeriodCents > 0) {
-      return {
-        type: 'positive' as const,
-        text: lang === 'en'
-          ? `Period completed with ${formatAmount(stats.remainingPeriodCents, lang)} ${config?.currency || 'kr'} left`
-          : `Perioden avslutades med ${formatAmount(stats.remainingPeriodCents, lang)} ${config?.currency || 'kr'} kvar`,
-      };
-    }
-
-    return null;
-  }, [stats, calendarDays.length, categoryBudgetData, lang, config?.currency]);
-
   useEffect(() => {
     const updateHeight = () => {
       if (heroRef.current) {
@@ -499,7 +439,7 @@ export function TodayView({
       window.removeEventListener("resize", updateHeight);
       if (ro) ro.disconnect();
     };
-  }, [categoryBudgetData.length, todayData, dynamicInsight]);
+  }, [categoryBudgetData.length, todayData]);
 
   if (!stats) return null;
 
@@ -522,7 +462,7 @@ export function TodayView({
         }}
       />
 
-      {/* 1. FIXED STATIC HERO LAYER (Kvar att spendera + Dynamic insight + Dina budgetar) */}
+      {/* 1. FIXED STATIC HERO LAYER (Kvar att spendera + Dina budgetar) */}
       <div
         ref={heroRef}
         className="fixed left-0 right-0 z-10 pointer-events-auto"
@@ -562,7 +502,6 @@ export function TodayView({
             onQuickAddExpense={onQuickAddExpense}
             onOpenCalculator={onOpenCalculator}
             allTransactions={allTransactions}
-            dynamicInsight={dynamicInsight}
             categoryBudgets={
               <div className="pt-1 pb-1">
                 {/* Section header: "Dina budgetar" on the left, "Hantera" text-action on the right */}
