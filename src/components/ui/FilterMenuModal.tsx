@@ -58,7 +58,7 @@ export function FilterMenuModal<T = string>({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#242424] rounded-t-[28px] sm:rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl max-h-[85dvh] flex flex-col z-10 overflow-hidden pb-[max(1.25rem,env(safe-area-inset-bottom,0px))]"
+          className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#242424] rounded-t-[28px] sm:rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
         >
           {/* Mobile Drag Handle */}
           <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -89,7 +89,7 @@ export function FilterMenuModal<T = string>({
           </div>
 
           {/* Options List */}
-          <div className="p-2.5 sm:p-3 overflow-y-auto space-y-1 flex-1 custom-scrollbar">
+          <div className="p-2.5 sm:p-3 overflow-y-auto space-y-1 shrink min-h-0 custom-scrollbar">
             {options.map((opt) => {
               const isSelected = opt.id === selectedId;
               return (

@@ -89,7 +89,8 @@ export function TransactionItem({
     containerClasses = "bg-white dark:bg-[#242424] rounded-none shadow-none border-b border-[#E6E2D8]/60 dark:border-white/[0.04] last:border-none py-3 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
-    containerClasses = "bg-transparent hover:bg-[#EDE9DF] dark:hover:bg-[#333333] rounded-none shadow-none border-none transition-colors";
+    containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
+    paddingClasses = "px-3.5 sm:px-4 py-2 sm:py-2.5 min-h-[50px]";
   } else if (variant === 'nested') {
     containerClasses = "bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] shadow-none border-none rounded-[14px]";
   } else {

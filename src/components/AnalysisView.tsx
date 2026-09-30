@@ -441,34 +441,34 @@ export function AnalysisView({
               return (
                 <div key={item.name} className="transition-colors">
                   <div 
-                    className="p-3.5 sm:p-4 min-h-[68px] flex flex-col justify-center group hover:bg-[#EDE9DF] dark:hover:bg-[#333333] transition-colors cursor-pointer"
+                    className="py-2.5 px-3.5 sm:py-3 sm:px-4 min-h-[52px] flex flex-col justify-center group hover:bg-[#EDE9DF] dark:hover:bg-[#333333] transition-colors cursor-pointer"
                     onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
                   >
                     <div className="flex items-center justify-between gap-3 w-full">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         {/* Category Icon */}
                         <div 
-                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0"
+                          className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full flex items-center justify-center shrink-0"
                           style={{ 
                             backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
                             color: '#fff'
                           }}
                         >
                           {isEmojiString(iconName) ? (
-                            <span className="text-[17px] leading-none">{iconName}</span>
+                            <span className="text-[15px] leading-none">{iconName}</span>
                           ) : Icon ? (
-                            <Icon size={16} strokeWidth={1.75} />
+                            <Icon size={15} strokeWidth={1.75} />
                           ) : (
                             <div className="w-1.5 h-1.5 rounded-full bg-white" />
                           )}
                         </div>
 
                         <div className="min-w-0 flex-1 flex flex-col justify-center">
-                          <p className="text-[14px] sm:text-[14.5px] font-medium text-[#1C1917] dark:text-white leading-tight truncate tracking-tight">
+                          <p className="text-[13.5px] sm:text-[14px] font-semibold text-[#1C1917] dark:text-white leading-tight truncate tracking-tight">
                             {item.name}
                           </p>
-                          <div className="flex items-center gap-1.5 mt-1 min-w-0 overflow-hidden text-[#6E6961] dark:text-[#9CA6BC]">
-                            <span className="text-xs font-normal">
+                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#6E6961] dark:text-[#9CA6BC]">
+                            <span className="text-[11px] font-normal">
                               {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
                             </span>
                           </div>
@@ -477,13 +477,13 @@ export function AnalysisView({
 
                       <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
                         <div className="text-right flex flex-col items-end justify-center">
-                          <p className="text-[14px] sm:text-[14.5px] font-semibold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
+                          <p className="text-[13.5px] sm:text-[14px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
                             {formatAmount(Math.round(item.value), config.language)}
                             <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1">{config.currency}</span>
                           </p>
                         </div>
-                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'}`}>
-                          <ChevronDown size={16} strokeWidth={2} />
+                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[#1C1917] dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'}`}>
+                          <ChevronDown size={15} strokeWidth={2} />
                         </div>
                       </div>
                     </div>
@@ -496,10 +496,10 @@ export function AnalysisView({
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden bg-black/[0.02] dark:bg-white/[0.015] border-t border-[#EDE9DF] dark:border-white/[0.03]"
+                        className="overflow-hidden bg-black/[0.015] dark:bg-white/[0.015] border-t border-[#EDE9DF]/60 dark:border-white/[0.04]"
                       >
                         {(categoryTransactions.length > 0 || categoryFixedExpenses.length > 0) ? (
-                          <div className="space-y-2.5 p-2 overflow-hidden">
+                          <div className="divide-y divide-[#EDE9DF]/50 dark:divide-white/[0.035] overflow-hidden">
                             {categoryTransactions.map(t => {
                               let displayAmount = t.amount;
                               const transactionSplits = (t as any).splits;
@@ -566,7 +566,7 @@ export function AnalysisView({
                             })}
                           </div>
                         ) : (
-                          <EmptyState title={t('noDataAvailable')} className="py-6" />
+                          <EmptyState title={t('noDataAvailable')} className="py-5" />
                         )}
                       </motion.div>
                     )}
