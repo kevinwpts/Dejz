@@ -7,7 +7,7 @@ import {
   WalletCards,
   Plus,
 } from "lucide-react";
-import { Language, translations, TranslationKey } from "../i18n";
+import { Language } from "../i18n";
 
 type Tab = "today" | "transactions" | "analysis" | "budget" | "profile" | "allocate";
 
@@ -33,15 +33,15 @@ export function CustomBottomNavigation({
   language,
   onPlusClick,
 }: CustomBottomNavigationProps) {
-  const t = (key: TranslationKey) => translations[language]?.[key] || translations["sv"]?.[key] || key;
-
   const isAllocateActive = activeTab === "budget" && (budgetSection === "allocate" || budgetSection === "category-budgets");
   const isBudgetActive = activeTab === "budget" && !isAllocateActive;
 
+  const isEn = language === 'en';
+
   return (
-    <div className="fixed bottom-[22px] sm:bottom-[30px] left-0 right-0 z-30 px-2.5 sm:px-6 pointer-events-none flex justify-center">
+    <div className="fixed bottom-0 left-0 right-0 z-30 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] px-3 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
-        className="w-[94%] sm:w-[86%] max-w-[430px] sm:max-w-[450px] h-[64px] sm:h-[68px] rounded-[18px] px-2 sm:px-3 bg-white dark:bg-[#242424] text-[#6E6961] dark:text-[#A8A8A8] backdrop-blur-[24px] flex items-center justify-between pointer-events-auto border border-[#E2DDD4] dark:border-white/[0.04] shadow-lg shadow-black/[0.03] dark:shadow-none"
+        className="w-full max-w-[440px] h-[64px] rounded-[24px] px-2 bg-white dark:bg-[#242424] text-[#6D6962] dark:text-[#A8A8A8] flex items-center justify-between pointer-events-auto border border-[#E2DDD4] dark:border-[#383838] shadow-md shadow-black/[0.04]"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 28 }}
@@ -49,7 +49,7 @@ export function CustomBottomNavigation({
         {/* 1. Hem */}
         <NavItem
           icon={Home}
-          label={t("today")}
+          label={isEn ? "Home" : "Hem"}
           isActive={activeTab === "today"}
           onClick={() => setActiveTab("today")}
           fillOnActive
@@ -58,29 +58,29 @@ export function CustomBottomNavigation({
         {/* 2. Historik */}
         <NavItem
           icon={History}
-          label={t("log")}
+          label={isEn ? "History" : "Historik"}
           isActive={activeTab === "transactions"}
           onClick={() => setActiveTab("transactions")}
         />
 
-        {/* 3. Central Plus Button */}
-        <div className="flex-1 flex flex-col items-center justify-center -mt-0.5">
+        {/* 3. Centrerad Plusknapp (cirka 48px) */}
+        <div className="flex items-center justify-center px-1">
           <button
             onClick={() => {
               if (onPlusClick) onPlusClick();
             }}
-            className="w-11 h-11 sm:w-12 sm:h-12 bg-[#635BFF] text-white rounded-full active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-[#635BFF]/25 hover:bg-[#5148E5]"
-            aria-label="Lägg till transaktion"
-            title="Lägg till transaktion"
+            className="w-[48px] h-[48px] bg-[#635BFF] hover:bg-[#5148E5] text-white rounded-full active:scale-95 flex items-center justify-center transition-all cursor-pointer shadow-sm shadow-[#635BFF]/30"
+            aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
+            title={isEn ? "Add transaction" : "Lägg till transaktion"}
           >
-            <Plus size={22} strokeWidth={2.5} />
+            <Plus size={22} strokeWidth={2.2} />
           </button>
         </div>
 
         {/* 4. Analys */}
         <NavItem
           icon={BarChart3}
-          label={t("analysis")}
+          label={isEn ? "Analysis" : "Analys"}
           isActive={activeTab === "analysis"}
           onClick={() => setActiveTab("analysis")}
         />
@@ -88,7 +88,7 @@ export function CustomBottomNavigation({
         {/* 5. Ekonomi */}
         <NavItem
           icon={WalletCards}
-          label={language === "en" ? "Finances" : "Ekonomi"}
+          label={isEn ? "Finances" : "Ekonomi"}
           isActive={isBudgetActive}
           onClick={() => {
             if (onNavigateSection) {
@@ -121,18 +121,20 @@ function NavItem({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`flex-1 h-full flex items-center justify-center py-2 px-1 transition-all duration-200 active:scale-90 cursor-pointer select-none rounded-2xl relative ${
+      className={`min-w-[44px] min-h-[44px] flex-1 h-full flex flex-col items-center justify-center gap-0.5 transition-all duration-150 active:scale-95 cursor-pointer select-none rounded-[16px] ${
         isActive
           ? 'text-[#635BFF] dark:text-[#7C75FF]'
-          : 'text-[#8C867C] hover:text-[#1C1917] dark:text-[#A8A8A8]/70 dark:hover:text-white'
+          : 'text-[#6D6962] hover:text-[#211F1C] dark:text-[#A8A8A8] dark:hover:text-white'
       }`}
     >
       <Icon 
-        size={23} 
-        strokeWidth={isActive ? 2.3 : 1.85} 
+        size={22} 
+        strokeWidth={isActive ? 2.2 : 1.8} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
-        className="transition-transform duration-200"
       />
+      <span className="text-[11px] font-medium leading-none tracking-tight">
+        {label}
+      </span>
     </button>
   );
 }

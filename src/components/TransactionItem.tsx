@@ -84,25 +84,25 @@ export function TransactionItem({
 
   // Determine layout style classes with solid opaque surfaces (prevents background bleed-through)
   let containerClasses = "";
-  let paddingClasses = "px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px]";
+  let paddingClasses = "px-4 py-3 sm:py-3.5 min-h-[64px]";
   if (squared) {
-    containerClasses = "bg-white dark:bg-[#242424] rounded-none shadow-none border-b border-[var(--border-color)]/60 dark:border-white/[0.04] last:border-none py-3 px-2";
+    containerClasses = "bg-white dark:bg-[#242424] rounded-none shadow-none border-b border-[#E2DDD4]/60 dark:border-white/[0.04] last:border-none py-3 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
-    paddingClasses = "px-3.5 sm:px-4 py-2 sm:py-2.5 min-h-[50px]";
+    paddingClasses = "px-4 py-2 sm:py-2.5 min-h-[50px]";
   } else if (variant === 'nested') {
-    containerClasses = "bg-[var(--surface-muted)] dark:bg-[#2D2D2D] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] shadow-none border-none rounded-[14px]";
+    containerClasses = "bg-[var(--surface-muted)] dark:bg-[#2D2D2D] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] shadow-none border border-[#E2DDD4]/50 dark:border-white/[0.04] rounded-[12px]";
   } else {
-    containerClasses = "bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] rounded-[18px] shadow-none border-none";
+    containerClasses = "bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] rounded-[20px] shadow-none border border-[#E2DDD4] dark:border-[#383838]";
   }
 
-  // Neutral discreet category display (no pill background, no bright red/colored badge)
+  // Neutral discreet category display
   const renderCategoryBadge = (categoryName: string, amount?: number) => {
     const iconKey = getCategoryIconName(categoryName || '');
 
     return (
-      <div className="flex items-center gap-1.5 shrink-0 text-[#6E6961] dark:text-[#A8A8A8]">
+      <div className="flex items-center gap-1.5 shrink-0 text-[#6D6962] dark:text-[#A8A8A8]">
         {iconKey ? (
           <CategoryIcon 
             icon={iconKey} 
@@ -110,7 +110,7 @@ export function TransactionItem({
             size="xs" 
           />
         ) : null}
-        <span className="text-[12px] font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] tracking-tight whitespace-nowrap">
+        <span className="text-[13px] sm:text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] tracking-tight whitespace-nowrap">
           {capitalize(categoryName || '')}
           {amount !== undefined && <span className="ml-1 opacity-70">({formatAmount(amount, config?.language || 'sv')})</span>}
         </span>
@@ -141,7 +141,7 @@ export function TransactionItem({
 
   return (
     <>
-      <div data-font="barlow" className={`relative overflow-hidden ${squared ? '' : 'rounded-[18px]'} select-none font-barlow`}>
+      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[20px]'} select-none`}>
         {/* Swipe Left Background Action: Delete */}
         {canSwipe && (
           <motion.div 
@@ -156,11 +156,11 @@ export function TransactionItem({
                 feedback.tap();
                 setShowConfirmModal(true);
               }}
-              className="w-full h-full flex flex-col items-center justify-center gap-1 text-white hover:bg-rose-600 active:scale-95 transition-all cursor-pointer select-none font-barlow"
+              className="w-full h-full flex flex-col items-center justify-center gap-1 text-white hover:bg-rose-600 active:scale-95 transition-all cursor-pointer select-none"
               aria-label={getL10n('Ta bort', 'Delete')}
             >
-              <Trash2 size={19} strokeWidth={2.2} />
-              <span className="text-[10.5px] font-medium tracking-tight">
+              <Trash2 size={19} strokeWidth={2} />
+              <span className="text-[11px] font-medium tracking-tight">
                 {getL10n('Ta bort', 'Delete')}
               </span>
             </button>
@@ -169,7 +169,6 @@ export function TransactionItem({
 
         {/* Foreground Draggable Transaction Card */}
         <motion.div 
-          data-font="barlow"
           drag={canSwipe ? "x" : false}
           dragDirectionLock={true}
           dragMomentum={false}
@@ -194,29 +193,29 @@ export function TransactionItem({
               onView(transaction);
             }
           }}
-          className={`${paddingClasses} relative z-10 flex items-center justify-between gap-[12px] group transition-colors duration-150 font-barlow ${containerClasses} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
+          className={`${paddingClasses} relative z-10 flex items-center justify-between gap-3 group transition-colors duration-150 ${containerClasses} ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <div className="flex items-center gap-[12px] min-w-0 flex-1">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             {/* Real Logo in original color */}
             <div className="flex-shrink-0">
               <TransactionLogo transaction={transaction} config={config} />
             </div>
             
             <div className="min-w-0 flex-1 flex flex-col justify-center">
-              {/* Primary Merchant Name */}
-              <p className="text-[14px] sm:text-[14.5px] font-semibold text-[var(--text-primary)] dark:text-white leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
+              {/* Primary Merchant Name: 16px, weight 500 */}
+              <p className="text-[15px] sm:text-[16px] font-medium text-[#211F1C] dark:text-white leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
                 {merchantName}
               </p>
               
-              {/* Secondary Details (Category, Note, Paperclip) */}
-              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)] dark:text-[#9CA6BC]">
+              {/* Secondary Details: 14px, weight 400 */}
+              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#6D6962] dark:text-[#A8A8A8]">
                 {hideCategoryBadge ? (
                   (transaction.timestamp || transaction.date) ? (
-                    <span className="text-[12px] font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] opacity-80 tabular-nums">
+                    <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] tabular-nums">
                       {new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
                     </span>
                   ) : isFixed ? (
-                    <span className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[#9CA6BC] opacity-80">
+                    <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
                       {getL10n('Fast utgift', 'Fixed expense', 'Fast utgift', 'Fast udgift', 'Kiinteä kulu')}
                     </span>
                   ) : null
@@ -231,32 +230,32 @@ export function TransactionItem({
                 )}
 
                 {transaction.note && !isFixed && (
-                  <span className="text-[12px] font-normal text-[var(--text-secondary)]/80 dark:text-[#9CA6BC]/80 truncate min-w-0 flex-1">
-                    {hideCategoryBadge ? `• ${transaction.note}` : `• ${transaction.note}`}
+                  <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate min-w-0 flex-1">
+                    • {transaction.note}
                   </span>
                 )}
                 {transaction.receiptUrl && (
-                  <Paperclip className="w-3 h-3 text-[var(--text-secondary)] dark:text-[#9CA6BC] opacity-75 shrink-0" />
+                  <Paperclip className="w-3 h-3 text-[#6D6962] dark:text-[#A8A8A8] shrink-0" />
                 )}
               </div>
             </div>
           </div>
           
-          {/* Primary Amount */}
+          {/* Primary Amount: 15-16px, weight 500 */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-            <p className={`text-[14.5px] sm:text-[15px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
-              <span className="opacity-75 mr-0.5 text-[13px] font-medium">{transaction.type === 'income' ? '+' : '−'}</span>
+            <p className={`text-[15px] sm:text-[16px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
+              <span className="opacity-75 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
               <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
-              <span className="text-[12px] font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] ml-1">{config?.currency || 'kr'}</span>
+              <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-1">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixed ? (
-              <p className="text-[11px] font-normal text-[var(--text-tertiary)] dark:text-[#9CA6BC]/75 mt-0.5 tabular-nums">
+              <p className="text-[12px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 tabular-nums">
                 {showDate 
                   ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
                   : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}
               </p>
             ) : isFixed && (
-              <span className="text-[10px] font-normal text-[var(--text-tertiary)] dark:text-[#9CA6BC] opacity-80 px-1.5 py-0.5 rounded-md mt-0.5 whitespace-nowrap">
+              <span className="text-[11px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap">
                 {getL10n(
                   transaction.type === 'income' ? 'Fast inkomst' : transaction.type === 'saving' ? 'Fast sparande' : 'Fast utgift',
                   transaction.type === 'income' ? 'Fixed income' : transaction.type === 'saving' ? 'Fixed savings' : 'Fixed expense',

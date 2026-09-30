@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, LayoutGrid, TrendingUp, Calendar } from 'lucide-react';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { Transaction, FixedExpense, Config, WeekendAdjustment, Frequency } from '../types';
+import { Transaction, FixedExpense, Config, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
@@ -10,8 +9,9 @@ import { BudgetSummaryModule } from './BudgetSummaryModule';
 import { FilterSelectButton, FilterMenuModal } from './ui';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { formatAmount } from '../utils/format';
-import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
-import { getEmojiSolidColor } from '../utils/ui';
+import { getCategoryIconName } from '../utils/icons';
+import { CategoryIcon } from './CategoryIcon';
+import { getCategoryColor } from '../utils/categoryColors';
 
 interface AnalysisViewProps {
   transactions: Transaction[];
@@ -44,14 +44,6 @@ export function AnalysisView({
   onPeriodChange,
   _onOpenCalendarPicker
 }: AnalysisViewProps) {
-  const _paydaySetting = config.payday || 25;
-  const _adjustment = config.paydayBeforeWeekend ? WeekendAdjustment.BEFORE : WeekendAdjustment.NONE;
-  
-  const _currentPeriod = useMemo(() => {
-    if (!stats) return { start: new Date(), end: new Date() };
-    return { start: stats.periodStart, end: stats.periodEnd };
-  }, [stats?.periodStart, stats?.periodEnd]);
-
   const currentPeriod = useMemo(() => {
     if (!periods || periods.length === 0) return null;
     const refTime = currentPeriodDate ? new Date(currentPeriodDate).getTime() : Date.now();
@@ -68,26 +60,45 @@ export function AnalysisView({
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
+  const isEn = config.language === 'en';
+
+  // Format date range (e.g. "24 sep–22 okt")
+  const periodDateRange = useMemo(() => {
+    const start = currentPeriod?.start || stats?.periodStart;
+    const end = currentPeriod?.end || stats?.periodEnd;
+    if (!start || !end) return '';
+    try {
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      const locale = isEn ? 'en-US' : 'sv-SE';
+      const sStr = startDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' }).replace(/\.$/, '');
+      const eStr = endDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' }).replace(/\.$/, '');
+      return `${sStr} \u2013 ${eStr}`;
+    } catch {
+      return '';
+    }
+  }, [currentPeriod, stats?.periodStart, stats?.periodEnd, isEn]);
+
   const filterOptions = useMemo(() => [
     {
       id: 'all' as const,
-      label: t('all' as TranslationKey) || (config.language === 'en' ? 'All expenses' : 'Alla utgifter'),
-      subtitle: config.language === 'en' ? 'Variable and fixed expenses' : 'Både rörliga och fasta kostnader',
+      label: t('all' as TranslationKey) || (isEn ? 'All expenses' : 'Alla utgifter'),
+      subtitle: isEn ? 'Variable and fixed expenses' : 'Både rörliga och fasta kostnader',
       icon: <LayoutGrid size={16} strokeWidth={2} />,
     },
     {
       id: 'variable' as const,
-      label: t('variableExpenses' as TranslationKey) || (config.language === 'en' ? 'Variable expenses' : 'Rörliga utgifter'),
-      subtitle: config.language === 'en' ? 'Purchases, groceries, daily spending' : 'Köp, mat och vardagskostnader',
+      label: t('variableExpenses' as TranslationKey) || (isEn ? 'Variable expenses' : 'Rörliga utgifter'),
+      subtitle: isEn ? 'Purchases, groceries, daily spending' : 'Köp, mat och vardagskostnader',
       icon: <TrendingUp size={16} strokeWidth={2} />,
     },
     {
       id: 'fixed' as const,
-      label: t('fixedExpenses' as TranslationKey) || (config.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter'),
-      subtitle: config.language === 'en' ? 'Rent, bills and recurring contracts' : 'Hyra, räkningar och abonnemang',
+      label: t('fixedExpenses' as TranslationKey) || (isEn ? 'Fixed expenses' : 'Fasta utgifter'),
+      subtitle: isEn ? 'Rent, bills and recurring contracts' : 'Hyra, räkningar och abonnemang',
       icon: <Calendar size={16} strokeWidth={2} />,
     },
-  ], [config.language, t]);
+  ], [isEn, t]);
 
   const filteredExpenses = useMemo(() => {
     if (!stats || !transactions) return [];
@@ -158,20 +169,23 @@ export function AnalysisView({
       });
     }
 
+    const allCats = [...(config.categories || []), ...(config.incomeCategories || [])];
+
     const data = Object.entries(breakdown)
-      .map(([name, value]) => {
+      .map(([name, value], index) => {
         const searchName = name.trim().toLowerCase();
-        const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+        const cat = allCats.find(
           c => c.name.trim().toLowerCase() === searchName
         );
         
         const icon = cat?.icon || getCategoryIconName(name);
+        const color = cat?.color || getCategoryColor(name, config.categories, index);
         const budgetValue = cat?.budget !== undefined && cat?.budget !== null 
           ? Number(String(cat.budget).replace(/[^0-9.]/g, "")) 
           : 0;
         const budgetInKronor = !isNaN(budgetValue) && budgetValue > 0 ? Math.round(budgetValue) : 0;
 
-        return { name, value, color: cat?.color, icon, budget: cat?.budget, budgetInKronor };
+        return { name, value, color, icon, budget: cat?.budget, budgetInKronor };
       })
       .filter(item => item.value > 0)
       .sort((a, b) => b.value - a.value);
@@ -185,7 +199,6 @@ export function AnalysisView({
 
   const totalSpent = (analysisFilter === 'fixed' ? 0 : totalSpentInPeriod) + 
     (analysisFilter !== 'variable' ? totalFixed : 0);
-  const COLORS = ['#05b862', '#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#14b8a6', '#f59e0b', '#64748b', '#8b5cf6'];
 
   const effectiveBudget = useMemo(() => {
     if (!stats) return 0;
@@ -195,8 +208,8 @@ export function AnalysisView({
     if (analysisFilter === 'fixed') {
       return stats.totalFixed || 0;
     }
-    // 'all'
-    return stats.disposablePot || 0;
+    if (stats.totalIncome > 0) return Math.max(0, stats.totalIncome - (stats.totalSavings || 0));
+    return (stats.disposablePot || 0) + (stats.totalFixed || 0);
   }, [stats, analysisFilter]);
 
   const remainingBudget = useMemo(() => {
@@ -207,12 +220,11 @@ export function AnalysisView({
     if (analysisFilter === 'fixed') {
       return (stats.totalFixed || 0) - totalSpent;
     }
-    // 'all'
     if (stats.remainingPeriodCents !== undefined) {
       return stats.remainingPeriodCents;
     }
-    return (stats.disposablePot || 0) - totalSpent;
-  }, [stats, analysisFilter, totalSpent]);
+    return effectiveBudget - totalSpent;
+  }, [stats, analysisFilter, totalSpent, effectiveBudget]);
 
   const largestCategory = useMemo(() => {
     if (categoryData.length === 0) return { name: "", amount: 0 };
@@ -231,69 +243,117 @@ export function AnalysisView({
     return effectiveBudget > 0 ? Math.round((totalSpent / effectiveBudget) * 100) : 0;
   }, [stats, analysisFilter, effectiveBudget, remainingBudget, totalSpent]);
 
+  // Horizontal bar chart data: Top 5 categories + "Övriga kategorier"
+  const chartItems = useMemo(() => {
+    if (categoryData.length <= 5) {
+      return categoryData.map(c => ({
+        name: c.name,
+        value: c.value,
+        color: c.color,
+        icon: c.icon,
+        pct: totalSpent > 0 ? Math.round((c.value / totalSpent) * 100) : 0,
+        isOther: false,
+      }));
+    }
+
+    const top5 = categoryData.slice(0, 5).map(c => ({
+      name: c.name,
+      value: c.value,
+      color: c.color,
+      icon: c.icon,
+      pct: totalSpent > 0 ? Math.round((c.value / totalSpent) * 100) : 0,
+      isOther: false,
+    }));
+
+    const otherSum = categoryData.slice(5).reduce((acc, c) => acc + c.value, 0);
+    const otherPct = totalSpent > 0 ? Math.max(0, 100 - top5.reduce((acc, c) => acc + c.pct, 0)) : 0;
+
+    top5.push({
+      name: isEn ? 'Other categories' : 'Övriga kategorier',
+      value: otherSum,
+      color: '#79728D',
+      icon: 'morehorizontal',
+      pct: otherPct,
+      isOther: true,
+    });
+
+    return top5;
+  }, [categoryData, totalSpent, isEn]);
+
   if (!stats) return null;
 
   return (
-    <div className="space-y-6 sm:space-y-7 font-sans">
+    <div className="space-y-6 font-sans">
       {/* Top Selectors: Period (Left) & Content Filter (Right) */}
-      <div className="flex items-center gap-2 w-full">
-        {/* Left: Period Button */}
-        <FilterSelectButton
-          icon={<Calendar size={15} strokeWidth={2} />}
-          value={stats.periodName?.split('(')[0]?.trim() || (config.language === 'en' ? 'Period' : 'Period')}
-          onClick={() => setIsPeriodModalOpen(true)}
-          className="flex-[1.25] min-w-0"
-        />
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2 w-full">
+          {/* Left: Period Button */}
+          <FilterSelectButton
+            icon={<Calendar size={15} strokeWidth={2} />}
+            value={stats.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}
+            onClick={() => setIsPeriodModalOpen(true)}
+            className="flex-[1.25] min-w-0"
+          />
 
-        {/* Right: Content Filter Button */}
-        <FilterSelectButton
-          icon={
-            analysisFilter === 'all' ? <LayoutGrid size={15} strokeWidth={2} /> :
-            analysisFilter === 'variable' ? <TrendingUp size={15} strokeWidth={2} /> :
-            <Calendar size={15} strokeWidth={2} />
-          }
-          value={
-            analysisFilter === 'all' ? (t('all' as TranslationKey) || (config.language === 'en' ? 'All' : 'Alla')) :
-            analysisFilter === 'variable' ? (config.language === 'en' ? 'Variable' : 'Rörliga') :
-            (config.language === 'en' ? 'Fixed' : 'Fasta')
-          }
-          onClick={() => setIsFilterModalOpen(true)}
-          className="flex-1 min-w-0"
-        />
-
-        {/* Period Selector Modal */}
-        <PeriodSelectorModal
-          isOpen={isPeriodModalOpen}
-          onClose={() => setIsPeriodModalOpen(false)}
-          periods={periods || []}
-          selectedPeriod={currentPeriod}
-          selectedDate={null}
-          onSelectPeriod={(p) => {
-            if (p.date && onPeriodChange) {
-              onPeriodChange(new Date(p.date));
+          {/* Right: Content Filter Button */}
+          <FilterSelectButton
+            icon={
+              analysisFilter === 'all' ? <LayoutGrid size={15} strokeWidth={2} /> :
+              analysisFilter === 'variable' ? <TrendingUp size={15} strokeWidth={2} /> :
+              <Calendar size={15} strokeWidth={2} />
             }
-          }}
-          onSelectDate={() => {}}
-          showCalendarOption={false}
-          currentLang={config.language}
-        />
+            value={
+              analysisFilter === 'all' ? (t('all' as TranslationKey) || (isEn ? 'All' : 'Alla')) :
+              analysisFilter === 'variable' ? (isEn ? 'Variable' : 'Rörliga') :
+              (isEn ? 'Fixed' : 'Fasta')
+            }
+            onClick={() => setIsFilterModalOpen(true)}
+            className="flex-1 min-w-0"
+          />
+        </div>
 
-        {/* Content Filter Modal */}
-        <FilterMenuModal
-          isOpen={isFilterModalOpen}
-          onClose={() => setIsFilterModalOpen(false)}
-          title={config.language === 'en' ? 'Filter spending' : 'Filtrera utgifter'}
-          subtitle={config.language === 'en' ? 'Choose which expenses to include in analysis' : 'Välj vilka kostnader som ska visas i analysen'}
-          selectedId={analysisFilter}
-          onSelect={(id) => {
-            setAnalysisFilter(id as 'all' | 'variable' | 'fixed');
-            setExpandedCategory(null);
-          }}
-          options={filterOptions}
-        />
+        {/* Selected date range directly under period selector */}
+        {periodDateRange && (
+          <div className="text-center pt-0.5">
+            <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] select-none">
+              {periodDateRange}
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Budget Summary Metrics */}
+      {/* Period Selector Modal */}
+      <PeriodSelectorModal
+        isOpen={isPeriodModalOpen}
+        onClose={() => setIsPeriodModalOpen(false)}
+        periods={periods || []}
+        selectedPeriod={currentPeriod}
+        selectedDate={null}
+        onSelectPeriod={(p) => {
+          if (p.date && onPeriodChange) {
+            onPeriodChange(new Date(p.date));
+          }
+        }}
+        onSelectDate={() => {}}
+        showCalendarOption={false}
+        currentLang={config.language}
+      />
+
+      {/* Content Filter Modal */}
+      <FilterMenuModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        title={isEn ? 'Filter spending' : 'Filtrera utgifter'}
+        subtitle={isEn ? 'Choose which expenses to include in analysis' : 'Välj vilka kostnader som ska visas i analysen'}
+        selectedId={analysisFilter}
+        onSelect={(id) => {
+          setAnalysisFilter(id as 'all' | 'variable' | 'fixed');
+          setExpandedCategory(null);
+        }}
+        options={filterOptions}
+      />
+
+      {/* Unified Budget Summary Card */}
       <BudgetSummaryModule
         stats={stats}
         config={config}
@@ -304,112 +364,86 @@ export function AnalysisView({
         largestCategoryOverride={largestCategory}
         budgetUsedPctOverride={budgetUsedPct}
         remainingBudgetOverride={remainingBudget}
+        filterMode={analysisFilter}
       />
 
-      {/* Donut Chart Distribution Card */}
-      <div className="p-5 sm:p-6 rounded-[18px] border-none bg-white dark:bg-[#242424] shadow-none flex flex-col items-center relative overflow-hidden">
-        <div className="flex items-center justify-between w-full mb-3 px-1">
-          <span className="text-sm font-semibold text-[#1C1917] dark:text-white tracking-tight">{t('distribution')}</span>
-          <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#A8A8A8] tabular-nums">
-            {categoryData.filter(c => c.value > 0).length} {config.language === 'en' ? 'categories' : 'kategorier'}
+      {/* HORISONTELLT STAPELDIAGRAM (FÖRDELNING) */}
+      <div className="bg-white dark:bg-[#242424] rounded-[20px] p-4 sm:p-5 border border-[#E2DDD4] dark:border-[#383838] shadow-none space-y-4">
+        <div className="flex items-center justify-between px-0.5">
+          <h2 className="text-[20px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
+            {isEn ? 'Distribution' : 'Fördelning'}
+          </h2>
+          <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
+            {categoryData.filter(c => c.value > 0).length} {isEn ? 'categories' : 'kategorier'}
           </span>
         </div>
 
-        <div className="w-full h-64 sm:h-72 relative z-10">
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20">
-            <AnimatePresence mode="wait">
-              {expandedCategory ? (
-                <motion.div 
-                  key={expandedCategory}
-                  initial={{ opacity: 0, scale: 0.92 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.92 }}
-                  className="flex flex-col items-center text-center px-8"
+        {chartItems.length > 0 ? (
+          <div className="space-y-3.5 pt-1">
+            {chartItems.map((item) => {
+              const barWidth = totalSpent > 0 ? Math.min(100, Math.max(4, (item.value / totalSpent) * 100)) : 0;
+              const isSelected = expandedCategory === item.name;
+
+              return (
+                <div 
+                  key={item.name}
+                  onClick={() => {
+                    if (!item.isOther) {
+                      setExpandedCategory(expandedCategory === item.name ? null : item.name);
+                    }
+                  }}
+                  className={`space-y-1.5 transition-all ${item.isOther ? '' : 'cursor-pointer hover:opacity-90'}`}
                 >
-                  <span className="text-xs font-medium text-neutral-900 dark:text-white dark:text-[#1C1917] dark:text-white mb-1 truncate max-w-[140px]">
-                    {expandedCategory}
-                  </span>
-                  <span className="text-2xl sm:text-3xl font-semibold text-[#1C1917] dark:text-white font-amount tabular-nums leading-none">
-                    {Math.round(categoryData.find(c => c.name === expandedCategory)?.value || 0).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
-                  </span>
-                  <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#A8A8A8] mt-1">
-                    {config.currency}
-                  </span>
-                </motion.div>
-              ) : (
-                <motion.div 
-                  key="total"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex flex-col items-center text-center"
-                >
-                  <span className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8] mb-1">
-                    {t('total')}
-                  </span>
-                  <span className="text-2xl sm:text-3xl font-semibold text-[#1C1917] dark:text-white font-amount tabular-nums leading-none">
-                    {Math.round(totalSpent).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE')}
-                  </span>
-                  <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#A8A8A8] mt-1">
-                    {config.currency}
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <div className="flex items-center justify-between text-[14px] gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CategoryIcon icon={item.icon} color={item.color} size="xs" />
+                      <span className={`font-normal truncate ${isSelected ? 'text-[#635BFF] dark:text-[#7C75FF] font-medium' : 'text-[#211F1C] dark:text-white'}`}>
+                        {item.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0 tabular-nums">
+                      <span className="font-medium text-[#211F1C] dark:text-white">
+                        {formatAmount(Math.round(item.value), config.language)} {config.currency}
+                      </span>
+                      <span className="font-normal text-[#6D6962] dark:text-[#A8A8A8] text-[13px]">
+                        ({item.pct}%)
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Horizontal Bar */}
+                  <div className="w-full h-2 rounded-full bg-[var(--surface-muted)] dark:bg-[#2D2D2D] overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${barWidth}%` }}
+                      transition={{ duration: 0.45, ease: 'easeOut' }}
+                      className="h-full rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={categoryData}
-                cx="50%"
-                cy="50%"
-                innerRadius={72}
-                outerRadius={92}
-                paddingAngle={3}
-                dataKey="value"
-                stroke="none"
-                onClick={(data) => {
-                  const categoryName = data?.name || data?.payload?.name;
-                  if (categoryName) {
-                    setExpandedCategory(expandedCategory === categoryName ? null : categoryName);
-                  }
-                }}
-                animationBegin={0}
-                animationDuration={600}
-              >
-                {categoryData.map((entry: any, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.color || COLORS[index % COLORS.length]} 
-                    opacity={expandedCategory ? (expandedCategory === entry.name ? 1 : 0.25) : 0.9}
-                    style={{ 
-                       transition: 'all 0.25s ease'
-                    }}
-                    strokeWidth={expandedCategory === entry.name ? 2 : 0}
-                    stroke={expandedCategory === entry.name ? '#232323' : 'none'}
-                  />
-                ))}
-              </Pie>
-              <Tooltip content={() => null} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+        ) : (
+          <div className="py-8 text-center text-[14px] text-[#6D6962] dark:text-[#A8A8A8]">
+            {isEn ? 'No spending recorded for this period' : 'Inga utgifter registrerade för denna period'}
+          </div>
+        )}
       </div>
 
-      {/* Categories Breakdown - Single Unified Cohesive List */}
+      {/* FULLSTÄNDIG KATEGORILISTA */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#6E6961] dark:text-[#A8A8A8]">
+          <h3 className="text-[20px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
             {t('categories')} ({categoryData.length})
-          </span>
+          </h3>
         </div>
 
         {categoryData.length > 0 ? (
-          <div className="bg-white dark:bg-[#242424] rounded-[18px] border-none shadow-none divide-y divide-[#EDE9DF]/50 dark:divide-white/[0.035] overflow-hidden">
-            {categoryData.map((item: any, index) => {
+          <div className="bg-white dark:bg-[#242424] rounded-[20px] border border-[#E2DDD4] dark:border-[#383838] shadow-none divide-y divide-[#E2DDD4] dark:divide-[#383838] overflow-hidden">
+            {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
-              const iconName = item.icon || getCategoryIconName(item.name);
-              const Icon = ICON_MAP[iconName];
               
               // Get transactions for this category
               const categoryTransactions = analysisFilter === 'fixed' ? [] : filteredExpenses
@@ -441,35 +475,20 @@ export function AnalysisView({
               return (
                 <div key={item.name} className="transition-colors">
                   <div 
-                    className="py-2.5 px-3.5 sm:py-3 sm:px-4 min-h-[52px] flex flex-col justify-center group hover:bg-[#EDE9DF] dark:hover:bg-[#333333] transition-colors cursor-pointer"
+                    className="p-4 flex flex-col justify-center group hover:bg-[var(--surface-muted)]/50 dark:hover:bg-[#2D2D2D] transition-colors cursor-pointer"
                     onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
                   >
                     <div className="flex items-center justify-between gap-3 w-full">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        {/* Category Icon */}
-                        <div 
-                          className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full flex items-center justify-center shrink-0"
-                          style={{ 
-                            backgroundColor: item.color || (isEmojiString(iconName) ? getEmojiSolidColor(iconName) : COLORS[index % COLORS.length]),
-                            color: '#fff'
-                          }}
-                        >
-                          {isEmojiString(iconName) ? (
-                            <span className="text-[15px] leading-none">{iconName}</span>
-                          ) : Icon ? (
-                            <Icon size={15} strokeWidth={1.75} />
-                          ) : (
-                            <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                          )}
-                        </div>
+                        <CategoryIcon icon={item.icon} color={item.color} size="md" />
 
                         <div className="min-w-0 flex-1 flex flex-col justify-center">
-                          <p className="text-[13.5px] sm:text-[14px] font-semibold text-[#1C1917] dark:text-white leading-tight truncate tracking-tight">
+                          <p className="text-[16px] font-medium text-[#211F1C] dark:text-white leading-tight truncate tracking-tight">
                             {item.name}
                           </p>
-                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#6E6961] dark:text-[#9CA6BC]">
-                            <span className="text-[11px] font-normal">
-                              {totalItemCount} {config.language === 'en' ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
+                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[14px] text-[#6D6962] dark:text-[#A8A8A8]">
+                            <span>
+                              {totalItemCount} {isEn ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
                             </span>
                           </div>
                         </div>
@@ -477,13 +496,13 @@ export function AnalysisView({
 
                       <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
                         <div className="text-right flex flex-col items-end justify-center">
-                          <p className="text-[13.5px] sm:text-[14px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
+                          <p className="text-[16px] font-medium font-amount tabular-nums text-[#211F1C] dark:text-white leading-tight">
                             {formatAmount(Math.round(item.value), config.language)}
-                            <span className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1">{config.currency}</span>
+                            <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-1">{config.currency}</span>
                           </p>
                         </div>
-                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[#1C1917] dark:text-white' : 'text-[#6E6961] dark:text-[#9CA6BC]'}`}>
-                          <ChevronDown size={15} strokeWidth={2} />
+                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[#211F1C] dark:text-white' : 'text-[#6D6962] dark:text-[#A8A8A8]'}`}>
+                          <ChevronDown size={18} strokeWidth={1.8} />
                         </div>
                       </div>
                     </div>
@@ -496,78 +515,57 @@ export function AnalysisView({
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden bg-black/[0.015] dark:bg-white/[0.015] border-t border-[#EDE9DF]/60 dark:border-white/[0.04]"
+                        className="overflow-hidden bg-[var(--surface-muted)]/30 dark:bg-white/[0.02] border-t border-[#E2DDD4] dark:border-[#383838]"
                       >
-                        {(categoryTransactions.length > 0 || categoryFixedExpenses.length > 0) ? (
-                          <div className="divide-y divide-[#EDE9DF]/50 dark:divide-white/[0.035] overflow-hidden">
-                            {categoryTransactions.map(t => {
-                              let displayAmount = t.amount;
-                              const transactionSplits = (t as any).splits;
-                              if (transactionSplits && transactionSplits.length > 0) {
-                                const relevantSplits = transactionSplits.filter((s: any) => 
-                                  (s.category || '').trim() === item.name.trim()
-                                );
-                                if (relevantSplits.length > 0) {
-                                  displayAmount = relevantSplits.reduce((sum: number, s: any) => sum + s.amount, 0);
-                                } else {
-                                  displayAmount = 0;
-                                }
-                              }
-                              
-                              return (
-                                <TransactionItem
+                        <div className="p-3 sm:p-4 space-y-2">
+                          {/* Transactions list */}
+                          {categoryTransactions.length > 0 && (
+                            <div className="space-y-1.5">
+                              {categoryTransactions.map((t) => (
+                                <TransactionItem 
                                   key={t.id}
                                   transaction={t}
                                   config={config}
-                                  displayAmount={displayAmount}
                                   onView={onViewTransaction}
                                   onDelete={onDeleteTransaction}
-                                  showAllCategories={false}
-                                  showDate={true}
-                                  variant="transparent"
+                                  variant="nested"
+                                  showDate
                                 />
-                              );
-                            })}
+                              ))}
+                            </div>
+                          )}
 
-                            {categoryFixedExpenses.map(e => {
-                              let amount = Number(e.amount) || 0;
-                              switch (e.frequency) {
-                                case Frequency.QUARTERLY: amount = amount / 3; break;
-                                case Frequency.SEMI_ANNUALLY: amount = amount / 6; break;
-                                case Frequency.ANNUALLY: amount = amount / 12; break;
-                                default: break;
-                              }
-                              
-                              const mockTransaction: Transaction = {
-                                id: e.id,
-                                amount: amount,
-                                category: e.category || t('fixedExpenses'),
-                                type: 'expense',
-                                timestamp: stats?.periodStart ? new Date(stats.periodStart).getTime() : Date.now(),
-                                note: e.name,
-                                merchant: e.name,
-                                logo: e.logo,
-                                icon: e.icon,
-                                tags: [],
-                              };
-                              
-                              return (
-                                <TransactionItem
-                                  key={`fixed-${e.id}`}
-                                  transaction={mockTransaction}
-                                  config={config}
-                                  isFixed={true}
-                                  onClick={() => {
-                                    onViewFixedExpense?.(e);
-                                  }}
-                                  variant="transparent"
-                                />
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <EmptyState title={t('noDataAvailable')} className="py-5" />
-                        )}
+                          {/* Fixed expenses list */}
+                          {categoryFixedExpenses.length > 0 && (
+                            <div className="space-y-1.5">
+                              {categoryFixedExpenses.map((fe) => (
+                                <div
+                                  key={fe.id}
+                                  onClick={() => onViewFixedExpense?.(fe)}
+                                  className="flex items-center justify-between p-3 rounded-[12px] bg-white dark:bg-[#242424] hover:bg-[var(--surface-muted)] dark:hover:bg-[#333333] transition-colors cursor-pointer border border-[#E2DDD4]/60 dark:border-[#383838]"
+                                >
+                                  <div className="min-w-0">
+                                    <p className="text-[14px] font-medium text-[#211F1C] dark:text-white truncate">
+                                      {fe.name}
+                                    </p>
+                                    <p className="text-[12px] text-[#6D6962] dark:text-[#A8A8A8]">
+                                      {isEn ? 'Fixed expense' : 'Fast utgift'}
+                                    </p>
+                                  </div>
+                                  <span className="text-[14px] font-medium text-[#211F1C] dark:text-white tabular-nums">
+                                    {formatAmount(Math.round(fe.amount), config.language)} {config.currency}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {totalItemCount === 0 && (
+                            <div className="py-4 text-center text-[14px] text-[#6D6962] dark:text-[#A8A8A8]">
+                              {isEn ? 'No transactions in this category' : 'Inga transaktioner i denna kategori'}
+                            </div>
+                          )}
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -576,7 +574,10 @@ export function AnalysisView({
             })}
           </div>
         ) : (
-          <EmptyState title={t('noDataAvailable')} />
+          <EmptyState
+            title={t('noData')}
+            description={isEn ? 'No expenses recorded for this period' : 'Inga utgifter finns registrerade för den valda perioden'}
+          />
         )}
       </div>
     </div>

@@ -7,6 +7,8 @@ import { IconPickerModal } from './IconPickerModal';
 import { CategoryIcon } from './CategoryIcon';
 import { Button, IconButton } from './ui';
 
+import { DEFAULT_CATEGORY_PALETTE } from '../utils/categoryColors';
+
 interface CategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,20 +19,7 @@ interface CategoryModalProps {
   t: (key: TranslationKey) => string;
 }
 
-const PRESET_COLORS = [
-  '#6366f1', // Indigo
-  '#3b82f6', // Blue
-  '#0ea5e9', // Sky
-  '#06b6d4', // Cyan
-  '#10b981', // Emerald
-  '#f59e0b', // Amber
-  '#f97316', // Orange
-  '#ef4444', // Red
-  '#ec4899', // Pink
-  '#a855f7', // Purple
-  '#64748b', // Slate
-  '#14b8a6', // Teal
-];
+const PRESET_COLORS = [...DEFAULT_CATEGORY_PALETTE];
 
 export function CategoryModal({ 
   isOpen, 
@@ -43,14 +32,14 @@ export function CategoryModal({
 }: CategoryModalProps) {
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('receipt');
-  const [color, setColor] = useState('#6366f1');
+  const [color, setColor] = useState('#6658E8');
   const [showIconPicker, setShowIconPicker] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setName(initialData?.name || '');
       setIcon(initialData?.icon || 'receipt');
-      setColor(initialData?.color || '#6366f1');
+      setColor(initialData?.color || '#6658E8');
       setShowIconPicker(false);
     }
   }, [isOpen, initialData]);

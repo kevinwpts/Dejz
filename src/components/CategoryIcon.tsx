@@ -3,7 +3,7 @@ import { Tag } from 'lucide-react';
 import { ICON_MAP, resolveLucideIcon } from '../utils/icons';
 
 interface CategoryIconProps {
-  icon: string;
+  icon?: string;
   color?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
@@ -17,26 +17,33 @@ export function CategoryIcon({
   className = '',
   isActive = false 
 }: CategoryIconProps) {
-  const iconKey = resolveLucideIcon(icon);
-  const IconComp = ICON_MAP[iconKey] || Tag;
+  const iconKey = icon ? resolveLucideIcon(icon) : 'receipt';
+  const IconComp = (iconKey && ICON_MAP[iconKey]) ? ICON_MAP[iconKey] : Tag;
   
+  // Container dimensions:
+  // xs: inline transparent / 16px icon
+  // sm: 32px container / 16px icon
+  // md: 34-36px container / 20px icon (standard category icon container)
+  // lg: 40-44px container / 22px icon
+  // xl: 48px container / 24px icon
   const sizeClasses = {
-    xs: 'w-auto h-auto text-xs',
-    sm: 'w-8 h-8 rounded-full text-sm',
-    md: 'w-10 h-10 rounded-full text-lg',
-    lg: 'w-12 h-12 rounded-full text-xl',
-    xl: 'w-14 h-14 rounded-full text-2xl',
+    xs: 'w-auto h-auto',
+    sm: 'w-8 h-8 rounded-full',
+    md: 'w-[34px] h-[34px] sm:w-9 sm:h-9 rounded-full',
+    lg: 'w-11 h-11 rounded-full',
+    xl: 'w-12 h-12 rounded-full',
   };
 
   const iconSizes = {
-    xs: 12,
-    sm: 14,
-    md: 18,
+    xs: 16,
+    sm: 16,
+    md: 20,
     lg: 22,
-    xl: 26,
+    xl: 24,
   };
 
-  // Clean style: subtle opacity tint of category color with rich colored stroke, no container borders
+  const strokeWidth = 1.8;
+
   const getMatureStyles = () => {
     if (size === 'xs') {
       return {
@@ -47,13 +54,13 @@ export function CategoryIcon({
 
     if (color) {
       return {
-        backgroundColor: `${color}${isActive ? '30' : '18'}`, // slightly stronger opacity when active
+        backgroundColor: `${color}${isActive ? '30' : '18'}`,
         color: color,
       };
     }
 
     return {
-      backgroundColor: isActive ? 'var(--accent-color)/10' : 'var(--surface-color)',
+      backgroundColor: isActive ? 'var(--accent-soft)' : 'var(--surface-muted)',
       color: color || 'var(--text-primary)',
     };
   };
@@ -67,7 +74,7 @@ export function CategoryIcon({
     >
       <IconComp 
         size={iconSizes[size]} 
-        strokeWidth={size === 'xs' ? 2 : 1.75} 
+        strokeWidth={strokeWidth} 
       />
     </div>
   );

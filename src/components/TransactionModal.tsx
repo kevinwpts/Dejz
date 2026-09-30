@@ -716,13 +716,13 @@ export function TransactionModal({
                 onChange={handleReceiptFileChange}
               />
 
-              {/* Amount Input: Primary, prominent hero input field */}
-              <div className="flex flex-col gap-1.5">
+              {/* Amount Input: 88px height, 40px font-medium, plain kr text (no bubble) */}
+              <div className="flex flex-col gap-2">
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-2xl py-3.5 px-4 sm:py-4 sm:px-5 flex items-center justify-between transition-all border border-[#E2DDD4] dark:border-white/[0.06] focus-within:border-[#1C1917] dark:focus-within:border-white focus-within:ring-2 focus-within:ring-[#1C1917]/10 dark:focus-within:ring-white/10 group cursor-text"
+                  className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-[12px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-[#E2DDD4] dark:border-white/[0.06] focus-within:border-[#211F1C] dark:focus-within:border-white group cursor-text"
                 >
-                  <div className="shrink-0 flex items-center min-w-[72px]">
+                  <div className="shrink-0 flex items-center min-w-[64px]">
                     {type === 'expense' && (
                       <button 
                         type="button"
@@ -734,17 +734,17 @@ export function TransactionModal({
                             setSplits([]);
                           }
                         }}
-                        className={`text-xs font-semibold transition-all px-3 py-1.5 rounded-full border cursor-pointer active:scale-95 ${
+                        className={`text-[13px] font-medium transition-all px-3 py-1.5 rounded-full border cursor-pointer active:scale-95 ${
                           splits.length > 0 
                             ? "bg-rose-500 text-white border-transparent" 
-                            : "bg-[#EAE6DE] dark:bg-white/10 text-[#1C1917] dark:text-white border-transparent hover:bg-[#DFD9CF] dark:hover:bg-white/20"
+                            : "bg-white dark:bg-white/10 text-[#211F1C] dark:text-white border-[#E2DDD4] dark:border-transparent hover:bg-[var(--surface-muted)] dark:hover:bg-white/20"
                         }`}
                       >
-                        {splits.length > 0 ? (currentLang === 'en' ? 'Cancel' : 'Avbryt') : (currentLang === 'en' ? 'Split' : 'Splitta')}
+                        {splits.length > 0 ? (currentLang === 'en' ? 'Avbryt' : 'Avbryt') : (currentLang === 'en' ? 'Splitta' : 'Splitta')}
                       </button>
                     )}
                   </div>
-                  <div className="flex-1 flex justify-center">
+                  <div className="flex-1 flex items-baseline justify-center gap-1.5">
                     <input
                       ref={amountInputRef}
                       type="text"
@@ -758,20 +758,19 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[#1C1917] dark:text-white outline-none font-amount text-[40px] sm:text-[46px] font-bold text-center tracking-tight leading-none placeholder-[#6E6961]/30 dark:placeholder-white/30 cursor-text select-text"
+                      className="w-full bg-transparent text-[#211F1C] dark:text-white outline-none font-amount text-[40px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/40 dark:placeholder-white/30 cursor-text select-text"
                     />
-                  </div>
-                  <div className="shrink-0 flex items-center justify-end min-w-[72px]">
-                    <span className="text-xs font-semibold text-[#1C1917] dark:text-white bg-black/5 dark:bg-white/10 px-3 py-1.5 rounded-full transition-colors font-sans">
+                    <span className="text-[16px] font-normal text-[#6D6962] dark:text-[#A8A8A8] select-none font-sans shrink-0">
                       {currency}
                     </span>
                   </div>
+                  <div className="shrink-0 min-w-[64px]" />
                 </div>
               </div>
 
-              {/* Merchant Input & Quick Icons */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
+              {/* Merchant Input */}
+              <div className="space-y-2">
+                <label className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block">
                   {type === 'income' ? t('incomeSource') : t('merchant')}
                 </label>
                 <div className="relative group">
@@ -781,12 +780,12 @@ export function TransactionModal({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border border-[#E2DDD4] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white"
+                    className="w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[16px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 border border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white"
                   />
                   {merchant && (
                     <button 
                       onClick={() => setMerchant('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] hover:text-[#1C1917] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[#211F1C] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
                     >
                       <X size={16} strokeWidth={2} />
                     </button>
@@ -795,8 +794,8 @@ export function TransactionModal({
               </div>
 
               {/* Note Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
+              <div className="space-y-2">
+                <label className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block">
                   {t('ownNote')}
                 </label>
                 <div className="relative group">
@@ -806,14 +805,14 @@ export function TransactionModal({
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                    className={`w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border ${
-                      validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-[#E2DDD4] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white'
+                    className={`w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[16px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 border ${
+                      validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white'
                     }`}
                   />
                   {note && (
                     <button 
                       onClick={() => setNote('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] hover:text-[#1C1917] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[#211F1C] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
                     >
                       <X size={16} strokeWidth={2} />
                     </button>

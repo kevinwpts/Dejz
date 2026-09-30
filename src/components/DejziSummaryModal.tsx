@@ -5,7 +5,7 @@ import { formatAmount } from '../utils/format';
 
 export function DejziAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const sizeClasses = {
-    sm: 'w-7 h-7',
+    sm: 'w-6 h-6',
     md: 'w-9 h-9',
     lg: 'w-16 h-16',
   }[size];
@@ -18,13 +18,15 @@ export function DejziAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
 
   return (
     <div className={`relative ${sizeClasses} flex items-center justify-center shrink-0`}>
-      <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/25 via-yellow-400/20 to-cyan-400/25 rounded-full blur-xs animate-pulse" />
+      {size !== 'sm' && (
+        <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/20 via-yellow-400/15 to-cyan-400/20 rounded-full blur-xs animate-pulse" />
+      )}
       <motion.div
-        animate={{ y: [0, -2, 0], rotate: [0, 1.5, -1.5, 0] }}
+        animate={{ y: [0, -1.5, 0] }}
         transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
         className={`relative ${svgSizes} flex items-center justify-center`}
       >
-        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm overflow-visible">
+        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-xs overflow-visible">
           <defs>
             <radialGradient id="dejziBody" cx="40%" cy="35%" r="65%">
               <stop offset="0%" stopColor="#FFFFFF" />
@@ -45,9 +47,11 @@ export function DejziAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
           <circle cx="58.5" cy="46" r="1.8" fill="#FFFFFF" />
           <path d="M 45 58 Q 50 63 55 58" fill="none" stroke="#0F172A" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
-        <div className="absolute -top-0.5 -right-0.5 text-amber-400 drop-shadow-xs">
-          <Sparkles size={size === 'lg' ? 14 : 9} />
-        </div>
+        {size !== 'sm' && (
+          <div className="absolute -top-0.5 -right-0.5 text-amber-400 drop-shadow-xs">
+            <Sparkles size={size === 'lg' ? 14 : 9} />
+          </div>
+        )}
       </motion.div>
     </div>
   );

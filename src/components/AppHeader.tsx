@@ -38,7 +38,6 @@ export function AppHeader({
   const [isAtTop, setIsAtTop] = useState(true);
 
   const isProfileOrSettings = activeTab === "profile" || activeTab === "settings";
-  const _useWhiteHeader = false;
   const isHomeTab = activeTab === "today" || !activeTab;
 
   useEffect(() => {
@@ -66,118 +65,112 @@ export function AppHeader({
     }
   }, [date, language]);
 
-  // Compute uppercase display title for header
+  // Compute display title for header in standard capitalization (Ekonomi, Analys, Historik)
   const getFallbackTitle = () => {
     switch (activeTab) {
       case "today":
-        return language === "en" ? "OVERVIEW" : "ÖVERBLICK";
+        return language === "en" ? "Overview" : "Överblick";
       case "transactions":
-        return language === "en" ? "TRANSACTIONS" : "TRANSAKTIONER";
+        return language === "en" ? "Transactions" : "Historik";
       case "analysis":
-        return language === "en" ? "ANALYSIS" : "ANALYS";
+        return language === "en" ? "Analysis" : "Analys";
       case "budget":
-        return language === "en" ? "FINANCES" : "EKONOMI";
+        return language === "en" ? "Finances" : "Ekonomi";
       case "profile":
-        return language === "en" ? "PROFILE" : "PROFIL";
+        return language === "en" ? "Profile" : "Profil";
       case "settings":
-        return language === "en" ? "SETTINGS" : "INSTÄLLNINGAR";
+        return language === "en" ? "Settings" : "Inställningar";
       case "notifications":
-        return language === "en" ? "NOTIFICATIONS" : "NOTISER";
+        return language === "en" ? "Notifications" : "Notiser";
       default:
-        return "DEJZ";
+        return "Dejz";
     }
   };
 
-  const displayTitle = (title || getFallbackTitle()).toUpperCase();
-
-  const _isHomeAtTop = isHomeTab && isAtTop;
+  const displayTitle = title || getFallbackTitle();
 
   return (
     <header
-      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-in-out translate-y-0 opacity-100 ${
+      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-200 ease-in-out ${
         !isAtTop || isProfileOrSettings
-          ? "bg-[#F7F5F0]/90 dark:bg-[#232323]/85 backdrop-blur-xl border-b border-[#E6E2D8] dark:border-white/[0.018] shadow-none"
-          : "bg-transparent border-b border-transparent shadow-none"
+          ? "bg-[#F2EFE8]/95 dark:bg-[#181818]/95 backdrop-blur-md border-b border-[#E2DDD4] dark:border-[#383838]"
+          : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className={`max-w-2xl mx-auto px-4 sm:px-6 py-3.5 ${isDemoMode ? '' : 'pt-[calc(0.85rem+env(safe-area-inset-top))]'} flex justify-between items-center w-full gap-2 relative`}>
-        {/* Left: Back button OR Profile Picture + Title/Greeting right next to it */}
-        <div className="flex items-center gap-3 shrink-0 z-10 min-w-0">
+      <div className={`max-w-xl mx-auto px-4 h-16 ${isDemoMode ? '' : 'pt-[env(safe-area-inset-top)]'} flex justify-between items-center w-full gap-2 relative`}>
+        {/* Left: Back button OR Profile Picture + Title/Greeting */}
+        <div className="flex items-center gap-2.5 shrink-0 z-10 min-w-0">
           {onBack ? (
             <button
               onClick={onBack}
-              className="w-10 h-10 rounded-[14px] bg-[#EFECE6] dark:bg-[#2D2D2D] flex items-center justify-center text-[#1C1917] dark:text-white hover:bg-black/15 dark:hover:bg-white/10 active:scale-95 transition-all cursor-pointer shrink-0"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-[12px] bg-white dark:bg-[#242424] border border-[#E2DDD4] dark:border-[#383838] flex items-center justify-center text-[#211F1C] dark:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D] active:scale-95 transition-all cursor-pointer shrink-0"
               aria-label="Tillbaka"
             >
-              <ChevronLeft size={20} strokeWidth={2.2} />
+              <ChevronLeft size={20} strokeWidth={2} />
             </button>
           ) : (
             <button
               onClick={() => onNavigate("profile")}
-              className={`w-[38px] h-[38px] sm:w-[40px] sm:h-[40px] rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 overflow-hidden shrink-0 border border-[#E6E2D8] dark:border-white/[0.045] bg-[#FFFFFF] dark:bg-white/[0.035] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.07] text-[var(--text-primary)] ${
-                activeTab === "profile" ? "ring-2 ring-[#1C1917] dark:ring-white" : ""
-              }`}
+              className={`min-w-[44px] min-h-[44px] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0`}
               aria-label="Profil"
               title="Profil"
             >
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <User size={18} strokeWidth={2} className="text-[var(--text-secondary)]" />
-              )}
+              <div className={`w-8 h-8 rounded-full overflow-hidden border border-[#E2DDD4] dark:border-[#383838] bg-white dark:bg-[#242424] flex items-center justify-center ${
+                activeTab === "profile" ? "ring-2 ring-[#211F1C] dark:ring-white" : ""
+              }`}>
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <User size={16} strokeWidth={2} className="text-[#6D6962] dark:text-[#A8A8A8]" />
+                )}
+              </div>
             </button>
           )}
 
-          {/* Title right next to profile picture */}
-          <div className="min-w-0 text-left flex flex-col justify-center pl-1">
+          {/* Title / Greeting */}
+          <div className="min-w-0 text-left flex flex-col justify-center">
             {isHomeTab ? (
               <>
-                <h1 className="text-[17px] sm:text-[19px] font-semibold font-display tracking-tight truncate select-none leading-tight text-[var(--text-primary)]">
+                <h1 className="text-[17px] font-semibold tracking-tight truncate select-none leading-tight text-[#211F1C] dark:text-white">
                   {language === 'en' ? 'Hi' : 'Hej'} {userName || 'Kevin'}
                 </h1>
-                <p className="text-[11px] font-normal text-[var(--text-tertiary)] leading-none mt-0.5 select-none truncate">
+                <p className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] leading-none mt-0.5 select-none truncate">
                   {formattedDate}
                 </p>
               </>
             ) : (
-              <h1 className="text-[19px] sm:text-[22px] font-semibold font-display uppercase tracking-[0.05em] truncate select-none leading-none text-[var(--text-primary)]">
+              <h1 className="text-[24px] font-semibold tracking-tight truncate select-none leading-none text-[#211F1C] dark:text-white">
                 {displayTitle}
               </h1>
             )}
           </div>
         </div>
 
-        {/* Empty flex-1 spacer if needed or let right actions push */}
-        <div className="flex-1" />
-  
-        {/* Right Actions: Notifications + Search Icon (between notifications and dejzi) + Dejzi Coach */}
-        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 z-10">
-          {/* 1. Notisikonen */}
+        {/* Right Actions: Notifications + Search + Dejzi Coach */}
+        <div className="flex items-center gap-1 shrink-0 z-10">
+          {/* 1. Notifications */}
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-[#1C1917] dark:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D]"
               aria-label="Notiser"
               title="Notiser"
             >
-              <Bell
-                size={19}
-                strokeWidth={2}
-              />
+              <Bell size={22} strokeWidth={1.8} />
               {notificationCount > 0 && (
-                <span className="absolute top-1 right-1 min-w-[15px] h-[15px] px-0.5 rounded-full bg-rose-500 text-white text-[8.5px] font-bold flex items-center justify-center leading-none shadow-xs">
+                <span className="absolute top-2 right-2 min-w-[15px] h-[15px] px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-semibold flex items-center justify-center leading-none">
                   {notificationCount}
                 </span>
               )}
             </button>
           )}
 
-          {/* 2. Sökikonen (mellan notisikonen och Dejzi) */}
+          {/* 2. Search Icon */}
           <button
             type="button"
             onClick={() => {
@@ -187,19 +180,19 @@ export function AppHeader({
                 onNavigate("search");
               }
             }}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[#1C1917] dark:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333]"
+            className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D]"
             aria-label={language === 'en' ? 'Search' : 'Sök'}
             title={language === 'en' ? 'Search' : 'Sök'}
           >
-            <Search size={19} strokeWidth={2} />
+            <Search size={22} strokeWidth={1.8} />
           </button>
 
-          {/* 3. Dejzi */}
+          {/* 3. Toned down Dejzi mascot button (24px mascot image, no large background circle, 44x44px touch target) */}
           {onOpenDejzi && (
             <button
               type="button"
               onClick={onOpenDejzi}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 hover:bg-[#EDE9DF] dark:hover:bg-[#333333]"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D]"
               aria-label="Dejzi sammanfattning"
               title="Dejzi sammanfattning"
             >

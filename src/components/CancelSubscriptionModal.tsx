@@ -6,7 +6,6 @@ import {
   ExternalLink,
   Phone,
   Mail,
-  ShieldAlert,
   Trash2,
   HelpCircle,
   Clock,
@@ -109,28 +108,23 @@ export function CancelSubscriptionModal({
           <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-3 sm:pt-5 pb-4 border-b border-[#E6E2D8] dark:border-[#383838] shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                <ShieldAlert size={18} strokeWidth={2.2} />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-[#1C1917] dark:text-white tracking-tight">
-                  {isEn ? 'Cancel subscription / contract' : 'Säg upp abonnemang & avtal'}
-                </h3>
-                <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8]">
-                  {isEn ? 'Direct link and step-by-step guide' : 'Direktlänk och steg-för-steg-guide'}
-                </p>
-              </div>
+          <div className="flex items-center justify-between px-5 pt-3 sm:pt-5 pb-4 border-b border-[#E2DDD4] dark:border-[#383838] shrink-0">
+            <div>
+              <h3 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
+                {isEn ? 'Show how to cancel' : 'Visa hur du säger upp'}
+              </h3>
+              <p className="text-[13px] text-[#6D6962] dark:text-[#A8A8A8]">
+                {isEn ? 'Instructions and link to provider' : 'Instruktioner och länk till leverantören'}
+              </p>
             </div>
 
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6D6962] dark:text-[#A8A8A8] hover:text-[#211F1C] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Stäng"
             >
-              <X size={16} />
+              <X size={16} strokeWidth={2} />
             </button>
           </div>
 

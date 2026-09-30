@@ -106,23 +106,23 @@ export function GreetingModule({
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className="pt-2 sm:pt-4 text-center flex flex-col items-center"
       >
-        {/* Tracked Minimalist Uppercase Structural Label: KVAR ATT SPENDERA */}
-        <span className="text-[12px] sm:text-[13px] font-medium uppercase tracking-[0.08em] text-[#8C867C] dark:text-[#A8A8A8] block select-none font-display">
+        {/* Information label: Kvar att spendera (standard capitalization) */}
+        <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block select-none">
           {t('totalRemaining')}
         </span>
 
-        {/* Primary Dominant Hero Amount: e.g. 7 018 kr */}
+        {/* Primary Dominant Hero Amount: 48px, weight 600 with responsive scaling */}
         <div className="flex items-baseline justify-center gap-1.5 mt-0.5">
           <AnimatedNumber 
             value={stats?.remainingPeriodCents || 0} 
-            className={`text-[54px] sm:text-[66px] leading-[0.95] font-semibold font-amount tabular-nums tracking-tight ${
-              isNegative ? 'text-rose-500 dark:text-rose-400' : 'text-[#1C1917] dark:text-white'
+            className={`text-3xl sm:text-4xl md:text-[48px] leading-tight font-semibold font-amount tabular-nums tracking-tight ${
+              isNegative ? 'text-rose-500 dark:text-rose-400' : 'text-[#211F1C] dark:text-white'
             }`}
             formatter={(val) => formatAmount(val, language)}
           />
           {/* Currency label */}
-          <span className={`text-[20px] sm:text-[24px] font-medium tracking-tight ${
-            isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[#6E6961] dark:text-[#A8A8A8]'
+          <span className={`text-base sm:text-lg font-normal tracking-tight ${
+            isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[#6D6962] dark:text-[#A8A8A8]'
           }`}>
             {currency}
           </span>
@@ -132,13 +132,13 @@ export function GreetingModule({
             24 sep – 22 okt
             23 dagar kvar till lön
         */}
-        <div className="flex flex-col items-center gap-0.5 mt-2 select-none">
+        <div className="flex flex-col items-center gap-0.5 mt-1.5 select-none">
           {periodIntervalText && (
-            <p className="text-sm font-normal text-[#1C1917] dark:text-[#E7E5E4] tracking-tight">
+            <p className="text-[14px] font-normal text-[#211F1C] dark:text-[#E7E5E4] tracking-tight">
               {periodIntervalText}
             </p>
           )}
-          <p className="text-xs sm:text-[13px] font-normal text-[#8C867C] dark:text-[#A8A8A8] tabular-nums tracking-tight">
+          <p className="text-[13px] sm:text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] tabular-nums tracking-tight">
             {daysRemainingText}
           </p>
         </div>

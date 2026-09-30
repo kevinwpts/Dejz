@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
@@ -6,29 +6,29 @@
 @theme {
   --color-black: #181818;
   --font-sans:
-    "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-display:
-    "Manrope", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-editorial:
-    "Instrument Serif", serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-ui:
-    "Geist", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-amount:
-    "Manrope", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-shoulders:
-    "Manrope", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-barlow:
-    "Geist", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-barlow-standard:
-    "Geist", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-exo:
-    "Geist", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-logo:
-    "Manrope", sans-serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-serif:
-    "Instrument Serif", serif;
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-mono:
-    "Geist", monospace;
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --color-accent: var(--accent-color);
   --color-accent-hover: var(--accent-hover);
@@ -45,7 +45,7 @@
 
   --radius-4xl: 24px;
   --radius-3xl: 22px;
-  --radius-2xl: 18px;
+  --radius-2xl: 20px;
   --radius-xl: 16px;
   --radius-lg: 14px;
   --radius-md: 12px;
@@ -72,7 +72,7 @@ input,
 select,
 textarea {
   font-family: var(--font-sans);
-  letter-spacing: 0.005em;
+  letter-spacing: normal;
   font-style: normal;
 }
 
@@ -147,12 +147,12 @@ textarea {
 }
 
 :root {
-  /* Global Typography System - Manrope, Instrument Serif & Geist */
-  --font-display: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-editorial: 'Instrument Serif', Georgia, serif;
-  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-ui: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-amount: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Global Unified Typography System - Apple SF / Inter */
+  --font-display: -apple-system, BlinkMacSystemFont, 'Inter', "Segoe UI", Roboto, sans-serif;
+  --font-editorial: -apple-system, BlinkMacSystemFont, 'Inter', "Segoe UI", Roboto, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', "Segoe UI", Roboto, sans-serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, 'Inter', "Segoe UI", Roboto, sans-serif;
+  --font-amount: -apple-system, BlinkMacSystemFont, 'Inter', "Segoe UI", Roboto, sans-serif;
 
   font-size: 100%;
   -webkit-font-smoothing: antialiased;
@@ -166,16 +166,16 @@ textarea {
   --orange-200: #FED7AA;
   --orange-300: #FDBA74;
   --orange-400: #FB923C;
-  --orange-500: #FF8A00; /* Dejz official brand color */
+  --orange-500: #FF8A00;
   --orange-600: #E87900;
   --orange-700: #C96500;
   --orange-800: #9A4D00;
   --orange-900: #713800;
 
-  /* Dejz Official Brand Logo Color (Matches Accent / Ink) */
-  --logo-color: #0B0A12;
+  /* Dejz Official Brand Logo Color */
+  --logo-color: #211F1C;
 
-  /* Premium Warm Sand Light Theme (Dejz Minimalist Warm Edition) */
+  /* Premium Warm Sand Light Theme */
   --bg-top-color: #F2EFE8;
   --bg-color: #F2EFE8;
   --bg-secondary: #F2EFE8;
@@ -187,12 +187,12 @@ textarea {
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
   --surface-muted: #EAE6DE;
-  --surface-tint: rgba(28, 25, 23, 0.02);
+  --surface-tint: rgba(33, 31, 28, 0.02);
 
-  --text-primary: #1C1917;
-  --text-secondary: #6E6961;
-  --text-tertiary: #8C867C;
-  --text-inactive: #BFB9AD;
+  --text-primary: #211F1C;
+  --text-secondary: #6D6962;
+  --text-tertiary: #777168;
+  --text-inactive: #A8A39D;
 
   --border-color: #E2DDD4;
   --border-strong: #D5CFC4;
@@ -208,7 +208,7 @@ textarea {
   --shadow-level-2: none;
   --shadow-level-3: none;
 
-  /* Brand Accents & Colors - Dejz Indigo Accent */
+  /* Brand Accents & Colors - Dejz Purple Accent */
   --accent-color: #635BFF;
   --accent-hover: #5148E5;
   --accent-pressed: #5148E5;
