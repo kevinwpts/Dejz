@@ -63,6 +63,7 @@ export const DS = {
     heroAmount: 'text-4xl sm:text-5xl font-extrabold tracking-tight font-amount tabular-nums font-display',
     pageTitle: 'text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1C1917] dark:text-white font-display',
     sectionTitle: 'text-xl sm:text-2xl font-normal text-[#1C1917] dark:text-white font-editorial tracking-normal',
+    contentSectionTitle: 'text-2xl sm:text-3xl font-normal text-[#1C1917] dark:text-white font-editorial tracking-normal',
     modalTitle: 'text-lg sm:text-xl font-bold tracking-tight text-[#1C1917] dark:text-white font-ui',
     cardTitle: 'text-sm sm:text-base font-bold text-[#1C1917] dark:text-white font-ui',
     merchantName: 'text-[13.5px] sm:text-[14px] font-bold text-[#1C1917] dark:text-white tracking-tight font-display',
@@ -90,3 +91,5 @@ export const DS = {
     bounce: 'transition-transform active:scale-[0.98]',
   },
 } as const;
+
+export const designSystem = DS;

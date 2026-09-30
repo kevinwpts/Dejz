@@ -23,6 +23,7 @@ import { ICON_MAP, getCategoryIconName, isEmojiString } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
 import { feedback } from "../utils/feedback";
+import { designSystem } from "../constants/designSystem";
 
 interface TodayViewProps {
   stats: any;
@@ -506,7 +507,7 @@ export function TodayView({
               <div className="pt-1 pb-1">
                 {/* Section header: "Dina budgetar" on the left, "Hantera" text-action on the right */}
                 <div className="flex items-center justify-between px-1 mb-2">
-                  <span className="text-xl sm:text-2xl font-normal font-editorial text-[#1C1917] dark:text-white normal-case">
+                  <span className={designSystem.typography.sectionTitle}>
                     {lang === 'en' ? 'Your budgets' : 'Dina budgetar'}
                   </span>
                   <button
@@ -647,7 +648,7 @@ export function TodayView({
       {/* 4. SELECTED DAY'S TRANSACTIONS (Natural Swedish casing: Idag, 26 september) */}
       <div className="space-y-4 pt-1">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-2xl sm:text-3xl font-normal font-editorial text-[#1C1917] dark:text-white normal-case">
+          <h3 className={designSystem.typography.contentSectionTitle}>
             {stats.isPastPeriod
               ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
               : selectedDate.toDateString() === new Date().toDateString()
