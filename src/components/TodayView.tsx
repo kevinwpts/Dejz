@@ -414,6 +414,66 @@ export function TodayView({
 
   const displayedFixedTransactions = (config?.showFixedExpensesInCalendar ?? true) ? fixedTransactions : [];
 
+  const dynamicInsight = useMemo(() => {
+    if (!stats) return null;
+
+    const totalDays = stats.totalDaysInPeriod || calendarDays.length || 0;
+    const daysElapsed = stats.daysElapsed !== undefined ? stats.daysElapsed : 0;
+    const disposablePot = stats.disposablePot || 0;
+    const totalSpent = stats.totalSpentInPeriod !== undefined ? stats.totalSpentInPeriod : 0;
+
+    // 1. Pacing vs plan: linear progression over period
+    if (daysElapsed >= 1 && totalDays > 0 && disposablePot > 0 && !stats.isPastPeriod) {
+      const plannedSpendToDate = Math.round((daysElapsed / totalDays) * disposablePot);
+      const diff = plannedSpendToDate - totalSpent;
+
+      // Meaningful variance (at least 50 kr)
+      if (Math.abs(diff) >= 50) {
+        if (diff > 0) {
+          return {
+            type: 'positive' as const,
+            text: lang === 'en'
+              ? `You're ${formatAmount(diff, lang)} ${config?.currency || 'kr'} under your plan so far`
+              : `Du ligger ${formatAmount(diff, lang)} ${config?.currency || 'kr'} under din plan hittills`,
+          };
+        } else {
+          return {
+            type: 'warning' as const,
+            text: lang === 'en'
+              ? `You're ${formatAmount(Math.abs(diff), lang)} ${config?.currency || 'kr'} over your plan so far`
+              : `Du ligger ${formatAmount(Math.abs(diff), lang)} ${config?.currency || 'kr'} över din plan hittills`,
+          };
+        }
+      }
+    }
+
+    // 2. Over-budget category alert (if any category has exceeded budget by >= 50 kr)
+    if (categoryBudgetData && categoryBudgetData.length > 0 && !stats.isPastPeriod) {
+      const overBudgetCat = categoryBudgetData.find((c) => c.isOverBudget && c.remaining <= -50);
+      if (overBudgetCat) {
+        const overAmount = Math.abs(overBudgetCat.remaining);
+        return {
+          type: 'warning' as const,
+          text: lang === 'en'
+            ? `${formatAmount(overAmount, lang)} ${config?.currency || 'kr'} over budget in ${overBudgetCat.name}`
+            : `${formatAmount(overAmount, lang)} ${config?.currency || 'kr'} över budget i ${overBudgetCat.name}`,
+        };
+      }
+    }
+
+    // 3. Past period completion
+    if (stats.isPastPeriod && stats.remainingPeriodCents !== undefined && stats.remainingPeriodCents > 0) {
+      return {
+        type: 'positive' as const,
+        text: lang === 'en'
+          ? `Period completed with ${formatAmount(stats.remainingPeriodCents, lang)} ${config?.currency || 'kr'} left`
+          : `Perioden avslutades med ${formatAmount(stats.remainingPeriodCents, lang)} ${config?.currency || 'kr'} kvar`,
+      };
+    }
+
+    return null;
+  }, [stats, calendarDays.length, categoryBudgetData, lang, config?.currency]);
+
   useEffect(() => {
     const updateHeight = () => {
       if (heroRef.current) {
@@ -439,7 +499,7 @@ export function TodayView({
       window.removeEventListener("resize", updateHeight);
       if (ro) ro.disconnect();
     };
-  }, [categoryBudgetData.length, todayData]);
+  }, [categoryBudgetData.length, todayData, dynamicInsight]);
 
   if (!stats) return null;
 
@@ -462,7 +522,7 @@ export function TodayView({
         }}
       />
 
-      {/* 1. FIXED STATIC HERO LAYER (Kvar att spendera + Budgetkategorier) */}
+      {/* 1. FIXED STATIC HERO LAYER (Kvar att spendera + Dynamic insight + Dina budgetar) */}
       <div
         ref={heroRef}
         className="fixed left-0 right-0 z-10 pointer-events-auto"
@@ -502,9 +562,22 @@ export function TodayView({
             onQuickAddExpense={onQuickAddExpense}
             onOpenCalculator={onOpenCalculator}
             allTransactions={allTransactions}
+            dynamicInsight={dynamicInsight}
             categoryBudgets={
-              <div className="pt-1.5 pb-2">
-
+              <div className="pt-1 pb-1">
+                {/* Section header: "Dina budgetar" on the left, "Hantera" text-action on the right */}
+                <div className="flex items-center justify-between px-1 mb-2">
+                  <span className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8]">
+                    {lang === 'en' ? 'Your budgets' : 'Dina budgetar'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate("budget", "category-budgets")}
+                    className="text-xs font-semibold text-[#8C867C] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-colors cursor-pointer active:scale-95 touch-manipulation py-0.5 px-1"
+                  >
+                    {lang === 'en' ? 'Manage' : 'Hantera'}
+                  </button>
+                </div>
 
                 {categoryBudgetData.length > 0 ? (
                   <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
@@ -567,20 +640,6 @@ export function TodayView({
                         </motion.button>
                       );
                     })}
-
-                    {/* Direct shortcut button at the end */}
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.97, x: 6 }}
-                      animate={{ opacity: 1, scale: 1, x: 0 }}
-                      transition={{ delay: 0.04 + categoryBudgetData.length * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
-                      onClick={() => onNavigate("budget", "category-budgets")}
-                      className="flex-shrink-0 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/60 dark:bg-white/[0.02] hover:bg-white dark:hover:bg-white/[0.05] text-[#6E6961] dark:text-[#C7CDDC] hover:text-[#1C1917] dark:hover:text-white transition-all group cursor-pointer snap-start border border-dashed border-[#E6E2D8] dark:border-white/15 self-stretch"
-                    >
-                      <SlidersHorizontal size={13} strokeWidth={1.8} />
-                      <span className="text-xs font-semibold">
-                        {lang === "en" ? "Manage" : "Hantera"}
-                      </span>
-                    </motion.button>
                   </div>
                 ) : (
                   <button
