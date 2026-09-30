@@ -55,6 +55,7 @@ export function BudgetView({
   initialSection,
   onClearSection
 }: BudgetViewProps) {
+  const curr = config?.currency || 'kr';
   const [editingCategoryName, setEditingCategoryName] = React.useState<string | null>(null);
   const [inlineInputValue, setInlineInputValue] = React.useState<string>("");
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
@@ -78,8 +79,6 @@ export function BudgetView({
     setShowCategoryBudgets(false);
     onClearSection?.();
   };
-
-
 
   const [fixedSortBy, setFixedSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [incomeSortBy, setIncomeSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
@@ -287,25 +286,25 @@ export function BudgetView({
             <div className="text-[26px] sm:text-[32px] leading-tight font-bold tracking-tight text-[#1C1917] dark:text-white tabular-nums">
               {isOverAllocated ? (
                 <>
-                  <span className="text-rose-600 dark:text-rose-400">{formatAmount(totalAllocated, config.language)} kr</span>
+                  <span className="text-rose-600 dark:text-rose-400">{formatAmount(totalAllocated, config.language)} {curr}</span>
                   <span className="text-[#6E6961] dark:text-[#A8A8A8] text-lg sm:text-xl font-medium"> fördelat av </span>
-                  <span>{formatAmount(totalIncomeSum, config.language)} kr</span>
+                  <span>{formatAmount(totalIncomeSum, config.language)} {curr}</span>
                 </>
               ) : (
                 <>
-                  <span className="text-[#1C1917] dark:text-white">{formatAmount(totalAllocated, config.language)} kr</span>
+                  <span className="text-[#1C1917] dark:text-white">{formatAmount(totalAllocated, config.language)} {curr}</span>
                   <span className="text-[#6E6961] dark:text-[#A8A8A8] text-lg sm:text-xl font-medium"> fördelat av </span>
-                  <span>{formatAmount(totalIncomeSum, config.language)} kr</span>
+                  <span>{formatAmount(totalIncomeSum, config.language)} {curr}</span>
                 </>
               )}
             </div>
             {isOverAllocated ? (
               <span className="text-xs font-semibold tracking-wide text-rose-600 dark:text-rose-400 block mt-1">
-                ⚠️ Du har fördelat {formatAmount(Math.abs(remainingToAllocate), config.language)} kr mer än din inkomst ({formatAmount(totalIncomeSum, config.language)} kr)
+                ⚠️ Du har fördelat {formatAmount(Math.abs(remainingToAllocate), config.language)} {curr} mer än din inkomst ({formatAmount(totalIncomeSum, config.language)} {curr})
               </span>
             ) : (
               <span className="text-xs font-semibold tracking-wide text-[#6E6961] dark:text-[#A8A8A8] block mt-1">
-                ✓ {formatAmount(remainingToAllocate, config.language)} kr kvar att fördela av din inkomst ({formatAmount(totalIncomeSum, config.language)} kr)
+                ✓ {formatAmount(remainingToAllocate, config.language)} {curr} kvar att fördela av din inkomst ({formatAmount(totalIncomeSum, config.language)} {curr})
               </span>
             )}
           </div>
@@ -404,7 +403,7 @@ export function BudgetView({
                       </span>
                       {fixedSpent > 0 && (
                         <span className="text-[11px] font-medium text-[#6E6961] dark:text-[#A8A8A8] opacity-80 block truncate mt-0.5">
-                          {formatAmount(fixedSpent, config.language)} kr fast
+                          {formatAmount(fixedSpent, config.language)} {curr} fast
                         </span>
                       )}
                     </div>
@@ -474,7 +473,7 @@ export function BudgetView({
                             }}
                             className="px-2 py-1 rounded-lg transition-all text-xs font-bold font-amount tabular-nums text-center text-[#1C1917] dark:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] cursor-pointer"
                           >
-                            {formatAmount(catBudget, config.language)} kr
+                            {formatAmount(catBudget, config.language)} {curr}
                           </button>
                         )}
 

@@ -1174,7 +1174,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 placeholder={t('fixedExpensePlaceholder')} 
-                className="w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[16px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 border border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white" 
+                className="w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[14px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 border border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white" 
               />
               {name && (
                 <button 
@@ -1198,7 +1198,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               onChange={(e) => setNote(e.target.value)}
               placeholder="Skriv en notering..."
               rows={2}
-              className="w-full bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[16px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 py-3 border border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white min-h-[48px] resize-y"
+               className="w-full bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[14px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 py-3 border border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white min-h-[48px] resize-y"
             />
           </div>
 

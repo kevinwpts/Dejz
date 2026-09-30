@@ -562,7 +562,7 @@ export function TodayView({
                             <span className={`text-xs font-medium tabular-nums tracking-tight ${
                               cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[#6E6961] dark:text-[#9CA6BC]'
                             }`}>
-                              {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} kr ${lang === 'en' ? 'left' : 'kvar'}` : `${formatAmount(cat.spent, lang)} kr`}
+                              {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} ${config?.currency || 'kr'} ${lang === 'en' ? 'left' : 'kvar'}` : `${formatAmount(cat.spent, lang)} ${config?.currency || 'kr'}`}
                             </span>
                           </div>
 

@@ -48,6 +48,7 @@ export function CategoryBottomSheetModal({
   onDeleteTransaction,
 }: CategoryBottomSheetModalProps) {
   const isEn = language === 'en';
+  const curr = config?.currency || 'kr';
 
   useScrollLock(isOpen);
 
@@ -204,16 +205,16 @@ export function CategoryBottomSheetModal({
                     {categoryData?.hasBudget ? (
                       categoryData.isOverBudget ? (
                         <span className="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-500 font-amount tabular-nums">
-                          +{formatAmount(Math.abs(categoryData.remaining), language)} kr
+                          +{formatAmount(Math.abs(categoryData.remaining), language)} {curr}
                         </span>
                       ) : (
                         <span className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
-                          {formatAmount(categoryData.remaining, language)} kr
+                          {formatAmount(categoryData.remaining, language)} {curr}
                         </span>
                       )
                     ) : (
                       <span className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
-                        {formatAmount(categoryData?.spent || 0, language)} kr
+                        {formatAmount(categoryData?.spent || 0, language)} {curr}
                       </span>
                     )}
                     <span className="text-xs font-medium text-[#6E6961] dark:text-[#9CA6BC]">
@@ -260,7 +261,7 @@ export function CategoryBottomSheetModal({
                     <span className="text-[11px] font-semibold text-[#6E6961] dark:text-[#9CA6BC]">
                       {isEn ? 'Sum:' : 'Summa:'}{' '}
                       <span className="font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
-                        {formatAmount(totalDisplaySum, language)} kr
+                        {formatAmount(totalDisplaySum, language)} {curr}
                       </span>
                     </span>
                   )}

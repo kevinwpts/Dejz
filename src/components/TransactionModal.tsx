@@ -365,7 +365,7 @@ export function TransactionModal({
   const noteInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
 
-  const currency = t('currency') || 'SEK';
+  const currency = config?.currency || 'kr';
   const categoryData = categories.find(c => c.name === category);
   const _categoryColor = categoryData?.color;
 
@@ -780,7 +780,7 @@ export function TransactionModal({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[16px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 border border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white"
+                    className="w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[14px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 border border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white"
                   />
                   {merchant && (
                     <button 
@@ -805,7 +805,7 @@ export function TransactionModal({
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                    className={`w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[16px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 border ${
+                    className={`w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[14px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 border ${
                       validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white'
                     }`}
                   />
