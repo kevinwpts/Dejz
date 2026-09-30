@@ -60,13 +60,20 @@ export const DS = {
   },
 
   typography: {
-    heroAmount: 'text-4xl sm:text-5xl font-extrabold tracking-tight font-amount tabular-nums',
-    pageTitle: 'text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1C1917] dark:text-white',
-    sectionTitle: 'text-base font-bold text-[#1C1917] dark:text-white',
-    cardAmount: 'text-sm sm:text-base font-bold font-amount tabular-nums',
-    body: 'text-sm font-semibold text-[#1C1917] dark:text-white',
-    caption: 'text-xs text-[#6E6961] dark:text-[#A8A8A8] font-medium',
-    micro: 'text-[11px] font-bold tracking-wide uppercase',
+    heroAmount: 'text-4xl sm:text-5xl font-extrabold tracking-tight font-amount tabular-nums font-display',
+    pageTitle: 'text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1C1917] dark:text-white font-display',
+    sectionTitle: 'text-base font-bold text-[#1C1917] dark:text-white font-display',
+    modalTitle: 'text-lg sm:text-xl font-bold tracking-tight text-[#1C1917] dark:text-white font-display',
+    cardTitle: 'text-sm sm:text-base font-bold text-[#1C1917] dark:text-white font-display',
+    merchantName: 'text-[13.5px] sm:text-[14px] font-semibold text-[#1C1917] dark:text-white tracking-tight font-display',
+    body: 'text-sm font-normal text-[#1C1917] dark:text-white font-sans',
+    label: 'text-xs font-semibold text-[var(--text-secondary)] font-sans',
+    button: 'text-sm font-semibold text-[#1C1917] dark:text-white font-sans',
+    secondary: 'text-xs font-normal text-[var(--text-secondary)] font-sans',
+    caption: 'text-xs text-[#6E6961] dark:text-[#A8A8A8] font-medium font-sans',
+    micro: 'text-[11px] font-bold tracking-wide uppercase font-sans',
+    amount: 'text-sm sm:text-base font-bold font-amount tabular-nums font-display',
+    metadata: 'text-xs text-[var(--text-tertiary)] font-sans tabular-nums',
   },
 
   spacing: {
