@@ -3340,7 +3340,8 @@ export default function App() {
           ) || [newSaving]
         : [...(config.monthlySavingsItems || []), newSaving];
 
-      const newConfig = { ...config, monthlySavingsItems: newItems };
+      const itemsSum = newItems.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0);
+      const newConfig = { ...config, monthlySavingsItems: newItems, monthlySavings: itemsSum };
       setConfig(newConfig);
       await dataService.saveSettings(session.user.id, newConfig);
       setIsMonthlySavingModalOpen(false);
@@ -3356,7 +3357,8 @@ export default function App() {
     try {
       const newItems =
         config.monthlySavingsItems?.filter((s: any) => s.id !== id) || [];
-      const newConfig = { ...config, monthlySavingsItems: newItems };
+      const itemsSum = newItems.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0);
+      const newConfig = { ...config, monthlySavingsItems: newItems, monthlySavings: itemsSum };
       setConfig(newConfig);
       await dataService.saveSettings(session.user.id, newConfig);
       addToast(t("deleted"), "success");

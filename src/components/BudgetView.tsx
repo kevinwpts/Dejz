@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { RefreshCw, Check, Sparkles, RotateCcw, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
+import { Check, Sparkles, RotateCcw, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -126,17 +126,7 @@ export function BudgetView({
   }, [fixedExpenses, fixedSortBy]);
 
   const sortedSavings = React.useMemo(() => {
-    const list = config?.monthlySavingsItems && config.monthlySavingsItems.length > 0
-      ? [...config.monthlySavingsItems]
-      : (config?.savingsGoals || []).filter((g: any) => Number(g.targetAmount) > 0).map((g: any) => ({
-          id: g.id || 'savings-goal-' + g.title,
-          name: g.title || 'Månadssparande',
-          amount: Number(g.targetAmount) || 0,
-          icon: g.icon || 'PiggyBank',
-          logo: g.logo,
-          deductionDay: config?.payday || 25,
-          frequency: Frequency.MONTHLY,
-        }));
+    const list = config?.monthlySavingsItems ? [...config.monthlySavingsItems] : [];
     if (savingSortBy === 'day') {
       return list.sort((a, b) => {
         const dayA = typeof a.deductionDay === 'number' && a.deductionDay > 0 ? a.deductionDay : 999;
@@ -189,12 +179,14 @@ export function BudgetView({
     }
   }, 0);
 
-  const totalSavingsSum = (config.monthlySavingsItems?.reduce((sum, item) => {
-    const amount = (item.isVariable && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined)
-      ? item.periodOverrides[currentPeriodId]
-      : (Number(item.amount) || 0);
-    return sum + amount;
-  }, 0) || 0) + (Number(config.monthlySavings) || 0);
+  const totalSavingsSum = config.monthlySavingsItems && config.monthlySavingsItems.length > 0
+    ? (config.monthlySavingsItems.reduce((sum, item) => {
+        const amount = (item.isVariable && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined)
+          ? item.periodOverrides[currentPeriodId]
+          : (Number(item.amount) || 0);
+        return sum + amount;
+      }, 0) || 0)
+    : (Number(config.monthlySavings) || 0);
 
   const calculatedEverydayBudget = Math.max(0, Math.round(totalIncomeSum - totalFixedSum - totalSavingsSum));
   const everydayBudget = stats?.disposablePot !== undefined ? Math.round(stats.disposablePot) : calculatedEverydayBudget;
@@ -866,29 +858,6 @@ export function BudgetView({
                     />
                   ))}
                 </div>
-              ) : config.monthlySavings > 0 ? (
-                <button 
-                  type="button"
-                  onClick={onAddMonthlySaving} 
-                  className="w-full bg-white dark:bg-[#242424] p-4 sm:p-5 rounded-[18px] border-none shadow-none hover:bg-[#EDE9DF] dark:hover:bg-[#333333] transition-all flex items-center justify-between text-left group cursor-pointer"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/[0.04] border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] shrink-0">
-                      <RefreshCw size={17} strokeWidth={1.75} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#1C1917] dark:text-white tracking-tight leading-tight">
-                        Migrera månadssparande
-                      </p>
-                      <p className="text-xs font-normal text-[#6E6961] dark:text-[#A8A8A8] mt-1">
-                        Lägg till sparande på <span className="font-amount tabular-nums font-semibold text-[#1C1917] dark:text-white">{formatAmount(config.monthlySavings)}</span> <span className="text-xs text-[#6E6961] dark:text-[#A8A8A8]">{config.currency}</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="h-7 px-3.5 rounded-full bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] hover:bg-neutral-800 dark:hover:bg-neutral-200 text-xs font-semibold shrink-0 ml-3 flex items-center justify-center transition-all shadow-xs">
-                    Lägg till
-                  </div>
-                </button>
               ) : (
                 <EmptyState 
                   title={config.language === 'en' ? 'No monthly savings added yet' : 'Inget månadssparande inlagt än'} 
