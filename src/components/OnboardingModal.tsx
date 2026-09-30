@@ -38,7 +38,7 @@ const texts = {
     // Step 2
     paydayTitle: 'Din lönedag',
     paydayQuestion: 'När får du lön?',
-    paydayDesc: 'Det avgör din ekonomiska period.',
+    paydayDesc: 'Det avgör när din period börjar och slutar.',
     customDay: 'Annan dag',
     everyMonth: ':e varje månad',
     paydayBeforeWeekendTitle: 'Lön tidigare vid helg',
@@ -63,10 +63,10 @@ const texts = {
     // Step 5
     savingsTitle: 'Månadssparande',
     savingsQuestion: 'Hur mycket vill du spara varje månad?',
-    savingsDesc: 'Vi räknar bort det innan vi visar vad du har kvar att använda.',
+    savingsDesc: 'Vi räknar bort det innan vi visar vad du har kvar att spendera.',
     
     // Step 6
-    midMonthTitle: 'Start i perioden',
+    midMonthTitle: 'Din start',
     
     // Step 7
     summaryTitle: 'Din plan',
@@ -76,7 +76,7 @@ const texts = {
     fixedCostsLabel: 'Fasta kostnader',
     savingsLabel: 'Månadssparande',
     spentSoFarLabel: 'Spenderat hittills',
-    freeSpendLabel: 'Kvar att använda',
+    freeSpendLabel: 'Kvar att spendera',
     openDejz: 'Öppna Dejz',
     
     next: 'Nästa',
@@ -148,15 +148,15 @@ function getStep6DynamicContent(daysSince: number, isEn: boolean) {
 
   const headline = isEn
     ? (isSingular
-        ? 'You are 1 day into your pay period. How much have you spent since payday?'
-        : `You are ${days} days into your pay period. How much have you spent since payday?`)
+        ? 'You are 1 day into your pay period. How much have you spent on other purchases since payday?'
+        : `You are ${days} days into your pay period. How much have you spent on other purchases since payday?`)
     : (isSingular
-        ? 'Du är 1 dag in i din löneperiod. Hur mycket har du spenderat sedan du fick lön?'
-        : `Du är ${days} dagar in i din löneperiod. Hur mycket har du spenderat sedan du fick lön?`);
+        ? 'Du är 1 dag in i din löneperiod. Hur mycket har du spenderat på övriga köp sedan du fick lön?'
+        : `Du är ${days} dagar in i din löneperiod. Hur mycket har du spenderat på övriga köp sedan du fick lön?`);
 
   const helpText = isEn
-    ? "It doesn't need to be exact. You only do this once."
-    : 'Det behöver inte vara exakt. Det här gör du bara en gång.';
+    ? 'Do not include fixed expenses you already entered. It does not need to be exact. You only do this once.'
+    : 'Räkna inte med fasta kostnader du redan lagt in. Det behöver inte vara exakt. Det här gör du bara en gång.';
 
   return {
     headline,

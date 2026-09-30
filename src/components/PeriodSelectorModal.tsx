@@ -99,8 +99,8 @@ export function PeriodSelectorModal({
                 </h3>
                 <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8] truncate mt-0.5">
                   {viewMode === 'calendar'
-                    ? (currentLang === 'en' ? 'Pick a day or view full period' : 'Klicka på en dag eller visa hela perioden')
-                    : (currentLang === 'en' ? 'Salary-adjusted budget periods' : 'Lönedagsanpassade budgetperioder')}
+                    ? (currentLang === 'en' ? 'Pick a day or view full period' : 'Välj en dag eller visa hela perioden')
+                    : (currentLang === 'en' ? 'Pay periods' : 'Dina löneperioder')}
                 </p>
               </div>
             </div>
@@ -199,7 +199,7 @@ export function PeriodSelectorModal({
                 className="w-full py-2.5 px-4 rounded-xl bg-[#F7F5F0] dark:bg-white/[0.04] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.08] text-[#1C1917] dark:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border border-[#E6E2D8] dark:border-white/[0.06] active:scale-[0.99]"
               >
                 <CalendarIcon size={14} strokeWidth={2} />
-                <span>{currentLang === 'en' ? 'Open calendar / select day' : 'Öppna kalender / välj dag'}</span>
+                <span>{currentLang === 'en' ? 'Select day' : 'Välj dag'}</span>
               </button>
             </div>
           )}

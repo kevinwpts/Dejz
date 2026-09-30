@@ -290,13 +290,13 @@ export function LogView({
             {
               id: 'expense',
               label: t('expense' as TranslationKey) || (config.language === 'en' ? 'Expenses' : 'Utgifter'),
-              subtitle: getL10n('Endast utgifter och köp', 'Only expense transactions'),
+              subtitle: getL10n('Visa endast utgifter', 'Only expense transactions'),
               icon: <ArrowDownLeft size={16} strokeWidth={2} />,
             },
             {
               id: 'income',
               label: t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster'),
-              subtitle: getL10n('Endast inkomster och insättningar', 'Only income deposits'),
+              subtitle: getL10n('Visa endast inkomster', 'Only income deposits'),
               icon: <ArrowUpRight size={16} strokeWidth={2} />,
             },
             {
