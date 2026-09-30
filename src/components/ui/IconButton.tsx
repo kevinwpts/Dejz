@@ -35,11 +35,11 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 
     const variantStyles = {
       muted:
-        'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333] border-none shadow-none',
+        'bg-[var(--surface-muted)] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] border-none shadow-none',
       default:
-        'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-[#EDE9DF] dark:hover:bg-[#333333] border-none shadow-none',
+        'bg-[var(--surface-muted)] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] border-none shadow-none',
       ghost:
-        'bg-transparent text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[#EFECE6] dark:hover:bg-[#2D2D2D]',
+        'bg-transparent text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D]',
       accent:
         'bg-[#05B862] text-white hover:opacity-90 shadow-none border-none',
       danger:

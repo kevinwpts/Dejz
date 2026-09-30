@@ -24,7 +24,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const variantStyles = {
       default: 'bg-white dark:bg-[#242424] rounded-[18px]',
       hero: 'bg-white dark:bg-[#242424] rounded-[18px]',
-      nested: 'bg-[#EFECE6] dark:bg-[#2D2D2D] rounded-[14px]',
+      nested: 'bg-[var(--surface-muted)] dark:bg-[#2D2D2D] rounded-[14px]',
       flat: 'bg-white dark:bg-[#242424] rounded-[18px]',
       elevated: 'bg-white dark:bg-[#242424] rounded-[18px]',
     }[variant];
@@ -37,7 +37,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     }[padding];
 
     const interactiveStyles = interactive
-      ? 'cursor-pointer hover:bg-[#EDE9DF] dark:hover:bg-[#333333] active:scale-[0.99] select-none'
+      ? 'cursor-pointer hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] active:scale-[0.99] select-none'
       : '';
 
     return (

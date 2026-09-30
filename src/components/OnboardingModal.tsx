@@ -48,7 +48,6 @@ const texts = {
     incomeTitle: 'Månadsinkomst',
     incomeQuestion: 'Vilka inkomster har du varje månad?',
     incomeDesc: 'Lägg till dina återkommande inkomster.',
-    aiHelper: 'Skriv som du vill – Dejz ordnar resten.',
     aiPlaceholder: 'T.ex. 25 000 från Ur & Penn',
     addIncome: 'Lägg till inkomst manuellt',
     
@@ -103,7 +102,6 @@ const texts = {
     incomeTitle: 'Monthly Income',
     incomeQuestion: 'What recurring income do you have each month?',
     incomeDesc: 'Add your recurring income.',
-    aiHelper: 'Write as you want – Dejz handles the rest.',
     aiPlaceholder: 'E.g. 25 000 from Ur & Penn',
     addIncome: 'Add income manually',
     

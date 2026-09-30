@@ -143,7 +143,7 @@ export function BudgetSummaryModule({
             ? (config.language === 'en' ? 'TOTAL SPENT' : 'TOTALT SPENDERAT')
             : (config.language === 'en' ? 'SPENT SO FAR' : 'SPENDERAT HITTILLS')}
           {isPastPeriod && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8] font-semibold uppercase tracking-wider">
+            <span className="px-2 py-0.5 rounded-full text-[10px] bg-[var(--surface-muted)] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8] font-semibold uppercase tracking-wider">
               {config.language === 'en' ? 'Completed' : 'Avslutad'}
             </span>
           )}

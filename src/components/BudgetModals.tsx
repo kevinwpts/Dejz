@@ -635,6 +635,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     }}
                     isPro={isPro}
                     userId={userId}
+                    onRestoreAuto={() => {
+                      setManualSelectionThisSession(false);
+                      setLogo(undefined);
+                      setIcon('receipt');
+                      setShowIconSelector(false);
+                    }}
                     t={t}
                   />
                 </div>
@@ -1459,6 +1465,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     }}
                     isPro={isPro}
                     userId={userId}
+                    onRestoreAuto={() => {
+                      setManualSelectionThisSession(false);
+                      setLogo(undefined);
+                      setIcon('receipt');
+                      setShowIconSelector(false);
+                    }}
                     t={t}
                   />
                 </div>
@@ -2074,6 +2086,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                     }}
                     isPro={isPro}
                     userId={userId}
+                    onRestoreAuto={() => {
+                      setManualSelectionThisSession(false);
+                      setLogo(undefined);
+                      setIcon('receipt');
+                      setShowIconSelector(false);
+                    }}
                     t={t}
                   />
                 </div>

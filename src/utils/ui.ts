@@ -1,9 +1,9 @@
 export const getIconBg = (name: string) => {
   const colors = [
     'bg-black/5 text-[#1C1917] dark:bg-white/10 dark:text-white',
-    'bg-[#EFECE6] text-[#1C1917] dark:bg-[#2D2D2D] dark:text-white',
+    'bg-[#EAE6DE] text-[#1C1917] dark:bg-[#2D2D2D] dark:text-white',
     'bg-black/[0.04] text-[#6E6961] dark:bg-white/[0.08] dark:text-[#A8A8A8]',
-    'bg-[#EDE9DF] text-[#1C1917] dark:bg-[#383838] dark:text-white',
+    'bg-[#DFD9CF] text-[#1C1917] dark:bg-[#383838] dark:text-white',
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {

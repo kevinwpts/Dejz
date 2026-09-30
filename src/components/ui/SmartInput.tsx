@@ -18,10 +18,11 @@ export interface SmartInputLabelProps {
  * Displays a subtle Dejz green (#05B862) sparkle symbol with smooth, subtle processing animation.
  */
 export const SmartInputLabel: React.FC<SmartInputLabelProps> = ({
-  label = 'Skriv som du vill – Dejz ordnar resten.',
+  label,
   isProcessing = false,
   className = '',
 }) => {
+  if (!label) return null;
   return (
     <div className={`flex items-center gap-1.5 px-0.5 select-none ${className}`}>
       <motion.span
@@ -124,7 +125,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
   value,
   onChange,
   onSubmit,
-  label = 'Skriv som du vill – Dejz ordnar resten.',
+  label,
   hideLabel = false,
   placeholder,
   isProcessing = false,

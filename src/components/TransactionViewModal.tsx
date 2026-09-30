@@ -176,7 +176,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           </div>
 
           {/* Details Section: Clean, Lightweight, and Non-Administrative */}
-          <div className="bg-[#F7F5F0] dark:bg-white/[0.04] rounded-2xl p-4 space-y-3.5 border border-[#E6E2D8] dark:border-white/[0.06]">
+          <div className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-2xl p-4 space-y-3.5 border border-[#E2DDD4] dark:border-white/[0.06]">
             {/* Category */}
             <div className="flex items-center justify-between gap-4">
               <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] shrink-0">

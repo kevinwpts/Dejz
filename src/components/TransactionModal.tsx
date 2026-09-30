@@ -636,14 +636,14 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E6E2D8] dark:border-[#383838] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
+        className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E2DDD4] dark:border-[#383838] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
         <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
         {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[#E6E2D8] dark:border-[#383838]">
+        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[#E2DDD4] dark:border-[#383838]">
           <div className="flex justify-start">
             <button
               type="button"
@@ -697,7 +697,7 @@ export function TransactionModal({
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[#EAE6DE] dark:bg-[#2D2D2D] hover:bg-[#DFD9CF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
               aria-label={t('close')}
             >
               <X size={17} strokeWidth={2.2} />
@@ -720,7 +720,7 @@ export function TransactionModal({
               <div className="flex flex-col gap-1.5">
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="bg-[#F7F5F0] dark:bg-white/[0.04] rounded-2xl py-3.5 px-4 sm:py-4 sm:px-5 flex items-center justify-between transition-all border border-[#E6E2D8] dark:border-white/[0.06] focus-within:border-[#1C1917] dark:focus-within:border-white focus-within:ring-2 focus-within:ring-[#1C1917]/10 dark:focus-within:ring-white/10 group cursor-text"
+                  className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-2xl py-3.5 px-4 sm:py-4 sm:px-5 flex items-center justify-between transition-all border border-[#E2DDD4] dark:border-white/[0.06] focus-within:border-[#1C1917] dark:focus-within:border-white focus-within:ring-2 focus-within:ring-[#1C1917]/10 dark:focus-within:ring-white/10 group cursor-text"
                 >
                   <div className="shrink-0 flex items-center min-w-[72px]">
                     {type === 'expense' && (
@@ -737,7 +737,7 @@ export function TransactionModal({
                         className={`text-xs font-semibold transition-all px-3 py-1.5 rounded-full border cursor-pointer active:scale-95 ${
                           splits.length > 0 
                             ? "bg-rose-500 text-white border-transparent" 
-                            : "bg-[#EFECE6] dark:bg-white/10 text-[#1C1917] dark:text-white border-transparent hover:bg-[#EDE9DF] dark:hover:bg-white/20"
+                            : "bg-[#EAE6DE] dark:bg-white/10 text-[#1C1917] dark:text-white border-transparent hover:bg-[#DFD9CF] dark:hover:bg-white/20"
                         }`}
                       >
                         {splits.length > 0 ? (currentLang === 'en' ? 'Cancel' : 'Avbryt') : (currentLang === 'en' ? 'Split' : 'Splitta')}
@@ -781,7 +781,7 @@ export function TransactionModal({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white"
+                    className="w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border border-[#E2DDD4] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white"
                   />
                   {merchant && (
                     <button 
@@ -806,8 +806,8 @@ export function TransactionModal({
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                    className={`w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border ${
-                      validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white'
+                    className={`w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] rounded-[14px] px-4 border ${
+                      validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-[#E2DDD4] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white'
                     }`}
                   />
                   {note && (
@@ -982,7 +982,7 @@ export function TransactionModal({
               )}
 
                   {/* Category Selection */}
-                  <div className={`space-y-2.5 pt-3 border-t border-[#E6E2D8] dark:border-white/[0.06] ${splits.length > 0 ? 'hidden' : ''}`}>
+                  <div className={`space-y-2.5 pt-3 border-t border-[#E2DDD4] dark:border-white/[0.06] ${splits.length > 0 ? 'hidden' : ''}`}>
                     <div className="flex items-center justify-between px-1">
                       <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">{t('category')}</label>
                       <button 
@@ -1016,9 +1016,9 @@ export function TransactionModal({
                         <button
                           type="button"
                           onClick={() => setIsAddingCategory(true)}
-                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-[#F7F5F0] dark:bg-white/[0.04] text-[#1C1917] dark:text-white hover:bg-black/5 dark:hover:bg-white/[0.08] transition-all group border border-[#E6E2D8] dark:border-white/[0.06] cursor-pointer"
+                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-[#EAE6DE] dark:bg-white/[0.04] text-[#1C1917] dark:text-white hover:bg-black/5 dark:hover:bg-white/[0.08] transition-all group border border-[#E2DDD4] dark:border-white/[0.06] cursor-pointer"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.08] flex items-center justify-center transition-all group-hover:scale-105">
+                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.08] border border-[#E2DDD4] dark:border-white/[0.08] flex items-center justify-center transition-all group-hover:scale-105">
                             <Plus size={18} strokeWidth={2.2} />
                           </div>
                           <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
@@ -1029,9 +1029,9 @@ export function TransactionModal({
                         <button
                           type="button"
                           onClick={() => setIsCategorySelectorOpen(true)}
-                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-[#F7F5F0] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[#1C1917] dark:hover:text-white transition-all group border border-[#E6E2D8] dark:border-white/[0.06] cursor-pointer"
+                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-[#EAE6DE] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[#1C1917] dark:hover:text-white transition-all group border border-[#E2DDD4] dark:border-white/[0.06] cursor-pointer"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.08] flex items-center justify-center group-hover:bg-[#1C1917] group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-all">
+                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.08] border border-[#E2DDD4] dark:border-white/[0.08] flex items-center justify-center group-hover:bg-[#1C1917] group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-all">
                             <Plus size={18} strokeWidth={2.2} />
                           </div>
                           <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
@@ -1043,7 +1043,7 @@ export function TransactionModal({
                   </div>
             
                   {/* Date Selection */}
-                  <div className="space-y-2.5 pt-3 border-t border-[#E6E2D8] dark:border-white/[0.06]">
+                  <div className="space-y-2.5 pt-3 border-t border-[#E2DDD4] dark:border-white/[0.06]">
                     <div className="flex items-center justify-between px-1">
                       <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">{t('date')}</label>
                       {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
@@ -1063,7 +1063,7 @@ export function TransactionModal({
                         className={`flex-1 py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
                             ? 'bg-[#1C1917] text-white dark:bg-white dark:text-black shadow-xs'
-                            : 'bg-[#F7F5F0] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.06]'
+                            : 'bg-[#EAE6DE] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#DFD9CF] dark:hover:bg-white/[0.08] border border-[#E2DDD4] dark:border-white/[0.06]'
                         }`}
                       >
                         {t('todayLabel')}
@@ -1079,7 +1079,7 @@ export function TransactionModal({
                         className={`flex-1 py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
                             ? 'bg-[#1C1917] text-white dark:bg-white dark:text-black shadow-xs'
-                            : 'bg-[#F7F5F0] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.06]'
+                            : 'bg-[#EAE6DE] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#DFD9CF] dark:hover:bg-white/[0.08] border border-[#E2DDD4] dark:border-white/[0.06]'
                         }`}
                       >
                         {t('yesterdayLabel')}
@@ -1090,7 +1090,7 @@ export function TransactionModal({
                         className={`w-12 py-3 rounded-xl transition-all flex items-center justify-center cursor-pointer ${
                           showFullCalendar 
                             ? 'bg-[#1C1917] text-white dark:bg-white dark:text-black shadow-xs' 
-                            : 'bg-[#F7F5F0] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.06]'
+                            : 'bg-[#EAE6DE] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#DFD9CF] dark:hover:bg-white/[0.08] border border-[#E2DDD4] dark:border-white/[0.06]'
                         }`}
                         title={t('chooseDate')}
                       >
@@ -1122,9 +1122,9 @@ export function TransactionModal({
 
                   {/* Receipt Section: Toned-down quick action */}
                   {type !== 'income' && (
-                    <div className="pt-2 border-t border-[#E6E2D8] dark:border-white/[0.06]">
+                    <div className="pt-2 border-t border-[#E2DDD4] dark:border-white/[0.06]">
                       {isScanningReceipt ? (
-                        <div className="bg-[#F7F5F0] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-accent/25 flex items-center justify-between transition-all">
+                        <div className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-accent/25 flex items-center justify-between transition-all">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
                               <Loader2 size={16} className="animate-spin text-accent" />
@@ -1143,7 +1143,7 @@ export function TransactionModal({
                           </span>
                         </div>
                       ) : receiptUrl ? (
-                        <div className="bg-[#F7F5F0] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-between transition-all">
+                        <div className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-between transition-all">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shrink-0 bg-black/5">
                               <img src={receiptUrl} alt="Receipt" className="w-full h-full object-cover" />
@@ -1171,7 +1171,7 @@ export function TransactionModal({
                       ) : (
                         <div 
                           onClick={() => !isScanningReceipt && !isUploadingReceipt && setIsCameraModalOpen(true)}
-                          className="bg-[#F7F5F0] dark:bg-white/[0.04] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.07] rounded-xl p-3 sm:p-3.5 border border-[#E6E2D8] dark:border-white/[0.06] flex items-center justify-between transition-all cursor-pointer group active:scale-[0.99]"
+                          className="bg-[#EAE6DE] dark:bg-white/[0.04] hover:bg-[#DFD9CF] dark:hover:bg-white/[0.07] rounded-xl p-3 sm:p-3.5 border border-[#E2DDD4] dark:border-white/[0.06] flex items-center justify-between transition-all cursor-pointer group active:scale-[0.99]"
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[#1C1917] dark:text-white shrink-0 group-hover:scale-105 transition-transform">
@@ -1210,7 +1210,7 @@ export function TransactionModal({
           </div>
 
           {/* Register / Save Button */}
-          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-[#E6E2D8] dark:border-white/[0.06] bg-white dark:bg-[#242424]">
+          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-[#E2DDD4] dark:border-white/[0.06] bg-white dark:bg-[#242424]">
             <Button 
               disabled={!isSplitsValid}
               onClick={() => {
@@ -1295,9 +1295,10 @@ export function TransactionModal({
                     }}
                     onRestoreAuto={() => {
                       setManualSelectionThisSession(false);
+                      setLogo(undefined);
+                      setIcon('receipt');
                       setLogoError(false);
                       setShowIconSelector(false);
-                      // The useEffect in TransactionModal will re-trigger the auto-suggestion
                     }}
                     isPro={isPro}
                     userId={userId}

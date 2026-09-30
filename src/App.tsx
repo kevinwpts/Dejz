@@ -1491,7 +1491,7 @@ export default function App() {
         document.body.classList.add("light");
       }
 
-      const themeColor = isDark ? "#232323" : "#F7F5F0";
+      const themeColor = isDark ? "#232323" : "#F2EFE8";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -5504,7 +5504,7 @@ export default function App() {
               {/* Snabbutgift Form with Mic using Reusable SmartInput */}
               <div className="pt-2 border-t border-[#E6E2D8] dark:border-[#383838]">
                 <SmartInput
-                  label={config?.language === "en" ? "Write as you want – Dejz handles the rest." : "Skriv som du vill – Dejz ordnar resten."}
+                  hideLabel
                   value={plusQuickText}
                   onChange={setPlusQuickText}
                   onSubmit={handlePlusQuickExpenseSubmit}

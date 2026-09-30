@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Sparkles, Upload, Check, Plus } from 'lucide-react';
 import { fetchLogoForName, getInstantBrandLogo } from '../utils/logo';
+import { getAutomaticMerchantLogo, isAutomaticMerchantLogo } from '../utils/resolver';
 import { uploadLogo } from '../services/storageService';
 import { TranslationKey } from '../i18n';
 import { suggestIcon, resolveLucideIcon, ICON_MAP } from '../utils/icons';
 import { IconPickerModal } from './IconPickerModal';
-
 
 interface IconSelectorProps {
   name: string;
@@ -39,24 +39,45 @@ export function IconSelector({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const suggestedEmoji = name && name.length >= 2 ? suggestIcon(name) : undefined;
+  // 1. Resolve automatic merchant logo from our central resolver or instant brand database
+  const instantAuto = useMemo(() => {
+    return getAutomaticMerchantLogo(name) || (name ? getInstantBrandLogo(name) : undefined);
+  }, [name]);
 
   useEffect(() => {
-    const fetchLogo = async () => {
+    let isCancelled = false;
+    const resolveLogo = async () => {
+      if (instantAuto) {
+        setFetchedLogo(instantAuto);
+        return;
+      }
       if (name && name.length >= 2) {
-        const instant = getInstantBrandLogo(name);
-        if (instant) {
-          setFetchedLogo(instant);
-          return;
-        }
         const logo = await fetchLogoForName(name);
-        setFetchedLogo(logo);
+        if (!isCancelled) {
+          setFetchedLogo(logo);
+        }
       } else {
-        setFetchedLogo(undefined);
+        if (!isCancelled) setFetchedLogo(undefined);
       }
     };
-    fetchLogo();
-  }, [name]);
+    resolveLogo();
+    return () => {
+      isCancelled = true;
+    };
+  }, [name, instantAuto]);
+
+  const autoMerchantLogo = instantAuto || fetchedLogo || autoLogo;
+
+  // 2. Custom User Logo: strictly separated from automatic merchant logos.
+  // A corporate logo (McDonald's, Lidl, etc.) is NEVER a custom user logo.
+  const isCurrentCustom = Boolean(currentLogo && !isAutomaticMerchantLogo(currentLogo, name));
+  const [customUserLogo, setCustomUserLogo] = useState<string | undefined>(isCurrentCustom ? currentLogo : undefined);
+
+  useEffect(() => {
+    if (currentLogo && !isAutomaticMerchantLogo(currentLogo, name)) {
+      setCustomUserLogo(currentLogo);
+    }
+  }, [currentLogo, name]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -66,6 +87,7 @@ export function IconSelector({
     try {
       const url = await uploadLogo(file, userId);
       if (url) {
+        setCustomUserLogo(url);
         onLogoChange(url);
         onIconChange('none');
       }
@@ -76,8 +98,32 @@ export function IconSelector({
     }
   };
 
-  const isSelected = (emoji: string) => currentIcon === emoji && !currentLogo;
-  const isLogoSelected = (url: string) => currentLogo === url;
+  const suggestedEmoji = name && name.length >= 2 ? suggestIcon(name) : undefined;
+
+  // 3. Selection States
+  const hasManualIcon = Boolean(currentIcon && currentIcon !== 'none' && currentIcon !== 'receipt' && currentIcon !== '🧾');
+  
+  const isCustomLogoSelected = Boolean(
+    customUserLogo && 
+    currentLogo === customUserLogo && 
+    !isAutomaticMerchantLogo(customUserLogo, name)
+  );
+
+  const isAutoLogoSelected = Boolean(
+    autoMerchantLogo &&
+    !isCustomLogoSelected &&
+    !hasManualIcon &&
+    (currentLogo === autoMerchantLogo ||
+     (currentLogo && isAutomaticMerchantLogo(currentLogo, name)) ||
+     !currentLogo)
+  );
+
+  const isIconSelected = (emoji: string) => {
+    if (isAutoLogoSelected || isCustomLogoSelected) return false;
+    const resolvedEmoji = resolveLucideIcon(emoji);
+    const resolvedCurrent = resolveLucideIcon(currentIcon);
+    return currentIcon === emoji || resolvedCurrent === resolvedEmoji;
+  };
 
   return (
     <div className="space-y-8 pb-4">
@@ -87,10 +133,11 @@ export function IconSelector({
           <label className="text-xs font-medium text-[var(--text-secondary)]">
             {t('suggested')}
           </label>
-          {onRestoreAuto && (currentLogo || (currentIcon !== 'receipt' && currentIcon !== '🧾')) && (
+          {onRestoreAuto && (currentLogo || hasManualIcon) && (
             <button 
+              type="button"
               onClick={onRestoreAuto}
-              className="text-xs font-medium text-accent flex items-center gap-1 hover:opacity-70 transition-opacity"
+              className="text-xs font-medium text-accent flex items-center gap-1 hover:opacity-70 transition-opacity cursor-pointer"
             >
               <Sparkles size={12} strokeWidth={1.5} />
               {t('restoreToAuto')}
@@ -99,42 +146,49 @@ export function IconSelector({
         </div>
 
         <div className="flex items-center gap-3">
-          {/* The "Auto" Logo if fetched */}
-          {(fetchedLogo || autoLogo) && (
+          {/* Automatic Merchant Logo under "Förslag" */}
+          {autoMerchantLogo && (
             <button
+              type="button"
               onClick={() => {
-                onLogoChange(fetchedLogo || autoLogo);
+                onLogoChange(autoMerchantLogo);
                 onIconChange('none');
               }}
-              className={`relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center overflow-hidden transition-all border ${
-                isLogoSelected(fetchedLogo || autoLogo || '')
-                  ? 'border-accent bg-accent/5 ring-2 ring-accent/20'
-                  : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-accent/50'
+              className={`relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center overflow-hidden transition-all border cursor-pointer ${
+                isAutoLogoSelected
+                  ? 'border-[#1C1917] dark:border-white ring-2 ring-[#1C1917]/20 dark:ring-white/20 bg-white shadow-xs'
+                  : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[#1C1917]/40 dark:hover:border-white/40'
               }`}
+              title={name}
             >
-              <img src={fetchedLogo || autoLogo} alt="Logo" className="w-full h-full object-contain p-2 rounded-full" referrerPolicy="no-referrer" />
-              {isLogoSelected(fetchedLogo || autoLogo || '') && (
-                <div className="absolute inset-0 bg-accent/10 flex items-center justify-center">
-                   <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center text-[var(--text-on-accent)] scale-110 shadow-xs">
-                      <Check size={12} strokeWidth={2} />
-                   </div>
+              <img 
+                src={autoMerchantLogo} 
+                alt={name} 
+                className="w-full h-full object-contain p-2 rounded-full" 
+                referrerPolicy="no-referrer" 
+              />
+              {isAutoLogoSelected && (
+                <div className="absolute inset-0 bg-black/10 dark:bg-white/10 flex items-center justify-center">
+                  <div className="w-5 h-5 bg-[#1C1917] dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center scale-110 shadow-xs">
+                    <Check size={12} strokeWidth={2.5} />
+                  </div>
                 </div>
               )}
             </button>
           )}
 
-          {/* Suggested Emoji (if matches a category/keyword) */}
-          
+          {/* Suggested Emoji (if matches keyword/category) */}
           {suggestedEmoji && suggestedEmoji !== 'receipt' && (
             <button
+              type="button"
               onClick={() => {
                 onIconChange(suggestedEmoji);
                 onLogoChange(undefined);
               }}
-              className={`relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all border ${
-                isSelected(suggestedEmoji)
-                  ? 'border-accent bg-accent/10 ring-2 ring-accent/20 text-accent'
-                  : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-accent/50 text-[var(--text-primary)]'
+              className={`relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all border cursor-pointer ${
+                isIconSelected(suggestedEmoji)
+                  ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-white/10 ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
+                  : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[#1C1917]/40 dark:hover:border-white/40 text-[var(--text-primary)]'
               }`}
             >
               {(() => {
@@ -142,35 +196,49 @@ export function IconSelector({
                 const Icon = ICON_MAP[key] || Sparkles;
                 return <Icon size={26} strokeWidth={1.75} />;
               })()}
-              {isSelected(suggestedEmoji) && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-accent rounded-full flex items-center justify-center text-[var(--text-on-accent)] scale-110 shadow-xs">
-                  <Check size={12} strokeWidth={2} />
+              {isIconSelected(suggestedEmoji) && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#1C1917] dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center scale-110 shadow-xs">
+                  <Check size={12} strokeWidth={2.5} />
                 </div>
               )}
             </button>
           )}
 
-
-          {/* Upload Button */}
+          {/* Egen Logotyp / Upload Action - NEVER shows automatic merchant logo */}
           <button
-            onClick={() => fileInputRef.current?.click()}
-            className={`flex-1 h-16 rounded-[14px] border border-solid flex flex-col items-center justify-center gap-1 transition-all ${
-              currentLogo && currentLogo !== fetchedLogo && currentLogo !== autoLogo
-                ? 'border-accent bg-accent/5 text-accent '
-                : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-tertiary)] hover:border-accent/50 hover:text-accent hover:bg-accent/5'
+            type="button"
+            onClick={() => {
+              if (customUserLogo && isCustomLogoSelected) {
+                fileInputRef.current?.click();
+              } else if (customUserLogo) {
+                onLogoChange(customUserLogo);
+                onIconChange('none');
+              } else {
+                fileInputRef.current?.click();
+              }
+            }}
+            className={`flex-1 h-16 rounded-[14px] border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
+              isCustomLogoSelected
+                ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/5 dark:bg-white/10 ring-1 ring-[#1C1917] dark:ring-white text-[#1C1917] dark:text-white'
+                : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[#1C1917]/30 dark:hover:border-white/30'
             }`}
           >
             {isUploading ? (
               <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-            ) : currentLogo && currentLogo !== fetchedLogo && currentLogo !== autoLogo ? (
+            ) : customUserLogo && !isAutomaticMerchantLogo(customUserLogo, name) ? (
               <div className="relative w-full h-full flex flex-col items-center justify-center">
-                 <img src={currentLogo} alt="Custom" className="w-8 h-8 object-contain rounded-full" />
-                 <span className="text-[10px] font-medium mt-0.5">{t('customLogo')}</span>
+                <img src={customUserLogo} alt="Custom" className="w-8 h-8 object-contain rounded-full" />
+                <span className="text-[10px] font-semibold mt-0.5">{t('customLogo')}</span>
+                {isCustomLogoSelected && (
+                  <div className="absolute top-1.5 right-2 w-4 h-4 bg-[#1C1917] dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center scale-90 shadow-xs">
+                    <Check size={10} strokeWidth={2.5} />
+                  </div>
+                )}
               </div>
             ) : (
               <>
-                <Upload size={18} strokeWidth={1.5} className="opacity-40" />
-                <span className="text-xs font-medium">{t('uploadLogo')}</span>
+                <Upload size={18} strokeWidth={1.5} className="opacity-60" />
+                <span className="text-xs font-semibold">{t('uploadLogo')}</span>
               </>
             )}
           </button>
@@ -183,44 +251,44 @@ export function IconSelector({
           Ikoner
         </label>
         <div className="grid grid-cols-4 gap-2.5">
-          
           {QUICK_ICONS.map(iconKey => {
             const resolvedKey = resolveLucideIcon(iconKey);
             const Icon = ICON_MAP[resolvedKey] || Sparkles;
-            const selected = isSelected(iconKey) || isSelected(resolvedKey);
+            const selected = isIconSelected(iconKey);
             return (
-            <button
-              key={iconKey}
-              onClick={() => {
-                onIconChange(resolvedKey);
-                onLogoChange(undefined);
-              }}
-              className={`relative aspect-square rounded-[14px] flex items-center justify-center text-[var(--text-primary)] transition-all border ${
-                selected
-                  ? 'border-accent bg-accent/10 ring-2 ring-accent/20 text-accent '
-                  : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-accent/30'
-              }`}
-            >
-              <Icon size={22} strokeWidth={1.75} />
-              {selected && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-accent rounded-[4px] flex items-center justify-center text-[var(--text-on-accent)] scale-110 shadow-xs">
-                  <Check size={10} strokeWidth={2} />
-                </div>
-              )}
-            </button>
-          )})}
+              <button
+                key={iconKey}
+                type="button"
+                onClick={() => {
+                  onIconChange(resolvedKey);
+                  onLogoChange(undefined);
+                }}
+                className={`relative aspect-square rounded-[14px] flex items-center justify-center text-[var(--text-primary)] transition-all border cursor-pointer ${
+                  selected
+                    ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-white/10 ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
+                    : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[#1C1917]/30 dark:hover:border-white/30'
+                }`}
+              >
+                <Icon size={22} strokeWidth={1.75} />
+                {selected && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#1C1917] dark:bg-white text-white dark:text-black rounded-[4px] flex items-center justify-center scale-110 shadow-xs">
+                    <Check size={10} strokeWidth={2.5} />
+                  </div>
+                )}
+              </button>
+            );
+          })}
 
-          
           <button
+            type="button"
             onClick={() => setShowEmojiPicker(true)}
-            className={`relative aspect-square rounded-[14px] flex items-center justify-center transition-all border border-solid ${
-              !QUICK_ICONS.includes(currentIcon) && currentIcon !== 'none' && currentIcon !== 'receipt' && !currentLogo
-                ? 'border-accent bg-accent/10 ring-2 ring-accent/20 text-accent'
-                : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-tertiary)] hover:border-accent/50'
+            className={`relative aspect-square rounded-[14px] flex items-center justify-center transition-all border border-solid cursor-pointer ${
+              hasManualIcon && !QUICK_ICONS.includes(currentIcon) && !isAutoLogoSelected && !isCustomLogoSelected
+                ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-white/10 ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
+                : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-tertiary)] hover:border-[#1C1917]/40 dark:hover:border-white/40'
             }`}
           >
-            
-            {!QUICK_ICONS.includes(currentIcon) && currentIcon !== 'none' && currentIcon !== 'receipt' && !currentLogo ? (
+            {hasManualIcon && !QUICK_ICONS.includes(currentIcon) && !isAutoLogoSelected && !isCustomLogoSelected ? (
               (() => {
                 const key = resolveLucideIcon(currentIcon);
                 const Icon = ICON_MAP[key] || Sparkles;
@@ -229,7 +297,6 @@ export function IconSelector({
             ) : (
               <Plus size={20} strokeWidth={1.5} />
             )}
-
           </button>
         </div>
       </div>

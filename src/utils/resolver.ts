@@ -225,3 +225,64 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     source: 'fallback'
   };
 }
+
+/**
+ * Resolves the automatic merchant logo URL for a merchant name if one exists with high confidence.
+ * Returns undefined if no safe automatic merchant logo is recognized.
+ */
+export function getAutomaticMerchantLogo(merchantName?: string, categoryName?: string): string | undefined {
+  if (!merchantName || merchantName.trim().length < 2) return undefined;
+  const visual = resolveEntityVisual({
+    id: 'temp',
+    merchant: merchantName.trim(),
+    note: '',
+    category: categoryName || '',
+    amount: 0,
+    timestamp: Date.now(),
+    type: 'expense',
+    tags: []
+  });
+  if (visual.type === 'merchant' && visual.logoUrl) {
+    return visual.logoUrl;
+  }
+  return undefined;
+}
+
+/**
+ * Checks whether a given logo URL is an automatic corporate/merchant logo
+ * (e.g. Google favicon, instant brand SVG, Clearbit, DuckDuckGo, logo.dev)
+ * rather than a user's uploaded custom image.
+ */
+export function isAutomaticMerchantLogo(url?: string, merchantName?: string): boolean {
+  if (!url || url === 'none') return false;
+
+  // Instant brand vector SVG data URI
+  if (url.startsWith('data:image/svg+xml')) return true;
+
+  // Favicon providers and corporate logo APIs
+  if (
+    url.includes('google.com/s2/favicons') ||
+    url.includes('logo.clearbit.com') ||
+    url.includes('img.logo.dev') ||
+    url.includes('icons.duckduckgo.com')
+  ) {
+    return true;
+  }
+
+  // Matches auto-resolved logo
+  if (merchantName) {
+    const autoLogo = getAutomaticMerchantLogo(merchantName);
+    if (autoLogo && (url === autoLogo || url.includes(autoLogo) || autoLogo.includes(url))) {
+      return true;
+    }
+    const instant = getInstantBrandLogo(merchantName);
+    if (instant && url === instant) return true;
+    const knownDomain = findKnownBrandDomain(merchantName);
+    if (knownDomain && url.includes(knownDomain)) return true;
+    const autoUrl = getLogoUrl(merchantName);
+    if (autoUrl && url === autoUrl) return true;
+  }
+
+  return false;
+}
+

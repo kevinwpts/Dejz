@@ -288,6 +288,12 @@ export function SavingsGoalModal({
                         }}
                         isPro={isPro}
                         userId={userId}
+                        onRestoreAuto={() => {
+                          setIsManualSelection(false);
+                          setLogo(undefined);
+                          setIcon('target');
+                          setShowIconSelector(false);
+                        }}
                         t={t}
                       />
                     </div>

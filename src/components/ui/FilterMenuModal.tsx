@@ -58,13 +58,13 @@ export function FilterMenuModal<T = string>({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#242424] rounded-t-[28px] sm:rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
+          className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#242424] rounded-t-[28px] sm:rounded-[26px] border border-[var(--border-color)] dark:border-[#383838] shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
         >
           {/* Mobile Drag Handle */}
           <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-[#E6E2D8] dark:border-[#383838] shrink-0">
+          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-[var(--border-color)] dark:border-[#383838] shrink-0">
             <div className="min-w-0 pr-2">
               <h3 className="text-base font-bold text-[#1C1917] dark:text-white tracking-tight truncate">
                 {title}
@@ -81,7 +81,7 @@ export function FilterMenuModal<T = string>({
                 if (typeof feedback?.light === 'function') feedback.light();
                 onClose();
               }}
-              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
+              className="w-8 h-8 rounded-full bg-[var(--surface-muted)] dark:bg-[#2D2D2D] hover:bg-[var(--bg-hover)] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
               aria-label="Stäng"
             >
               <X size={16} strokeWidth={2.2} />
@@ -104,7 +104,7 @@ export function FilterMenuModal<T = string>({
                   }}
                   className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] ${
                     isSelected
-                      ? 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white font-semibold'
+                      ? 'bg-[var(--surface-muted)] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white font-semibold'
                       : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white font-medium'
                   }`}
                 >
@@ -150,7 +150,7 @@ export function FilterMenuModal<T = string>({
           </div>
 
           {footerNode && (
-            <div className="px-4 pt-2 pb-1 border-t border-[#E6E2D8] dark:border-[#383838]">
+            <div className="px-4 pt-2 pb-1 border-t border-[var(--border-color)] dark:border-[#383838]">
               {footerNode}
             </div>
           )}

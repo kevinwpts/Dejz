@@ -41,7 +41,7 @@ export function CustomBottomNavigation({
   return (
     <div className="fixed bottom-[14px] sm:bottom-[22px] left-0 right-0 z-30 px-2.5 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
-        className="w-[94%] sm:w-[86%] max-w-[430px] sm:max-w-[450px] h-[64px] sm:h-[68px] rounded-[18px] px-2 sm:px-3 bg-white dark:bg-[#242424] text-[#6E6961] dark:text-[#A8A8A8] backdrop-blur-[24px] flex items-center justify-between pointer-events-auto border border-[#E6E2D8] dark:border-white/[0.04] shadow-lg shadow-black/[0.03] dark:shadow-none"
+        className="w-[94%] sm:w-[86%] max-w-[430px] sm:max-w-[450px] h-[64px] sm:h-[68px] rounded-[18px] px-2 sm:px-3 bg-white dark:bg-[#242424] text-[#6E6961] dark:text-[#A8A8A8] backdrop-blur-[24px] flex items-center justify-between pointer-events-auto border border-[#E2DDD4] dark:border-white/[0.04] shadow-lg shadow-black/[0.03] dark:shadow-none"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 28 }}

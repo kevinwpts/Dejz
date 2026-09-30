@@ -533,13 +533,13 @@ export function TodayView({
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                           onClick={() => handleCategoryClick(cat.name)}
-                          className="flex-shrink-0 flex flex-col justify-between py-2.5 px-3 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] text-[#1C1917] dark:text-white transition-all group cursor-pointer snap-start border-none shadow-none relative min-w-[118px]"
+                          className="flex-shrink-0 flex flex-col justify-between py-2.5 px-3 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] text-[#1C1917] dark:text-white transition-all group cursor-pointer snap-start border-none shadow-none relative min-w-[118px]"
                         >
                           {/* Top Row: Icon and Name */}
                           <div className="flex items-center gap-2 w-full mb-1">
                             <div className="flex items-center gap-2 min-w-0">
                               {/* Mini Icon */}
-                              <div className="w-6 h-6 rounded-lg bg-[#F7F5F0] dark:bg-white/[0.06] border-none text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
+                              <div className="w-6 h-6 rounded-lg bg-[var(--surface-muted)] dark:bg-white/[0.06] border-none text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
                                 {isEmojiString(cat.iconName) ? (
                                   <span className="text-[11px] leading-none">{cat.iconName}</span>
                                 ) : Icon ? (
@@ -584,10 +584,10 @@ export function TodayView({
                   <button
                     type="button"
                     onClick={() => onNavigate("budget", "category-budgets")}
-                    className="w-full p-4 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] border-none text-[#1C1917] dark:text-white shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
+                    className="w-full p-4 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] border-none text-[#1C1917] dark:text-white shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-[#EFECE6] dark:bg-[#2D2D2D] border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] transition-colors">
+                      <div className="w-9 h-9 rounded-xl bg-[var(--surface-muted)] dark:bg-[#2D2D2D] border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] transition-colors">
                         <SlidersHorizontal size={15} strokeWidth={1.75} />
                       </div>
                       <div>
@@ -617,7 +617,7 @@ export function TodayView({
       {/* 2. EXPANDING BOTTOM SHEET (Scroll-driven surface covering hero as user scrolls down) */}
       <div
         ref={sheetRef}
-        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[#F7F5F0] dark:bg-[#232323] rounded-t-[22px] sm:rounded-t-[24px] border-t border-[#E6E2D8] dark:border-white/[0.1] shadow-none min-h-[calc(100vh-8rem)] pt-1 pb-40 space-y-3 mt-1"
+        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[var(--bg-color)] dark:bg-[#232323] rounded-t-[22px] sm:rounded-t-[24px] border-t border-[var(--border-color)] dark:border-white/[0.1] shadow-none min-h-[calc(100vh-8rem)] pt-1 pb-40 space-y-3 mt-1"
       >
         {/* Visual Grab Handle / Sheet Indicator */}
         <div
@@ -631,7 +631,7 @@ export function TodayView({
 
         {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
         {calendarDays && calendarDays.length > 0 && (
-          <div className={`sticky ${timelineStickyTop} z-20 bg-[#F7F5F0]/95 dark:bg-[#232323]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-0 pb-2.5 transition-all`}>
+          <div className={`sticky ${timelineStickyTop} z-20 bg-[var(--bg-color)]/95 dark:bg-[#232323]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-0 pb-2.5 transition-all`}>
             <PeriodTimeline
               calendarDays={calendarDays}
               selectedDate={normalizedSelectedDate}
@@ -660,7 +660,7 @@ export function TodayView({
           {!isTodaySelected && (
             <button
               onClick={handleGoToToday}
-              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white dark:bg-white/[0.04] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.07] border border-[#E6E2D8] dark:border-white/[0.045] backdrop-blur-[18px] text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC] hover:text-black dark:hover:text-white transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
+              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white dark:bg-white/[0.04] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.07] border border-[var(--border-color)] dark:border-white/[0.045] backdrop-blur-[18px] text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC] hover:text-black dark:hover:text-white transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
             >
               <RotateCcw size={11} strokeWidth={1.75} />
               <span>{lang === "en" ? "Today" : "Idag"}</span>
@@ -720,10 +720,10 @@ export function TodayView({
                         onViewFixedExpense(item.originalItem);
                       }
                     }}
-                    className="flex items-center justify-between px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px] rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[#EDE9DF] dark:hover:bg-[#333333] transition-all cursor-pointer shadow-none border-none group"
+                    className="flex items-center justify-between px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px] rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] transition-all cursor-pointer shadow-none border-none group"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-[#EFECE6] dark:bg-[#2D2D2D] border-none flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-[var(--surface-muted)] dark:bg-[#2D2D2D] border-none flex items-center justify-center shrink-0">
                         <BudgetItemLogo item={item.originalItem} type={item.type as any} config={config} />
                       </div>
                       <div className="min-w-0">

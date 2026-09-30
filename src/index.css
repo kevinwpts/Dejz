@@ -84,6 +84,12 @@
   --color-success: var(--success-color);
   --color-danger: var(--danger-color);
   --color-warning: var(--warning-color);
+  --color-canvas: var(--bg-color);
+  --color-surface: var(--surface-color);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-hover: var(--bg-hover);
+  --color-border-subtle: var(--border-color);
+  --color-border-strong: var(--border-strong);
 
   --radius-4xl: 24px;
   --radius-3xl: 22px;
@@ -207,32 +213,32 @@ textarea {
   /* Dejz Official Brand Logo Color (Matches Accent / Ink) */
   --logo-color: #0B0A12;
 
-  /* Premium Warm Beige Light Theme (Dejz Minimalist Warm Edition) */
-  --bg-top-color: #F7F5F0;
-  --bg-color: #F7F5F0;
-  --bg-secondary: #F7F5F0;
-  --bg-gradient: linear-gradient(180deg, #F7F5F0 0%, #F7F5F0 100%);
+  /* Premium Warm Sand Light Theme (Dejz Minimalist Warm Edition) */
+  --bg-top-color: #F2EFE8;
+  --bg-color: #F2EFE8;
+  --bg-secondary: #F2EFE8;
+  --bg-gradient: linear-gradient(180deg, #F2EFE8 0%, #F2EFE8 100%);
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: #EFECE6;
+  --surface-muted: #EAE6DE;
   --surface-tint: rgba(28, 25, 23, 0.02);
 
   --text-primary: #1C1917;
   --text-secondary: #6E6961;
   --text-tertiary: #8C867C;
-  --text-inactive: #C4BFB5;
+  --text-inactive: #BFB9AD;
 
-  --border-color: #E6E2D8;
-  --border-strong: #D8D3C8;
+  --border-color: #E2DDD4;
+  --border-strong: #D5CFC4;
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: #EFECE6;
+  --chip-bg: #EAE6DE;
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #EFECE6;
+  --card-nested-bg: #EAE6DE;
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
@@ -245,10 +251,10 @@ textarea {
   --accent-hover: #2E2A27;
   --accent-gradient: linear-gradient(145deg, #1C1917 0%, #2E2A27 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: #E8F8F0;
+  --accent-soft: #E5F6ED;
   --dejz-accent: #05B862;
   --accent-glow: none;
-  --accent-secondary-color: #E6E2D8;
+  --accent-secondary-color: #E2DDD4;
 
   /* Primary button states (Light mode) */
   --btn-primary-bg: #1C1917;
@@ -256,10 +262,10 @@ textarea {
   --btn-primary-hover: #2E2A27;
   --btn-primary-pressed: #44403C;
 
-  --modal-bg: #F7F5F0;
+  --modal-bg: #FFFFFF;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #EDE9DF;
+  --bg-hover: #DFD9CF;
 
   --card-shadow: none;
   --card-inner-stroke: none;
@@ -281,11 +287,11 @@ textarea {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #EFECE6;
+  --date-active-bg: #EAE6DE;
   --date-active-color: #1C1917;
   --date-active-shadow: none;
   --date-inactive-bg: #FFFFFF;
-  --date-inactive-border: #E6E2D8;
+  --date-inactive-border: #E2DDD4;
   --date-inactive-color: #6E6961;
 
   --ambient-glow: none;
