@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Check, Sun, Moon, Monitor, CheckCheck } from 'lucide-react';
+import { Plus, Check, Sun, Moon, Monitor } from 'lucide-react';
 import { Config } from '../types';
 import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
@@ -355,21 +355,8 @@ export function SettingsView({
     { code: 'ISK', symbol: 'kr', name: { sv: 'Isländska krónur (kr)', en: 'Icelandic Króna (kr)' }, flag: '🇮🇸', example: '1 250 kr' },
   ];
 
-  const [customCurrencyInput, setCustomCurrencyInput] = useState(config.currency || 'kr');
-  const [customCurrencySaved, setCustomCurrencySaved] = useState(false);
-
   const handleSelectCurrency = (newSymbol: string) => {
     setConfig({ ...config, currency: newSymbol });
-    setCustomCurrencyInput(newSymbol);
-    setCustomCurrencySaved(true);
-    setTimeout(() => setCustomCurrencySaved(false), 2000);
-  };
-
-  const handleSaveCustomCurrency = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const trimmed = customCurrencyInput.trim();
-    if (!trimmed) return;
-    handleSelectCurrency(trimmed);
   };
 
   const renderCurrencySettings = () => {
@@ -377,155 +364,54 @@ export function SettingsView({
     const activeCurrency = config.currency || 'kr';
 
     return (
-      <div className="space-y-6 w-full py-2">
-        {/* Live Preview Card */}
-        <div className="bg-white dark:bg-[#242424] rounded-[20px] p-4 sm:p-5 border border-[#E2DDD4] dark:border-[#383838] shadow-none space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[12px] font-bold uppercase tracking-wider text-[#6D6962] dark:text-[#A8A8A8] font-display">
-              {isEn ? 'Live Preview' : 'Förhandsvisning i appen'}
-            </span>
-            <span className="text-[12px] font-medium text-[#635BFF] dark:text-[#7C75FF] bg-[#635BFF]/10 dark:bg-[#7C75FF]/15 px-2.5 py-0.5 rounded-full">
-              {activeCurrency}
-            </span>
-          </div>
+      <div className="space-y-3 w-full py-2">
+        <h3 className="text-[14px] font-semibold text-[#211F1C] dark:text-white px-1 tracking-tight">
+          {isEn ? 'Select Currency' : 'Välj valuta'}
+        </h3>
 
-          <div className="grid grid-cols-2 gap-2 pt-1">
-            <div className="p-3 rounded-[14px] bg-[var(--surface-muted)]/60 dark:bg-white/[0.03] border border-[#E2DDD4]/50 dark:border-white/[0.04]">
-              <p className="text-[11px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate">
-                {isEn ? 'Remaining budget' : 'Kvar att spendera'}
-              </p>
-              <p className="text-[16px] font-semibold text-[#211F1C] dark:text-white font-amount tabular-nums mt-0.5">
-                7 370 <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-0.5">{activeCurrency}</span>
-              </p>
-            </div>
-            <div className="p-3 rounded-[14px] bg-[var(--surface-muted)]/60 dark:bg-white/[0.03] border border-[#E2DDD4]/50 dark:border-white/[0.04]">
-              <p className="text-[11px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate">
-                {isEn ? 'Sample transaction' : 'Exempelutgift'}
-              </p>
-              <p className="text-[16px] font-semibold text-[#211F1C] dark:text-white font-amount tabular-nums mt-0.5">
-                −450 <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-0.5">{activeCurrency}</span>
-              </p>
-            </div>
-          </div>
-        </div>
+        <div className="bg-white dark:bg-[#242424] rounded-[20px] border border-[#E2DDD4] dark:border-[#383838] shadow-none divide-y divide-[#E2DDD4] dark:divide-[#383838] overflow-hidden">
+          {PRESET_CURRENCIES.map((c) => {
+            const isSelected = activeCurrency === c.symbol || activeCurrency === c.code;
+            const nameText = isEn ? c.name.en : c.name.sv;
 
-        {/* Custom Currency Card */}
-        <div className="bg-white dark:bg-[#242424] rounded-[20px] p-4 sm:p-5 border border-[#E2DDD4] dark:border-[#383838] shadow-none space-y-3.5">
-          <div>
-            <h3 className="text-[15px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
-              {isEn ? 'Custom Currency Symbol' : 'Valfri egen valuta eller symbol'}
-            </h3>
-            <p className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] mt-0.5 leading-relaxed">
-              {isEn 
-                ? 'Type any symbol, currency code or custom text you want to appear after all amounts.' 
-                : 'Skriv in vilken valutasymbol, kod eller text som helst som du vill ska visas efter belopp.'}
-            </p>
-          </div>
-
-          <form onSubmit={handleSaveCustomCurrency} className="flex gap-2 items-center">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={customCurrencyInput}
-                onChange={(e) => setCustomCurrencyInput(e.target.value)}
-                placeholder="t.ex. kr, SEK, €, $, DKK, BTC"
-                maxLength={12}
-                className="w-full h-11 px-3.5 rounded-[12px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] text-[15px] font-medium text-[#211F1C] dark:text-white placeholder:text-[#6D6962]/60 focus:outline-none focus:ring-2 focus:ring-[#635BFF] dark:focus:ring-[#7C75FF] transition-all"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={!customCurrencyInput.trim() || customCurrencyInput.trim() === activeCurrency}
-              className="h-11 px-4 rounded-[12px] bg-[#211F1C] dark:bg-white text-white dark:text-[#211F1C] text-[13px] font-semibold hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer shrink-0 inline-flex items-center gap-1.5"
-            >
-              {customCurrencySaved ? (
-                <>
-                  <CheckCheck size={16} />
-                  <span>{isEn ? 'Saved' : 'Sparat'}</span>
-                </>
-              ) : (
-                <span>{isEn ? 'Apply' : 'Använd'}</span>
-              )}
-            </button>
-          </form>
-
-          {/* Quick symbol chips */}
-          <div className="space-y-1.5 pt-1">
-            <span className="text-[11px] font-medium text-[#6D6962] dark:text-[#A8A8A8]">
-              {isEn ? 'Quick pick symbols:' : 'Snabbval symboler:'}
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {['kr', 'SEK', '€', '$', 'NOK', 'DKK', '£', 'CHF', 'zł', '¥', 'BTC'].map((sym) => (
-                <button
-                  key={sym}
-                  type="button"
-                  onClick={() => handleSelectCurrency(sym)}
-                  className={`px-2.5 py-1 rounded-[8px] text-[12px] font-medium transition-all cursor-pointer ${
-                    activeCurrency === sym
-                      ? 'bg-[#211F1C] dark:bg-white text-white dark:text-[#211F1C]'
-                      : 'bg-[#F7F5F0] dark:bg-[#2D2D2D] text-[#211F1C] dark:text-white hover:bg-black/10 dark:hover:bg-white/10'
-                  }`}
-                >
-                  {sym}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Predefined Currencies List */}
-        <div className="space-y-2">
-          <h3 className="text-[14px] font-semibold text-[#211F1C] dark:text-white px-1 tracking-tight">
-            {isEn ? 'Popular Currencies' : 'Populära valutor'}
-          </h3>
-
-          <div className="bg-white dark:bg-[#242424] rounded-[20px] border border-[#E2DDD4] dark:border-[#383838] shadow-none divide-y divide-[#E2DDD4] dark:divide-[#383838] overflow-hidden">
-            {PRESET_CURRENCIES.map((c) => {
-              const isSelected = activeCurrency === c.symbol;
-              const nameText = isEn ? c.name.en : c.name.sv;
-
-              return (
-                <button
-                  key={`${c.code}-${c.symbol}`}
-                  type="button"
-                  onClick={() => handleSelectCurrency(c.symbol)}
-                  className={`w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-[var(--surface-muted)]/50 dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left ${
-                    isSelected ? 'bg-[#635BFF]/5 dark:bg-[#7C75FF]/10' : ''
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-xl shrink-0 select-none">{c.flag}</span>
-                    <div className="min-w-0 flex flex-col justify-center">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[14px] font-medium text-[#211F1C] dark:text-white tracking-tight">
-                          {c.code}
-                        </span>
-                        <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
-                          ({c.symbol})
-                        </span>
-                      </div>
-                      <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5">
-                        {nameText}
+            return (
+              <button
+                key={`${c.code}-${c.symbol}`}
+                type="button"
+                onClick={() => handleSelectCurrency(c.symbol)}
+                className={`w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-[var(--surface-muted)]/50 dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left ${
+                  isSelected ? 'bg-[#635BFF]/5 dark:bg-[#7C75FF]/10' : ''
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-xl shrink-0 select-none">{c.flag}</span>
+                  <div className="min-w-0 flex flex-col justify-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[14px] font-medium text-[#211F1C] dark:text-white tracking-tight">
+                        {c.code}
+                      </span>
+                      <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
+                        ({c.symbol})
                       </span>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0 pl-2">
-                    <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] tabular-nums hidden sm:inline">
-                      {c.example}
+                    <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5">
+                      {nameText}
                     </span>
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-                      isSelected
-                        ? 'bg-[#635BFF] dark:bg-[#7C75FF] text-white'
-                        : 'border border-[#E2DDD4] dark:border-[#383838]'
-                    }`}>
-                      {isSelected && <Check size={12} strokeWidth={2.5} />}
-                    </div>
                   </div>
-                </button>
-              );
-            })}
-          </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 pl-2">
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
+                    isSelected
+                      ? 'bg-[#635BFF] dark:bg-[#7C75FF] text-white'
+                      : 'border border-[#E2DDD4] dark:border-[#383838]'
+                  }`}>
+                    {isSelected && <Check size={12} strokeWidth={3} />}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     );

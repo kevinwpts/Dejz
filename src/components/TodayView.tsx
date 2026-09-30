@@ -473,7 +473,7 @@ export function TodayView({
             : 'calc(4.75rem + env(safe-area-inset-top, 0px))',
         }}
       >
-        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        <div className="max-w-2xl mx-auto px-3">
           <GreetingModule
             userName={userName}
             availableForD={todayData?.availableForD || stats?.availableForD || 0}
