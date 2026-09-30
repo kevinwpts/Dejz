@@ -468,14 +468,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
 
       setIncomes((prev) => [...prev, newIncome]);
       setAiIncomePrompt('');
-      setAiFeedback({
-        message: isEn ? 'Income added' : 'Inkomst tillagd',
-        type: 'success',
-      });
-
-      setTimeout(() => {
-        setAiFeedback(null);
-      }, 2000);
+      setAiFeedback(null);
     } catch (err: any) {
       console.error('AI parsing error:', err);
       setAiFeedback({
@@ -714,9 +707,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       </div>
 
                       <div className="space-y-3 max-h-[36vh] overflow-y-auto pr-0.5 no-scrollbar">
-                        {/* Reusable Natural Language Smart Input with Sparkle Visual Signature */}
+                        {/* Direct Natural Language Input */}
                         <SmartInput
-                          label={s.aiHelper}
+                          hideLabel
                           value={aiIncomePrompt}
                           onChange={setAiIncomePrompt}
                           onSubmit={handleAiAddIncome}
@@ -724,7 +717,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           isProcessing={isAiParsing}
                           submitText={isEn ? 'Add' : 'Lägg till'}
                           submitVariant="inline"
-                          feedback={aiFeedback}
+                          feedback={aiFeedback?.type === 'error' ? aiFeedback : null}
                           inputClassName="h-[46px]"
                         />
 
@@ -914,18 +907,23 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                         </button>
                       </div>
 
-                      {/* Bottom spacing clearance so the last expense and custom button can be scrolled completely above the sticky Next button */}
-                      <div className="h-6 sm:h-2 shrink-0" aria-hidden="true" />
+                      {/* Generous bottom spacing clearance so the last expense and custom button can be scrolled completely above the fixed Next button */}
+                      <div className="h-28 sm:h-24 shrink-0" aria-hidden="true" />
 
-                      {/* Sticky Next Button at bottom on mobile */}
-                      <div className="sticky bottom-0 -mx-4 px-4 sm:-mx-0 sm:px-0 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-gradient-to-t from-[var(--bg-color)] via-[var(--bg-color)]/95 to-transparent z-20 shrink-0 mt-auto">
-                        <button 
-                          onClick={handleNext}
-                          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:opacity-95"
-                        >
-                          <span>{s.next}</span>
-                          <ArrowRight size={16} strokeWidth={2.5} />
-                        </button>
+                      {/* Fixed Next Button docked to the very bottom */}
+                      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[var(--bg-color)] border-t border-[var(--border-color)]/50 px-4 sm:px-6 pt-3 pb-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] shadow-[0_-4px_20px_rgba(0,0,0,0.15)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+                        {/* Subtle upward gradient fade */}
+                        <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-t from-[var(--bg-color)] to-transparent pointer-events-none" />
+
+                        <div className="max-w-sm sm:max-w-md mx-auto w-full">
+                          <button 
+                            onClick={handleNext}
+                            className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-[16px] font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:opacity-95"
+                          >
+                            <span>{s.next}</span>
+                            <ArrowRight size={16} strokeWidth={2.5} />
+                          </button>
+                        </div>
                       </div>
                     </motion.div>
                   )}
