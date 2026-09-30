@@ -28,10 +28,10 @@ import {
   Square,
   Plus,
   X,
-  Check,
 } from "lucide-react";
 import { useVoiceExpense } from "./hooks/useVoiceExpense";
 import { parseQuickExpense } from "./utils/expenseAiParser";
+import { SmartInput } from "./components/ui";
 
 
 import { CalendarModal } from './components/CalendarModal';
@@ -325,13 +325,13 @@ export default function App() {
         }
         feedback.success();
         setPlusSuccessMsg({
-          text: config?.language === "en" ? "Add complete ✨" : "Lagt till ✨"
+          text: config?.language === "en" ? "Expense added" : "Utgift tillagd"
         });
         setPlusQuickText("");
         setTimeout(() => {
           setPlusSuccessMsg(null);
           setIsPlusMenuOpen(false);
-        }, 2500);
+        }, 1500);
       }
     }
   });
@@ -380,14 +380,12 @@ export default function App() {
       feedback.success();
       setIsReceiptCameraOpen(false);
       setPlusSuccessMsg({
-        text: config?.language === "en" 
-          ? `Saved ${amount} ${config?.currency || "kr"} from ${merchant} ✨` 
-          : `Sparade ${amount} ${config?.currency || "kr"} från ${merchant} ✨`
+        text: config?.language === "en" ? "Expense added" : "Utgift tillagd"
       });
       setTimeout(() => {
         setPlusSuccessMsg(null);
         setIsPlusMenuOpen(false);
-      }, 3500);
+      }, 1500);
     } catch (err) {
       console.error("Auto receipt scan error:", err);
       setIsReceiptCameraOpen(false);
@@ -434,13 +432,13 @@ export default function App() {
 
         feedback.success();
         setPlusSuccessMsg({
-          text: `${config?.language === "en" ? "Added" : "Lade till"} ${parsed.amount} ${config?.currency || "kr"} (${parsed.merchant}) ✨`
+          text: config?.language === "en" ? "Expense added" : "Utgift tillagd"
         });
         setPlusQuickText("");
         setTimeout(() => {
           setPlusSuccessMsg(null);
           setIsPlusMenuOpen(false);
-        }, 2500);
+        }, 1500);
       }
     } catch (_err) {
       console.error("Quick expense failed", _err);
@@ -5392,90 +5390,58 @@ export default function App() {
                 />
               </div>
 
-              {/* Snabbutgift Form with Mic */}
-              <div className="space-y-2 pt-1 border-t border-[#E6E2D8] dark:border-[#383838]">
-                <form onSubmit={handlePlusQuickExpenseSubmit} className="relative flex items-center">
-                  {/* Mic Button */}
-                  <button
-                    type="button"
-                    onClick={handlePlusMicClick}
-                    disabled={isSubmittingQuick || isAudioTranscribing}
-                    className={`absolute left-1.5 z-10 w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all cursor-pointer border select-none ${
-                      isRecording
-                        ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
-                        : isAudioTranscribing
-                          ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/30"
-                          : "bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/20 active:scale-95"
-                    }`}
-                  >
-                    {isAudioTranscribing ? (
-                      <Loader2 size={14} className="animate-spin text-rose-500 dark:text-rose-400" />
-                    ) : isRecording ? (
-                      <Square size={12} className="fill-current" />
-                    ) : (
-                      <Mic size={15} strokeWidth={2} />
-                    )}
-                  </button>
-
-                  {/* Input Field */}
-                  <input
-                    ref={plusQuickInputRef}
-                    type="text"
-                    value={plusQuickText}
-                    onChange={(e) => setPlusQuickText(e.target.value)}
-                    placeholder={
-                      isRecording
-                        ? (config?.language === "en" ? "Listening... Speak purchase" : "Lyssnar... Prata in köpet")
-                        : isAudioTranscribing
-                          ? (config?.language === "en" ? "Processing speech..." : "Tolkar röstinlägg...")
-                          : (config?.language === "en" ? "Quick expense: e.g. 45 Coop..." : "Snabbutgift: t.ex. 45 ICA...")
-                    }
-                    className={`w-full h-11 sm:h-12 pl-12 pr-12 rounded-2xl bg-[#F6F4EE] dark:bg-white/[0.04] hover:bg-[#EFECE6] dark:hover:bg-white/[0.06] focus:bg-white dark:focus:bg-[#2D2D2D] border text-xs sm:text-sm font-normal text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#A8A8A8]/70 outline-none transition-all shadow-none ${
-                      isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white"
-                    }`}
-                  />
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={!plusQuickText.trim() || isSubmittingQuick || isAudioTranscribing || isRecording}
-                    className="absolute right-1.5 z-10 w-8.5 h-8.5 rounded-xl bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[#1C1917] dark:border-white"
-                  >
-                    <Plus size={16} strokeWidth={2.2} />
-                  </button>
-                </form>
-
-                {/* Feedback notifications */}
-                <AnimatePresence>
-                  {plusSuccessMsg && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/10 border border-[#E6E2D8] dark:border-[#383838] text-[#1C1917] dark:text-white text-xs font-semibold"
+              {/* Snabbutgift Form with Mic using Reusable SmartInput */}
+              <div className="pt-2 border-t border-[#E6E2D8] dark:border-[#383838]">
+                <SmartInput
+                  label={config?.language === "en" ? "Write as you want – Dejz handles the rest." : "Skriv som du vill – Dejz ordnar resten."}
+                  value={plusQuickText}
+                  onChange={setPlusQuickText}
+                  onSubmit={handlePlusQuickExpenseSubmit}
+                  placeholder={
+                    isRecording
+                      ? (config?.language === "en" ? "Listening... Speak purchase" : "Lyssnar... Prata in köpet")
+                      : isAudioTranscribing
+                        ? (config?.language === "en" ? "Processing speech..." : "Tolkar röstinlägg...")
+                        : (config?.language === "en" ? "Quick expense: e.g. 45 Coop..." : "Snabbutgift: t.ex. 45 ICA...")
+                  }
+                  isProcessing={isSubmittingQuick || isAudioTranscribing}
+                  disabled={isRecording}
+                  inputRef={plusQuickInputRef}
+                  leftElement={
+                    <button
+                      type="button"
+                      onClick={handlePlusMicClick}
+                      disabled={isSubmittingQuick || isAudioTranscribing}
+                      className={`w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all cursor-pointer border select-none ${
+                        isRecording
+                          ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
+                          : isAudioTranscribing
+                            ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/30"
+                            : "bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/20 active:scale-95"
+                      }`}
                     >
-                      <Check size={14} strokeWidth={2.5} className="shrink-0 text-[#1C1917] dark:text-white" />
-                      <div className="truncate flex-1">
-                        <span>{plusSuccessMsg.text}</span>
-                        {plusSuccessMsg.transcript && (
-                          <p className="text-[11px] opacity-75 italic mt-0.5 truncate">
-                            ”{plusSuccessMsg.transcript}”
-                          </p>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {plusVoiceError && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-xs text-rose-400 px-1 pt-0.5"
-                    >
-                      {plusVoiceError}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
+                      {isAudioTranscribing ? (
+                        <Loader2 size={14} className="animate-spin text-rose-500 dark:text-rose-400" />
+                      ) : isRecording ? (
+                        <Square size={12} className="fill-current" />
+                      ) : (
+                        <Mic size={15} strokeWidth={2} />
+                      )}
+                    </button>
+                  }
+                  submitVariant="inside"
+                  submitIcon={<Plus size={16} strokeWidth={2.2} />}
+                  feedback={
+                    plusSuccessMsg
+                      ? { type: 'success', message: plusSuccessMsg.text }
+                      : plusVoiceError
+                        ? { type: 'error', message: plusVoiceError }
+                        : null
+                  }
+                  inputClassName={`h-11 sm:h-12 rounded-2xl bg-[#F6F4EE] dark:bg-white/[0.04] text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#A8A8A8]/70 ${
+                    isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-[#E6E2D8] dark:border-[#383838]"
+                  }`}
+                />
               </div>
             </motion.div>
           </motion.div>

@@ -12,3 +12,4 @@ export * from './EmptyState';
 export * from './Divider';
 export * from './FilterSelectButton';
 export * from './FilterMenuModal';
+export * from './SmartInput';

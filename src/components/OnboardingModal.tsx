@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, Sparkles, Search, X, PiggyBank, ArrowDownRight, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, Search, X, PiggyBank, ArrowDownRight, ArrowUpRight, ShieldCheck } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { Config, Frequency, Category } from '../types';
@@ -13,6 +13,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
 import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 import { parseIncomePrompt } from '../utils/incomeAiParser';
+import { SmartInput } from './ui';
 
 export type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
 
@@ -63,10 +64,11 @@ const texts = {
     
     // Step 6
     midMonthTitle: 'Kvar till nästa lön',
-    midMonthDaysBadge: (days: number, payday: number) => `${days} ${days === 1 ? 'dag kvar' : 'dagar kvar'} till den ${payday}:e`,
-    midMonthQuestion: 'Hur mycket har du kvar till nästa lön?',
-    estimatedLabel: 'Beräknat:',
-    useEstimatedAction: 'Använd',
+    midMonthDaysText: (days: number) => `${days} ${days === 1 ? 'dag' : 'dagar'} till nästa lön`,
+    midMonthQuestion: 'Hur mycket har du kvar just nu?',
+    estimatedPrefix: 'Dejz beräknar att du har',
+    estimatedSuffix: 'kvar',
+    useEstimatedAction: 'Använd beloppet',
     dailyRateText: (daily: string) => `≈ ${daily} kr per dag`,
     
     // Step 7
@@ -120,10 +122,11 @@ const texts = {
     
     // Step 6
     midMonthTitle: 'Remaining to Payday',
-    midMonthDaysBadge: (days: number, payday: number) => `${days} ${days === 1 ? 'day left' : 'days left'} until the ${payday}th`,
-    midMonthQuestion: 'How much do you have left until next payday?',
-    estimatedLabel: 'Estimated:',
-    useEstimatedAction: 'Use',
+    midMonthDaysText: (days: number) => `${days} ${days === 1 ? 'day' : 'days'} to next payday`,
+    midMonthQuestion: 'How much do you have left right now?',
+    estimatedPrefix: 'Dejz estimates you have',
+    estimatedSuffix: 'left',
+    useEstimatedAction: 'Use amount',
     dailyRateText: (daily: string) => `≈ ${daily} per day`,
     
     // Step 7
@@ -466,15 +469,13 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
       setIncomes((prev) => [...prev, newIncome]);
       setAiIncomePrompt('');
       setAiFeedback({
-        message: isEn
-          ? `Added ${formatAmount(parsed.amount, config.language)} ${config.currency || 'kr'} from ${parsed.name}! ✨`
-          : `Lade till ${formatAmount(parsed.amount, config.language)} kr från ${parsed.name}! ✨`,
+        message: isEn ? 'Income added' : 'Inkomst tillagd',
         type: 'success',
       });
 
       setTimeout(() => {
         setAiFeedback(null);
-      }, 4000);
+      }, 2000);
     } catch (err: any) {
       console.error('AI parsing error:', err);
       setAiFeedback({
@@ -705,69 +706,28 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                     >
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="income" />
-                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
+                        <div className="mt-5 sm:mt-6 text-center">
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
                             {s.incomeQuestion}
                           </h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
-                            {s.incomeDesc}
-                          </p>
                         </div>
                       </div>
 
                       <div className="space-y-3 max-h-[36vh] overflow-y-auto pr-0.5 no-scrollbar">
-                        {/* Direct, clean AI Natural Language Input Area */}
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-1.5 px-0.5">
-                            <Sparkles size={13} className="text-[var(--accent-color)] shrink-0" />
-                            <span className="text-xs font-semibold text-[var(--text-secondary)]">
-                              {s.aiHelper}
-                            </span>
-                          </div>
+                        {/* Reusable Natural Language Smart Input with Sparkle Visual Signature */}
+                        <SmartInput
+                          label={s.aiHelper}
+                          value={aiIncomePrompt}
+                          onChange={setAiIncomePrompt}
+                          onSubmit={handleAiAddIncome}
+                          placeholder={s.aiPlaceholder}
+                          isProcessing={isAiParsing}
+                          submitText={isEn ? 'Add' : 'Lägg till'}
+                          submitVariant="inline"
+                          feedback={aiFeedback}
+                          inputClassName="h-[46px]"
+                        />
 
-                          <form onSubmit={handleAiAddIncome} className="flex items-center gap-2">
-                            <div className="relative flex-1">
-                              <input
-                                type="text"
-                                value={aiIncomePrompt}
-                                onChange={(e) => setAiIncomePrompt(e.target.value)}
-                                placeholder={s.aiPlaceholder}
-                                disabled={isAiParsing}
-                                className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] px-3.5 py-3 text-xs sm:text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 outline-none transition-all pr-8 shadow-2xs"
-                              />
-                              {aiIncomePrompt && !isAiParsing && (
-                                <button
-                                  type="button"
-                                  onClick={() => setAiIncomePrompt('')}
-                                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer"
-                                >
-                                  <X size={14} />
-                                </button>
-                              )}
-                            </div>
-
-                            <button
-                              type="submit"
-                              disabled={!aiIncomePrompt.trim() || isAiParsing}
-                              className="h-[46px] px-4 rounded-[16px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-xs sm:text-sm flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
-                            >
-                              {isAiParsing ? (
-                                <Loader2 size={15} className="animate-spin" />
-                              ) : (
-                                <span>{isEn ? 'Add' : 'Lägg till'}</span>
-                              )}
-                            </button>
-                          </form>
-
-                          {aiFeedback && (
-                            <p className={`text-[11px] font-medium px-1 flex items-center gap-1 transition-all ${
-                              aiFeedback.type === 'success' ? 'text-neutral-800 dark:text-white' : 'text-rose-500'
-                            }`}>
-                              {aiFeedback.type === 'success' ? <Check size={12} strokeWidth={2.5} /> : null}
-                              <span>{aiFeedback.message}</span>
-                            </p>
-                          )}
-                        </div>
 
                         {/* Incomes List */}
                         {incomes.map((inc, i) => (
@@ -886,8 +846,8 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                                 onClick={() => handleTogglePreset(preset)}
                                 className={`p-2.5 rounded-[16px] flex items-center justify-between gap-2 text-left transition-all cursor-pointer border relative min-h-[54px] ${
                                   isAdded 
-                                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-2xs' 
-                                    : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] border-[var(--border-color)] shadow-2xs'
+                                    ? 'bg-[#E8F8F0] dark:bg-[#E8F8F0] border-[#05B862] shadow-2xs' 
+                                    : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border-[var(--border-color)] shadow-2xs'
                                 }`}
                               >
                                 <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -895,20 +855,22 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                                     <TransactionLogo transaction={mockTx} config={config} size="sm" />
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-bold leading-tight break-words">
+                                    <p className={`text-xs font-bold leading-tight break-words ${
+                                      isAdded ? 'text-[#1C1917]' : 'text-[var(--text-primary)]'
+                                    }`}>
                                       {preset.name}
                                     </p>
                                     <p className={`text-[10.5px] font-amount font-semibold mt-0.5 ${
-                                      isAdded ? 'text-white/90' : 'text-[var(--text-secondary)]'
+                                      isAdded ? 'text-[#44403C]' : 'text-[var(--text-secondary)]'
                                     }`}>
                                       {formatAmount(preset.defaultAmount, lang)} kr
                                     </p>
                                   </div>
                                 </div>
                                 <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                                  isAdded ? 'bg-white text-[var(--accent-color)]' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
+                                  isAdded ? 'bg-white text-[#05B862] border border-[#05B862]/30 shadow-2xs' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
                                 }`}>
-                                  {isAdded ? <Check size={11} strokeWidth={3} /> : <Plus size={11} />}
+                                  {isAdded ? <Check size={11} strokeWidth={3} className="text-[#05B862]" /> : <Plus size={11} />}
                                 </div>
                               </button>
                             );
@@ -980,13 +942,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                     >
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="goals" />
-                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
+                        <div className="mt-5 sm:mt-6 text-center">
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
                             {s.savingsQuestion}
                           </h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[300px] mx-auto leading-relaxed">
-                            {s.savingsDesc}
-                          </p>
                         </div>
                       </div>
 
@@ -1014,13 +973,13 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                                 key={amount}
                                 type="button"
                                 onClick={() => handleSavingsChange(amount.toString())}
-                                className={`py-2 rounded-[12px] text-xs font-bold transition-all border cursor-pointer active:scale-95 ${
+                                className={`py-2 rounded-[12px] text-xs font-bold font-amount tabular-nums transition-all border cursor-pointer active:scale-95 ${
                                   isSelected
                                     ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-2xs'
                                     : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/40'
                                 }`}
                               >
-                                {amount === 0 ? (isEn ? '0' : '0 kr') : `${amount / 1000}k`}
+                                {amount === 0 ? '0 kr' : formatAmount(amount, lang)}
                               </button>
                             );
                           })}
@@ -1051,18 +1010,16 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                     >
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="midMonth" days={daysUntilPayday} payday={payday} />
-                        <div className="mt-5 sm:mt-6 space-y-1 text-center">
-                          <span className="inline-block px-2.5 py-0.5 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-[11px] font-bold">
-                            {s.midMonthDaysBadge(daysUntilPayday, payday)}
-                          </span>
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
-                            {s.midMonthQuestion}
-                          </h3>
-                        </div>
+                        <p className="mt-4 sm:mt-5 text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
+                          {s.midMonthDaysText(daysUntilPayday)}
+                        </p>
+                        <h3 className="mt-2 text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                          {s.midMonthQuestion}
+                        </h3>
                       </div>
 
                       {/* Main Remaining Amount Input */}
-                      <div className="space-y-2.5">
+                      <div className="space-y-3">
                         <div className="relative">
                           <input
                             type="number"
@@ -1076,28 +1033,32 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           </span>
                         </div>
 
-                        {/* Estimated Amount Indicator & "Använd" Action */}
-                        <div className="flex items-center justify-between px-3 py-2 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[14px] text-xs">
-                          <span className="text-[var(--text-secondary)] font-medium">
-                            {s.estimatedLabel} <strong className="text-[var(--text-primary)] font-amount font-bold">{formatAmount(monthlyDisposablePot, lang)} {config.currency || 'kr'}</strong>
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setMidMonthSpent(monthlyDisposablePot.toString())}
-                            className="text-xs font-bold text-[var(--accent-color)] hover:underline cursor-pointer flex items-center gap-1"
-                          >
-                            <span>→ {s.useEstimatedAction}</span>
-                          </button>
-                        </div>
-
-                        {/* Simplified Daily Rate: ≈ 2 872 kr per dag */}
+                        {/* Simplified Daily Rate: ≈ 879 kr per dag (visuellt sekundärt) */}
                         {activeAmountForRemainingDays > 0 && (
-                          <div className="text-center pt-0.5">
-                            <p className="text-xs font-semibold text-[var(--text-secondary)]">
+                          <div className="text-center">
+                            <p className="text-xs font-medium text-[var(--text-secondary)] font-amount tabular-nums">
                               {s.dailyRateText(formatAmount(dailyRate, lang))}
                             </p>
                           </div>
                         )}
+
+                        {/* Calculated Reference Area: Dejz beräknar att du har 21 973 kr kvar + Använd beloppet */}
+                        <div className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-[16px] p-3 sm:p-3.5 flex items-center justify-between gap-3 shadow-2xs">
+                          <p className="text-xs text-[var(--text-secondary)] font-medium leading-snug min-w-0">
+                            {s.estimatedPrefix}{' '}
+                            <strong className="text-[var(--text-primary)] font-amount font-bold">
+                              {formatAmount(monthlyDisposablePot, lang)} {config.currency || 'kr'}
+                            </strong>{' '}
+                            {s.estimatedSuffix}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setMidMonthSpent(monthlyDisposablePot.toString())}
+                            className="px-3 py-1.5 rounded-[12px] bg-[var(--surface-muted)] hover:bg-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] border border-[var(--border-color)] transition-all cursor-pointer active:scale-95 shrink-0"
+                          >
+                            {s.useEstimatedAction}
+                          </button>
+                        </div>
                       </div>
 
                       <div className="pt-1">
