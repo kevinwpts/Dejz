@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette } from 'lucide-react';
+import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -98,7 +98,7 @@ export function ProfileView({
   onRenameCategory,
   onMigrateAndDeleteCategory,
 }: ProfileViewProps) {
-  const [activePage, setActivePage] = useState<'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'pro' | 'receipts'>(initialSection as any);
+  const [activePage, setActivePage] = useState<'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'pro' | 'receipts'>(initialSection as any);
 
   useEffect(() => {
     setActivePage(initialSection);
@@ -290,6 +290,21 @@ export function ProfileView({
               icon={CreditCard} 
               label={t('paymentMethod')} 
               onClick={() => handleSectionClick('paymentMethods')} 
+            />
+            <SettingsMenuItem 
+              icon={Coins} 
+              label={config.language === 'en' ? 'Currency' : 'Valuta'} 
+              iconBgColor="bg-amber-500/10 dark:bg-amber-400/10"
+              iconTextColor="text-amber-600 dark:text-amber-400"
+              onClick={() => handleSectionClick('currency')} 
+              rightNode={(
+                <div className="flex items-center gap-1 text-[var(--text-secondary)]">
+                  <span className="text-xs font-semibold">
+                    {config.currency || 'kr'}
+                  </span>
+                  <ChevronRight size={14} strokeWidth={2} className="opacity-60 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              )}
             />
           </div>
         </div>

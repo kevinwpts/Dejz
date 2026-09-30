@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Tag, CreditCard, Globe, Palette } from 'lucide-react';
+import { Calendar, Tag, CreditCard, Globe, Palette, Coins } from 'lucide-react';
 import { Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -29,7 +29,7 @@ interface SettingsMainViewProps {
   transactions?: any[];
   onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
   onNavigate: (tab: string, section?: string) => void;
-  initialSection?: 'main' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance';
+  initialSection?: 'main' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency';
 }
 
 export function SettingsMainView({
@@ -57,7 +57,7 @@ export function SettingsMainView({
   onNavigate,
   initialSection = 'main'
 }: SettingsMainViewProps) {
-  const [activeSection, setActiveSection] = useState<'main' | 'salary' | 'categories' | 'paymentMethods' | 'language'>(initialSection);
+  const [activeSection, setActiveSection] = useState<'main' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency'>(initialSection);
 
   useEffect(() => {
     setActiveSection(initialSection);
@@ -138,6 +138,13 @@ export function SettingsMainView({
           title={config?.language === 'en' ? 'Payment methods' : 'Betalmetoder'}
           subtitle={`${(config.paymentMethods || []).length} ${config?.language === 'en' ? 'methods' : 'metoder'}`}
           onClick={() => handleSectionClick('paymentMethods')}
+          showChevron
+        />
+        <ListRow
+          icon={<Coins size={18} strokeWidth={2} />}
+          title={config?.language === 'en' ? 'Currency' : 'Valuta'}
+          subtitle={config.currency || 'kr'}
+          onClick={() => handleSectionClick('currency')}
           showChevron
         />
         <ListRow
