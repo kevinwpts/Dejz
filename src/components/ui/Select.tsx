@@ -58,7 +58,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               error
                 ? 'border-rose-500 focus:border-rose-500'
                 : 'border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white'
-            } rounded-[14px] ${icon ? 'pl-10' : 'px-4'} pr-10 font-medium text-sm text-[#1C1917] dark:text-white outline-none transition-all cursor-pointer appearance-none ${className}`}
+            } rounded-[14px] ${icon ? 'pl-10' : 'px-4'} pr-10 font-normal text-[14px] text-[#1C1917] dark:text-white outline-none transition-all cursor-pointer appearance-none ${className}`}
             {...props}
           >
             {options

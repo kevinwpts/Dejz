@@ -527,7 +527,7 @@ export function SettingsView({
               <select
                 value={targetMigrationId}
                 onChange={(e) => setTargetMigrationId(e.target.value)}
-                className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-3 text-sm font-semibold text-[#1C1917] dark:text-white outline-none"
+                className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-3 text-[14px] font-normal text-[#1C1917] dark:text-white outline-none"
               >
                 {(deleteMigrationData.type === 'income' ? (config.incomeCategories || []) : (config.categories || []))
                   .filter(c => c.id !== deleteMigrationData.category.id)

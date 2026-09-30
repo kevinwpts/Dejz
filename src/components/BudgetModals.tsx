@@ -482,7 +482,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               <select
                 value={deductionDay}
                 onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
+                className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-[14px] font-normal text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                   <option key={day} value={day}>{day}</option>
@@ -499,7 +499,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-[14px] font-normal text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
                     <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
@@ -516,7 +516,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
+                    className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-[14px] font-normal text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
@@ -1214,7 +1214,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <select
                   value={deductionDay}
                   onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                  className="w-full h-[48px] appearance-none bg-[#EAE6DE] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] rounded-[12px] px-4 text-[16px] font-normal text-[#211F1C] dark:text-white focus:border-[#211F1C] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#EAE6DE] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] rounded-[12px] px-4 text-[14px] font-normal text-[#211F1C] dark:text-white focus:border-[#211F1C] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                     <option key={day} value={day}>{day}</option>
@@ -1230,7 +1230,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full h-[48px] appearance-none bg-[#EAE6DE] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] rounded-[12px] px-4 text-[16px] font-normal text-[#211F1C] dark:text-white focus:border-[#211F1C] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#EAE6DE] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] rounded-[12px] px-4 text-[14px] font-normal text-[#211F1C] dark:text-white focus:border-[#211F1C] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(paymentMethods || []).map((method, idx) => {
                     const methodName = typeof method === 'string' ? method : method?.name || '';
@@ -1251,7 +1251,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full h-[48px] appearance-none bg-[#EAE6DE] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] rounded-[12px] px-4 text-[16px] font-normal text-[#211F1C] dark:text-white focus:border-[#211F1C] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#EAE6DE] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] rounded-[12px] px-4 text-[14px] font-normal text-[#211F1C] dark:text-white focus:border-[#211F1C] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
                     <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
@@ -1268,7 +1268,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full h-[48px] appearance-none bg-[#EAE6DE] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] rounded-[12px] px-4 text-[16px] font-normal text-[#211F1C] dark:text-white focus:border-[#211F1C] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
+                    className="w-full h-[48px] appearance-none bg-[#EAE6DE] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] rounded-[12px] px-4 text-[14px] font-normal text-[#211F1C] dark:text-white focus:border-[#211F1C] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
@@ -1307,7 +1307,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             <button
               type="button"
               onClick={() => setIsCategorySelectorOpen(true)}
-              className="w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] rounded-[12px] px-4 flex items-center justify-between text-[16px] font-normal text-[#211F1C] dark:text-white transition-all cursor-pointer hover:border-[#211F1C] dark:hover:border-white"
+              className="w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] border border-[#E2DDD4] dark:border-[#383838] rounded-[12px] px-4 flex items-center justify-between text-[14px] font-normal text-[#211F1C] dark:text-white transition-all cursor-pointer hover:border-[#211F1C] dark:hover:border-white"
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <CategoryIcon icon={categories.find(c => c.name === category)?.icon || 'receipt'} size="xs" />
@@ -1926,7 +1926,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               <select
                 value={deductionDay}
                 onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
+                className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-[14px] font-normal text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                   <option key={day} value={day}>{day}</option>
@@ -1943,7 +1943,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-[14px] font-normal text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
                     <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
@@ -1960,7 +1960,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
+                    className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-[14px] font-normal text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
@@ -2001,7 +2001,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full appearance-none bg-[var(--surface-muted)]/50 border border-[var(--border-color)] rounded-[16px] px-4 py-3.5 text-[15px] font-medium text-[var(--text-primary)] focus:border-accent/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-4 text-[14px] font-normal text-[#1C1917] dark:text-white focus:border-[#1C1917] dark:focus:border-white outline-none transition-all pr-10 cursor-pointer"
                 >
                   {paymentMethods.map((pm: any) => {
                     const pmName = typeof pm === 'string' ? pm : pm.name;

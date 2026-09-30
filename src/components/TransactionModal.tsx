@@ -981,7 +981,7 @@ export function TransactionModal({
               )}
 
                   {/* Category Selection */}
-                  <div className={`space-y-2.5 pt-3 border-t border-[#E2DDD4] dark:border-white/[0.06] ${splits.length > 0 ? 'hidden' : ''}`}>
+                  <div className={`space-y-2.5 pt-3 ${splits.length > 0 ? 'hidden' : ''}`}>
                     <div className="flex items-center justify-between px-1">
                       <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">{t('category')}</label>
                       <button 

@@ -520,12 +520,12 @@ export function TodayView({
                 </div>
 
                 {categoryBudgetData.length > 0 ? (
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-hide -mx-1 px-1 snap-x snap-mandatory">
+                  <div className="flex items-center gap-4 overflow-x-auto pb-1.5 scrollbar-hide -mx-1 px-1">
                     {categoryBudgetData.map((cat, index) => {
                       const Icon = ICON_MAP[cat.iconName];
                       const spentPct = cat.budgetInKronor > 0 
-                        ? Math.min(100, Math.round((cat.spent / cat.budgetInKronor) * 100))
-                        : 0;
+                        ? Math.min(100, Math.max(0, (cat.spent / cat.budgetInKronor) * 100))
+                        : (cat.spent > 0 ? 100 : 0);
 
                       return (
                         <motion.button
@@ -534,49 +534,56 @@ export function TodayView({
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                           onClick={() => handleCategoryClick(cat.name)}
-                          className="flex-shrink-0 flex flex-col justify-between py-2.5 px-3 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] text-[#1C1917] dark:text-white transition-all group cursor-pointer snap-start border-none shadow-none relative min-w-[118px]"
+                          className="flex-shrink-0 flex flex-col items-center text-center group cursor-pointer border-none bg-transparent shadow-none p-0 focus:outline-none"
                         >
-                          {/* Top Row: Icon and Name */}
-                          <div className="flex items-center gap-2 w-full mb-1">
-                            <div className="flex items-center gap-2 min-w-0">
-                              {/* Mini Icon */}
-                              <div className="w-6 h-6 rounded-lg bg-[var(--surface-muted)] dark:bg-white/[0.06] border-none text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
-                                {isEmojiString(cat.iconName) ? (
-                                  <span className="text-[11px] leading-none">{cat.iconName}</span>
-                                ) : Icon ? (
-                                  <Icon size={12} strokeWidth={2} className="text-[#1C1917] dark:text-white" />
-                                ) : (
-                                  <div className="w-1.5 h-1.5 rounded-full bg-[#1C1917] dark:bg-white" />
-                                )}
-                              </div>
-
-                              {/* Name */}
-                              <span className="text-xs font-semibold tracking-tight truncate text-[#1C1917] dark:text-white">
-                                {cat.name}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Amount between category and bar */}
-                          <div className="mb-2">
-                            <span className={`text-xs font-medium tabular-nums tracking-tight ${
-                              cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[#6E6961] dark:text-[#9CA6BC]'
-                            }`}>
-                              {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} ${config?.currency || 'kr'} ${lang === 'en' ? 'left' : 'kvar'}` : `${formatAmount(cat.spent, lang)} ${config?.currency || 'kr'}`}
-                            </span>
-                          </div>
-
-                          {/* Progress Bar under the info */}
-                          {cat.hasBudget && (
-                            <div className="w-full h-1 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
-                              <div 
-                                className={`h-full rounded-full transition-all duration-500 ${
-                                  cat.isOverBudget ? 'bg-rose-500' : 'bg-neutral-900 dark:bg-white'
-                                }`} 
-                                style={{ width: `${spentPct}%` }} 
+                          {/* Circular Progress & Icon (~72px) */}
+                          <div className="relative w-[72px] h-[72px] flex items-center justify-center mb-1.5">
+                            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                              {/* Background track (subtle & neutral) */}
+                              <path
+                                className="text-black/10 dark:text-white/10"
+                                strokeWidth="2.5"
+                                stroke="currentColor"
+                                fill="none"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                               />
+                              {/* Progress arc using category's existing color */}
+                              <path
+                                stroke={cat.color || (cat.isOverBudget ? '#e11d48' : '#1C1917')}
+                                strokeWidth="2.5"
+                                strokeDasharray="100"
+                                strokeDashoffset={100 - spentPct}
+                                strokeLinecap="round"
+                                fill="none"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                style={{
+                                  transition: 'stroke-dashoffset 0.5s ease',
+                                }}
+                              />
+                            </svg>
+                            {/* Center Icon inside circle */}
+                            <div className="w-[56px] h-[56px] rounded-full bg-[var(--surface-muted)] dark:bg-[#2D2D2D] flex items-center justify-center text-[#1C1917] dark:text-white">
+                              {isEmojiString(cat.iconName) ? (
+                                <span className="text-base leading-none">{cat.iconName}</span>
+                              ) : Icon ? (
+                                <Icon size={18} strokeWidth={2} className="text-[#1C1917] dark:text-white" />
+                              ) : (
+                                <div className="w-2 h-2 rounded-full bg-[#1C1917] dark:bg-white" />
+                              )}
                             </div>
-                          )}
+                          </div>
+
+                          {/* Category Name */}
+                          <span className="text-xs font-semibold tracking-tight text-[#1C1917] dark:text-white max-w-[80px] truncate mb-0.5">
+                            {cat.name}
+                          </span>
+
+                          {/* Remaining Amount */}
+                          <span className={`text-[11px] font-medium tabular-nums tracking-tight whitespace-nowrap ${
+                            cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[#6E6961] dark:text-[#9CA6BC]'
+                          }`}>
+                            {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} ${config?.currency || 'kr'} ${lang === 'en' ? 'left' : 'kvar'}` : `${formatAmount(cat.spent, lang)} ${config?.currency || 'kr'}`}
+                          </span>
                         </motion.button>
                       );
                     })}
