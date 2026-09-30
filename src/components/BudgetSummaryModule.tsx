@@ -118,7 +118,7 @@ export function BudgetSummaryModule({
 
   const effectiveBudget = useMemo(() => {
     if (!stats) return 0;
-    if (stats.totalIncome > 0) return stats.totalIncome;
+    if (stats.totalIncome > 0) return Math.max(0, stats.totalIncome - (stats.totalSavings || 0));
     return (stats.disposablePot || 0) + (stats.totalFixed || 0);
   }, [stats]);
 

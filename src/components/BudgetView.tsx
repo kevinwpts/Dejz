@@ -126,7 +126,17 @@ export function BudgetView({
   }, [fixedExpenses, fixedSortBy]);
 
   const sortedSavings = React.useMemo(() => {
-    const list = [...(config?.monthlySavingsItems || [])];
+    const list = config?.monthlySavingsItems && config.monthlySavingsItems.length > 0
+      ? [...config.monthlySavingsItems]
+      : (config?.savingsGoals || []).filter((g: any) => Number(g.targetAmount) > 0).map((g: any) => ({
+          id: g.id || 'savings-goal-' + g.title,
+          name: g.title || 'Månadssparande',
+          amount: Number(g.targetAmount) || 0,
+          icon: g.icon || 'PiggyBank',
+          logo: g.logo,
+          deductionDay: config?.payday || 25,
+          frequency: Frequency.MONTHLY,
+        }));
     if (savingSortBy === 'day') {
       return list.sort((a, b) => {
         const dayA = typeof a.deductionDay === 'number' && a.deductionDay > 0 ? a.deductionDay : 999;
@@ -139,7 +149,7 @@ export function BudgetView({
     } else {
       return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
-  }, [config?.monthlySavingsItems, savingSortBy]);
+  }, [config?.monthlySavingsItems, config?.savingsGoals, config?.payday, savingSortBy]);
 
   const getFixedSpentForCategory = (catName: string) => {
     return (fixedExpenses || [])

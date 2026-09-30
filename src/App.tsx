@@ -15,6 +15,7 @@ import {
   WeekendAdjustment,
   PaydayType,
   SavingsGoal,
+  MonthlySaving,
   AppNotification,
 } from "./types";
 import {
@@ -915,6 +916,7 @@ export default function App() {
           paymentMethods: normalizePaymentMethods(dbSettings.paymentMethods),
           surplusIncome: dbSettings.surplusIncome || 0,
           monthlySavings: dbSettings.monthlySavings || 0,
+          monthlySavingsItems: dbSettings.monthlySavingsItems || [],
           appIconTheme: dbSettings.appIconTheme,
           includeFixedExpensesInAnalysis:
             dbSettings.includeFixedExpensesInAnalysis !== undefined
@@ -2184,9 +2186,27 @@ export default function App() {
           savingsPot: dbProfile.savings_pot || 0,
           paymentMethods: normalizePaymentMethods(dbProfile.payment_methods),
           surplusIncome: dbProfile.surplus_income || 0,
-          monthlySavings: dbProfile.monthly_savings || 0,
-          monthlySavingsItems: dbProfile.monthly_savings_items || [],
-          savingsGoals: dbProfile.savings_goals || [],
+          monthlySavings: dbProfile.monthly_savings || dbProfile.monthlySavings || config?.monthlySavings || 0,
+          monthlySavingsItems: (dbProfile.monthly_savings_items && dbProfile.monthly_savings_items.length > 0)
+            ? dbProfile.monthly_savings_items
+            : (dbProfile.monthlySavingsItems && dbProfile.monthlySavingsItems.length > 0)
+              ? dbProfile.monthlySavingsItems
+              : (config?.monthlySavingsItems && config.monthlySavingsItems.length > 0)
+                ? config.monthlySavingsItems
+                : (dbProfile.savings_goals || dbProfile.savingsGoals || config?.savingsGoals || []).filter((g: any) => Number(g.targetAmount) > 0).map((g: any) => ({
+                    id: g.id || crypto.randomUUID(),
+                    name: g.title || 'Månadssparande',
+                    amount: Number(g.targetAmount) || 0,
+                    icon: g.icon || 'PiggyBank',
+                    logo: g.logo,
+                    deductionDay: dbProfile.payday || 25,
+                    frequency: Frequency.MONTHLY,
+                  })),
+          savingsGoals: (dbProfile.savings_goals && dbProfile.savings_goals.length > 0)
+            ? dbProfile.savings_goals
+            : (dbProfile.savingsGoals && dbProfile.savingsGoals.length > 0)
+              ? dbProfile.savingsGoals
+              : (config?.savingsGoals || []),
           totalSavedLifetime: dbProfile.total_saved_lifetime || 0,
           includeFixedExpensesInAnalysis:
             dbProfile.include_fixed_expenses_in_analysis !== undefined
@@ -2201,6 +2221,27 @@ export default function App() {
               ? dbProfile.show_fixed_expenses_in_calendar
               : true,
         };
+
+        // Ensure monthlySavings is consistent with monthlySavingsItems
+        if (mappedConfig.monthlySavingsItems && mappedConfig.monthlySavingsItems.length > 0) {
+          const itemsSum = mappedConfig.monthlySavingsItems.reduce(
+            (sum: number, item: any) => sum + (Number(item.amount) || 0),
+            0,
+          );
+          if (itemsSum > 0) {
+            mappedConfig.monthlySavings = itemsSum;
+          }
+        } else if (mappedConfig.monthlySavings > 0) {
+          mappedConfig.monthlySavingsItems = [{
+            id: crypto.randomUUID(),
+            name: mappedConfig.language === 'en' ? 'Monthly savings' : 'Månadssparande',
+            amount: mappedConfig.monthlySavings,
+            icon: 'PiggyBank',
+            deductionDay: mappedConfig.payday || 25,
+            frequency: Frequency.MONTHLY,
+          }];
+        }
+
         setConfig(mappedConfig);
       } else {
         const newConfig = {
@@ -2444,11 +2485,24 @@ export default function App() {
               return sum + amount;
           }
         }, 0);
-        const totalMonthlySavings =
-          (config.monthlySavingsItems?.reduce(
-            (sum, item) => sum + getAmountForPeriod(item),
-            0,
-          ) || 0) + (Number(config.monthlySavings) || 0);
+        const savingsFromItems = config.monthlySavingsItems?.reduce(
+          (sum, item) => sum + getAmountForPeriod(item),
+          0,
+        ) || 0;
+
+        const explicitMonthlySavings = savingsFromItems > 0 
+          ? savingsFromItems 
+          : (Number(config.monthlySavings) || 0);
+
+        const fallbackSavingsGoals =
+          explicitMonthlySavings === 0 && config.savingsGoals?.length
+            ? config.savingsGoals.reduce(
+                (sum, g) => sum + (Number(g.targetAmount) || 0),
+                0,
+              )
+            : 0;
+
+        const totalMonthlySavings = explicitMonthlySavings + fallbackSavingsGoals;
         const disposablePot = totalIncome - totalFixed - totalMonthlySavings;
 
         // --- FINAL MODEL: BASE + CARRY SYSTEM ---
@@ -2808,10 +2862,7 @@ export default function App() {
           disposablePot: periodBudgetCents,
           totalIncome,
           totalFixed,
-          totalSavings: (config.monthlySavingsItems || []).reduce(
-            (sum: number, s: any) => sum + (Number(s.amount) || 0),
-            0,
-          ),
+          totalSavings: totalMonthlySavings,
           totalDaysInPeriod: totalDays,
           daysElapsed,
           remainingDays: remainingDaysIncludingToday,
@@ -4692,22 +4743,61 @@ export default function App() {
                 }
               }
 
-              // 2. Map savings goals
-              const mappedSavingsGoals: SavingsGoal[] = (data.savingsGoals || []).map(
-                (g) => ({
-                  id: crypto.randomUUID(),
-                  title: g.title,
-                  targetAmount: Number(g.targetAmount) || 0,
-                  currentAmount: 0,
-                  priority: 0,
-                  icon: g.icon || "Target",
-                  logo: g.logo,
-                  deadline: g.deadline,
-                  createdAt: Date.now(),
-                }),
-              );
+              // 2. Map savings goals and monthly savings
+              const totalMonthlySavingsAmount =
+                (data.monthlySavings !== undefined && data.monthlySavings > 0)
+                  ? data.monthlySavings
+                  : (data.savingsGoals || []).reduce((sum, g) => sum + (Number(g.targetAmount) || 0), 0);
 
-              // 3. Update config with income, initialSpent, payday, savings goals, age, gender, and categories
+              const mappedSavingsGoals: SavingsGoal[] = (data.savingsGoals && data.savingsGoals.length > 0)
+                ? (data.savingsGoals || []).map((g) => ({
+                    id: crypto.randomUUID(),
+                    title: g.title,
+                    targetAmount: Number(g.targetAmount) || 0,
+                    currentAmount: 0,
+                    priority: 0,
+                    icon: g.icon || "Target",
+                    logo: g.logo,
+                    deadline: g.deadline,
+                    createdAt: Date.now(),
+                  }))
+                : (totalMonthlySavingsAmount > 0 ? [{
+                    id: crypto.randomUUID(),
+                    title: config?.language === "en" ? "Monthly savings" : "Månadssparande",
+                    targetAmount: totalMonthlySavingsAmount,
+                    currentAmount: 0,
+                    priority: 0,
+                    icon: "PiggyBank",
+                    createdAt: Date.now(),
+                  }] : []);
+
+              // Map recurring monthly savings items from onboarding
+              const mappedMonthlySavingsItems: MonthlySaving[] = (data.monthlySavingsItems && data.monthlySavingsItems.length > 0)
+                ? data.monthlySavingsItems
+                : (data.savingsGoals || [])
+                    .filter((g) => Number(g.targetAmount) > 0)
+                    .map((g) => ({
+                      id: crypto.randomUUID(),
+                      name: g.title || (config?.language === "en" ? "Monthly savings" : "Månadssparande"),
+                      amount: Number(g.targetAmount) || 0,
+                      icon: g.icon || "PiggyBank",
+                      logo: g.logo,
+                      deductionDay: data.payday || 25,
+                      frequency: Frequency.MONTHLY,
+                    }));
+
+              const finalMonthlySavingsItems: MonthlySaving[] = mappedMonthlySavingsItems.length > 0
+                ? mappedMonthlySavingsItems
+                : (totalMonthlySavingsAmount > 0 ? [{
+                    id: crypto.randomUUID(),
+                    name: config?.language === "en" ? "Monthly savings" : "Månadssparande",
+                    amount: totalMonthlySavingsAmount,
+                    icon: "PiggyBank",
+                    deductionDay: data.payday || 25,
+                    frequency: Frequency.MONTHLY,
+                  }] : (config?.monthlySavingsItems || []));
+
+              // 3. Update config with income, initialSpent, payday, savings goals, monthlySavings, monthlySavingsItems, age, gender, and categories
               const newConfig: Config = {
                 ...config,
                 darkMode: (config?.darkMode !== undefined && config?.darkMode !== null) ? config.darkMode : true,
@@ -4715,6 +4805,8 @@ export default function App() {
                 paydayBeforeWeekend: data.paydayBeforeWeekend !== undefined ? data.paydayBeforeWeekend : (config?.paydayBeforeWeekend !== undefined ? config.paydayBeforeWeekend : true),
                 initialSpent: data.initialSpent,
                 savingsGoals: mappedSavingsGoals,
+                monthlySavings: totalMonthlySavingsAmount,
+                monthlySavingsItems: finalMonthlySavingsItems,
                 userAgeGroup: data.userAgeGroup || config?.userAgeGroup,
                 userGender: data.userGender || config?.userGender,
                 categories: (data.categories && data.categories.length > 0) ? data.categories : config.categories,

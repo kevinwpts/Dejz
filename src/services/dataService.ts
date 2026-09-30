@@ -64,12 +64,15 @@ export const dataService = {
       darkMode: (profileData.dark_mode !== undefined && profileData.dark_mode !== null) ? profileData.dark_mode : true,
       themeMode: profileData.theme_mode || localSavedConfig?.themeMode || 'system',
       quickChoices: profileData.quick_choices || [],
-      savingsPot: profileData.savings_pot || 0,
-      savingsGoals: profileData.savings_goals || [],
+      savingsGoals: (profileData.savings_goals && Array.isArray(profileData.savings_goals) && profileData.savings_goals.length > 0)
+        ? profileData.savings_goals
+        : (localSavedConfig?.savingsGoals || []),
       totalSavedLifetime: profileData.total_saved_lifetime || 0,
       surplusIncome: profileData.surplus_income || 0,
-      monthlySavings: profileData.monthly_savings || 0,
-      monthlySavingsItems: profileData.monthly_savings_items || [],
+      monthlySavings: profileData.monthly_savings || localSavedConfig?.monthlySavings || 0,
+      monthlySavingsItems: (profileData.monthly_savings_items && Array.isArray(profileData.monthly_savings_items) && profileData.monthly_savings_items.length > 0)
+        ? profileData.monthly_savings_items
+        : (localSavedConfig?.monthlySavingsItems || []),
       appIconTheme: profileData.app_icon_theme,
       includeFixedExpensesInAnalysis: profileData.include_fixed_expenses_in_analysis !== undefined 
         ? profileData.include_fixed_expenses_in_analysis 
@@ -184,7 +187,7 @@ export const dataService = {
       savings_goals: config.savingsGoals,
       total_saved_lifetime: config.totalSavedLifetime,
       surplus_income: config.surplusIncome,
-      monthly_savings: config.monthlySavings,
+      monthly_savings: config.monthlySavings !== undefined ? config.monthlySavings : (config.monthlySavingsItems?.reduce((sum, s) => sum + (Number(s.amount) || 0), 0) || 0),
       monthly_savings_items: config.monthlySavingsItems || [],
       app_icon_theme: config.appIconTheme,
       include_fixed_expenses_in_analysis: config.includeFixedExpensesInAnalysis,

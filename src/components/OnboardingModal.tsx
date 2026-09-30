@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, Search, X, PiggyBank, ArrowDownRight, ArrowUpRight, ShieldCheck, Receipt } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
-import { Config, Frequency, Category, FixedExpense, Income, SavingsGoal, PaydayType, WeekendAdjustment } from '../types';
+import { Config, Frequency, Category, FixedExpense, Income, SavingsGoal, MonthlySaving, PaydayType, WeekendAdjustment } from '../types';
 import { formatAmount } from '../utils/format';
 import { getPeriodBoundaries } from '../utils/date';
 import { FixedExpenseModal, IncomeModal } from './BudgetModals';
@@ -200,6 +200,8 @@ interface OnboardingModalProps {
     incomes: { amount: number; name: string; icon?: string; logo?: string; deductionDay?: number }[];
     fixedExpenses: Omit<FixedExpense, 'id'>[];
     savingsGoals: { title: string; targetAmount: number; icon?: string; logo?: string; deadline?: string }[];
+    monthlySavings?: number;
+    monthlySavingsItems?: MonthlySaving[];
     initialSpent: number;
     payday: number;
     paydayBeforeWeekend: boolean;
@@ -458,11 +460,36 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
             icon: 'PiggyBank',
           }] : []);
 
+      const finalMonthlySavingsAmount = totalMonthlySavings > 0
+        ? totalMonthlySavings
+        : finalGoals.reduce((sum, g) => sum + (Number(g.targetAmount) || 0), 0);
+
+      const finalMonthlySavingsItems: MonthlySaving[] = finalGoals.length > 0
+        ? finalGoals.filter(g => Number(g.targetAmount) > 0).map(g => ({
+            id: crypto.randomUUID(),
+            name: g.title || (isEn ? 'Monthly savings' : 'Månadssparande'),
+            amount: Number(g.targetAmount) || 0,
+            icon: g.icon || 'PiggyBank',
+            logo: g.logo,
+            deductionDay: payday || 25,
+            frequency: Frequency.MONTHLY,
+          }))
+        : (finalMonthlySavingsAmount > 0 ? [{
+            id: crypto.randomUUID(),
+            name: isEn ? 'Monthly savings' : 'Månadssparande',
+            amount: finalMonthlySavingsAmount,
+            icon: 'PiggyBank',
+            deductionDay: payday || 25,
+            frequency: Frequency.MONTHLY,
+          }] : []);
+
       await onComplete({
         fullName: trimmedName,
         incomes: incomes || [],
         fixedExpenses: fixedExpenses || [],
         savingsGoals: finalGoals,
+        monthlySavings: finalMonthlySavingsAmount,
+        monthlySavingsItems: finalMonthlySavingsItems,
         initialSpent,
         payday,
         paydayBeforeWeekend,
