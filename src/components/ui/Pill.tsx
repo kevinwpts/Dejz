@@ -24,8 +24,8 @@ export const Pill: React.FC<PillProps> = ({
   }[size];
 
   const activeStyles = active
-    ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-bold shadow-none'
-    : 'bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#333333] font-semibold';
+    ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-medium shadow-none'
+    : 'bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#333333] font-medium';
 
   return (
     <button
@@ -38,7 +38,7 @@ export const Pill: React.FC<PillProps> = ({
       <span>{children}</span>
       {count !== undefined && (
         <span
-          className={`ml-1 text-[11px] font-bold px-1.5 py-0.2 rounded-full ${
+          className={`ml-1 text-[11px] font-medium px-1.5 py-0.2 rounded-full ${
             active
               ? 'bg-white/20 text-white dark:bg-black/10 dark:text-[#1C1917]'
               : 'bg-black/5 dark:bg-white/10 text-[#6E6961] dark:text-[#A8A8A8]'

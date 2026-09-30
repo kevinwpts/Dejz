@@ -137,15 +137,15 @@ export function AppHeader({
           <div className="min-w-0 text-left flex flex-col justify-center pl-1">
             {isHomeTab ? (
               <>
-                <h1 className="text-[17px] sm:text-[19px] font-extrabold font-display tracking-tight truncate select-none leading-tight text-[var(--text-primary)]">
+                <h1 className="text-[17px] sm:text-[19px] font-semibold font-display tracking-tight truncate select-none leading-tight text-[var(--text-primary)]">
                   {language === 'en' ? 'Hi' : 'Hej'} {userName || 'Kevin'}
                 </h1>
-                <p className="text-[11px] font-medium text-[var(--text-tertiary)] leading-none mt-0.5 select-none truncate">
+                <p className="text-[11px] font-normal text-[var(--text-tertiary)] leading-none mt-0.5 select-none truncate">
                   {formattedDate}
                 </p>
               </>
             ) : (
-              <h1 className="text-[19px] sm:text-[22px] font-extrabold font-display uppercase tracking-[0.05em] truncate select-none leading-none text-[var(--text-primary)]">
+              <h1 className="text-[19px] sm:text-[22px] font-semibold font-display uppercase tracking-[0.05em] truncate select-none leading-none text-[var(--text-primary)]">
                 {displayTitle}
               </h1>
             )}

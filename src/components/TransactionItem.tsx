@@ -110,7 +110,7 @@ export function TransactionItem({
             size="xs" 
           />
         ) : null}
-        <span className="text-[12px] font-medium text-[var(--text-secondary)] dark:text-[#9CA6BC] tracking-tight whitespace-nowrap">
+        <span className="text-[12px] font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] tracking-tight whitespace-nowrap">
           {capitalize(categoryName || '')}
           {amount !== undefined && <span className="ml-1 opacity-70">({formatAmount(amount, config?.language || 'sv')})</span>}
         </span>
@@ -160,7 +160,7 @@ export function TransactionItem({
               aria-label={getL10n('Ta bort', 'Delete')}
             >
               <Trash2 size={19} strokeWidth={2.2} />
-              <span className="text-[10.5px] font-bold tracking-tight">
+              <span className="text-[10.5px] font-medium tracking-tight">
                 {getL10n('Ta bort', 'Delete')}
               </span>
             </button>
@@ -244,9 +244,9 @@ export function TransactionItem({
           
           {/* Primary Amount */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-            <p className={`text-[14.5px] sm:text-[15px] font-semibold whitespace-nowrap tracking-tight ${amountColor}`}>
-              <span className="opacity-75 mr-0.5 text-[13px] font-semibold">{transaction.type === 'income' ? '+' : '−'}</span>
-              <span className="font-amount tabular-nums font-semibold tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
+            <p className={`text-[14.5px] sm:text-[15px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
+              <span className="opacity-75 mr-0.5 text-[13px] font-medium">{transaction.type === 'income' ? '+' : '−'}</span>
+              <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
               <span className="text-[12px] font-normal text-[var(--text-secondary)] dark:text-[#9CA6BC] ml-1">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixed ? (

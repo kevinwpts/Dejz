@@ -33,7 +33,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
       }}
       className={`h-11 px-3.5 rounded-2xl border transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none shadow-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none ${
         active
-          ? 'bg-[#EEECFF] dark:bg-[#635BFF]/20 border-[#635BFF]/30 text-[#635BFF] dark:text-[#7C75FF] font-bold'
+          ? 'bg-[#EEECFF] dark:bg-[#635BFF]/20 border-[#635BFF]/30 text-[#635BFF] dark:text-[#7C75FF] font-medium'
           : 'bg-white dark:bg-[#242424] border-[#E2DDD4] dark:border-[#383838] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#2D2D2D]'
       } ${className}`}
     >
@@ -41,11 +41,11 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
         {icon && <span className="text-[#6E6961] dark:text-[#A8A8A8] shrink-0">{icon}</span>}
         <div className="min-w-0 flex-1">
           {label && (
-            <span className="block text-[10px] uppercase font-bold tracking-wider text-[#8C867C] dark:text-[#71717A] leading-tight truncate">
+            <span className="block text-[10px] uppercase font-medium tracking-wider text-[#8C867C] dark:text-[#71717A] leading-tight truncate">
               {label}
             </span>
           )}
-          <span className="block text-xs sm:text-[13px] font-semibold text-[#1C1917] dark:text-white truncate leading-tight">
+          <span className="block text-xs sm:text-[13px] font-medium text-[#1C1917] dark:text-white truncate leading-tight">
             {value}
           </span>
         </div>

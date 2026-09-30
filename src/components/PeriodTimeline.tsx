@@ -269,7 +269,7 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-[#635BFF] text-white border-transparent shadow-xs scale-105 font-bold z-10 opacity-100'
+                  ? 'bg-[#635BFF] text-white border-transparent shadow-xs scale-105 font-medium z-10 opacity-100'
                   : hasCategoryMatch
                   ? 'bg-black/5 text-[#1C1917] border border-[#1C1917]/20 dark:bg-white/[0.08] dark:text-white dark:border-white/20 hover:bg-black/10 dark:hover:bg-white/[0.1] scale-100 opacity-100'
                   : isRealToday
@@ -281,21 +281,21 @@ export function PeriodTimeline({
             >
               {/* Day of Week */}
               <span
-                className={`text-[8.5px] sm:text-[9px] tracking-wider uppercase leading-none ${
+                className={`text-[8.5px] sm:text-[9px] tracking-wider uppercase leading-none font-medium ${
                   isSelected
-                    ? 'text-white font-bold'
+                    ? 'text-white'
                     : hasCategoryMatch
-                    ? 'text-[#1C1917] dark:text-white font-bold'
+                    ? 'text-[#1C1917] dark:text-white'
                     : isRealToday
-                    ? 'text-[#1C1917] dark:text-[#C7CDDC] font-semibold'
-                    : 'text-[#6E6961] dark:text-[#9CA6BC]/70 font-medium'
+                    ? 'text-[#1C1917] dark:text-[#C7CDDC]'
+                    : 'text-[#6E6961] dark:text-[#9CA6BC]/70'
                 }`}
               >
                 {isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}
               </span>
 
               {/* Day Number */}
-              <span className="text-[13px] sm:text-[14px] leading-none font-bold tabular-nums font-amount">
+              <span className="text-[13px] sm:text-[14px] leading-none font-medium tabular-nums font-amount">
                 {dayNumber}
               </span>
 
@@ -314,7 +314,7 @@ export function PeriodTimeline({
           className="flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl bg-black/5 dark:bg-white/[0.04] text-[#1C1917] dark:text-white border border-[#E6E2D8] dark:border-white/[0.08] select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5"
         >
           <span className="text-[12px] leading-none">💰</span>
-          <span className="text-[8px] sm:text-[8.5px] font-bold tracking-wider uppercase">
+          <span className="text-[8px] sm:text-[8.5px] font-medium tracking-wider uppercase">
             {isEn ? 'Payday' : 'Lön'}
           </span>
         </div>

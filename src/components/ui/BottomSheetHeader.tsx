@@ -27,7 +27,7 @@ export function BottomSheetHeader({
         </div>
         <div className="flex flex-col items-center justify-center text-center overflow-hidden px-2">
           {title && (
-            <h2 className="text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
               {title}
             </h2>
           )}
@@ -76,7 +76,7 @@ export function BottomSheetHeader({
         {leading}
         <div className="flex flex-col min-w-0">
           {title && (
-            <h2 className="text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
               {title}
             </h2>
           )}

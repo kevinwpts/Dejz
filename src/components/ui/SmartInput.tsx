@@ -43,7 +43,7 @@ export const SmartInputLabel: React.FC<SmartInputLabelProps> = ({
       >
         <Sparkles size={13} strokeWidth={2} className="text-[#05B862]" />
       </motion.span>
-      <span className="text-xs font-semibold text-[var(--text-secondary)] dark:text-[#A8A8A8] tracking-tight">
+      <span className="text-xs font-medium text-[var(--text-secondary)] dark:text-[#A8A8A8] tracking-tight">
         {label}
       </span>
     </div>
@@ -191,7 +191,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             placeholder={placeholder}
             disabled={disabled || isProcessing}
             autoFocus={autoFocus}
-            className={`w-full bg-[var(--surface-color)] dark:bg-[#242424] border border-[var(--border-color)] dark:border-[#383838] rounded-[16px] text-xs sm:text-sm font-semibold text-[var(--text-primary)] dark:text-white placeholder-[var(--text-tertiary)] dark:placeholder-[#71717A] focus:border-[#05B862] dark:focus:border-[#05B862] focus:ring-2 focus:ring-[#05B862]/15 outline-none transition-all shadow-none ${
+            className={`w-full bg-[var(--surface-color)] dark:bg-[#242424] border border-[var(--border-color)] dark:border-[#383838] rounded-[16px] text-xs sm:text-sm font-normal text-[var(--text-primary)] dark:text-white placeholder:font-normal placeholder-[var(--text-tertiary)] dark:placeholder-[#71717A] focus:border-[#05B862] dark:focus:border-[#05B862] focus:ring-2 focus:ring-[#05B862]/15 outline-none transition-all shadow-none ${
               leftElement ? 'pl-12' : 'px-3.5'
             } ${
               hasInsideSubmit ? (value && !isProcessing ? 'pr-20' : 'pr-12') : (value && !isProcessing ? 'pr-8' : 'pr-3.5')

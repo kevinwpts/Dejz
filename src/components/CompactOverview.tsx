@@ -28,10 +28,10 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
       {/* Budget Status */}
       <div className="p-5 rounded-[18px] bg-white dark:bg-[#242424] border-none shadow-none">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
+          <h3 className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8]">
             {t('budgetUsage')}
           </h3>
-          <span className="text-xs font-bold text-[#05B862] bg-[#05B862]/10 px-2 py-0.5 rounded-full">
+          <span className="text-xs font-medium text-[#05B862] bg-[#05B862]/10 px-2 py-0.5 rounded-full">
             {budgetUsage.toFixed(0)}%
           </span>
         </div>
@@ -43,8 +43,8 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
           />
         </div>
         
-        <p className="text-[13px] text-[#6E6961] dark:text-[#A8A8A8] font-medium">
-          <span className="text-[#1C1917] dark:text-white font-bold font-amount tabular-nums">
+        <p className="text-[13px] text-[#6E6961] dark:text-[#A8A8A8] font-normal">
+          <span className="text-[#1C1917] dark:text-white font-medium font-amount tabular-nums">
             {formatAmount(totalExpenses, config.language)}
           </span>
           {' '}{t('ofBudgetUsed')}
@@ -53,16 +53,16 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
 
       {/* Category Totals */}
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-1">
+        <h3 className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8] ml-1">
           {t('categories')}
         </h3>
         <div className="grid grid-cols-1 gap-2">
           {Object.entries(categoryTotals).slice(0, 4).map(([cat, amount]) => (
             <div key={cat} className="flex items-center justify-between p-3.5 sm:p-4 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] active:scale-[0.99] transition-all group border-none shadow-none">
-              <span className="text-sm font-semibold text-[#1C1917] dark:text-white leading-tight truncate tracking-tight">
+              <span className="text-sm font-medium text-[#1C1917] dark:text-white leading-tight truncate tracking-tight">
                 {cat}
               </span>
-              <span className="text-sm font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
+              <span className="text-sm font-medium text-[#1C1917] dark:text-white font-amount tabular-nums">
                 {formatAmount(amount, config.language)}
               </span>
             </div>
@@ -72,7 +72,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
 
       {/* Recent Transactions */}
       <div className="space-y-4">
-        <h3 className="text-xs font-semibold text-[var(--text-secondary)] opacity-70 ml-1">
+        <h3 className="text-xs font-medium text-[var(--text-secondary)] opacity-70 ml-1">
           {t('recentTransactions')}
         </h3>
         <div className="space-y-1">

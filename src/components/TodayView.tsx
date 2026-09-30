@@ -513,7 +513,7 @@ export function TodayView({
                   <button
                     type="button"
                     onClick={() => onNavigate("budget", "category-budgets")}
-                    className="text-xs font-bold text-[#635BFF] dark:text-[#7C75FF] hover:opacity-80 transition-opacity cursor-pointer active:scale-95 touch-manipulation py-0.5 px-1"
+                    className="text-xs font-medium text-[#635BFF] dark:text-[#7C75FF] hover:opacity-80 transition-opacity cursor-pointer active:scale-95 touch-manipulation py-0.5 px-1"
                   >
                     {lang === 'en' ? 'Manage' : 'Hantera'}
                   </button>
@@ -559,7 +559,7 @@ export function TodayView({
 
                           {/* Amount between category and bar */}
                           <div className="mb-2">
-                            <span className={`text-xs font-bold tabular-nums tracking-tight ${
+                            <span className={`text-xs font-medium tabular-nums tracking-tight ${
                               cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[#6E6961] dark:text-[#9CA6BC]'
                             }`}>
                               {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} kr ${lang === 'en' ? 'left' : 'kvar'}` : `${formatAmount(cat.spent, lang)} kr`}
@@ -592,10 +592,10 @@ export function TodayView({
                         <SlidersHorizontal size={15} strokeWidth={1.75} />
                       </div>
                       <div>
-                        <p className="text-xs sm:text-sm font-bold text-[#1C1917] dark:text-white leading-snug">
+                        <p className="text-xs sm:text-sm font-semibold text-[#1C1917] dark:text-white leading-snug">
                           {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
                         </p>
-                        <p className="text-[11px] font-medium text-[#8C867C] dark:text-[#A8A8A8]">
+                        <p className="text-[11px] font-normal text-[#8C867C] dark:text-[#A8A8A8]">
                           {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
                         </p>
                       </div>

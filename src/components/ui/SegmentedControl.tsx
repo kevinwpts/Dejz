@@ -50,7 +50,7 @@ export function SegmentedControl<T extends string = string>({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`relative flex items-center justify-center gap-1.5 font-bold transition-all select-none cursor-pointer z-10 ${itemSizeStyles} ${
+            className={`relative flex items-center justify-center gap-1.5 font-medium transition-all select-none cursor-pointer z-10 ${itemSizeStyles} ${
               fullWidth ? 'flex-1' : ''
             } ${
               isSelected
@@ -62,7 +62,7 @@ export function SegmentedControl<T extends string = string>({
             <span>{option.label}</span>
             {option.badge !== undefined && (
               <span
-                className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${
+                className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${
                   isSelected
                     ? 'bg-white/20 text-white dark:bg-black/10 dark:text-[#1C1917]'
                     : 'bg-black/5 dark:bg-white/10 text-[#6E6961] dark:text-[#A8A8A8]'

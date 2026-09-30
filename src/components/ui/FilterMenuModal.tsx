@@ -104,7 +104,7 @@ export function FilterMenuModal<T = string>({
                   }}
                   className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] ${
                     isSelected
-                      ? 'bg-[#EEECFF] dark:bg-[#635BFF]/20 text-[#635BFF] dark:text-[#7C75FF] font-semibold'
+                      ? 'bg-[#EEECFF] dark:bg-[#635BFF]/20 text-[#635BFF] dark:text-[#7C75FF] font-medium'
                       : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white font-medium'
                   }`}
                 >
@@ -122,11 +122,11 @@ export function FilterMenuModal<T = string>({
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'text-[#635BFF] dark:text-[#7C75FF] font-bold' : ''}`}>
+                        <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'text-[#635BFF] dark:text-[#7C75FF] font-medium' : ''}`}>
                           {opt.label}
                         </span>
                         {opt.badge && (
-                          <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white shrink-0">
+                          <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white shrink-0">
                             {opt.badge}
                           </span>
                         )}

@@ -106,9 +106,9 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
       
       {/* Right side: Amount + Deduction metadata */}
       <div className="flex flex-col items-end justify-center shrink-0 max-w-[46%] sm:max-w-[42%] text-right pl-1">
-        <p className={`text-[14px] sm:text-[14.5px] font-semibold whitespace-nowrap tracking-tight ${type === 'income' ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white' : 'text-[#1C1917] dark:text-white'}`}>
-          <span className="opacity-75 mr-0.5 text-[13px] font-semibold">{type === 'income' ? '+' : '−'}</span>
-          <span className="font-amount tabular-nums font-semibold tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
+        <p className={`text-[14px] sm:text-[14.5px] font-medium whitespace-nowrap tracking-tight ${type === 'income' ? 'text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white' : 'text-[#1C1917] dark:text-white'}`}>
+          <span className="opacity-75 mr-0.5 text-[13px] font-medium">{type === 'income' ? '+' : '−'}</span>
+          <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
           <span className="text-[12px] font-normal text-[#8C867C] dark:text-[#A8A8A8] ml-1">{currency}</span>
         </p>
 

@@ -107,7 +107,7 @@ export function GreetingModule({
         className="pt-2 sm:pt-4 text-center flex flex-col items-center"
       >
         {/* Tracked Minimalist Uppercase Structural Label: KVAR ATT SPENDERA */}
-        <span className="text-[12px] sm:text-[13px] font-semibold uppercase tracking-[0.08em] text-[#8C867C] dark:text-[#A8A8A8] block select-none font-display">
+        <span className="text-[12px] sm:text-[13px] font-medium uppercase tracking-[0.08em] text-[#8C867C] dark:text-[#A8A8A8] block select-none font-display">
           {t('totalRemaining')}
         </span>
 
@@ -115,13 +115,13 @@ export function GreetingModule({
         <div className="flex items-baseline justify-center gap-1.5 mt-0.5">
           <AnimatedNumber 
             value={stats?.remainingPeriodCents || 0} 
-            className={`text-[54px] sm:text-[66px] leading-[0.95] font-bold font-amount tabular-nums tracking-tight ${
+            className={`text-[54px] sm:text-[66px] leading-[0.95] font-semibold font-amount tabular-nums tracking-tight ${
               isNegative ? 'text-rose-500 dark:text-rose-400' : 'text-[#1C1917] dark:text-white'
             }`}
             formatter={(val) => formatAmount(val, language)}
           />
           {/* Currency label */}
-          <span className={`text-[20px] sm:text-[24px] font-semibold tracking-tight ${
+          <span className={`text-[20px] sm:text-[24px] font-medium tracking-tight ${
             isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[#6E6961] dark:text-[#A8A8A8]'
           }`}>
             {currency}
@@ -134,11 +134,11 @@ export function GreetingModule({
         */}
         <div className="flex flex-col items-center gap-0.5 mt-2 select-none">
           {periodIntervalText && (
-            <p className="text-sm font-medium text-[#1C1917] dark:text-[#E7E5E4] tracking-tight">
+            <p className="text-sm font-normal text-[#1C1917] dark:text-[#E7E5E4] tracking-tight">
               {periodIntervalText}
             </p>
           )}
-          <p className="text-xs sm:text-[13px] font-medium text-[#8C867C] dark:text-[#A8A8A8] tabular-nums tracking-tight">
+          <p className="text-xs sm:text-[13px] font-normal text-[#8C867C] dark:text-[#A8A8A8] tabular-nums tracking-tight">
             {daysRemainingText}
           </p>
         </div>

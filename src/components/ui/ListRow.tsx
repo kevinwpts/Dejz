@@ -52,14 +52,14 @@ export const ListRow: React.FC<ListRowProps> = ({
         )}
         <div className="min-w-0 flex flex-col justify-center">
           <div
-            className={`text-sm font-semibold truncate ${
+            className={`text-sm font-medium truncate ${
               destructive ? 'text-rose-600 dark:text-rose-400' : 'text-[#1C1917] dark:text-white'
             }`}
           >
             {title}
           </div>
           {subtitle && (
-            <div className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8] truncate mt-0.5">
+            <div className="text-xs font-normal text-[#6E6961] dark:text-[#A8A8A8] truncate mt-0.5">
               {subtitle}
             </div>
           )}
@@ -68,7 +68,7 @@ export const ListRow: React.FC<ListRowProps> = ({
 
       <div className="flex items-center gap-2 shrink-0">
         {value && (
-          <div className="text-sm font-bold font-amount tabular-nums text-[#1C1917] dark:text-white">
+          <div className="text-sm font-medium font-amount tabular-nums text-[#1C1917] dark:text-white">
             {value}
           </div>
         )}

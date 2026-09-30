@@ -138,21 +138,21 @@ export function BudgetSummaryModule({
     <div className="space-y-6 font-sans">
       {/* HUVUDBELOPP */}
       <div className="py-2 text-center space-y-1 flex flex-col items-center">
-        <span className="text-[13px] sm:text-[14px] font-bold uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#A8A8A8] block select-none font-display flex items-center justify-center gap-2">
+        <span className="text-[13px] sm:text-[14px] font-medium uppercase tracking-[0.08em] text-[#6E6961] dark:text-[#A8A8A8] block select-none font-display flex items-center justify-center gap-2">
           {isPastPeriod 
             ? (config.language === 'en' ? 'TOTAL SPENT' : 'TOTALT SPENDERAT')
             : (config.language === 'en' ? 'SPENT SO FAR' : 'SPENDERAT HITTILLS')}
           {isPastPeriod && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] bg-[var(--surface-muted)] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8] font-semibold uppercase tracking-wider">
+            <span className="px-2 py-0.5 rounded-full text-[10px] bg-[var(--surface-muted)] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8] font-medium uppercase tracking-wider">
               {config.language === 'en' ? 'Completed' : 'Avslutad'}
             </span>
           )}
         </span>
         <div className="flex items-baseline justify-center gap-2">
-          <span className="text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums text-[#1C1917] dark:text-white tracking-normal">
+          <span className="text-[44px] sm:text-[54px] leading-none font-semibold font-amount tabular-nums text-[#1C1917] dark:text-white tracking-normal">
             {formatAmount(Math.round(totalSpent), config.language)}
           </span>
-          <span className="text-[19px] sm:text-[21px] font-semibold text-[#8C867C] dark:text-[#A8A8A8]">
+          <span className="text-[19px] sm:text-[21px] font-medium text-[#8C867C] dark:text-[#A8A8A8]">
             {config.currency || "kr"}
           </span>
         </div>
@@ -162,13 +162,13 @@ export function BudgetSummaryModule({
       <div className="grid grid-cols-3 gap-2.5 sm:gap-3 pt-1">
         {/* Kort 1: Kvar att spendera / Kvar vid periodens slut / Över budget vid slut */}
         <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-between text-left min-w-0 min-h-[82px]">
-          <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
+          <div className="text-base sm:text-[17px] font-semibold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
             {formatAmount(Math.round(isOverBudget && isPastPeriod ? Math.abs(remainingBudget) : Math.max(0, remainingBudget)), config.language)}{' '}
             <span className="text-xs font-normal text-[#6E6961] dark:text-[#A8A8A8]">
               {config.currency || "kr"}
             </span>
           </div>
-          <span className="text-[9.5px] sm:text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1.5 select-none line-clamp-2 leading-snug">
+          <span className="text-[9.5px] sm:text-[10px] font-medium uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1.5 select-none line-clamp-2 leading-snug">
             {isPastPeriod ? (
               isOverBudget 
                 ? (config.language === 'en' ? 'OVER BUDGET AT END' : 'ÖVER BUDGET VID SLUT')
@@ -182,7 +182,7 @@ export function BudgetSummaryModule({
         {/* Kort 2: Största kategori */}
         <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-between text-left min-w-0 min-h-[82px]">
           <div className="min-w-0">
-            <div className="text-xs sm:text-[13px] font-bold text-[#1C1917] dark:text-white truncate leading-tight capitalize">
+            <div className="text-xs sm:text-[13px] font-semibold text-[#1C1917] dark:text-white truncate leading-tight capitalize">
               {largestCategory.name ? largestCategory.name : <span className="text-[#8C867C] dark:text-[#A8A8A8] font-normal">—</span>}
             </div>
             <div className="text-[11px] sm:text-xs font-medium font-amount tabular-nums text-[#6E6961] dark:text-[#A8A8A8] mt-0.5 truncate">
@@ -191,17 +191,17 @@ export function BudgetSummaryModule({
                 : <span className="opacity-0">0 kr</span>}
             </div>
           </div>
-          <span className="text-[9.5px] sm:text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1.5 select-none line-clamp-2 leading-snug">
+          <span className="text-[9.5px] sm:text-[10px] font-medium uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1.5 select-none line-clamp-2 leading-snug">
             {config.language === 'en' ? 'TOP CATEGORY' : 'STÖRSTA KATEGORI'}
           </span>
         </div>
 
         {/* Kort 3: Av budgeten använd */}
         <div className="bg-white dark:bg-[#242424] p-3 sm:p-3.5 rounded-[18px] border-none shadow-none flex flex-col justify-between text-left min-w-0 min-h-[82px]">
-          <div className="text-base sm:text-[17px] font-bold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
+          <div className="text-base sm:text-[17px] font-semibold font-amount tabular-nums text-[#1C1917] dark:text-white leading-tight">
             {budgetUsedPct}%
           </div>
-          <span className="text-[9.5px] sm:text-[10px] font-semibold uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1.5 select-none line-clamp-2 leading-snug">
+          <span className="text-[9.5px] sm:text-[10px] font-medium uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] mt-1.5 select-none line-clamp-2 leading-snug">
             {config.language === 'en' ? 'OF BUDGET USED' : 'AV BUDGETEN ANVÄND'}
           </span>
         </div>

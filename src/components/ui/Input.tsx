@@ -32,7 +32,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-xs font-semibold text-[var(--text-secondary)] flex items-center justify-between"
+            className="text-xs font-medium text-[var(--text-secondary)] flex items-center justify-between"
           >
             <span>{label}</span>
           </label>
@@ -55,7 +55,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 : 'border-[var(--border-color)] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white'
             } rounded-[14px] ${icon ? 'pl-10' : 'px-4'} ${
               iconRight ? 'pr-10' : 'px-4'
-            } font-semibold text-sm text-[#1C1917] dark:text-white outline-none transition-all placeholder-[var(--text-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+            } font-normal text-sm text-[#1C1917] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
             {...props}
           />
 
