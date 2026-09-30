@@ -16,10 +16,12 @@ export const formatAmount = (val: string | number, language: string = 'sv-SE'): 
   if (val === undefined || val === null || val === '') return '';
   
   if (typeof val === 'number') {
-    return val.toLocaleString(language === 'en' ? 'en-US' : 'sv-SE', {
-      minimumFractionDigits: 0,
+    const locale = (language === 'en' || language === 'en-US') ? 'en-US' : 'sv-SE';
+    const hasDecimals = Math.abs(val % 1) > 1e-6;
+    return val.toLocaleString(locale, {
+      minimumFractionDigits: hasDecimals ? 2 : 0,
       maximumFractionDigits: 2
-    }).replace(/\s/g, ' ');
+    }).replace(/\s/g, ' ').replace(/\u00a0/g, ' ');
   }
 
   // If the input contains math operators, preserve them nicely

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, Receipt, Calendar, Eye, ArrowUpRight, ArrowDownRight, Tag, FileText } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { EmptyState } from './EmptyState';
+import { formatAmount } from '../utils/format';
 
 interface ReceiptsViewProps {
   onBack: () => void;
@@ -32,13 +33,8 @@ export function ReceiptsView({
     return merchantMatch || categoryMatch || noteMatch || amountMatch;
   });
 
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('sv-SE', {
-      style: 'currency',
-      currency: 'SEK',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amount).replace(/\s/g, ' ');
+  const formatDisplayAmount = (amount: number) => {
+    return `${formatAmount(amount, config.language)} ${config.currency || 'kr'}`;
   };
 
   const formatDate = (timestamp: number) => {
@@ -69,7 +65,7 @@ export function ReceiptsView({
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-extrabold text-[#1C1917] dark:text-white tracking-tight font-amount tabular-nums">
-              {formatAmount(totalAmount)}
+              {formatDisplayAmount(totalAmount)}
             </span>
             <span className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8]">
               {config.language === 'sv' ? 'totalt belopp' : 'total amount'}
@@ -168,7 +164,7 @@ export function ReceiptsView({
                   <div className="flex items-center gap-3">
                     <div className="text-right">
                       <span className="font-extrabold text-[13.5px] text-[var(--text-primary)] font-amount tabular-nums">
-                        {formatAmount(item.amount)}
+                        {formatDisplayAmount(item.amount)}
                       </span>
                     </div>
                     <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)]/50 text-[var(--text-secondary)] group-hover:bg-accent/10 group-hover:text-accent flex items-center justify-center transition-all">

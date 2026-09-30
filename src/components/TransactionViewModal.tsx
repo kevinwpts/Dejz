@@ -11,6 +11,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { getCategoryIconName } from '../utils/icons';
 import { formatFullDate } from '../utils/date';
+import { feedback } from '../utils/feedback';
 
 interface TransactionViewModalProps {
   transaction: Transaction;
@@ -94,22 +95,16 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full transition-colors" />
         </div>
 
-        {/* Header with Navigation and Actions */}
+        {/* Header with Navigation and Actions: Actions left, Close button right */}
         <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[#E6E2D8] dark:border-white/[0.06]">
-          <button 
-            type="button"
-            onClick={onClose} 
-            className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-            aria-label={t('close')}
-          >
-            <X size={17} strokeWidth={2.2} />
-          </button>
-          
           <div className="flex items-center gap-1.5 shrink-0">
             <button 
               type="button"
-              onClick={() => onDuplicate(transaction)} 
-              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                onDuplicate(transaction);
+              }} 
+              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
               title={t('duplicate')}
               aria-label={t('duplicate')}
             >
@@ -117,8 +112,11 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             </button>
             <button 
               type="button"
-              onClick={() => onEdit(transaction)} 
-              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                onEdit(transaction);
+              }} 
+              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
               title={t('edit')}
               aria-label={t('edit')}
             >
@@ -126,14 +124,29 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             </button>
             <button 
               type="button"
-              onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.18] flex items-center justify-center text-rose-600 dark:text-rose-400 transition-colors cursor-pointer"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setShowDeleteConfirm(true);
+              }} 
+              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.18] flex items-center justify-center text-rose-600 dark:text-rose-400 transition-colors cursor-pointer active:scale-95"
               title={t('delete')}
               aria-label={t('delete')}
             >
               <Trash2 size={14} strokeWidth={1.8} />
             </button>
           </div>
+
+          <button 
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              onClose();
+            }} 
+            className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+            aria-label={t('close')}
+          >
+            <X size={17} strokeWidth={2.2} />
+          </button>
         </div>
 
         {/* Main Content Area: Modern Consumer App Presentation */}

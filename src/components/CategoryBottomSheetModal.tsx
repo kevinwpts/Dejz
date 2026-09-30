@@ -224,7 +224,7 @@ export function CategoryBottomSheetModal({
                   </div>
                   {categoryData?.hasBudget && (
                     <span className="text-xs font-semibold text-[#8C867C] dark:text-[#A8A8A8] tabular-nums">
-                      {spentPct}%
+                      {spentPct} {isEn ? '% used' : '% använt'}
                     </span>
                   )}
                 </div>
@@ -244,9 +244,17 @@ export function CategoryBottomSheetModal({
               {/* Transactions List: Expanded natural space for Periodens utgifter */}
               <div className="space-y-2 flex-1 flex flex-col min-h-0 pt-0.5">
                 <div className="flex items-center justify-between shrink-0 pb-0.5">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#6E6961] dark:text-[#9CA6BC] font-display">
-                    {isEn ? 'Purchases this period' : 'Periodens utgifter'} ({periodTransactions.length})
-                  </span>
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#6E6961] dark:text-[#9CA6BC]">
+                    <span className="font-bold uppercase tracking-wider font-display">
+                      {isEn ? 'Period purchases' : 'Periodens utgifter'}
+                    </span>
+                    <span className="opacity-60">·</span>
+                    <span className="font-medium">
+                      {isEn
+                        ? `${periodTransactions.length} transaction${periodTransactions.length === 1 ? '' : 's'}`
+                        : `${periodTransactions.length} transaktion${periodTransactions.length === 1 ? '' : 'er'}`}
+                    </span>
+                  </div>
 
                   {totalDisplaySum > 0 && (
                     <span className="text-[11px] font-semibold text-[#6E6961] dark:text-[#9CA6BC]">

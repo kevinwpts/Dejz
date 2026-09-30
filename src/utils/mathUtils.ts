@@ -39,9 +39,11 @@ export function parseMathAmount(expr: string): number | null {
 export function evaluateAndFormatAmount(expr: string): string {
   const result = parseMathAmount(expr);
   if (result !== null) {
-    return new Intl.NumberFormat('sv-SE', {
+    const hasDecimals = Math.abs(result % 1) > 1e-6;
+    return result.toLocaleString('sv-SE', {
+      minimumFractionDigits: hasDecimals ? 2 : 0,
       maximumFractionDigits: 2,
-    }).format(result).replace(/\s/g, ' ');
+    }).replace(/\s/g, ' ').replace(/\u00a0/g, ' ');
   }
   return expr;
 }
@@ -55,8 +57,9 @@ export function formatLiveMathPreview(expr: string): string | null {
   const result = parseMathAmount(expr);
   if (result === null) return null;
   
-  // Return nicely formatted Swedish number
-  return new Intl.NumberFormat('sv-SE', {
+  const hasDecimals = Math.abs(result % 1) > 1e-6;
+  return result.toLocaleString('sv-SE', {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
     maximumFractionDigits: 2,
-  }).format(result);
+  }).replace(/\s/g, ' ').replace(/\u00a0/g, ' ');
 }

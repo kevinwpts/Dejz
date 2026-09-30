@@ -713,87 +713,11 @@ export function TransactionModal({
                 onChange={handleReceiptFileChange}
               />
 
-              {/* Skanna kvitto options for new expenses */}
-              {!transaction && type === 'expense' && (
-                <div className="space-y-4">
-                  {isScanningReceipt ? (
-                    <div className="relative overflow-hidden bg-accent/5 rounded-[20px] border border-accent/25 p-4 flex items-center justify-between transition-all">
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-11 h-11 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                          <Loader2 size={22} className="animate-spin text-accent" />
-                        </div>
-                        <div>
-                          <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">Läser kvittot…</h4>
-                          <p className="text-[11px] font-medium text-accent mt-0.5">Analyserar belopp, företag och datum</p>
-                        </div>
-                      </div>
-                      <div className="px-3.5 py-1.5 bg-accent/10 text-accent text-xs font-semibold rounded-full flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                        <span>Vänta…</span>
-                      </div>
-                    </div>
-                  ) : !receiptUrl ? (
-                    <div 
-                      onClick={() => !isScanningReceipt && !isUploadingReceipt && setIsCameraModalOpen(true)}
-                      className="relative overflow-hidden bg-[var(--surface-muted)]/40 hover:bg-[var(--surface-muted)]/60 rounded-[20px] border border-[var(--border-color)] p-4 flex items-center justify-between transition-all group cursor-pointer active:scale-[0.99]"
-                    >
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-11 h-11 rounded-full bg-accent/10 flex items-center justify-center text-accent group-hover:scale-105 transition-transform duration-300">
-                          {isUploadingReceipt ? (
-                            <Loader2 size={22} className="animate-spin text-accent" />
-                          ) : (
-                            <Camera size={22} strokeWidth={2} />
-                          )}
-                        </div>
-                        <div>
-                          <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">Skanna kvitto</h4>
-                          <p className="text-[11px] font-medium text-[var(--text-tertiary)] opacity-85 mt-0.5">Fotografera med appens kamera</p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsCameraModalOpen(true);
-                        }}
-                        disabled={isUploadingReceipt}
-                        className="relative px-4 py-2 bg-[var(--text-primary)] hover:opacity-90 text-[var(--bg-color)] text-xs font-bold rounded-full shadow-sm active:scale-95 transition-all cursor-pointer select-none disabled:opacity-50"
-                      >
-                        Öppna kamera
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="relative overflow-hidden bg-success/5 rounded-[20px] border border-success/20 p-4 flex items-center justify-between transition-all">
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="relative w-11 h-11 rounded-[12px] overflow-hidden border border-success/20 shadow-xs shrink-0">
-                          <img src={receiptUrl} alt="Bifogat kvitto" className="w-full h-full object-cover" />
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-[14px] font-bold text-[var(--text-primary)] tracking-tight">Kvitto bifogat</h4>
-                          <p className="text-[11px] font-medium text-success mt-0.5 truncate">
-                            {scanFeedback?.message || 'Kontrollera uppgifterna nedan innan du sparar'}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReceiptUrl(undefined);
-                          setScanFeedback(null);
-                        }}
-                        className="px-3.5 py-1.5 bg-danger/10 text-danger text-xs font-bold rounded-full hover:bg-danger/20 transition-all cursor-pointer shrink-0 ml-2"
-                      >
-                        Ta bort
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Amount Input */}
-              <div className="flex flex-col gap-2">
+              {/* Amount Input: Primary, prominent hero input field */}
+              <div className="flex flex-col gap-1.5">
                 <div 
-                  className="bg-[#F7F5F0] dark:bg-white/[0.04] rounded-2xl py-3 px-4 sm:py-3.5 sm:px-5 flex items-center justify-between transition-all border border-[#E6E2D8] dark:border-white/[0.06] group"
+                  onClick={() => amountInputRef.current?.focus()}
+                  className="bg-[#F7F5F0] dark:bg-white/[0.04] rounded-2xl py-3.5 px-4 sm:py-4 sm:px-5 flex items-center justify-between transition-all border border-[#E6E2D8] dark:border-white/[0.06] focus-within:border-[#1C1917] dark:focus-within:border-white focus-within:ring-2 focus-within:ring-[#1C1917]/10 dark:focus-within:ring-white/10 group cursor-text"
                 >
                   <div className="shrink-0 flex items-center min-w-[72px]">
                     {type === 'expense' && (
@@ -831,7 +755,7 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[#1C1917] dark:text-white outline-none font-amount text-[38px] sm:text-[44px] font-bold text-center tracking-tight leading-none placeholder-[#6E6961]/30 dark:placeholder-white/30 cursor-text select-text"
+                      className="w-full bg-transparent text-[#1C1917] dark:text-white outline-none font-amount text-[40px] sm:text-[46px] font-bold text-center tracking-tight leading-none placeholder-[#6E6961]/30 dark:placeholder-white/30 cursor-text select-text"
                     />
                   </div>
                   <div className="shrink-0 flex items-center justify-end min-w-[72px]">
@@ -1193,67 +1117,91 @@ export function TransactionModal({
                     </AnimatePresence>
                   </div>
 
-                  {/* Receipt Section */}
+                  {/* Receipt Section: Toned-down quick action */}
                   {type !== 'income' && (
-                    <div className="pt-4 space-y-4 pb-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between px-1">
-                          <h3 className="text-[11px] font-medium text-[var(--text-secondary)] ml-2">{t('receipt')}</h3>
-                          {!isPro && (
-                            <span className="text-[9px] font-medium text-accent bg-accent/10 px-2.5 py-0.5 rounded-[8px] border border-accent/20">
-                              {t('proFeature')}
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-4">
-
-                          {receiptUrl ? (
-                            <div className="relative w-24 h-24 rounded-[16px] overflow-hidden group shadow-sm border border-[var(--border-color)]">
-                              <img src={receiptUrl} alt="Receipt" className="w-full h-full object-cover" />
-                              <button 
-                                onClick={() => setReceiptUrl(undefined)}
-                                className="absolute inset-0 bg-danger/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[var(--text-on-accent)]"
-                              >
-                                <Trash2 size={22} strokeWidth={2} />
-                              </button>
+                    <div className="pt-2 border-t border-[#E6E2D8] dark:border-white/[0.06]">
+                      {isScanningReceipt ? (
+                        <div className="bg-[#F7F5F0] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-accent/25 flex items-center justify-between transition-all">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                              <Loader2 size={16} className="animate-spin text-accent" />
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => isPro && !isScanningReceipt && !isUploadingReceipt && receiptInputRef.current?.click()}
-                              disabled={!isPro || isUploadingReceipt || isScanningReceipt}
-                              className={`w-24 h-24 rounded-[16px] flex flex-col items-center justify-center gap-2 transition-all border ${
-                                !isPro 
-                                  ? 'bg-[var(--surface-muted)]/50 border-[var(--border-color)] opacity-50 cursor-not-allowed text-[var(--text-tertiary)]'
-                                  : 'bg-[var(--surface-muted)]/50 text-[var(--text-tertiary)] border-[var(--border-color)] hover:border-accent/40 hover:text-accent shadow-xs'
-                              }`}
-                            >
-                              {isScanningReceipt ? (
-                                <div className="flex flex-col items-center gap-1.5 px-1 text-center">
-                                  <Loader2 size={20} className="animate-spin text-accent" />
-                                  <span className="text-[10px] font-semibold text-accent leading-tight">Läser kvittot…</span>
-                                </div>
-                              ) : isUploadingReceipt ? (
-                                <div className="flex flex-col items-center gap-2">
-                                  <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                                  <span className="text-[10px] font-medium text-accent">{t('uploading')}</span>
-                                </div>
-                              ) : (
-                                <>
-                                  <Camera size={24} strokeWidth={1.5} />
-                                  <span className="text-[10px] font-medium">{t('add')}</span>
-                                </>
-                              )}
-                            </button>
-                          )}
-                          
-                          {isPro && !receiptUrl && (
-                            <p className="text-[13px] font-medium text-[var(--text-tertiary)] opacity-60 max-w-[160px] leading-relaxed">
-                              {t('uploadReceipt')}
-                            </p>
-                          )}
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-bold text-[#1C1917] dark:text-white tracking-tight">
+                                {currentLang === 'en' ? 'Scanning receipt…' : 'Läser kvittot…'}
+                              </h4>
+                              <p className="text-[11px] font-medium text-accent truncate">
+                                {currentLang === 'en' ? 'Analyzing amount, store & date' : 'Analyserar belopp, företag och datum'}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-[11px] font-semibold text-accent bg-accent/10 px-2.5 py-1 rounded-full animate-pulse">
+                            {currentLang === 'en' ? 'Wait…' : 'Vänta…'}
+                          </span>
                         </div>
-                      </div>
+                      ) : receiptUrl ? (
+                        <div className="bg-[#F7F5F0] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-between transition-all">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shrink-0 bg-black/5">
+                              <img src={receiptUrl} alt="Receipt" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-bold text-[#1C1917] dark:text-white tracking-tight">
+                                {currentLang === 'en' ? 'Receipt attached' : 'Kvitto bifogat'}
+                              </h4>
+                              <p className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] truncate">
+                                {scanFeedback?.message || (currentLang === 'en' ? 'Check details before saving' : 'Kontrollera uppgifterna innan du sparar')}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReceiptUrl(undefined);
+                              setScanFeedback(null);
+                            }}
+                            className="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-full transition-colors cursor-pointer shrink-0 ml-2"
+                          >
+                            {currentLang === 'en' ? 'Remove' : 'Ta bort'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div 
+                          onClick={() => !isScanningReceipt && !isUploadingReceipt && setIsCameraModalOpen(true)}
+                          className="bg-[#F7F5F0] dark:bg-white/[0.04] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.07] rounded-xl p-3 sm:p-3.5 border border-[#E6E2D8] dark:border-white/[0.06] flex items-center justify-between transition-all cursor-pointer group active:scale-[0.99]"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[#1C1917] dark:text-white shrink-0 group-hover:scale-105 transition-transform">
+                              {isUploadingReceipt ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Camera size={16} strokeWidth={2} />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-[#1C1917] dark:text-white tracking-tight">
+                                  {currentLang === 'en' ? 'Scan receipt' : 'Skanna kvitto'}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] truncate">
+                                {currentLang === 'en' ? 'Take a photo with the camera' : 'Fotografera med appens kamera'}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsCameraModalOpen(true);
+                            }}
+                            disabled={isUploadingReceipt}
+                            className="px-3 py-1.5 bg-[#1C1917] text-white dark:bg-white dark:text-black hover:opacity-90 text-xs font-semibold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer shrink-0 ml-2"
+                          >
+                            {currentLang === 'en' ? 'Open camera' : 'Öppna kamera'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
           </div>
