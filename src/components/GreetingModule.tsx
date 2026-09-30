@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Wallet, Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
+import { DejziAvatar } from './DejziSummaryModal';
 
 interface GreetingModuleProps {
   userName?: string;
@@ -34,6 +35,7 @@ interface GreetingModuleProps {
   allTransactions?: any[];
   children?: React.ReactNode;
   categoryBudgets?: React.ReactNode;
+  onOpenDejzi?: () => void;
 }
 
 export function GreetingModule({
@@ -46,6 +48,7 @@ export function GreetingModule({
   periodEnd,
   children,
   categoryBudgets,
+  onOpenDejzi,
 }: GreetingModuleProps) {
   const isEn = language === 'en';
 
@@ -97,74 +100,82 @@ export function GreetingModule({
 
   return (
     <div className="flex flex-col font-sans relative">
-      {/* WHITE SUMMARY CARD */}
+      {/* SUMMARY CARD */}
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full bg-white/88 dark:bg-[#242424]/90 backdrop-blur-[2px] rounded-[20px] p-[20px] border border-[#E2DDD4]/80 dark:border-[#383838] shadow-none mb-[24px] select-none"
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full bg-white dark:bg-[#242424] rounded-[20px] p-[16px] sm:p-[20px] border border-[#E5E2DC] dark:border-[#383838] shadow-none mb-[16px] select-none"
       >
         {/* UPPER PART */}
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             {/* Label: Kvar att spendera */}
-            <span className="text-[15px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
+            <span className="text-[14px] sm:text-[15px] font-normal text-[#716E68] dark:text-[#A8A8A8] block leading-snug">
               {t('totalRemaining')}
             </span>
 
-            {/* Amount: 8px gap below label */}
-            <div className="flex items-baseline gap-1.5 mt-[8px]">
+            {/* Amount */}
+            <div className="flex items-baseline gap-1.5 mt-[6px]">
               <AnimatedNumber
                 value={stats?.remainingPeriodCents || 0}
-                className={`text-[42px] font-semibold leading-none font-amount tabular-nums tracking-tight ${
-                  isNegative ? 'text-rose-500 dark:text-rose-400' : 'text-[#1C1917] dark:text-white'
+                className={`text-[36px] sm:text-[40px] font-semibold leading-none font-amount tabular-nums tracking-tight ${
+                  isNegative ? 'text-rose-500 dark:text-rose-400' : 'text-[#242321] dark:text-white'
                 }`}
                 formatter={(val) => formatAmount(val, language)}
               />
-              <span className={`text-[20px] font-normal leading-none ${
-                isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[#6D6962] dark:text-[#A8A8A8]'
+              <span className={`text-[18px] sm:text-[20px] font-normal leading-none ${
+                isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[#716E68] dark:text-[#A8A8A8]'
               }`}>
                 {currency || 'kr'}
               </span>
             </div>
           </div>
 
-          {/* Top Right: 52 x 52 px circle with soft theme bg and theme wallet outline icon */}
-          <div className="w-[52px] h-[52px] rounded-full bg-[var(--accent-soft)] flex items-center justify-center shrink-0">
-            <Wallet size={24} className="text-[var(--accent-color)]" strokeWidth={1.75} />
-          </div>
+          {/* Top Right: AI Mascot Button (Requirement 3: replacing wallet icon) */}
+          {onOpenDejzi && (
+            <button
+              type="button"
+              onClick={onOpenDejzi}
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[#F0EEEA] dark:bg-[#2D2D2D] border border-[#E5E2DC] dark:border-[#383838] flex items-center justify-center shrink-0 hover:bg-[#EAE6DE] dark:hover:bg-[#383838] active:scale-95 transition-all cursor-pointer shadow-none"
+              aria-label={isEn ? "Visa AI-överblick" : "Visa AI-överblick"}
+              title={isEn ? "Visa AI-överblick" : "Visa AI-överblick"}
+            >
+              <DejziAvatar size="sm" />
+            </button>
+          )}
         </div>
 
-        {/* THIN HORIZONTAL DIVIDER (20px below amount) */}
-        <div className="mt-[20px] border-t border-[#E2DDD4] dark:border-[#383838]" />
+        {/* THIN HORIZONTAL DIVIDER */}
+        <div className="mt-[14px] border-t border-[#E5E2DC] dark:border-[#383838]" />
 
-        {/* LOWER PART: Info row (16px below line) */}
-        <div className="pt-[16px] grid grid-cols-2 divide-x divide-[#E2DDD4] dark:divide-[#383838]">
+        {/* LOWER PART: Info row */}
+        <div className="pt-[12px] grid grid-cols-2 divide-x divide-[#E5E2DC] dark:divide-[#383838]">
           {/* Left Column: Period */}
-          <div className="flex items-center gap-[10px] pr-2.5 min-w-0">
-            <div className="w-[36px] h-[36px] rounded-full bg-[#F3F0EB] dark:bg-[#2D2D2D] flex items-center justify-center shrink-0">
-              <Calendar size={18} className="text-[#6D6962] dark:text-[#A8A8A8]" strokeWidth={1.75} />
+          <div className="flex items-center gap-[8px] sm:gap-[10px] pr-2 min-w-0">
+            <div className="w-[32px] h-[32px] rounded-full bg-[#F0EEEA] dark:bg-[#2D2D2D] flex items-center justify-center shrink-0">
+              <Calendar size={16} className="text-[#716E68] dark:text-[#A8A8A8]" strokeWidth={1.75} />
             </div>
-            <div className="flex flex-col gap-[4px] min-w-0">
-              <span className="text-[10px] font-normal text-[#6D6962] dark:text-[#A8A8A8] uppercase tracking-wider leading-none">
+            <div className="flex flex-col gap-[2px] min-w-0">
+              <span className="text-[10px] font-normal text-[#716E68] dark:text-[#A8A8A8] uppercase tracking-wider leading-none">
                 PERIOD
               </span>
-              <span className="text-[14px] font-medium text-[#1C1917] dark:text-white truncate leading-tight">
+              <span className="text-[13px] sm:text-[14px] font-medium text-[#242321] dark:text-white truncate leading-tight">
                 {periodIntervalText}
               </span>
             </div>
           </div>
 
           {/* Right Column: Till Lön */}
-          <div className="flex items-center gap-[10px] pl-3.5 sm:pl-4 min-w-0">
-            <div className="w-[36px] h-[36px] rounded-full bg-[#F3F0EB] dark:bg-[#2D2D2D] flex items-center justify-center shrink-0">
-              <Clock size={18} className="text-[#6D6962] dark:text-[#A8A8A8]" strokeWidth={1.75} />
+          <div className="flex items-center gap-[8px] sm:gap-[10px] pl-3 sm:pl-4 min-w-0">
+            <div className="w-[32px] h-[32px] rounded-full bg-[#F0EEEA] dark:bg-[#2D2D2D] flex items-center justify-center shrink-0">
+              <Clock size={16} className="text-[#716E68] dark:text-[#A8A8A8]" strokeWidth={1.75} />
             </div>
-            <div className="flex flex-col gap-[4px] min-w-0">
-              <span className="text-[10px] font-normal text-[#6D6962] dark:text-[#A8A8A8] uppercase tracking-wider leading-none">
+            <div className="flex flex-col gap-[2px] min-w-0">
+              <span className="text-[10px] font-normal text-[#716E68] dark:text-[#A8A8A8] uppercase tracking-wider leading-none">
                 {isEn ? 'PAYDAY' : 'TILL LÖN'}
               </span>
-              <span className="text-[14px] font-medium text-[#1C1917] dark:text-white truncate leading-tight">
+              <span className="text-[13px] sm:text-[14px] font-medium text-[#242321] dark:text-white truncate leading-tight">
                 {daysValueText}
               </span>
             </div>

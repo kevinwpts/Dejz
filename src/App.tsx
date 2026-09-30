@@ -4261,13 +4261,14 @@ export default function App() {
       )}
 
             <PullToRefresh onRefresh={handleRefresh}>
-        <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top,0px))]' : 'pt-[calc(5rem+env(safe-area-inset-top,0px))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
+        <main className={`max-w-2xl mx-auto px-3.5 sm:px-6 relative ${isDemoMode ? 'pt-[calc(5.8rem+env(safe-area-inset-top,0px))]' : 'pt-[calc(3.75rem+env(safe-area-inset-top,0px))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
           {stats && (
             <div style={{ display: activeTab === "today" ? "block" : "none" }}>
               <TodayView
                 stats={stats}
                 config={config}
                 isDemoMode={isDemoMode}
+                onOpenDejzi={() => setIsDejziSummaryOpen(true)}
                 userName={
                   (() => {
                     const raw = (

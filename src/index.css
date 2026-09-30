@@ -182,34 +182,34 @@ h6 {
   --orange-900: #713800;
 
   /* Dejz Official Brand Logo Color */
-  --logo-color: #211F1C;
+  --logo-color: #242321;
 
   /* Premium Warm Sand Light Theme */
-  --bg-top-color: #F2EFE8;
-  --bg-color: #F2EFE8;
-  --bg-secondary: #F2EFE8;
-  --bg-gradient: linear-gradient(180deg, #F2EFE8 0%, #F2EFE8 100%);
+  --bg-top-color: #F7F6F3;
+  --bg-color: #F7F6F3;
+  --bg-secondary: #F7F6F3;
+  --bg-gradient: linear-gradient(180deg, #F7F6F3 0%, #F7F6F3 100%);
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: #EAE6DE;
-  --surface-tint: rgba(33, 31, 28, 0.02);
+  --surface-muted: #F0EEEA;
+  --surface-tint: rgba(36, 35, 33, 0.02);
 
-  --text-primary: #211F1C;
-  --text-secondary: #6D6962;
-  --text-tertiary: #777168;
-  --text-inactive: #A8A39D;
+  --text-primary: #242321;
+  --text-secondary: #716E68;
+  --text-tertiary: #716E68;
+  --text-inactive: #A09C95;
 
-  --border-color: #E2DDD4;
-  --border-strong: #D5CFC4;
+  --border-color: #E5E2DC;
+  --border-strong: #D8D4CC;
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: #EAE6DE;
+  --chip-bg: #F0EEEA;
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #EAE6DE;
+  --card-nested-bg: #F0EEEA;
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
@@ -230,15 +230,15 @@ h6 {
   --accent-secondary-color: #EEECFF;
 
   /* Primary button states (Light mode) */
-  --btn-primary-bg: #1C1917;
+  --btn-primary-bg: #242321;
   --btn-primary-text: #FFFFFF;
-  --btn-primary-hover: #2E2A27;
-  --btn-primary-pressed: #44403C;
+  --btn-primary-hover: #33312E;
+  --btn-primary-pressed: #484542;
 
   --modal-bg: #FFFFFF;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #DFD9CF;
+  --bg-hover: #EAE6DE;
 
   --card-shadow: none;
   --card-inner-stroke: none;
@@ -246,7 +246,7 @@ h6 {
   --success-color: #05B862;
   --danger-color: #EF4444;
   --warning-color: #F59E0B;
-  --info-color: #1C1917;
+  --info-color: #242321;
 
   --nav-active-color: #635BFF;
   --nav-inactive-color: #8C867C;
@@ -260,12 +260,12 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #EAE6DE;
-  --date-active-color: #1C1917;
+  --date-active-bg: #F0EEEA;
+  --date-active-color: #242321;
   --date-active-shadow: none;
   --date-inactive-bg: #FFFFFF;
-  --date-inactive-border: #E2DDD4;
-  --date-inactive-color: #6E6961;
+  --date-inactive-border: #E5E2DC;
+  --date-inactive-color: #716E68;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;
