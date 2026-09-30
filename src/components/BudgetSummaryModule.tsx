@@ -163,10 +163,10 @@ export function BudgetSummaryModule({
             : (isEn ? 'Spenderat hittills' : 'Spenderat hittills')}
         </span>
         <div className="flex items-baseline justify-center gap-1.5">
-          <span className="text-4xl sm:text-5xl md:text-[48px] leading-tight font-semibold font-amount tabular-nums text-[#211F1C] dark:text-white tracking-tight">
+          <span className="text-[34px] sm:text-[38px] md:text-[42px] leading-tight font-semibold font-amount tabular-nums text-[#211F1C] dark:text-white tracking-tight">
             {formatAmount(Math.round(totalSpent), config.language)}
           </span>
-          <span className="text-base sm:text-lg font-normal text-[#6D6962] dark:text-[#A8A8A8]">
+          <span className="text-sm sm:text-base font-normal text-[#6D6962] dark:text-[#A8A8A8]">
             {config.currency || "kr"}
           </span>
         </div>

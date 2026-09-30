@@ -107,21 +107,21 @@ export function GreetingModule({
         className="pt-2 sm:pt-4 text-center flex flex-col items-center"
       >
         {/* Information label: Kvar att spendera (standard capitalization) */}
-        <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block select-none">
+        <span className="text-[13px] sm:text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block select-none">
           {t('totalRemaining')}
         </span>
 
-        {/* Primary Dominant Hero Amount: 48px, weight 600 with responsive scaling */}
+        {/* Primary Hero Amount: refined 36-42px, weight 600 */}
         <div className="flex items-baseline justify-center gap-1.5 mt-0.5">
           <AnimatedNumber 
             value={stats?.remainingPeriodCents || 0} 
-            className={`text-3xl sm:text-4xl md:text-[48px] leading-tight font-semibold font-amount tabular-nums tracking-tight ${
+            className={`text-[34px] sm:text-[38px] md:text-[42px] leading-tight font-semibold font-amount tabular-nums tracking-tight ${
               isNegative ? 'text-rose-500 dark:text-rose-400' : 'text-[#211F1C] dark:text-white'
             }`}
             formatter={(val) => formatAmount(val, language)}
           />
           {/* Currency label */}
-          <span className={`text-base sm:text-lg font-normal tracking-tight ${
+          <span className={`text-sm sm:text-base font-normal tracking-tight ${
             isNegative ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-[#6D6962] dark:text-[#A8A8A8]'
           }`}>
             {currency}

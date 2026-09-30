@@ -146,7 +146,7 @@ export function AppHeader({
                 </p>
               </>
             ) : (
-              <h1 className="text-[24px] font-semibold tracking-tight truncate select-none leading-none text-[#211F1C] dark:text-white">
+              <h1 className="text-[22px] sm:text-[23px] font-semibold tracking-tight truncate select-none leading-none text-[#211F1C] dark:text-white">
                 {displayTitle}
               </h1>
             )}

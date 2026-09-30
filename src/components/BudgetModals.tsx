@@ -140,18 +140,18 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           <div className="bg-[var(--surface-color)] dark:bg-[#312f2f] rounded-[18px] border border-[var(--border-color)] dark:border-white/[0.05] divide-y divide-[var(--border-color)]/50 dark:divide-white/[0.05] overflow-hidden shadow-xs dark:shadow-none">
             
             {/* Amount Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between">
-              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC]">
+            <div className="p-3.5 sm:p-4 flex items-center justify-between">
+              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
                 {t('amount')}
               </span>
               <div className="text-right">
-                <p className="text-xl sm:text-2xl font-semibold font-amount tabular-nums text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white">
-                  <span className="opacity-75 mr-1">+</span>
+                <p className="text-[22px] sm:text-[24px] font-semibold font-amount tabular-nums text-[#211F1C] dark:text-white">
+                  <span className="opacity-75 mr-0.5">+</span>
                   <span>{formatAmount(displayAmount, config.language)}</span>
-                  <span className="text-sm font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1.5 font-sans">{currency}</span>
+                  <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px] font-sans">{currency}</span>
                 </p>
                 {hasAdjustment && (
-                  <p className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] mt-0.5">
+                  <p className="text-[12px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 tabular-nums">
                     {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(income.amount, config.language)} {currency})
                   </p>
                 )}
@@ -159,11 +159,11 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             </div>
 
             {/* Merchant / Payer Row */}
-            <div className="p-4 sm:p-4.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
+            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
+              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
                 {t('merchant')}
               </span>
-              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right truncate">
+              <span className="text-[15px] font-medium text-[#211F1C] dark:text-white text-right truncate">
                 {income.name}
               </span>
             </div>
@@ -402,7 +402,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                       }
                     }}
                     placeholder="0"
-                    className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[44px] font-semibold text-center tracking-tighter leading-none placeholder-[var(--text-tertiary)]/30"
+                    className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:[var(--text-tertiary)]/30"
                   />
                 </div>
                 <div className="shrink-0 flex items-center justify-end min-w-[72px]">
@@ -793,18 +793,18 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           <div className="bg-[var(--surface-color)] dark:bg-[#312f2f] rounded-[18px] border border-[var(--border-color)] dark:border-white/[0.05] divide-y divide-[var(--border-color)]/50 dark:divide-white/[0.05] overflow-hidden shadow-xs dark:shadow-none">
             
             {/* Amount Row */}
-            <div className="p-3 sm:p-3.5 flex items-center justify-between">
-              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC]">
+            <div className="p-3.5 sm:p-4 flex items-center justify-between">
+              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
                 {t('amount')}
               </span>
               <div className="text-right">
-                <p className="text-xl sm:text-2xl font-semibold font-amount tabular-nums text-[#1C1917] dark:text-white">
-                  <span className="opacity-75 mr-1">−</span>
+                <p className="text-[22px] sm:text-[24px] font-semibold font-amount tabular-nums text-[#211F1C] dark:text-white">
+                  <span className="opacity-75 mr-0.5">−</span>
                   <span>{formatAmount(displayAmount, config.language)}</span>
-                  <span className="text-sm font-normal text-[#6E6961] dark:text-[#9CA6BC] ml-1.5 font-sans">{currency}</span>
+                  <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px] font-sans">{currency}</span>
                 </p>
                 {hasAdjustment && (
-                  <p className="text-[11px] font-normal text-[#6E6961] dark:text-[#9CA6BC] mt-0.5">
+                  <p className="text-[12px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 tabular-nums">
                     {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
                   </p>
                 )}
@@ -812,44 +812,44 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             </div>
 
             {/* Merchant / Receiver Row */}
-            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
+            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
+              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
                 {t('merchant')}
               </span>
-              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right truncate">
+              <span className="text-[15px] font-medium text-[#211F1C] dark:text-white text-right truncate">
                 {expense.name}
               </span>
             </div>
 
             {/* Category Row */}
-            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
+            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
+              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center justify-end gap-2">
                 <CategoryIcon icon={expense.icon || '🏠'} size="xs" />
-                <span className="text-sm font-medium text-[#1C1917] dark:text-white">
+                <span className="text-[15px] font-medium text-[#211F1C] dark:text-white">
                   {typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || '')}
                 </span>
               </div>
             </div>
 
             {/* Type Row */}
-            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
+            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
+              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right">
+              <span className="text-[15px] font-medium text-[#211F1C] dark:text-white text-right">
                 {expense.isVariable ? 'Varierande' : 'Fast belopp'}
               </span>
             </div>
 
             {/* Frequency Row */}
-            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
-              <span className="text-xs font-normal text-[#6E6961] dark:text-[#9CA6BC] shrink-0">
+            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
+              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
                 {t('frequency')}
               </span>
-              <span className="text-sm font-medium text-[#1C1917] dark:text-white text-right">
+              <span className="text-[15px] font-medium text-[#211F1C] dark:text-white text-right">
                 {freqText}
               </span>
             </div>
@@ -1125,9 +1125,9 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                       }
                     }}
                     placeholder="0" 
-                    className="w-full bg-transparent text-[#211F1C] dark:text-white outline-none font-amount text-[40px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/40 dark:placeholder-white/30" 
+                    className="w-full bg-transparent text-[#211F1C] dark:text-white outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/40 dark:placeholder-white/30" 
                   />
-                  <span className="text-[16px] font-normal text-[#6D6962] dark:text-[#A8A8A8] select-none font-sans shrink-0">
+                  <span className="text-[15px] font-normal text-[#6D6962] dark:text-[#A8A8A8] select-none font-sans shrink-0">
                     {currency}
                   </span>
                 </div>
@@ -1611,12 +1611,12 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             />
           </div>
 
-          <div className="bg-[#FFFFFF] dark:bg-[#312f2f] p-5 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.05] shadow-xs dark:shadow-none">
-            <p className="text-xs font-medium text-[#6E6961] dark:text-[var(--text-secondary)] opacity-75 mb-1">{t('amount')}</p>
-            <p className="text-3xl font-semibold text-neutral-900 dark:text-white dark:text-neutral-200 dark:text-white font-amount">
-              <span className="opacity-40 mr-1">→</span>
+          <div className="bg-[#FFFFFF] dark:bg-[#312f2f] p-4 sm:p-5 rounded-[18px] border border-[#E6E2D8] dark:border-white/[0.05] shadow-xs dark:shadow-none">
+            <p className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8] mb-1">{t('amount')}</p>
+            <p className="text-[22px] sm:text-[24px] font-semibold text-[#211F1C] dark:text-white font-amount tabular-nums">
+              <span className="opacity-75 mr-0.5">→</span>
               <span className="font-amount">{formatAmount(saving.amount)}</span>
-              <span className="text-xl font-semibold text-[#8C867C] dark:text-[var(--text-secondary)] opacity-60 ml-2 font-sans">{currency}</span>
+              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px] font-sans">{currency}</span>
             </p>
           </div>
           
@@ -1856,7 +1856,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                       }
                     }}
                     placeholder="0" 
-                    className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[44px] font-semibold text-center tracking-tighter leading-none placeholder-[var(--text-tertiary)]/30" 
+                    className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:[var(--text-tertiary)]/30" 
                   />
                 </div>
                 <div className="shrink-0 flex items-center justify-end min-w-[72px]">

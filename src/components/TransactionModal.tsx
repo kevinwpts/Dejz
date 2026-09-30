@@ -683,7 +683,7 @@ export function TransactionModal({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="text-base sm:text-lg font-bold tracking-tight text-[#1C1917] dark:text-white text-center truncate px-2"
+                  className="text-[17px] sm:text-[18px] font-semibold tracking-tight text-[#211F1C] dark:text-white text-center truncate px-2"
                 >
                   {transaction 
                     ? (currentLang === 'en' ? 'Edit transaction' : (type === 'income' ? 'Redigera inkomst' : 'Redigera transaktion'))
@@ -758,9 +758,9 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[#211F1C] dark:text-white outline-none font-amount text-[40px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/40 dark:placeholder-white/30 cursor-text select-text"
+                      className="w-full bg-transparent text-[#211F1C] dark:text-white outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/40 dark:placeholder-white/30 cursor-text select-text"
                     />
-                    <span className="text-[16px] font-normal text-[#6D6962] dark:text-[#A8A8A8] select-none font-sans shrink-0">
+                    <span className="text-[15px] font-normal text-[#6D6962] dark:text-[#A8A8A8] select-none font-sans shrink-0">
                       {currency}
                     </span>
                   </div>

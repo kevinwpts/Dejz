@@ -160,17 +160,17 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               <TransactionLogo transaction={transaction} config={config} size="md" />
             </div>
 
-            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#1C1917] dark:text-white mt-3 truncate max-w-full px-4">
+            <h2 className="text-[17px] sm:text-[18px] font-semibold tracking-tight text-[#211F1C] dark:text-white mt-3 truncate max-w-full px-4">
               {merchantName}
             </h2>
 
-            <p className={`text-[36px] sm:text-[42px] font-black font-amount tabular-nums tracking-tight leading-tight mt-1 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-white'}`}>
-              <span className="opacity-70 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
+            <p className={`text-[30px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight leading-tight mt-1 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#211F1C] dark:text-white'}`}>
+              <span className="opacity-75 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
               <span>{formatAmount(transaction.amount, config.language)}</span>
-              <span className="text-xl sm:text-2xl font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-1.5 font-sans">{config.currency}</span>
+              <span className="text-[15px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px] font-sans">{config.currency}</span>
             </p>
 
-            <p className="text-xs sm:text-[13px] font-medium text-[#8C867C] dark:text-[#A8A8A8] mt-1.5 select-none tabular-nums">
+            <p className="text-[12px] sm:text-[13px] font-normal text-[#777168] dark:text-[#71717A] mt-1 select-none tabular-nums">
               {formattedDate}{formattedTime ? ` · ${formattedTime}` : ''}
             </p>
           </div>
@@ -179,7 +179,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           <div className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-2xl p-4 space-y-3.5 border border-[#E2DDD4] dark:border-white/[0.06]">
             {/* Category */}
             <div className="flex items-center justify-between gap-4">
-              <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] shrink-0">
+              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
                 {t('category')}
               </span>
               <div className="text-right">
@@ -195,8 +195,8 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       return (
                         <div key={split.id || idx} className="flex items-center justify-end gap-2">
                           {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />}
-                          <span className="text-xs sm:text-sm font-semibold text-[#1C1917] dark:text-white">{splitCatName}</span>
-                          <span className="text-xs text-[#6E6961] dark:text-[#A8A8A8]">({formatAmount(split.amount, config.language)} {config.currency})</span>
+                          <span className="text-[15px] font-medium text-[#211F1C] dark:text-white">{splitCatName}</span>
+                          <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">({formatAmount(split.amount, config.language)} {config.currency})</span>
                         </div>
                       );
                     })}
@@ -213,7 +213,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       if (!iconKey) return null;
                       return <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />;
                     })()}
-                    <span className="text-xs sm:text-sm font-semibold text-[#1C1917] dark:text-white">
+                    <span className="text-[15px] font-medium text-[#211F1C] dark:text-white">
                       {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}
                     </span>
                   </div>
@@ -226,10 +226,10 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               <>
                 <div className="h-px bg-[#E6E2D8] dark:bg-white/[0.06]" />
                 <div className="flex items-start justify-between gap-4">
-                  <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] shrink-0 pt-0.5">
+                  <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0 pt-0.5">
                     {t('ownNote')}
                   </span>
-                  <span className="text-xs sm:text-sm font-medium text-[#1C1917] dark:text-white text-right max-w-[70%] break-words">
+                  <span className="text-[15px] font-medium text-[#211F1C] dark:text-white text-right max-w-[70%] break-words">
                     {transaction.note}
                   </span>
                 </div>
