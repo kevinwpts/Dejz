@@ -190,6 +190,7 @@ export function TransactionModal({
   const [amount, setAmount] = useState(formatAmount(transaction?.amount?.toString() || prefill?.amount?.toString() || ''));
   const [splits, setSplits] = useState<TransactionSplit[]>(transaction?.splits || []);
   const [category, setCategory] = useState(transaction?.category || prefill?.category || (categories && categories.length > 0 ? categories[0].name : ''));
+  const [hasManuallySelectedCategory, setHasManuallySelectedCategory] = useState(!!prefill?.category);
   const [isCategorySelectorOpen, setIsCategorySelectorOpen] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
