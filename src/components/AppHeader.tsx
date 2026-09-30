@@ -20,8 +20,6 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({
-  userName,
-  date,
   avatarUrl,
   onNavigate,
   onOpenSearch,
@@ -30,7 +28,7 @@ export function AppHeader({
   onBack,
   notificationCount = 0,
   onOpenNotifications,
-  onOpenDejzi,
+  onOpenDejzi = () => {},
   isDemoMode,
   language = "sv",
   activeTab,
@@ -38,7 +36,6 @@ export function AppHeader({
   const [isAtTop, setIsAtTop] = useState(true);
 
   const isProfileOrSettings = activeTab === "profile" || activeTab === "settings";
-  const isHomeTab = activeTab === "today" || !activeTab;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,20 +47,6 @@ export function AppHeader({
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Compute date string
-  const formattedDate = React.useMemo(() => {
-    try {
-      const d = date || new Date();
-      const locale = language === 'en' ? 'en-US' : language === 'no' ? 'nb-NO' : language === 'da' ? 'da-DK' : 'sv-SE';
-      const weekday = new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(d);
-      const dayMonth = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(d);
-      const capWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
-      return `${capWeekday}, ${dayMonth}`;
-    } catch {
-      return '';
-    }
-  }, [date, language]);
 
   // Compute display title for header in standard capitalization (Ekonomi, Analys, Historik)
   const getFallbackTitle = () => {
@@ -134,22 +117,11 @@ export function AppHeader({
             </button>
           )}
 
-          {/* Title / Greeting */}
+          {/* Title */}
           <div className="min-w-0 text-left flex flex-col justify-center">
-            {isHomeTab ? (
-              <>
-                <h1 className="text-[17px] font-semibold tracking-tight truncate select-none leading-tight text-[#211F1C] dark:text-white">
-                  {language === 'en' ? 'Hi' : 'Hej'} {userName || 'Kevin'}
-                </h1>
-                <p className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] leading-none mt-0.5 select-none truncate">
-                  {formattedDate}
-                </p>
-              </>
-            ) : (
-              <h1 className="text-[22px] sm:text-[23px] font-semibold tracking-tight truncate select-none leading-none text-[#211F1C] dark:text-white">
-                {displayTitle}
-              </h1>
-            )}
+            <h1 className="text-[22px] sm:text-[23px] font-semibold tracking-tight truncate select-none leading-none text-[#211F1C] dark:text-white">
+              {displayTitle}
+            </h1>
           </div>
         </div>
 
