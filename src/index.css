@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
@@ -8,13 +8,15 @@
   --font-sans:
     "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display:
-    "Instrument Sans", sans-serif;
+    "Manrope", sans-serif;
+  --font-editorial:
+    "Instrument Serif", serif;
   --font-ui:
     "Geist", sans-serif;
   --font-amount:
-    "Instrument Sans", sans-serif;
+    "Manrope", sans-serif;
   --font-shoulders:
-    "Instrument Sans", sans-serif;
+    "Manrope", sans-serif;
   --font-barlow:
     "Geist", sans-serif;
   --font-barlow-standard:
@@ -22,9 +24,9 @@
   --font-exo:
     "Geist", sans-serif;
   --font-logo:
-    "Instrument Sans", sans-serif;
+    "Manrope", sans-serif;
   --font-serif:
-    "Instrument Sans", sans-serif;
+    "Instrument Serif", serif;
   --font-mono:
     "Geist", monospace;
 
@@ -136,12 +138,21 @@ textarea {
   }
 }
 
+@utility font-editorial {
+  font-family: var(--font-editorial) !important;
+}
+
+.font-editorial {
+  font-family: var(--font-editorial) !important;
+}
+
 :root {
-  /* Global Typography System - Instrument Sans & Geist */
-  --font-display: 'Instrument Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Global Typography System - Manrope, Instrument Serif & Geist */
+  --font-display: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-editorial: 'Instrument Serif', Georgia, serif;
   --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-ui: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-amount: 'Instrument Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-amount: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   font-size: 100%;
   -webkit-font-smoothing: antialiased;
