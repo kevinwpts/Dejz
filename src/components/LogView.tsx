@@ -9,7 +9,6 @@ import {
   Calendar as CalendarIcon, 
   ChevronLeft,
   ChevronRight,
-  RotateCcw, 
   Layers
 } from 'lucide-react';
 import { Transaction, Config } from '../types';
@@ -425,110 +424,86 @@ export function LogView({
         showCalendarOption={true}
         currentLang={currentLang}
         calendarContent={
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {/* Period Stepper (Left / Right) */}
-            <div className="flex items-center justify-between bg-[#F0EDE6] dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.06] rounded-2xl p-1.5">
+            <div className="flex items-center justify-between bg-[#F7F5F0] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] rounded-xl p-1.5">
               <button
                 type="button"
                 onClick={handleModalPrev}
                 disabled={!canModalGoPrev}
-                className={`p-2 rounded-xl transition-all cursor-pointer ${
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoPrev
-                    ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] active:scale-90'
+                    ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.08] active:scale-90'
                     : 'text-[#6E6961]/30 dark:text-[#A8A8A8]/30 cursor-not-allowed'
                 }`}
                 aria-label="Föregående period"
                 title="Föregående period"
               >
-                <ChevronLeft size={18} strokeWidth={2.2} />
+                <ChevronLeft size={17} strokeWidth={2.2} />
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedPeriod(modalPeriod);
-                  setSelectedDate(null);
-                  setIsPeriodPickerOpen(false);
-                }}
-                className="flex flex-col items-center text-center px-2 min-w-0 cursor-pointer group hover:opacity-85 transition-opacity"
-                title={getL10n('Välj hela perioden', 'Select full period')}
-              >
+              <div className="flex flex-col items-center text-center px-2 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-[#1C1917] dark:text-white tracking-tight truncate capitalize transition-colors">
+                  <span className="text-xs sm:text-sm font-bold text-[#1C1917] dark:text-white tracking-tight truncate capitalize">
                     {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                   </span>
                   {modalPeriod?.isCurrent && (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white tracking-tight">
+                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/[0.08] text-[#6E6961] dark:text-[#A8A8A8] border border-black/5 dark:border-white/5">
                       {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
                     </span>
                   )}
                 </div>
                 {modalPeriod?.name?.includes('(') && (
-                  <span className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] font-medium truncate mt-0.5">
+                  <span className="text-[10.5px] text-[#8C867C] dark:text-[#71717A] font-normal truncate mt-0.5">
                     {modalPeriod.name.split('(')[1]?.replace(')', '').trim()}
                   </span>
                 )}
-              </button>
+              </div>
 
               <button
                 type="button"
                 onClick={handleModalNext}
                 disabled={!canModalGoNext}
-                className={`p-2 rounded-xl transition-all cursor-pointer ${
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoNext
-                    ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] active:scale-90'
+                    ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.08] active:scale-90'
                     : 'text-[#6E6961]/30 dark:text-[#A8A8A8]/30 cursor-not-allowed'
                 }`}
                 aria-label="Nästa period"
                 title="Nästa period"
               >
-                <ChevronRight size={18} strokeWidth={2.2} />
+                <ChevronRight size={17} strokeWidth={2.2} />
               </button>
             </div>
 
-            {/* Quick Actions (Full period vs All transactions) */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* Quick Action: View whole period */}
+            <div className="flex justify-center">
               <button
                 type="button"
                 onClick={() => {
+                  if (typeof feedback?.selection === 'function') feedback.selection();
+                  else if (typeof feedback?.tap === 'function') feedback.tap();
                   setSelectedPeriod(modalPeriod);
                   setSelectedDate(null);
                   setIsPeriodPickerOpen(false);
                 }}
-                className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                className={`inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer border active:scale-95 ${
                   selectedPeriod?.name === modalPeriod?.name && !selectedDate
-                    ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-semibold border-transparent shadow-xs'
-                    : 'bg-[#FFFFFF] dark:bg-white/[0.03] text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/[0.06] border-[#E6E2D8] dark:border-white/[0.05]'
+                    ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border-transparent shadow-xs'
+                    : 'bg-[#F7F5F0] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-white/[0.08] border-[#E6E2D8] dark:border-white/[0.06]'
                 }`}
               >
                 <Layers size={13} strokeWidth={2} />
                 <span>{getL10n('Visa hela perioden', 'View full period', 'Vis hele perioden', 'Vis hele perioden', 'Koko jakso')}</span>
               </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedPeriod(null);
-                  setSelectedDate(null);
-                  setIsPeriodPickerOpen(false);
-                }}
-                className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
-                  selectedPeriod === null && selectedDate === null
-                    ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-semibold border-transparent shadow-xs'
-                    : 'bg-[#FFFFFF] dark:bg-white/[0.03] text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:text-white dark:hover:bg-white/[0.06] border-[#E6E2D8] dark:border-white/[0.05]'
-                }`}
-              >
-                <RotateCcw size={13} strokeWidth={2} />
-                <span>{getL10n('Alla transaktioner', 'All transactions', 'Alle transaksjoner', 'Alle transaktioner', 'Kaikki tapahtumat')}</span>
-              </button>
             </div>
 
             {/* Interactive Calendar Days Grid */}
-            <div className="bg-[#F0EDE6]/60 dark:bg-white/[0.02] border border-[#E6E2D8] dark:border-white/[0.05] rounded-2xl p-3 select-none">
+            <div className="select-none pt-1">
               {/* Weekday headers */}
-              <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+              <div className="grid grid-cols-7 gap-1 mb-1 text-center">
                 {weekdayNames.map((d, i) => (
-                  <div key={i} className="text-center text-[10.5px] font-semibold text-[#6E6961] dark:text-[#A8A8A8] uppercase tracking-wider py-0.5">
+                  <div key={i} className="text-center text-[10px] font-semibold text-[#8C867C] dark:text-[#71717A] uppercase tracking-wider py-0.5">
                     {d}
                   </div>
                 ))}
@@ -552,6 +527,8 @@ export function LogView({
                       key={dayNum}
                       type="button"
                       onClick={() => {
+                        if (typeof feedback?.selection === 'function') feedback.selection();
+                        else if (typeof feedback?.tap === 'function') feedback.tap();
                         setSelectedDate(dayDate);
                         setSelectedPeriod(modalPeriod);
                         setIsPeriodPickerOpen(false);
@@ -560,12 +537,12 @@ export function LogView({
                         isSelected 
                           ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-bold shadow-xs z-10' 
                           : isToday
-                          ? 'bg-white dark:bg-white/[0.08] text-[#1C1917] dark:text-white border border-[#E6E2D8] dark:border-white/30 font-semibold'
-                          : 'bg-transparent text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.06] hover:text-black dark:hover:text-white font-medium'
+                          ? 'bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white border border-black/10 dark:border-white/20 font-bold'
+                          : 'bg-transparent text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.06] hover:text-[#1C1917] dark:hover:text-white font-medium'
                       }`}
                     >
-                      <span className={`text-[13px] sm:text-[14px] leading-none tabular-nums ${
-                        isSelected ? 'text-white dark:text-[#1C1917]' : isToday ? 'text-[#1C1917] dark:text-white font-bold' : 'text-[#1C1917] dark:text-[#A8A8A8]'
+                      <span className={`text-xs sm:text-[13px] leading-none tabular-nums ${
+                        isSelected ? 'text-white dark:text-[#1C1917]' : isToday ? 'text-[#1C1917] dark:text-white font-bold' : 'text-[#1C1917] dark:text-white'
                       }`}>
                         {dayNum}
                       </span>

@@ -77,8 +77,11 @@ export function FilterMenuModal<T = string>({
             </div>
             <button
               type="button"
-              onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                onClose();
+              }}
+              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
               aria-label="Stäng"
             >
               <X size={16} strokeWidth={2.2} />
@@ -86,7 +89,7 @@ export function FilterMenuModal<T = string>({
           </div>
 
           {/* Options List */}
-          <div className="p-3 sm:p-4 overflow-y-auto space-y-1.5 flex-1 custom-scrollbar">
+          <div className="p-2.5 sm:p-3 overflow-y-auto space-y-1 flex-1 custom-scrollbar">
             {options.map((opt) => {
               const isSelected = opt.id === selectedId;
               return (
@@ -99,16 +102,16 @@ export function FilterMenuModal<T = string>({
                     onSelect(opt.id);
                     onClose();
                   }}
-                  className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer text-left active:scale-[0.99] ${
+                  className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] ${
                     isSelected
-                      ? 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white'
-                      : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
+                      ? 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white font-semibold'
+                      : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white font-medium'
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     {opt.icon && (
                       <div
-                        className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                           isSelected
                             ? 'bg-[#1C1917] text-white dark:bg-white dark:text-[#1C1917]'
                             : 'bg-black/5 dark:bg-white/10 text-[#6E6961] dark:text-[#A8A8A8]'
@@ -119,17 +122,17 @@ export function FilterMenuModal<T = string>({
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs sm:text-sm font-semibold truncate ${isSelected ? 'text-[#1C1917] dark:text-white font-bold' : ''}`}>
+                        <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'text-[#1C1917] dark:text-white font-bold' : ''}`}>
                           {opt.label}
                         </span>
                         {opt.badge && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white shrink-0">
+                          <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white shrink-0">
                             {opt.badge}
                           </span>
                         )}
                       </div>
                       {opt.subtitle && (
-                        <p className="text-[11px] text-[#8C867C] dark:text-[#71717A] truncate mt-0.5">
+                        <p className="text-[11px] text-[#8C867C] dark:text-[#71717A] truncate mt-0.5 font-normal">
                           {opt.subtitle}
                         </p>
                       )}
@@ -137,8 +140,8 @@ export function FilterMenuModal<T = string>({
                   </div>
 
                   {isSelected && (
-                    <div className="w-6 h-6 rounded-full bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] flex items-center justify-center shrink-0 ml-2">
-                      <Check size={13} strokeWidth={2.8} />
+                    <div className="w-5 h-5 rounded-full bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] flex items-center justify-center shrink-0 ml-2">
+                      <Check size={12} strokeWidth={3} />
                     </div>
                   )}
                 </button>
