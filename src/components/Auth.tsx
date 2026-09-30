@@ -103,7 +103,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
           password,
           options: {
             data: {
-              dark_mode: false,
+              dark_mode: true,
             },
           },
         });

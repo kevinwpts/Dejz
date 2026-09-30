@@ -675,7 +675,7 @@ export default function App() {
             role:
               session.user.email === "hej@dejz.se" || session.user.email === "kevinwpts@gmail.com" ? "admin" : "user",
             language: landingLanguage,
-            dark_mode: false,
+            dark_mode: true,
           })
           .select()
           .single();
@@ -889,7 +889,7 @@ export default function App() {
           notifications: dbSettings.notifications,
           securityLock: dbSettings.securityLock,
           darkMode:
-            (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? dbSettings.darkMode : false,
+            (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? dbSettings.darkMode : true,
           themeMode: dbSettings.themeMode || 'system',
           quickChoices: dbSettings.quickChoices || [],
           savingsPot: dbSettings.savingsPot || 0,
@@ -1852,7 +1852,7 @@ export default function App() {
       initialSpent: 0,
       notifications: { salaryDayReminder: true, weeklySummary: true },
       securityLock: false,
-      darkMode: false,
+      darkMode: true,
       themeMode: 'system',
       quickChoices: [],
       savingsPot: 0,
@@ -4067,7 +4067,7 @@ export default function App() {
   }
 
   if (!session) {
-    const isDark = !showLanding && (config?.darkMode ?? false);
+    const isDark = !showLanding && (config?.darkMode ?? true);
     return (
       <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-clip ${isDark ? 'dark' : ''}`}>
         {showLanding ? (
