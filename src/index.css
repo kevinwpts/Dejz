@@ -208,15 +208,17 @@ textarea {
   --shadow-level-2: none;
   --shadow-level-3: none;
 
-  /* Brand Accents & Colors */
-  --accent-color: #1C1917;
-  --accent-hover: #2E2A27;
-  --accent-gradient: linear-gradient(145deg, #1C1917 0%, #2E2A27 100%);
+  /* Brand Accents & Colors - Dejz Indigo Accent */
+  --accent-color: #635BFF;
+  --accent-hover: #5148E5;
+  --accent-pressed: #5148E5;
+  --accent-gradient: linear-gradient(145deg, #635BFF 0%, #5148E5 100%);
   --text-on-accent: #FFFFFF;
-  --accent-soft: #E5F6ED;
-  --dejz-accent: #05B862;
+  --accent-soft: #EEECFF;
+  --accent-on-solid: #FFFFFF;
+  --dejz-accent: #635BFF;
   --accent-glow: none;
-  --accent-secondary-color: #E2DDD4;
+  --accent-secondary-color: #EEECFF;
 
   /* Primary button states (Light mode) */
   --btn-primary-bg: #1C1917;
@@ -237,9 +239,9 @@ textarea {
   --warning-color: #F59E0B;
   --info-color: #1C1917;
 
-  --nav-active-color: #1C1917;
+  --nav-active-color: #635BFF;
   --nav-inactive-color: #8C867C;
-  --nav-plus-bg: #1C1917;
+  --nav-plus-bg: #635BFF;
   --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
@@ -298,14 +300,16 @@ textarea {
   --logo-color: #FFFFFF;
 
   /* Brand Accents & Colors (Dark) */
-  --accent-color: #FFFFFF;
-  --accent-hover: #EBEAE8;
-  --accent-gradient: linear-gradient(135deg, #FFFFFF 0%, #EBEAE8 100%);
-  --text-on-accent: #181818;
-  --accent-soft: #0D2E1F;
-  --dejz-accent: #05B862;
+  --accent-color: #7C75FF;
+  --accent-hover: #5148E5;
+  --accent-pressed: #5148E5;
+  --accent-gradient: linear-gradient(135deg, #7C75FF 0%, #5148E5 100%);
+  --text-on-accent: #FFFFFF;
+  --accent-soft: rgba(99, 91, 255, 0.2);
+  --accent-on-solid: #FFFFFF;
+  --dejz-accent: #635BFF;
   --accent-glow: none;
-  --accent-secondary-color: #333333;
+  --accent-secondary-color: rgba(99, 91, 255, 0.15);
 
   /* Primary button states (Dark mode) */
   --btn-primary-bg: #FFFFFF;

@@ -33,7 +33,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
       }}
       className={`h-11 px-3.5 rounded-2xl border transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none shadow-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none ${
         active
-          ? 'bg-[#EAE6DE] dark:bg-[#2D2D2D] border-[#1C1917]/20 dark:border-white/20 text-[#1C1917] dark:text-white font-bold'
+          ? 'bg-[#EEECFF] dark:bg-[#635BFF]/20 border-[#635BFF]/30 text-[#635BFF] dark:text-[#7C75FF] font-bold'
           : 'bg-white dark:bg-[#242424] border-[#E2DDD4] dark:border-[#383838] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#2D2D2D]'
       } ${className}`}
     >

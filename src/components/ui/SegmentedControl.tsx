@@ -54,7 +54,7 @@ export function SegmentedControl<T extends string = string>({
               fullWidth ? 'flex-1' : ''
             } ${
               isSelected
-                ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
+                ? 'bg-[#635BFF] text-white shadow-none'
                 : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
             }`}
           >

@@ -69,7 +69,7 @@ export function CustomBottomNavigation({
             onClick={() => {
               if (onPlusClick) onPlusClick();
             }}
-            className="w-11 h-11 sm:w-12 sm:h-12 bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] rounded-full active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-black/10 hover:opacity-95"
+            className="w-11 h-11 sm:w-12 sm:h-12 bg-[#635BFF] text-white rounded-full active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-[#635BFF]/25 hover:bg-[#5148E5]"
             aria-label="Lägg till transaktion"
             title="Lägg till transaktion"
           >
@@ -123,7 +123,7 @@ function NavItem({
       title={label}
       className={`flex-1 h-full flex items-center justify-center py-2 px-1 transition-all duration-200 active:scale-90 cursor-pointer select-none rounded-2xl relative ${
         isActive
-          ? 'text-[#1C1917] dark:text-white'
+          ? 'text-[#635BFF] dark:text-[#7C75FF]'
           : 'text-[#8C867C] hover:text-[#1C1917] dark:text-[#A8A8A8]/70 dark:hover:text-white'
       }`}
     >

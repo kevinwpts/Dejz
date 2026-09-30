@@ -513,7 +513,7 @@ export function TodayView({
                   <button
                     type="button"
                     onClick={() => onNavigate("budget", "category-budgets")}
-                    className="text-xs font-semibold text-[#8C867C] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-colors cursor-pointer active:scale-95 touch-manipulation py-0.5 px-1"
+                    className="text-xs font-bold text-[#635BFF] dark:text-[#7C75FF] hover:opacity-80 transition-opacity cursor-pointer active:scale-95 touch-manipulation py-0.5 px-1"
                   >
                     {lang === 'en' ? 'Manage' : 'Hantera'}
                   </button>

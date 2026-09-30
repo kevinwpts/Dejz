@@ -269,7 +269,7 @@ export function PeriodTimeline({
               onClick={(e) => handleSelect(day.date, dayTime, e)}
               className={`flex flex-col items-center justify-center gap-1 w-[48px] sm:w-[52px] h-[54px] sm:h-[58px] p-1.5 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
                 isSelected
-                  ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border border-transparent shadow-xs scale-105 font-bold z-10 opacity-100'
+                  ? 'bg-[#635BFF] text-white border-transparent shadow-xs scale-105 font-bold z-10 opacity-100'
                   : hasCategoryMatch
                   ? 'bg-black/5 text-[#1C1917] border border-[#1C1917]/20 dark:bg-white/[0.08] dark:text-white dark:border-white/20 hover:bg-black/10 dark:hover:bg-white/[0.1] scale-100 opacity-100'
                   : isRealToday
@@ -283,7 +283,7 @@ export function PeriodTimeline({
               <span
                 className={`text-[8.5px] sm:text-[9px] tracking-wider uppercase leading-none ${
                   isSelected
-                    ? 'text-white dark:text-[#1C1917] font-bold'
+                    ? 'text-white font-bold'
                     : hasCategoryMatch
                     ? 'text-[#1C1917] dark:text-white font-bold'
                     : isRealToday
@@ -302,7 +302,7 @@ export function PeriodTimeline({
               {/* Fixed Item or Category Match Indicator Dot */}
               {((showFixedInCalendar && day.hasFixedItems) || (hasCategoryMatch && !isSelected)) && (
                 <span className={`w-1 h-1 rounded-full absolute bottom-1 shadow-none ${
-                  isSelected ? 'bg-white dark:bg-[#1C1917]' : 'bg-[var(--accent-color)]'
+                  isSelected ? 'bg-white' : 'bg-[#635BFF]'
                 }`} />
               )}
             </button>
