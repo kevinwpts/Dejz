@@ -243,19 +243,19 @@ export function TransactionItem({
           
           {/* Primary Amount: 13px, matching muted grey tone for cost */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-            <p className={`text-[13px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
+            <p className={`text-[12px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
               <span className="opacity-75 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
               <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
-              <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] ml-[2px]">{config?.currency || 'kr'}</span>
+              <span className="text-[10px] font-normal text-[#777168] dark:text-[#A8A8A8] ml-[2px]">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixed ? (
-              <p className="text-[10px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 tabular-nums">
+              <p className="text-[9.5px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 tabular-nums">
                 {showDate 
                   ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
                   : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}
               </p>
             ) : isFixed && (
-              <span className="text-[10px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap">
+              <span className="text-[9.5px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap">
                 {getL10n(
                   transaction.type === 'income' ? 'Fast inkomst' : transaction.type === 'saving' ? 'Fast sparande' : 'Fast utgift',
                   transaction.type === 'income' ? 'Fixed income' : transaction.type === 'saving' ? 'Fixed savings' : 'Fixed expense',

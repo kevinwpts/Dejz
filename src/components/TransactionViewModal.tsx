@@ -111,8 +111,8 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
           className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
           style={{
             background: `
-              radial-gradient(800px circle at 20% 0%, ${hexToRgba(brandColor, 0.35)} 0%, ${hexToRgba(brandColor, 0.16)} 35%, ${hexToRgba(brandColor, 0.05)} 65%, transparent 90%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.12)} 0%, transparent 55%)
+              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
             `
           }}
         />
