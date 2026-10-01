@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
-import { X, Pencil, Tag, Receipt, Repeat } from 'lucide-react';
+import { X, Pencil, Tag, Repeat, Paperclip, FileText } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
@@ -288,20 +288,29 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
               </div>
             )}
 
-            {/* Receipt Section if exists */}
+            {/* Attached file / Receipt Section if exists */}
             {transaction.receiptUrl && (
               <div className="py-3.5 space-y-2">
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
-                  <Receipt size={13} strokeWidth={1.75} />
-                  <span className="text-[14px] font-normal">{t('receipt')}</span>
+                  <Paperclip size={13} strokeWidth={1.75} />
+                  <span className="text-[13px] font-normal">
+                    {config.language === 'en' ? 'Attached file / Receipt' : 'Bifogad fil / Kvitto'}
+                  </span>
                 </div>
-                <div className="relative aspect-[3/4] max-w-[180px] rounded-[14px] overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10">
-                  <img 
-                    src={transaction.receiptUrl} 
-                    alt="Receipt" 
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
+                <div className="relative aspect-[3/4] max-w-[180px] rounded-[14px] overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 flex items-center justify-center">
+                  {transaction.receiptUrl.includes('.pdf') ? (
+                    <div className="flex flex-col items-center justify-center p-4 text-center space-y-2">
+                      <FileText size={32} className="text-[#777168] dark:text-[#A8A8A8]" />
+                      <span className="text-[11px] font-medium text-[var(--text-primary)]">PDF-dokument</span>
+                    </div>
+                  ) : (
+                    <img 
+                      src={transaction.receiptUrl} 
+                      alt="Attachment" 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
                   <a 
                     href={transaction.receiptUrl} 
                     target="_blank" 
@@ -309,7 +318,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
                     className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-all group"
                   >
                     <span className="bg-white/95 text-black px-3.5 py-2 rounded-xl text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-lg">
-                      Visa fullstorlek
+                      {config.language === 'en' ? 'Open file' : 'Öppna fil'}
                     </span>
                   </a>
                 </div>

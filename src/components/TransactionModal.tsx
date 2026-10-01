@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { X, ChevronDown, Calendar, Plus, Camera, Trash2, Check, Loader2 } from 'lucide-react';
+import { X, ChevronDown, Calendar, Plus, Camera, Trash2, Check, Loader2, Paperclip, FileText } from 'lucide-react';
 import { Transaction, Category, TransactionSplit } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
@@ -213,9 +213,10 @@ export function TransactionModal({
   const [logo, setLogo] = useState<string | undefined>(transaction?.logo);
   const [_logoError, setLogoError] = useState(false);
   const [receiptUrl, setReceiptUrl] = useState<string | undefined>(transaction?.receiptUrl);
+  const [receiptFileName, setReceiptFileName] = useState<string | undefined>();
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
   const [isScanningReceipt, setIsScanningReceipt] = useState(false);
-  const [scanFeedback, setScanFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [_scanFeedback, setScanFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
     if (transaction?.timestamp) {
@@ -236,6 +237,7 @@ export function TransactionModal({
     // Immediately display preview image to give instant feedback
     const localUrl = URL.createObjectURL(file);
     setReceiptUrl(localUrl);
+    setReceiptFileName(file.name);
 
     setIsUploadingReceipt(true);
     setIsScanningReceipt(true);
@@ -643,9 +645,9 @@ export function TransactionModal({
         {/* Drawer Handle on Mobile */}
         <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
-        {/* Header Section with Large (size="xl") Logo */}
+        {/* Header Section */}
         <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between gap-3 border-b border-black/[0.06] dark:border-white/[0.06] relative z-10">
-          <div className="flex items-center gap-3.5 min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setShowIconSelector(true)}
@@ -654,7 +656,7 @@ export function TransactionModal({
               aria-label={t('chooseIcon')}
             >
               <TransactionLogo 
-                size="xl"
+                size="lg"
                 config={config}
                 transaction={previewTransaction} 
               />
@@ -685,7 +687,7 @@ export function TransactionModal({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="text-[17px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate"
+                    className="text-[16px] sm:text-[17px] font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate"
                   >
                     {transaction 
                       ? (currentLang === 'en' ? 'Edit transaction' : (type === 'income' ? 'Redigera inkomst' : 'Redigera transaktion'))
@@ -694,9 +696,6 @@ export function TransactionModal({
                   </motion.h2>
                 )}
               </AnimatePresence>
-              <p className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] mt-0.5">
-                {currentLang === 'en' ? 'Tap logo to change' : 'Tryck på loggan för att byta'}
-              </p>
             </div>
           </div>
 
@@ -704,32 +703,35 @@ export function TransactionModal({
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+              className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
               aria-label={t('close')}
             >
-              <X size={16} strokeWidth={2.2} />
+              <X size={15} strokeWidth={2.2} />
             </button>
           </div>
         </div>
 
-        {/* Main Content Area: Clean, Compact, Card-styled Presentation */}
-        <div className="shrink overflow-y-auto px-5 sm:px-6 py-4 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-              {/* Hidden file input for camera/photo library */}
+        {/* Main Content Area: Consistent Vertical Spacing & Card-styled Inputs */}
+        <div className="shrink overflow-y-auto px-5 sm:px-6 py-3.5 space-y-3 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+              {/* Hidden file input for tickets, receipts and documents */}
               <input 
                 ref={receiptInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,application/pdf,.pdf,.png,.jpg,.jpeg,.heic"
                 className="hidden"
                 onChange={handleReceiptFileChange}
               />
 
               {/* Amount Input */}
-              <div className="flex flex-col gap-1.5">
+              <div className="space-y-1">
+                <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
+                  {currentLang === 'en' ? 'Amount' : 'Belopp'}
+                </label>
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="bg-white dark:bg-[#1E1B22] rounded-[16px] h-[84px] px-4 sm:px-5 flex items-center justify-between transition-all border-none shadow-none group cursor-text"
+                  className="bg-white dark:bg-[#1E1B22] rounded-[14px] h-[68px] sm:h-[72px] px-4 flex items-center justify-between transition-all border-none shadow-none group cursor-text"
                 >
-                  <div className="shrink-0 flex items-center min-w-[64px]">
+                  <div className="shrink-0 flex items-center min-w-[56px]">
                     {type === 'expense' && (
                       <button 
                         type="button"
@@ -741,13 +743,13 @@ export function TransactionModal({
                             setSplits([]);
                           }
                         }}
-                        className={`text-[12px] font-medium transition-all px-3 py-1.5 rounded-full border cursor-pointer active:scale-95 ${
+                        className={`text-[11px] font-medium transition-all px-2.5 py-1 rounded-full cursor-pointer active:scale-95 ${
                           splits.length > 0 
-                            ? "bg-rose-500 text-white border-transparent" 
-                            : "bg-black/5 dark:bg-white/10 text-[var(--text-primary)] border-transparent hover:bg-black/10 dark:hover:bg-white/20"
+                            ? "bg-rose-500 text-white" 
+                            : "bg-black/5 dark:bg-white/10 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/20"
                         }`}
                       >
-                        {splits.length > 0 ? (currentLang === 'en' ? 'Avbryt' : 'Avbryt') : (currentLang === 'en' ? 'Splitta' : 'Splitta')}
+                        {splits.length > 0 ? (currentLang === 'en' ? 'Cancel' : 'Avbryt') : (currentLang === 'en' ? 'Split' : 'Splitta')}
                       </button>
                     )}
                   </div>
@@ -765,19 +767,19 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[30px] sm:text-[32px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 cursor-text select-text"
+                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[24px] sm:text-[26px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/40 dark:placeholder-[#A8A8A8]/40 cursor-text select-text"
                     />
-                    <span className="text-[14px] font-normal text-[#777168] dark:text-[#A8A8A8] select-none font-sans shrink-0">
+                    <span className="text-[13px] font-normal text-[#777168] dark:text-[#A8A8A8] select-none font-sans shrink-0">
                       {currency}
                     </span>
                   </div>
-                  <div className="shrink-0 min-w-[64px]" />
+                  <div className="shrink-0 min-w-[56px]" />
                 </div>
               </div>
 
               {/* Merchant Input */}
-              <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
+              <div className="space-y-1">
+                <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
                   {type === 'income' ? t('incomeSource') : t('merchant')}
                 </label>
                 <div className="relative group">
@@ -787,22 +789,22 @@ export function TransactionModal({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="w-full h-[50px] bg-white dark:bg-[#1E1B22] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[#777168]/60 dark:placeholder-[#A8A8A8]/60 rounded-[16px] px-4 border-none shadow-none"
+                    className="w-full h-[46px] bg-white dark:bg-[#1E1B22] text-[13.5px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 rounded-[14px] px-3.5 border-none shadow-none"
                   />
                   {merchant && (
                     <button 
                       onClick={() => setMerchant('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
                     >
-                      <X size={15} strokeWidth={2} />
+                      <X size={14} strokeWidth={2} />
                     </button>
                   )}
                 </div>
               </div>
 
               {/* Note Input */}
-              <div className="space-y-1.5">
-                <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
+              <div className="space-y-1">
+                <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
                   {t('ownNote')}
                 </label>
                 <div className="relative group">
@@ -812,16 +814,16 @@ export function TransactionModal({
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                    className={`w-full h-[50px] bg-white dark:bg-[#1E1B22] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[#777168]/60 dark:placeholder-[#A8A8A8]/60 rounded-[16px] px-4 ${
+                    className={`w-full h-[46px] bg-white dark:bg-[#1E1B22] text-[13.5px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 rounded-[14px] px-3.5 ${
                       validationError === 'note' ? 'ring-2 ring-rose-500 bg-rose-500/5' : 'border-none shadow-none'
                     }`}
                   />
                   {note && (
                     <button 
                       onClick={() => setNote('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
                     >
-                      <X size={15} strokeWidth={2} />
+                      <X size={14} strokeWidth={2} />
                     </button>
                   )}
                 </div>
@@ -988,19 +990,19 @@ export function TransactionModal({
               )}
 
                   {/* Category Selection Row */}
-                  <div className={`space-y-1.5 ${splits.length > 0 ? 'hidden' : ''}`}>
-                    <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">{t('category')}</label>
+                  <div className={`space-y-1 ${splits.length > 0 ? 'hidden' : ''}`}>
+                    <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">{t('category')}</label>
                     <button
                       type="button"
                       onClick={() => {
                         if (typeof feedback?.light === 'function') feedback.light();
                         setIsCategoryPickerOpen(true);
                       }}
-                      className="w-full h-[50px] bg-white dark:bg-[#1E1B22] rounded-[16px] px-4 border-none shadow-none flex items-center justify-between transition-all hover:bg-black/[0.02] dark:hover:bg-[#27242E] cursor-pointer text-left group"
+                      className="w-full h-[46px] bg-white dark:bg-[#1E1B22] rounded-[14px] px-3.5 border-none shadow-none flex items-center justify-between transition-all hover:bg-black/[0.02] dark:hover:bg-[#27242E] cursor-pointer text-left group"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <div 
-                          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                           style={{ 
                             backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
                             color: currentCatData?.color || 'var(--text-primary)'
@@ -1009,41 +1011,41 @@ export function TransactionModal({
                           <CategoryIcon 
                             icon={currentCatData?.icon || 'tag'} 
                             color={currentCatData?.color} 
-                            size="sm" 
+                            size="xs" 
                           />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <span className="text-[14px] font-medium text-[var(--text-primary)] block truncate">
+                          <span className="text-[13.5px] font-medium text-[var(--text-primary)] block truncate">
                             {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                           </span>
                         </div>
                       </div>
                       <div className="flex items-center gap-1 text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] shrink-0">
-                        <span className="text-[12px] font-normal">{currentLang === 'en' ? 'Change' : 'Ändra'}</span>
-                        <ChevronDown size={15} strokeWidth={2} />
+                        <span className="text-[11.5px] font-normal">{currentLang === 'en' ? 'Change' : 'Ändra'}</span>
+                        <ChevronDown size={14} strokeWidth={2} />
                       </div>
                     </button>
                   </div>
             
                   {/* Date Selection */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <div className="flex items-center justify-between px-0.5">
-                      <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8]">{t('date')}</label>
+                      <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8]">{t('date')}</label>
                       {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
                        new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
-                        <span className="text-[12px] font-medium text-[var(--text-primary)] tabular-nums">
+                        <span className="text-[11.5px] font-medium text-[var(--text-primary)] tabular-nums">
                           {formatFullDate(selectedDate, currentLang)}
                         </span>
                       )}
                     </div>
-                    <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-2 flex gap-1.5 border-none shadow-none">
+                    <div className="bg-white dark:bg-[#1E1B22] rounded-[14px] p-1.5 flex gap-1.5 border-none shadow-none">
                       <button
                         type="button"
                         onClick={() => {
                           setSelectedDate(new Date());
                           setShowFullCalendar(false);
                         }}
-                        className={`flex-1 py-2.5 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        className={`flex-1 py-2 rounded-xl text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
                             ? 'bg-[var(--accent-color)] text-white shadow-xs'
                             : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
@@ -1059,7 +1061,7 @@ export function TransactionModal({
                           setSelectedDate(yesterday);
                           setShowFullCalendar(false);
                         }}
-                        className={`flex-1 py-2.5 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        className={`flex-1 py-2 rounded-xl text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
                             ? 'bg-[var(--accent-color)] text-white shadow-xs'
                             : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
@@ -1070,14 +1072,14 @@ export function TransactionModal({
                       <button
                         type="button"
                         onClick={() => setShowFullCalendar(!showFullCalendar)}
-                        className={`w-12 py-2.5 rounded-xl transition-all flex items-center justify-center cursor-pointer ${
+                        className={`w-10 py-2 rounded-xl transition-all flex items-center justify-center cursor-pointer ${
                           showFullCalendar 
                             ? 'bg-[var(--accent-color)] text-white shadow-xs' 
                             : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
                         }`}
                         title={t('chooseDate')}
                       >
-                        <Calendar size={17} strokeWidth={2} />
+                        <Calendar size={15} strokeWidth={2} />
                       </button>
                     </div>
 
@@ -1089,7 +1091,7 @@ export function TransactionModal({
                           exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-4 border-none shadow-none mt-1.5">
+                          <div className="bg-white dark:bg-[#1E1B22] rounded-[14px] p-3.5 border-none shadow-none mt-1">
                             <CalendarWidget 
                               calendarDays={calendarDays}
                               normalizedSelectedDate={selectedDate}
@@ -1103,96 +1105,112 @@ export function TransactionModal({
                     </AnimatePresence>
                   </div>
 
-                  {/* Receipt Section */}
-                  {type !== 'income' && (
-                    <div className="space-y-1.5">
-                      <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
-                        {currentLang === 'en' ? 'Receipt' : 'Kvitto'}
-                      </label>
-                      {isScanningReceipt ? (
-                        <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-3 sm:p-3.5 border-none shadow-none flex items-center justify-between transition-all">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-8 h-8 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
-                              <Loader2 size={16} className="animate-spin text-[var(--accent-color)]" />
-                            </div>
-                            <div className="min-w-0">
-                              <h4 className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
-                                {currentLang === 'en' ? 'Scanning receipt…' : 'Läser kvittot…'}
-                              </h4>
-                              <p className="text-[11px] font-medium text-[var(--accent-color)] truncate">
-                                {currentLang === 'en' ? 'Analyzing amount, store & date' : 'Analyserar belopp, företag och datum'}
-                              </p>
-                            </div>
+                  {/* Attachment / File Upload Section ("Bifoga fil") */}
+                  <div className="space-y-1">
+                    <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
+                      {currentLang === 'en' ? 'Attach file' : 'Bifoga fil'}
+                    </label>
+                    {isScanningReceipt ? (
+                      <div className="bg-white dark:bg-[#1E1B22] rounded-[14px] p-3 border-none shadow-none flex items-center justify-between transition-all">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-7 h-7 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
+                            <Loader2 size={15} className="animate-spin text-[var(--accent-color)]" />
                           </div>
-                          <span className="text-[11px] font-semibold text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2.5 py-1 rounded-full animate-pulse">
-                            {currentLang === 'en' ? 'Wait…' : 'Vänta…'}
-                          </span>
+                          <div className="min-w-0">
+                            <h4 className="text-[12px] font-semibold text-[var(--text-primary)] tracking-tight">
+                              {currentLang === 'en' ? 'Uploading file…' : 'Laddar upp fil…'}
+                            </h4>
+                            <p className="text-[10.5px] text-[var(--accent-color)] truncate">
+                              {currentLang === 'en' ? 'Processing attachment' : 'Bearbetar bilagan'}
+                            </p>
+                          </div>
                         </div>
-                      ) : receiptUrl ? (
-                        <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-3 sm:p-3.5 border-none shadow-none flex items-center justify-between transition-all">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-black/5 dark:border-white/5 shrink-0 bg-black/5">
-                              <img src={receiptUrl} alt="Receipt" className="w-full h-full object-cover" />
-                            </div>
-                            <div className="min-w-0">
-                              <h4 className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
-                                {currentLang === 'en' ? 'Receipt attached' : 'Kvitto bifogat'}
-                              </h4>
-                              <p className="text-[11px] text-[#777168] dark:text-[#A8A8A8] truncate">
-                                {scanFeedback?.message || (currentLang === 'en' ? 'Check details before saving' : 'Kontrollera uppgifterna innan du sparar')}
-                              </p>
-                            </div>
+                        <span className="text-[10px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2 py-0.5 rounded-full animate-pulse">
+                          {currentLang === 'en' ? 'Wait…' : 'Vänta…'}
+                        </span>
+                      </div>
+                    ) : receiptUrl ? (
+                      <div className="bg-white dark:bg-[#1E1B22] rounded-[14px] p-2.5 sm:p-3 border-none shadow-none flex items-center justify-between transition-all">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-black/5 dark:border-white/5 shrink-0 bg-black/5 flex items-center justify-center">
+                            {receiptUrl.includes('.pdf') ? (
+                              <FileText size={18} className="text-[#777168] dark:text-[#A8A8A8]" />
+                            ) : (
+                              <img src={receiptUrl} alt="Attached file" className="w-full h-full object-cover" />
+                            )}
                           </div>
+                          <div className="min-w-0">
+                            <h4 className="text-[12.5px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
+                              {receiptFileName || (currentLang === 'en' ? 'File attached' : 'Fil bifogad')}
+                            </h4>
+                            <p className="text-[10.5px] text-[#777168] dark:text-[#A8A8A8] truncate">
+                              {currentLang === 'en' ? 'Ticket, receipt or document' : 'Biljett, kvitto eller dokument'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                          <a
+                            href={receiptUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-1 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-medium rounded-lg transition-colors cursor-pointer"
+                          >
+                            {currentLang === 'en' ? 'View' : 'Visa'}
+                          </a>
                           <button
                             type="button"
                             onClick={() => {
                               setReceiptUrl(undefined);
+                              setReceiptFileName(undefined);
                               setScanFeedback(null);
                             }}
-                            className="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-full transition-colors cursor-pointer shrink-0 ml-2"
+                            className="p-1 text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                            title={currentLang === 'en' ? 'Remove' : 'Ta bort'}
                           >
-                            {currentLang === 'en' ? 'Remove' : 'Ta bort'}
+                            <Trash2 size={14} />
                           </button>
                         </div>
-                      ) : (
-                        <div 
-                          onClick={() => !isScanningReceipt && !isUploadingReceipt && setIsCameraModalOpen(true)}
-                          className="bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] rounded-[16px] p-3 sm:p-3.5 border-none shadow-none flex items-center justify-between transition-all cursor-pointer group active:scale-[0.99]"
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 group-hover:scale-105 transition-transform">
-                              {isUploadingReceipt ? (
-                                <Loader2 size={16} className="animate-spin" />
-                              ) : (
-                                <Camera size={16} strokeWidth={2} />
-                              )}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
-                                  {currentLang === 'en' ? 'Scan receipt' : 'Skanna kvitto'}
-                                </span>
-                              </div>
-                              <p className="text-[11px] text-[#777168] dark:text-[#A8A8A8] truncate">
-                                {currentLang === 'en' ? 'Take a photo with the camera' : 'Fotografera med appens kamera'}
-                              </p>
-                            </div>
+                      </div>
+                    ) : (
+                      <div 
+                        className="bg-white dark:bg-[#1E1B22] rounded-[14px] p-2.5 sm:p-3 border-none shadow-none flex items-center justify-between transition-all"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+                            <Paperclip size={14} strokeWidth={2} />
                           </div>
+                          <div className="min-w-0">
+                            <span className="text-[12.5px] font-medium text-[var(--text-primary)] block truncate">
+                              {currentLang === 'en' ? 'Concert tickets, receipts, PDFs' : 'Konsertbiljetter, kvitto, PDF m.m.'}
+                            </span>
+                            <p className="text-[10.5px] text-[#777168] dark:text-[#A8A8A8] truncate">
+                              {currentLang === 'en' ? 'Attach file or take photo' : 'Bifoga fil eller fotografera'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setIsCameraModalOpen(true);
-                            }}
+                            onClick={() => receiptInputRef.current?.click()}
                             disabled={isUploadingReceipt}
-                            className="px-3 py-1.5 bg-[var(--accent-color)] text-white hover:opacity-90 text-xs font-semibold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer shrink-0 ml-2"
+                            className="px-2.5 py-1.5 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11.5px] font-medium rounded-xl transition-all cursor-pointer active:scale-95 flex items-center gap-1"
                           >
-                            {currentLang === 'en' ? 'Open camera' : 'Öppna kamera'}
+                            <Paperclip size={12} strokeWidth={2} />
+                            <span>{currentLang === 'en' ? 'File' : 'Välj fil'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsCameraModalOpen(true)}
+                            disabled={isUploadingReceipt}
+                            className="px-2.5 py-1.5 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11.5px] font-medium rounded-xl shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1"
+                          >
+                            <Camera size={12} strokeWidth={2} />
+                            <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
                           </button>
                         </div>
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
           </div>
 
           {/* Register / Save Button & Delete Button */}
