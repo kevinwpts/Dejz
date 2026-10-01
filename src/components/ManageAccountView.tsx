@@ -188,7 +188,7 @@ export function ManageAccountView({
             </div>
 
             {/* Password */}
-            <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#191523] backdrop-blur-xl border-none shadow-none">
+            <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1E1B22] backdrop-blur-xl border-none shadow-none">
               <button
                 type="button"
                 onClick={() => setShowPasswordChange(true)}
@@ -212,7 +212,7 @@ export function ManageAccountView({
                 <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1.5 opacity-60 block">
                   {t('connectedAccounts' as any) || 'Kopplade konton'}
                 </span>
-                <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-white dark:bg-[#191523] backdrop-blur-xl border-none shadow-none">
+                <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-white dark:bg-[#1E1B22] backdrop-blur-xl border-none shadow-none">
                   {identities.map((identity) => (
                     <div
                       key={identity.id}

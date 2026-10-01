@@ -53,7 +53,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   return (
     <div 
       onClick={onClick}
-      className="px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px] flex items-center justify-between gap-3 group transition-colors bg-white dark:bg-[#191523] hover:bg-black/[0.02] dark:hover:bg-[#221D2F] rounded-[20px] shadow-none border-none cursor-pointer"
+      className="px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px] flex items-center justify-between gap-3 group transition-colors bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] rounded-[20px] shadow-none border-none cursor-pointer"
     >
       {/* Left side: Logo + Name + Category */}
       <div className="flex items-center gap-3 min-w-0 flex-1">

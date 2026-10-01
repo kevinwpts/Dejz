@@ -173,7 +173,7 @@ export function BudgetSummaryModule({
       </div>
 
       {/* 2. GEMENSAMT SAMMANFATTNINGSKORT MED 3 HORISONTELLA INFORMATIONSRADER */}
-      <div className="bg-white dark:bg-[#191523] rounded-[22px] p-4 border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+      <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] p-4 border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
         {/* Rad 1: Kvar att spendera */}
         <div className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 min-w-0">

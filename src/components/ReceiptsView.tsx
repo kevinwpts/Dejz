@@ -54,7 +54,7 @@ export function ReceiptsView({
     >
       {/* Stats Summary Panel */}
       {receiptTransactions.length > 0 && (
-        <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#191523] p-5 border-none shadow-none space-y-2">
+        <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1E1B22] p-5 border-none shadow-none space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
               {config.language === 'sv' ? 'Sammanställning' : 'Summary'}
@@ -85,7 +85,7 @@ export function ReceiptsView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={config.language === 'sv' ? 'Sök köpställe, kategori eller belopp...' : 'Search merchant, category, or amount...'}
-            className="w-full h-[46px] pl-11 pr-4 bg-white dark:bg-[#191523] border-none rounded-full text-xs font-semibold placeholder-[#8C867C] dark:placeholder-[#71717A] focus:outline-none shadow-none transition-all text-[#1C1917] dark:text-white"
+            className="w-full h-[46px] pl-11 pr-4 bg-white dark:bg-[#1E1B22] border-none rounded-full text-xs font-semibold placeholder-[#8C867C] dark:placeholder-[#71717A] focus:outline-none shadow-none transition-all text-[#1C1917] dark:text-white"
             id="receipts_search_input"
           />
         </div>
@@ -104,7 +104,7 @@ export function ReceiptsView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={() => onViewTransaction(item)}
-                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-[#191523] rounded-[20px] shadow-none border-none hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer"
+                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-[#1E1B22] rounded-[20px] shadow-none border-none hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer"
                   id={`receipt_item_${item.id}`}
                 >
                   <div className="flex items-center gap-4 min-w-0">

@@ -157,7 +157,7 @@ export function SettingsView({
           </button>
         </div>
 
-        <div className="bg-white dark:bg-[#191523] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {list.map((cat: any, index: number) => (
             <div
               key={cat.id || index}
@@ -240,7 +240,7 @@ export function SettingsView({
           </button>
         </div>
 
-        <div className="bg-white dark:bg-[#191523] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {methodsList.map((method: any, index: number) => (
             <div
               key={method.name || index}
@@ -274,7 +274,7 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="bg-white dark:bg-[#191523] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {languages.map((l) => (
             <div
               key={l.code}
@@ -333,7 +333,7 @@ export function SettingsView({
                   className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[18px] border-none transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
-                      : 'bg-white dark:bg-[#191523] text-[#1C1917] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                      : 'bg-white dark:bg-[#1E1B22] text-[#1C1917] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   {mode.icon}
@@ -363,8 +363,8 @@ export function SettingsView({
                   }}
                   className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[18px] border-none transition-all cursor-pointer active:scale-95 ${
                     isSelected
-                      ? 'bg-white dark:bg-[#191523] ring-2 ring-[var(--accent-color)] shadow-none'
-                      : 'bg-white dark:bg-[#191523] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                      ? 'bg-white dark:bg-[#1E1B22] ring-2 ring-[var(--accent-color)] shadow-none'
+                      : 'bg-white dark:bg-[#1E1B22] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   <div
@@ -417,7 +417,7 @@ export function SettingsView({
           {isEn ? 'Select Currency' : 'Välj valuta'}
         </h3>
 
-        <div className="bg-white dark:bg-[#191523] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+        <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrency === c.symbol || activeCurrency === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
@@ -470,7 +470,7 @@ export function SettingsView({
        <div>
         {activeSection === 'salary' && (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-[#191523] p-5 rounded-[22px] border-none shadow-none space-y-5">
+            <div className="bg-white dark:bg-[#1E1B22] p-5 rounded-[22px] border-none shadow-none space-y-5">
               <h2 className="text-sm font-bold text-[#1C1917] dark:text-white">Lönedag & Period</h2>
               
               {/* Payday Setting Row */}
