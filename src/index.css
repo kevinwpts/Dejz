@@ -185,10 +185,10 @@ h6 {
   --logo-color: #211F1C;
 
   /* Premium Warm Sand Light Theme */
-  --bg-top-color: #F2EFE8;
-  --bg-color: #F2EFE8;
-  --bg-secondary: #F2EFE8;
-  --bg-gradient: linear-gradient(180deg, #F2EFE8 0%, #F2EFE8 100%);
+  --bg-top-color: #EFECE6;
+  --bg-color: #EFECE6;
+  --bg-secondary: #EFECE6;
+  --bg-gradient: linear-gradient(180deg, #EFECE6 0%, #EFECE6 100%);
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;

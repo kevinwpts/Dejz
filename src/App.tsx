@@ -4186,7 +4186,7 @@ export default function App() {
       <div 
         className="fixed inset-0 pointer-events-none z-0 transition-all duration-500"
         style={{
-          background: 'linear-gradient(180deg, var(--user-home-bg-from, transparent) 0%, var(--user-home-bg-to, transparent) 100%)',
+          background: 'linear-gradient(180deg, var(--user-home-bg-from, transparent) 0%, var(--user-home-bg-to, transparent) 55dvh, transparent 100%)',
         }}
         aria-hidden="true"
       />

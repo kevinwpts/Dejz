@@ -24,9 +24,9 @@ export function applyThemeColor(themeColorHex: string = '#635BFF', isDark: boole
     root.style.setProperty('--user-accent', themeColorHex);
     root.style.setProperty('--user-accent-soft', `rgba(${r}, ${g}, ${b}, 0.22)`);
     root.style.setProperty('--user-accent-surface', `rgba(${r}, ${g}, ${b}, 0.08)`);
-    root.style.setProperty('--user-home-bg-from', `rgba(${r}, ${g}, ${b}, 0.14)`);
-    root.style.setProperty('--user-home-bg-to', `rgba(${r}, ${g}, ${b}, 0.02)`);
-    root.style.setProperty('--app-bg-tint', `rgba(${r}, ${g}, ${b}, 0.06)`);
+    root.style.setProperty('--user-home-bg-from', `rgba(${r}, ${g}, ${b}, 0.08)`);
+    root.style.setProperty('--user-home-bg-to', `rgba(${r}, ${g}, ${b}, 0.01)`);
+    root.style.setProperty('--app-bg-tint', `rgba(${r}, ${g}, ${b}, 0.03)`);
 
     root.style.setProperty('--accent-color', themeColorHex);
     root.style.setProperty('--accent-soft', `rgba(${r}, ${g}, ${b}, 0.2)`);
@@ -35,9 +35,9 @@ export function applyThemeColor(themeColorHex: string = '#635BFF', isDark: boole
     root.style.setProperty('--user-accent', themeColorHex);
     root.style.setProperty('--user-accent-soft', `rgba(${r}, ${g}, ${b}, 0.12)`);
     root.style.setProperty('--user-accent-surface', `rgba(${r}, ${g}, ${b}, 0.05)`);
-    root.style.setProperty('--user-home-bg-from', `rgba(${r}, ${g}, ${b}, 0.08)`);
-    root.style.setProperty('--user-home-bg-to', `rgba(${r}, ${g}, ${b}, 0.015)`);
-    root.style.setProperty('--app-bg-tint', `rgba(${r}, ${g}, ${b}, 0.035)`);
+    root.style.setProperty('--user-home-bg-from', `rgba(${r}, ${g}, ${b}, 0.035)`);
+    root.style.setProperty('--user-home-bg-to', `rgba(${r}, ${g}, ${b}, 0.005)`);
+    root.style.setProperty('--app-bg-tint', `rgba(${r}, ${g}, ${b}, 0.015)`);
 
     root.style.setProperty('--accent-color', themeColorHex);
     root.style.setProperty('--accent-soft', `rgba(${r}, ${g}, ${b}, 0.12)`);
