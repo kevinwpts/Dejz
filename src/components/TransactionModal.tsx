@@ -827,7 +827,7 @@ export function TransactionModal({
                     <motion.div 
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
-                      className="space-y-6 bg-[var(--surface-muted)]/50 p-4 rounded-[16px] border border-[var(--border-color)] overflow-hidden"
+                      className="space-y-6 bg-black/5 dark:bg-white/5 p-4 rounded-[16px] border border-black/10 dark:border-white/10 overflow-hidden"
                     >
                       {/* Splits List with Sliders */}
                       <div className="space-y-6">
@@ -836,7 +836,7 @@ export function TransactionModal({
                           const totalVal = parseAmount(amount);
                           
                           return (
-                            <div key={split.id} className="space-y-3 p-3 bg-[var(--surface-color)] rounded-[12px] border border-[var(--border-color)] group">
+                            <div key={split.id} className="space-y-3 p-3 bg-white/70 dark:bg-white/[0.06] backdrop-blur-md rounded-[14px] border border-black/10 dark:border-white/10 group">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                   <div 
@@ -922,7 +922,7 @@ export function TransactionModal({
                                     }
                                     setSplits(newSplits);
                                   }}
-                                  className="w-full accent-accent h-2 bg-[var(--surface-muted)] rounded-full appearance-none cursor-pointer border border-[var(--border-color)]/20"
+                                  className="w-full accent-accent h-2 bg-black/10 dark:bg-white/10 rounded-full appearance-none cursor-pointer border border-black/10 dark:border-white/10"
                                 />
                               </div>
                             </div>
@@ -959,8 +959,8 @@ export function TransactionModal({
                                  }}
                                  className={`flex-shrink-0 flex flex-col items-center gap-1.5 p-2 rounded-[14px] border transition-all ${
                                    isAlreadyInSplit 
-                                     ? 'bg-[var(--surface-muted)]/50 border-transparent opacity-40' 
-                                     : 'bg-[var(--surface-color)] border-[var(--border-color)] hover:border-accent/40 active:scale-95 shadow-xs'
+                                     ? 'bg-black/5 dark:bg-white/5 border-transparent opacity-40' 
+                                     : 'bg-white/70 dark:bg-white/[0.08] border-black/10 dark:border-white/10 hover:border-accent/40 active:scale-95 shadow-xs'
                                  }`}
                                >
                                  <div 
@@ -1105,7 +1105,7 @@ export function TransactionModal({
                           exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="bg-[var(--surface-muted)]/50 rounded-[16px] p-4 border border-[var(--border-color)]">
+                          <div className="bg-black/5 dark:bg-white/5 rounded-[16px] p-4 border border-black/10 dark:border-white/10">
                             <CalendarWidget 
                               calendarDays={calendarDays}
                               normalizedSelectedDate={selectedDate}

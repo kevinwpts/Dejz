@@ -179,7 +179,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           <div className="bg-black/5 dark:bg-white/5 rounded-2xl p-4 space-y-3.5 border border-black/10 dark:border-white/10">
             {/* Category */}
             <div className="flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
+              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="text-right">
@@ -195,8 +195,8 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       return (
                         <div key={split.id || idx} className="flex items-center justify-end gap-2">
                           {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />}
-                          <span className="text-[15px] font-medium text-[#211F1C] dark:text-white">{splitCatName}</span>
-                          <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">({formatAmount(split.amount, config.language)} {config.currency})</span>
+                          <span className="text-[15px] font-medium text-[var(--text-primary)]">{splitCatName}</span>
+                          <span className="text-[13px] font-normal text-[var(--text-secondary)]">({formatAmount(split.amount, config.language)} {config.currency})</span>
                         </div>
                       );
                     })}
@@ -213,7 +213,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       if (!iconKey) return null;
                       return <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />;
                     })()}
-                    <span className="text-[15px] font-medium text-[#211F1C] dark:text-white">
+                    <span className="text-[15px] font-medium text-[var(--text-primary)]">
                       {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}
                     </span>
                   </div>
@@ -224,12 +224,12 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             {/* Note if exists */}
             {transaction.note && (
               <>
-                <div className="h-px bg-[#E6E2D8] dark:bg-white/[0.06]" />
+                <div className="h-px bg-black/5 dark:bg-white/10" />
                 <div className="flex items-start justify-between gap-4">
-                  <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0 pt-0.5">
+                  <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
                     {t('ownNote')}
                   </span>
-                  <span className="text-[15px] font-medium text-[#211F1C] dark:text-white text-right max-w-[70%] break-words">
+                  <span className="text-[15px] font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                     {transaction.note}
                   </span>
                 </div>
@@ -239,14 +239,14 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
           {/* Tags Section if exists */}
           {transaction.tags && transaction.tags.length > 0 && (
-            <div className="p-4 bg-[var(--surface-color)] dark:bg-[#312f2f] rounded-[18px] border border-[var(--border-color)] dark:border-white/[0.05]">
-              <div className="flex items-center gap-1.5 mb-2 text-[var(--text-secondary)] dark:text-[#9CA6BC]">
+            <div className="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/10 dark:border-white/10">
+              <div className="flex items-center gap-1.5 mb-2 text-[var(--text-secondary)]">
                 <Tag size={12} strokeWidth={1.75} />
                 <span className="text-xs font-medium">{t('tags')}</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {(transaction.tags || []).map((tag, index) => (
-                  <span key={index} className="bg-[var(--surface-muted)] dark:bg-white/[0.06] text-[var(--text-primary)] dark:text-white px-2.5 py-1 rounded-[10px] text-xs font-medium border border-[var(--border-color)]/60 dark:border-transparent">
+                  <span key={index} className="bg-black/5 dark:bg-white/10 text-[var(--text-primary)] px-2.5 py-1 rounded-[10px] text-xs font-medium border border-black/5 dark:border-white/10">
                     {tag}
                   </span>
                 ))}
@@ -256,12 +256,12 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
           {/* Receipt Section if exists */}
           {transaction.receiptUrl && (
-            <div className="p-4 bg-[var(--surface-color)] dark:bg-[#312f2f] rounded-[18px] border border-[var(--border-color)] dark:border-white/[0.05]">
-              <div className="flex items-center gap-1.5 mb-3 text-[var(--text-secondary)] dark:text-[#9CA6BC]">
+            <div className="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/10 dark:border-white/10">
+              <div className="flex items-center gap-1.5 mb-3 text-[var(--text-secondary)]">
                 <Receipt size={12} strokeWidth={1.75} />
                 <span className="text-xs font-medium">{t('receipt')}</span>
               </div>
-              <div className="relative aspect-[3/4] rounded-[14px] overflow-hidden bg-black/5 dark:bg-black/20 border border-[var(--border-color)] dark:border-white/[0.05]">
+              <div className="relative aspect-[3/4] rounded-[14px] overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10">
                 <img 
                   src={transaction.receiptUrl} 
                   alt="Receipt" 

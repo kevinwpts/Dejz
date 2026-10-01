@@ -74,7 +74,9 @@ export function AppHeader({
       className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top,0px))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-200 ease-in-out ${
         isDemoMode ? '' : 'pt-[env(safe-area-inset-top,0px)]'
       } ${
-        !isAtTop || isProfileOrSettings
+        isProfileOrSettings
+          ? "bg-[#080611]/90 backdrop-blur-xl border-b border-white/[0.08]"
+          : !isAtTop
           ? "bg-[#F2EFE8]/90 dark:bg-[#050709]/80 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
           : "bg-transparent border-b border-transparent"
       }`}

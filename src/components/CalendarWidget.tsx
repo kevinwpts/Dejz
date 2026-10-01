@@ -49,10 +49,10 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
               }}
               className={`aspect-square w-full rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
                 isSelected 
-                  ? 'bg-[var(--accent-color)] text-white shadow-md shadow-accent/30 z-10' 
+                  ? 'bg-[var(--accent-color)] text-white shadow-xs z-10' 
                   : isToday
-                  ? 'bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)]'
-                  : 'bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-muted)]/50'
+                  ? 'bg-black/5 dark:bg-white/10 text-[var(--text-primary)] border border-black/10 dark:border-white/10'
+                  : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
               }`}
             >
               <span className={`text-[13px] sm:text-[14px] font-medium tabular-nums leading-none text-center ${
@@ -64,13 +64,13 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
               {/* Activity Indicators */}
               <div className="flex items-center justify-center gap-0.5 pointer-events-none h-1 w-full">
                 {hasIncome && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[#1C1917] dark:bg-white/[0.12] 300' : 'bg-neutral-800 dark:text-white'}`} />
+                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
                 )}
                 {hasSpend && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/80' : 'bg-[var(--accent-color)]/60'}`} />
+                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/80' : 'bg-[var(--accent-color)]'}`} />
                 )}
                 {hasFixed && !hasIncome && !hasSpend && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/80' : 'bg-[var(--accent-color)]/70'}`} />
+                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/80' : 'bg-amber-500'}`} />
                 )}
               </div>
             </button>
