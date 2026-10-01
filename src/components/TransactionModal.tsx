@@ -718,9 +718,8 @@ export function TransactionModal({
                 onChange={handleReceiptFileChange}
               />
 
-              {/* Unified Form Module */}
-              <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] divide-y divide-black/[0.06] dark:divide-white/[0.06] overflow-hidden shadow-none border-none">
-                {/* 1. Beloppsrutan (Amount Input) - slightly taller for prominence */}
+              {/* 1. Beloppsmodul (Egen modul för summan) */}
+              <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] overflow-hidden shadow-none border-none">
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
                   className="h-[82px] sm:h-[88px] px-4 sm:px-5 flex items-center justify-between cursor-text"
@@ -769,6 +768,10 @@ export function TransactionModal({
                   </div>
                   <div className="shrink-0 min-w-[56px]" />
                 </div>
+              </div>
+
+              {/* 2. Detaljmodul med skiljelinjer mellan valen */}
+              <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] divide-y divide-black/[0.06] dark:divide-white/[0.06] overflow-hidden shadow-none border-none">
 
                 {/* 2. Mottagare / Butik Input */}
                 <div className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex flex-col justify-center">
