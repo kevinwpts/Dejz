@@ -86,7 +86,7 @@ export function AppHeader({
               aria-label="Dejz"
               title="Dejz"
             >
-              <DejzLogo className="h-6 sm:h-7 w-auto" textColor="var(--text-primary)" />
+              <DejzLogo className="h-5 sm:h-[22px] w-auto" textColor="var(--text-primary)" />
             </button>
           )}
         </div>

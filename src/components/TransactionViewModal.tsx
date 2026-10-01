@@ -196,8 +196,8 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           {/* Details Section: Clean list with discrete subtle divider lines without background */}
           <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
             {/* Category */}
-            <div className="py-3.5 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="text-right">
@@ -213,8 +213,8 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       return (
                         <div key={split.id || idx} className="flex items-center justify-end gap-2">
                           {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />}
-                          <span className="text-[15px] font-medium text-[var(--text-primary)]">{splitCatName}</span>
-                          <span className="text-[13px] font-normal text-[var(--text-secondary)]">({formatAmount(split.amount, config.language)} {config.currency})</span>
+                          <span className="text-[14px] font-medium text-[var(--text-primary)]">{splitCatName}</span>
+                          <span className="text-[12px] font-normal text-[var(--text-secondary)]">({formatAmount(split.amount, config.language)} {config.currency})</span>
                         </div>
                       );
                     })}
@@ -231,7 +231,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       if (!iconKey) return null;
                       return <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />;
                     })()}
-                    <span className="text-[15px] font-medium text-[var(--text-primary)]">
+                    <span className="text-[14px] font-medium text-[var(--text-primary)]">
                       {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}
                     </span>
                   </div>
@@ -240,22 +240,22 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             </div>
 
             {/* Date Field */}
-            <div className="py-3.5 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('date')}
               </span>
-              <span className="text-[15px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formattedDate}
               </span>
             </div>
 
             {/* Time Field */}
             {formattedTime && (
-              <div className="py-3.5 flex items-center justify-between gap-4">
-                <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+              <div className="py-3 flex items-center justify-between gap-4">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                   {config.language === 'en' ? 'Time' : config.language === 'fi' ? 'Aika' : 'Tid'}
                 </span>
-                <span className="text-[15px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+                <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
                   {formattedTime}
                 </span>
               </div>
@@ -263,11 +263,11 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
             {/* Note if exists */}
             {transaction.note && (
-              <div className="py-3.5 flex items-start justify-between gap-4">
-                <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
+              <div className="py-3 flex items-start justify-between gap-4">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
                   {t('ownNote')}
                 </span>
-                <span className="text-[15px] font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                <span className="text-[14px] font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {transaction.note}
                 </span>
               </div>
@@ -275,14 +275,14 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
             {/* Tags Section if exists */}
             {transaction.tags && transaction.tags.length > 0 && (
-              <div className="py-3.5 flex items-start justify-between gap-4">
+              <div className="py-3 flex items-start justify-between gap-4">
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)] shrink-0 pt-0.5">
                   <Tag size={13} strokeWidth={1.75} />
-                  <span className="text-[14px] font-normal">{t('tags')}</span>
+                  <span className="text-[13px] font-normal">{t('tags')}</span>
                 </div>
                 <div className="flex flex-wrap justify-end gap-1.5">
                   {(transaction.tags || []).map((tag, index) => (
-                    <span key={index} className="bg-black/5 dark:bg-white/10 text-[var(--text-primary)] px-2.5 py-1 rounded-[8px] text-xs font-medium">
+                    <span key={index} className="bg-black/5 dark:bg-white/10 text-[var(--text-primary)] px-2.5 py-1 rounded-[8px] text-[11px] font-medium">
                       {tag}
                     </span>
                   ))}

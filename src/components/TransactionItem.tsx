@@ -92,9 +92,9 @@ export function TransactionItem({
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
     paddingClasses = "px-4 py-2.5 sm:py-3 min-h-[52px]";
   } else if (variant === 'nested') {
-    containerClasses = "bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] shadow-none border-none rounded-[16px]";
+    containerClasses = "bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] shadow-none border-none rounded-[12px]";
   } else {
-    containerClasses = "bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] rounded-[20px] shadow-none border-none";
+    containerClasses = "bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] rounded-[12px] shadow-none border-none";
   }
 
   // Neutral discreet category display
@@ -141,7 +141,7 @@ export function TransactionItem({
 
   return (
     <>
-      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[20px]'} select-none`}>
+      <div className={`relative overflow-hidden ${squared ? '' : 'rounded-[12px]'} select-none`}>
         {/* Swipe Left Background Action: Delete */}
         {canSwipe && (
           <motion.div 
