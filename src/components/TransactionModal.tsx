@@ -646,7 +646,7 @@ export function TransactionModal({
         <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
         {/* Header Section: Centered Title, Logo on Left, Close on Right */}
-        <div className="px-5 sm:px-6 pt-3.5 sm:pt-4 pb-3 relative flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] z-10 min-h-[58px]">
+        <div className="px-5 sm:px-6 py-3 relative flex items-center justify-between border-b border-black/[0.05] dark:border-white/[0.06] z-10 min-h-[60px]">
           {/* Logo on Left */}
           <div className="flex items-center z-10">
             <button
@@ -665,7 +665,7 @@ export function TransactionModal({
           </div>
 
           {/* Title dead-centered */}
-          <div className="absolute inset-x-14 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-x-16 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
             <AnimatePresence mode="wait">
               {!transaction && onChangeType ? (
                 <div className="pointer-events-auto">
@@ -700,7 +700,7 @@ export function TransactionModal({
           <button 
             type="button"
             onClick={onClose} 
-            className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 z-10 shrink-0"
+            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 z-10 shrink-0"
             aria-label={t('close')}
           >
             <X size={15} strokeWidth={2.2} />
@@ -708,7 +708,7 @@ export function TransactionModal({
         </div>
 
         {/* Main Content Area: Grouped Unified Module (Profile Style with subtle dividing lines) */}
-        <div className="shrink overflow-y-auto px-5 sm:px-6 py-4 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+        <div className="shrink overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
               {/* Hidden file input for tickets, receipts and documents */}
               <input 
                 ref={receiptInputRef}
@@ -719,10 +719,10 @@ export function TransactionModal({
               />
 
               {/* 1. Beloppsmodul (Egen modul för summan) */}
-              <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] overflow-hidden shadow-none border-none">
+              <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] overflow-hidden border border-black/[0.04] dark:border-white/[0.05] shadow-xs">
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="h-[82px] sm:h-[88px] px-4 sm:px-5 flex items-center justify-between cursor-text"
+                  className="h-[88px] sm:h-[94px] px-5 flex items-center justify-between cursor-text"
                 >
                   <div className="shrink-0 flex items-center min-w-[56px]">
                     {type === 'expense' && (
@@ -736,10 +736,10 @@ export function TransactionModal({
                             setSplits([]);
                           }
                         }}
-                        className={`text-[11px] font-medium transition-all px-2.5 py-1 rounded-full cursor-pointer active:scale-95 ${
+                        className={`text-[11.5px] font-medium transition-all px-3 py-1 rounded-full cursor-pointer active:scale-95 ${
                           splits.length > 0 
-                            ? "bg-rose-500 text-white" 
-                            : "bg-black/5 dark:bg-white/10 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/20"
+                            ? "bg-rose-500 text-white shadow-xs" 
+                            : "bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/15"
                         }`}
                       >
                         {splits.length > 0 ? (currentLang === 'en' ? 'Cancel' : 'Avbryt') : (currentLang === 'en' ? 'Split' : 'Splitta')}
@@ -760,9 +760,9 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[24px] sm:text-[26px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/40 dark:placeholder-[#A8A8A8]/40 cursor-text select-text"
+                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[28px] sm:text-[32px] font-semibold text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/25 dark:placeholder-[#A8A8A8]/25 cursor-text select-text"
                     />
-                    <span className="text-[13px] font-normal text-[#777168] dark:text-[#A8A8A8] select-none font-sans shrink-0">
+                    <span className="text-[14px] font-medium text-[#777168] dark:text-[#A8A8A8] select-none font-sans shrink-0 ml-1">
                       {currency}
                     </span>
                   </div>
@@ -771,26 +771,26 @@ export function TransactionModal({
               </div>
 
               {/* 2. Detaljmodul med skiljelinjer mellan valen */}
-              <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] divide-y divide-black/[0.06] dark:divide-white/[0.06] overflow-hidden shadow-none border-none">
+              <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] divide-y divide-black/[0.05] dark:divide-white/[0.05] overflow-hidden border border-black/[0.04] dark:border-white/[0.05] shadow-xs">
 
                 {/* 2. Mottagare / Butik Input */}
-                <div className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex flex-col justify-center">
-                  <label className="text-[11px] font-medium text-[#777168] dark:text-[#A8A8A8] block">
+                <div className="px-5 py-3.5 min-h-[62px] flex flex-col justify-center">
+                  <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block">
                     {type === 'income' ? t('incomeSource') : t('merchant')}
                   </label>
-                  <div className="flex items-center justify-between gap-2 mt-0.5">
+                  <div className="flex items-center justify-between gap-2 mt-1">
                     <input 
                       ref={merchantInputRef}
                       type="text" 
                       value={merchant}
                       onChange={(e) => setMerchant(e.target.value)}
                       placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                      className="w-full bg-transparent text-[13.5px] font-normal text-[var(--text-primary)] outline-none placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50"
+                      className="w-full bg-transparent text-[14px] sm:text-[14.5px] font-normal text-[var(--text-primary)] outline-none placeholder:font-normal placeholder:text-[13.5px] placeholder-[#777168]/40 dark:placeholder-[#A8A8A8]/40"
                     />
                     {merchant && (
                       <button 
                         onClick={() => setMerchant('')}
-                        className="text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer shrink-0"
+                        className="text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer shrink-0 transition-colors"
                       >
                         <X size={14} strokeWidth={2} />
                       </button>
@@ -799,25 +799,25 @@ export function TransactionModal({
                 </div>
 
                 {/* 3. Egen anteckning Input */}
-                <div className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex flex-col justify-center">
-                  <label className="text-[11px] font-medium text-[#777168] dark:text-[#A8A8A8] block">
+                <div className="px-5 py-3.5 min-h-[62px] flex flex-col justify-center">
+                  <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block">
                     {t('ownNote')}
                   </label>
-                  <div className="flex items-center justify-between gap-2 mt-0.5">
+                  <div className="flex items-center justify-between gap-2 mt-1">
                     <input 
                       ref={noteInputRef}
                       type="text" 
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
                       placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                      className={`w-full bg-transparent text-[13.5px] font-normal text-[var(--text-primary)] outline-none placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 ${
+                      className={`w-full bg-transparent text-[14px] sm:text-[14.5px] font-normal text-[var(--text-primary)] outline-none placeholder:font-normal placeholder:text-[13.5px] placeholder-[#777168]/40 dark:placeholder-[#A8A8A8]/40 ${
                         validationError === 'note' ? 'text-rose-500' : ''
                       }`}
                     />
                     {note && (
                       <button 
                         onClick={() => setNote('')}
-                        className="text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer shrink-0"
+                        className="text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer shrink-0 transition-colors"
                       >
                         <X size={14} strokeWidth={2} />
                       </button>
@@ -832,14 +832,14 @@ export function TransactionModal({
                       if (typeof feedback?.light === 'function') feedback.light();
                       setIsCategoryPickerOpen(true);
                     }}
-                    className="px-4 sm:px-5 py-3.5 min-h-[58px] sm:min-h-[62px] flex items-center justify-between cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group select-none"
+                    className="px-5 py-3.5 min-h-[58px] sm:min-h-[60px] flex items-center justify-between cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group select-none"
                   >
                     <span className="text-[13.5px] sm:text-[14px] font-normal text-[#777168] dark:text-[#A8A8A8] shrink-0">
                       {t('category')}
                     </span>
-                    <div className="flex items-center gap-2 shrink-0 ml-3">
+                    <div className="flex items-center gap-2.5 shrink-0 ml-3">
                       <div 
-                        className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0"
+                        className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
                         style={{ 
                           backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
                           color: currentCatData?.color || 'var(--text-primary)'
@@ -860,9 +860,9 @@ export function TransactionModal({
                 )}
 
                 {/* 5. Datum Selection */}
-                <div className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex flex-col justify-center">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] font-medium text-[#777168] dark:text-[#A8A8A8]">
+                <div className="px-5 py-3.5 min-h-[62px] flex flex-col justify-center">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8]">
                       {t('date')}
                     </span>
                     {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
@@ -872,14 +872,14 @@ export function TransactionModal({
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => {
                         setSelectedDate(new Date());
                         setShowFullCalendar(false);
                       }}
-                      className={`flex-1 h-[36px] rounded-lg text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      className={`flex-1 h-[34px] rounded-xl text-[12px] font-medium tracking-tight transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                         !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
                           ? 'bg-[var(--accent-color)] text-white shadow-xs'
                           : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
@@ -895,7 +895,7 @@ export function TransactionModal({
                         setSelectedDate(yesterday);
                         setShowFullCalendar(false);
                       }}
-                      className={`flex-1 h-[36px] rounded-lg text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      className={`flex-1 h-[34px] rounded-xl text-[12px] font-medium tracking-tight transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                         !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
                           ? 'bg-[var(--accent-color)] text-white shadow-xs'
                           : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
@@ -906,7 +906,7 @@ export function TransactionModal({
                     <button
                       type="button"
                       onClick={() => setShowFullCalendar(!showFullCalendar)}
-                      className={`w-10 h-[36px] rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+                      className={`w-10 h-[34px] rounded-xl transition-all flex items-center justify-center cursor-pointer ${
                         showFullCalendar 
                           ? 'bg-[var(--accent-color)] text-white shadow-xs' 
                           : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
@@ -923,7 +923,7 @@ export function TransactionModal({
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden pt-2.5"
+                        className="overflow-hidden pt-3"
                       >
                         <CalendarWidget 
                           calendarDays={calendarDays}
@@ -938,29 +938,29 @@ export function TransactionModal({
                 </div>
 
                 {/* 6. Bifoga fil (Attach file) */}
-                <div className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex items-center justify-between">
+                <div className="px-5 py-3.5 min-h-[58px] sm:min-h-[60px] flex items-center justify-between">
                   {isScanningReceipt ? (
                     <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-6 h-6 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
-                          <Loader2 size={13} className="animate-spin text-[var(--accent-color)]" />
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
+                          <Loader2 size={14} className="animate-spin text-[var(--accent-color)]" />
                         </div>
                         <div className="min-w-0">
-                          <h4 className="text-[12px] font-semibold text-[var(--text-primary)] tracking-tight">
+                          <h4 className="text-[12.5px] font-semibold text-[var(--text-primary)] tracking-tight">
                             {currentLang === 'en' ? 'Uploading file…' : 'Laddar upp fil…'}
                           </h4>
-                          <p className="text-[10px] text-[var(--accent-color)] truncate">
+                          <p className="text-[11px] text-[var(--accent-color)] truncate">
                             {currentLang === 'en' ? 'Processing attachment' : 'Bearbetar bilagan'}
                           </p>
                         </div>
                       </div>
-                      <span className="text-[10px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2 py-0.5 rounded-full animate-pulse">
+                      <span className="text-[10.5px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2.5 py-0.5 rounded-full animate-pulse">
                         {currentLang === 'en' ? 'Wait…' : 'Vänta…'}
                       </span>
                     </div>
                   ) : receiptUrl ? (
                     <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
                         <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-black/5 dark:border-white/5 shrink-0 bg-black/5 flex items-center justify-center">
                           {receiptUrl.includes('.pdf') ? (
                             <FileText size={16} className="text-[#777168] dark:text-[#A8A8A8]" />
@@ -969,20 +969,20 @@ export function TransactionModal({
                           )}
                         </div>
                         <div className="min-w-0">
-                          <h4 className="text-[12.5px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
+                          <h4 className="text-[13px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
                             {receiptFileName || (currentLang === 'en' ? 'File attached' : 'Fil bifogad')}
                           </h4>
-                          <p className="text-[10px] text-[#777168] dark:text-[#A8A8A8] truncate">
+                          <p className="text-[11px] text-[#777168] dark:text-[#A8A8A8] truncate">
                             {currentLang === 'en' ? 'Ticket, receipt or document' : 'Biljett, kvitto eller dokument'}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
                         <a
                           href={receiptUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-2.5 py-1 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-medium rounded-lg transition-colors cursor-pointer"
+                          className="px-2.5 py-1 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11.5px] font-medium rounded-lg transition-colors cursor-pointer"
                         >
                           {currentLang === 'en' ? 'View' : 'Visa'}
                         </a>
@@ -993,45 +993,45 @@ export function TransactionModal({
                             setReceiptFileName(undefined);
                             setScanFeedback(null);
                           }}
-                          className="p-1 text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                          className="p-1.5 text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
                           title={currentLang === 'en' ? 'Remove' : 'Ta bort'}
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={13.5} />
                         </button>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-6 h-6 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
-                          <Paperclip size={13} strokeWidth={2} />
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+                          <Paperclip size={14} strokeWidth={2} />
                         </div>
                         <div className="min-w-0">
-                          <span className="text-[12.5px] font-medium text-[var(--text-primary)] block truncate">
+                          <span className="text-[13px] font-medium text-[var(--text-primary)] block truncate">
                             {currentLang === 'en' ? 'Attach file' : 'Bifoga fil'}
                           </span>
-                          <p className="text-[10px] text-[#777168] dark:text-[#A8A8A8] truncate">
+                          <p className="text-[11px] text-[#777168] dark:text-[#A8A8A8] truncate">
                             {currentLang === 'en' ? 'Tickets, receipts, PDFs' : 'Biljetter, kvitton, PDF m.m.'}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
                         <button
                           type="button"
                           onClick={() => receiptInputRef.current?.click()}
                           disabled={isUploadingReceipt}
-                          className="h-7 px-2.5 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-medium rounded-lg transition-all cursor-pointer active:scale-95 flex items-center gap-1"
+                          className="h-[30px] px-3 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11.5px] font-medium rounded-lg transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
                         >
-                          <Paperclip size={11} strokeWidth={2} />
+                          <Paperclip size={12} strokeWidth={2} />
                           <span>{currentLang === 'en' ? 'File' : 'Välj fil'}</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setIsCameraModalOpen(true)}
                           disabled={isUploadingReceipt}
-                          className="h-7 px-2.5 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11px] font-medium rounded-lg shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1"
+                          className="h-[30px] px-3 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11.5px] font-medium rounded-lg shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
                         >
-                          <Camera size={11} strokeWidth={2} />
+                          <Camera size={12} strokeWidth={2} />
                           <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
                         </button>
                       </div>
