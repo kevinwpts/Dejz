@@ -13,6 +13,7 @@ import { useScrollLock } from '../hooks/useScrollLock';
 import { getCategoryIconName } from '../utils/icons';
 import { formatFullDate } from '../utils/date';
 import { feedback } from '../utils/feedback';
+import { getTransactionDominantColor } from '../utils/brandColor';
 
 interface TransactionViewModalProps {
   transaction: Transaction;
@@ -31,6 +32,8 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const isIncome = transaction.type === 'income';
   const isSavings = transaction.type === 'savings';
+
+  const brandColor = getTransactionDominantColor(transaction, config);
 
   const getLocale = () => {
     const lang = config.language || 'sv';
@@ -90,34 +93,46 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
         className="bg-white dark:bg-[#080611] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Subtle Brand Color Ambient Glow / Tint */}
+        <div className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden">
+          <div 
+            className="absolute -top-12 -left-10 w-80 h-80 rounded-full blur-3xl opacity-25 dark:opacity-30"
+            style={{ backgroundColor: brandColor }}
+          />
+          <div 
+            className="absolute top-0 inset-x-0 h-44 opacity-15 dark:opacity-20"
+            style={{
+              background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
+            }}
+          />
+        </div>
+
+        {/* Floating Close Button Top Right */}
+        <button 
+          type="button"
+          onClick={() => {
+            if (typeof feedback?.light === 'function') feedback.light();
+            onClose();
+          }} 
+          className="absolute top-3 right-4 sm:top-4 sm:right-5 z-30 w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+          aria-label={t('close')}
+        >
+          <X size={17} strokeWidth={2.2} />
+        </button>
+
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
           onClick={onClose}
-          className="w-full py-2.5 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
+          className="w-full pt-2.5 pb-1 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0 relative z-20"
         >
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Clean Header: Close button only */}
-        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-2 flex items-center justify-end shrink-0">
-          <button 
-            type="button"
-            onClick={() => {
-              if (typeof feedback?.light === 'function') feedback.light();
-              onClose();
-            }} 
-            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-            aria-label={t('close')}
-          >
-            <X size={17} strokeWidth={2.2} />
-          </button>
-        </div>
-
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-2 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-2 sm:pt-4 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
           {/* Hero Section: Logo to the left, name & cost in line to the right */}
-          <div className="flex items-center gap-4 text-left pt-1 pb-3">
+          <div className="flex items-center gap-4 text-left pt-0.5 pb-2.5 pr-10">
             <div className="shrink-0">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
