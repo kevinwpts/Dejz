@@ -1235,6 +1235,12 @@ export default function App() {
     }
   }, [config?.appIconTheme]);
 
+  // Dynamically update CSS variables and background tint when theme color or dark mode changes
+  useEffect(() => {
+    if (!config) return;
+    applyThemeColor(config.themeColor || '#635BFF', !!config.darkMode);
+  }, [config?.themeColor, config?.darkMode]);
+
   const handleFeedbackSubmit = async (message: string) => {
     if (!session) return;
 

@@ -462,9 +462,9 @@ export function TodayView({
         }}
       />
 
-      {/* SUBTLE THEME TINT GRADIENT ON UPPER HOME (Light mode) */}
+      {/* SUBTLE THEME TINT GRADIENT ON UPPER HOME */}
       <div 
-        className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-opacity duration-500 dark:hidden"
+        className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-opacity duration-500"
         style={{
           height: '65vh',
           background: 'linear-gradient(180deg, var(--user-home-bg-from, rgba(99, 91, 255, 0.08)) 0%, var(--user-home-bg-to, rgba(99, 91, 255, 0.015)) 100%)',
