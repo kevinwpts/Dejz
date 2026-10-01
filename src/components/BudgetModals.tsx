@@ -120,7 +120,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -157,47 +157,18 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                   {income.name}
                 </h2>
 
-                {/* Smaller Action Buttons aligned inline with the title */}
-                <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      onEdit(income);
-                    }} 
-                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-                    title={t('edit')}
-                    aria-label={t('edit')}
-                  >
-                    <Pencil size={13.5} strokeWidth={1.9} />
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setShowDeleteConfirm(true);
-                    }} 
-                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-                    title={config.language === 'en' ? 'Delete' : 'Ta bort'}
-                    aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
-                  >
-                    <Trash2 size={13.5} strokeWidth={1.9} />
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      onClose();
-                    }} 
-                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 ml-0.5"
-                    title={t('close')}
-                    aria-label={t('close')}
-                  >
-                    <X size={14.5} strokeWidth={2.2} />
-                  </button>
-                </div>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    onClose();
+                  }} 
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                  title={t('close')}
+                  aria-label={t('close')}
+                >
+                  <X size={15} strokeWidth={2.2} />
+                </button>
               </div>
 
               <p className="text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline text-emerald-600 dark:text-emerald-400">
@@ -272,6 +243,34 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           </div>
         </div>
 
+        {/* Action Buttons Footer: Bred Redigera-knapp och Radera */}
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+          <button 
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              onEdit(income);
+            }} 
+            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+          >
+            <Pencil size={14.5} strokeWidth={1.9} />
+            <span>{t('edit')}</span>
+          </button>
+
+          <button 
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              setShowDeleteConfirm(true);
+            }} 
+            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+            title={config.language === 'en' ? 'Delete' : 'Ta bort'}
+            aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
+          >
+            <Trash2 size={16} strokeWidth={1.9} />
+          </button>
+        </div>
+
         {showDeleteConfirm && (
           <ConfirmModal
             isOpen={showDeleteConfirm}
@@ -329,7 +328,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
   const [manualSelectionThisSession, setManualSelectionThisSession] = useState(false);
   
   const [logo, setLogo] = useState<string | undefined>(income?.logo);
-  const [autoLogo, setAutoLogo] = useState<string | undefined>(income?.name ? getLogoUrl(income.name) : undefined);
+  const [_autoLogo, setAutoLogo] = useState<string | undefined>(income?.name ? getLogoUrl(income.name) : undefined);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const [showIconSelector, setShowIconSelector] = useState(false);
@@ -375,6 +374,34 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
     });
   };
 
+  const incomeCompatible = {
+    ...income,
+    name,
+    amount: parseAmount(amount),
+    note,
+    category,
+    logo,
+    icon,
+    type: 'income' as const,
+    timestamp: Date.now()
+  };
+
+  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(incomeCompatible as any, config));
+
+  useEffect(() => {
+    const initial = getTransactionDominantColor(incomeCompatible as any, config);
+    setBrandColor(initial);
+
+    const visual = resolveEntityVisual(incomeCompatible as any, config);
+    if (visual.logoUrl && !visual.logoUrl.startsWith('data:image/svg+xml')) {
+      extractDominantColorFromImage(visual.logoUrl).then((extracted) => {
+        if (extracted) {
+          setBrandColor(extracted);
+        }
+      });
+    }
+  }, [name, logo, config]);
+
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
   return (
@@ -397,65 +424,77 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        {/* Smooth, Seamless Ambient Brand Color Glow */}
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+            `
+          }}
+        />
 
-        {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/5 dark:border-white/10">
-          <div className="flex justify-start">
-            <button
-              key="icon"
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowIconSelector(true);
-              }}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-2xl overflow-hidden transition-all duration-300 active:scale-95 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 shrink-0"
-              title={t('chooseIcon')}
-            >
-              {logo ? (
-                <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              ) : isEmojiString(icon) ? (
-                icon
-              ) : (
-                (() => {
-                  const Icon = ICON_MAP[icon] || Banknote;
-                  return <Icon size={20} className="text-accent" />;
-                })()
-              )}
-            </button>
-          </div>
-          <div className="flex justify-center overflow-hidden">
-            <h2 className="text-[18px] sm:text-[20px] font-semibold tracking-tight text-[var(--text-primary)] dark:text-white text-center truncate px-2">
-              {income ? t('edit') : t('newIncome')}
-            </h2>
-          </div>
-          <div className="flex justify-end">
-            <button 
-              type="button"
-              onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
-              aria-label={t('close')}
-            >
-              <X size={17} strokeWidth={2.2} />
-            </button>
-          </div>
-        </div>
+        {/* Drawer Handle on Mobile */}
+        <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
         {/* Main Content Area */}
-        <div className="shrink overflow-y-auto px-5 sm:px-6 py-5 space-y-5 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          {/* Amount Inputs Section */}
-          <div className="space-y-4">
-            <div className="flex flex-col gap-1">
-              <div 
-                onClick={() => amountInputRef.current?.focus()}
-                className="bg-black/5 dark:bg-white/5 rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-6 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+          {/* Hero Section: Logo to the left, Payer name and Close Button inline, Price below */}
+          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
+            <div className="shrink-0 pt-0.5">
+              <button
+                type="button"
+                onClick={() => setShowIconSelector(true)}
+                className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-2xl transition-all duration-300 active:scale-95 bg-black/5 dark:bg-white/10 hover:ring-2 hover:ring-[var(--accent-color)]/30 group cursor-pointer shrink-0"
+                title={t('chooseIcon')}
               >
-                <div className="shrink-0 min-w-[48px]" />
-                <div className="flex-1 flex items-baseline justify-center gap-1.5">
+                {logo ? (
+                  <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : isEmojiString(icon) ? (
+                  icon
+                ) : (
+                  (() => {
+                    const Icon = ICON_MAP[icon] || Banknote;
+                    return <Icon size={22} className="text-accent" />;
+                  })()
+                )}
+              </button>
+            </div>
+
+            <div className="min-w-0 flex-1 flex flex-col justify-center">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <input 
+                    ref={nameInputRef}
+                    type="text" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)} 
+                    placeholder={t('incomePayerPlaceholder')} 
+                    className="text-[20px] sm:text-[24px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  />
+                </div>
+
+                <button 
+                  type="button"
+                  onClick={onClose} 
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
+                  aria-label={t('close')}
+                >
+                  <X size={15} strokeWidth={2.2} />
+                </button>
+              </div>
+
+              {/* Amount display / input in the Hero */}
+              <div className="mt-1.5 flex items-baseline justify-between gap-2">
+                <div 
+                  onClick={() => amountInputRef.current?.focus()}
+                  className="flex items-baseline font-amount text-[20px] sm:text-[24px] font-semibold tabular-nums tracking-tight cursor-text text-emerald-600 dark:text-emerald-400"
+                >
+                  <span className="opacity-80 mr-0.5 select-none">+</span>
                   <input
                     ref={amountInputRef}
                     type="text"
@@ -469,188 +508,187 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                       }
                     }}
                     placeholder="0"
-                    className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[var(--text-tertiary)]"
+                    className="bg-transparent outline-none font-amount font-semibold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400 placeholder:font-normal placeholder-[var(--text-tertiary)] max-w-[170px] sm:max-w-[210px]"
+                    style={{ width: `${Math.max(1, (amount || '0').length) * 1.1}ch` }}
                   />
-                  <span className="text-[15px] font-normal text-[var(--text-secondary)] select-none font-sans shrink-0">
+                  <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans select-none">
                     {currency}
                   </span>
                 </div>
-                <div className="shrink-0 min-w-[48px]" />
               </div>
-
-              <QuickMathToolbar value={amount} onChange={setAmount} inputRef={amountInputRef} currency={currency} showMathTools={false} />
-            </div>
-
-            <div className="flex items-center justify-between px-4 py-3.5 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] transition-all">
-              <div className="flex flex-col gap-0.5 pr-2">
-                <span className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight">Varierande belopp</span>
-                <span className="text-[12px] font-normal text-[var(--text-secondary)]">Ändras månad till månad</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsVariable(!isVariable)}
-                className={`w-11 h-6 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-              >
-                <div
-                  className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[22px]' : 'left-0.5'}`}
-                />
-              </button>
             </div>
           </div>
 
-          {/* Name Input */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between px-1">
-              <label className="text-[14px] font-normal text-[var(--text-secondary)]">
-                {t('incomePayerLabel')}
-              </label>
-              {autoLogo && !manualSelectionThisSession && name !== originalName.current && (
-                <span className="text-[10px] font-semibold text-[#05B862] bg-[#E8F8F0] dark:bg-[#0D2E1F] px-2 py-0.5 rounded-full">
-                  Auto
+          {/* Details Section: Clean list with discrete subtle hairline divider lines */}
+          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+            {/* Category */}
+            <div className="py-3 flex flex-col gap-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                  {t('category')}
                 </span>
-              )}
+                <span className="text-[13px] font-medium text-[var(--text-primary)]">
+                  {category || t('income')}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                {(categories || []).map(cat => {
+                  const isActive = category === cat.name;
+                  return (
+                    <CategoryTile
+                      key={cat.name}
+                      name={cat.name}
+                      icon={cat.icon}
+                      color={cat.color}
+                      isActive={isActive}
+                      onClick={() => setCategory(cat.name)}
+                    />
+                  );
+                })}
+              </div>
             </div>
-            <div className="relative group">
-              <input 
-                ref={nameInputRef}
-                type="text" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                placeholder={t('incomePayerPlaceholder')} 
-                className="w-full h-[48px] bg-black/5 dark:bg-white/5 text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40" 
-              />
-              {name && (
-                <button 
+
+            {/* Type: Fixed / Variable */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('type')}
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] font-medium text-[var(--text-primary)]">
+                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
+                </span>
+                <button
                   type="button"
-                  onClick={() => setName('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1 cursor-pointer"
+                  onClick={() => setIsVariable(!isVariable)}
+                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
                 >
-                  <X size={16} strokeWidth={2} />
+                  <div
+                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
+                  />
                 </button>
-              )}
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-[14px] font-normal text-[var(--text-secondary)] block">
-              {t('ownNote')}
-            </label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Skriv en notering..."
-              rows={2}
-              className="w-full bg-black/5 dark:bg-white/5 text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 py-3 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40 min-h-[48px] resize-y"
-            />
-          </div>
-
-          {/* Arrival Day */}
-          <div className="space-y-2">
-            <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('arrivalDay')}</label>
-            <div className="relative">
-              <select
-                value={deductionDay}
-                onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
-              >
-                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <option key={day} value={day}>{day}</option>
-                ))}
-              </select>
-              <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+            {/* Arrival Day */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('arrivalDay')}
+              </span>
+              <div className="relative">
+                <select
+                  value={deductionDay}
+                  onChange={(e) => setDeductionDay(parseInt(e.target.value))}
+                  className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] tabular-nums outline-none pr-5 text-right cursor-pointer"
+                >
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                    <option key={day} value={day} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">{day}:e</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+              </div>
             </div>
-          </div>
 
-          <div className={`grid gap-3 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            <div className="space-y-2">
-              <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('frequency')}</label>
+            {/* Frequency */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('frequency')}
+              </span>
               <div className="relative">
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                    <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
+                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">
+                      {t(`freq_${key.toLowerCase()}` as TranslationKey)}
+                    </option>
                   ))}
                 </select>
-                <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
               </div>
             </div>
 
+            {/* Start Month if not monthly */}
             {frequency !== Frequency.MONTHLY && (
-              <div className="space-y-2">
-                <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('startMonthLabel')}</label>
+              <div className="py-3 flex items-center justify-between gap-4">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                  {t('startMonthLabel')}
+                </span>
                 <div className="relative">
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                    className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
                       const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                       const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-                      
-                      let cycleText = '';
-                      if (frequency === Frequency.QUARTERLY) {
-                        const m2 = (i + 3) % 12;
-                        const m3 = (i + 6) % 12;
-                        const m4 = (i + 9) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
-                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)}, ${getMonthShort(m3)}, ${getMonthShort(m4)})`;
-                      } else if (frequency === Frequency.SEMI_ANNUALLY) {
-                        const m2 = (i + 6) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
-                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)})`;
-                      }
-
                       return (
-                        <option key={i} value={i}>
-                          {capitalizedMonth}{cycleText}
+                        <option key={i} value={i} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">
+                          {capitalizedMonth}
                         </option>
                       );
                     })}
                   </select>
-                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                  <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Category */}
-          <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between px-1">
-              <label className="text-[14px] font-normal text-[var(--text-secondary)]">{t('category')}</label>
-            </div>
-            <div className="grid grid-cols-3 gap-2.5">
-              {(categories || []).map(cat => {
-                const isActive = category === cat.name;
-                return (
-                  <CategoryTile
-                    key={cat.name}
-                    name={cat.name}
-                    icon={cat.icon}
-                    color={cat.color}
-                    isActive={isActive}
-                    onClick={() => setCategory(cat.name)}
-                  />
-                );
-              })}
+            {/* Note */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('ownNote')}
+              </span>
+              <div className="flex-1 flex items-center justify-end gap-1.5">
+                <input 
+                  type="text" 
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv en notering...'}
+                  className="text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none placeholder:font-normal placeholder:text-[13px] placeholder-[var(--text-tertiary)] max-w-[70%]"
+                />
+                {note && (
+                  <button 
+                    type="button"
+                    onClick={() => setNote('')}
+                    className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
+                  >
+                    <X size={13} strokeWidth={2} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Action Button Footer */}
-        <div className="shrink-0 px-6 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-4 border-t border-black/5 dark:border-white/10 bg-transparent flex flex-col items-center">
+        {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
           <button 
             type="button"
             onClick={handleSave} 
-            className="w-full h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
+            className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
           >
             <Check size={15} strokeWidth={2} />
             <span>{income ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add income' : 'Lägg till inkomst')}</span>
           </button>
+
+          {income && onDelete && (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setShowDeleteConfirm(true);
+              }}
+              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
+              aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
+            >
+              <Trash2 size={16} strokeWidth={1.9} />
+            </button>
+          )}
         </div>
 
         {/* Compact Icon Selector Popover */}
@@ -821,7 +859,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -846,7 +884,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section: Logo to the left, Title and Action Buttons inline, Price below */}
+          {/* Hero Section: Logo to the left, Title and Close Button inline, Price below */}
           <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
             <div className="shrink-0 pt-0.5">
               <TransactionLogo transaction={expenseCompatible as any} config={config} size="xl" />
@@ -858,47 +896,18 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                   {expense.name}
                 </h2>
 
-                {/* Smaller Action Buttons aligned inline with the title */}
-                <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      onEdit(expense);
-                    }} 
-                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-                    title={t('edit')}
-                    aria-label={t('edit')}
-                  >
-                    <Pencil size={13.5} strokeWidth={1.9} />
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setShowDeleteConfirm(true);
-                    }} 
-                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-                    title={config.language === 'en' ? 'Delete' : 'Ta bort'}
-                    aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
-                  >
-                    <Trash2 size={13.5} strokeWidth={1.9} />
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      onClose();
-                    }} 
-                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 ml-0.5"
-                    title={t('close')}
-                    aria-label={t('close')}
-                  >
-                    <X size={14.5} strokeWidth={2.2} />
-                  </button>
-                </div>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    onClose();
+                  }} 
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                  title={t('close')}
+                  aria-label={t('close')}
+                >
+                  <X size={15} strokeWidth={2.2} />
+                </button>
               </div>
 
               <p className="text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline text-[var(--text-primary)]">
@@ -1020,6 +1029,34 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           </button>
         </div>
 
+        {/* Action Buttons Footer: Bred Redigera-knapp och Radera-knapp */}
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+          <button 
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              onEdit(expense);
+            }} 
+            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+          >
+            <Pencil size={14.5} strokeWidth={1.9} />
+            <span>{t('edit')}</span>
+          </button>
+
+          <button 
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              setShowDeleteConfirm(true);
+            }} 
+            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+            title={config.language === 'en' ? 'Delete' : 'Ta bort'}
+            aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
+          >
+            <Trash2 size={16} strokeWidth={1.9} />
+          </button>
+        </div>
+
         {showDeleteConfirm && (
           <ConfirmModal
             isOpen={showDeleteConfirm}
@@ -1093,7 +1130,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
   const [manualSelectionThisSession, setManualSelectionThisSession] = useState(false);
   
   const [logo, setLogo] = useState<string | undefined>(expense?.logo);
-  const [autoLogo, setAutoLogo] = useState<string | undefined>(expense?.name ? getLogoUrl(expense.name) : undefined);
+  const [_autoLogo, setAutoLogo] = useState<string | undefined>(expense?.name ? getLogoUrl(expense.name) : undefined);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showIconSelector, setShowIconSelector] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -1141,6 +1178,33 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
     });
   };
 
+  const expenseCompatible = {
+    ...expense,
+    name,
+    amount: parseAmount(amount),
+    note,
+    category,
+    logo,
+    icon,
+    timestamp: Date.now()
+  };
+
+  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
+
+  useEffect(() => {
+    const initial = getTransactionDominantColor(expenseCompatible as any, config);
+    setBrandColor(initial);
+
+    const visual = resolveEntityVisual(expenseCompatible as any, config);
+    if (visual.logoUrl && !visual.logoUrl.startsWith('data:image/svg+xml')) {
+      extractDominantColorFromImage(visual.logoUrl).then((extracted) => {
+        if (extracted) {
+          setBrandColor(extracted);
+        }
+      });
+    }
+  }, [name, logo, config]);
+
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
   return (
@@ -1163,73 +1227,82 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        {/* Smooth, Seamless Ambient Brand Color Glow */}
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+            `
+          }}
+        />
 
-        {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/5 dark:border-white/10">
-          <div className="flex justify-start">
-            <button
-              key="icon"
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowIconSelector(true);
-              }}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-2xl overflow-hidden transition-all duration-300 active:scale-95 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 shrink-0"
-              title={t('chooseIcon')}
-            >
-              {logo ? (
-                <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              ) : isEmojiString(icon) ? (
-                icon
-              ) : (
-                (() => {
-                  const Icon = ICON_MAP[icon] || Receipt;
-                  return <Icon size={20} className="text-accent" />;
-                })()
-              )}
-            </button>
-          </div>
-          <div className="flex justify-center overflow-hidden">
-            <h2 className="text-[18px] sm:text-[20px] font-semibold tracking-tight text-[var(--text-primary)] dark:text-white text-center truncate px-2">
-              {expense 
-                ? (config?.language === 'en' ? 'Edit fixed expense' : 'Redigera fast utgift')
-                : (config?.language === 'en' ? 'New fixed expense' : 'Ny fast utgift')
-              }
-            </h2>
-          </div>
-          <div className="flex justify-end">
-            <button 
-              type="button"
-              onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
-              aria-label={t('close')}
-            >
-              <X size={17} strokeWidth={2.2} />
-            </button>
-          </div>
-        </div>
+        {/* Drawer Handle on Mobile */}
+        <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
         {/* Main Content Area */}
-        <div className="shrink overflow-y-auto px-5 sm:px-6 py-5 space-y-5 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          {/* Amount Inputs Section: 88px height, 40px font-medium, plain kr text */}
-          <div className="space-y-4">
-            <div className="flex flex-col gap-1">
-              <div 
-                onClick={() => amountInputRef.current?.focus()}
-                className="bg-black/5 dark:bg-white/5 rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-6 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+          {/* Hero Section: Logo to the left, Provider name and Close Button inline, Price below */}
+          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
+            <div className="shrink-0 pt-0.5">
+              <button
+                type="button"
+                onClick={() => setShowIconSelector(true)}
+                className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-2xl transition-all duration-300 active:scale-95 bg-black/5 dark:bg-white/10 hover:ring-2 hover:ring-[var(--accent-color)]/30 group cursor-pointer shrink-0"
+                title={t('chooseIcon')}
               >
-                <div className="shrink-0 min-w-[48px]" />
-                <div className="flex-1 flex items-baseline justify-center gap-1.5">
+                {logo ? (
+                  <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : isEmojiString(icon) ? (
+                  icon
+                ) : (
+                  (() => {
+                    const Icon = ICON_MAP[icon] || Receipt;
+                    return <Icon size={22} className="text-accent" />;
+                  })()
+                )}
+              </button>
+            </div>
+
+            <div className="min-w-0 flex-1 flex flex-col justify-center">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
                   <input 
-                    ref={amountInputRef}
+                    ref={nameInputRef}
                     type="text" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)} 
+                    placeholder={t('fixedExpensePlaceholder')} 
+                    className="text-[20px] sm:text-[24px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  />
+                </div>
+
+                <button 
+                  type="button"
+                  onClick={onClose} 
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
+                  aria-label={t('close')}
+                >
+                  <X size={15} strokeWidth={2.2} />
+                </button>
+              </div>
+
+              {/* Amount display / input in the Hero */}
+              <div className="mt-1.5 flex items-baseline justify-between gap-2">
+                <div 
+                  onClick={() => amountInputRef.current?.focus()}
+                  className="flex items-baseline font-amount text-[20px] sm:text-[24px] font-semibold tabular-nums tracking-tight cursor-text"
+                >
+                  <span className="opacity-80 mr-0.5 select-none text-[var(--text-primary)]">−</span>
+                  <input
+                    ref={amountInputRef}
+                    type="text"
                     inputMode="decimal"
-                    value={amount} 
+                    value={amount}
                     onChange={(e) => setAmount(formatAmount(e.target.value))}
                     onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
                     onKeyDown={(e) => {
@@ -1237,197 +1310,174 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                         setAmount(evaluateAndFormatAmount(amount));
                       }
                     }}
-                    placeholder="0" 
-                    className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[var(--text-tertiary)]" 
+                    placeholder="0"
+                    className="bg-transparent outline-none font-amount font-semibold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder-[var(--text-tertiary)] max-w-[170px] sm:max-w-[210px]"
+                    style={{ width: `${Math.max(1, (amount || '0').length) * 1.1}ch` }}
                   />
-                  <span className="text-[15px] font-normal text-[var(--text-secondary)] select-none font-sans shrink-0">
+                  <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans select-none">
                     {currency}
                   </span>
                 </div>
-                <div className="shrink-0 min-w-[48px]" />
               </div>
-
-              <QuickMathToolbar value={amount} onChange={setAmount} inputRef={amountInputRef} currency={currency} showMathTools={false} />
-            </div>
-
-            {/* Varierande belopp: compact row with text and switch + help text */}
-            <div className="flex items-center justify-between px-4 py-3.5 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] transition-all">
-              <div className="flex flex-col gap-0.5 pr-2">
-                <span className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight">Varierande belopp</span>
-                <span className="text-[12px] font-normal text-[var(--text-secondary)]">Ändras månad till månad</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsVariable(!isVariable)}
-                className={`w-11 h-6 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-              >
-                <div
-                  className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[22px]' : 'left-0.5'}`}
-                />
-              </button>
             </div>
           </div>
 
-          {/* Name / Provider Input */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between px-1">
-              <label className="text-[14px] font-normal text-[var(--text-secondary)]">
-                {config?.language === 'en' ? 'Provider / Name' : 'Leverantör'}
-              </label>
-              {autoLogo && !manualSelectionThisSession && name !== originalName.current && (
-                <span className="text-[10px] font-semibold text-[#05B862] bg-[#E8F8F0] dark:bg-[#0D2E1F] px-2 py-0.5 rounded-full">
-                  Auto
+          {/* Details Section: Clean list with discrete subtle hairline divider lines */}
+          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+            {/* Category */}
+            <div 
+              onClick={() => setIsCategorySelectorOpen(true)}
+              className="py-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors rounded-xl -mx-2 px-2 select-none group"
+            >
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('category')}
+              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <CategoryIcon icon={categories.find(c => c.name === category)?.icon || 'receipt'} color={categories.find(c => c.name === category)?.color} size="xs" />
+                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  {category || (config?.language === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
-              )}
+                <ChevronRight size={14} className="text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] transition-colors" />
+              </div>
             </div>
-            <div className="relative group">
-              <input 
-                ref={nameInputRef}
-                type="text" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                placeholder={t('fixedExpensePlaceholder')} 
-                className="w-full h-[48px] bg-black/5 dark:bg-white/5 text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40" 
-              />
-              {name && (
-                <button 
+
+            {/* Type: Fixed / Variable */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('type')}
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] font-medium text-[var(--text-primary)]">
+                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
+                </span>
+                <button
                   type="button"
-                  onClick={() => setName('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1 cursor-pointer"
+                  onClick={() => setIsVariable(!isVariable)}
+                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
                 >
-                  <X size={16} strokeWidth={2} />
+                  <div
+                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
+                  />
                 </button>
-              )}
-            </div>
-          </div>
-
-          {/* Note Input */}
-          <div className="space-y-2">
-            <label className="text-[14px] font-normal text-[var(--text-secondary)] block">
-              {t('ownNote')}
-            </label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Skriv en notering..."
-              rows={2}
-               className="w-full bg-black/5 dark:bg-white/5 text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 py-3 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40 min-h-[48px] resize-y"
-            />
-          </div>
-
-          {/* Deduction Day & Payment Method */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <label className="text-[14px] font-normal text-[var(--text-secondary)] block">
-                {paymentMethod === 'autogiro' || (typeof paymentMethod === 'string' && (paymentMethod.toLowerCase().includes('autogiro') || paymentMethod.toLowerCase().includes('kort')))
-                  ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag')
-                  : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
-              </label>
-              <div className="relative">
-                <select
-                  value={deductionDay}
-                  onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
-                >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                    <option key={day} value={day}>{day}</option>
-                  ))}
-                </select>
-                <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('paymentMethod')}</label>
-              <div className="relative">
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
-                >
-                  {(paymentMethods || []).map((method, idx) => {
-                    const methodName = typeof method === 'string' ? method : method?.name || '';
-                    return (
-                      <option key={methodName || idx} value={methodName}>{methodName}</option>
-                    );
-                  })}
-                </select>
-                <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
-              </div>
-            </div>
-          </div>
-
-          <div className={`grid gap-3 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            <div className="space-y-2">
-              <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('frequency')}</label>
+            {/* Frequency */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('frequency')}
+              </span>
               <div className="relative">
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                    <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
+                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">
+                      {t(`freq_${key.toLowerCase()}` as TranslationKey)}
+                    </option>
                   ))}
                 </select>
-                <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
               </div>
             </div>
 
+            {/* Start Month if not monthly */}
             {frequency !== Frequency.MONTHLY && (
-              <div className="space-y-2">
-                <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('startMonthLabel')}</label>
+              <div className="py-3 flex items-center justify-between gap-4">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                  {t('startMonthLabel')}
+                </span>
                 <div className="relative">
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                    className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
                       const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                       const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-                      
-                      let cycleText = '';
-                      if (frequency === Frequency.QUARTERLY) {
-                        const m2 = (i + 3) % 12;
-                        const m3 = (i + 6) % 12;
-                        const m4 = (i + 9) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
-                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)}, ${getMonthShort(m3)}, ${getMonthShort(m4)})`;
-                      } else if (frequency === Frequency.SEMI_ANNUALLY) {
-                        const m2 = (i + 6) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
-                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)})`;
-                      }
-
                       return (
-                        <option key={i} value={i}>
-                          {capitalizedMonth}{cycleText}
+                        <option key={i} value={i} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">
+                          {capitalizedMonth}
                         </option>
                       );
                     })}
                   </select>
-                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                  <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Category */}
-          <div className="space-y-2 pt-1">
-            <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('category')}</label>
-            <button
-              type="button"
-              onClick={() => setIsCategorySelectorOpen(true)}
-              className="w-full h-[48px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 flex items-center justify-between text-[14px] font-normal text-[var(--text-primary)] transition-all cursor-pointer hover:border-[var(--accent-color)] dark:hover:border-white/40"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <CategoryIcon icon={categories.find(c => c.name === category)?.icon || 'receipt'} size="xs" />
-                <span className="truncate">{category || (config?.language === 'en' ? 'Select category' : 'Välj kategori')}</span>
+            {/* Deduction Day / Payment Day */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {paymentMethod === 'autogiro' || (typeof paymentMethod === 'string' && (paymentMethod.toLowerCase().includes('autogiro') || paymentMethod.toLowerCase().includes('kort')))
+                  ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag')
+                  : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
+              </span>
+              <div className="relative">
+                <select
+                  value={deductionDay}
+                  onChange={(e) => setDeductionDay(parseInt(e.target.value))}
+                  className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] tabular-nums outline-none pr-5 text-right cursor-pointer"
+                >
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                    <option key={day} value={day} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">{day}:e</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
               </div>
-              <ChevronRight size={16} className="text-[var(--text-tertiary)] shrink-0" />
-            </button>
+            </div>
+
+            {/* Payment Method */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('paymentMethod')}
+              </span>
+              <div className="relative">
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
+                >
+                  {(paymentMethods || []).map((method, idx) => {
+                    const methodName = typeof method === 'string' ? method : method?.name || '';
+                    return (
+                      <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">{methodName}</option>
+                    );
+                  })}
+                </select>
+                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+              </div>
+            </div>
+
+            {/* Note */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('ownNote')}
+              </span>
+              <div className="flex-1 flex items-center justify-end gap-1.5">
+                <input 
+                  type="text" 
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv en notering...'}
+                  className="text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none placeholder:font-normal placeholder:text-[13px] placeholder-[var(--text-tertiary)] max-w-[70%]"
+                />
+                {note && (
+                  <button 
+                    type="button"
+                    onClick={() => setNote('')}
+                    className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
+                  >
+                    <X size={13} strokeWidth={2} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Category Selector Bottom Sheet Modal */}
@@ -1493,29 +1543,44 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 className="w-full p-3.5 rounded-[16px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
               >
                 <div>
-                  <p className="text-[14px] font-medium text-[var(--text-primary)]">
+                  <p className="text-[13px] font-medium text-[var(--text-primary)]">
                     {config?.language === 'en' ? 'Show how to cancel' : 'Visa hur du säger upp'}
                   </p>
-                  <p className="text-[12px] font-normal text-[var(--text-secondary)] mt-0.5">
+                  <p className="text-[11.5px] font-normal text-[var(--text-secondary)] mt-0.5">
                     {config?.language === 'en' ? 'Instructions and link to provider' : 'Instruktioner och länk till leverantören'}
                   </p>
                 </div>
-                <ChevronRight size={18} className="text-[var(--text-secondary)] opacity-70 group-hover:opacity-100 transition-opacity shrink-0" />
+                <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-70 group-hover:opacity-100 transition-opacity shrink-0" />
               </button>
             </div>
           )}
         </div>
 
-        {/* Action Button Footer */}
-        <div className="shrink-0 px-6 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-4 border-t border-black/5 dark:border-white/10 bg-transparent flex flex-col items-center">
+        {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
           <button 
             type="button"
             onClick={handleSave} 
-            className="w-full h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
+            className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
           >
             <Check size={15} strokeWidth={2} />
             <span>{expense ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add fixed expense' : 'Lägg till fast kostnad')}</span>
           </button>
+
+          {expense && onDelete && (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setShowDeleteConfirm(true);
+              }}
+              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
+              aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
+            >
+              <Trash2 size={16} strokeWidth={1.9} />
+            </button>
+          )}
         </div>
 
         {/* Compact Icon Selector Popover */}

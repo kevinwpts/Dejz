@@ -22,6 +22,24 @@ import { SegmentedControl } from './ui';
 import { ReceiptCameraModal } from './ReceiptCameraModal';
 import { ConfirmModal } from './ConfirmModal';
 import { feedback } from '../utils/feedback';
+import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
+import { resolveEntityVisual } from '../utils/resolver';
+
+function hexToRgba(hex: string, alpha: number): string {
+  if (!hex) return `rgba(124, 58, 237, ${alpha})`;
+  if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
+  let clean = hex.replace('#', '');
+  if (clean.length === 3) {
+    clean = clean.split('').map(c => c + c).join('');
+  }
+  if (clean.length === 6) {
+    const r = parseInt(clean.substring(0, 2), 16) || 0;
+    const g = parseInt(clean.substring(2, 4), 16) || 0;
+    const b = parseInt(clean.substring(4, 6), 16) || 0;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return `rgba(124, 58, 237, ${alpha})`;
+}
 
 interface TransactionModalProps {
   transaction: Transaction | null;
@@ -213,7 +231,7 @@ export function TransactionModal({
   const [logo, setLogo] = useState<string | undefined>(transaction?.logo);
   const [_logoError, setLogoError] = useState(false);
   const [receiptUrl, setReceiptUrl] = useState<string | undefined>(transaction?.receiptUrl);
-  const [receiptFileName, setReceiptFileName] = useState<string | undefined>();
+  const [_receiptFileName, setReceiptFileName] = useState<string | undefined>();
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
   const [isScanningReceipt, setIsScanningReceipt] = useState(false);
   const [_scanFeedback, setScanFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -615,6 +633,22 @@ export function TransactionModal({
     splits: splits
   }), [transaction, merchant, note, category, amount, type, logo, icon, selectedDate, splits]);
 
+  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(previewTransaction as any, config || {}));
+
+  useEffect(() => {
+    const initial = getTransactionDominantColor(previewTransaction as any, config || {});
+    setBrandColor(initial);
+
+    const visual = resolveEntityVisual(previewTransaction as any, config || {});
+    if (visual.logoUrl && !visual.logoUrl.startsWith('data:image/svg+xml')) {
+      extractDominantColorFromImage(visual.logoUrl).then((extracted) => {
+        if (extracted) {
+          setBrandColor(extracted);
+        }
+      });
+    }
+  }, [previewTransaction, config]);
+
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
   if (typeof document === 'undefined') return null;
@@ -639,406 +673,357 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[#F6F5F2] dark:bg-[#141118] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Smooth, Seamless Ambient Brand Color Glow */}
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+            `
+          }}
+        />
+
         {/* Drawer Handle on Mobile */}
         <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
-        {/* Header Section: Centered Title, Logo on Left, Close on Right */}
-        <div className="px-5 sm:px-6 py-3 relative flex items-center justify-between border-b border-black/[0.05] dark:border-white/[0.06] z-10 min-h-[60px]">
-          {/* Logo on Left */}
-          <div className="flex items-center z-10">
-            <button
-              type="button"
-              onClick={() => setShowIconSelector(true)}
-              className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30"
-              title={t('chooseIcon')}
-              aria-label={t('chooseIcon')}
-            >
-              <TransactionLogo 
-                size="md"
-                config={config}
-                transaction={previewTransaction} 
-              />
-            </button>
-          </div>
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-6 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+          {/* Hidden file input for tickets, receipts and documents */}
+          <input 
+            ref={receiptInputRef}
+            type="file"
+            accept="image/*,application/pdf,.pdf,.png,.jpg,.jpeg,.heic"
+            className="hidden"
+            onChange={handleReceiptFileChange}
+          />
 
-          {/* Title dead-centered */}
-          <div className="absolute inset-x-16 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
-            <AnimatePresence mode="wait">
-              {!transaction && onChangeType ? (
-                <div className="pointer-events-auto">
-                  <SegmentedControl
-                    options={[
-                      { value: 'expense', label: t('expense') },
-                      { value: 'income', label: t('income') }
-                    ]}
-                    value={type}
-                    onChange={(val) => onChangeType(val as 'expense' | 'income')}
-                    size="sm"
+          {/* Hero Section: Logo to the left, Merchant title and Close Button inline, Price below (matching preview) */}
+          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
+            <div className="shrink-0 pt-0.5">
+              <button
+                type="button"
+                onClick={() => setShowIconSelector(true)}
+                className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                title={t('chooseIcon')}
+                aria-label={t('chooseIcon')}
+              >
+                <TransactionLogo 
+                  size="xl"
+                  config={config}
+                  transaction={previewTransaction} 
+                />
+              </button>
+            </div>
+
+            <div className="min-w-0 flex-1 flex flex-col justify-center">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <input 
+                    ref={merchantInputRef}
+                    type="text" 
+                    value={merchant}
+                    onChange={(e) => setMerchant(e.target.value)}
+                    placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
+                    className="text-[20px] sm:text-[24px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
                   />
                 </div>
-              ) : (
-                <motion.h2 
-                  key="title-form"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  className="text-[16px] sm:text-[17px] font-semibold tracking-tight text-[var(--text-primary)] dark:text-white text-center pointer-events-auto truncate px-2"
-                >
-                  {transaction 
-                    ? (currentLang === 'en' ? 'Edit transaction' : (type === 'income' ? 'Redigera inkomst' : 'Redigera transaktion'))
-                    : (type === 'income' ? t('newIncome') : t('newExpense'))
-                  }
-                </motion.h2>
-              )}
-            </AnimatePresence>
-          </div>
 
-          {/* Close Button on Right */}
-          <button 
-            type="button"
-            onClick={onClose} 
-            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 z-10 shrink-0"
-            aria-label={t('close')}
-          >
-            <X size={15} strokeWidth={2.2} />
-          </button>
-        </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {!transaction && onChangeType && (
+                    <SegmentedControl
+                      options={[
+                        { value: 'expense', label: t('expense') },
+                        { value: 'income', label: t('income') }
+                      ]}
+                      value={type}
+                      onChange={(val) => onChangeType(val as 'expense' | 'income')}
+                      size="sm"
+                    />
+                  )}
 
-        {/* Main Content Area: Grouped Unified Module (Profile Style with subtle dividing lines) */}
-        <div className="shrink overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-              {/* Hidden file input for tickets, receipts and documents */}
-              <input 
-                ref={receiptInputRef}
-                type="file"
-                accept="image/*,application/pdf,.pdf,.png,.jpg,.jpeg,.heic"
-                className="hidden"
-                onChange={handleReceiptFileChange}
-              />
+                  <button 
+                    type="button"
+                    onClick={onClose} 
+                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
+                    aria-label={t('close')}
+                  >
+                    <X size={15} strokeWidth={2.2} />
+                  </button>
+                </div>
+              </div>
 
-              {/* 1. Beloppsmodul (Egen modul för summan) */}
-              <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] overflow-hidden border border-black/[0.04] dark:border-white/[0.05] shadow-xs">
+              {/* Amount display / input in the Hero */}
+              <div className="mt-1.5 flex items-baseline justify-between gap-2">
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="h-[88px] sm:h-[94px] px-5 flex items-center justify-between cursor-text"
+                  className="flex items-baseline font-amount text-[20px] sm:text-[24px] font-semibold tabular-nums tracking-tight cursor-text"
                 >
-                  <div className="shrink-0 flex items-center min-w-[56px]">
-                    {type === 'expense' && (
-                      <button 
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (splits.length === 0) {
-                            setSplits([{ id: Math.random().toString(), amount: parseAmount(amount), category: '', tags: [] }]);
-                          } else {
-                            setSplits([]);
-                          }
-                        }}
-                        className={`text-[11.5px] font-medium transition-all px-3 py-1 rounded-full cursor-pointer active:scale-95 ${
-                          splits.length > 0 
-                            ? "bg-rose-500 text-white shadow-xs" 
-                            : "bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/15"
-                        }`}
-                      >
-                        {splits.length > 0 ? (currentLang === 'en' ? 'Cancel' : 'Avbryt') : (currentLang === 'en' ? 'Split' : 'Splitta')}
-                      </button>
-                    )}
-                  </div>
-                  <div className="flex-1 flex items-baseline justify-center gap-1.5">
-                    <input
-                      ref={amountInputRef}
-                      type="text"
-                      inputMode="decimal"
-                      value={amount}
-                      onChange={(e) => setAmount(formatAmount(e.target.value))}
-                      onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          setAmount(evaluateAndFormatAmount(amount));
-                        }
-                      }}
-                      placeholder="0"
-                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[28px] sm:text-[32px] font-semibold text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/25 dark:placeholder-[#A8A8A8]/25 cursor-text select-text"
-                    />
-                    <span className="text-[14px] font-medium text-[#777168] dark:text-[#A8A8A8] select-none font-sans shrink-0 ml-1">
-                      {currency}
-                    </span>
-                  </div>
-                  <div className="shrink-0 min-w-[56px]" />
-                </div>
-              </div>
-
-              {/* 2. Detaljmodul med skiljelinjer mellan valen */}
-              <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] divide-y divide-black/[0.05] dark:divide-white/[0.05] overflow-hidden border border-black/[0.04] dark:border-white/[0.05] shadow-xs">
-
-                {/* 2. Mottagare / Butik Input */}
-                <div className="px-5 py-3.5 min-h-[62px] flex flex-col justify-center">
-                  <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block">
-                    {type === 'income' ? t('incomeSource') : t('merchant')}
-                  </label>
-                  <div className="flex items-center justify-between gap-2 mt-1">
-                    <input 
-                      ref={merchantInputRef}
-                      type="text" 
-                      value={merchant}
-                      onChange={(e) => setMerchant(e.target.value)}
-                      placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                      className="w-full bg-transparent text-[14px] sm:text-[14.5px] font-normal text-[var(--text-primary)] outline-none placeholder:font-normal placeholder:text-[13.5px] placeholder-[#777168]/40 dark:placeholder-[#A8A8A8]/40"
-                    />
-                    {merchant && (
-                      <button 
-                        onClick={() => setMerchant('')}
-                        className="text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer shrink-0 transition-colors"
-                      >
-                        <X size={14} strokeWidth={2} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* 3. Egen anteckning Input */}
-                <div className="px-5 py-3.5 min-h-[62px] flex flex-col justify-center">
-                  <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block">
-                    {t('ownNote')}
-                  </label>
-                  <div className="flex items-center justify-between gap-2 mt-1">
-                    <input 
-                      ref={noteInputRef}
-                      type="text" 
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                      className={`w-full bg-transparent text-[14px] sm:text-[14.5px] font-normal text-[var(--text-primary)] outline-none placeholder:font-normal placeholder:text-[13.5px] placeholder-[#777168]/40 dark:placeholder-[#A8A8A8]/40 ${
-                        validationError === 'note' ? 'text-rose-500' : ''
-                      }`}
-                    />
-                    {note && (
-                      <button 
-                        onClick={() => setNote('')}
-                        className="text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer shrink-0 transition-colors"
-                      >
-                        <X size={14} strokeWidth={2} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* 4. Kategori Selection: Kategori till vänster, tryck/val till höger */}
-                {splits.length === 0 && (
-                  <div 
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setIsCategoryPickerOpen(true);
+                  <span className={`opacity-80 mr-0.5 select-none ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+                    {type === 'income' ? '+' : '−'}
+                  </span>
+                  <input
+                    ref={amountInputRef}
+                    type="text"
+                    inputMode="decimal"
+                    value={amount}
+                    onChange={(e) => setAmount(formatAmount(e.target.value))}
+                    onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setAmount(evaluateAndFormatAmount(amount));
+                      }
                     }}
-                    className="px-5 py-3.5 min-h-[58px] sm:min-h-[60px] flex items-center justify-between cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group select-none"
-                  >
-                    <span className="text-[13.5px] sm:text-[14px] font-normal text-[#777168] dark:text-[#A8A8A8] shrink-0">
-                      {t('category')}
-                    </span>
-                    <div className="flex items-center gap-2.5 shrink-0 ml-3">
-                      <div 
-                        className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-                        style={{ 
-                          backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
-                          color: currentCatData?.color || 'var(--text-primary)'
-                        }}
-                      >
-                        <CategoryIcon 
-                          icon={currentCatData?.icon || 'tag'} 
-                          color={currentCatData?.color} 
-                          size="2xs" 
-                        />
-                      </div>
-                      <span className="text-[13.5px] sm:text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
-                        {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
-                      </span>
-                      <ChevronDown size={14} strokeWidth={2} className="text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] transition-colors ml-0.5" />
-                    </div>
-                  </div>
-                )}
-
-                {/* 5. Datum Selection */}
-                <div className="px-5 py-3.5 min-h-[62px] flex flex-col justify-center">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8]">
-                      {t('date')}
-                    </span>
-                    {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
-                     new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
-                      <span className="text-[11.5px] font-medium text-[var(--text-primary)] tabular-nums">
-                        {formatFullDate(selectedDate, currentLang)}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedDate(new Date());
-                        setShowFullCalendar(false);
-                      }}
-                      className={`flex-1 h-[34px] rounded-xl text-[12px] font-medium tracking-tight transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                        !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
-                          ? 'bg-[var(--accent-color)] text-white shadow-xs'
-                          : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
-                      }`}
-                    >
-                      {t('todayLabel')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const yesterday = new Date();
-                        yesterday.setDate(yesterday.getDate() - 1);
-                        setSelectedDate(yesterday);
-                        setShowFullCalendar(false);
-                      }}
-                      className={`flex-1 h-[34px] rounded-xl text-[12px] font-medium tracking-tight transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                        !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
-                          ? 'bg-[var(--accent-color)] text-white shadow-xs'
-                          : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
-                      }`}
-                    >
-                      {t('yesterdayLabel')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowFullCalendar(!showFullCalendar)}
-                      className={`w-10 h-[34px] rounded-xl transition-all flex items-center justify-center cursor-pointer ${
-                        showFullCalendar 
-                          ? 'bg-[var(--accent-color)] text-white shadow-xs' 
-                          : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
-                      }`}
-                      title={t('chooseDate')}
-                    >
-                      <Calendar size={14} strokeWidth={2} />
-                    </button>
-                  </div>
-
-                  <AnimatePresence>
-                    {showFullCalendar && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden pt-3"
-                      >
-                        <CalendarWidget 
-                          calendarDays={calendarDays}
-                          normalizedSelectedDate={selectedDate}
-                          setSelectedDate={setSelectedDate}
-                          t={t}
-                          currentLang={currentLang}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                    placeholder="0"
+                    className={`bg-transparent outline-none font-amount font-semibold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] max-w-[170px] sm:max-w-[210px] ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}
+                    style={{ width: `${Math.max(1, (amount || '0').length) * 1.1}ch` }}
+                  />
+                  <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans select-none">
+                    {currency}
+                  </span>
                 </div>
 
-                {/* 6. Bifoga fil (Attach file) */}
-                <div className="px-5 py-3.5 min-h-[58px] sm:min-h-[60px] flex items-center justify-between">
-                  {isScanningReceipt ? (
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
-                          <Loader2 size={14} className="animate-spin text-[var(--accent-color)]" />
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-[12.5px] font-semibold text-[var(--text-primary)] tracking-tight">
-                            {currentLang === 'en' ? 'Uploading file…' : 'Laddar upp fil…'}
-                          </h4>
-                          <p className="text-[11px] text-[var(--accent-color)] truncate">
-                            {currentLang === 'en' ? 'Processing attachment' : 'Bearbetar bilagan'}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-[10.5px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2.5 py-0.5 rounded-full animate-pulse">
-                        {currentLang === 'en' ? 'Wait…' : 'Vänta…'}
-                      </span>
-                    </div>
-                  ) : receiptUrl ? (
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-black/5 dark:border-white/5 shrink-0 bg-black/5 flex items-center justify-center">
-                          {receiptUrl.includes('.pdf') ? (
-                            <FileText size={16} className="text-[#777168] dark:text-[#A8A8A8]" />
-                          ) : (
-                            <img src={receiptUrl} alt="Attached file" className="w-full h-full object-cover" />
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-[13px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
-                            {receiptFileName || (currentLang === 'en' ? 'File attached' : 'Fil bifogad')}
-                          </h4>
-                          <p className="text-[11px] text-[#777168] dark:text-[#A8A8A8] truncate">
-                            {currentLang === 'en' ? 'Ticket, receipt or document' : 'Biljett, kvitto eller dokument'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0 ml-2">
-                        <a
-                          href={receiptUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-2.5 py-1 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11.5px] font-medium rounded-lg transition-colors cursor-pointer"
-                        >
-                          {currentLang === 'en' ? 'View' : 'Visa'}
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setReceiptUrl(undefined);
-                            setReceiptFileName(undefined);
-                            setScanFeedback(null);
-                          }}
-                          className="p-1.5 text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-                          title={currentLang === 'en' ? 'Remove' : 'Ta bort'}
-                        >
-                          <Trash2 size={13.5} />
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
-                          <Paperclip size={14} strokeWidth={2} />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-[13px] font-medium text-[var(--text-primary)] block truncate">
-                            {currentLang === 'en' ? 'Attach file' : 'Bifoga fil'}
-                          </span>
-                          <p className="text-[11px] text-[#777168] dark:text-[#A8A8A8] truncate">
-                            {currentLang === 'en' ? 'Tickets, receipts, PDFs' : 'Biljetter, kvitton, PDF m.m.'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0 ml-2">
-                        <button
-                          type="button"
-                          onClick={() => receiptInputRef.current?.click()}
-                          disabled={isUploadingReceipt}
-                          className="h-[30px] px-3 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11.5px] font-medium rounded-lg transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
-                        >
-                          <Paperclip size={12} strokeWidth={2} />
-                          <span>{currentLang === 'en' ? 'File' : 'Välj fil'}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setIsCameraModalOpen(true)}
-                          disabled={isUploadingReceipt}
-                          className="h-[30px] px-3 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11.5px] font-medium rounded-lg shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
-                        >
-                          <Camera size={12} strokeWidth={2} />
-                          <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                {type === 'expense' && (
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (splits.length === 0) {
+                        setSplits([{ id: Math.random().toString(), amount: parseAmount(amount), category: '', tags: [] }]);
+                      } else {
+                        setSplits([]);
+                      }
+                    }}
+                    className={`text-[11.5px] font-medium transition-all px-2.5 py-1 rounded-full cursor-pointer active:scale-95 ${
+                      splits.length > 0 
+                        ? "bg-rose-500 text-white shadow-xs" 
+                        : "bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/15"
+                    }`}
+                  >
+                    {splits.length > 0 ? (currentLang === 'en' ? 'Cancel' : 'Avbryt') : (currentLang === 'en' ? 'Split' : 'Splitta')}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Details Section: Clean list with discrete subtle hairline divider lines, identical to TransactionViewModal */}
+          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+            {/* Category */}
+            {splits.length === 0 && (
+              <div 
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  setIsCategoryPickerOpen(true);
+                }}
+                className="py-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors rounded-xl -mx-2 px-2 select-none group"
+              >
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                  {t('category')}
+                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div 
+                    className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                    style={{ 
+                      backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
+                      color: currentCatData?.color || 'var(--text-primary)'
+                    }}
+                  >
+                    <CategoryIcon 
+                      icon={currentCatData?.icon || 'tag'} 
+                      color={currentCatData?.color} 
+                      size="2xs" 
+                    />
+                  </div>
+                  <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
+                  </span>
+                  <ChevronDown size={14} strokeWidth={2} className="text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] transition-colors ml-0.5" />
                 </div>
               </div>
+            )}
+
+            {/* Date Selection */}
+            <div className="py-3 flex flex-col justify-center">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                  {t('date')}
+                </span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedDate(new Date());
+                      setShowFullCalendar(false);
+                    }}
+                    className={`h-[30px] px-3 rounded-lg text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center cursor-pointer ${
+                      !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
+                        ? 'bg-[var(--accent-color)] text-white shadow-xs'
+                        : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
+                    }`}
+                  >
+                    {t('todayLabel')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const yesterday = new Date();
+                      yesterday.setDate(yesterday.getDate() - 1);
+                      setSelectedDate(yesterday);
+                      setShowFullCalendar(false);
+                    }}
+                    className={`h-[30px] px-3 rounded-lg text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center cursor-pointer ${
+                      !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
+                        ? 'bg-[var(--accent-color)] text-white shadow-xs'
+                        : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
+                    }`}
+                  >
+                    {t('yesterdayLabel')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowFullCalendar(!showFullCalendar)}
+                    className={`w-8 h-[30px] rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+                      showFullCalendar 
+                        ? 'bg-[var(--accent-color)] text-white shadow-xs' 
+                        : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
+                    }`}
+                    title={t('chooseDate')}
+                  >
+                    <Calendar size={13.5} strokeWidth={2} />
+                  </button>
+                </div>
+              </div>
+
+              {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
+               new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
+                <div className="mt-1 text-right">
+                  <span className="text-[11.5px] font-medium text-[var(--text-primary)] tabular-nums">
+                    {formatFullDate(selectedDate, currentLang)}
+                  </span>
+                </div>
+              )}
+
+              <AnimatePresence>
+                {showFullCalendar && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden pt-3"
+                  >
+                    <CalendarWidget 
+                      calendarDays={calendarDays}
+                      normalizedSelectedDate={selectedDate}
+                      setSelectedDate={setSelectedDate}
+                      t={t}
+                      currentLang={currentLang}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Note */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('ownNote')}
+              </span>
+              <div className="flex-1 flex items-center justify-end gap-1.5">
+                <input 
+                  ref={noteInputRef}
+                  type="text" 
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
+                  className={`text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none placeholder:font-normal placeholder:text-[13px] placeholder-[var(--text-tertiary)] max-w-[70%] ${
+                    validationError === 'note' ? 'text-rose-500' : ''
+                  }`}
+                />
+                {note && (
+                  <button 
+                    onClick={() => setNote('')}
+                    className="text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-0.5 cursor-pointer shrink-0 transition-colors"
+                  >
+                    <X size={13} strokeWidth={2} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Attached file / Receipt */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-1.5 text-[var(--text-secondary)] shrink-0">
+                <Paperclip size={13} strokeWidth={1.75} />
+                <span className="text-[13px] font-normal">
+                  {currentLang === 'en' ? 'Attached file / Receipt' : 'Bifogad fil / Kvitto'}
+                </span>
+              </div>
+
+              {isScanningReceipt ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 size={13} className="animate-spin text-[var(--accent-color)]" />
+                  <span className="text-[11px] text-[var(--accent-color)] font-medium">
+                    {currentLang === 'en' ? 'Uploading…' : 'Laddar upp…'}
+                  </span>
+                </div>
+              ) : receiptUrl ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-md overflow-hidden bg-black/5 dark:bg-white/10 flex items-center justify-center">
+                    {receiptUrl.includes('.pdf') ? (
+                      <FileText size={13} className="text-[var(--text-secondary)]" />
+                    ) : (
+                      <img src={receiptUrl} alt="Attached" className="w-full h-full object-cover" />
+                    )}
+                  </div>
+                  <a
+                    href={receiptUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-medium text-[var(--text-primary)] hover:underline"
+                  >
+                    {currentLang === 'en' ? 'View' : 'Visa'}
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReceiptUrl(undefined);
+                      setReceiptFileName(undefined);
+                      setScanFeedback(null);
+                    }}
+                    className="text-rose-500 hover:text-rose-600 p-1 cursor-pointer"
+                    title={currentLang === 'en' ? 'Remove' : 'Ta bort'}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => receiptInputRef.current?.click()}
+                    disabled={isUploadingReceipt}
+                    className="h-[30px] px-3 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11.5px] font-medium rounded-lg transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
+                  >
+                    <Paperclip size={12} strokeWidth={2} />
+                    <span>{currentLang === 'en' ? 'File' : 'Välj fil'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsCameraModalOpen(true)}
+                    disabled={isUploadingReceipt}
+                    className="h-[30px] px-3 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11.5px] font-medium rounded-lg shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Camera size={12} strokeWidth={2} />
+                    <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
 
               {/* Split Transaction Details if Active */}
               {type === 'expense' && splits.length > 0 && (
@@ -1200,7 +1185,7 @@ export function TransactionModal({
           </div>
 
           {/* Register / Save Button & Delete Button */}
-          <div className="shrink-0 px-6 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-4 border-t border-black/5 dark:border-white/[0.06] bg-transparent flex flex-col items-center gap-2 relative z-10">
+          <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
             <button 
               type="button"
               disabled={!isSplitsValid}
@@ -1223,7 +1208,7 @@ export function TransactionModal({
                 });
                 onClose();
               }}
-              className="w-full h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-none"
+              className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-none"
             >
               <Check size={15} strokeWidth={2} />
               <span>
@@ -1240,10 +1225,11 @@ export function TransactionModal({
                   if (typeof feedback?.light === 'function') feedback.light();
                   setShowDeleteConfirm(true);
                 }}
-                className="inline-flex items-center justify-center gap-1.5 text-[12px] font-medium text-rose-500/80 hover:text-rose-600 dark:text-rose-400/90 dark:hover:text-rose-300 transition-colors cursor-pointer py-1 px-3 rounded-lg hover:bg-rose-500/5 active:scale-95"
+                className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                title={currentLang === 'en' ? 'Delete' : 'Ta bort'}
+                aria-label={currentLang === 'en' ? 'Delete' : 'Ta bort'}
               >
-                <Trash2 size={13} strokeWidth={1.75} />
-                <span>{currentLang === 'en' ? 'Delete transaction' : 'Ta bort transaktion'}</span>
+                <Trash2 size={16} strokeWidth={1.9} />
               </button>
             )}
           </div>
