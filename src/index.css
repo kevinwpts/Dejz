@@ -273,33 +273,33 @@ h6 {
 }
 
 .dark {
-  /* Premium Dark Theme (Pure OLED Black matching iOS Screenshot) */
-  --bg-top-color: #000000;
-  --bg-color: #000000;
-  --bg-secondary: #000000;
-  --bg-gradient: #000000;
+  /* Premium Dark Theme (#141118) */
+  --bg-top-color: #141118;
+  --bg-color: #141118;
+  --bg-secondary: #141118;
+  --bg-gradient: #141118;
 
-  --surface-color: #121214;
-  --surface-gradient: #121214;
-  --surface-elevated: #18181B;
-  --surface-elevated-gradient: #18181B;
-  --surface-solid: #121214;
-  --surface-muted: #1C1C1E;
+  --surface-color: #1D1A23;
+  --surface-gradient: #1D1A23;
+  --surface-elevated: #24202B;
+  --surface-elevated-gradient: #24202B;
+  --surface-solid: #1D1A23;
+  --surface-muted: #292433;
   --surface-tint: rgba(255, 255, 255, 0.01);
 
   --text-primary: #FFFFFF;
-  --text-secondary: #A1A1AA;
-  --text-tertiary: #71717A;
-  --text-inactive: #52525B;
+  --text-secondary: #A6A0AF;
+  --text-tertiary: #7D7688;
+  --text-inactive: #555060;
 
-  --border-color: #27272A;
-  --border-strong: #3F3F46;
+  --border-color: #2D2738;
+  --border-strong: #3F374D;
   --inner-highlight: transparent;
 
-  --chip-bg: #1C1C1E;
+  --chip-bg: #24202B;
   --transaction-bg: var(--surface-color);
-  --card-nested-bg: #1C1C1E;
-  --remaining-today-gradient: #121214;
+  --card-nested-bg: #24202B;
+  --remaining-today-gradient: #1D1A23;
 
   /* Custom Elevation Levels - Dark Mode */
   --shadow-level-1: none;
@@ -326,10 +326,10 @@ h6 {
   --btn-primary-hover: #EBEAE8;
   --btn-primary-pressed: #D7D6D4;
 
-  --modal-bg: #121214;
+  --modal-bg: #1D1A23;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #1C1C1E; /* active brand subtle in dark mode */
+  --bg-hover: #292433; /* active brand subtle in dark mode */
 
   --card-shadow: none;
   --card-inner-stroke: none;
@@ -340,7 +340,7 @@ h6 {
   --info-color: #F9F8F6;
 
   --nav-active-color: #7C75FF;
-  --nav-inactive-color: #A1A1AA;
+  --nav-inactive-color: #A6A0AF;
   --nav-plus-bg: #7C75FF;
   --nav-plus-shadow: none;
 
@@ -351,7 +351,7 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #1C1C1E;
+  --date-active-bg: #292433;
   --date-active-color: #FFFFFF;
   --date-active-shadow: none;
   --date-inactive-bg: var(--surface-color);
@@ -371,7 +371,7 @@ h6 {
 
 .dark .glass-card,
 .dark .surface-card {
-  background: #121214 !important;
+  background: #1D1A23 !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -387,7 +387,7 @@ h6 {
   box-shadow: none !important;
 }
 .dark .glass-nav {
-  background: rgba(0, 0, 0, 0.85) !important;
+  background: rgba(20, 17, 24, 0.85) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -401,7 +401,7 @@ h6 {
   pointer-events: none;
   z-index: 0;
   display: none;
-  background-color: #000000;
+  background-color: #141118;
   background-image: none;
 }
 
