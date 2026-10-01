@@ -17,11 +17,11 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
 
   if (visual.logoUrl && !imgError) {
     return (
-      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0`}>
+      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 border-none outline-none ring-0 shadow-none`}>
         <img 
           src={visual.logoUrl} 
           alt={transaction.merchant || 'Logo'} 
-          className="w-full h-full object-cover rounded-full"
+          className="w-full h-full object-cover rounded-full border-none outline-none ring-0"
           onError={() => setImgError(true)}
           referrerPolicy="no-referrer"
         />
@@ -35,7 +35,7 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
 
   return (
     <div 
-      className={`${containerSize} flex items-center justify-center overflow-hidden flex-shrink-0`}
+      className={`${containerSize} flex items-center justify-center overflow-hidden flex-shrink-0 border-none outline-none ring-0 shadow-none`}
       style={{ backgroundColor: bgColor, color: textColor }}
     >
       <IconComponent size={iconSize} strokeWidth={1.75} />

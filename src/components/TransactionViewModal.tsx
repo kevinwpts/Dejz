@@ -154,25 +154,27 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
         {/* Main Content Area: Modern Consumer App Presentation */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          {/* Hero Section: Logo to the left, without enclosing container, significantly larger */}
-          <div className="flex flex-col items-start text-left pt-1 pb-2">
-            <div className="mb-3 shrink-0">
+          {/* Hero Section: Logo to the left, name & cost in line to the right */}
+          <div className="flex items-center gap-4 text-left pt-1 pb-2">
+            <div className="shrink-0">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
 
-            <h2 className="text-[20px] sm:text-[22px] font-semibold tracking-tight text-[var(--text-primary)] truncate max-w-full">
-              {merchantName}
-            </h2>
+            <div className="min-w-0 flex-1 flex flex-col justify-center">
+              <h2 className="text-[18px] sm:text-[20px] font-semibold tracking-tight text-[var(--text-primary)] truncate">
+                {merchantName}
+              </h2>
 
-            <p className={`text-[30px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight leading-tight mt-1 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
-              <span className="opacity-75 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
-              <span>{formatAmount(transaction.amount, config.language)}</span>
-              <span className="text-[15px] font-normal text-[var(--text-secondary)] ml-[3px] font-sans">{config.currency}</span>
-            </p>
+              <p className={`text-[26px] sm:text-[30px] font-semibold font-amount tabular-nums tracking-tight leading-tight mt-0.5 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+                <span className="opacity-75 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
+                <span>{formatAmount(transaction.amount, config.language)}</span>
+                <span className="text-[14px] font-normal text-[var(--text-secondary)] ml-[3px] font-sans">{config.currency}</span>
+              </p>
 
-            <p className="text-[12px] sm:text-[13px] font-normal text-[var(--text-tertiary)] mt-1 select-none tabular-nums">
-              {formattedDate}{formattedTime ? ` · ${formattedTime}` : ''}
-            </p>
+              <p className="text-[12px] sm:text-[12.5px] font-normal text-[var(--text-tertiary)] mt-0.5 select-none tabular-nums truncate">
+                {formattedDate}{formattedTime ? ` · ${formattedTime}` : ''}
+              </p>
+            </div>
           </div>
 
           {/* Details Section: Clean, Lightweight, and Non-Administrative */}
