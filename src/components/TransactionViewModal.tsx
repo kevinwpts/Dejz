@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
-import { X, Pencil, Trash2, Tag, Receipt, Repeat, MoreHorizontal } from 'lucide-react';
+import { Pencil, Trash2, Tag, Receipt, Repeat, MoreHorizontal } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
@@ -120,18 +120,76 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           }}
         />
 
-        {/* Floating Close Button Top Right */}
-        <button 
-          type="button"
-          onClick={() => {
-            if (typeof feedback?.light === 'function') feedback.light();
-            onClose();
-          }} 
-          className="absolute top-3 right-4 sm:top-4 sm:right-5 z-30 w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-          aria-label={t('close')}
-        >
-          <X size={17} strokeWidth={2.2} />
-        </button>
+        {/* Floating More Options Button Top Right (3 dots) */}
+        <div className="absolute top-3 right-4 sm:top-4 sm:right-5 z-30">
+          <button 
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              setShowMoreMenu(!showMoreMenu);
+            }} 
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer active:scale-95 ${
+              showMoreMenu 
+                ? 'bg-black/15 dark:bg-white/20 text-[var(--text-primary)]' 
+                : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+            title="Alternativ"
+            aria-label="Alternativ"
+          >
+            <MoreHorizontal size={17} strokeWidth={2} />
+          </button>
+
+          {showMoreMenu && (
+            <>
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setShowMoreMenu(false)} 
+              />
+              <div className="absolute right-0 top-full mt-2 z-50 w-48 bg-white dark:bg-[#191523] rounded-2xl shadow-2xl border border-black/10 dark:border-white/10 py-1.5 overflow-hidden font-sans animate-in fade-in zoom-in-95 duration-150">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    setShowMoreMenu(false);
+                    onEdit(transaction);
+                  }}
+                  className="w-full px-4 py-2.5 flex items-center gap-2.5 text-left text-[14px] text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  <Pencil size={15} strokeWidth={1.8} className="text-[var(--text-secondary)]" />
+                  <span>{t('edit')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    setShowMoreMenu(false);
+                    onDuplicate(transaction);
+                  }}
+                  className="w-full px-4 py-2.5 flex items-center gap-2.5 text-left text-[14px] text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  <Repeat size={15} strokeWidth={1.8} className="text-[var(--text-secondary)]" />
+                  <span>{t('duplicate')}</span>
+                </button>
+
+                <div className="h-px bg-black/5 dark:bg-white/[0.06] my-1" />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    setShowMoreMenu(false);
+                    setShowDeleteConfirm(true);
+                  }}
+                  className="w-full px-4 py-2.5 flex items-center gap-2.5 text-left text-[14px] text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                >
+                  <Trash2 size={15} strokeWidth={1.8} />
+                  <span>{t('delete')}</span>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
 
         {/* Drawer Handle on Mobile */}
         <div 
@@ -143,22 +201,22 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-2 sm:pt-4 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section: Logo to the left, name & cost in line to the right */}
-          <div className="flex items-center gap-4 text-left pt-0.5 pb-2.5 pr-10">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-2 sm:pt-4 pb-6 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+          {/* Hero Section: Logo to the left, Large Title and smaller Price in line to the right */}
+          <div className="flex items-center gap-4 text-left pt-0.5 pb-2.5 pr-12">
             <div className="shrink-0">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
 
             <div className="min-w-0 flex-1 flex flex-col justify-center">
-              <h2 className="text-[19px] sm:text-[21px] font-semibold tracking-tight text-[var(--text-primary)] truncate">
+              <h2 className="text-[26px] sm:text-[30px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight truncate">
                 {merchantName}
               </h2>
 
-              <p className={`text-[28px] sm:text-[32px] font-semibold font-amount tabular-nums tracking-tight leading-tight mt-0.5 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
-                <span className="opacity-75 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
+              <p className={`text-[17px] sm:text-[19px] font-medium font-amount tabular-nums tracking-tight mt-0.5 flex items-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-secondary)]'}`}>
+                <span className="opacity-80 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
                 <span>{formatAmount(transaction.amount, config.language)}</span>
-                <span className="text-[15px] font-normal text-[var(--text-secondary)] ml-[3px] font-sans">{config.currency}</span>
+                <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans">{config.currency}</span>
               </p>
             </div>
           </div>
@@ -286,78 +344,6 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                   </a>
                 </div>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Ergonomic Action Bar in Footer (Alternative 2) */}
-        <div className="px-5 sm:px-6 pt-3 pb-1 shrink-0 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center gap-2.5 relative">
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof feedback?.light === 'function') feedback.light();
-              onEdit(transaction);
-            }}
-            className="flex-1 h-12 bg-[#211F1C] dark:bg-white text-white dark:text-[#080611] font-semibold text-[15px] rounded-2xl flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition-all cursor-pointer"
-          >
-            <Pencil size={16} strokeWidth={2} />
-            <span>{t('edit')}</span>
-          </button>
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                setShowMoreMenu(!showMoreMenu);
-              }}
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors cursor-pointer active:scale-95 ${
-                showMoreMenu 
-                  ? 'bg-black/10 dark:bg-white/20 text-[var(--text-primary)]' 
-                  : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-              }`}
-              title="Fler åtgärder"
-              aria-label="Fler åtgärder"
-            >
-              <MoreHorizontal size={19} strokeWidth={2} />
-            </button>
-
-            {showMoreMenu && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40" 
-                  onClick={() => setShowMoreMenu(false)} 
-                />
-                <div className="absolute right-0 bottom-full mb-2.5 z-50 w-48 bg-white dark:bg-[#191523] rounded-2xl shadow-2xl border border-black/10 dark:border-white/10 py-1.5 overflow-hidden font-sans animate-in fade-in zoom-in-95 duration-150">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setShowMoreMenu(false);
-                      onDuplicate(transaction);
-                    }}
-                    className="w-full px-4 py-2.5 flex items-center gap-2.5 text-left text-[14px] text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    <Repeat size={15} strokeWidth={1.8} className="text-[var(--text-secondary)]" />
-                    <span>{t('duplicate')}</span>
-                  </button>
-
-                  <div className="h-px bg-black/5 dark:bg-white/[0.06] my-1" />
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setShowMoreMenu(false);
-                      setShowDeleteConfirm(true);
-                    }}
-                    className="w-full px-4 py-2.5 flex items-center gap-2.5 text-left text-[14px] text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                  >
-                    <Trash2 size={15} strokeWidth={1.8} />
-                    <span>{t('delete')}</span>
-                  </button>
-                </div>
-              </>
             )}
           </div>
         </div>
