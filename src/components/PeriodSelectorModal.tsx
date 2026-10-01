@@ -142,21 +142,29 @@ export function PeriodSelectorModal({
                         onSelectDate(null);
                         onClose();
                       }}
-                      className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] min-h-[46px] ${
+                      style={isSelected ? {
+                        backgroundColor: 'var(--user-accent-soft, rgba(99, 91, 255, 0.15))',
+                        borderColor: 'rgba(var(--user-accent-rgb, 99, 91, 255), 0.25)',
+                        color: 'var(--accent-color, #635BFF)'
+                      } : undefined}
+                      className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] min-h-[46px] border ${
                         isSelected
-                          ? 'bg-[var(--accent-color)]/15 border border-[var(--accent-color)]/25 text-[var(--accent-color)] font-semibold'
-                          : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
+                          ? 'font-semibold'
+                          : 'bg-transparent border-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                          isSelected ? 'bg-[var(--accent-color)] text-white' : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'
-                        }`}>
+                        <div 
+                          style={isSelected ? { backgroundColor: 'var(--accent-color, #635BFF)' } : undefined}
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? 'text-white' : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'
+                          }`}
+                        >
                           <CalendarIcon size={14} strokeWidth={1.8} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'text-[var(--accent-color)] font-semibold' : ''}`}>
+                            <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'font-semibold' : ''}`} style={isSelected ? { color: 'var(--accent-color, #635BFF)' } : undefined}>
                               {title}
                             </span>
                             {p.isCurrent && (
@@ -174,7 +182,10 @@ export function PeriodSelectorModal({
                       </div>
 
                       {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-white flex items-center justify-center shrink-0 ml-2">
+                        <div 
+                          style={{ backgroundColor: 'var(--accent-color, #635BFF)' }}
+                          className="w-5 h-5 rounded-full text-white flex items-center justify-center shrink-0 ml-2"
+                        >
                           <Check size={12} strokeWidth={3} />
                         </div>
                       )}
