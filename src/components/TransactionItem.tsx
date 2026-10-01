@@ -78,7 +78,7 @@ export function TransactionItem({
   };
 
   const finalAmount = displayAmount !== undefined ? displayAmount : transaction.amount;
-  const amountColor = transaction.type === 'income' 
+  const _amountColor = transaction.type === 'income' 
     ? 'text-emerald-600 dark:text-emerald-400' 
     : 'text-[#4A453F] dark:text-[#D1D1D6]';
 
@@ -241,12 +241,12 @@ export function TransactionItem({
             </div>
           </div>
           
-          {/* Primary Amount: 13px, matching muted grey tone for cost */}
+          {/* Primary Amount: matching title size and color, normal weight */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-            <p className={`text-[12px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
+            <p className={`text-[14px] font-normal whitespace-nowrap tracking-tight ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#211F1C] dark:text-white'}`}>
               <span className="opacity-75 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
-              <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
-              <span className="text-[10px] font-normal text-[#777168] dark:text-[#A8A8A8] ml-[2px]">{config?.currency || 'kr'}</span>
+              <span className="font-amount tabular-nums font-normal tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
+              <span className="text-[11px] font-normal opacity-75 ml-[2px]">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixed ? (
               <p className="text-[9.5px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 tabular-nums">
