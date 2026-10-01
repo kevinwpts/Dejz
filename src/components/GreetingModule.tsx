@@ -100,7 +100,7 @@ export function GreetingModule({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full mb-[20px] select-none px-1"
+        className="w-full -mt-3 sm:-mt-5 pt-0 mb-[12px] select-none px-1"
       >
         {/* UPPER PART: Budget Gauge */}
         <BudgetGauge
@@ -112,38 +112,24 @@ export function GreetingModule({
         />
 
         {/* THIN HORIZONTAL DIVIDER */}
-        <div className="mt-[16px] border-t border-[#E2DDD4]/80 dark:border-white/[0.1]" />
+        <div className="mt-[6px] border-t border-[#E2DDD4]/60 dark:border-white/[0.08]" />
 
-        {/* LOWER PART: Info row */}
-        <div className="pt-[14px] grid grid-cols-2 divide-x divide-[#E2DDD4]/80 dark:divide-white/[0.1]">
+        {/* LOWER PART: Compact Info row */}
+        <div className="pt-2 grid grid-cols-2 divide-x divide-[#E2DDD4]/60 dark:divide-white/[0.08]">
           {/* Left Column: Period */}
-          <div className="flex items-center gap-[10px] pr-2.5 min-w-0">
-            <div className="w-[36px] h-[36px] rounded-full bg-black/5 dark:bg-white/[0.08] flex items-center justify-center shrink-0">
-              <Calendar size={18} className="text-[#6D6962] dark:text-[#A8A8A8]" strokeWidth={1.75} />
-            </div>
-            <div className="flex flex-col gap-[3px] min-w-0">
-              <span className="text-[10px] font-normal text-[#6D6962] dark:text-[#A8A8A8] uppercase tracking-wider leading-none">
-                PERIOD
-              </span>
-              <span className="text-[14px] font-medium text-[#1C1917] dark:text-white truncate leading-tight">
-                {periodIntervalText}
-              </span>
-            </div>
+          <div className="flex items-center gap-1.5 pr-2 justify-center sm:justify-start min-w-0">
+            <Calendar size={13} className="text-[#6D6962] dark:text-[#A8A8A8] shrink-0" strokeWidth={2} />
+            <span className="text-[11.5px] font-medium text-[#6D6962] dark:text-[#A8A8A8] truncate">
+              {periodIntervalText}
+            </span>
           </div>
 
           {/* Right Column: Till Lön */}
-          <div className="flex items-center gap-[10px] pl-3.5 sm:pl-4 min-w-0">
-            <div className="w-[36px] h-[36px] rounded-full bg-black/5 dark:bg-white/[0.08] flex items-center justify-center shrink-0">
-              <Clock size={18} className="text-[#6D6962] dark:text-[#A8A8A8]" strokeWidth={1.75} />
-            </div>
-            <div className="flex flex-col gap-[3px] min-w-0">
-              <span className="text-[10px] font-normal text-[#6D6962] dark:text-[#A8A8A8] uppercase tracking-wider leading-none">
-                {isEn ? 'PAYDAY' : 'TILL LÖN'}
-              </span>
-              <span className="text-[14px] font-medium text-[#1C1917] dark:text-white truncate leading-tight">
-                {daysValueText}
-              </span>
-            </div>
+          <div className="flex items-center gap-1.5 pl-2 justify-center sm:justify-start min-w-0">
+            <Clock size={13} className="text-[#6D6962] dark:text-[#A8A8A8] shrink-0" strokeWidth={2} />
+            <span className="text-[11.5px] font-medium text-[#6D6962] dark:text-[#A8A8A8] truncate">
+              {daysValueText} {isEn ? 'to payday' : 'till lön'}
+            </span>
           </div>
         </div>
       </motion.div>

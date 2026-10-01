@@ -75,7 +75,7 @@ export function BudgetGauge({
         </svg>
 
         {/* Text centered inside the semi-circle arc */}
-        <div className="absolute inset-x-0 bottom-2 sm:bottom-3 flex flex-col items-center justify-center text-center pointer-events-none">
+        <div className="absolute inset-x-0 bottom-8 sm:bottom-10 flex flex-col items-center justify-center text-center pointer-events-none">
           {/* Heading: 14px, medium, secondary text color */}
           <span className="text-[14px] font-medium text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
             {label}

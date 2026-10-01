@@ -514,11 +514,8 @@ export function TodayView({
             allTransactions={allTransactions}
             categoryBudgets={
               <div className="pt-1 pb-1">
-                {/* Section header: "Dina budgetar" on the left, "Hantera" text-action on the right */}
-                <div className="flex items-center justify-between px-1 mb-2">
-                  <span className={designSystem.typography.sectionTitle}>
-                    {lang === 'en' ? 'Your budgets' : 'Dina budgetar'}
-                  </span>
+                {/* Action link on the right */}
+                <div className="flex items-center justify-end px-1 mb-1.5">
                   <button
                     type="button"
                     onClick={() => onNavigate("budget", "category-budgets")}
