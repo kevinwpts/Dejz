@@ -18,7 +18,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { formatFullDate } from '../utils/date';
-import { Button, SegmentedControl } from './ui';
+import { SegmentedControl } from './ui';
 import { ReceiptCameraModal } from './ReceiptCameraModal';
 import { ConfirmModal } from './ConfirmModal';
 import { feedback } from '../utils/feedback';
@@ -646,7 +646,7 @@ export function TransactionModal({
         <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
         {/* Header Section: Centered Title, Logo on Left, Close on Right */}
-        <div className="px-5 sm:px-6 pt-3.5 sm:pt-4 pb-3 relative flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] z-10 min-h-[52px]">
+        <div className="px-5 sm:px-6 pt-3.5 sm:pt-4 pb-3 relative flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] z-10 min-h-[58px]">
           {/* Logo on Left */}
           <div className="flex items-center z-10">
             <button
@@ -657,7 +657,7 @@ export function TransactionModal({
               aria-label={t('chooseIcon')}
             >
               <TransactionLogo 
-                size="sm"
+                size="md"
                 config={config}
                 transaction={previewTransaction} 
               />
@@ -825,41 +825,36 @@ export function TransactionModal({
                   </div>
                 </div>
 
-                {/* 4. Kategori Selection */}
+                {/* 4. Kategori Selection: Kategori till vänster, tryck/val till höger */}
                 {splits.length === 0 && (
                   <div 
                     onClick={() => {
                       if (typeof feedback?.light === 'function') feedback.light();
                       setIsCategoryPickerOpen(true);
                     }}
-                    className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex items-center justify-between cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group"
+                    className="px-4 sm:px-5 py-3.5 min-h-[58px] sm:min-h-[62px] flex items-center justify-between cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group select-none"
                   >
-                    <div className="flex flex-col justify-center min-w-0 flex-1">
-                      <span className="text-[11px] font-medium text-[#777168] dark:text-[#A8A8A8] block">
-                        {t('category')}
-                      </span>
-                      <div className="flex items-center gap-2 mt-0.5 min-w-0">
-                        <div 
-                          className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
-                          style={{ 
-                            backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
-                            color: currentCatData?.color || 'var(--text-primary)'
-                          }}
-                        >
-                          <CategoryIcon 
-                            icon={currentCatData?.icon || 'tag'} 
-                            color={currentCatData?.color} 
-                            size="2xs" 
-                          />
-                        </div>
-                        <span className="text-[13.5px] font-medium text-[var(--text-primary)] truncate">
-                          {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
-                        </span>
+                    <span className="text-[13.5px] sm:text-[14px] font-normal text-[#777168] dark:text-[#A8A8A8] shrink-0">
+                      {t('category')}
+                    </span>
+                    <div className="flex items-center gap-2 shrink-0 ml-3">
+                      <div 
+                        className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0"
+                        style={{ 
+                          backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
+                          color: currentCatData?.color || 'var(--text-primary)'
+                        }}
+                      >
+                        <CategoryIcon 
+                          icon={currentCatData?.icon || 'tag'} 
+                          color={currentCatData?.color} 
+                          size="2xs" 
+                        />
                       </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] shrink-0 ml-3">
-                      <span className="text-[11.5px] font-normal">{currentLang === 'en' ? 'Change' : 'Ändra'}</span>
-                      <ChevronDown size={14} strokeWidth={2} />
+                      <span className="text-[13.5px] sm:text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                        {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
+                      </span>
+                      <ChevronDown size={14} strokeWidth={2} className="text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] transition-colors ml-0.5" />
                     </div>
                   </div>
                 )}
@@ -1205,11 +1200,13 @@ export function TransactionModal({
           </div>
 
           {/* Register / Save Button & Delete Button */}
-          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/5 dark:border-white/[0.06] bg-transparent space-y-2.5 relative z-10">
-            <Button 
+          <div className="shrink-0 px-6 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-4 border-t border-black/5 dark:border-white/[0.06] bg-transparent flex flex-col items-center gap-2 relative z-10">
+            <button 
+              type="button"
               disabled={!isSplitsValid}
               onClick={() => {
                 if (!isSplitsValid) return;
+                if (typeof feedback?.light === 'function') feedback.light();
                 onSave({
                   merchant,
                   note,
@@ -1226,30 +1223,28 @@ export function TransactionModal({
                 });
                 onClose();
               }}
-              variant="primary"
-              fullWidth
-              size="lg"
-              icon={<Check size={18} strokeWidth={2.5} />}
+              className="w-full h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-none"
             >
-              {transaction 
-                ? (currentLang === 'en' ? 'Save changes' : 'Spara ändringar')
-                : (type === 'income' ? (t('registerIncome' as any) || 'Registrera inkomst') : (t('registerExpense' as any) || 'Registrera utgift'))}
-            </Button>
+              <Check size={15} strokeWidth={2} />
+              <span>
+                {transaction 
+                  ? (currentLang === 'en' ? 'Save changes' : 'Spara ändringar')
+                  : (type === 'income' ? (t('registerIncome' as any) || 'Registrera inkomst') : (t('registerExpense' as any) || 'Registrera utgift'))}
+              </span>
+            </button>
 
             {transaction && transaction.id && onDelete && (
-              <div className="text-center pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof feedback?.light === 'function') feedback.light();
-                    setShowDeleteConfirm(true);
-                  }}
-                  className="inline-flex items-center justify-center gap-2 text-[13px] font-medium text-rose-500 hover:text-rose-600 dark:text-rose-400/90 dark:hover:text-rose-300 transition-colors cursor-pointer py-1.5 px-4 rounded-xl hover:bg-rose-500/5 active:scale-95"
-                >
-                  <Trash2 size={14} strokeWidth={1.8} />
-                  <span>{currentLang === 'en' ? 'Delete transaction' : 'Ta bort transaktion'}</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  setShowDeleteConfirm(true);
+                }}
+                className="inline-flex items-center justify-center gap-1.5 text-[12px] font-medium text-rose-500/80 hover:text-rose-600 dark:text-rose-400/90 dark:hover:text-rose-300 transition-colors cursor-pointer py-1 px-3 rounded-lg hover:bg-rose-500/5 active:scale-95"
+              >
+                <Trash2 size={13} strokeWidth={1.75} />
+                <span>{currentLang === 'en' ? 'Delete transaction' : 'Ta bort transaktion'}</span>
+              </button>
             )}
           </div>
 

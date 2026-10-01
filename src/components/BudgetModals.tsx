@@ -642,17 +642,15 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         </div>
 
         {/* Action Button Footer */}
-        <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/5 dark:border-white/10 bg-transparent">
-          <Button 
+        <div className="shrink-0 px-6 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-4 border-t border-black/5 dark:border-white/10 bg-transparent flex flex-col items-center">
+          <button 
             type="button"
             onClick={handleSave} 
-            variant="primary"
-            fullWidth
-            size="lg"
-            icon={<Check size={18} strokeWidth={2.5} />}
+            className="w-full h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
           >
-            {income ? t('saveChanges') : t('addIncome')}
-          </Button>
+            <Check size={15} strokeWidth={2} />
+            <span>{income ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add income' : 'Lägg till inkomst')}</span>
+          </button>
         </div>
 
         {/* Compact Icon Selector Popover */}
@@ -1509,17 +1507,15 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         </div>
 
         {/* Action Button Footer */}
-        <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/5 dark:border-white/10 bg-transparent">
-          <Button 
+        <div className="shrink-0 px-6 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-4 border-t border-black/5 dark:border-white/10 bg-transparent flex flex-col items-center">
+          <button 
             type="button"
             onClick={handleSave} 
-            variant="primary"
-            fullWidth
-            size="lg"
-            icon={<Check size={18} strokeWidth={2.5} />}
+            className="w-full h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
           >
-            {expense ? t('saveChanges') : t('addFixedExpense')}
-          </Button>
+            <Check size={15} strokeWidth={2} />
+            <span>{expense ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add fixed expense' : 'Lägg till fast kostnad')}</span>
+          </button>
         </div>
 
         {/* Compact Icon Selector Popover */}
