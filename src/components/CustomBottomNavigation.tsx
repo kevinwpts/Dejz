@@ -39,16 +39,16 @@ export function CustomBottomNavigation({
 
   return (
     <footer 
-      className="fixed bottom-0 left-0 right-0 z-40 w-full bg-white dark:bg-[#1E1B22] select-none overflow-visible rounded-none m-0 p-0 border-none shadow-none pb-[min(10px,env(safe-area-inset-bottom,0px))]"
+      className="fixed bottom-0 left-0 right-0 z-40 w-full bg-[var(--bg-color)] select-none overflow-visible rounded-none m-0 p-0 border-none shadow-none pb-[min(14px,env(safe-area-inset-bottom,0px))]"
     >
-      {/* Konvex rund upphöjning (kulle) på 76 × 76 px bakom knappen i exakt samma bakgrundsfärg */}
+      {/* Konvex rund upphöjning (kulle) på 76 × 76 px bakom knappen i exakt samma bakgrundsfärg som appen */}
       <div 
-        className="absolute left-1/2 -top-[16px] -translate-x-1/2 w-[76px] h-[76px] rounded-full bg-white dark:bg-[#1E1B22] pointer-events-none z-0 border-none shadow-none"
+        className="absolute left-1/2 -top-[23px] -translate-x-1/2 w-[76px] h-[76px] rounded-full bg-[var(--bg-color)] pointer-events-none z-0 border-none shadow-none"
         aria-hidden="true"
       />
 
-      {/* Upphöjd rund mittknapp på 56 × 56 px */}
-      <div className="absolute left-1/2 -top-[6px] -translate-x-1/2 z-20">
+      {/* Upphöjd rund mittknapp på 56 × 56 px flyttad upp typ 2 mm */}
+      <div className="absolute left-1/2 -top-[13px] -translate-x-1/2 z-20">
         <button
           type="button"
           onClick={() => {
@@ -62,8 +62,8 @@ export function CustomBottomNavigation({
         </button>
       </div>
 
-      {/* 5 lika breda kolumner med texten placerad max en halv cm från skärmbotten */}
-      <nav className="relative z-10 w-full h-[58px] grid grid-cols-5 items-end pb-2">
+      {/* 5 lika breda kolumner med ca 2 mm mer luft i botten */}
+      <nav className="relative z-10 w-full h-[62px] grid grid-cols-5 items-end pb-3.5">
         {/* 1. Hem */}
         <NavItem
           icon={Home}
