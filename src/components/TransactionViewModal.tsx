@@ -120,7 +120,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -145,7 +145,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section: Logo to the left, Title and smaller Action Buttons inline, Price below */}
+          {/* Hero Section: Logo to the left, Title and Close Button inline, Price below */}
           <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
             <div className="shrink-0 pt-0.5">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
@@ -157,62 +157,18 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                   {merchantName}
                 </h2>
 
-                {/* Smaller Action Buttons aligned inline with the title */}
-                <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      onDuplicate(transaction);
-                    }} 
-                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-                    title={t('duplicate')}
-                    aria-label={t('duplicate')}
-                  >
-                    <Repeat size={13.5} strokeWidth={1.9} />
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      onEdit(transaction);
-                    }} 
-                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-                    title={t('edit')}
-                    aria-label={t('edit')}
-                  >
-                    <Pencil size={13.5} strokeWidth={1.9} />
-                  </button>
-
-                  {onDelete && (
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        if (typeof feedback?.light === 'function') feedback.light();
-                        setShowDeleteConfirm(true);
-                      }} 
-                      className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-                      title={config.language === 'en' ? 'Delete' : 'Ta bort'}
-                      aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
-                    >
-                      <Trash2 size={13.5} strokeWidth={1.9} />
-                    </button>
-                  )}
-
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      onClose();
-                    }} 
-                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 ml-0.5"
-                    title={t('close')}
-                    aria-label={t('close')}
-                  >
-                    <X size={14.5} strokeWidth={2.2} />
-                  </button>
-                </div>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    onClose();
+                  }} 
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                  title={t('close')}
+                  aria-label={t('close')}
+                >
+                  <X size={15} strokeWidth={2.2} />
+                </button>
               </div>
 
               <p className={`text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
@@ -357,6 +313,49 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               </div>
             )}
           </div>
+        </div>
+
+        {/* Action Buttons Footer: Bred Redigera-knapp, Duplicera och Radera */}
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+          <button 
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              onEdit(transaction);
+            }} 
+            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+          >
+            <Pencil size={14.5} strokeWidth={1.9} />
+            <span>{t('edit')}</span>
+          </button>
+
+          <button 
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              onDuplicate(transaction);
+            }} 
+            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+            title={t('duplicate')}
+            aria-label={t('duplicate')}
+          >
+            <Repeat size={16} strokeWidth={1.9} />
+          </button>
+
+          {onDelete && (
+            <button 
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setShowDeleteConfirm(true);
+              }} 
+              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              title={config.language === 'en' ? 'Delete' : 'Ta bort'}
+              aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
+            >
+              <Trash2 size={16} strokeWidth={1.9} />
+            </button>
+          )}
         </div>
 
         {showDeleteConfirm && transaction && transaction.id && onDelete && (
