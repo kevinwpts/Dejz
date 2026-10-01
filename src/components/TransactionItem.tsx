@@ -86,15 +86,15 @@ export function TransactionItem({
   let containerClasses = "";
   let paddingClasses = "px-4 py-3.5 sm:py-4 min-h-[68px]";
   if (squared) {
-    containerClasses = "bg-white dark:bg-[#1E1B22] rounded-none shadow-none border-b border-black/5 dark:border-white/[0.04] last:border-none py-3.5 px-2";
+    containerClasses = "bg-white dark:bg-[#333333] rounded-none shadow-none border-b border-black/5 dark:border-white/[0.04] last:border-none py-3.5 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
     paddingClasses = "px-4 py-2.5 sm:py-3 min-h-[52px]";
   } else if (variant === 'nested') {
-    containerClasses = "bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] shadow-none border-none rounded-[12px]";
+    containerClasses = "bg-white dark:bg-[#333333] hover:bg-black/[0.02] dark:hover:bg-[#3a3a3a] shadow-none border-none rounded-[12px]";
   } else {
-    containerClasses = "bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] rounded-[12px] shadow-none border-none";
+    containerClasses = "bg-white dark:bg-[#333333] hover:bg-black/[0.02] dark:hover:bg-[#3a3a3a] rounded-[12px] shadow-none border-none";
   }
 
   // Neutral discreet category display

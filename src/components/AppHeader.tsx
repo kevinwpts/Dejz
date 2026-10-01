@@ -55,8 +55,8 @@ export function AppHeader({
       } ${
         !isAtTop
           ? isProfileOrSettings
-            ? "bg-[#141118]/90 backdrop-blur-xl border-b border-white/[0.08]"
-            : "bg-[#F2EFE8]/90 dark:bg-[#141118]/90 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
+            ? "bg-[#0b0b0b]/90 backdrop-blur-xl border-b border-white/[0.08]"
+            : "bg-[#F2EFE8]/90 dark:bg-[#0b0b0b]/90 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
           : "bg-transparent border-b border-transparent"
       }`}
     >

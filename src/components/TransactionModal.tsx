@@ -21,6 +21,8 @@ import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { formatFullDate } from '../utils/date';
 import { Button, SegmentedControl } from './ui';
 import { ReceiptCameraModal } from './ReceiptCameraModal';
+import { ConfirmModal } from './ConfirmModal';
+import { feedback } from '../utils/feedback';
 
 interface TransactionModalProps {
   transaction: Transaction | null;
@@ -33,6 +35,7 @@ interface TransactionModalProps {
   periodEnd: Date;
   onClose: () => void;
   onSave: (e: Omit<Transaction, 'id' | 'timestamp'> & { date?: Date }) => void;
+  onDelete?: (id: string) => void;
   onChangeType?: (type: 'income' | 'expense') => void;
   t: (key: TranslationKey) => string;
   currentLang: Language;
@@ -178,6 +181,7 @@ export function TransactionModal({
   _periodEnd,
   onClose, 
   onSave, 
+  onDelete,
   onChangeType, 
   t, 
   currentLang,
@@ -188,6 +192,7 @@ export function TransactionModal({
   prefill
 }: TransactionModalProps) {
   useScrollLock(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [amount, setAmount] = useState(formatAmount(transaction?.amount?.toString() || prefill?.amount?.toString() || ''));
   const [splits, setSplits] = useState<TransactionSplit[]>(transaction?.splits || []);
   const [category, setCategory] = useState(transaction?.category || prefill?.category || (categories && categories.length > 0 ? categories[0].name : ''));
@@ -1208,8 +1213,8 @@ export function TransactionModal({
                   )}
           </div>
 
-          {/* Register / Save Button */}
-          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/5 dark:border-white/10 bg-transparent">
+          {/* Register / Save Button & Delete Button */}
+          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/5 dark:border-white/10 bg-transparent space-y-2.5">
             <Button 
               disabled={!isSplitsValid}
               onClick={() => {
@@ -1239,6 +1244,22 @@ export function TransactionModal({
                 ? (currentLang === 'en' ? 'Save changes' : 'Spara ändringar')
                 : (type === 'income' ? (t('registerIncome' as any) || 'Registrera inkomst') : (t('registerExpense' as any) || 'Registrera utgift'))}
             </Button>
+
+            {transaction && transaction.id && onDelete && (
+              <div className="text-center pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    setShowDeleteConfirm(true);
+                  }}
+                  className="inline-flex items-center justify-center gap-2 text-[13px] font-medium text-rose-500 hover:text-rose-600 dark:text-rose-400/90 dark:hover:text-rose-300 transition-colors cursor-pointer py-1.5 px-4 rounded-xl hover:bg-rose-500/5 active:scale-95"
+                >
+                  <Trash2 size={14} strokeWidth={1.8} />
+                  <span>{currentLang === 'en' ? 'Delete transaction' : 'Ta bort transaktion'}</span>
+                </button>
+              </div>
+            )}
           </div>
 
 
@@ -1334,6 +1355,28 @@ export function TransactionModal({
           isProcessing={isScanningReceipt}
           language={currentLang}
         />
+
+        {showDeleteConfirm && transaction && transaction.id && onDelete && (
+          <ConfirmModal
+            isOpen={showDeleteConfirm}
+            title={currentLang === 'en' ? "Delete transaction?" : "Radera transaktion?"}
+            message={
+              currentLang === 'en'
+                ? `Do you want to delete the transaction of ${formatAmount(transaction.amount, currentLang)} ${config?.currency || 'kr'}?`
+                : `Vill du radera transaktionen på ${formatAmount(transaction.amount, currentLang)} ${config?.currency || 'kr'}?`
+            }
+            confirmText={currentLang === 'en' ? "Delete" : "Radera"}
+            cancelText={currentLang === 'en' ? "Cancel" : "Avbryt"}
+            variant="danger"
+            onConfirm={() => {
+              onDelete(transaction.id);
+              setShowDeleteConfirm(false);
+              onClose();
+            }}
+            onCancel={() => setShowDeleteConfirm(false)}
+            t={t}
+          />
+        )}
       </motion.div>
     </motion.div>,
     document.body

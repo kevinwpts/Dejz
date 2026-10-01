@@ -104,7 +104,7 @@ export function ReceiptsView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={() => onViewTransaction(item)}
-                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-[#1E1B22] rounded-[12px] shadow-none border-none hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer"
+                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-[#333333] rounded-[12px] shadow-none border-none hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer"
                   id={`receipt_item_${item.id}`}
                 >
                   <div className="flex items-center gap-4 min-w-0">
