@@ -4439,7 +4439,15 @@ export default function App() {
           )}
 
           {stats && (
-            <div style={{ display: activeTab === "budget" ? "block" : "none" }}>
+            <div 
+              style={{ display: activeTab === "budget" ? "block" : "none" }}
+              className="min-h-full bg-gradient-to-b from-[#0B0F19] via-[#090C14] to-[#06080D] relative overflow-hidden pb-24"
+            >
+              {/* Subtle lighter blue ambient light spots here and there */}
+              <div className="absolute top-12 left-1/4 w-72 h-72 bg-cyan-500/[0.07] rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-1/2 right-6 w-80 h-80 bg-blue-600/[0.08] rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-1/4 left-8 w-64 h-64 bg-indigo-500/[0.06] rounded-full blur-3xl pointer-events-none" />
+
               <BudgetView
                 stats={stats}
                 config={config}

@@ -736,7 +736,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[#111011] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border border-white/[0.08] relative max-h-[92dvh] sm:max-h-[88vh] flex flex-col overflow-hidden shadow-2xl pb-[max(2rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans text-[#F7F5F7]"
+        className="bg-gradient-to-b from-[#2A1742] via-[#181124] to-[#111011] w-full max-w-lg rounded-t-[28px] rounded-b-none sm:rounded-[28px] border border-white/[0.08] relative max-h-[92dvh] sm:max-h-[88vh] flex flex-col overflow-hidden shadow-2xl pb-[max(2rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans text-[#F7F5F7]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -751,9 +751,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
         {/* Header with Redigera button */}
         <div className="px-6 pt-3 pb-2 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-[#211F22] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
-              <TransactionLogo transaction={expenseCompatible as any} config={config} size="md" />
-            </div>
+            <TransactionLogo transaction={expenseCompatible as any} config={config} size="lg" />
           </div>
           
           <button 
