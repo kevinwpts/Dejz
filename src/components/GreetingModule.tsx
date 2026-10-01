@@ -95,12 +95,12 @@ export function GreetingModule({
 
   return (
     <div className="flex flex-col font-sans relative">
-      {/* WHITE SUMMARY CARD */}
+      {/* TOP HERO SUMMARY SECTION (Sits directly on app background - no card wrapper/border) */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full bg-white/88 dark:bg-[#242424]/90 backdrop-blur-[2px] rounded-[20px] p-[20px] border border-[#E2DDD4]/80 dark:border-[#383838] shadow-none mb-[24px] select-none"
+        className="w-full mb-[20px] select-none px-1"
       >
         {/* UPPER PART: Budget Gauge */}
         <BudgetGauge
@@ -111,17 +111,17 @@ export function GreetingModule({
           label={t('totalRemaining')}
         />
 
-        {/* THIN HORIZONTAL DIVIDER (16px below gauge) */}
-        <div className="mt-[16px] border-t border-[#E2DDD4] dark:border-[#383838]" />
+        {/* THIN HORIZONTAL DIVIDER */}
+        <div className="mt-[16px] border-t border-[#E2DDD4]/80 dark:border-white/[0.1]" />
 
-        {/* LOWER PART: Info row (16px below line) */}
-        <div className="pt-[16px] grid grid-cols-2 divide-x divide-[#E2DDD4] dark:divide-[#383838]">
+        {/* LOWER PART: Info row */}
+        <div className="pt-[14px] grid grid-cols-2 divide-x divide-[#E2DDD4]/80 dark:divide-white/[0.1]">
           {/* Left Column: Period */}
           <div className="flex items-center gap-[10px] pr-2.5 min-w-0">
-            <div className="w-[36px] h-[36px] rounded-full bg-[#F3F0EB] dark:bg-[#2D2D2D] flex items-center justify-center shrink-0">
+            <div className="w-[36px] h-[36px] rounded-full bg-black/5 dark:bg-white/[0.08] flex items-center justify-center shrink-0">
               <Calendar size={18} className="text-[#6D6962] dark:text-[#A8A8A8]" strokeWidth={1.75} />
             </div>
-            <div className="flex flex-col gap-[4px] min-w-0">
+            <div className="flex flex-col gap-[3px] min-w-0">
               <span className="text-[10px] font-normal text-[#6D6962] dark:text-[#A8A8A8] uppercase tracking-wider leading-none">
                 PERIOD
               </span>
@@ -133,10 +133,10 @@ export function GreetingModule({
 
           {/* Right Column: Till Lön */}
           <div className="flex items-center gap-[10px] pl-3.5 sm:pl-4 min-w-0">
-            <div className="w-[36px] h-[36px] rounded-full bg-[#F3F0EB] dark:bg-[#2D2D2D] flex items-center justify-center shrink-0">
+            <div className="w-[36px] h-[36px] rounded-full bg-black/5 dark:bg-white/[0.08] flex items-center justify-center shrink-0">
               <Clock size={18} className="text-[#6D6962] dark:text-[#A8A8A8]" strokeWidth={1.75} />
             </div>
-            <div className="flex flex-col gap-[4px] min-w-0">
+            <div className="flex flex-col gap-[3px] min-w-0">
               <span className="text-[10px] font-normal text-[#6D6962] dark:text-[#A8A8A8] uppercase tracking-wider leading-none">
                 {isEn ? 'PAYDAY' : 'TILL LÖN'}
               </span>
@@ -155,4 +155,3 @@ export function GreetingModule({
     </div>
   );
 }
-
