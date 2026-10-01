@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "motion/react";
 import {
   Home,
   History,
@@ -39,13 +38,35 @@ export function CustomBottomNavigation({
   const isEn = language === 'en';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] px-3 sm:px-6 pointer-events-none flex justify-center">
-      <motion.nav
-        className="w-full max-w-[340px] sm:max-w-[360px] h-[58px] rounded-full px-2 bg-white/85 dark:bg-[#1E1B22]/90 backdrop-blur-2xl text-[#6D6962] dark:text-[#A8A8A8] flex items-center justify-between pointer-events-auto border-none shadow-xl shadow-black/[0.08] dark:shadow-2xl dark:shadow-black/90"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 380, damping: 28 }}
-      >
+    <footer 
+      className="fixed bottom-0 left-0 right-0 z-40 w-full bg-white dark:bg-[#1E1B22] select-none overflow-visible rounded-none m-0 p-0 border-none shadow-none"
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      }}
+    >
+      {/* Konvex rund upphöjning (kulle) på 76 × 76 px bakom knappen i exakt samma bakgrundsfärg */}
+      <div 
+        className="absolute left-1/2 -top-[20px] -translate-x-1/2 w-[76px] h-[76px] rounded-full bg-white dark:bg-[#1E1B22] pointer-events-none z-0 border-none shadow-none"
+        aria-hidden="true"
+      />
+
+      {/* Upphöjd rund mittknapp på 56 × 56 px placerad 10 px ovanför footerns överkant */}
+      <div className="absolute left-1/2 -top-[10px] -translate-x-1/2 z-20">
+        <button
+          type="button"
+          onClick={() => {
+            if (onPlusClick) onPlusClick();
+          }}
+          className="w-[56px] h-[56px] rounded-full bg-[var(--accent-color)] text-white flex items-center justify-center cursor-pointer active:scale-95 transition-transform border-none outline-none shadow-none"
+          aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
+          title={isEn ? "Add transaction" : "Lägg till transaktion"}
+        >
+          <Plus size={30} strokeWidth={2.5} className="text-white" />
+        </button>
+      </div>
+
+      {/* 5 lika breda kolumner i en 76 px hög navigationsrad */}
+      <nav className="relative z-10 w-full h-[76px] grid grid-cols-5 items-center">
         {/* 1. Hem */}
         <NavItem
           icon={Home}
@@ -63,19 +84,8 @@ export function CustomBottomNavigation({
           onClick={() => setActiveTab("transactions")}
         />
 
-        {/* 3. Centrerad Plusknapp */}
-        <div className="flex items-center justify-center px-1">
-          <button
-            onClick={() => {
-              if (onPlusClick) onPlusClick();
-            }}
-            className="w-[38px] h-[38px] bg-[var(--accent-color)] hover:opacity-90 text-white rounded-full active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-[var(--accent-color)]/25"
-            aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
-            title={isEn ? "Add transaction" : "Lägg till transaktion"}
-          >
-            <Plus size={20} strokeWidth={2.5} />
-          </button>
-        </div>
+        {/* 3. Mittkolumn spacer (mittknappen ligger absolut centrerad över denna) */}
+        <div className="w-full h-full pointer-events-none" aria-hidden="true" />
 
         {/* 4. Analys */}
         <NavItem
@@ -98,8 +108,8 @@ export function CustomBottomNavigation({
             }
           }}
         />
-      </motion.nav>
-    </div>
+      </nav>
+    </footer>
   );
 }
 
@@ -118,21 +128,22 @@ function NavItem({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-all duration-200 active:scale-95 cursor-pointer select-none py-1 ${
+      className={`w-full h-full flex flex-col items-center justify-center transition-colors active:scale-95 cursor-pointer select-none py-1 ${
         isActive
-          ? 'text-[var(--accent-color)] dark:text-white font-semibold'
-          : 'text-[#8C867C] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white font-medium'
+          ? 'text-[var(--accent-color)] font-semibold'
+          : 'text-[#8C867C] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white font-medium'
       }`}
     >
       <Icon 
-        size={17} 
-        strokeWidth={isActive ? 2.3 : 1.75} 
+        size={26} 
+        strokeWidth={isActive ? 2.2 : 1.75} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
       />
-      <span className="text-[10px] leading-tight tracking-tight">
+      <span className="text-[12px] leading-tight tracking-tight mt-[5px]">
         {label}
       </span>
     </button>
