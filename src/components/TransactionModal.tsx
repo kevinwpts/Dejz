@@ -214,6 +214,7 @@ export function TransactionModal({
   const [category, setCategory] = useState(transaction?.category || prefill?.category || (categories && categories.length > 0 ? categories[0].name : ''));
   const [hasManuallySelectedCategory, setHasManuallySelectedCategory] = useState(!!prefill?.category);
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
+  const [activeSplitIndex, setActiveSplitIndex] = useState<number | null>(null);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
   const currentCatData = useMemo(() => {
@@ -657,7 +658,7 @@ export function TransactionModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -672,7 +673,7 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-none rounded-t-[32px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -771,62 +772,165 @@ export function TransactionModal({
                   </span>
                 </div>
 
-                {type === 'expense' && (
-                  <button 
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (splits.length === 0) {
-                        setSplits([{ id: Math.random().toString(), amount: parseAmount(amount), category: '', tags: [] }]);
-                      } else {
-                        setSplits([]);
-                      }
-                    }}
-                    className={`text-[11.5px] font-medium transition-all px-2.5 py-1 rounded-full cursor-pointer active:scale-95 ${
-                      splits.length > 0 
-                        ? "bg-rose-500 text-white shadow-xs" 
-                        : "bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/15"
-                    }`}
-                  >
-                    {splits.length > 0 ? (currentLang === 'en' ? 'Cancel' : 'Avbryt') : (currentLang === 'en' ? 'Split' : 'Splitta')}
-                  </button>
-                )}
               </div>
             </div>
           </div>
 
           {/* Details Section: Clean list with discrete subtle hairline divider lines, identical to TransactionViewModal */}
           <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
-            {/* Category */}
-            {splits.length === 0 && (
-              <div 
-                onClick={() => {
-                  if (typeof feedback?.light === 'function') feedback.light();
-                  setIsCategoryPickerOpen(true);
-                }}
-                className="py-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors rounded-xl -mx-2 px-2 select-none group"
-              >
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                  {t('category')}
-                </span>
-                <div className="flex items-center gap-2 shrink-0">
-                  <div 
-                    className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-                    style={{ 
-                      backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
-                      color: currentCatData?.color || 'var(--text-primary)'
-                    }}
-                  >
-                    <CategoryIcon 
-                      icon={currentCatData?.icon || 'tag'} 
-                      color={currentCatData?.color} 
-                      size="2xs" 
-                    />
-                  </div>
-                  <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
-                    {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
+            {/* Category / Splits */}
+            {splits.length === 0 ? (
+              <div className="py-3">
+                <div 
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    setActiveSplitIndex(null);
+                    setIsCategoryPickerOpen(true);
+                  }}
+                  className="flex items-center justify-between gap-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors select-none group"
+                >
+                  <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                    {t('category')}
                   </span>
-                  <ChevronDown size={14} strokeWidth={2} className="text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] transition-colors ml-0.5" />
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div 
+                      className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                      style={{ 
+                        backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
+                        color: currentCatData?.color || 'var(--text-primary)'
+                      }}
+                    >
+                      <CategoryIcon 
+                        icon={currentCatData?.icon || 'tag'} 
+                        color={currentCatData?.color} 
+                        size="2xs" 
+                      />
+                    </div>
+                    <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                      {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
+                    </span>
+                    <ChevronDown size={14} strokeWidth={2} className="text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] transition-colors ml-0.5" />
+                  </div>
+                </div>
+
+                {type === 'expense' && (
+                  <div className="mt-2.5 pt-2.5 border-t border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between">
+                    <span className="text-[12.5px] text-[var(--text-secondary)]">
+                      {currentLang === 'en' ? 'Add another category' : 'Lägg till fler kategorier'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof feedback?.light === 'function') feedback.light();
+                        const total = parseAmount(amount);
+                        setSplits([
+                          { id: Math.random().toString(), amount: total, category: category || categories[0]?.name || '', tags: [] },
+                          { id: Math.random().toString(), amount: 0, category: '', tags: [] }
+                        ]);
+                      }}
+                      className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/15 hover:bg-[var(--accent-color)] hover:text-white text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer"
+                      title={currentLang === 'en' ? 'Add category' : 'Lägg till kategori'}
+                    >
+                      <Plus size={13} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="py-2.5 space-y-3">
+                <div className="flex items-center justify-between text-[13px] text-[var(--text-secondary)]">
+                  <span>{t('category')}</span>
+                </div>
+                {splits.map((split, index) => {
+                  const splitCatData = categories.find(c => c.name === split.category);
+                  return (
+                    <div key={split.id || index} className="flex items-center justify-between gap-4 py-1.5">
+                      <div 
+                        onClick={() => {
+                          if (typeof feedback?.light === 'function') feedback.light();
+                          setActiveSplitIndex(index);
+                          setIsCategoryPickerOpen(true);
+                        }}
+                        className="flex items-center gap-2 cursor-pointer group flex-1 min-w-0"
+                      >
+                        <div 
+                          className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                          style={{ 
+                            backgroundColor: splitCatData?.color ? `${splitCatData.color}20` : 'rgba(0,0,0,0.05)',
+                            color: splitCatData?.color || 'var(--text-primary)'
+                          }}
+                        >
+                          <CategoryIcon 
+                            icon={splitCatData?.icon || 'tag'} 
+                            color={splitCatData?.color} 
+                            size="2xs" 
+                          />
+                        </div>
+                        <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate">
+                          {split.category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
+                        </span>
+                        <ChevronDown size={14} strokeWidth={2} className="text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] transition-colors ml-0.5 shrink-0" />
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={split.amount || ''}
+                            onChange={(e) => {
+                              const val = parseAmount(e.target.value);
+                              const newSplits = [...splits];
+                              newSplits[index].amount = val;
+                              setSplits(newSplits);
+                            }}
+                            className="w-20 bg-transparent border-none text-[14px] font-bold text-[var(--text-primary)] text-right outline-none p-0 tabular-nums"
+                            placeholder="0"
+                          />
+                          <span className="text-[12px] text-[var(--text-secondary)]">{currency}</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newSplits = splits.filter((_, i) => i !== index);
+                            if (newSplits.length <= 1) {
+                              if (newSplits.length === 1) {
+                                setCategory(newSplits[0].category);
+                              }
+                              setSplits([]);
+                            } else {
+                              setSplits(newSplits);
+                            }
+                          }}
+                          className="w-6 h-6 rounded-full text-[var(--text-tertiary)] hover:text-rose-500 hover:bg-rose-500/10 flex items-center justify-center transition-colors cursor-pointer"
+                          title={currentLang === 'en' ? 'Remove' : 'Ta bort'}
+                        >
+                          <Trash2 size={13} strokeWidth={1.9} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <div className="pt-2 border-t border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between">
+                  <span className="text-[12.5px] text-[var(--text-secondary)]">
+                    {currentLang === 'en' ? 'Add another category' : 'Lägg till fler kategorier'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      setSplits([
+                        ...splits,
+                        { id: Math.random().toString(), amount: 0, category: '', tags: [] }
+                      ]);
+                    }}
+                    className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/15 hover:bg-[var(--accent-color)] hover:text-white text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer"
+                    title={currentLang === 'en' ? 'Add category' : 'Lägg till kategori'}
+                  >
+                    <Plus size={13} strokeWidth={2.5} />
+                  </button>
                 </div>
               </div>
             )}
@@ -1333,8 +1437,15 @@ export function TransactionModal({
                           key={cat.name}
                           type="button"
                           onClick={() => {
-                            setCategory(cat.name);
-                            setHasManuallySelectedCategory(true);
+                            if (activeSplitIndex !== null) {
+                              const newSplits = [...splits];
+                              newSplits[activeSplitIndex].category = cat.name;
+                              setSplits(newSplits);
+                              setActiveSplitIndex(null);
+                            } else {
+                              setCategory(cat.name);
+                              setHasManuallySelectedCategory(true);
+                            }
                             setIsCategoryPickerOpen(false);
                           }}
                           className={`flex items-center gap-2.5 p-3 rounded-[14px] text-left transition-all cursor-pointer ${
