@@ -17,7 +17,6 @@ import { TranslationKey } from "../i18n";
 import { TransactionItem } from "./TransactionItem";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
-import { BudgetItemLogo } from "./BudgetItem";
 import { PeriodTimeline } from "./PeriodTimeline";
 import { ICON_MAP, getCategoryIconName, isEmojiString } from "../utils/icons";
 import { formatAmount } from "../utils/format";
@@ -711,46 +710,35 @@ export function TodayView({
               <h4 className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] px-1">
                 {lang === "en" ? "Fixed transactions" : "Fasta transaktioner"}
               </h4>
-              <div className="space-y-2">
-                {displayedFixedTransactions.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      if (item.type === "income" && onViewIncome) {
-                        onViewIncome(item.originalItem);
-                      } else if (item.originalItem?.targetAmount && onViewMonthlySaving) {
-                        onViewMonthlySaving(item.originalItem);
-                      } else if (onViewFixedExpense) {
-                        onViewFixedExpense(item.originalItem);
-                      }
-                    }}
-                    className="flex items-center justify-between px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[64px] rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] transition-all cursor-pointer shadow-none border border-[#E2DDD4] dark:border-[#383838] group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="flex-shrink-0">
-                        <BudgetItemLogo item={item.originalItem} type={item.type as any} config={config} />
-                      </div>
-                      <div className="min-w-0 flex-1 flex flex-col justify-center">
-                        <p className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight">
-                          {item.merchant}
-                        </p>
-                        <p className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5 tracking-tight">
-                          {item.category}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-                      <p className="text-[14px] font-medium whitespace-nowrap tracking-tight text-[#211F1C] dark:text-white">
-                        <span className="opacity-75 mr-0.5">{item.type === "income" ? "+" : "−"}</span>
-                        <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(item.amount, lang)}</span>
-                        <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[2.5px]">{config?.currency || 'kr'}</span>
-                      </p>
-                      <span className="text-[11.5px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap">
-                        {item.type === 'income' ? (lang === 'en' ? 'Fixed income' : 'Fast inkomst') : (lang === 'en' ? 'Fixed expense' : 'Fast utgift')}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+              <div className="space-y-2.5">
+                {displayedFixedTransactions.map((item) => {
+                  const tx: Transaction = {
+                    id: item.id,
+                    merchant: item.merchant,
+                    category: item.category,
+                    amount: item.amount,
+                    type: item.type as any,
+                    date: selectedDate.toISOString(),
+                  };
+
+                  return (
+                    <TransactionItem
+                      key={item.id}
+                      transaction={tx}
+                      isFixed={true}
+                      config={config}
+                      onClick={() => {
+                        if (item.type === "income" && onViewIncome) {
+                          onViewIncome(item.originalItem);
+                        } else if (item.originalItem?.targetAmount && onViewMonthlySaving) {
+                          onViewMonthlySaving(item.originalItem);
+                        } else if (onViewFixedExpense) {
+                          onViewFixedExpense(item.originalItem);
+                        }
+                      }}
+                    />
+                  );
+                })}
               </div>
             </div>
           )}
