@@ -131,14 +131,15 @@ function NavItem({
       title={label}
       className={`w-full flex flex-col items-center justify-center transition-colors active:scale-95 cursor-pointer select-none ${
         isActive
-          ? 'text-[var(--accent-color)] font-semibold'
-          : 'text-[#8C867C] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white font-medium'
+          ? 'text-[var(--accent-color)] dark:text-white font-semibold'
+          : 'text-[#8C867C] dark:text-white/80 hover:text-[#1C1917] dark:hover:text-white font-medium'
       }`}
     >
       <Icon 
         size={20} 
         strokeWidth={isActive ? 2.2 : 1.8} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
+        className="transition-colors dark:text-white"
       />
       <span className="text-[10.5px] leading-none tracking-tight mt-[3px]">
         {label}

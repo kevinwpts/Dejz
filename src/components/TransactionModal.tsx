@@ -18,7 +18,6 @@ import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { formatFullDate } from '../utils/date';
-import { SegmentedControl } from './ui';
 import { ReceiptCameraModal } from './ReceiptCameraModal';
 import { ConfirmModal } from './ConfirmModal';
 import { feedback } from '../utils/feedback';
@@ -199,7 +198,7 @@ export function TransactionModal({
   onClose, 
   onSave, 
   onDelete,
-  onChangeType, 
+  _onChangeType, 
   t, 
   currentLang,
   isPro,
@@ -732,28 +731,14 @@ export function TransactionModal({
                   />
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {!transaction && onChangeType && (
-                    <SegmentedControl
-                      options={[
-                        { value: 'expense', label: t('expense') },
-                        { value: 'income', label: t('income') }
-                      ]}
-                      value={type}
-                      onChange={(val) => onChangeType(val as 'expense' | 'income')}
-                      size="sm"
-                    />
-                  )}
-
-                  <button 
-                    type="button"
-                    onClick={onClose} 
-                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
-                    aria-label={t('close')}
-                  >
-                    <X size={15} strokeWidth={2.2} />
-                  </button>
-                </div>
+                <button 
+                  type="button"
+                  onClick={onClose} 
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                  aria-label={t('close')}
+                >
+                  <X size={15} strokeWidth={2.2} />
+                </button>
               </div>
 
               {/* Amount display / input in the Hero */}

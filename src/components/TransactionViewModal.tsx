@@ -323,9 +323,9 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(transaction);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
           >
-            <Pencil size={14.5} strokeWidth={1.9} />
+            <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
             <span>{t('edit')}</span>
           </button>
 
@@ -335,11 +335,11 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               if (typeof feedback?.light === 'function') feedback.light();
               onDuplicate(transaction);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
             title={t('duplicate')}
             aria-label={t('duplicate')}
           >
-            <Repeat size={16} strokeWidth={1.9} />
+            <Repeat size={16} strokeWidth={1.9} className="dark:text-white" />
           </button>
 
           {onDelete && (
