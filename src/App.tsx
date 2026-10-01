@@ -675,7 +675,7 @@ export default function App() {
             role:
               session.user.email === "hej@dejz.se" || session.user.email === "kevinwpts@gmail.com" ? "admin" : "user",
             language: landingLanguage,
-            dark_mode: true,
+            dark_mode: false,
           })
           .select()
           .single();
@@ -889,7 +889,7 @@ export default function App() {
           notifications: dbSettings.notifications,
           securityLock: dbSettings.securityLock,
           darkMode:
-            (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? dbSettings.darkMode : true,
+            (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? dbSettings.darkMode : false,
           themeMode: dbSettings.themeMode || 'system',
           quickChoices: dbSettings.quickChoices || [],
           savingsPot: dbSettings.savingsPot || 0,
@@ -1852,7 +1852,7 @@ export default function App() {
       initialSpent: 0,
       notifications: { salaryDayReminder: true, weeklySummary: true },
       securityLock: false,
-      darkMode: true,
+      darkMode: false,
       themeMode: 'system',
       quickChoices: [],
       savingsPot: 0,
@@ -4067,7 +4067,7 @@ export default function App() {
   }
 
   if (!session) {
-    const isDark = !showLanding && (config?.darkMode ?? true);
+    const isDark = !showLanding && (config?.darkMode ?? false);
     return (
       <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-clip ${isDark ? 'dark' : ''}`}>
         {showLanding ? (
@@ -4173,6 +4173,8 @@ export default function App() {
 
   return (
     <div className={`min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-clip bg-[var(--bg-color)] transition-colors duration-500`}>
+      {/* Shared Fixed Dark Mode Background Layer */}
+      <div className="dark-app-bg-layer" aria-hidden="true" />
 
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 
@@ -4261,14 +4263,13 @@ export default function App() {
       )}
 
             <PullToRefresh onRefresh={handleRefresh}>
-        <main className={`max-w-2xl mx-auto px-3.5 sm:px-6 relative ${isDemoMode ? 'pt-[calc(5.8rem+env(safe-area-inset-top,0px))]' : 'pt-[calc(3.75rem+env(safe-area-inset-top,0px))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
+        <main className={`max-w-2xl mx-auto px-4 sm:px-6 relative ${isDemoMode ? 'pt-[calc(7.2rem+env(safe-area-inset-top,0px))]' : 'pt-[calc(5rem+env(safe-area-inset-top,0px))]'} ${isAddTransactionOpen ? 'pb-0' : 'pb-32'}`}>
           {stats && (
             <div style={{ display: activeTab === "today" ? "block" : "none" }}>
               <TodayView
                 stats={stats}
                 config={config}
                 isDemoMode={isDemoMode}
-                onOpenDejzi={() => setIsDejziSummaryOpen(true)}
                 userName={
                   (() => {
                     const raw = (
@@ -4439,15 +4440,7 @@ export default function App() {
           )}
 
           {stats && (
-            <div 
-              style={{ display: activeTab === "budget" ? "block" : "none" }}
-              className="min-h-full bg-gradient-to-b from-[#0B0F19] via-[#090C14] to-[#06080D] relative overflow-hidden pb-24"
-            >
-              {/* Subtle lighter blue ambient light spots here and there */}
-              <div className="absolute top-12 left-1/4 w-72 h-72 bg-cyan-500/[0.07] rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute top-1/2 right-6 w-80 h-80 bg-blue-600/[0.08] rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute bottom-1/4 left-8 w-64 h-64 bg-indigo-500/[0.06] rounded-full blur-3xl pointer-events-none" />
-
+            <div style={{ display: activeTab === "budget" ? "block" : "none" }}>
               <BudgetView
                 stats={stats}
                 config={config}

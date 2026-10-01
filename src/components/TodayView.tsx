@@ -57,7 +57,6 @@ interface TodayViewProps {
   onUpdateConfig?: (config: Config) => void;
   onOpenCalculator?: () => void;
   isDemoMode?: boolean;
-  onOpenDejzi?: () => void;
 }
 
 export function TodayView({
@@ -92,7 +91,6 @@ export function TodayView({
   onViewMonthlySaving,
   onUpdateConfig,
   onOpenCalculator,
-  onOpenDejzi,
 }: TodayViewProps) {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -456,12 +454,21 @@ export function TodayView({
 
   return (
     <div className="relative font-sans">
-      {/* SOLID FLAT BACKGROUND LAYER (Seamless app neutral canvas) */}
+      {/* SOLID FLAT BACKGROUND LAYER (Light mode canvas) */}
       <div 
-        className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-colors duration-300"
+        className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-colors duration-300 dark:hidden"
         style={{
           height: '100vh',
           backgroundColor: 'var(--bg-color)',
+        }}
+      />
+
+      {/* SUBTLE THEME TINT GRADIENT ON UPPER HOME (Light mode) */}
+      <div 
+        className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-opacity duration-500 dark:hidden"
+        style={{
+          height: '65vh',
+          background: 'linear-gradient(180deg, var(--user-home-bg-from, rgba(99, 91, 255, 0.08)) 0%, var(--user-home-bg-to, rgba(99, 91, 255, 0.015)) 100%)',
         }}
       />
 
@@ -471,11 +478,11 @@ export function TodayView({
         className="fixed left-0 right-0 z-10 pointer-events-auto"
         style={{
           top: isDemoMode 
-            ? 'calc(5.8rem + env(safe-area-inset-top, 0px))' 
-            : 'calc(3.5rem + env(safe-area-inset-top, 0px))',
+            ? 'calc(7.2rem + env(safe-area-inset-top, 0px))' 
+            : 'calc(4.75rem + env(safe-area-inset-top, 0px))',
         }}
       >
-        <div className="max-w-2xl mx-auto px-3.5 sm:px-4">
+        <div className="max-w-2xl mx-auto px-3">
           <GreetingModule
             userName={userName}
             availableForD={todayData?.availableForD || stats?.availableForD || 0}
@@ -505,25 +512,24 @@ export function TodayView({
             onQuickAddExpense={onQuickAddExpense}
             onOpenCalculator={onOpenCalculator}
             allTransactions={allTransactions}
-            onOpenDejzi={onOpenDejzi}
             categoryBudgets={
-              <div className="pt-0.5 pb-1">
-                {/* Section header: "Dina budgetar" on left, "Hantera" text-action on right */}
-                <div className="flex items-center justify-between px-0.5 mb-1.5">
-                  <span className="text-[17px] sm:text-[18px] font-semibold text-[#242321] dark:text-white tracking-tight">
+              <div className="pt-1 pb-1">
+                {/* Section header: "Dina budgetar" on the left, "Hantera" text-action on the right */}
+                <div className="flex items-center justify-between px-1 mb-2">
+                  <span className={designSystem.typography.sectionTitle}>
                     {lang === 'en' ? 'Your budgets' : 'Dina budgetar'}
                   </span>
                   <button
                     type="button"
                     onClick={() => onNavigate("budget", "category-budgets")}
-                    className="text-[13px] font-medium text-[var(--accent-color)] hover:opacity-80 transition-opacity cursor-pointer active:scale-95 touch-manipulation py-0.5 px-1"
+                    className="text-xs font-medium text-[var(--accent-color)] hover:opacity-80 transition-opacity cursor-pointer active:scale-95 touch-manipulation py-0.5 px-1"
                   >
                     {lang === 'en' ? 'Manage' : 'Hantera'}
                   </button>
                 </div>
 
                 {categoryBudgetData.length > 0 ? (
-                  <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+                  <div className="flex items-center gap-4 overflow-x-auto pb-1.5 scrollbar-hide -mx-1 px-1">
                     {categoryBudgetData.map((cat, index) => {
                       const Icon = ICON_MAP[cat.iconName];
                       const spentPct = cat.budgetInKronor > 0 
@@ -535,12 +541,12 @@ export function TodayView({
                           key={cat.name}
                           initial={{ opacity: 0, scale: 0.97, x: 6 }}
                           animate={{ opacity: 1, scale: 1, x: 0 }}
-                          transition={{ delay: 0.03 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
+                          transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                           onClick={() => handleCategoryClick(cat.name)}
                           className="flex-shrink-0 flex flex-col items-center text-center group cursor-pointer border-none bg-transparent shadow-none p-0 focus:outline-none"
                         >
-                          {/* Circular Progress & Icon (~62px) */}
-                          <div className="relative w-[62px] h-[62px] flex items-center justify-center mb-1">
+                          {/* Circular Progress & Icon (~72px) */}
+                          <div className="relative w-[72px] h-[72px] flex items-center justify-center mb-1.5">
                             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
                               {/* Background track (subtle & neutral) */}
                               <path
@@ -552,7 +558,7 @@ export function TodayView({
                               />
                               {/* Progress arc using category's existing color */}
                               <path
-                                stroke={cat.color || (cat.isOverBudget ? '#e11d48' : '#242321')}
+                                stroke={cat.color || (cat.isOverBudget ? '#e11d48' : '#1C1917')}
                                 strokeWidth="2.5"
                                 strokeDasharray="100"
                                 strokeDashoffset={100 - spentPct}
@@ -565,25 +571,25 @@ export function TodayView({
                               />
                             </svg>
                             {/* Center Icon inside circle */}
-                            <div className="w-[48px] h-[48px] rounded-full bg-[#F0EEEA] dark:bg-[#2D2D2D] flex items-center justify-center text-[#242321] dark:text-white">
+                            <div className="w-[56px] h-[56px] rounded-full bg-[var(--surface-muted)] dark:bg-[#2D2D2D] flex items-center justify-center text-[#1C1917] dark:text-white">
                               {isEmojiString(cat.iconName) ? (
-                                <span className="text-sm leading-none">{cat.iconName}</span>
+                                <span className="text-base leading-none">{cat.iconName}</span>
                               ) : Icon ? (
-                                <Icon size={16} strokeWidth={2} className="text-[#242321] dark:text-white" />
+                                <Icon size={18} strokeWidth={2} className="text-[#1C1917] dark:text-white" />
                               ) : (
-                                <div className="w-2 h-2 rounded-full bg-[#242321] dark:bg-white" />
+                                <div className="w-2 h-2 rounded-full bg-[#1C1917] dark:bg-white" />
                               )}
                             </div>
                           </div>
 
                           {/* Category Name */}
-                          <span className="text-[12px] font-semibold tracking-tight text-[#242321] dark:text-white max-w-[70px] truncate mb-0.5">
+                          <span className="text-xs font-semibold tracking-tight text-[#1C1917] dark:text-white max-w-[80px] truncate mb-0.5">
                             {cat.name}
                           </span>
 
                           {/* Remaining Amount */}
                           <span className={`text-[11px] font-medium tabular-nums tracking-tight whitespace-nowrap ${
-                            cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[#716E68] dark:text-[#A8A8A8]'
+                            cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[#6E6961] dark:text-[#9CA6BC]'
                           }`}>
                             {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} ${config?.currency || 'kr'} ${lang === 'en' ? 'left' : 'kvar'}` : `${formatAmount(cat.spent, lang)} ${config?.currency || 'kr'}`}
                           </span>
@@ -628,7 +634,7 @@ export function TodayView({
       {/* 2. EXPANDING BOTTOM SHEET (Scroll-driven surface covering hero as user scrolls down) */}
       <div
         ref={sheetRef}
-        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[var(--bg-color)] dark:bg-[#232323] rounded-t-[22px] sm:rounded-t-[24px] border-t border-[var(--border-color)] dark:border-white/[0.1] shadow-none min-h-[calc(100vh-8rem)] pt-1 pb-40 space-y-3 mt-1"
+        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[var(--bg-color)] dark:bg-[#050709]/75 dark:backdrop-blur-xl rounded-t-[22px] sm:rounded-t-[24px] border-t border-[var(--border-color)] dark:border-white/[0.1] shadow-none min-h-[calc(100vh-8rem)] pt-1 pb-40 space-y-3 mt-1"
       >
         {/* Visual Grab Handle / Sheet Indicator */}
         <div
@@ -642,7 +648,7 @@ export function TodayView({
 
         {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
         {calendarDays && calendarDays.length > 0 && (
-          <div className={`sticky ${timelineStickyTop} z-20 bg-[var(--bg-color)]/95 dark:bg-[#232323]/95 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-0 pb-2.5 transition-all`}>
+          <div className={`sticky ${timelineStickyTop} z-20 bg-[var(--bg-color)]/95 dark:bg-[#050709]/80 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-0 pb-2.5 transition-all`}>
             <PeriodTimeline
               calendarDays={calendarDays}
               selectedDate={normalizedSelectedDate}

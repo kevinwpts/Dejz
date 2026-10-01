@@ -182,34 +182,34 @@ h6 {
   --orange-900: #713800;
 
   /* Dejz Official Brand Logo Color */
-  --logo-color: #242321;
+  --logo-color: #211F1C;
 
   /* Premium Warm Sand Light Theme */
-  --bg-top-color: #F7F6F3;
-  --bg-color: #F7F6F3;
-  --bg-secondary: #F7F6F3;
-  --bg-gradient: linear-gradient(180deg, #F7F6F3 0%, #F7F6F3 100%);
+  --bg-top-color: #F2EFE8;
+  --bg-color: #F2EFE8;
+  --bg-secondary: #F2EFE8;
+  --bg-gradient: linear-gradient(180deg, #F2EFE8 0%, #F2EFE8 100%);
 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: #F0EEEA;
-  --surface-tint: rgba(36, 35, 33, 0.02);
+  --surface-muted: #EAE6DE;
+  --surface-tint: rgba(33, 31, 28, 0.02);
 
-  --text-primary: #242321;
-  --text-secondary: #716E68;
-  --text-tertiary: #716E68;
-  --text-inactive: #A09C95;
+  --text-primary: #211F1C;
+  --text-secondary: #6D6962;
+  --text-tertiary: #777168;
+  --text-inactive: #A8A39D;
 
-  --border-color: #E5E2DC;
-  --border-strong: #D8D4CC;
+  --border-color: #E2DDD4;
+  --border-strong: #D5CFC4;
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: #F0EEEA;
+  --chip-bg: #EAE6DE;
   --transaction-bg: #FFFFFF;
-  --card-nested-bg: #F0EEEA;
+  --card-nested-bg: #EAE6DE;
   --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
@@ -230,15 +230,15 @@ h6 {
   --accent-secondary-color: #EEECFF;
 
   /* Primary button states (Light mode) */
-  --btn-primary-bg: #242321;
+  --btn-primary-bg: #1C1917;
   --btn-primary-text: #FFFFFF;
-  --btn-primary-hover: #33312E;
-  --btn-primary-pressed: #484542;
+  --btn-primary-hover: #2E2A27;
+  --btn-primary-pressed: #44403C;
 
   --modal-bg: #FFFFFF;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #EAE6DE;
+  --bg-hover: #DFD9CF;
 
   --card-shadow: none;
   --card-inner-stroke: none;
@@ -246,7 +246,7 @@ h6 {
   --success-color: #05B862;
   --danger-color: #EF4444;
   --warning-color: #F59E0B;
-  --info-color: #242321;
+  --info-color: #1C1917;
 
   --nav-active-color: #635BFF;
   --nav-inactive-color: #8C867C;
@@ -260,12 +260,12 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #F0EEEA;
-  --date-active-color: #242321;
+  --date-active-bg: #EAE6DE;
+  --date-active-color: #1C1917;
   --date-active-shadow: none;
   --date-inactive-bg: #FFFFFF;
-  --date-inactive-border: #E5E2DC;
-  --date-inactive-color: #716E68;
+  --date-inactive-border: #E2DDD4;
+  --date-inactive-color: #6E6961;
 
   --ambient-glow: none;
   --ambient-glow-strong: none;
@@ -274,10 +274,10 @@ h6 {
 
 .dark {
   /* Premium Dark Theme (Dejz Design System) */
-  --bg-top-color: #181818;
-  --bg-color: #181818;
-  --bg-secondary: #181818;
-  --bg-gradient: linear-gradient(180deg, #181818 0%, #181818 100%);
+  --bg-top-color: #050709;
+  --bg-color: #050709;
+  --bg-secondary: #050709;
+  --bg-gradient: #050709;
 
   --surface-color: #242424;
   --surface-gradient: #242424;
@@ -385,6 +385,24 @@ h6 {
   -webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid var(--border-color) !important;
   box-shadow: none !important;
+}
+
+/* Shared Fixed Dark Mode Background Layer */
+.dark-app-bg-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  display: none;
+  background-color: #050709;
+  background-image:
+    radial-gradient(ellipse 75% 38% at 76% 68%, rgba(34, 51, 70, 0.62) 0%, rgba(22, 34, 46, 0.24) 48%, transparent 78%),
+    radial-gradient(ellipse 60% 50% at 8% 34%, rgba(20, 31, 42, 0.40) 0%, transparent 80%),
+    radial-gradient(ellipse 65% 28% at 38% 12%, rgba(18, 25, 32, 0.28) 0%, transparent 82%);
+}
+
+.dark .dark-app-bg-layer {
+  display: block;
 }
 
 @layer base {
