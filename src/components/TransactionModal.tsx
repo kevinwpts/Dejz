@@ -23,6 +23,23 @@ import { Button, SegmentedControl } from './ui';
 import { ReceiptCameraModal } from './ReceiptCameraModal';
 import { ConfirmModal } from './ConfirmModal';
 import { feedback } from '../utils/feedback';
+import { getTransactionDominantColor } from '../utils/brandColor';
+
+function hexToRgba(hex: string, alpha: number): string {
+  if (!hex) return `rgba(124, 58, 237, ${alpha})`;
+  if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
+  let clean = hex.replace('#', '');
+  if (clean.length === 3) {
+    clean = clean.split('').map(c => c + c).join('');
+  }
+  if (clean.length === 6) {
+    const r = parseInt(clean.substring(0, 2), 16) || 0;
+    const g = parseInt(clean.substring(2, 4), 16) || 0;
+    const b = parseInt(clean.substring(4, 6), 16) || 0;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return `rgba(124, 58, 237, ${alpha})`;
+}
 
 interface TransactionModalProps {
   transaction: Transaction | null;
@@ -617,6 +634,8 @@ export function TransactionModal({
     splits: splits
   }), [transaction, merchant, note, category, amount, type, logo, icon, selectedDate, splits]);
 
+  const brandColor = useMemo(() => getTransactionDominantColor(previewTransaction as Transaction, config), [previewTransaction, config]);
+
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
   if (typeof document === 'undefined') return null;
@@ -641,14 +660,25 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] sm:border border-black/10 dark:border-white/10 relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Smooth, Seamless Ambient Brand Color Glow */}
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+            `
+          }}
+        />
+
         {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
         {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/5 dark:border-white/10">
+        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/[0.06] dark:border-white/[0.06] relative z-10">
           <div className="flex justify-start">
             <button
               type="button"
@@ -702,16 +732,16 @@ export function TransactionModal({
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+              className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
               aria-label={t('close')}
             >
-              <X size={17} strokeWidth={2.2} />
+              <X size={15} strokeWidth={2.2} />
             </button>
           </div>
         </div>
 
         {/* Main Content Area: Clean, Compact, Consumer App Presentation */}
-        <div className="shrink overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
+        <div className="shrink overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
               {/* Hidden file input for camera/photo library */}
               <input 
                 ref={receiptInputRef}
@@ -725,7 +755,7 @@ export function TransactionModal({
               <div className="flex flex-col gap-2">
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="bg-black/5 dark:bg-white/5 rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
+                  className="bg-black/[0.03] dark:bg-white/[0.04] rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/5 dark:border-white/[0.06] focus-within:border-[var(--accent-color)] dark:focus-within:border-white/30 group cursor-text"
                 >
                   <div className="shrink-0 flex items-center min-w-[64px]">
                     {type === 'expense' && (
@@ -739,7 +769,7 @@ export function TransactionModal({
                             setSplits([]);
                           }
                         }}
-                        className={`text-[13px] font-medium transition-all px-3 py-1.5 rounded-full border cursor-pointer active:scale-95 ${
+                        className={`text-[12px] font-medium transition-all px-3 py-1.5 rounded-full border cursor-pointer active:scale-95 ${
                           splits.length > 0 
                             ? "bg-rose-500 text-white border-transparent" 
                             : "bg-white dark:bg-white/10 text-[var(--text-primary)] border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/20"
@@ -763,9 +793,9 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[var(--text-tertiary)] cursor-text select-text"
+                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 cursor-text select-text"
                     />
-                    <span className="text-[15px] font-normal text-[var(--text-secondary)] select-none font-sans shrink-0">
+                    <span className="text-[14px] font-normal text-[#777168] dark:text-[#A8A8A8] select-none font-sans shrink-0">
                       {currency}
                     </span>
                   </div>
@@ -774,8 +804,8 @@ export function TransactionModal({
               </div>
 
               {/* Merchant Input */}
-              <div className="space-y-2">
-                <label className="text-[14px] font-normal text-[var(--text-secondary)] block">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
                   {type === 'income' ? t('incomeSource') : t('merchant')}
                 </label>
                 <div className="relative group">
@@ -785,22 +815,22 @@ export function TransactionModal({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="w-full h-[48px] bg-black/5 dark:bg-white/5 text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40"
+                    className="w-full h-[48px] bg-black/[0.03] dark:bg-white/[0.04] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[#777168]/60 dark:placeholder-[#A8A8A8]/60 rounded-[16px] px-4 border border-black/5 dark:border-white/[0.06] focus:border-[var(--accent-color)] dark:focus:border-white/30"
                   />
                   {merchant && (
                     <button 
                       onClick={() => setMerchant('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1 cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
                     >
-                      <X size={16} strokeWidth={2} />
+                      <X size={15} strokeWidth={2} />
                     </button>
                   )}
                 </div>
               </div>
 
               {/* Note Input */}
-              <div className="space-y-2">
-                <label className="text-[14px] font-normal text-[var(--text-secondary)] block">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
                   {t('ownNote')}
                 </label>
                 <div className="relative group">
@@ -810,16 +840,16 @@ export function TransactionModal({
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                    className={`w-full h-[48px] bg-black/5 dark:bg-white/5 text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border ${
-                      validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40'
+                    className={`w-full h-[48px] bg-black/[0.03] dark:bg-white/[0.04] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[#777168]/60 dark:placeholder-[#A8A8A8]/60 rounded-[16px] px-4 border ${
+                      validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-black/5 dark:border-white/[0.06] focus:border-[var(--accent-color)] dark:focus:border-white/30'
                     }`}
                   />
                   {note && (
                     <button 
                       onClick={() => setNote('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[#211F1C] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
                     >
-                      <X size={16} strokeWidth={2} />
+                      <X size={15} strokeWidth={2} />
                     </button>
                   )}
                 </div>
@@ -988,11 +1018,11 @@ export function TransactionModal({
                   {/* Category Selection */}
                   <div className={`space-y-2.5 pt-3 ${splits.length > 0 ? 'hidden' : ''}`}>
                     <div className="flex items-center justify-between px-1">
-                      <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">{t('category')}</label>
+                      <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8]">{t('category')}</label>
                       <button 
                         type="button"
                         onClick={() => setIsCategorySelectorOpen(!isCategorySelectorOpen)}
-                        className="text-xs font-semibold text-[#1C1917] dark:text-white hover:opacity-80 transition-opacity flex items-center gap-1 cursor-pointer"
+                        className="text-[12px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
                       >
                         <span>{isCategorySelectorOpen ? (currentLang === 'en' ? 'Show fewer' : 'Visa färre') : (currentLang === 'en' ? 'Show all' : 'Visa alla')}</span>
                         <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform duration-200 ${isCategorySelectorOpen ? 'rotate-180' : ''}`} />
@@ -1020,9 +1050,9 @@ export function TransactionModal({
                         <button
                           type="button"
                           onClick={() => setIsAddingCategory(true)}
-                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 transition-all group border border-black/10 dark:border-white/10 cursor-pointer"
+                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.08] transition-all group border border-black/5 dark:border-white/[0.06] cursor-pointer"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-center transition-all group-hover:scale-105">
+                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 flex items-center justify-center transition-all group-hover:scale-105">
                             <Plus size={18} strokeWidth={2.2} />
                           </div>
                           <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
@@ -1033,9 +1063,9 @@ export function TransactionModal({
                         <button
                           type="button"
                           onClick={() => setIsCategorySelectorOpen(true)}
-                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-black/10 dark:hover:bg-white/10 hover:text-[var(--text-primary)] transition-all group border border-black/10 dark:border-white/10 cursor-pointer"
+                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white transition-all group border border-black/5 dark:border-white/[0.06] cursor-pointer"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-center group-hover:bg-[var(--accent-color)] group-hover:text-white transition-all">
+                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 flex items-center justify-center group-hover:bg-[var(--accent-color)] group-hover:text-white transition-all">
                             <Plus size={18} strokeWidth={2.2} />
                           </div>
                           <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
@@ -1047,12 +1077,12 @@ export function TransactionModal({
                   </div>
             
                   {/* Date Selection */}
-                  <div className="space-y-2.5 pt-3 border-t border-black/5 dark:border-white/10">
+                  <div className="space-y-2.5 pt-3 border-t border-black/5 dark:border-white/[0.06]">
                     <div className="flex items-center justify-between px-1">
-                      <label className="text-xs font-semibold text-[var(--text-secondary)]">{t('date')}</label>
+                      <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8]">{t('date')}</label>
                       {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
                        new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
-                        <span className="text-xs font-semibold text-[var(--text-primary)] tabular-nums">
+                        <span className="text-[12px] font-medium text-[var(--text-primary)] tabular-nums">
                           {formatFullDate(selectedDate, currentLang)}
                         </span>
                       )}
@@ -1064,10 +1094,10 @@ export function TransactionModal({
                           setSelectedDate(new Date());
                           setShowFullCalendar(false);
                         }}
-                        className={`flex-1 py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
                             ? 'bg-[var(--accent-color)] text-white shadow-xs'
-                            : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10'
+                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white border border-black/5 dark:border-white/[0.06]'
                         }`}
                       >
                         {t('todayLabel')}
@@ -1080,10 +1110,10 @@ export function TransactionModal({
                           setSelectedDate(yesterday);
                           setShowFullCalendar(false);
                         }}
-                        className={`flex-1 py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
                             ? 'bg-[var(--accent-color)] text-white shadow-xs'
-                            : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10'
+                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white border border-black/5 dark:border-white/[0.06]'
                         }`}
                       >
                         {t('yesterdayLabel')}
@@ -1091,14 +1121,14 @@ export function TransactionModal({
                       <button
                         type="button"
                         onClick={() => setShowFullCalendar(!showFullCalendar)}
-                        className={`w-12 py-3 rounded-xl transition-all flex items-center justify-center cursor-pointer ${
+                        className={`w-12 py-2.5 sm:py-3 rounded-xl transition-all flex items-center justify-center cursor-pointer ${
                           showFullCalendar 
                             ? 'bg-[var(--accent-color)] text-white shadow-xs' 
-                            : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10'
+                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white border border-black/5 dark:border-white/[0.06]'
                         }`}
                         title={t('chooseDate')}
                       >
-                        <Calendar size={18} strokeWidth={2} />
+                        <Calendar size={17} strokeWidth={2} />
                       </button>
                     </div>
 
@@ -1110,7 +1140,7 @@ export function TransactionModal({
                           exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="bg-black/5 dark:bg-white/5 rounded-[16px] p-4 border border-black/10 dark:border-white/10">
+                          <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-[16px] p-4 border border-black/5 dark:border-white/[0.06]">
                             <CalendarWidget 
                               calendarDays={calendarDays}
                               normalizedSelectedDate={selectedDate}
@@ -1126,9 +1156,9 @@ export function TransactionModal({
 
                   {/* Receipt Section: Toned-down quick action */}
                   {type !== 'income' && (
-                    <div className="pt-2 border-t border-black/5 dark:border-white/10">
+                    <div className="pt-2 border-t border-black/5 dark:border-white/[0.06]">
                       {isScanningReceipt ? (
-                        <div className="bg-black/5 dark:bg-white/5 rounded-xl p-3 sm:p-3.5 border border-[var(--accent-color)]/25 flex items-center justify-between transition-all">
+                        <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-[var(--accent-color)]/25 flex items-center justify-between transition-all">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-8 h-8 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
                               <Loader2 size={16} className="animate-spin text-[var(--accent-color)]" />
@@ -1147,16 +1177,16 @@ export function TransactionModal({
                           </span>
                         </div>
                       ) : receiptUrl ? (
-                        <div className="bg-black/5 dark:bg-white/5 rounded-xl p-3 sm:p-3.5 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-between transition-all">
+                        <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-between transition-all">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shrink-0 bg-black/5">
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-black/5 dark:border-white/[0.06] shrink-0 bg-black/5">
                               <img src={receiptUrl} alt="Receipt" className="w-full h-full object-cover" />
                             </div>
                             <div className="min-w-0">
                               <h4 className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
                                 {currentLang === 'en' ? 'Receipt attached' : 'Kvitto bifogat'}
                               </h4>
-                              <p className="text-[11px] text-[var(--text-secondary)] truncate">
+                              <p className="text-[11px] text-[#777168] dark:text-[#A8A8A8] truncate">
                                 {scanFeedback?.message || (currentLang === 'en' ? 'Check details before saving' : 'Kontrollera uppgifterna innan du sparar')}
                               </p>
                             </div>
@@ -1175,7 +1205,7 @@ export function TransactionModal({
                       ) : (
                         <div 
                           onClick={() => !isScanningReceipt && !isUploadingReceipt && setIsCameraModalOpen(true)}
-                          className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-xl p-3 sm:p-3.5 border border-black/10 dark:border-white/10 flex items-center justify-between transition-all cursor-pointer group active:scale-[0.99]"
+                          className="bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.08] rounded-xl p-3 sm:p-3.5 border border-black/5 dark:border-white/[0.06] flex items-center justify-between transition-all cursor-pointer group active:scale-[0.99]"
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 group-hover:scale-105 transition-transform">
@@ -1191,7 +1221,7 @@ export function TransactionModal({
                                   {currentLang === 'en' ? 'Scan receipt' : 'Skanna kvitto'}
                                 </span>
                               </div>
-                              <p className="text-[11px] text-[var(--text-secondary)] truncate">
+                              <p className="text-[11px] text-[#777168] dark:text-[#A8A8A8] truncate">
                                 {currentLang === 'en' ? 'Take a photo with the camera' : 'Fotografera med appens kamera'}
                               </p>
                             </div>
@@ -1214,7 +1244,7 @@ export function TransactionModal({
           </div>
 
           {/* Register / Save Button & Delete Button */}
-          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/5 dark:border-white/10 bg-transparent space-y-2.5">
+          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/5 dark:border-white/[0.06] bg-transparent space-y-2.5 relative z-10">
             <Button 
               disabled={!isSplitsValid}
               onClick={() => {
