@@ -12,7 +12,6 @@ import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import { CalendarWidget } from './CalendarWidget';
 import { IconSelector } from './IconSelector';
 import { CategoryModal } from './CategoryModal';
-import { CategoryTile } from './CategoryTile';
 import { suggestIcon, suggestCategory } from '../utils/icons';
 import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
@@ -197,20 +196,17 @@ export function TransactionModal({
   const [splits, setSplits] = useState<TransactionSplit[]>(transaction?.splits || []);
   const [category, setCategory] = useState(transaction?.category || prefill?.category || (categories && categories.length > 0 ? categories[0].name : ''));
   const [hasManuallySelectedCategory, setHasManuallySelectedCategory] = useState(!!prefill?.category);
-  const [isCategorySelectorOpen, setIsCategorySelectorOpen] = useState(false);
+  const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
 
-  const displayedCategories = useMemo(() => {
-    if (isCategorySelectorOpen) return categories;
-    const top = categories.slice(0, 5);
-    if (category && !top.some(c => c.name.toLowerCase() === category.toLowerCase())) {
-      const selected = categories.find(c => c.name.toLowerCase() === category.toLowerCase());
-      if (selected) {
-        return [...categories.slice(0, 4), selected];
-      }
-    }
-    return top;
-  }, [categories, isCategorySelectorOpen, category]);
+  const currentCatData = useMemo(() => {
+    if (!category) return undefined;
+    const catName = typeof category === 'object' ? (category as any)?.name : category;
+    const norm = (catName || '').trim().toLowerCase();
+    return categories.find(c => c.name.trim().toLowerCase() === norm) || 
+      (config?.categories || []).find((c: any) => c.name?.trim().toLowerCase() === norm) ||
+      (config?.incomeCategories || []).find((c: any) => c.name?.trim().toLowerCase() === norm);
+  }, [categories, category, config]);
   const [note, setNote] = useState(transaction?.note || prefill?.note || '');
   const [merchant, setMerchant] = useState(transaction?.merchant || prefill?.name || '');
   const [icon, setIcon] = useState(transaction?.icon || 'none');
@@ -641,77 +637,83 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] sm:border border-black/10 dark:border-white/10 relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[#F6F5F2] dark:bg-[#141118] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
         <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
-        {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/[0.06] dark:border-white/[0.06] relative z-10">
-          <div className="flex justify-start">
+        {/* Header Section with Large (size="xl") Logo */}
+        <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between gap-3 border-b border-black/[0.06] dark:border-white/[0.06] relative z-10">
+          <div className="flex items-center gap-3.5 min-w-0">
             <button
               type="button"
               onClick={() => setShowIconSelector(true)}
-              className={`w-10 h-10 rounded-full flex items-center justify-center text-2xl overflow-hidden transition-all duration-300 active:scale-95 ${(merchant.trim() || note.trim()) ? 'shadow-xs' : ''}`}
+              className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30"
               title={t('chooseIcon')}
+              aria-label={t('chooseIcon')}
             >
               <TransactionLogo 
-                size="sm"
+                size="xl"
                 config={config}
                 transaction={previewTransaction} 
               />
             </button>
+
+            <div className="min-w-0">
+              <AnimatePresence mode="wait">
+                {!transaction && onChangeType ? (
+                  <motion.div 
+                    key="type-selector"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <SegmentedControl
+                      options={[
+                        { value: 'expense', label: t('expense') },
+                        { value: 'income', label: t('income') }
+                      ]}
+                      value={type}
+                      onChange={(val) => onChangeType(val as 'expense' | 'income')}
+                      size="sm"
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.h2 
+                    key="title-form"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="text-[17px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate"
+                  >
+                    {transaction 
+                      ? (currentLang === 'en' ? 'Edit transaction' : (type === 'income' ? 'Redigera inkomst' : 'Redigera transaktion'))
+                      : (type === 'income' ? t('newIncome') : t('newExpense'))
+                    }
+                  </motion.h2>
+                )}
+              </AnimatePresence>
+              <p className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] mt-0.5">
+                {currentLang === 'en' ? 'Tap logo to change' : 'Tryck på loggan för att byta'}
+              </p>
+            </div>
           </div>
-          <div className="flex justify-center overflow-hidden">
-            <AnimatePresence mode="wait">
-              {!transaction && onChangeType ? (
-                <motion.div 
-                  key="type-selector"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                >
-                  <SegmentedControl
-                    options={[
-                      { value: 'expense', label: t('expense') },
-                      { value: 'income', label: t('income') }
-                    ]}
-                    value={type}
-                    onChange={(val) => onChangeType(val as 'expense' | 'income')}
-                    size="sm"
-                  />
-                </motion.div>
-              ) : (
-                <motion.h2 
-                  key="title-form"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="text-[17px] sm:text-[18px] font-semibold tracking-tight text-[#211F1C] dark:text-white text-center truncate px-2"
-                >
-                  {transaction 
-                    ? (currentLang === 'en' ? 'Edit transaction' : (type === 'income' ? 'Redigera inkomst' : 'Redigera transaktion'))
-                    : (type === 'income' ? t('newIncome') : t('newExpense'))
-                  }
-                </motion.h2>
-              )}
-            </AnimatePresence>
-          </div>
-          <div className="flex justify-end">
+
+          <div className="flex justify-end shrink-0">
             <button 
               type="button"
               onClick={onClose} 
-              className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
               aria-label={t('close')}
             >
-              <X size={15} strokeWidth={2.2} />
+              <X size={16} strokeWidth={2.2} />
             </button>
           </div>
         </div>
 
-        {/* Main Content Area: Clean, Compact, Consumer App Presentation */}
-        <div className="shrink overflow-y-auto px-5 sm:px-6 py-4 sm:py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+        {/* Main Content Area: Clean, Compact, Card-styled Presentation */}
+        <div className="shrink overflow-y-auto px-5 sm:px-6 py-4 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
               {/* Hidden file input for camera/photo library */}
               <input 
                 ref={receiptInputRef}
@@ -722,10 +724,10 @@ export function TransactionModal({
               />
 
               {/* Amount Input */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="bg-black/[0.03] dark:bg-white/[0.04] rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/5 dark:border-white/[0.06] focus-within:border-[var(--accent-color)] dark:focus-within:border-white/30 group cursor-text"
+                  className="bg-white dark:bg-[#1E1B22] rounded-[16px] h-[84px] px-4 sm:px-5 flex items-center justify-between transition-all border-none shadow-none group cursor-text"
                 >
                   <div className="shrink-0 flex items-center min-w-[64px]">
                     {type === 'expense' && (
@@ -742,7 +744,7 @@ export function TransactionModal({
                         className={`text-[12px] font-medium transition-all px-3 py-1.5 rounded-full border cursor-pointer active:scale-95 ${
                           splits.length > 0 
                             ? "bg-rose-500 text-white border-transparent" 
-                            : "bg-white dark:bg-white/10 text-[var(--text-primary)] border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/20"
+                            : "bg-black/5 dark:bg-white/10 text-[var(--text-primary)] border-transparent hover:bg-black/10 dark:hover:bg-white/20"
                         }`}
                       >
                         {splits.length > 0 ? (currentLang === 'en' ? 'Avbryt' : 'Avbryt') : (currentLang === 'en' ? 'Splitta' : 'Splitta')}
@@ -763,7 +765,7 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 cursor-text select-text"
+                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[30px] sm:text-[32px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 cursor-text select-text"
                     />
                     <span className="text-[14px] font-normal text-[#777168] dark:text-[#A8A8A8] select-none font-sans shrink-0">
                       {currency}
@@ -785,7 +787,7 @@ export function TransactionModal({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="w-full h-[48px] bg-black/[0.03] dark:bg-white/[0.04] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[#777168]/60 dark:placeholder-[#A8A8A8]/60 rounded-[16px] px-4 border border-black/5 dark:border-white/[0.06] focus:border-[var(--accent-color)] dark:focus:border-white/30"
+                    className="w-full h-[50px] bg-white dark:bg-[#1E1B22] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[#777168]/60 dark:placeholder-[#A8A8A8]/60 rounded-[16px] px-4 border-none shadow-none"
                   />
                   {merchant && (
                     <button 
@@ -810,8 +812,8 @@ export function TransactionModal({
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                    className={`w-full h-[48px] bg-black/[0.03] dark:bg-white/[0.04] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[#777168]/60 dark:placeholder-[#A8A8A8]/60 rounded-[16px] px-4 border ${
-                      validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-black/5 dark:border-white/[0.06] focus:border-[var(--accent-color)] dark:focus:border-white/30'
+                    className={`w-full h-[50px] bg-white dark:bg-[#1E1B22] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[#777168]/60 dark:placeholder-[#A8A8A8]/60 rounded-[16px] px-4 ${
+                      validationError === 'note' ? 'ring-2 ring-rose-500 bg-rose-500/5' : 'border-none shadow-none'
                     }`}
                   />
                   {note && (
@@ -832,7 +834,7 @@ export function TransactionModal({
                     <motion.div 
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
-                      className="space-y-6 bg-black/5 dark:bg-white/5 p-4 rounded-[16px] border border-black/10 dark:border-white/10 overflow-hidden"
+                      className="space-y-6 bg-white dark:bg-[#1E1B22] p-4 rounded-[16px] border-none shadow-none overflow-hidden"
                     >
                       {/* Splits List with Sliders */}
                       <div className="space-y-6">
@@ -841,7 +843,7 @@ export function TransactionModal({
                           const totalVal = parseAmount(amount);
                           
                           return (
-                            <div key={split.id} className="space-y-3 p-3 bg-white/70 dark:bg-white/[0.06] backdrop-blur-md rounded-[14px] border border-black/10 dark:border-white/10 group">
+                            <div key={split.id} className="space-y-3 p-3 bg-black/[0.03] dark:bg-white/[0.04] rounded-[14px] border-none shadow-none group">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                   <div 
@@ -883,7 +885,7 @@ export function TransactionModal({
                                       }
                                       setSplits(newSplits);
                                     }}
-                                    className="w-8 h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-danger hover:bg-danger/10 rounded-full transition-all ml-1"
+                                    className="w-8 h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-danger hover:bg-danger/10 rounded-full transition-all ml-1 cursor-pointer"
                                   >
                                     <Trash2 size={16} />
                                   </button>
@@ -962,10 +964,10 @@ export function TransactionModal({
                                       setSplits([...splits, { id: Math.random().toString(), amount: remainder, category: cat.name, tags: [] }]);
                                     }
                                  }}
-                                 className={`flex-shrink-0 flex flex-col items-center gap-1.5 p-2 rounded-[14px] border transition-all ${
+                                 className={`flex-shrink-0 flex flex-col items-center gap-1.5 p-2 rounded-[14px] transition-all cursor-pointer ${
                                    isAlreadyInSplit 
                                      ? 'bg-black/5 dark:bg-white/5 border-transparent opacity-40' 
-                                     : 'bg-white/70 dark:bg-white/[0.08] border-black/10 dark:border-white/10 hover:border-accent/40 active:scale-95 shadow-xs'
+                                     : 'bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.08] active:scale-95 shadow-none border-none'
                                  }`}
                                >
                                  <div 
@@ -985,70 +987,47 @@ export function TransactionModal({
                 </div>
               )}
 
-                  {/* Category Selection */}
-                  <div className={`space-y-2.5 pt-3 ${splits.length > 0 ? 'hidden' : ''}`}>
-                    <div className="flex items-center justify-between px-1">
-                      <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8]">{t('category')}</label>
-                      <button 
-                        type="button"
-                        onClick={() => setIsCategorySelectorOpen(!isCategorySelectorOpen)}
-                        className="text-[12px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] dark:hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>{isCategorySelectorOpen ? (currentLang === 'en' ? 'Show fewer' : 'Visa färre') : (currentLang === 'en' ? 'Show all' : 'Visa alla')}</span>
-                        <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform duration-200 ${isCategorySelectorOpen ? 'rotate-180' : ''}`} />
-                      </button>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-                      {displayedCategories.map(cat => {
-                        const isActive = category === cat.name;
-                        return (
-                          <CategoryTile
-                            key={cat.name}
-                            name={cat.name}
-                            icon={cat.icon}
-                            color={cat.color}
-                            isActive={isActive}
-                            onClick={() => {
-                              setCategory(cat.name);
-                              setHasManuallySelectedCategory(true);
-                            }}
+                  {/* Category Selection Row */}
+                  <div className={`space-y-1.5 ${splits.length > 0 ? 'hidden' : ''}`}>
+                    <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">{t('category')}</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof feedback?.light === 'function') feedback.light();
+                        setIsCategoryPickerOpen(true);
+                      }}
+                      className="w-full h-[50px] bg-white dark:bg-[#1E1B22] rounded-[16px] px-4 border-none shadow-none flex items-center justify-between transition-all hover:bg-black/[0.02] dark:hover:bg-[#27242E] cursor-pointer text-left group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div 
+                          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                          style={{ 
+                            backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
+                            color: currentCatData?.color || 'var(--text-primary)'
+                          }}
+                        >
+                          <CategoryIcon 
+                            icon={currentCatData?.icon || 'tag'} 
+                            color={currentCatData?.color} 
+                            size="sm" 
                           />
-                        );
-                      })}
-                      {isCategorySelectorOpen ? (
-                        <button
-                          type="button"
-                          onClick={() => setIsAddingCategory(true)}
-                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.08] transition-all group border border-black/5 dark:border-white/[0.06] cursor-pointer"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 flex items-center justify-center transition-all group-hover:scale-105">
-                            <Plus size={18} strokeWidth={2.2} />
-                          </div>
-                          <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
-                            {t('newCategory')}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="text-[14px] font-medium text-[var(--text-primary)] block truncate">
+                            {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                           </span>
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setIsCategorySelectorOpen(true)}
-                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white transition-all group border border-black/5 dark:border-white/[0.06] cursor-pointer"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 border border-black/5 dark:border-white/10 flex items-center justify-center group-hover:bg-[var(--accent-color)] group-hover:text-white transition-all">
-                            <Plus size={18} strokeWidth={2.2} />
-                          </div>
-                          <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
-                            {currentLang === 'en' ? 'More' : 'Fler'}
-                          </span>
-                        </button>
-                      )}
-                    </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] shrink-0">
+                        <span className="text-[12px] font-normal">{currentLang === 'en' ? 'Change' : 'Ändra'}</span>
+                        <ChevronDown size={15} strokeWidth={2} />
+                      </div>
+                    </button>
                   </div>
             
                   {/* Date Selection */}
-                  <div className="space-y-2.5 pt-3 border-t border-black/5 dark:border-white/[0.06]">
-                    <div className="flex items-center justify-between px-1">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between px-0.5">
                       <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8]">{t('date')}</label>
                       {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
                        new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
@@ -1057,17 +1036,17 @@ export function TransactionModal({
                         </span>
                       )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-2 flex gap-1.5 border-none shadow-none">
                       <button
                         type="button"
                         onClick={() => {
                           setSelectedDate(new Date());
                           setShowFullCalendar(false);
                         }}
-                        className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
                             ? 'bg-[var(--accent-color)] text-white shadow-xs'
-                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white border border-black/5 dark:border-white/[0.06]'
+                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
                         }`}
                       >
                         {t('todayLabel')}
@@ -1080,10 +1059,10 @@ export function TransactionModal({
                           setSelectedDate(yesterday);
                           setShowFullCalendar(false);
                         }}
-                        className={`flex-1 py-2.5 sm:py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
                             ? 'bg-[var(--accent-color)] text-white shadow-xs'
-                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white border border-black/5 dark:border-white/[0.06]'
+                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
                         }`}
                       >
                         {t('yesterdayLabel')}
@@ -1091,10 +1070,10 @@ export function TransactionModal({
                       <button
                         type="button"
                         onClick={() => setShowFullCalendar(!showFullCalendar)}
-                        className={`w-12 py-2.5 sm:py-3 rounded-xl transition-all flex items-center justify-center cursor-pointer ${
+                        className={`w-12 py-2.5 rounded-xl transition-all flex items-center justify-center cursor-pointer ${
                           showFullCalendar 
                             ? 'bg-[var(--accent-color)] text-white shadow-xs' 
-                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white border border-black/5 dark:border-white/[0.06]'
+                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
                         }`}
                         title={t('chooseDate')}
                       >
@@ -1110,7 +1089,7 @@ export function TransactionModal({
                           exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-[16px] p-4 border border-black/5 dark:border-white/[0.06]">
+                          <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-4 border-none shadow-none mt-1.5">
                             <CalendarWidget 
                               calendarDays={calendarDays}
                               normalizedSelectedDate={selectedDate}
@@ -1124,11 +1103,14 @@ export function TransactionModal({
                     </AnimatePresence>
                   </div>
 
-                  {/* Receipt Section: Toned-down quick action */}
+                  {/* Receipt Section */}
                   {type !== 'income' && (
-                    <div className="pt-2 border-t border-black/5 dark:border-white/[0.06]">
+                    <div className="space-y-1.5">
+                      <label className="text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
+                        {currentLang === 'en' ? 'Receipt' : 'Kvitto'}
+                      </label>
                       {isScanningReceipt ? (
-                        <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-[var(--accent-color)]/25 flex items-center justify-between transition-all">
+                        <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-3 sm:p-3.5 border-none shadow-none flex items-center justify-between transition-all">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-8 h-8 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
                               <Loader2 size={16} className="animate-spin text-[var(--accent-color)]" />
@@ -1147,9 +1129,9 @@ export function TransactionModal({
                           </span>
                         </div>
                       ) : receiptUrl ? (
-                        <div className="bg-black/[0.03] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-between transition-all">
+                        <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-3 sm:p-3.5 border-none shadow-none flex items-center justify-between transition-all">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-black/5 dark:border-white/[0.06] shrink-0 bg-black/5">
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-black/5 dark:border-white/5 shrink-0 bg-black/5">
                               <img src={receiptUrl} alt="Receipt" className="w-full h-full object-cover" />
                             </div>
                             <div className="min-w-0">
@@ -1175,7 +1157,7 @@ export function TransactionModal({
                       ) : (
                         <div 
                           onClick={() => !isScanningReceipt && !isUploadingReceipt && setIsCameraModalOpen(true)}
-                          className="bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.08] rounded-xl p-3 sm:p-3.5 border border-black/5 dark:border-white/[0.06] flex items-center justify-between transition-all cursor-pointer group active:scale-[0.99]"
+                          className="bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] rounded-[16px] p-3 sm:p-3.5 border-none shadow-none flex items-center justify-between transition-all cursor-pointer group active:scale-[0.99]"
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 group-hover:scale-105 transition-transform">
@@ -1324,6 +1306,102 @@ export function TransactionModal({
                     userId={userId}
                     t={t}
                   />
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Category Picker Popover Modal */}
+        <AnimatePresence>
+          {isCategoryPickerOpen && (
+            <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsCategoryPickerOpen(false)}
+                className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+              />
+              <motion.div
+                initial={{ scale: 0.94, opacity: 0, y: 16 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.94, opacity: 0, y: 16 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="bg-white dark:bg-[#1E1B22] w-full max-w-sm rounded-[24px] border border-black/10 dark:border-white/10 relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
+              >
+                <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
+                  <div>
+                    <h3 className="text-[16px] font-semibold text-[var(--text-primary)] tracking-tight">
+                      {t('category')}
+                    </h3>
+                    <p className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] mt-0.5">
+                      {currentLang === 'en' ? 'Choose category for transaction' : 'Välj kategori för transaktionen'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsCategoryPickerOpen(false)}
+                    className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                    aria-label={t('close')}
+                  >
+                    <X size={15} strokeWidth={2.2} />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar min-h-0">
+                  <div className="grid grid-cols-2 gap-2">
+                    {categories.map(cat => {
+                      const isSelected = (category || '').toLowerCase() === cat.name.toLowerCase();
+                      return (
+                        <button
+                          key={cat.name}
+                          type="button"
+                          onClick={() => {
+                            setCategory(cat.name);
+                            setHasManuallySelectedCategory(true);
+                            setIsCategoryPickerOpen(false);
+                          }}
+                          className={`flex items-center gap-2.5 p-3 rounded-[14px] text-left transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-[var(--accent-color)] text-white shadow-xs font-semibold'
+                              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          <div 
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                              isSelected ? 'bg-white/20 text-white' : ''
+                            }`}
+                            style={isSelected ? {} : { backgroundColor: cat.color ? `${cat.color}20` : 'rgba(0,0,0,0.05)', color: cat.color || 'var(--text-primary)' }}
+                          >
+                            <CategoryIcon 
+                              icon={cat.icon} 
+                              color={isSelected ? '#ffffff' : cat.color} 
+                              size="xs" 
+                            />
+                          </div>
+                          <span className="text-[13px] truncate font-medium flex-1">
+                            {cat.name}
+                          </span>
+                          {isSelected && <Check size={16} strokeWidth={2.5} className="shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCategoryPickerOpen(false);
+                        setIsAddingCategory(true);
+                      }}
+                      className="w-full py-2.5 rounded-[14px] border border-dashed border-black/15 dark:border-white/15 text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] hover:border-black/30 dark:hover:border-white/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus size={15} strokeWidth={2} />
+                      <span>{t('newCategory')}</span>
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             </div>
