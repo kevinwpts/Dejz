@@ -123,7 +123,7 @@ export function TodayView({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleToggleExpand = useCallback(() => {
+  const _handleToggleExpand = useCallback(() => {
     const threshold = Math.max(60, (heroHeight || 300) * 0.4);
     if (window.scrollY > threshold) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -617,20 +617,11 @@ export function TodayView({
         className="w-full shrink-0 pointer-events-none"
       />
 
-      {/* 2. EXPANDING BOTTOM SHEET (Scroll-driven surface covering hero as user scrolls down) */}
+      {/* 2. SCROLL CONTAINER (Scrolls up seamlessly over static hero) */}
       <div
         ref={sheetRef}
-        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-[var(--bg-color)] dark:bg-[#050709]/75 dark:backdrop-blur-xl rounded-t-[22px] sm:rounded-t-[24px] border-t border-[var(--border-color)] dark:border-white/[0.1] shadow-none min-h-[calc(100vh-8rem)] pt-1 pb-40 space-y-3 mt-1"
+        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-transparent border-none shadow-none min-h-[calc(100vh-8rem)] pt-0 pb-40 space-y-3"
       >
-        {/* Visual Grab Handle / Sheet Indicator */}
-        <div
-          onClick={handleToggleExpand}
-          className="w-full flex flex-col items-center justify-center py-1 cursor-pointer group active:opacity-70 transition-opacity select-none touch-manipulation"
-          title={progress > 0.5 ? (lang === 'en' ? 'Click to show overview' : 'Klicka för att visa översikt') : (lang === 'en' ? 'Click to expand' : 'Klicka för att expandera')}
-          aria-label="Expand or collapse sheet"
-        >
-          <div className="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20 group-hover:bg-black/40 dark:group-hover:bg-white/40 transition-colors" />
-        </div>
 
         {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
         {calendarDays && calendarDays.length > 0 && (
