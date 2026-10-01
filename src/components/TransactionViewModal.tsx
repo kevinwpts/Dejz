@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
-import { X, Pencil, Tag, Repeat, Paperclip, FileText } from 'lucide-react';
+import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2 } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
@@ -14,6 +14,7 @@ import { formatFullDate } from '../utils/date';
 import { feedback } from '../utils/feedback';
 import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
 import { resolveEntityVisual } from '../utils/resolver';
+import { ConfirmModal } from './ConfirmModal';
 
 interface TransactionViewModalProps {
   transaction: Transaction;
@@ -41,12 +42,13 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(124, 58, 237, ${alpha})`;
 }
 
-export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _onDelete, onDuplicate, t, config }: TransactionViewModalProps) {
+export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, onDuplicate, t, config }: TransactionViewModalProps) {
   useScrollLock(true);
   const dragControls = useDragControls();
   const isIncome = transaction.type === 'income';
   const isSavings = transaction.type === 'savings';
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(transaction, config));
 
   useEffect(() => {
@@ -155,7 +157,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
                   {merchantName}
                 </h2>
 
-                {/* 3 Smaller Action Buttons aligned inline with the title */}
+                {/* Smaller Action Buttons aligned inline with the title */}
                 <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
                   <button 
                     type="button"
@@ -182,6 +184,21 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
                   >
                     <Pencil size={13.5} strokeWidth={1.9} />
                   </button>
+
+                  {onDelete && (
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        if (typeof feedback?.light === 'function') feedback.light();
+                        setShowDeleteConfirm(true);
+                      }} 
+                      className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                      title={config.language === 'en' ? 'Delete' : 'Ta bort'}
+                      aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
+                    >
+                      <Trash2 size={13.5} strokeWidth={1.9} />
+                    </button>
+                  )}
 
                   <button 
                     type="button"
@@ -341,6 +358,28 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
             )}
           </div>
         </div>
+
+        {showDeleteConfirm && transaction && transaction.id && onDelete && (
+          <ConfirmModal
+            isOpen={showDeleteConfirm}
+            title={config.language === 'en' ? "Delete transaction?" : "Radera transaktion?"}
+            message={
+              config.language === 'en'
+                ? `Do you want to delete the transaction of ${formatAmount(transaction.amount, config.language)} ${config?.currency || 'kr'}?`
+                : `Vill du radera transaktionen på ${formatAmount(transaction.amount, config.language)} ${config?.currency || 'kr'}?`
+            }
+            confirmText={config.language === 'en' ? "Delete" : "Radera"}
+            cancelText={config.language === 'en' ? "Cancel" : "Avbryt"}
+            variant="danger"
+            onConfirm={() => {
+              onDelete(transaction.id);
+              setShowDeleteConfirm(false);
+              onClose();
+            }}
+            onCancel={() => setShowDeleteConfirm(false)}
+            t={t}
+          />
+        )}
       </motion.div>
     </motion.div>,
     document.body

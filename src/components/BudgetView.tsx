@@ -618,27 +618,27 @@ export function BudgetView({
       </div>
 
       {/* Overview Hero Section - Dynamic based on filter */}
-      <div className="py-2 text-center space-y-1.5 flex flex-col items-center">
-        <span className="text-[13px] sm:text-[14px] font-bold tracking-tight text-[#6E6961] dark:text-[#A8A8A8] block select-none font-display">
+      <div className="py-2 text-center space-y-1 flex flex-col items-center select-none">
+        <span className="text-[14px] font-medium text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
           {budgetFilter === 'fixed' && (config?.language === 'en' ? 'Total fixed expenses' : 'Totala fasta utgifter')}
           {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
           {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
         </span>
-        <div className="flex items-baseline justify-center gap-2">
+        <div className="flex items-baseline justify-center gap-1.5 mt-1">
           <AnimatedNumber 
             value={Math.round(
               budgetFilter === 'fixed' ? totalFixedSum :
               budgetFilter === 'income' ? totalIncomeSum :
               totalSavingsSum
             )} 
-            className="text-[44px] sm:text-[54px] leading-none font-bold font-amount tabular-nums tracking-normal text-[#1C1917] dark:text-white"
+            className="text-[34px] sm:text-[38px] font-semibold leading-none font-amount tabular-nums tracking-tight text-[#1C1917] dark:text-white"
             formatter={(val) => {
               const prefix = budgetFilter === 'income' ? '+' : '−';
               return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
-          <span className="text-[19px] sm:text-[21px] font-semibold text-[#8C867C] dark:text-[#A8A8A8]">
-            {config?.currency}
+          <span className="text-[18px] sm:text-[20px] font-normal leading-none text-[#6D6962] dark:text-[#A8A8A8]">
+            {config?.currency || 'kr'}
           </span>
         </div>
       </div>

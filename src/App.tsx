@@ -5175,7 +5175,7 @@ export default function App() {
             config={config}
             prefill={transactionPrefill}
             onDelete={(id) => {
-              handleDeleteTransaction(id);
+              deleteTransaction(id);
               setIsAddTransactionOpen(false);
               setEditingTransaction(null);
             }}

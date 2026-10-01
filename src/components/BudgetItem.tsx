@@ -4,6 +4,7 @@ import { Language, TranslationKey } from '../i18n';
 import { formatAmount, capitalize } from '../utils/format';
 import { Config, Frequency } from '../types';
 import { TransactionLogo } from './TransactionLogo';
+import { getCategoryIconName } from '../utils/icons';
 
 interface BudgetItemProps {
   item: any;
@@ -50,12 +51,16 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   const dayString = item.deductionDay ? `${item.deductionDay}${daySuffix}` : '';
   const paymentString = item.paymentMethod ? (typeof item.paymentMethod === 'string' ? item.paymentMethod : item.paymentMethod?.name) : '';
 
+  const amountColor = type === 'income' 
+    ? 'text-emerald-600 dark:text-emerald-400' 
+    : 'text-[#777168] dark:text-[#A8A8A8]';
+
   return (
     <div 
       onClick={onClick}
-      className="px-3.5 sm:px-4 py-3 sm:py-3.5 min-h-[66px] flex items-center justify-between gap-3 group transition-colors bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] rounded-[20px] shadow-none border-none cursor-pointer"
+      className="px-4 py-3.5 sm:py-4 min-h-[68px] relative z-10 flex items-center justify-between gap-3 group transition-colors duration-150 bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] rounded-[12px] shadow-none border-none cursor-pointer select-none"
     >
-      {/* Left side: Logo + Name + Category */}
+      {/* Left side: Logo + Name + Category / Details */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="relative flex-shrink-0">
           <BudgetItemLogo item={item} type={type} config={config} />
@@ -70,58 +75,63 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           <p 
-            className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight"
+            className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight"
             title={displayName}
           >
             {displayName}
           </p>
-          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#6D6962] dark:text-[#A8A8A8]">
+          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#777168] dark:text-[#A8A8A8]">
             {!isSaving && item.category && (
-              <div className="inline-flex items-center gap-1 shrink-0 max-w-full text-[#6D6962] dark:text-[#A8A8A8]">
+              <div className="flex items-center gap-1 shrink-0 text-[#777168] dark:text-[#A8A8A8]">
                 {(() => {
                   const searchCategory = (item.category || '').trim().toLowerCase();
                   const category = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
                     c => c.name.trim().toLowerCase() === searchCategory
                   );
-                  const iconKey = category?.icon;
+                  const iconKey = category?.icon || getCategoryIconName(item.category);
                   if (iconKey) {
                     return (
                       <CategoryIcon 
                         icon={iconKey} 
                         color="currentColor" 
-                        size="xs" 
+                        size="2xs" 
                       />
                     );
                   }
                   return null;
                 })()}
-                <span className="text-[12px] font-normal tracking-tight whitespace-nowrap truncate max-w-[130px] sm:max-w-[180px] text-[#6D6962] dark:text-[#A8A8A8]">
+                <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] tracking-tight whitespace-nowrap truncate max-w-[130px] sm:max-w-[180px]">
                   {capitalize(item.category || '')}
                 </span>
               </div>
+            )}
+            {item.note && (
+              <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] truncate min-w-0 flex-1">
+                • {item.note}
+              </span>
             )}
           </div>
         </div>
       </div>
       
       {/* Right side: Amount + Deduction metadata */}
-      <div className="flex flex-col items-end justify-center shrink-0 max-w-[46%] sm:max-w-[42%] text-right pl-2">
-        <p className="text-[14px] font-medium whitespace-nowrap tracking-tight text-[#211F1C] dark:text-white">
+      <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
+        <p className={`text-[12px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
           <span className="opacity-75 mr-0.5">{type === 'income' ? '+' : '−'}</span>
           <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
-          <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[2.5px]">{currency}</span>
+          <span className="text-[10px] font-normal text-[#777168] dark:text-[#A8A8A8] ml-[2px]">{currency}</span>
         </p>
 
         {/* Right-aligned deduction metadata under amount */}
-        <div className="flex flex-col items-end gap-0.5 mt-0.5 justify-end max-w-full overflow-hidden text-[#777168] dark:text-[#71717A]">
-          {(dayString || paymentString) && (
-            <span className="text-[11.5px] font-normal tracking-tight truncate tabular-nums">
+        {(dayString || paymentString) && (
+          <div className="flex items-center gap-0.5 mt-0.5 justify-end max-w-full overflow-hidden text-[#777168] dark:text-[#A8A8A8]">
+            <span className="text-[11px] font-normal tracking-tight truncate tabular-nums">
               {dayString && <span>{dayString}</span>}
               {dayString && paymentString && <span className="mx-1 opacity-50">·</span>}
               {paymentString && <span className="truncate max-w-[70px] sm:max-w-[100px]">{paymentString}</span>}
             </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
