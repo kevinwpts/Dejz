@@ -119,14 +119,14 @@ export function SavingsGoalModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-            className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E6E2D8] dark:border-[#383838] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0"
+            className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0 font-sans text-[var(--text-primary)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Handle on Mobile */}
-            <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+            <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
             {/* Header Section */}
-            <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[#E6E2D8] dark:border-[#383838]">
+            <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/5 dark:border-white/10">
               <div className="flex justify-start">
                 <button
                   key="icon"

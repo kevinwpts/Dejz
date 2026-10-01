@@ -86,7 +86,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -99,7 +99,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
         </div>
 
         {/* Header with Navigation and Actions: Actions left, Close button right */}
-        <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[#E6E2D8] dark:border-white/[0.06]">
+        <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
           <div className="flex items-center gap-1.5 shrink-0">
             <button 
               type="button"
@@ -107,7 +107,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 if (typeof feedback?.light === 'function') feedback.light();
                 onDuplicate(transaction);
               }} 
-              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
               title={t('duplicate')}
               aria-label={t('duplicate')}
             >
@@ -119,7 +119,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 if (typeof feedback?.light === 'function') feedback.light();
                 onEdit(transaction);
               }} 
-              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
               title={t('edit')}
               aria-label={t('edit')}
             >
@@ -145,7 +145,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               if (typeof feedback?.light === 'function') feedback.light();
               onClose();
             }} 
-            className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
             aria-label={t('close')}
           >
             <X size={17} strokeWidth={2.2} />
@@ -156,27 +156,27 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
           {/* Hero Section: Logo, Merchant, Prominent Amount, and Swedish Formatted Date */}
           <div className="flex flex-col items-center text-center pt-2 pb-2">
-            <div className="w-14 h-14 rounded-2xl bg-black/5 dark:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.1] flex items-center justify-center shadow-xs overflow-hidden">
+            <div className="w-14 h-14 rounded-2xl bg-black/5 dark:bg-white/[0.08] border border-black/10 dark:border-white/10 flex items-center justify-center shadow-xs overflow-hidden">
               <TransactionLogo transaction={transaction} config={config} size="md" />
             </div>
 
-            <h2 className="text-[17px] sm:text-[18px] font-semibold tracking-tight text-[#211F1C] dark:text-white mt-3 truncate max-w-full px-4">
+            <h2 className="text-[17px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] mt-3 truncate max-w-full px-4">
               {merchantName}
             </h2>
 
-            <p className={`text-[30px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight leading-tight mt-1 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#211F1C] dark:text-white'}`}>
+            <p className={`text-[30px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight leading-tight mt-1 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-75 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
               <span>{formatAmount(transaction.amount, config.language)}</span>
-              <span className="text-[15px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[3px] font-sans">{config.currency}</span>
+              <span className="text-[15px] font-normal text-[var(--text-secondary)] ml-[3px] font-sans">{config.currency}</span>
             </p>
 
-            <p className="text-[12px] sm:text-[13px] font-normal text-[#777168] dark:text-[#71717A] mt-1 select-none tabular-nums">
+            <p className="text-[12px] sm:text-[13px] font-normal text-[var(--text-tertiary)] mt-1 select-none tabular-nums">
               {formattedDate}{formattedTime ? ` · ${formattedTime}` : ''}
             </p>
           </div>
 
           {/* Details Section: Clean, Lightweight, and Non-Administrative */}
-          <div className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-2xl p-4 space-y-3.5 border border-[#E2DDD4] dark:border-white/[0.06]">
+          <div className="bg-black/5 dark:bg-white/5 rounded-2xl p-4 space-y-3.5 border border-black/10 dark:border-white/10">
             {/* Category */}
             <div className="flex items-center justify-between gap-4">
               <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">

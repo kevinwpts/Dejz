@@ -31,10 +31,10 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
           onClick();
         }
       }}
-      className={`h-11 px-3.5 rounded-2xl border transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none shadow-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none ${
+      className={`h-11 px-3.5 rounded-2xl border transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none shadow-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans ${
         active
-          ? 'bg-[#EEECFF] dark:bg-[#635BFF]/20 border-[#635BFF]/30 text-[#635BFF] dark:text-[#7C75FF] font-medium'
-          : 'bg-white dark:bg-[#242424] border-[#E2DDD4] dark:border-[#383838] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#2D2D2D]'
+          ? 'bg-[var(--accent-color)]/15 border-[var(--accent-color)]/30 text-[var(--accent-color)] font-semibold'
+          : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10'
       } ${className}`}
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">

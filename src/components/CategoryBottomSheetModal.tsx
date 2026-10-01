@@ -159,15 +159,15 @@ export function CategoryBottomSheetModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#242424] border-t sm:border border-[#E6E2D8] dark:border-[#383838] rounded-t-[28px] sm:rounded-[26px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[#1C1917] dark:text-white"
+            className="relative w-full max-w-lg bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl border-t sm:border border-black/10 dark:border-white/10 rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
           >
             {/* Top Grab Handle */}
-            <div className="w-10 h-1 rounded-full bg-[#D6D1C7] dark:bg-[#3D3D3D] mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+            <div className="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20 mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
             {/* Header: Category Identity & Close Button */}
-            <div className="flex items-center justify-between px-5 sm:px-6 pt-3 pb-3 border-b border-[#E6E2D8] dark:border-white/[0.06] shrink-0">
+            <div className="flex items-center justify-between px-5 sm:px-6 pt-3 pb-3 border-b border-black/5 dark:border-white/10 shrink-0">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/[0.08] border border-[#E6E2D8] dark:border-white/[0.1] text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/[0.08] border border-black/10 dark:border-white/10 text-[var(--text-primary)] flex items-center justify-center shrink-0">
                   {isEmojiString(iconKey) ? (
                     <span className="text-xl leading-none">{iconKey}</span>
                   ) : IconComponent ? (
@@ -177,7 +177,7 @@ export function CategoryBottomSheetModal({
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[#1C1917] dark:text-white truncate">
+                  <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] truncate">
                     {targetCategoryName}
                   </h2>
                 </div>
@@ -189,7 +189,7 @@ export function CategoryBottomSheetModal({
                   if (typeof feedback.light === 'function') feedback.light();
                   onClose();
                 }}
-                className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Stäng"
               >
                 <X size={17} strokeWidth={2.2} />
@@ -199,7 +199,7 @@ export function CategoryBottomSheetModal({
             {/* Scrollable Body Content */}
             <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0">
               {/* Category Budget Status Card - Ultra-compact, clean & lightweight */}
-              <div className="py-2.5 px-3.5 rounded-xl bg-[#F7F5F0] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] shrink-0 space-y-1.5">
+              <div className="py-2.5 px-3.5 rounded-[18px] bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 shrink-0 space-y-1.5">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-baseline gap-1.5">
                     {categoryData?.hasBudget ? (

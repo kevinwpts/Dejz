@@ -636,7 +636,7 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -697,7 +697,7 @@ export function TransactionModal({
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-[#EAE6DE] dark:bg-[#2D2D2D] hover:bg-[#DFD9CF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
               aria-label={t('close')}
             >
               <X size={17} strokeWidth={2.2} />
@@ -1015,9 +1015,9 @@ export function TransactionModal({
                         <button
                           type="button"
                           onClick={() => setIsAddingCategory(true)}
-                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-[#EAE6DE] dark:bg-white/[0.04] text-[#1C1917] dark:text-white hover:bg-black/5 dark:hover:bg-white/[0.08] transition-all group border border-[#E2DDD4] dark:border-white/[0.06] cursor-pointer"
+                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 transition-all group border border-black/10 dark:border-white/10 cursor-pointer"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.08] border border-[#E2DDD4] dark:border-white/[0.08] flex items-center justify-center transition-all group-hover:scale-105">
+                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-center transition-all group-hover:scale-105">
                             <Plus size={18} strokeWidth={2.2} />
                           </div>
                           <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
@@ -1028,9 +1028,9 @@ export function TransactionModal({
                         <button
                           type="button"
                           onClick={() => setIsCategorySelectorOpen(true)}
-                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-[#EAE6DE] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[#1C1917] dark:hover:text-white transition-all group border border-[#E2DDD4] dark:border-white/[0.06] cursor-pointer"
+                          className="flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-black/10 dark:hover:bg-white/10 hover:text-[var(--text-primary)] transition-all group border border-black/10 dark:border-white/10 cursor-pointer"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.08] border border-[#E2DDD4] dark:border-white/[0.08] flex items-center justify-center group-hover:bg-[#1C1917] group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-all">
+                          <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-center group-hover:bg-[var(--accent-color)] group-hover:text-white transition-all">
                             <Plus size={18} strokeWidth={2.2} />
                           </div>
                           <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 opacity-90 w-full px-0.5">
@@ -1042,12 +1042,12 @@ export function TransactionModal({
                   </div>
             
                   {/* Date Selection */}
-                  <div className="space-y-2.5 pt-3 border-t border-[#E2DDD4] dark:border-white/[0.06]">
+                  <div className="space-y-2.5 pt-3 border-t border-black/5 dark:border-white/10">
                     <div className="flex items-center justify-between px-1">
-                      <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">{t('date')}</label>
+                      <label className="text-xs font-semibold text-[var(--text-secondary)]">{t('date')}</label>
                       {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
                        new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
-                        <span className="text-xs font-semibold text-[#1C1917] dark:text-white tabular-nums">
+                        <span className="text-xs font-semibold text-[var(--text-primary)] tabular-nums">
                           {formatFullDate(selectedDate, currentLang)}
                         </span>
                       )}
@@ -1061,8 +1061,8 @@ export function TransactionModal({
                         }}
                         className={`flex-1 py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
-                            ? 'bg-[#1C1917] text-white dark:bg-white dark:text-black shadow-xs'
-                            : 'bg-[#EAE6DE] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#DFD9CF] dark:hover:bg-white/[0.08] border border-[#E2DDD4] dark:border-white/[0.06]'
+                            ? 'bg-[var(--accent-color)] text-white shadow-xs'
+                            : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10'
                         }`}
                       >
                         {t('todayLabel')}
@@ -1077,8 +1077,8 @@ export function TransactionModal({
                         }}
                         className={`flex-1 py-3 rounded-xl text-xs font-semibold tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
-                            ? 'bg-[#1C1917] text-white dark:bg-white dark:text-black shadow-xs'
-                            : 'bg-[#EAE6DE] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#DFD9CF] dark:hover:bg-white/[0.08] border border-[#E2DDD4] dark:border-white/[0.06]'
+                            ? 'bg-[var(--accent-color)] text-white shadow-xs'
+                            : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10'
                         }`}
                       >
                         {t('yesterdayLabel')}
@@ -1088,8 +1088,8 @@ export function TransactionModal({
                         onClick={() => setShowFullCalendar(!showFullCalendar)}
                         className={`w-12 py-3 rounded-xl transition-all flex items-center justify-center cursor-pointer ${
                           showFullCalendar 
-                            ? 'bg-[#1C1917] text-white dark:bg-white dark:text-black shadow-xs' 
-                            : 'bg-[#EAE6DE] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:bg-[#DFD9CF] dark:hover:bg-white/[0.08] border border-[#E2DDD4] dark:border-white/[0.06]'
+                            ? 'bg-[var(--accent-color)] text-white shadow-xs' 
+                            : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10'
                         }`}
                         title={t('chooseDate')}
                       >
@@ -1121,37 +1121,37 @@ export function TransactionModal({
 
                   {/* Receipt Section: Toned-down quick action */}
                   {type !== 'income' && (
-                    <div className="pt-2 border-t border-[#E2DDD4] dark:border-white/[0.06]">
+                    <div className="pt-2 border-t border-black/5 dark:border-white/10">
                       {isScanningReceipt ? (
-                        <div className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-accent/25 flex items-center justify-between transition-all">
+                        <div className="bg-black/5 dark:bg-white/5 rounded-xl p-3 sm:p-3.5 border border-[var(--accent-color)]/25 flex items-center justify-between transition-all">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                              <Loader2 size={16} className="animate-spin text-accent" />
+                            <div className="w-8 h-8 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
+                              <Loader2 size={16} className="animate-spin text-[var(--accent-color)]" />
                             </div>
                             <div className="min-w-0">
-                              <h4 className="text-xs font-bold text-[#1C1917] dark:text-white tracking-tight">
+                              <h4 className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
                                 {currentLang === 'en' ? 'Scanning receipt…' : 'Läser kvittot…'}
                               </h4>
-                              <p className="text-[11px] font-medium text-accent truncate">
+                              <p className="text-[11px] font-medium text-[var(--accent-color)] truncate">
                                 {currentLang === 'en' ? 'Analyzing amount, store & date' : 'Analyserar belopp, företag och datum'}
                               </p>
                             </div>
                           </div>
-                          <span className="text-[11px] font-semibold text-accent bg-accent/10 px-2.5 py-1 rounded-full animate-pulse">
+                          <span className="text-[11px] font-semibold text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2.5 py-1 rounded-full animate-pulse">
                             {currentLang === 'en' ? 'Wait…' : 'Vänta…'}
                           </span>
                         </div>
                       ) : receiptUrl ? (
-                        <div className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-xl p-3 sm:p-3.5 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-between transition-all">
+                        <div className="bg-black/5 dark:bg-white/5 rounded-xl p-3 sm:p-3.5 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-between transition-all">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-black/10 dark:border-white/10 shrink-0 bg-black/5">
                               <img src={receiptUrl} alt="Receipt" className="w-full h-full object-cover" />
                             </div>
                             <div className="min-w-0">
-                              <h4 className="text-xs font-bold text-[#1C1917] dark:text-white tracking-tight">
+                              <h4 className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
                                 {currentLang === 'en' ? 'Receipt attached' : 'Kvitto bifogat'}
                               </h4>
-                              <p className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] truncate">
+                              <p className="text-[11px] text-[var(--text-secondary)] truncate">
                                 {scanFeedback?.message || (currentLang === 'en' ? 'Check details before saving' : 'Kontrollera uppgifterna innan du sparar')}
                               </p>
                             </div>
@@ -1170,10 +1170,10 @@ export function TransactionModal({
                       ) : (
                         <div 
                           onClick={() => !isScanningReceipt && !isUploadingReceipt && setIsCameraModalOpen(true)}
-                          className="bg-[#EAE6DE] dark:bg-white/[0.04] hover:bg-[#DFD9CF] dark:hover:bg-white/[0.07] rounded-xl p-3 sm:p-3.5 border border-[#E2DDD4] dark:border-white/[0.06] flex items-center justify-between transition-all cursor-pointer group active:scale-[0.99]"
+                          className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-xl p-3 sm:p-3.5 border border-black/10 dark:border-white/10 flex items-center justify-between transition-all cursor-pointer group active:scale-[0.99]"
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[#1C1917] dark:text-white shrink-0 group-hover:scale-105 transition-transform">
+                            <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 group-hover:scale-105 transition-transform">
                               {isUploadingReceipt ? (
                                 <Loader2 size={16} className="animate-spin" />
                               ) : (
@@ -1182,11 +1182,11 @@ export function TransactionModal({
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-bold text-[#1C1917] dark:text-white tracking-tight">
+                                <span className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
                                   {currentLang === 'en' ? 'Scan receipt' : 'Skanna kvitto'}
                                 </span>
                               </div>
-                              <p className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] truncate">
+                              <p className="text-[11px] text-[var(--text-secondary)] truncate">
                                 {currentLang === 'en' ? 'Take a photo with the camera' : 'Fotografera med appens kamera'}
                               </p>
                             </div>
@@ -1198,7 +1198,7 @@ export function TransactionModal({
                               setIsCameraModalOpen(true);
                             }}
                             disabled={isUploadingReceipt}
-                            className="px-3 py-1.5 bg-[#1C1917] text-white dark:bg-white dark:text-black hover:opacity-90 text-xs font-semibold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer shrink-0 ml-2"
+                            className="px-3 py-1.5 bg-[var(--accent-color)] text-white hover:opacity-90 text-xs font-semibold rounded-full shadow-xs active:scale-95 transition-all cursor-pointer shrink-0 ml-2"
                           >
                             {currentLang === 'en' ? 'Open camera' : 'Öppna kamera'}
                           </button>
@@ -1209,7 +1209,7 @@ export function TransactionModal({
           </div>
 
           {/* Register / Save Button */}
-          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-[#E2DDD4] dark:border-white/[0.06] bg-white dark:bg-[#242424]">
+          <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/5 dark:border-white/10 bg-transparent">
             <Button 
               disabled={!isSplitsValid}
               onClick={() => {

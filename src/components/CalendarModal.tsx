@@ -47,7 +47,7 @@ export function CalendarModal({
             exit={{ opacity: 0, y: 40, scale: 0.98 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl border-t sm:border border-black/10 dark:border-white/10 w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] font-sans"
+            className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl border-t sm:border border-black/10 dark:border-white/10 w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] font-sans"
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-3.5 border-b border-black/5 dark:border-white/10 shrink-0">

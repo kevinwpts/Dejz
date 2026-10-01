@@ -65,7 +65,7 @@ export function PeriodSelectorModal({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm sm:max-w-md bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+          className="relative w-full max-w-sm sm:max-w-md bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
         >
           {/* Mobile Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -144,29 +144,29 @@ export function PeriodSelectorModal({
                       }}
                       className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] min-h-[46px] ${
                         isSelected
-                          ? 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white font-semibold'
-                          : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white font-medium'
+                          ? 'bg-[var(--accent-color)]/15 border border-[var(--accent-color)]/25 text-[var(--accent-color)] font-semibold'
+                          : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                          isSelected ? 'bg-[#1C1917] text-white dark:bg-white dark:text-[#1C1917]' : 'bg-black/5 dark:bg-white/10 text-[#6E6961] dark:text-[#A8A8A8]'
+                          isSelected ? 'bg-[var(--accent-color)] text-white' : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'
                         }`}>
                           <CalendarIcon size={14} strokeWidth={1.8} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'text-[#1C1917] dark:text-white font-bold' : ''}`}>
+                            <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'text-[var(--accent-color)] font-semibold' : ''}`}>
                               {title}
                             </span>
                             {p.isCurrent && (
-                              <span className="text-[9.5px] font-medium px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/[0.08] text-[#6E6961] dark:text-[#A8A8A8] border border-black/5 dark:border-white/5 shrink-0">
+                              <span className="text-[9.5px] font-medium px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/[0.08] text-[var(--text-secondary)] border border-black/5 dark:border-white/5 shrink-0">
                                 {currentLang === 'en' ? 'Current' : 'Nu'}
                               </span>
                             )}
                           </div>
                           {sub && (
-                            <p className="text-[11px] text-[#8C867C] dark:text-[#71717A] truncate mt-0.5 font-normal">
+                            <p className="text-[11px] text-[var(--text-tertiary)] truncate mt-0.5 font-normal">
                               {sub}
                             </p>
                           )}
@@ -174,7 +174,7 @@ export function PeriodSelectorModal({
                       </div>
 
                       {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] flex items-center justify-center shrink-0 ml-2">
+                        <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-white flex items-center justify-center shrink-0 ml-2">
                           <Check size={12} strokeWidth={3} />
                         </div>
                       )}
@@ -189,14 +189,14 @@ export function PeriodSelectorModal({
 
           {/* Footer Toggle Button when in list mode */}
           {showCalendarOption && viewMode === 'list' && (
-            <div className="px-4 pt-2 pb-1 border-t border-[#E6E2D8] dark:border-[#383838]">
+            <div className="px-4 pt-2 pb-1 border-t border-black/5 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => {
                   if (typeof feedback?.light === 'function') feedback.light();
                   setViewMode('calendar');
                 }}
-                className="w-full py-2.5 px-4 rounded-xl bg-[#F7F5F0] dark:bg-white/[0.04] hover:bg-[#EDE9DF] dark:hover:bg-white/[0.08] text-[#1C1917] dark:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border border-[#E6E2D8] dark:border-white/[0.06] active:scale-[0.99]"
+                className="w-full py-2.5 px-4 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-primary)] text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border border-black/10 dark:border-white/10 active:scale-[0.99]"
               >
                 <CalendarIcon size={14} strokeWidth={2} />
                 <span>{currentLang === 'en' ? 'Select day' : 'Välj dag'}</span>

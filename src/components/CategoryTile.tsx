@@ -26,8 +26,8 @@ export function CategoryTile({
       onClick={onClick}
       className={`flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] transition-all relative group cursor-pointer select-none ${
         isActive
-          ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border-2 border-[var(--accent-color)] shadow-xs scale-[1.02]'
-          : 'bg-[var(--surface-muted)]/50 text-[var(--text-secondary)] hover:bg-[var(--surface-muted)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
+          ? 'bg-[var(--accent-color)]/15 text-[var(--text-primary)] border-2 border-[var(--accent-color)] shadow-xs scale-[1.02]'
+          : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-black/10 dark:hover:bg-white/10 hover:text-[var(--text-primary)] border border-black/10 dark:border-white/10'
       } ${className}`}
     >
       <CategoryIcon

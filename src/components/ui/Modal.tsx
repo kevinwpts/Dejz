@@ -67,7 +67,7 @@ export const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.98 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`relative w-full ${sizeStyles} bg-white dark:bg-[#242424] rounded-t-[28px] sm:rounded-[24px] shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden border-none ${className}`}
+            className={`relative w-full ${sizeStyles} bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Pill */}
             <div className="w-10 h-1 bg-black/15 dark:bg-white/15 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />

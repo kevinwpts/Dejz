@@ -426,15 +426,15 @@ export function LogView({
         calendarContent={
           <div className="space-y-2.5">
             {/* Period Stepper (Left / Right) */}
-            <div className="flex items-center justify-between bg-[#F7F5F0] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.06] rounded-xl p-1.5">
+            <div className="flex items-center justify-between bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl p-1.5">
               <button
                 type="button"
                 onClick={handleModalPrev}
                 disabled={!canModalGoPrev}
                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoPrev
-                    ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.08] active:scale-90'
-                    : 'text-[#6E6961]/30 dark:text-[#A8A8A8]/30 cursor-not-allowed'
+                    ? 'text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
+                    : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
                 }`}
                 aria-label="Föregående period"
                 title="Föregående period"
@@ -444,17 +444,17 @@ export function LogView({
 
               <div className="flex flex-col items-center text-center px-2 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs sm:text-sm font-bold text-[#1C1917] dark:text-white tracking-tight truncate capitalize">
+                  <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] tracking-tight truncate capitalize">
                     {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                   </span>
                   {modalPeriod?.isCurrent && (
-                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/[0.08] text-[#6E6961] dark:text-[#A8A8A8] border border-black/5 dark:border-white/5">
+                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/[0.08] text-[var(--text-secondary)] border border-black/5 dark:border-white/5">
                       {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
                     </span>
                   )}
                 </div>
                 {modalPeriod?.name?.includes('(') && (
-                  <span className="text-[10.5px] text-[#8C867C] dark:text-[#71717A] font-normal truncate mt-0.5">
+                  <span className="text-[10.5px] text-[var(--text-tertiary)] font-normal truncate mt-0.5">
                     {modalPeriod.name.split('(')[1]?.replace(')', '').trim()}
                   </span>
                 )}
@@ -466,8 +466,8 @@ export function LogView({
                 disabled={!canModalGoNext}
                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoNext
-                    ? 'text-[#1C1917] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.08] active:scale-90'
-                    : 'text-[#6E6961]/30 dark:text-[#A8A8A8]/30 cursor-not-allowed'
+                    ? 'text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
+                    : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
                 }`}
                 aria-label="Nästa period"
                 title="Nästa period"
@@ -489,8 +489,8 @@ export function LogView({
                 }}
                 className={`inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer border active:scale-95 ${
                   selectedPeriod?.name === modalPeriod?.name && !selectedDate
-                    ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border-transparent shadow-xs'
-                    : 'bg-[#F7F5F0] dark:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[#EDE9DF] dark:hover:bg-white/[0.08] border-[#E6E2D8] dark:border-white/[0.06]'
+                    ? 'bg-[var(--accent-color)] text-white border-transparent shadow-xs'
+                    : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 border-black/10 dark:border-white/10'
                 }`}
               >
                 <Layers size={13} strokeWidth={2} />

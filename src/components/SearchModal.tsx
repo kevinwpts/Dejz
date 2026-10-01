@@ -109,7 +109,7 @@ export function SearchModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.98 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[28px] border-0 sm:border border-black/10 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden font-sans"
+            className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[28px] border-0 sm:border border-black/10 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Search Bar */}

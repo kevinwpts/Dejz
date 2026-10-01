@@ -19,8 +19,8 @@ export interface ListRowProps {
 
 export const ListRow: React.FC<ListRowProps> = ({
   icon,
-  iconBg = 'bg-[var(--surface-muted)] dark:bg-[#2D2D2D]',
-  iconColor = 'text-[#1C1917] dark:text-white',
+  iconBg = 'bg-black/5 dark:bg-white/10',
+  iconColor = 'text-[var(--text-primary)]',
   title,
   subtitle,
   value,
@@ -36,9 +36,9 @@ export const ListRow: React.FC<ListRowProps> = ({
   return (
     <div
       onClick={isClickable ? onClick : undefined}
-      className={`bg-white dark:bg-[#242424] p-3.5 sm:p-4 rounded-[18px] border-none shadow-none flex items-center justify-between transition-all select-none ${
+      className={`bg-white dark:bg-[#1E1C1A] border border-black/5 dark:border-white/10 p-3.5 sm:p-4 rounded-[18px] flex items-center justify-between transition-all select-none ${
         isClickable
-          ? 'cursor-pointer hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] active:scale-[0.99]'
+          ? 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.99]'
           : ''
       } ${disabled ? 'opacity-40 pointer-events-none' : ''} ${className}`}
     >
