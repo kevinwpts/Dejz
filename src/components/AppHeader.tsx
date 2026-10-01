@@ -74,10 +74,10 @@ export function AppHeader({
       className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top,0px))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-200 ease-in-out ${
         isDemoMode ? '' : 'pt-[env(safe-area-inset-top,0px)]'
       } ${
-        isProfileOrSettings
-          ? "bg-[#080611]/90 backdrop-blur-xl border-b border-white/[0.08]"
-          : !isAtTop
-          ? "bg-[#F2EFE8]/90 dark:bg-[#050709]/80 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
+        !isAtTop
+          ? isProfileOrSettings
+            ? "bg-[#080611]/90 backdrop-blur-xl border-b border-white/[0.08]"
+            : "bg-[#F2EFE8]/90 dark:bg-[#050709]/80 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
           : "bg-transparent border-b border-transparent"
       }`}
     >
@@ -118,7 +118,7 @@ export function AppHeader({
 
           {/* Title */}
           <div className="min-w-0 text-left flex flex-col justify-center">
-            <h1 className="text-[22px] sm:text-[23px] font-semibold tracking-tight truncate select-none leading-none text-[#211F1C] dark:text-white">
+            <h1 className="text-[15px] sm:text-[16px] font-semibold tracking-tight truncate select-none leading-tight text-[#211F1C] dark:text-white">
               {displayTitle}
             </h1>
           </div>
