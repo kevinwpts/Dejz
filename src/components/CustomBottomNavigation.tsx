@@ -39,19 +39,16 @@ export function CustomBottomNavigation({
 
   return (
     <footer 
-      className="fixed bottom-0 left-0 right-0 z-40 w-full bg-white dark:bg-[#1E1B22] select-none overflow-visible rounded-none m-0 p-0 border-none shadow-none"
-      style={{
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-      }}
+      className="fixed bottom-0 left-0 right-0 z-40 w-full bg-white dark:bg-[#1E1B22] select-none overflow-visible rounded-none m-0 p-0 border-none shadow-none pb-[min(10px,env(safe-area-inset-bottom,0px))]"
     >
       {/* Konvex rund upphöjning (kulle) på 76 × 76 px bakom knappen i exakt samma bakgrundsfärg */}
       <div 
-        className="absolute left-1/2 -top-[6px] -translate-x-1/2 w-[76px] h-[76px] rounded-full bg-white dark:bg-[#1E1B22] pointer-events-none z-0 border-none shadow-none"
+        className="absolute left-1/2 -top-[16px] -translate-x-1/2 w-[76px] h-[76px] rounded-full bg-white dark:bg-[#1E1B22] pointer-events-none z-0 border-none shadow-none"
         aria-hidden="true"
       />
 
-      {/* Upphöjd rund mittknapp på 56 × 56 px nedsänkt så den linjerar naturligt med ikonerna */}
-      <div className="absolute left-1/2 top-[4px] -translate-x-1/2 z-20">
+      {/* Upphöjd rund mittknapp på 56 × 56 px */}
+      <div className="absolute left-1/2 -top-[6px] -translate-x-1/2 z-20">
         <button
           type="button"
           onClick={() => {
@@ -65,8 +62,8 @@ export function CustomBottomNavigation({
         </button>
       </div>
 
-      {/* 5 lika breda kolumner i en 76 px hög navigationsrad */}
-      <nav className="relative z-10 w-full h-[76px] grid grid-cols-5 items-center">
+      {/* 5 lika breda kolumner med texten placerad max en halv cm från skärmbotten */}
+      <nav className="relative z-10 w-full h-[58px] grid grid-cols-5 items-end pb-2">
         {/* 1. Hem */}
         <NavItem
           icon={Home}
@@ -132,7 +129,7 @@ function NavItem({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`w-full h-full flex flex-col items-center justify-center transition-colors active:scale-95 cursor-pointer select-none py-1 ${
+      className={`w-full flex flex-col items-center justify-center transition-colors active:scale-95 cursor-pointer select-none ${
         isActive
           ? 'text-[var(--accent-color)] font-semibold'
           : 'text-[#8C867C] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white font-medium'
@@ -143,7 +140,7 @@ function NavItem({
         strokeWidth={isActive ? 2.2 : 1.8} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
       />
-      <span className="text-[11px] leading-tight tracking-tight mt-[3.5px]">
+      <span className="text-[10.5px] leading-none tracking-tight mt-[3px]">
         {label}
       </span>
     </button>
