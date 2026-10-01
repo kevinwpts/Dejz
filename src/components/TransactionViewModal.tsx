@@ -25,6 +25,22 @@ interface TransactionViewModalProps {
   config: Config;
 }
 
+function hexToRgba(hex: string, alpha: number): string {
+  if (!hex) return `rgba(124, 58, 237, ${alpha})`;
+  if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
+  let clean = hex.replace('#', '');
+  if (clean.length === 3) {
+    clean = clean.split('').map(c => c + c).join('');
+  }
+  if (clean.length === 6) {
+    const r = parseInt(clean.substring(0, 2), 16) || 0;
+    const g = parseInt(clean.substring(2, 4), 16) || 0;
+    const b = parseInt(clean.substring(4, 6), 16) || 0;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return `rgba(124, 58, 237, ${alpha})`;
+}
+
 export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, onDuplicate, t, config }: TransactionViewModalProps) {
   useScrollLock(true);
   const dragControls = useDragControls();
@@ -93,19 +109,16 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
         className="bg-white dark:bg-[#080611] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Subtle Brand Color Ambient Glow / Tint */}
-        <div className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden">
-          <div 
-            className="absolute -top-12 -left-10 w-80 h-80 rounded-full blur-3xl opacity-25 dark:opacity-30"
-            style={{ backgroundColor: brandColor }}
-          />
-          <div 
-            className="absolute top-0 inset-x-0 h-44 opacity-15 dark:opacity-20"
-            style={{
-              background: `linear-gradient(180deg, ${brandColor} 0%, transparent 100%)`
-            }}
-          />
-        </div>
+        {/* Smooth, Seamless Ambient Brand Color Glow */}
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(120% 85% at 0% 0%, ${hexToRgba(brandColor, 0.28)} 0%, ${hexToRgba(brandColor, 0.14)} 28%, ${hexToRgba(brandColor, 0.05)} 52%, transparent 75%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.10)} 0%, transparent 45%)
+            `
+          }}
+        />
 
         {/* Floating Close Button Top Right */}
         <button 
