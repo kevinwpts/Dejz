@@ -86,7 +86,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-white dark:bg-[#080611] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -154,13 +154,13 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
         {/* Main Content Area: Modern Consumer App Presentation */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          {/* Hero Section: Logo, Merchant, Prominent Amount, and Swedish Formatted Date */}
-          <div className="flex flex-col items-center text-center pt-2 pb-2">
-            <div className="w-14 h-14 rounded-2xl bg-black/5 dark:bg-white/[0.08] border border-black/10 dark:border-white/10 flex items-center justify-center shadow-xs overflow-hidden">
-              <TransactionLogo transaction={transaction} config={config} size="md" />
+          {/* Hero Section: Logo to the left, without enclosing container, significantly larger */}
+          <div className="flex flex-col items-start text-left pt-1 pb-2">
+            <div className="mb-3 shrink-0">
+              <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
 
-            <h2 className="text-[17px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] mt-3 truncate max-w-full px-4">
+            <h2 className="text-[20px] sm:text-[22px] font-semibold tracking-tight text-[var(--text-primary)] truncate max-w-full">
               {merchantName}
             </h2>
 

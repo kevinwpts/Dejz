@@ -3,15 +3,15 @@ import { Transaction, Config } from '../types';
 import { resolveEntityVisual } from '../utils/resolver';
 import { Receipt } from 'lucide-react';
 
-export function TransactionLogo({ transaction, config, size = 'md' }: { transaction: Transaction, config?: Config, size?: 'sm' | 'md' | 'lg' }) {
+export function TransactionLogo({ transaction, config, size = 'md' }: { transaction: Transaction, config?: Config, size?: 'sm' | 'md' | 'lg' | 'xl' }) {
   const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     setImgError(false);
   }, [transaction.logo, transaction.icon, transaction.merchant, transaction.note, transaction.category]);
 
-  const containerSize = size === 'lg' ? 'w-14 h-14 rounded-full' : size === 'sm' ? 'w-8 h-8 rounded-full' : 'w-[42px] h-[42px] rounded-full';
-  const iconSize = size === 'lg' ? 24 : size === 'sm' ? 16 : 21;
+  const containerSize = size === 'xl' ? 'w-16 h-16 rounded-full' : size === 'lg' ? 'w-14 h-14 rounded-full' : size === 'sm' ? 'w-8 h-8 rounded-full' : 'w-[42px] h-[42px] rounded-full';
+  const iconSize = size === 'xl' ? 32 : size === 'lg' ? 24 : size === 'sm' ? 16 : 21;
 
   const visual = resolveEntityVisual(transaction, config);
 
