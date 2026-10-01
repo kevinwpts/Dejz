@@ -4177,8 +4177,6 @@ export default function App() {
     );
   }
 
-  const isProfileOrSettings = activeTab === "profile" || activeTab === "settings";
-
   return (
     <div 
       className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-clip bg-[var(--bg-color)] transition-colors duration-500 !bg-[#141118]"
@@ -4189,17 +4187,6 @@ export default function App() {
         className="dark-app-bg-layer" 
         style={{ backgroundColor: '#141118', backgroundImage: 'none' }}
         aria-hidden="true" 
-      />
-
-      {/* Shared Fixed Theme Tint Background Layer (Subtly tints entire app according to chosen theme color) */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0 transition-all duration-500"
-        style={{
-          background: isProfileOrSettings
-            ? 'none'
-            : 'linear-gradient(180deg, var(--user-home-bg-from, transparent) 0%, var(--user-home-bg-to, transparent) 55dvh, transparent 100%)',
-        }}
-        aria-hidden="true"
       />
 
       <ToastContainer toasts={toasts} onDismiss={removeToast} />

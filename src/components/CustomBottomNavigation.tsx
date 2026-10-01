@@ -39,9 +39,9 @@ export function CustomBottomNavigation({
   const isEn = language === 'en';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 pb-[max(0.85rem,env(safe-area-inset-bottom,0px))] px-4 sm:px-6 pointer-events-none flex justify-center">
-      <motion.div
-        className="w-full max-w-[290px] h-[54px] rounded-full px-2.5 bg-white/80 dark:bg-white/[0.06] backdrop-blur-xl text-[#6D6962] dark:text-[#A8A8A8] flex items-center justify-between pointer-events-auto border-none shadow-xl shadow-black/[0.06] dark:shadow-2xl dark:shadow-black/80"
+    <div className="fixed bottom-0 left-0 right-0 z-30 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] px-3 sm:px-6 pointer-events-none flex justify-center">
+      <motion.nav
+        className="w-full max-w-[340px] sm:max-w-[360px] h-[58px] rounded-full px-2 bg-white/85 dark:bg-[#1E1B22]/90 backdrop-blur-2xl text-[#6D6962] dark:text-[#A8A8A8] flex items-center justify-between pointer-events-auto border-none shadow-xl shadow-black/[0.08] dark:shadow-2xl dark:shadow-black/90"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 28 }}
@@ -64,7 +64,7 @@ export function CustomBottomNavigation({
         />
 
         {/* 3. Centrerad Plusknapp */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center px-1">
           <button
             onClick={() => {
               if (onPlusClick) onPlusClick();
@@ -98,7 +98,7 @@ export function CustomBottomNavigation({
             }
           }}
         />
-      </motion.div>
+      </motion.nav>
     </div>
   );
 }
@@ -121,17 +121,20 @@ function NavItem({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`w-9 h-9 flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer select-none rounded-full ${
+      className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-all duration-200 active:scale-95 cursor-pointer select-none py-1 ${
         isActive
-          ? 'text-[var(--accent-color)] dark:text-white'
-          : 'text-[#8C867C] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white'
+          ? 'text-[var(--accent-color)] dark:text-white font-semibold'
+          : 'text-[#8C867C] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white font-medium'
       }`}
     >
       <Icon 
-        size={20} 
-        strokeWidth={isActive ? 2.2 : 1.8} 
+        size={17} 
+        strokeWidth={isActive ? 2.3 : 1.75} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
       />
+      <span className="text-[10px] leading-tight tracking-tight">
+        {label}
+      </span>
     </button>
   );
 }

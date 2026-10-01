@@ -188,8 +188,8 @@ h6 {
   --bg-top-color: #EFECE6;
   --bg-color: #EFECE6;
   --bg-secondary: #EFECE6;
-  --bg-gradient: linear-gradient(180deg, #EFECE6 0%, #EFECE6 100%);
-
+  --bg-gradient: #EFECE6;
+ 
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-elevated: #FFFFFF;
@@ -221,7 +221,7 @@ h6 {
   --accent-color: #635BFF;
   --accent-hover: #5148E5;
   --accent-pressed: #5148E5;
-  --accent-gradient: linear-gradient(145deg, #635BFF 0%, #5148E5 100%);
+  --accent-gradient: var(--accent-color);
   --text-on-accent: #FFFFFF;
   --accent-soft: #EEECFF;
   --accent-on-solid: #FFFFFF;
@@ -312,7 +312,7 @@ h6 {
   --accent-color: #7C75FF;
   --accent-hover: #5148E5;
   --accent-pressed: #5148E5;
-  --accent-gradient: linear-gradient(135deg, #7C75FF 0%, #5148E5 100%);
+  --accent-gradient: var(--accent-color);
   --text-on-accent: #FFFFFF;
   --accent-soft: rgba(99, 91, 255, 0.2);
   --accent-on-solid: #FFFFFF;
