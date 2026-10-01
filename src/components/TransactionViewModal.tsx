@@ -119,48 +119,6 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           }}
         />
 
-        {/* Top Right Action Button Group: Duplicate, Edit, Close */}
-        <div className="absolute top-3 right-4 sm:top-4 sm:right-5 z-30 flex items-center gap-1.5">
-          <button 
-            type="button"
-            onClick={() => {
-              if (typeof feedback?.light === 'function') feedback.light();
-              onDuplicate(transaction);
-            }} 
-            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-            title={t('duplicate')}
-            aria-label={t('duplicate')}
-          >
-            <Repeat size={14} strokeWidth={1.9} />
-          </button>
-
-          <button 
-            type="button"
-            onClick={() => {
-              if (typeof feedback?.light === 'function') feedback.light();
-              onEdit(transaction);
-            }} 
-            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-            title={t('edit')}
-            aria-label={t('edit')}
-          >
-            <Pencil size={14} strokeWidth={1.9} />
-          </button>
-
-          <button 
-            type="button"
-            onClick={() => {
-              if (typeof feedback?.light === 'function') feedback.light();
-              onClose();
-            }} 
-            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 ml-0.5"
-            title={t('close')}
-            aria-label={t('close')}
-          >
-            <X size={16} strokeWidth={2.2} />
-          </button>
-        </div>
-
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
@@ -172,18 +130,62 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-2 sm:pt-4 pb-4 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section: Logo to the left, Large Title and smaller Price in line to the right */}
-          <div className="flex items-center gap-4 text-left pt-0.5 pb-2.5 pr-28 sm:pr-32">
-            <div className="shrink-0">
+          {/* Hero Section: Logo to the left, Title and smaller Action Buttons inline, Price below */}
+          <div className="flex items-start gap-4 text-left pt-1 pb-2.5">
+            <div className="shrink-0 pt-0.5">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
 
             <div className="min-w-0 flex-1 flex flex-col justify-center">
-              <h2 className="text-[26px] sm:text-[30px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight truncate">
-                {merchantName}
-              </h2>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-[22px] sm:text-[26px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight truncate">
+                  {merchantName}
+                </h2>
 
-              <p className={`text-[17px] sm:text-[19px] font-medium font-amount tabular-nums tracking-tight mt-0.5 flex items-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-secondary)]'}`}>
+                {/* 3 Smaller Action Buttons aligned inline with the title */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      onDuplicate(transaction);
+                    }} 
+                    className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                    title={t('duplicate')}
+                    aria-label={t('duplicate')}
+                  >
+                    <Repeat size={13} strokeWidth={1.9} />
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      onEdit(transaction);
+                    }} 
+                    className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                    title={t('edit')}
+                    aria-label={t('edit')}
+                  >
+                    <Pencil size={13} strokeWidth={1.9} />
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      onClose();
+                    }} 
+                    className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 ml-0.5"
+                    title={t('close')}
+                    aria-label={t('close')}
+                  >
+                    <X size={14} strokeWidth={2.2} />
+                  </button>
+                </div>
+              </div>
+
+              <p className={`text-[17px] sm:text-[19px] font-medium font-amount tabular-nums tracking-tight mt-1 flex items-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-secondary)]'}`}>
                 <span className="opacity-80 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
                 <span>{formatAmount(transaction.amount, config.language)}</span>
                 <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans">{config.currency}</span>
