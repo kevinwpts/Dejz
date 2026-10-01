@@ -21,7 +21,7 @@ export function CategoryIcon({
   const IconComp = (iconKey && ICON_MAP[iconKey]) ? ICON_MAP[iconKey] : Tag;
   
   // Container dimensions:
-  // 2xs: inline transparent / 12px icon
+  // 2xs: inline transparent / 10.5px icon
   // xs: inline transparent / 16px icon
   // sm: 32px container / 16px icon
   // md: 34-36px container / 20px icon (standard category icon container)
@@ -37,7 +37,7 @@ export function CategoryIcon({
   };
 
   const iconSizes = {
-    '2xs': 12,
+    '2xs': 10.5,
     xs: 16,
     sm: 16,
     md: 20,
