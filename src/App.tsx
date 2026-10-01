@@ -4182,6 +4182,15 @@ export default function App() {
       {/* Shared Fixed Dark Mode Background Layer */}
       <div className="dark-app-bg-layer" aria-hidden="true" />
 
+      {/* Shared Fixed Theme Tint Background Layer (Subtly tints entire app according to chosen theme color) */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 transition-all duration-500"
+        style={{
+          background: 'linear-gradient(180deg, var(--user-home-bg-from, transparent) 0%, var(--user-home-bg-to, transparent) 100%)',
+        }}
+        aria-hidden="true"
+      />
+
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 
       <ConfirmModal

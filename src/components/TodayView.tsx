@@ -453,13 +453,6 @@ export function TodayView({
 
   return (
     <div className="relative font-sans">
-      {/* SOLID FLAT BACKGROUND LAYER */}
-      <div 
-        className="fixed inset-0 z-0 pointer-events-none transition-colors duration-300 dark:hidden"
-        style={{
-          backgroundColor: 'var(--bg-color)',
-        }}
-      />
 
       {/* 1. FIXED STATIC HERO LAYER (Kvar att spendera + Dina budgetar) */}
       <div
