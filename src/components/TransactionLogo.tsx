@@ -10,8 +10,8 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
     setImgError(false);
   }, [transaction.logo, transaction.icon, transaction.merchant, transaction.note, transaction.category]);
 
-  const containerSize = size === 'lg' ? 'w-14 h-14 rounded-full' : size === 'sm' ? 'w-8 h-8 rounded-full' : 'w-[36px] h-[36px] rounded-full';
-  const iconSize = size === 'lg' ? 24 : size === 'sm' ? 15 : 18;
+  const containerSize = size === 'lg' ? 'w-14 h-14 rounded-full' : size === 'sm' ? 'w-8 h-8 rounded-full' : 'w-[42px] h-[42px] rounded-full';
+  const iconSize = size === 'lg' ? 24 : size === 'sm' ? 16 : 21;
 
   const visual = resolveEntityVisual(transaction, config);
 
