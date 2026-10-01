@@ -729,7 +729,7 @@ export function TransactionModal({
                 </label>
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="bg-white dark:bg-[#1E1B22] rounded-[14px] h-[68px] sm:h-[72px] px-4 flex items-center justify-between transition-all border-none shadow-none group cursor-text"
+                  className="bg-white dark:bg-[#1E1B22] rounded-[16px] h-[80px] sm:h-[84px] px-4 sm:px-5 flex items-center justify-between transition-all border-none shadow-none group cursor-text"
                 >
                   <div className="shrink-0 flex items-center min-w-[56px]">
                     {type === 'expense' && (
@@ -789,12 +789,12 @@ export function TransactionModal({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="w-full h-[46px] bg-white dark:bg-[#1E1B22] text-[13.5px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 rounded-[14px] px-3.5 border-none shadow-none"
+                    className="w-full h-[54px] sm:h-[56px] bg-white dark:bg-[#1E1B22] text-[13.5px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 rounded-[16px] px-4 border-none shadow-none"
                   />
                   {merchant && (
                     <button 
                       onClick={() => setMerchant('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
                     >
                       <X size={14} strokeWidth={2} />
                     </button>
@@ -814,14 +814,14 @@ export function TransactionModal({
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                    className={`w-full h-[46px] bg-white dark:bg-[#1E1B22] text-[13.5px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 rounded-[14px] px-3.5 ${
+                    className={`w-full h-[54px] sm:h-[56px] bg-white dark:bg-[#1E1B22] text-[13.5px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 rounded-[16px] px-4 ${
                       validationError === 'note' ? 'ring-2 ring-rose-500 bg-rose-500/5' : 'border-none shadow-none'
                     }`}
                   />
                   {note && (
                     <button 
                       onClick={() => setNote('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
                     >
                       <X size={14} strokeWidth={2} />
                     </button>
@@ -998,7 +998,7 @@ export function TransactionModal({
                         if (typeof feedback?.light === 'function') feedback.light();
                         setIsCategoryPickerOpen(true);
                       }}
-                      className="w-full h-[46px] bg-white dark:bg-[#1E1B22] rounded-[14px] px-3.5 border-none shadow-none flex items-center justify-between transition-all hover:bg-black/[0.02] dark:hover:bg-[#27242E] cursor-pointer text-left group"
+                      className="w-full h-[54px] sm:h-[56px] bg-white dark:bg-[#1E1B22] rounded-[16px] px-4 border-none shadow-none flex items-center justify-between transition-all hover:bg-black/[0.02] dark:hover:bg-[#27242E] cursor-pointer text-left group"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div 
@@ -1038,14 +1038,14 @@ export function TransactionModal({
                         </span>
                       )}
                     </div>
-                    <div className="bg-white dark:bg-[#1E1B22] rounded-[14px] p-1.5 flex gap-1.5 border-none shadow-none">
+                    <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-1.5 flex gap-1.5 border-none shadow-none">
                       <button
                         type="button"
                         onClick={() => {
                           setSelectedDate(new Date());
                           setShowFullCalendar(false);
                         }}
-                        className={`flex-1 py-2 rounded-xl text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        className={`flex-1 h-[42px] sm:h-[44px] rounded-xl text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
                             ? 'bg-[var(--accent-color)] text-white shadow-xs'
                             : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
@@ -1061,7 +1061,7 @@ export function TransactionModal({
                           setSelectedDate(yesterday);
                           setShowFullCalendar(false);
                         }}
-                        className={`flex-1 py-2 rounded-xl text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        className={`flex-1 h-[42px] sm:h-[44px] rounded-xl text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
                             ? 'bg-[var(--accent-color)] text-white shadow-xs'
                             : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
@@ -1072,7 +1072,7 @@ export function TransactionModal({
                       <button
                         type="button"
                         onClick={() => setShowFullCalendar(!showFullCalendar)}
-                        className={`w-10 py-2 rounded-xl transition-all flex items-center justify-center cursor-pointer ${
+                        className={`w-12 h-[42px] sm:h-[44px] rounded-xl transition-all flex items-center justify-center cursor-pointer ${
                           showFullCalendar 
                             ? 'bg-[var(--accent-color)] text-white shadow-xs' 
                             : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
@@ -1091,7 +1091,7 @@ export function TransactionModal({
                           exit={{ height: 0, opacity: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="bg-white dark:bg-[#1E1B22] rounded-[14px] p-3.5 border-none shadow-none mt-1">
+                          <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-3.5 border-none shadow-none mt-1">
                             <CalendarWidget 
                               calendarDays={calendarDays}
                               normalizedSelectedDate={selectedDate}
@@ -1111,7 +1111,7 @@ export function TransactionModal({
                       {currentLang === 'en' ? 'Attach file' : 'Bifoga fil'}
                     </label>
                     {isScanningReceipt ? (
-                      <div className="bg-white dark:bg-[#1E1B22] rounded-[14px] p-3 border-none shadow-none flex items-center justify-between transition-all">
+                      <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] min-h-[54px] sm:min-h-[56px] px-4 py-2 border-none shadow-none flex items-center justify-between transition-all">
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className="w-7 h-7 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
                             <Loader2 size={15} className="animate-spin text-[var(--accent-color)]" />
@@ -1130,7 +1130,7 @@ export function TransactionModal({
                         </span>
                       </div>
                     ) : receiptUrl ? (
-                      <div className="bg-white dark:bg-[#1E1B22] rounded-[14px] p-2.5 sm:p-3 border-none shadow-none flex items-center justify-between transition-all">
+                      <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] min-h-[54px] sm:min-h-[56px] px-4 py-2 border-none shadow-none flex items-center justify-between transition-all">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-black/5 dark:border-white/5 shrink-0 bg-black/5 flex items-center justify-center">
                             {receiptUrl.includes('.pdf') ? (
@@ -1173,7 +1173,7 @@ export function TransactionModal({
                       </div>
                     ) : (
                       <div 
-                        className="bg-white dark:bg-[#1E1B22] rounded-[14px] p-2.5 sm:p-3 border-none shadow-none flex items-center justify-between transition-all"
+                        className="bg-white dark:bg-[#1E1B22] rounded-[16px] min-h-[54px] sm:min-h-[56px] px-4 py-2 border-none shadow-none flex items-center justify-between transition-all"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
@@ -1193,7 +1193,7 @@ export function TransactionModal({
                             type="button"
                             onClick={() => receiptInputRef.current?.click()}
                             disabled={isUploadingReceipt}
-                            className="px-2.5 py-1.5 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11.5px] font-medium rounded-xl transition-all cursor-pointer active:scale-95 flex items-center gap-1"
+                            className="h-8 px-3 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11.5px] font-medium rounded-xl transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
                           >
                             <Paperclip size={12} strokeWidth={2} />
                             <span>{currentLang === 'en' ? 'File' : 'Välj fil'}</span>
@@ -1202,7 +1202,7 @@ export function TransactionModal({
                             type="button"
                             onClick={() => setIsCameraModalOpen(true)}
                             disabled={isUploadingReceipt}
-                            className="px-2.5 py-1.5 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11.5px] font-medium rounded-xl shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1"
+                            className="h-8 px-3 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11.5px] font-medium rounded-xl shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
                           >
                             <Camera size={12} strokeWidth={2} />
                             <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
