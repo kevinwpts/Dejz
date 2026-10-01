@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
-import { X, Pencil, Trash2, Tag, Receipt, Repeat } from 'lucide-react';
+import { X, Pencil, Trash2, Tag, Receipt, Repeat, MoreHorizontal } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
@@ -28,6 +28,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
   useScrollLock(true);
   const dragControls = useDragControls();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const isIncome = transaction.type === 'income';
   const isSavings = transaction.type === 'savings';
 
@@ -86,59 +87,20 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#080611] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-white dark:bg-[#080611] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
           onClick={onClose}
-          className="w-full py-3 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
+          className="w-full py-2.5 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
         >
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Header with Navigation and Actions: Actions left, Close button right */}
-        <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button 
-              type="button"
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                onDuplicate(transaction);
-              }} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-              title={t('duplicate')}
-              aria-label={t('duplicate')}
-            >
-              <Repeat size={14} strokeWidth={1.8} />
-            </button>
-            <button 
-              type="button"
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                onEdit(transaction);
-              }} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-              title={t('edit')}
-              aria-label={t('edit')}
-            >
-              <Pencil size={14} strokeWidth={1.8} />
-            </button>
-            <button 
-              type="button"
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                setShowDeleteConfirm(true);
-              }} 
-              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.18] flex items-center justify-center text-rose-600 dark:text-rose-400 transition-colors cursor-pointer active:scale-95"
-              title={t('delete')}
-              aria-label={t('delete')}
-            >
-              <Trash2 size={14} strokeWidth={1.8} />
-            </button>
-          </div>
-
+        {/* Clean Header: Close button only */}
+        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-2 flex items-center justify-end shrink-0">
           <button 
             type="button"
             onClick={() => {
@@ -152,10 +114,10 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           </button>
         </div>
 
-        {/* Main Content Area: Modern Consumer App Presentation */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-2 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
           {/* Hero Section: Logo to the left, name & cost in line to the right */}
-          <div className="flex items-center gap-4 text-left pt-1 pb-2">
+          <div className="flex items-center gap-4 text-left pt-1 pb-3">
             <div className="shrink-0">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
@@ -173,10 +135,10 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             </div>
           </div>
 
-          {/* Details Section: Clean, Lightweight, and Non-Administrative */}
-          <div className="bg-black/5 dark:bg-white/5 rounded-2xl p-4 space-y-3.5 border border-black/10 dark:border-white/10">
+          {/* Details Section: Clean list with discrete subtle divider lines without background */}
+          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
             {/* Category */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="py-3.5 flex items-center justify-between gap-4">
               <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
@@ -220,8 +182,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             </div>
 
             {/* Date Field */}
-            <div className="h-px bg-black/5 dark:bg-white/10" />
-            <div className="flex items-center justify-between gap-4">
+            <div className="py-3.5 flex items-center justify-between gap-4">
               <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('date')}
               </span>
@@ -232,79 +193,145 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
             {/* Time Field */}
             {formattedTime && (
-              <>
-                <div className="h-px bg-black/5 dark:bg-white/10" />
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
-                    {config.language === 'en' ? 'Time' : config.language === 'fi' ? 'Aika' : 'Tid'}
-                  </span>
-                  <span className="text-[15px] font-medium text-[var(--text-primary)] text-right tabular-nums">
-                    {formattedTime}
-                  </span>
-                </div>
-              </>
+              <div className="py-3.5 flex items-center justify-between gap-4">
+                <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+                  {config.language === 'en' ? 'Time' : config.language === 'fi' ? 'Aika' : 'Tid'}
+                </span>
+                <span className="text-[15px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+                  {formattedTime}
+                </span>
+              </div>
             )}
 
             {/* Note if exists */}
             {transaction.note && (
+              <div className="py-3.5 flex items-start justify-between gap-4">
+                <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
+                  {t('ownNote')}
+                </span>
+                <span className="text-[15px] font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                  {transaction.note}
+                </span>
+              </div>
+            )}
+
+            {/* Tags Section if exists */}
+            {transaction.tags && transaction.tags.length > 0 && (
+              <div className="py-3.5 flex items-start justify-between gap-4">
+                <div className="flex items-center gap-1.5 text-[var(--text-secondary)] shrink-0 pt-0.5">
+                  <Tag size={13} strokeWidth={1.75} />
+                  <span className="text-[14px] font-normal">{t('tags')}</span>
+                </div>
+                <div className="flex flex-wrap justify-end gap-1.5">
+                  {(transaction.tags || []).map((tag, index) => (
+                    <span key={index} className="bg-black/5 dark:bg-white/10 text-[var(--text-primary)] px-2.5 py-1 rounded-[8px] text-xs font-medium">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Receipt Section if exists */}
+            {transaction.receiptUrl && (
+              <div className="py-3.5 space-y-2">
+                <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
+                  <Receipt size={13} strokeWidth={1.75} />
+                  <span className="text-[14px] font-normal">{t('receipt')}</span>
+                </div>
+                <div className="relative aspect-[3/4] max-w-[180px] rounded-[14px] overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10">
+                  <img 
+                    src={transaction.receiptUrl} 
+                    alt="Receipt" 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                  <a 
+                    href={transaction.receiptUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-all group"
+                  >
+                    <span className="bg-white/95 text-black px-3.5 py-2 rounded-xl text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-lg">
+                      Visa fullstorlek
+                    </span>
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Ergonomic Action Bar in Footer (Alternative 2) */}
+        <div className="px-5 sm:px-6 pt-3 pb-1 shrink-0 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center gap-2.5 relative">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              onEdit(transaction);
+            }}
+            className="flex-1 h-12 bg-[#211F1C] dark:bg-white text-white dark:text-[#080611] font-semibold text-[15px] rounded-2xl flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <Pencil size={16} strokeWidth={2} />
+            <span>{t('edit')}</span>
+          </button>
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setShowMoreMenu(!showMoreMenu);
+              }}
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors cursor-pointer active:scale-95 ${
+                showMoreMenu 
+                  ? 'bg-black/10 dark:bg-white/20 text-[var(--text-primary)]' 
+                  : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
+              title="Fler åtgärder"
+              aria-label="Fler åtgärder"
+            >
+              <MoreHorizontal size={19} strokeWidth={2} />
+            </button>
+
+            {showMoreMenu && (
               <>
-                <div className="h-px bg-black/5 dark:bg-white/10" />
-                <div className="flex items-start justify-between gap-4">
-                  <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
-                    {t('ownNote')}
-                  </span>
-                  <span className="text-[15px] font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
-                    {transaction.note}
-                  </span>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowMoreMenu(false)} 
+                />
+                <div className="absolute right-0 bottom-full mb-2.5 z-50 w-48 bg-white dark:bg-[#191523] rounded-2xl shadow-2xl border border-black/10 dark:border-white/10 py-1.5 overflow-hidden font-sans animate-in fade-in zoom-in-95 duration-150">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      setShowMoreMenu(false);
+                      onDuplicate(transaction);
+                    }}
+                    className="w-full px-4 py-2.5 flex items-center gap-2.5 text-left text-[14px] text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    <Repeat size={15} strokeWidth={1.8} className="text-[var(--text-secondary)]" />
+                    <span>{t('duplicate')}</span>
+                  </button>
+
+                  <div className="h-px bg-black/5 dark:bg-white/[0.06] my-1" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      setShowMoreMenu(false);
+                      setShowDeleteConfirm(true);
+                    }}
+                    className="w-full px-4 py-2.5 flex items-center gap-2.5 text-left text-[14px] text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                  >
+                    <Trash2 size={15} strokeWidth={1.8} />
+                    <span>{t('delete')}</span>
+                  </button>
                 </div>
               </>
             )}
           </div>
-
-          {/* Tags Section if exists */}
-          {transaction.tags && transaction.tags.length > 0 && (
-            <div className="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/10 dark:border-white/10">
-              <div className="flex items-center gap-1.5 mb-2 text-[var(--text-secondary)]">
-                <Tag size={12} strokeWidth={1.75} />
-                <span className="text-xs font-medium">{t('tags')}</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {(transaction.tags || []).map((tag, index) => (
-                  <span key={index} className="bg-black/5 dark:bg-white/10 text-[var(--text-primary)] px-2.5 py-1 rounded-[10px] text-xs font-medium border border-black/5 dark:border-white/10">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Receipt Section if exists */}
-          {transaction.receiptUrl && (
-            <div className="p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/10 dark:border-white/10">
-              <div className="flex items-center gap-1.5 mb-3 text-[var(--text-secondary)]">
-                <Receipt size={12} strokeWidth={1.75} />
-                <span className="text-xs font-medium">{t('receipt')}</span>
-              </div>
-              <div className="relative aspect-[3/4] rounded-[14px] overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10">
-                <img 
-                  src={transaction.receiptUrl} 
-                  alt="Receipt" 
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-                <a 
-                  href={transaction.receiptUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-all group"
-                >
-                  <span className="bg-white/95 text-black px-3.5 py-2 rounded-xl text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-lg">
-                    Visa fullstorlek
-                  </span>
-                </a>
-              </div>
-            </div>
-          )}
         </div>
       </motion.div>
 
