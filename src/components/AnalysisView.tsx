@@ -441,7 +441,7 @@ export function AnalysisView({
         </div>
 
         {categoryData.length > 0 ? (
-          <div className="bg-white dark:bg-[#242424] rounded-[20px] border border-[#E2DDD4] dark:border-[#383838] shadow-none divide-y divide-[#E2DDD4] dark:divide-[#383838] overflow-hidden">
+          <div className="bg-white/80 dark:bg-white/[0.06] backdrop-blur-xl rounded-[20px] border-none shadow-none divide-y divide-black/5 dark:divide-white/[0.04] overflow-hidden">
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               

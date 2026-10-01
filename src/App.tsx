@@ -3945,7 +3945,7 @@ export default function App() {
   };
 
   const headerTitle = useMemo(() => {
-    if (activeTab === "today") return config?.language === 'en' ? 'Overview' : 'Överblick';
+    if (activeTab === "today") return "";
     if (activeTab === "notifications") return t("notificationsTitle");
     if (activeTab === "transactions") return t("log");
     if (activeTab === "analysis") return t("analysis");

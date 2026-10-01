@@ -82,19 +82,19 @@ export function TransactionItem({
     ? 'text-[#1C1917] dark:text-white' 
     : 'text-[#1C1917] dark:text-white';
 
-  // Determine layout style classes with solid opaque surfaces (prevents background bleed-through)
+  // Determine layout style classes with translucent glass surfaces
   let containerClasses = "";
   let paddingClasses = "px-4 py-3 sm:py-3.5 min-h-[64px]";
   if (squared) {
-    containerClasses = "bg-white dark:bg-[#242424] rounded-none shadow-none border-b border-[#E2DDD4]/60 dark:border-white/[0.04] last:border-none py-3 px-2";
+    containerClasses = "bg-white/80 dark:bg-white/[0.06] backdrop-blur-xl rounded-none shadow-none border-b border-black/5 dark:border-white/[0.04] last:border-none py-3 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
     paddingClasses = "px-4 py-2 sm:py-2.5 min-h-[50px]";
   } else if (variant === 'nested') {
-    containerClasses = "bg-[var(--surface-muted)] dark:bg-[#2D2D2D] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] shadow-none border border-[#E2DDD4]/50 dark:border-white/[0.04] rounded-[12px]";
+    containerClasses = "bg-white/60 dark:bg-white/[0.04] backdrop-blur-md hover:bg-white/80 dark:hover:bg-white/[0.07] shadow-none border-none rounded-[12px]";
   } else {
-    containerClasses = "bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] rounded-[20px] shadow-none border border-[#E2DDD4] dark:border-[#383838]";
+    containerClasses = "bg-white/80 dark:bg-white/[0.06] backdrop-blur-xl hover:bg-white/90 dark:hover:bg-white/[0.09] rounded-[20px] shadow-none border-none";
   }
 
   // Neutral discreet category display
@@ -202,20 +202,20 @@ export function TransactionItem({
             </div>
             
             <div className="min-w-0 flex-1 flex flex-col justify-center">
-              {/* Primary Merchant Name: 15px, weight 500 */}
-              <p className="text-[15px] font-medium text-[#242321] dark:text-white leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
+              {/* Primary Merchant Name: 14px, weight 500 */}
+              <p className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
                 {merchantName}
               </p>
               
-              {/* Secondary Details: 13px, weight 400 */}
-              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#716E68] dark:text-[#A8A8A8]">
+              {/* Secondary Details: 12px, weight 400 */}
+              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#6D6962] dark:text-[#A8A8A8]">
                 {hideCategoryBadge ? (
                   (transaction.timestamp || transaction.date) ? (
-                    <span className="text-[13px] font-normal text-[#716E68] dark:text-[#A8A8A8] tabular-nums">
+                    <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] tabular-nums">
                       {new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
                     </span>
                   ) : isFixed ? (
-                    <span className="text-[13px] font-normal text-[#716E68] dark:text-[#A8A8A8]">
+                    <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
                       {getL10n('Fast utgift', 'Fixed expense', 'Fast utgift', 'Fast udgift', 'Kiinteä kulu')}
                     </span>
                   ) : null
@@ -230,23 +230,23 @@ export function TransactionItem({
                 )}
 
                 {transaction.note && !isFixed && (
-                  <span className="text-[13px] font-normal text-[#716E68] dark:text-[#A8A8A8] truncate min-w-0 flex-1">
+                  <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate min-w-0 flex-1">
                     • {transaction.note}
                   </span>
                 )}
                 {transaction.receiptUrl && (
-                  <Paperclip className="w-3 h-3 text-[#716E68] dark:text-[#A8A8A8] shrink-0" />
+                  <Paperclip className="w-3 h-3 text-[#6D6962] dark:text-[#A8A8A8] shrink-0" />
                 )}
               </div>
             </div>
           </div>
           
-          {/* Primary Amount: 15px, weight 500 */}
+          {/* Primary Amount: 14px, weight 500 with tight currency space */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-            <p className={`text-[15px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
+            <p className={`text-[14px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
               <span className="opacity-75 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
-              <span className="font-amount tabular-nums font-semibold tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
-              <span className="text-[13px] font-normal text-[#716E68] dark:text-[#A8A8A8] ml-[2.5px]">{config?.currency || 'kr'}</span>
+              <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
+              <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[2.5px]">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixed ? (
               <p className="text-[11.5px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 tabular-nums">

@@ -49,7 +49,7 @@ export function AppHeader({
   const getFallbackTitle = () => {
     switch (activeTab) {
       case "today":
-        return language === "en" ? "Overview" : "Överblick";
+        return "";
       case "transactions":
         return language === "en" ? "Transactions" : "Historik";
       case "analysis":

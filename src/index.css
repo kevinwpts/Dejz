@@ -359,14 +359,20 @@ h6 {
   --date-inactive-color: var(--text-secondary);
 }
 
-/* Glass-Card Surface Utility (harmonized with theme tokens - borderless clean) */
-.glass-card {
-  background: var(--surface-color) !important;
+/* Glass-Card Surface Utility (borderless translucent glass) */
+.glass-card,
+.surface-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
   box-shadow: none !important;
 }
-.dark .glass-card {
-  background-color: var(--surface-color) !important;
+.dark .glass-card,
+.dark .surface-card {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
   box-shadow: none !important;
 }
