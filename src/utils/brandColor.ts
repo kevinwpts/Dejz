@@ -157,32 +157,224 @@ export const BRAND_COLORS: Record<string, string> = {
   hinge: '#7C3AED'
 };
 
+// Cache for analyzed image dominant colors
+export const imageColorCache = new Map<string, string>();
+
 /**
- * Resolves the most prominent/dominant brand or entity color for subtle ambient UI tinting.
+ * Extracts vibrant/dominant color directly from SVG markup or data URI.
+ */
+export function extractColorFromSvg(svgUrlOrContent: string): string | null {
+  try {
+    const raw = svgUrlOrContent.startsWith('data:image/svg+xml')
+      ? decodeURIComponent(svgUrlOrContent.replace(/^data:image\/svg\+xml;utf8,/, ''))
+      : svgUrlOrContent;
+
+    // Match hex colors (e.g. #FF0055, %23FF0055)
+    const matches = raw.match(/(?:#|%23)([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g);
+    if (!matches || matches.length === 0) return null;
+
+    const candidates: { color: string; score: number }[] = [];
+
+    for (const match of matches) {
+      const cleanHex = match.replace('%23', '#');
+      const expandedHex = cleanHex.length === 4
+        ? '#' + cleanHex[1] + cleanHex[1] + cleanHex[2] + cleanHex[2] + cleanHex[3] + cleanHex[3]
+        : cleanHex;
+
+      const r = parseInt(expandedHex.slice(1, 3), 16);
+      const g = parseInt(expandedHex.slice(3, 5), 16);
+      const b = parseInt(expandedHex.slice(5, 7), 16);
+
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const delta = max - min;
+      const lightness = (max + min) / (2 * 255);
+
+      // Skip near-white, near-black, and flat neutral grays
+      if (lightness > 0.92 || lightness < 0.08) continue;
+      if (delta < 20) continue;
+
+      const saturation = delta / (max === 0 ? 1 : max);
+      // Higher score for saturated, vibrant colors
+      const score = saturation * 2 + (1 - Math.abs(lightness - 0.5));
+      candidates.push({ color: expandedHex.toUpperCase(), score });
+    }
+
+    if (candidates.length === 0) return null;
+    candidates.sort((a, b) => b.score - a.score);
+    return candidates[0].color;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Dynamically analyzes an image URL (PNG, JPEG, WebP, Favicon, SVG) on a canvas to find its true dominant color.
+ */
+export function extractDominantColorFromImage(url: string): Promise<string | null> {
+  if (!url) return Promise.resolve(null);
+
+  if (imageColorCache.has(url)) {
+    return Promise.resolve(imageColorCache.get(url)!);
+  }
+
+  // If SVG data URI, extract synchronously
+  if (url.startsWith('data:image/svg+xml')) {
+    const svgColor = extractColorFromSvg(url);
+    if (svgColor) {
+      imageColorCache.set(url, svgColor);
+      return Promise.resolve(svgColor);
+    }
+  }
+
+  if (typeof document === 'undefined') return Promise.resolve(null);
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    const timer = setTimeout(() => {
+      resolve(null);
+    }, 1500);
+
+    img.onload = () => {
+      clearTimeout(timer);
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 32;
+        canvas.height = 32;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) {
+          resolve(null);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, 32, 32);
+        const imgData = ctx.getImageData(0, 0, 32, 32).data;
+
+        const colorBuckets = new Map<string, { r: number; g: number; b: number; count: number; score: number }>();
+
+        for (let i = 0; i < imgData.length; i += 4) {
+          const a = imgData[i + 3];
+          if (a < 120) continue; // Skip transparent pixels
+
+          const r = imgData[i];
+          const g = imgData[i + 1];
+          const b = imgData[i + 2];
+
+          const max = Math.max(r, g, b);
+          const min = Math.min(r, g, b);
+          const delta = max - min;
+          const lightness = (max + min) / (2 * 255);
+
+          // Discard near-white, near-black, and unsaturated gray
+          if (lightness > 0.92 || lightness < 0.08) continue;
+          if (delta < 20) continue;
+
+          const saturation = delta / (max === 0 ? 1 : max);
+
+          // Quantize into 16-level buckets to aggregate nearby shades
+          const qr = Math.round(r / 16) * 16;
+          const qg = Math.round(g / 16) * 16;
+          const qb = Math.round(b / 16) * 16;
+          const key = `${qr},${qg},${qb}`;
+
+          const existing = colorBuckets.get(key);
+          if (existing) {
+            existing.count += 1;
+            existing.score += saturation;
+          } else {
+            colorBuckets.set(key, { r, g, b, count: 1, score: saturation });
+          }
+        }
+
+        if (colorBuckets.size === 0) {
+          resolve(null);
+          return;
+        }
+
+        let bestColor = '';
+        let bestScore = -1;
+
+        for (const bucket of colorBuckets.values()) {
+          const finalScore = bucket.score * Math.sqrt(bucket.count);
+          if (finalScore > bestScore) {
+            bestScore = finalScore;
+            const hexR = Math.min(255, Math.max(0, bucket.r)).toString(16).padStart(2, '0');
+            const hexG = Math.min(255, Math.max(0, bucket.g)).toString(16).padStart(2, '0');
+            const hexB = Math.min(255, Math.max(0, bucket.b)).toString(16).padStart(2, '0');
+            bestColor = `#${hexR}${hexG}${hexB}`.toUpperCase();
+          }
+        }
+
+        if (bestColor) {
+          imageColorCache.set(url, bestColor);
+          resolve(bestColor);
+        } else {
+          resolve(null);
+        }
+      } catch {
+        resolve(null);
+      }
+    };
+
+    img.onerror = () => {
+      clearTimeout(timer);
+      resolve(null);
+    };
+
+    img.src = url;
+  });
+}
+
+/**
+ * Resolves the most accurate brand or entity color for subtle ambient UI tinting.
+ * Prioritizes the true visible icon/logo color over guessing.
  */
 export function getTransactionDominantColor(transaction: Transaction, config?: Config): string {
-  const merchantText = transaction.merchant || transaction.note || '';
-  const norm = normalizeMerchant(merchantText).replace(/\s+/g, '');
-  
-  // Check exact/prefix match in brand colors
-  if (norm) {
-    if (BRAND_COLORS[norm]) {
-      return BRAND_COLORS[norm];
+  // 1. Resolve what visual representation is actually rendered on screen
+  const visual = resolveEntityVisual(transaction, config);
+
+  // If the visual is an image/logo:
+  if (visual.logoUrl) {
+    // Check in-memory cache
+    if (imageColorCache.has(visual.logoUrl)) {
+      return imageColorCache.get(visual.logoUrl)!;
     }
-    for (const [key, color] of Object.entries(BRAND_COLORS)) {
-      if (norm.includes(key) || key.includes(norm)) {
-        return color;
+
+    // If SVG data URI, extract color directly
+    if (visual.logoUrl.startsWith('data:image/svg+xml')) {
+      const svgColor = extractColorFromSvg(visual.logoUrl);
+      if (svgColor) {
+        imageColorCache.set(visual.logoUrl, svgColor);
+        return svgColor;
+      }
+    }
+
+    // High confidence brand lookup by strict whole-word match
+    const merchantText = transaction.merchant || transaction.note || '';
+    const norm = normalizeMerchant(merchantText).trim();
+    if (norm) {
+      if (BRAND_COLORS[norm]) {
+        return BRAND_COLORS[norm];
+      }
+      const words = norm.split(/\s+/);
+      for (const word of words) {
+        if (word.length >= 2 && BRAND_COLORS[word]) {
+          return BRAND_COLORS[word];
+        }
       }
     }
   }
 
-  // Visual resolver fallback (category color, user preference, etc.)
-  const visual = resolveEntityVisual(transaction, config);
+  // 2. If it is an ICON (Lucide, Category, Emoji):
+  // The icon is rendered inside a circle with visual.backgroundColor.
+  // We MUST use that exact color so the gradient matches what the user sees!
   if (visual.backgroundColor && visual.backgroundColor !== '#6E6961' && visual.backgroundColor !== '#ffffff') {
     return visual.backgroundColor;
   }
 
-  // Find category color in config
+  // 3. Category color in config
   const categoryText = typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '');
   const cat = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
     c => c.name.trim().toLowerCase() === categoryText.trim().toLowerCase()
@@ -191,7 +383,7 @@ export function getTransactionDominantColor(transaction: Transaction, config?: C
     return cat.color;
   }
 
-  // Default elegant subtle accent
+  // 4. Fallback based on type
   if (transaction.type === 'income') return '#05B862';
   if (transaction.type === 'savings') return '#3B82F6';
   return '#7C3AED'; // Soft vibrant violet fallback

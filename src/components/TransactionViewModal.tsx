@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
@@ -12,7 +12,8 @@ import { useScrollLock } from '../hooks/useScrollLock';
 import { getCategoryIconName } from '../utils/icons';
 import { formatFullDate } from '../utils/date';
 import { feedback } from '../utils/feedback';
-import { getTransactionDominantColor } from '../utils/brandColor';
+import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
+import { resolveEntityVisual } from '../utils/resolver';
 
 interface TransactionViewModalProps {
   transaction: Transaction;
@@ -46,7 +47,21 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
   const isIncome = transaction.type === 'income';
   const isSavings = transaction.type === 'savings';
 
-  const brandColor = getTransactionDominantColor(transaction, config);
+  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(transaction, config));
+
+  useEffect(() => {
+    const initial = getTransactionDominantColor(transaction, config);
+    setBrandColor(initial);
+
+    const visual = resolveEntityVisual(transaction, config);
+    if (visual.logoUrl && !visual.logoUrl.startsWith('data:image/svg+xml')) {
+      extractDominantColorFromImage(visual.logoUrl).then((extracted) => {
+        if (extracted) {
+          setBrandColor(extracted);
+        }
+      });
+    }
+  }, [transaction, config]);
 
   const getLocale = () => {
     const lang = config.language || 'sv';
@@ -121,15 +136,15 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
         <div 
           onPointerDown={(e) => dragControls.start(e)}
           onClick={onClose}
-          className="w-full pt-2.5 pb-1 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0 relative z-20"
+          className="w-full pt-3 pb-1.5 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0 relative z-20"
         >
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-2 sm:pt-4 pb-4 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
           {/* Hero Section: Logo to the left, Title and smaller Action Buttons inline, Price below */}
-          <div className="flex items-start gap-4 text-left pt-1 pb-2.5">
+          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
             <div className="shrink-0 pt-0.5">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
@@ -141,18 +156,18 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
                 </h2>
 
                 {/* 3 Smaller Action Buttons aligned inline with the title */}
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
                   <button 
                     type="button"
                     onClick={() => {
                       if (typeof feedback?.light === 'function') feedback.light();
                       onDuplicate(transaction);
                     }} 
-                    className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
                     title={t('duplicate')}
                     aria-label={t('duplicate')}
                   >
-                    <Repeat size={13} strokeWidth={1.9} />
+                    <Repeat size={13.5} strokeWidth={1.9} />
                   </button>
 
                   <button 
@@ -161,11 +176,11 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
                       if (typeof feedback?.light === 'function') feedback.light();
                       onEdit(transaction);
                     }} 
-                    className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
                     title={t('edit')}
                     aria-label={t('edit')}
                   >
-                    <Pencil size={13} strokeWidth={1.9} />
+                    <Pencil size={13.5} strokeWidth={1.9} />
                   </button>
 
                   <button 
@@ -174,11 +189,11 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
                       if (typeof feedback?.light === 'function') feedback.light();
                       onClose();
                     }} 
-                    className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 ml-0.5"
+                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 ml-0.5"
                     title={t('close')}
                     aria-label={t('close')}
                   >
-                    <X size={14} strokeWidth={2.2} />
+                    <X size={14.5} strokeWidth={2.2} />
                   </button>
                 </div>
               </div>
