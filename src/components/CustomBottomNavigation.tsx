@@ -46,12 +46,12 @@ export function CustomBottomNavigation({
     >
       {/* Konvex rund upphöjning (kulle) på 76 × 76 px bakom knappen i exakt samma bakgrundsfärg */}
       <div 
-        className="absolute left-1/2 -top-[20px] -translate-x-1/2 w-[76px] h-[76px] rounded-full bg-white dark:bg-[#1E1B22] pointer-events-none z-0 border-none shadow-none"
+        className="absolute left-1/2 -top-[6px] -translate-x-1/2 w-[76px] h-[76px] rounded-full bg-white dark:bg-[#1E1B22] pointer-events-none z-0 border-none shadow-none"
         aria-hidden="true"
       />
 
-      {/* Upphöjd rund mittknapp på 56 × 56 px placerad 10 px ovanför footerns överkant */}
-      <div className="absolute left-1/2 -top-[10px] -translate-x-1/2 z-20">
+      {/* Upphöjd rund mittknapp på 56 × 56 px nedsänkt så den linjerar naturligt med ikonerna */}
+      <div className="absolute left-1/2 top-[4px] -translate-x-1/2 z-20">
         <button
           type="button"
           onClick={() => {
@@ -61,7 +61,7 @@ export function CustomBottomNavigation({
           aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
           title={isEn ? "Add transaction" : "Lägg till transaktion"}
         >
-          <Plus size={30} strokeWidth={2.5} className="text-white" />
+          <Plus size={28} strokeWidth={2.5} className="text-white" />
         </button>
       </div>
 
@@ -139,11 +139,11 @@ function NavItem({
       }`}
     >
       <Icon 
-        size={26} 
-        strokeWidth={isActive ? 2.2 : 1.75} 
+        size={20} 
+        strokeWidth={isActive ? 2.2 : 1.8} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
       />
-      <span className="text-[12px] leading-tight tracking-tight mt-[5px]">
+      <span className="text-[11px] leading-tight tracking-tight mt-[3.5px]">
         {label}
       </span>
     </button>
