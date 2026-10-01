@@ -513,20 +513,9 @@ export function TodayView({
             onOpenCalculator={onOpenCalculator}
             allTransactions={allTransactions}
             categoryBudgets={
-              <div className="pt-1 pb-1">
-                {/* Action link on the right */}
-                <div className="flex items-center justify-end px-1 mb-1.5">
-                  <button
-                    type="button"
-                    onClick={() => onNavigate("budget", "category-budgets")}
-                    className="text-xs font-medium text-[var(--accent-color)] hover:opacity-80 transition-opacity cursor-pointer active:scale-95 touch-manipulation py-0.5 px-1"
-                  >
-                    {lang === 'en' ? 'Manage' : 'Hantera'}
-                  </button>
-                </div>
-
+              <div className="-mt-1 sm:-mt-2 pb-1">
                 {categoryBudgetData.length > 0 ? (
-                  <div className="flex items-center gap-4 overflow-x-auto pb-1.5 scrollbar-hide -mx-1 px-1">
+                  <div className="flex items-center gap-3.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
                     {categoryBudgetData.map((cat, index) => {
                       const Icon = ICON_MAP[cat.iconName];
                       const spentPct = cat.budgetInKronor > 0 
@@ -542,25 +531,26 @@ export function TodayView({
                           onClick={() => handleCategoryClick(cat.name)}
                           className="flex-shrink-0 flex flex-col items-center text-center group cursor-pointer border-none bg-transparent shadow-none p-0 focus:outline-none"
                         >
-                          {/* Circular Progress & Icon (~72px) */}
-                          <div className="relative w-[72px] h-[72px] flex items-center justify-center mb-1.5">
+                          {/* Circular Progress & Icon (~58px) */}
+                          <div className="relative w-[58px] h-[58px] flex items-center justify-center mb-1">
                             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
-                              {/* Background track (subtle & neutral) */}
+                              {/* Background track */}
                               <path
-                                className="text-black/10 dark:text-white/10"
-                                strokeWidth="2.5"
+                                className="text-black/5 dark:text-white/[0.08]"
+                                strokeWidth="2"
                                 stroke="currentColor"
                                 fill="none"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                               />
-                              {/* Progress arc using category's existing color */}
+                              {/* Progress arc with subtle, adapted color */}
                               <path
-                                stroke={cat.color || (cat.isOverBudget ? '#e11d48' : '#1C1917')}
-                                strokeWidth="2.5"
+                                stroke={cat.isOverBudget ? '#f43f5e' : (cat.color || '#635BFF')}
+                                strokeWidth="2"
                                 strokeDasharray="100"
                                 strokeDashoffset={100 - spentPct}
                                 strokeLinecap="round"
                                 fill="none"
+                                opacity="0.85"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                 style={{
                                   transition: 'stroke-dashoffset 0.5s ease',
@@ -568,25 +558,25 @@ export function TodayView({
                               />
                             </svg>
                             {/* Center Icon inside circle */}
-                            <div className="w-[56px] h-[56px] rounded-full bg-[var(--surface-muted)] dark:bg-[#2D2D2D] flex items-center justify-center text-[#1C1917] dark:text-white">
+                            <div className="w-[44px] h-[44px] rounded-full bg-black/5 dark:bg-white/[0.06] flex items-center justify-center text-[#1C1917] dark:text-white transition-colors">
                               {isEmojiString(cat.iconName) ? (
-                                <span className="text-base leading-none">{cat.iconName}</span>
+                                <span className="text-xs leading-none">{cat.iconName}</span>
                               ) : Icon ? (
-                                <Icon size={18} strokeWidth={2} className="text-[#1C1917] dark:text-white" />
+                                <Icon size={15} strokeWidth={1.8} className="text-[#1C1917] dark:text-white" />
                               ) : (
-                                <div className="w-2 h-2 rounded-full bg-[#1C1917] dark:bg-white" />
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#1C1917] dark:bg-white" />
                               )}
                             </div>
                           </div>
 
                           {/* Category Name */}
-                          <span className="text-xs font-semibold tracking-tight text-[#1C1917] dark:text-white max-w-[80px] truncate mb-0.5">
+                          <span className="text-[11.5px] font-medium tracking-tight text-[#1C1917] dark:text-white max-w-[70px] truncate mb-0.5">
                             {cat.name}
                           </span>
 
                           {/* Remaining Amount */}
-                          <span className={`text-[11px] font-medium tabular-nums tracking-tight whitespace-nowrap ${
-                            cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[#6E6961] dark:text-[#9CA6BC]'
+                          <span className={`text-[10.5px] font-normal tabular-nums tracking-tight whitespace-nowrap ${
+                            cat.isOverBudget ? 'text-rose-500 dark:text-rose-400' : 'text-[#6D6962] dark:text-[#A8A8A8]'
                           }`}>
                             {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} ${config?.currency || 'kr'} ${lang === 'en' ? 'left' : 'kvar'}` : `${formatAmount(cat.spent, lang)} ${config?.currency || 'kr'}`}
                           </span>
