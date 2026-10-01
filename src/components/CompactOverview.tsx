@@ -58,7 +58,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
         </h3>
         <div className="grid grid-cols-1 gap-2">
           {Object.entries(categoryTotals).slice(0, 4).map(([cat, amount]) => (
-            <div key={cat} className="flex items-center justify-between p-3.5 sm:p-4 rounded-[18px] bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] active:scale-[0.99] transition-all group border-none shadow-none">
+            <div key={cat} className="flex items-center justify-between p-3.5 sm:p-4 rounded-[20px] bg-white dark:bg-[#191523] hover:bg-black/[0.02] dark:hover:bg-[#221D2F] active:scale-[0.99] transition-all group border-none shadow-none">
               <span className="text-sm font-medium text-[#1C1917] dark:text-white leading-tight truncate tracking-tight">
                 {cat}
               </span>

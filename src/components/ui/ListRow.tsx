@@ -36,9 +36,9 @@ export const ListRow: React.FC<ListRowProps> = ({
   return (
     <div
       onClick={isClickable ? onClick : undefined}
-      className={`bg-white dark:bg-[#1E1C1A] border border-black/5 dark:border-white/10 p-3.5 sm:p-4 rounded-[18px] flex items-center justify-between transition-all select-none ${
+      className={`bg-white dark:bg-[#191523] border-none p-3.5 sm:p-4 rounded-[18px] flex items-center justify-between transition-all select-none ${
         isClickable
-          ? 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.99]'
+          ? 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/[0.04] active:scale-[0.99]'
           : ''
       } ${disabled ? 'opacity-40 pointer-events-none' : ''} ${className}`}
     >

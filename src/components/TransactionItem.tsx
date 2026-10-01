@@ -86,15 +86,15 @@ export function TransactionItem({
   let containerClasses = "";
   let paddingClasses = "px-4 py-3 sm:py-3.5 min-h-[64px]";
   if (squared) {
-    containerClasses = "bg-white/80 dark:bg-white/[0.06] backdrop-blur-xl rounded-none shadow-none border-b border-black/5 dark:border-white/[0.04] last:border-none py-3 px-2";
+    containerClasses = "bg-white dark:bg-[#191523] rounded-none shadow-none border-b border-black/5 dark:border-white/[0.04] last:border-none py-3 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
     paddingClasses = "px-4 py-2 sm:py-2.5 min-h-[50px]";
   } else if (variant === 'nested') {
-    containerClasses = "bg-white/60 dark:bg-white/[0.04] backdrop-blur-md hover:bg-white/80 dark:hover:bg-white/[0.07] shadow-none border-none rounded-[12px]";
+    containerClasses = "bg-white dark:bg-[#191523] hover:bg-black/[0.02] dark:hover:bg-[#221D2F] shadow-none border-none rounded-[16px]";
   } else {
-    containerClasses = "bg-white/80 dark:bg-white/[0.06] backdrop-blur-xl hover:bg-white/90 dark:hover:bg-white/[0.09] rounded-[20px] shadow-none border-none";
+    containerClasses = "bg-white dark:bg-[#191523] hover:bg-black/[0.02] dark:hover:bg-[#221D2F] rounded-[20px] shadow-none border-none";
   }
 
   // Neutral discreet category display

@@ -370,7 +370,7 @@ export function BudgetView({
             Kategorier ({config.categories?.length || 0})
           </span>
           
-          <div className="overflow-hidden rounded-[18px] bg-white/80 dark:bg-white/[0.06] backdrop-blur-xl shadow-none border-none divide-y divide-black/5 dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#191523] shadow-none border-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             {sortedCategoriesForManage.map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
@@ -665,7 +665,7 @@ export function BudgetView({
                     else if (incomeSortBy === 'name') setIncomeSortBy('amount');
                     else setIncomeSortBy('day');
                   }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white/70 dark:bg-white/[0.07] hover:bg-white/90 dark:hover:bg-white/[0.12] backdrop-blur-md border border-black/10 dark:border-white/10 text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-xs"
+                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white dark:bg-[#191523] hover:bg-black/5 dark:hover:bg-[#241F32] border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
@@ -731,7 +731,7 @@ export function BudgetView({
                     else if (fixedSortBy === 'name') setFixedSortBy('amount');
                     else setFixedSortBy('day');
                   }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white/70 dark:bg-white/[0.07] hover:bg-white/90 dark:hover:bg-white/[0.12] backdrop-blur-md border border-black/10 dark:border-white/10 text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-xs"
+                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white dark:bg-[#191523] hover:bg-black/5 dark:hover:bg-[#241F32] border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
@@ -815,7 +815,7 @@ export function BudgetView({
                     else if (savingSortBy === 'name') setSavingSortBy('amount');
                     else setSavingSortBy('day');
                   }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white/70 dark:bg-white/[0.07] hover:bg-white/90 dark:hover:bg-white/[0.12] backdrop-blur-md border border-black/10 dark:border-white/10 text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-xs"
+                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white dark:bg-[#191523] hover:bg-black/5 dark:hover:bg-[#241F32] border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />

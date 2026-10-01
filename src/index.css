@@ -274,17 +274,17 @@ h6 {
 
 .dark {
   /* Premium Dark Theme (Dejz Design System) */
-  --bg-top-color: #050709;
-  --bg-color: #050709;
-  --bg-secondary: #050709;
-  --bg-gradient: #050709;
+  --bg-top-color: #080611;
+  --bg-color: #080611;
+  --bg-secondary: #080611;
+  --bg-gradient: #080611;
 
-  --surface-color: #242424;
-  --surface-gradient: #242424;
-  --surface-elevated: #242424;
-  --surface-elevated-gradient: #242424;
-  --surface-solid: #242424;
-  --surface-muted: #2D2D2D;
+  --surface-color: #191523;
+  --surface-gradient: #191523;
+  --surface-elevated: #191523;
+  --surface-elevated-gradient: #191523;
+  --surface-solid: #191523;
+  --surface-muted: #241F32;
   --surface-tint: rgba(255, 255, 255, 0.01);
 
   --text-primary: #FFFFFF;
@@ -292,14 +292,14 @@ h6 {
   --text-tertiary: #71717A;
   --text-inactive: #525252;
 
-  --border-color: #383838;
-  --border-strong: #3D3D3D;
+  --border-color: #2D273D;
+  --border-strong: #3A324E;
   --inner-highlight: transparent;
 
-  --chip-bg: #2D2D2D;
+  --chip-bg: #241F32;
   --transaction-bg: var(--surface-color);
-  --card-nested-bg: #2D2D2D;
-  --remaining-today-gradient: #242424;
+  --card-nested-bg: #241F32;
+  --remaining-today-gradient: #191523;
 
   /* Custom Elevation Levels - Dark Mode */
   --shadow-level-1: none;
@@ -326,10 +326,10 @@ h6 {
   --btn-primary-hover: #EBEAE8;
   --btn-primary-pressed: #D7D6D4;
 
-  --modal-bg: #181818;
+  --modal-bg: #191523;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #333333; /* active brand subtle in dark mode */
+  --bg-hover: #241F32; /* active brand subtle in dark mode */
 
   --card-shadow: none;
   --card-inner-stroke: none;
@@ -339,9 +339,9 @@ h6 {
   --warning-color: #F59E0B;
   --info-color: #F9F8F6;
 
-  --nav-active-color: #FF941A;
+  --nav-active-color: #7C75FF;
   --nav-inactive-color: #A8A8A8;
-  --nav-plus-bg: #F9F8F6;
+  --nav-plus-bg: #7C75FF;
   --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
@@ -351,8 +351,8 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #38230E;
-  --date-active-color: #FF941A;
+  --date-active-bg: #241F32;
+  --date-active-color: #FFFFFF;
   --date-active-shadow: none;
   --date-inactive-bg: var(--surface-color);
   --date-inactive-border: var(--border-color);
@@ -368,9 +368,10 @@ h6 {
   border: none !important;
   box-shadow: none !important;
 }
+
 .dark .glass-card,
 .dark .surface-card {
-  background-color: rgba(255, 255, 255, 0.06) !important;
+  background: #191523 !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -382,14 +383,14 @@ h6 {
   background: rgba(255, 255, 255, 0.75) !important;
   backdrop-filter: blur(26px) !important;
   -webkit-backdrop-filter: blur(26px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  border: none !important;
   box-shadow: none !important;
 }
 .dark .glass-nav {
-  background: #242424 !important;
+  background: #080611/90 !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid var(--border-color) !important;
+  border: none !important;
   box-shadow: none !important;
 }
 
