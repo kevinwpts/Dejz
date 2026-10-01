@@ -62,8 +62,8 @@ export function CustomBottomNavigation({
         </button>
       </div>
 
-      {/* 5 lika breda kolumner med ca 2 mm mer luft i botten */}
-      <nav className="relative z-10 w-full h-[62px] grid grid-cols-5 items-end pb-3.5">
+      {/* 5 lika breda kolumner indragna från sidokanterna med ca 2 mm mer luft i botten */}
+      <nav className="relative z-10 w-full max-w-lg mx-auto h-[62px] grid grid-cols-5 items-end pb-3.5 px-3.5 sm:px-6">
         {/* 1. Hem */}
         <NavItem
           icon={Home}

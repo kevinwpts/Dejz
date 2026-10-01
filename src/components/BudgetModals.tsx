@@ -9,7 +9,7 @@ import { formatAmount, parseAmount } from '../utils/format';
 import { fetchLogoForName, getLogoUrl } from '../utils/logo';
 import { IconSelector } from './IconSelector';
 import { IconPickerModal } from './IconPickerModal';
-import { ICON_MAP, isEmojiString, getPaymentMethodIcon } from '../utils/icons';
+import { ICON_MAP, isEmojiString, getPaymentMethodIcon, getCategoryIconName } from '../utils/icons';
 import { ConfirmModal } from './ConfirmModal';
 import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
@@ -19,6 +19,25 @@ import { QuickMathToolbar } from './QuickMathToolbar';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { Button, IconButton } from './ui';
 import { CancelSubscriptionModal } from './CancelSubscriptionModal';
+import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
+import { resolveEntityVisual } from '../utils/resolver';
+import { feedback } from '../utils/feedback';
+
+function hexToRgba(hex: string, alpha: number): string {
+  if (!hex) return `rgba(124, 58, 237, ${alpha})`;
+  if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
+  let clean = hex.replace('#', '');
+  if (clean.length === 3) {
+    clean = clean.split('').map(c => c + c).join('');
+  }
+  if (clean.length === 6) {
+    const r = parseInt(clean.substring(0, 2), 16) || 0;
+    const g = parseInt(clean.substring(2, 4), 16) || 0;
+    const b = parseInt(clean.substring(4, 6), 16) || 0;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return `rgba(124, 58, 237, ${alpha})`;
+}
 
 // --- Income View Modal ---
 
@@ -45,6 +64,22 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
     timestamp: Date.now() // Dummy for logo logic
   };
 
+  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
+
+  useEffect(() => {
+    const initial = getTransactionDominantColor(expenseCompatible as any, config);
+    setBrandColor(initial);
+
+    const visual = resolveEntityVisual(expenseCompatible as any, config);
+    if (visual.logoUrl && !visual.logoUrl.startsWith('data:image/svg+xml')) {
+      extractDominantColorFromImage(visual.logoUrl).then((extracted) => {
+        if (extracted) {
+          setBrandColor(extracted);
+        }
+      });
+    }
+  }, [income, config]);
+
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
   const displayAmount = (income.isVariable && income.periodOverrides && currentPeriodId && income.periodOverrides[currentPeriodId] !== undefined)
@@ -53,12 +88,14 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
 
   const hasAdjustment = income.isVariable && income.periodOverrides && currentPeriodId && income.periodOverrides[currentPeriodId] !== undefined;
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -69,9 +106,9 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
       }}
     >
       <motion.div
-        initial={{ y: '100%', opacity: 0 }}
+        initial={{ y: "100%", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: '100%', opacity: 0 }}
+        exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
         drag="y"
         dragListener={false}
@@ -83,153 +120,182 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Smooth, Seamless Ambient Brand Color Glow */}
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+            `
+          }}
+        />
+
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
           onClick={onClose}
-          className="w-full py-3 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
+          className="w-full pt-3 pb-1.5 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0 relative z-20"
         >
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Compact Header Section */}
-        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
-          <div className="flex items-center gap-3 min-w-0">
-            <TransactionLogo transaction={expenseCompatible as any} config={config} size="sm" />
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
-              {income.name}
-            </h2>
-          </div>
-          
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button 
-              type="button"
-              onClick={() => onEdit(income)} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
-              title={t('edit')}
-              aria-label={t('edit')}
-            >
-              <Pencil size={14} strokeWidth={1.75} />
-            </button>
-            <button 
-              type="button"
-              onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] flex items-center justify-center text-rose-500 dark:text-rose-400 transition-colors cursor-pointer active:scale-95"
-              title={t('delete')}
-              aria-label={t('delete')}
-            >
-              <Trash2 size={14} strokeWidth={1.75} />
-            </button>
-            <div className="w-px h-4 bg-black/10 dark:bg-white/10 mx-0.5" />
-            <button 
-              type="button"
-              onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
-              aria-label={t('close')}
-            >
-              <X size={16} strokeWidth={1.75} />
-            </button>
-          </div>
-        </div>
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+          {/* Hero Section */}
+          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
+            <div className="shrink-0 pt-0.5">
+              <TransactionLogo transaction={expenseCompatible as any} config={config} size="xl" />
+            </div>
 
-        {/* Main Content Area: One Cohesive Detail Surface */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          <div className="bg-black/5 dark:bg-white/5 rounded-2xl border border-black/10 dark:border-white/10 divide-y divide-black/5 dark:divide-white/10 overflow-hidden shadow-xs">
-            
-            {/* Amount Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('amount')}
-              </span>
-              <div className="text-right">
-                <p className="text-[22px] sm:text-[24px] font-semibold font-amount tabular-nums text-[var(--text-primary)]">
-                  <span className="opacity-75 mr-0.5">+</span>
-                  <span>{formatAmount(displayAmount, config.language)}</span>
-                  <span className="text-[14px] font-normal text-[var(--text-secondary)] ml-[3px] font-sans">{currency}</span>
-                </p>
-                {hasAdjustment && (
-                  <p className="text-[12px] font-normal text-[var(--text-tertiary)] mt-0.5 tabular-nums">
-                    {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(income.amount, config.language)} {currency})
-                  </p>
-                )}
+            <div className="min-w-0 flex-1 flex flex-col justify-center">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-[22px] sm:text-[26px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight truncate">
+                  {income.name}
+                </h2>
+
+                {/* Smaller Action Buttons aligned inline with the title */}
+                <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      onEdit(income);
+                    }} 
+                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                    title={t('edit')}
+                    aria-label={t('edit')}
+                  >
+                    <Pencil size={13.5} strokeWidth={1.9} />
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      setShowDeleteConfirm(true);
+                    }} 
+                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                    title={config.language === 'en' ? 'Delete' : 'Ta bort'}
+                    aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
+                  >
+                    <Trash2 size={13.5} strokeWidth={1.9} />
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      onClose();
+                    }} 
+                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 ml-0.5"
+                    title={t('close')}
+                    aria-label={t('close')}
+                  >
+                    <X size={14.5} strokeWidth={2.2} />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Merchant / Payer Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('merchant')}
-              </span>
-              <span className="text-[15px] font-medium text-[var(--text-primary)] text-right truncate">
-                {income.name}
-              </span>
+              <p className="text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-center text-emerald-600 dark:text-emerald-400">
+                <span className="opacity-80 mr-0.5">+</span>
+                <span>{formatAmount(displayAmount, config.language)}</span>
+                <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans">{currency}</span>
+              </p>
+              {hasAdjustment && (
+                <p className="text-[12px] font-normal text-[var(--text-tertiary)] mt-0.5 tabular-nums">
+                  {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(income.amount, config.language)} {currency})
+                </p>
+              )}
             </div>
+          </div>
 
-            {/* Category Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+          {/* Details Section: Clean list with discrete subtle divider lines */}
+          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+            {/* Category */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center justify-end gap-2">
-                <CategoryIcon icon={income.icon || '💰'} size="xs" />
-                <span className="text-[15px] font-medium text-[var(--text-primary)]">
-                  {income.category || t('income')}
-                </span>
+                {(() => {
+                  const catName = typeof income.category === 'object' ? (income.category as any)?.name : (income.category || t('income'));
+                  const searchCat = catName.trim().toLowerCase();
+                  const cat = [...(config.incomeCategories || []), ...(config.categories || [])].find(
+                    c => c.name.trim().toLowerCase() === searchCat
+                  );
+                  const iconKey = income.icon || cat?.icon || getCategoryIconName(catName);
+                  return (
+                    <>
+                      {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />}
+                      <span className="text-[14px] font-medium text-[var(--text-primary)]">{catName}</span>
+                    </>
+                  );
+                })()}
               </div>
             </div>
 
-            {/* Type Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+            {/* Type */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-[15px] font-medium text-[var(--text-primary)] text-right">
-                {income.isVariable ? 'Varierande' : 'Fast belopp'}
+              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right">
+                {income.isVariable ? (config.language === 'en' ? 'Variable' : 'Varierande') : (config.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
               </span>
             </div>
 
-            {/* Arrival Day Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+            {/* Arrival Day */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('arrivalDay')}
               </span>
-              <span className="text-[15px] font-medium text-[var(--text-primary)] text-right">
+              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {income.deductionDay ? `${income.deductionDay}e` : '-'}
               </span>
             </div>
 
-            {/* Note Row if exists */}
+            {/* Note */}
             {income.note && (
-              <div className="p-3.5 sm:p-4 flex items-start justify-between gap-4">
-                <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
-                  {t('note')}
+              <div className="py-3 flex items-start justify-between gap-4">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
+                  {t('ownNote')}
                 </span>
-                <span className="text-[14px] font-normal text-[var(--text-primary)] text-right max-w-[65%] break-words">
+                <span className="text-[14px] font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {income.note}
                 </span>
               </div>
             )}
           </div>
         </div>
-      </motion.div>
 
-      {showDeleteConfirm && (
-        <ConfirmModal
-          isOpen={showDeleteConfirm}
-          title={t('delete')}
-          message={t('deleteConfirm')}
-          onConfirm={() => {
-            onDelete(income.id);
-            onClose();
-          }}
-          onCancel={() => setShowDeleteConfirm(false)}
-          t={t}
-        />
-      )}
-    </motion.div>
+        {showDeleteConfirm && (
+          <ConfirmModal
+            isOpen={showDeleteConfirm}
+            title={config.language === 'en' ? "Delete income?" : "Radera inkomst?"}
+            message={
+              config.language === 'en'
+                ? `Do you want to delete ${income.name} (${formatAmount(income.amount, config.language)} ${currency})?`
+                : `Vill du radera ${income.name} (${formatAmount(income.amount, config.language)} ${currency})?`
+            }
+            confirmText={config.language === 'en' ? "Delete" : "Radera"}
+            cancelText={config.language === 'en' ? "Cancel" : "Avbryt"}
+            variant="danger"
+            onConfirm={() => {
+              onDelete(income.id);
+              setShowDeleteConfirm(false);
+              onClose();
+            }}
+            onCancel={() => setShowDeleteConfirm(false)}
+            t={t}
+          />
+        )}
+      </motion.div>
+    </motion.div>,
+    document.body
   );
 }
 
@@ -695,6 +761,22 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
     timestamp: Date.now() // Dummy for logo logic
   };
 
+  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
+
+  useEffect(() => {
+    const initial = getTransactionDominantColor(expenseCompatible as any, config);
+    setBrandColor(initial);
+
+    const visual = resolveEntityVisual(expenseCompatible as any, config);
+    if (visual.logoUrl && !visual.logoUrl.startsWith('data:image/svg+xml')) {
+      extractDominantColorFromImage(visual.logoUrl).then((extracted) => {
+        if (extracted) {
+          setBrandColor(extracted);
+        }
+      });
+    }
+  }, [expense, config]);
+
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
   const displayAmount = (expense.isVariable && expense.periodOverrides && currentPeriodId && expense.periodOverrides[currentPeriodId] !== undefined)
@@ -709,12 +791,14 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
   const freqKey = Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === expense.frequency)?.toLowerCase();
   const freqText = freqKey ? t(`freq_${freqKey}` as TranslationKey) : 'Månadsvis';
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -725,9 +809,9 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
       }}
     >
       <motion.div
-        initial={{ y: '100%', opacity: 0 }}
+        initial={{ y: "100%", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: '100%', opacity: 0 }}
+        exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
         drag="y"
         dragListener={false}
@@ -739,127 +823,147 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Smooth, Seamless Ambient Brand Color Glow */}
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+            `
+          }}
+        />
+
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
           onClick={onClose}
-          className="w-full py-3 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
+          className="w-full pt-3 pb-1.5 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0 relative z-20"
         >
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Compact Header Section */}
-        <div className="px-5 sm:px-6 pt-2 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
-          <div className="flex items-center gap-3 min-w-0">
-            <TransactionLogo transaction={expenseCompatible as any} config={config} size="sm" />
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
-              {expense.name}
-            </h2>
-          </div>
-          
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button 
-              type="button"
-              onClick={() => onEdit(expense)} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
-              title={t('edit')}
-              aria-label={t('edit')}
-            >
-              <Pencil size={14} strokeWidth={1.75} />
-            </button>
-            <button 
-              type="button"
-              onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] flex items-center justify-center text-rose-500 dark:text-rose-400 transition-colors cursor-pointer active:scale-95"
-              title={t('delete')}
-              aria-label={t('delete')}
-            >
-              <Trash2 size={14} strokeWidth={1.75} />
-            </button>
-            <div className="w-px h-4 bg-black/10 dark:bg-white/10 mx-0.5" />
-            <button 
-              type="button"
-              onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
-              aria-label={t('close')}
-            >
-              <X size={16} strokeWidth={1.75} />
-            </button>
-          </div>
-        </div>
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+          {/* Hero Section: Logo to the left, Title and Action Buttons inline, Price below */}
+          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
+            <div className="shrink-0 pt-0.5">
+              <TransactionLogo transaction={expenseCompatible as any} config={config} size="xl" />
+            </div>
 
-        {/* Main Content Area: One Cohesive Detail Surface */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4 space-y-3 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          <div className="bg-black/5 dark:bg-white/5 rounded-2xl border border-black/10 dark:border-white/10 divide-y divide-black/5 dark:divide-white/10 overflow-hidden shadow-xs">
-            
-            {/* Amount Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('amount')}
-              </span>
-              <div className="text-right">
-                <p className="text-[22px] sm:text-[24px] font-semibold font-amount tabular-nums text-[var(--text-primary)]">
-                  <span className="opacity-75 mr-0.5">−</span>
-                  <span>{formatAmount(displayAmount, config.language)}</span>
-                  <span className="text-[14px] font-normal text-[var(--text-secondary)] ml-[3px] font-sans">{currency}</span>
-                </p>
-                {hasAdjustment && (
-                  <p className="text-[12px] font-normal text-[var(--text-tertiary)] mt-0.5 tabular-nums">
-                    {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
-                  </p>
-                )}
+            <div className="min-w-0 flex-1 flex flex-col justify-center">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-[22px] sm:text-[26px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight truncate">
+                  {expense.name}
+                </h2>
+
+                {/* Smaller Action Buttons aligned inline with the title */}
+                <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      onEdit(expense);
+                    }} 
+                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                    title={t('edit')}
+                    aria-label={t('edit')}
+                  >
+                    <Pencil size={13.5} strokeWidth={1.9} />
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      setShowDeleteConfirm(true);
+                    }} 
+                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                    title={config.language === 'en' ? 'Delete' : 'Ta bort'}
+                    aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
+                  >
+                    <Trash2 size={13.5} strokeWidth={1.9} />
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      onClose();
+                    }} 
+                    className="w-7.5 h-7.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 ml-0.5"
+                    title={t('close')}
+                    aria-label={t('close')}
+                  >
+                    <X size={14.5} strokeWidth={2.2} />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Merchant / Receiver Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('merchant')}
-              </span>
-              <span className="text-[15px] font-medium text-[var(--text-primary)] text-right truncate">
-                {expense.name}
-              </span>
+              <p className="text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-center text-[var(--text-primary)]">
+                <span className="opacity-80 mr-0.5">−</span>
+                <span>{formatAmount(displayAmount, config.language)}</span>
+                <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans">{currency}</span>
+              </p>
+              {hasAdjustment && (
+                <p className="text-[12px] font-normal text-[var(--text-tertiary)] mt-0.5 tabular-nums">
+                  {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
+                </p>
+              )}
             </div>
+          </div>
 
-            {/* Category Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+          {/* Details Section: Clean list with discrete subtle divider lines */}
+          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+            {/* Category */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center justify-end gap-2">
-                <CategoryIcon icon={expense.icon || '🏠'} size="xs" />
-                <span className="text-[15px] font-medium text-[var(--text-primary)]">
-                  {typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || '')}
-                </span>
+                {(() => {
+                  const catName = typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || '');
+                  const searchCat = catName.trim().toLowerCase();
+                  const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+                    c => c.name.trim().toLowerCase() === searchCat
+                  );
+                  const iconKey = expense.icon || cat?.icon || getCategoryIconName(catName);
+                  return (
+                    <>
+                      {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />}
+                      <span className="text-[14px] font-medium text-[var(--text-primary)]">{catName}</span>
+                    </>
+                  );
+                })()}
               </div>
             </div>
 
-            {/* Type Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+            {/* Type */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-[15px] font-medium text-[var(--text-primary)] text-right">
-                {expense.isVariable ? 'Varierande' : 'Fast belopp'}
+              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right">
+                {expense.isVariable ? (config.language === 'en' ? 'Variable' : 'Varierande') : (config.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
               </span>
             </div>
 
-            {/* Frequency Row */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+            {/* Frequency */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
-              <span className="text-[15px] font-medium text-[var(--text-primary)] text-right">
+              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right">
                 {freqText}
               </span>
             </div>
 
-            {/* Deduction Day / Payment Day Row */}
-            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+            {/* Deduction Day / Payment Day */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {expense.paymentMethod === 'autogiro' || (typeof expense.paymentMethod === 'string' && (expense.paymentMethod.toLowerCase().includes('autogiro') || expense.paymentMethod.toLowerCase().includes('kort')))
                   ? (config.language === 'en' ? 'Deduction day' : 'Dragningsdag')
                   : (config.language === 'en' ? 'Payment day' : 'Betaldag')}
@@ -874,26 +978,26 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               </span>
             </div>
 
-            {/* Payment Method Row */}
-            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-4">
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+            {/* Payment Method */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('paymentMethod')}
               </span>
               <div className="flex items-center justify-end gap-2">
-                <PaymentIcon size={14} className="text-[var(--text-secondary)]" />
+                {methodStr && <PaymentIcon size={14} className="text-[var(--text-secondary)]" />}
                 <span className="text-[14px] font-medium text-[var(--text-primary)]">
                   {methodStr || '-'}
                 </span>
               </div>
             </div>
 
-            {/* Note Row if exists */}
+            {/* Note */}
             {expense.note && (
-              <div className="p-3 sm:p-3.5 flex items-start justify-between gap-4">
-                <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
-                  {t('note')}
+              <div className="py-3 flex items-start justify-between gap-4">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
+                  {t('ownNote')}
                 </span>
-                <span className="text-[14px] font-normal text-[var(--text-primary)] text-right max-w-[65%] break-words">
+                <span className="text-[14px] font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
                   {expense.note}
                 </span>
               </div>
@@ -904,29 +1008,35 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           <button
             type="button"
             onClick={() => setIsCancelModalOpen(true)}
-            className="w-full p-3.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-2xl border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
+            className="w-full mt-2 p-3.5 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] rounded-xl flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left"
           >
             <div>
-              <p className="text-[14px] font-medium text-[var(--text-primary)]">
+              <p className="text-[13px] font-medium text-[var(--text-primary)]">
                 {config.language === 'en' ? 'Show how to cancel' : 'Visa hur du säger upp'}
               </p>
-              <p className="text-[12px] font-normal text-[var(--text-secondary)] mt-0.5">
+              <p className="text-[11.5px] font-normal text-[var(--text-secondary)] mt-0.5">
                 {config.language === 'en' ? 'Instructions and link to provider' : 'Instruktioner och länk till leverantören'}
               </p>
             </div>
-            <ChevronRight size={18} className="text-[var(--text-secondary)] opacity-70 group-hover:opacity-100 transition-opacity shrink-0" />
+            <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-70 group-hover:opacity-100 transition-opacity shrink-0" />
           </button>
         </div>
-      </motion.div>
 
-      <div>
         {showDeleteConfirm && (
           <ConfirmModal
             isOpen={showDeleteConfirm}
-            title={t('delete')}
-            message={t('deleteConfirm')}
+            title={config.language === 'en' ? "Delete fixed expense?" : "Radera fast kostnad?"}
+            message={
+              config.language === 'en'
+                ? `Do you want to delete ${expense.name} (${formatAmount(expense.amount, config.language)} ${currency})?`
+                : `Vill du radera ${expense.name} (${formatAmount(expense.amount, config.language)} ${currency})?`
+            }
+            confirmText={config.language === 'en' ? "Delete" : "Radera"}
+            cancelText={config.language === 'en' ? "Cancel" : "Avbryt"}
+            variant="danger"
             onConfirm={() => {
               onDelete(expense.id);
+              setShowDeleteConfirm(false);
               onClose();
             }}
             onCancel={() => setShowDeleteConfirm(false)}
@@ -947,8 +1057,9 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             }}
           />
         )}
-      </div>
-    </motion.div>
+      </motion.div>
+    </motion.div>,
+    document.body
   );
 }
 
