@@ -39,9 +39,9 @@ export function CustomBottomNavigation({
   const isEn = language === 'en';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] px-3 sm:px-6 pointer-events-none flex justify-center">
+    <div className="fixed bottom-0 left-0 right-0 z-30 pb-[max(0.85rem,env(safe-area-inset-bottom,0px))] px-4 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
-        className="w-full max-w-[440px] h-[64px] rounded-[24px] px-2 bg-white dark:bg-[#242424] text-[#6D6962] dark:text-[#A8A8A8] flex items-center justify-between pointer-events-auto border border-[#E2DDD4] dark:border-[#383838] shadow-md shadow-black/[0.04]"
+        className="w-full max-w-[390px] h-[58px] rounded-[28px] px-2.5 bg-white/85 dark:bg-[#0c1017]/80 backdrop-blur-2xl text-[#6D6962] dark:text-[#A8A8A8] flex items-center justify-between pointer-events-auto border border-white/60 dark:border-white/[0.12] shadow-lg shadow-black/[0.04] dark:shadow-2xl dark:shadow-black/60"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 28 }}
@@ -63,17 +63,17 @@ export function CustomBottomNavigation({
           onClick={() => setActiveTab("transactions")}
         />
 
-        {/* 3. Centrerad Plusknapp (cirka 48px) */}
+        {/* 3. Centrerad Plusknapp */}
         <div className="flex items-center justify-center px-1">
           <button
             onClick={() => {
               if (onPlusClick) onPlusClick();
             }}
-            className="w-[48px] h-[48px] bg-[var(--accent-color)] hover:opacity-90 text-white rounded-full active:scale-95 flex items-center justify-center transition-all cursor-pointer shadow-sm"
+            className="w-[44px] h-[44px] bg-[var(--accent-color)] hover:opacity-90 text-white rounded-full active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-[var(--accent-color)]/25"
             aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
             title={isEn ? "Add transaction" : "Lägg till transaktion"}
           >
-            <Plus size={22} strokeWidth={2.2} />
+            <Plus size={22} strokeWidth={2.5} />
           </button>
         </div>
 
@@ -121,20 +121,17 @@ function NavItem({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`min-w-[44px] min-h-[44px] flex-1 h-full flex flex-col items-center justify-center gap-0.5 transition-all duration-150 active:scale-95 cursor-pointer select-none rounded-[16px] ${
+      className={`relative w-11 h-11 flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer select-none rounded-2xl ${
         isActive
-          ? 'text-[var(--accent-color)]'
-          : 'text-[#6D6962] hover:text-[#211F1C] dark:text-[#A8A8A8] dark:hover:text-white'
+          ? 'text-[var(--accent-color)] dark:text-white bg-black/5 dark:bg-white/[0.08]'
+          : 'text-[#6D6962] hover:text-[#211F1C] dark:text-[#A8A8A8] dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
       }`}
     >
       <Icon 
-        size={22} 
+        size={21} 
         strokeWidth={isActive ? 2.2 : 1.8} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
       />
-      <span className="text-[11px] font-medium leading-none tracking-tight">
-        {label}
-      </span>
     </button>
   );
 }

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
-import { DejziAvatar } from "./DejziSummaryModal";
 
 interface AppHeaderProps {
   userName?: string;
@@ -13,7 +12,6 @@ interface AppHeaderProps {
   onBack?: () => void;
   notificationCount?: number;
   onOpenNotifications?: () => void;
-  onOpenDejzi?: () => void;
   isDemoMode?: boolean;
   language?: string;
   activeTab?: string;
@@ -28,7 +26,6 @@ export function AppHeader({
   onBack,
   notificationCount = 0,
   onOpenNotifications,
-  onOpenDejzi,
   isDemoMode,
   language = "sv",
   activeTab,
@@ -48,7 +45,7 @@ export function AppHeader({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Compute display title for header in standard capitalization (Ekonomi, Analys, Historik)
+  // Compute display title for header
   const getFallbackTitle = () => {
     switch (activeTab) {
       case "today":
@@ -78,7 +75,7 @@ export function AppHeader({
         isDemoMode ? '' : 'pt-[env(safe-area-inset-top,0px)]'
       } ${
         !isAtTop || isProfileOrSettings
-          ? "bg-[#F2EFE8]/95 dark:bg-[#181818]/95 backdrop-blur-md border-b border-[#E2DDD4] dark:border-[#383838]"
+          ? "bg-[#F2EFE8]/90 dark:bg-[#050709]/80 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
           : "bg-transparent border-b border-transparent"
       }`}
     >
@@ -88,7 +85,7 @@ export function AppHeader({
           {onBack ? (
             <button
               onClick={onBack}
-              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-[12px] bg-white dark:bg-[#242424] border border-[#E2DDD4] dark:border-[#383838] flex items-center justify-center text-[#211F1C] dark:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D] active:scale-95 transition-all cursor-pointer shrink-0"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-[12px] bg-white/80 dark:bg-white/[0.06] border border-[#E2DDD4] dark:border-white/[0.08] flex items-center justify-center text-[#211F1C] dark:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer shrink-0"
               aria-label="Tillbaka"
             >
               <ChevronLeft size={20} strokeWidth={2} />
@@ -100,7 +97,7 @@ export function AppHeader({
               aria-label="Profil"
               title="Profil"
             >
-              <div className={`w-8 h-8 rounded-full overflow-hidden border border-[#E2DDD4] dark:border-[#383838] bg-white dark:bg-[#242424] flex items-center justify-center ${
+              <div className={`w-8 h-8 rounded-full overflow-hidden border border-[#E2DDD4] dark:border-white/[0.12] bg-white dark:bg-white/[0.06] flex items-center justify-center ${
                 activeTab === "profile" ? "ring-2 ring-[#211F1C] dark:ring-white" : ""
               }`}>
                 {avatarUrl ? (
@@ -125,13 +122,13 @@ export function AppHeader({
           </div>
         </div>
 
-        {/* Right Actions: Notifications + Search + Dejzi Coach */}
+        {/* Right Actions: Notifications + Search */}
         <div className="flex items-center gap-1 shrink-0 z-10">
           {/* 1. Notifications */}
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D]"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-[#EAE6DE]/60 dark:hover:bg-white/[0.08]"
               aria-label="Notiser"
               title="Notiser"
             >
@@ -154,25 +151,12 @@ export function AppHeader({
                 onNavigate("search");
               }
             }}
-            className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D]"
+            className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-[#EAE6DE]/60 dark:hover:bg-white/[0.08]"
             aria-label={language === 'en' ? 'Search' : 'Sök'}
             title={language === 'en' ? 'Search' : 'Sök'}
           >
             <Search size={22} strokeWidth={1.8} />
           </button>
-
-          {/* 3. Toned down Dejzi mascot button (24px mascot image, no large background circle, 44x44px touch target) */}
-          {onOpenDejzi && (
-            <button
-              type="button"
-              onClick={onOpenDejzi}
-              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D]"
-              aria-label="Dejzi sammanfattning"
-              title="Dejzi sammanfattning"
-            >
-              <DejziAvatar size="sm" />
-            </button>
-          )}
         </div>
       </div>
     </header>
