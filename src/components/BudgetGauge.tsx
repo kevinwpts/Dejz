@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { Info } from 'lucide-react';
 import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
 
@@ -8,6 +9,7 @@ interface BudgetGaugeProps {
   currency: string;
   language: string;
   label?: string;
+  onOpenInfo?: () => void;
 }
 
 export function BudgetGauge({
@@ -16,6 +18,7 @@ export function BudgetGauge({
   currency,
   language,
   label = 'Kvar att spendera',
+  onOpenInfo,
 }: BudgetGaugeProps) {
   // Respect prefers-reduced-motion
   const prefersReducedMotion = useMemo(() => {
@@ -76,10 +79,23 @@ export function BudgetGauge({
 
         {/* Text centered inside the semi-circle arc */}
         <div className="absolute inset-x-0 bottom-8 sm:bottom-10 flex flex-col items-center justify-center text-center pointer-events-none">
-          {/* Heading: 14px, medium, secondary text color */}
-          <span className="text-[14px] font-medium text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
-            {label}
-          </span>
+          {/* Heading with minimal Info button */}
+          <div className="flex items-center justify-center gap-1.5 pointer-events-auto">
+            <span className="text-[14px] font-medium text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
+              {label}
+            </span>
+            {onOpenInfo && (
+              <button
+                type="button"
+                onClick={onOpenInfo}
+                className="w-5 h-5 rounded-full flex items-center justify-center text-[#8C867C] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white bg-black/5 dark:bg-white/10 transition-all cursor-pointer active:scale-90"
+                aria-label="Period- och löneinformation"
+                title="Period- och löneinformation"
+              >
+                <Info size={11} strokeWidth={2.2} />
+              </button>
+            )}
+          </div>
 
           {/* Remaining amount: ~38px, semibold, Swedish number format */}
           <div className="flex items-baseline justify-center gap-1.5 mt-1">
