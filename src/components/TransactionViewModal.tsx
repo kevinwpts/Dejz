@@ -161,18 +161,14 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             </div>
 
             <div className="min-w-0 flex-1 flex flex-col justify-center">
-              <h2 className="text-[18px] sm:text-[20px] font-semibold tracking-tight text-[var(--text-primary)] truncate">
+              <h2 className="text-[19px] sm:text-[21px] font-semibold tracking-tight text-[var(--text-primary)] truncate">
                 {merchantName}
               </h2>
 
-              <p className={`text-[26px] sm:text-[30px] font-semibold font-amount tabular-nums tracking-tight leading-tight mt-0.5 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+              <p className={`text-[28px] sm:text-[32px] font-semibold font-amount tabular-nums tracking-tight leading-tight mt-0.5 ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
                 <span className="opacity-75 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
                 <span>{formatAmount(transaction.amount, config.language)}</span>
-                <span className="text-[14px] font-normal text-[var(--text-secondary)] ml-[3px] font-sans">{config.currency}</span>
-              </p>
-
-              <p className="text-[12px] sm:text-[12.5px] font-normal text-[var(--text-tertiary)] mt-0.5 select-none tabular-nums truncate">
-                {formattedDate}{formattedTime ? ` · ${formattedTime}` : ''}
+                <span className="text-[15px] font-normal text-[var(--text-secondary)] ml-[3px] font-sans">{config.currency}</span>
               </p>
             </div>
           </div>
@@ -222,6 +218,32 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 )}
               </div>
             </div>
+
+            {/* Date Field */}
+            <div className="h-px bg-black/5 dark:bg-white/10" />
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('date')}
+              </span>
+              <span className="text-[15px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+                {formattedDate}
+              </span>
+            </div>
+
+            {/* Time Field */}
+            {formattedTime && (
+              <>
+                <div className="h-px bg-black/5 dark:bg-white/10" />
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
+                    {config.language === 'en' ? 'Time' : config.language === 'fi' ? 'Aika' : 'Tid'}
+                  </span>
+                  <span className="text-[15px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+                    {formattedTime}
+                  </span>
+                </div>
+              </>
+            )}
 
             {/* Note if exists */}
             {transaction.note && (
