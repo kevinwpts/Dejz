@@ -66,12 +66,12 @@ export function CategoryModal({
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-white dark:bg-[#242424] w-full max-w-sm rounded-[24px] overflow-hidden flex flex-col relative border border-[#E6E2D8] dark:border-[#383838] shadow-2xl"
+          className="bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/10 dark:border-white/10 shadow-2xl font-sans"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#E6E2D8] dark:border-[#383838]">
-            <h2 className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-white tracking-tight">
+          <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10">
+            <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
               {isEdit ? t('edit') : t('newCategory')}
             </h2>
             <div className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export function CategoryModal({
             {/* Inputs */}
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
+                <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
                   Namn
                 </label>
                 <input 
@@ -137,7 +137,7 @@ export function CategoryModal({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSave();
                   }}
-                  className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
+                  className="w-full h-[48px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40 rounded-[16px] px-4 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all"
                 />
               </div>
 

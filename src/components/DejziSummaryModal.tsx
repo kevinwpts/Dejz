@@ -211,7 +211,7 @@ export function DejziSummaryModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 12 }}
             transition={{ duration: 0.2 }}
-            className="bg-white dark:bg-[#242424] border border-[#E6E2D8] dark:border-[#383838] rounded-[28px] p-6 sm:p-7 w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden"
+            className="bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-[28px] p-6 sm:p-7 w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header with Close Button */}

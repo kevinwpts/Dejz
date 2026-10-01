@@ -86,7 +86,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E6E2D8] dark:border-[#383838] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -95,7 +95,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
           onClick={onClose}
           className="w-full py-3 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
         >
-          <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full transition-colors" />
+          <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
         {/* Header with Navigation and Actions: Actions left, Close button right */}

@@ -65,13 +65,13 @@ export function PeriodSelectorModal({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#242424] rounded-t-[28px] sm:rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
+          className="relative w-full max-w-sm sm:max-w-md bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
         >
           {/* Mobile Drag Handle */}
-          <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
+          <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-[#E6E2D8] dark:border-[#383838] shrink-0">
+          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/5 dark:border-white/10 shrink-0">
             <div className="flex items-center gap-2.5 min-w-0 pr-2">
               {viewMode === 'calendar' ? (
                 <button

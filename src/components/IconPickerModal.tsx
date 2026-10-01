@@ -113,24 +113,24 @@ export function IconPickerModal({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.94, opacity: 0, y: 16 }}
           transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-          className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+          className="bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl w-full max-w-lg rounded-[28px] border border-black/10 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[88vh] font-sans"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[#E6E2D8] dark:border-[#383838] shrink-0">
+          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-black/5 dark:border-white/10 shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-2xl bg-[#05B862]/15 text-[#05B862] flex items-center justify-center shrink-0">
                 <Sparkles size={18} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#1C1917] dark:text-white tracking-tight">
+                <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
                   Välj ikon
                 </h3>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] rounded-full transition-colors text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-white/10 rounded-full transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
               aria-label="Stäng"
             >
               <X size={18} strokeWidth={2} />
@@ -149,7 +149,7 @@ export function IconPickerModal({
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Sök bland över 1 000+ stilrena ikoner (t.ex. nässpray, bil, fika)..."
-                className="w-full h-[44px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white rounded-[14px] pl-9.5 pr-9 text-xs font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] focus:outline-none transition-all"
+                className="w-full h-[44px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40 rounded-[16px] pl-9.5 pr-9 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none transition-all"
               />
               {searchQuery && (
                 <button

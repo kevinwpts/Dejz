@@ -636,14 +636,14 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-[#E2DDD4] dark:border-[#383838] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto"
+        className="bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
         {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-[#E2DDD4] dark:border-[#383838]">
+        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/5 dark:border-white/10">
           <div className="flex justify-start">
             <button
               type="button"
@@ -716,11 +716,11 @@ export function TransactionModal({
                 onChange={handleReceiptFileChange}
               />
 
-              {/* Amount Input: 88px height, 40px font-medium, plain kr text (no bubble) */}
+              {/* Amount Input */}
               <div className="flex flex-col gap-2">
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="bg-[#EAE6DE] dark:bg-white/[0.04] rounded-[12px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-[#E2DDD4] dark:border-white/[0.06] focus-within:border-[#211F1C] dark:focus-within:border-white group cursor-text"
+                  className="bg-black/5 dark:bg-white/5 rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
                 >
                   <div className="shrink-0 flex items-center min-w-[64px]">
                     {type === 'expense' && (
@@ -737,7 +737,7 @@ export function TransactionModal({
                         className={`text-[13px] font-medium transition-all px-3 py-1.5 rounded-full border cursor-pointer active:scale-95 ${
                           splits.length > 0 
                             ? "bg-rose-500 text-white border-transparent" 
-                            : "bg-white dark:bg-white/10 text-[#211F1C] dark:text-white border-[#E2DDD4] dark:border-transparent hover:bg-[var(--surface-muted)] dark:hover:bg-white/20"
+                            : "bg-white dark:bg-white/10 text-[var(--text-primary)] border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/20"
                         }`}
                       >
                         {splits.length > 0 ? (currentLang === 'en' ? 'Avbryt' : 'Avbryt') : (currentLang === 'en' ? 'Splitta' : 'Splitta')}
@@ -758,9 +758,9 @@ export function TransactionModal({
                         }
                       }}
                       placeholder="0"
-                      className="w-full bg-transparent text-[#211F1C] dark:text-white outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[#777168]/40 dark:placeholder-white/30 cursor-text select-text"
+                      className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[var(--text-tertiary)] cursor-text select-text"
                     />
-                    <span className="text-[15px] font-normal text-[#6D6962] dark:text-[#A8A8A8] select-none font-sans shrink-0">
+                    <span className="text-[15px] font-normal text-[var(--text-secondary)] select-none font-sans shrink-0">
                       {currency}
                     </span>
                   </div>
@@ -770,7 +770,7 @@ export function TransactionModal({
 
               {/* Merchant Input */}
               <div className="space-y-2">
-                <label className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block">
+                <label className="text-[14px] font-normal text-[var(--text-secondary)] block">
                   {type === 'income' ? t('incomeSource') : t('merchant')}
                 </label>
                 <div className="relative group">
@@ -780,12 +780,12 @@ export function TransactionModal({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[14px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 border border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white"
+                    className="w-full h-[48px] bg-black/5 dark:bg-white/5 text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40"
                   />
                   {merchant && (
                     <button 
                       onClick={() => setMerchant('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[#211F1C] dark:text-[#71717A] dark:hover:text-white p-1 cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1 cursor-pointer"
                     >
                       <X size={16} strokeWidth={2} />
                     </button>
@@ -795,7 +795,7 @@ export function TransactionModal({
 
               {/* Note Input */}
               <div className="space-y-2">
-                <label className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block">
+                <label className="text-[14px] font-normal text-[var(--text-secondary)] block">
                   {t('ownNote')}
                 </label>
                 <div className="relative group">
@@ -805,8 +805,8 @@ export function TransactionModal({
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                    className={`w-full h-[48px] bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[14px] font-normal text-[#211F1C] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#71717A] rounded-[12px] px-4 border ${
-                      validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-[#E2DDD4] dark:border-[#383838] focus:border-[#211F1C] dark:focus:border-white'
+                    className={`w-full h-[48px] bg-black/5 dark:bg-white/5 text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border ${
+                      validationError === 'note' ? 'border-rose-500 bg-rose-500/5' : 'border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40'
                     }`}
                   />
                   {note && (
