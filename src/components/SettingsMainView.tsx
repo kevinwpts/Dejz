@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Tag, CreditCard, Globe, Palette, Coins } from 'lucide-react';
+import { Calendar, Tag, CreditCard, Globe, Palette, Coins, ChevronRight } from 'lucide-react';
 import { Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
-import { Card, ListRow } from './ui';
 
 interface SettingsMainViewProps {
   onBack: () => void;
@@ -118,50 +117,121 @@ export function SettingsMainView({
       exit={{ opacity: 0, y: -10 }}
       className="space-y-4 max-w-md mx-auto"
     >
-      <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/30 rounded-[18px] bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 shadow-sm">
-        <ListRow
-          icon={<Calendar size={18} strokeWidth={2} />}
-          title={t('salary')}
-          subtitle={config.payday ? `${config.payday}:e i varje månad` : 'Ej angivet'}
+      <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl border-none shadow-none">
+        <button
+          type="button"
           onClick={() => handleSectionClick('salary')}
-          showChevron
-        />
-        <ListRow
-          icon={<Tag size={18} strokeWidth={2} />}
-          title={t('categories')}
-          subtitle={`${(config.categories || []).length} ${t('expenses').toLowerCase()}, ${(config.incomeCategories || []).length} ${t('incomes').toLowerCase()}`}
+          className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3.5 min-w-0 pr-2">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)]">
+              <Calendar size={18} strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('salary')}</span>
+              <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                {config.payday ? `${config.payday}:e i varje månad` : 'Ej angivet'}
+              </span>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform shrink-0" />
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleSectionClick('categories')}
-          showChevron
-        />
-        <ListRow
-          icon={<CreditCard size={18} strokeWidth={2} />}
-          title={config?.language === 'en' ? 'Payment methods' : 'Betalmetoder'}
-          subtitle={`${(config.paymentMethods || []).length} ${config?.language === 'en' ? 'methods' : 'metoder'}`}
+          className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3.5 min-w-0 pr-2">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)]">
+              <Tag size={18} strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('categories')}</span>
+              <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                {`${(config.categories || []).length} ${t('expenses').toLowerCase()}, ${(config.incomeCategories || []).length} ${t('incomes').toLowerCase()}`}
+              </span>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform shrink-0" />
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleSectionClick('paymentMethods')}
-          showChevron
-        />
-        <ListRow
-          icon={<Coins size={18} strokeWidth={2} />}
-          title={config?.language === 'en' ? 'Currency' : 'Valuta'}
-          subtitle={config.currency || 'kr'}
+          className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3.5 min-w-0 pr-2">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)]">
+              <CreditCard size={18} strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{config?.language === 'en' ? 'Payment methods' : 'Betalmetoder'}</span>
+              <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                {`${(config.paymentMethods || []).length} ${config?.language === 'en' ? 'methods' : 'metoder'}`}
+              </span>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform shrink-0" />
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleSectionClick('currency')}
-          showChevron
-        />
-        <ListRow
-          icon={<Globe size={18} strokeWidth={2} />}
-          title={t('language')}
-          subtitle={config.language === 'en' ? 'English' : 'Svenska'}
+          className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3.5 min-w-0 pr-2">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-amber-500/10 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400">
+              <Coins size={18} strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{config?.language === 'en' ? 'Currency' : 'Valuta'}</span>
+              <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                {config.currency || 'kr'}
+              </span>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform shrink-0" />
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleSectionClick('language')}
-          showChevron
-        />
-        <ListRow
-          icon={<Palette size={18} strokeWidth={2} />}
-          title={config?.language === 'en' ? 'Appearance' : 'Utseende'}
-          subtitle={config.themeMode === 'light' ? 'Ljust' : config.themeMode === 'dark' ? 'Mörkt' : 'System'}
+          className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3.5 min-w-0 pr-2">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)]">
+              <Globe size={18} strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('language')}</span>
+              <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                {config.language === 'en' ? 'English' : 'Svenska'}
+              </span>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform shrink-0" />
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleSectionClick('appearance')}
-          showChevron
-        />
-      </Card>
+          className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3.5 min-w-0 pr-2">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-purple-500/10 dark:bg-purple-400/10 text-purple-600 dark:text-purple-400">
+              <Palette size={18} strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{config?.language === 'en' ? 'Appearance' : 'Utseende'}</span>
+              <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                {config.themeMode === 'light' ? 'Ljust' : config.themeMode === 'dark' ? 'Mörkt' : 'System'}
+              </span>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform shrink-0" />
+        </button>
+      </div>
     </motion.div>
   );
 }

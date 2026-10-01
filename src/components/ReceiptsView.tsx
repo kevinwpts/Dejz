@@ -54,7 +54,7 @@ export function ReceiptsView({
     >
       {/* Stats Summary Panel */}
       {receiptTransactions.length > 0 && (
-        <div className="overflow-hidden rounded-[18px] bg-white dark:bg-[#242424] p-5 border-none shadow-none space-y-2">
+        <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#161324] p-5 border-none shadow-none space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
               {config.language === 'sv' ? 'Sammanställning' : 'Summary'}
@@ -85,7 +85,7 @@ export function ReceiptsView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={config.language === 'sv' ? 'Sök köpställe, kategori eller belopp...' : 'Search merchant, category, or amount...'}
-            className="w-full h-[44px] pl-11 pr-4 bg-white dark:bg-[#242424] border border-[#E6E2D8] dark:border-[#383838] rounded-full text-xs font-semibold placeholder-[#8C867C] dark:placeholder-[#71717A] focus:outline-none focus:border-[#1C1917] dark:focus:border-white shadow-none transition-all text-[#1C1917] dark:text-white"
+            className="w-full h-[46px] pl-11 pr-4 bg-white dark:bg-[#161324] border-none rounded-full text-xs font-semibold placeholder-[#8C867C] dark:placeholder-[#71717A] focus:outline-none shadow-none transition-all text-[#1C1917] dark:text-white"
             id="receipts_search_input"
           />
         </div>
@@ -104,12 +104,12 @@ export function ReceiptsView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={() => onViewTransaction(item)}
-                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-[#242424] rounded-[18px] shadow-none border-none hover:bg-[#EDE9DF] dark:hover:bg-[#333333] active:scale-[0.99] transition-all cursor-pointer"
+                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-[#161324] rounded-[20px] shadow-none border-none hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer"
                   id={`receipt_item_${item.id}`}
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     {/* Receipt thumbnail / Icon wrapper */}
-                    <div className="w-12 h-12 rounded-xl border-none overflow-hidden relative shrink-0 bg-[var(--bg-color)] flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl border-none overflow-hidden relative shrink-0 bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center">
                       {item.receiptUrl ? (
                         <>
                           <img

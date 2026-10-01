@@ -189,13 +189,13 @@ export function ProfileView({
     onNavigate('profile', section);
   };
 
-  const SettingsMenuItem = ({ icon: Icon, label, onClick, rightNode, iconBgColor = "bg-[var(--surface-muted)]", iconTextColor = "text-[var(--text-primary)]" }: { icon: any, label: string, onClick?: () => void, rightNode?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) => (
+  const SettingsMenuItem = ({ icon: Icon, label, onClick, rightNode, iconBgColor = "bg-black/[0.04] dark:bg-white/[0.06]", iconTextColor = "text-[var(--text-primary)]" }: { icon: any, label: string, onClick?: () => void, rightNode?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) => (
     <button 
       onClick={onClick}
-      className={`w-full flex items-center justify-between py-3.5 px-4 hover:bg-[var(--surface-muted)]/50 transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
+      className={`w-full flex items-center justify-between py-3.5 px-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
     >
       <div className="flex items-center gap-3.5 min-w-0">
-        <div className={`w-9 h-9 rounded-xl ${iconBgColor} ${iconTextColor} border border-[var(--border-color)]/30 flex items-center justify-center relative shrink-0`}>
+        <div className={`w-9 h-9 rounded-xl ${iconBgColor} ${iconTextColor} border-none flex items-center justify-center relative shrink-0`}>
           <Icon size={16} strokeWidth={1.8} />
         </div>
         <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate tracking-tight">{label}</span>
@@ -212,7 +212,7 @@ export function ProfileView({
       className="space-y-5 w-full pb-12 font-sans"
     >
       {/* User Header Module */}
-      <div className="bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] p-5 shadow-none flex items-center gap-4">
+      <div className="bg-white dark:bg-[#161324] backdrop-blur-xl border-none rounded-[22px] p-5 shadow-none flex items-center gap-4">
         <div className="relative shrink-0">
           <label htmlFor="avatar-upload" className="cursor-pointer group block">
             <input 
@@ -231,7 +231,7 @@ export function ProfileView({
                 }
               }}
             />
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-[16px] flex items-center justify-center overflow-hidden relative bg-[var(--surface-muted)] dark:bg-white/[0.04] border border-[var(--border-color)]/60 dark:border-white/[0.04] group-hover:border-[var(--accent-color)]/50 transition-all duration-300 shadow-xs">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-[18px] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/[0.06] border-none group-hover:scale-[1.02] transition-all duration-300 shadow-none">
               {avatarUrl ? (
                 <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
               ) : (
@@ -261,7 +261,7 @@ export function ProfileView({
           </p>
           <button 
             onClick={() => handleSectionClick('manageAccount')}
-            className="px-3 py-1.5 bg-[var(--surface-muted)]/80 dark:bg-white/[0.04] text-[11px] font-semibold text-[var(--text-primary)] rounded-[12px] border border-[var(--border-color)]/40 dark:border-white/[0.04] hover:bg-[var(--surface-muted)] transition-all flex items-center gap-1.5 w-fit active:scale-95 shadow-2xs cursor-pointer"
+            className="px-3 py-1.5 bg-black/[0.04] dark:bg-white/[0.06] text-[11px] font-semibold text-[var(--text-primary)] rounded-[12px] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
           >
             {t('manageAccount')}
             <ChevronRight size={11} strokeWidth={2.5} />
@@ -275,7 +275,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('economy')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
+          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem 
               icon={Calendar} 
               label={t('salary')} 
@@ -314,7 +314,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('appSettings')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
+          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem 
               icon={SlidersHorizontal} 
               label={'Budget'} 
@@ -350,7 +350,7 @@ export function ProfileView({
             <div className="py-3.5 px-4 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--surface-muted)] dark:bg-white/[0.04] text-[var(--text-primary)] border border-[var(--border-color)]/30 dark:border-white/[0.035] flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border-none flex items-center justify-center shrink-0">
                     <Calendar size={16} strokeWidth={1.8} />
                   </div>
                   <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInCalendar')}</span>
@@ -379,7 +379,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('support')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
+          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem icon={Mail} label={t('feedback')} onClick={onFeedbackClick} />
             <SettingsMenuItem icon={Download} label={t('exportData')} onClick={onExportData} />
             <SettingsMenuItem icon={Shield} label={t('privacyPolicy')} onClick={() => onLegalClick('privacy')} />
@@ -392,9 +392,9 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-danger px-1.5 opacity-70">
             {t('dangerZone')}
           </h4>
-          <div className="overflow-hidden border border-[var(--border-color)]/60 dark:border-white/[0.025] rounded-[18px] bg-[var(--surface-color)] dark:bg-white/[0.025] backdrop-blur-[18px] shadow-none divide-y divide-[var(--border-color)]/30 dark:divide-white/[0.025]">
+          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             {isDemoMode && (
-              <div className="p-4 bg-[var(--surface-muted)]/50 dark:bg-white/[0.02] space-y-2.5">
+              <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="relative flex h-2 w-2">
@@ -409,7 +409,7 @@ export function ProfileView({
                 </p>
                 <button 
                   onClick={onExitDemo}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:opacity-90 active:scale-[0.98]"
+                  className="w-full py-2.5 px-4 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-none hover:opacity-90 active:scale-[0.98]"
                 >
                   <LogOut size={13} strokeWidth={2} />
                   <span>{t('exitDemo')}</span>
@@ -418,9 +418,9 @@ export function ProfileView({
             )}
             <button 
               onClick={onLogout}
-              className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-[var(--surface-muted)]/50 dark:hover:bg-white/[0.03] transition-all cursor-pointer active:scale-[0.99]"
+              className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-9 h-9 rounded-xl bg-[var(--surface-muted)] dark:bg-white/[0.04] text-[var(--text-secondary)] border border-[var(--border-color)]/30 dark:border-white/[0.035] flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-none flex items-center justify-center shrink-0">
                 <LogOut size={16} strokeWidth={1.8} />
               </div>
               <span className="text-[13.5px] font-semibold text-[var(--text-primary)]">{t('logout')}</span>
@@ -429,7 +429,7 @@ export function ProfileView({
               onClick={onDeleteAccount}
               className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-danger/5 transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-9 h-9 rounded-xl bg-danger/10 text-danger border border-danger/20 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-danger/10 text-danger border-none flex items-center justify-center shrink-0">
                 <Trash2 size={16} strokeWidth={1.8} />
               </div>
               <span className="text-[13.5px] font-semibold text-danger">{t('deleteAccount')}</span>

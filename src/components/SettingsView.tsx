@@ -150,19 +150,19 @@ export function SettingsView({
           </span>
           <button
             onClick={() => handleAddCategory(type)}
-            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-[#EFECE6] dark:bg-[#2D2D2D] px-3 py-1.5 rounded-[10px] hover:bg-black/10 transition-colors cursor-pointer"
+            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] px-3.5 py-1.5 rounded-[12px] transition-colors cursor-pointer border-none"
           >
             <Plus size={14} strokeWidth={2} />
             {t('newCategory')}
           </button>
         </div>
 
-        <div className="bg-white dark:bg-[#242424] rounded-[18px] border border-[#E6E2D8] dark:border-[#383838] overflow-hidden divide-y divide-[#E6E2D8]/50 dark:divide-[#383838]/50 shadow-xs">
+        <div className="bg-white dark:bg-[#161324] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {list.map((cat: any, index: number) => (
             <div
               key={cat.id || index}
               onClick={() => handleEditCategory(type, index, cat.name, cat.icon, cat.color)}
-              className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-[#F7F5F0]/50 dark:hover:bg-[#2D2D2D]/50 transition-colors cursor-pointer"
+              className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <CategoryIcon icon={cat.icon} color={cat.color} size="md" />
@@ -183,10 +183,10 @@ export function SettingsView({
   const renderCategoriesSettings = () => {
     return (
       <div className="space-y-6 w-full py-2">
-        <div className="flex p-1 bg-[#EFECE6] dark:bg-[#2D2D2D] rounded-[14px]">
+        <div className="flex p-1 bg-black/[0.04] dark:bg-white/[0.06] rounded-[16px]">
           <button
             onClick={() => setCategoryTab('expense')}
-            className={`flex-1 py-2 text-xs font-bold rounded-[10px] transition-all cursor-pointer ${
+            className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer ${
               categoryTab === 'expense'
                 ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
                 : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
@@ -196,7 +196,7 @@ export function SettingsView({
           </button>
           <button
             onClick={() => setCategoryTab('income')}
-            className={`flex-1 py-2 text-xs font-bold rounded-[10px] transition-all cursor-pointer ${
+            className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer ${
               categoryTab === 'income'
                 ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
                 : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
@@ -233,14 +233,14 @@ export function SettingsView({
               setPaymentMethodModalData({ name: '' });
               setIsPaymentMethodModalOpen(true);
             }}
-            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-[#EFECE6] dark:bg-[#2D2D2D] px-3 py-1.5 rounded-[10px] hover:bg-black/10 transition-colors cursor-pointer"
+            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] px-3.5 py-1.5 rounded-[12px] transition-colors cursor-pointer border-none"
           >
             <Plus size={14} strokeWidth={2} />
             Ny betalmetod
           </button>
         </div>
 
-        <div className="bg-white dark:bg-[#242424] rounded-[18px] border border-[#E6E2D8] dark:border-[#383838] overflow-hidden divide-y divide-[#E6E2D8]/50 dark:divide-[#383838]/50 shadow-xs">
+        <div className="bg-white dark:bg-[#161324] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {methodsList.map((method: any, index: number) => (
             <div
               key={method.name || index}
@@ -248,7 +248,7 @@ export function SettingsView({
                 setPaymentMethodModalData({ index, name: method.name });
                 setIsPaymentMethodModalOpen(true);
               }}
-              className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-[#F7F5F0]/50 dark:hover:bg-[#2D2D2D]/50 transition-colors cursor-pointer"
+              className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <CategoryIcon icon={method.icon} color={method.color} size="md" />
@@ -274,14 +274,14 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="bg-white dark:bg-[#242424] rounded-[18px] border border-[#E6E2D8] dark:border-[#383838] overflow-hidden divide-y divide-[#E6E2D8]/50 dark:divide-[#383838]/50 shadow-xs">
+        <div className="bg-white dark:bg-[#161324] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {languages.map((l) => (
             <div
               key={l.code}
               onClick={() => {
                 setConfig({ ...config, language: l.code });
               }}
-              className="flex items-center justify-between p-4 hover:bg-[#F7F5F0]/50 dark:hover:bg-[#2D2D2D]/50 transition-colors cursor-pointer"
+              className="flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <LanguageFlag code={l.code} size="md" />
@@ -330,10 +330,10 @@ export function SettingsView({
                     const isDark = mode.id === 'dark' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                     setConfig({ ...config, themeMode: mode.id as any, darkMode: isDark });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[16px] border transition-all cursor-pointer ${
+                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[18px] border-none transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] border-transparent shadow-md'
-                      : 'bg-white dark:bg-[#242424] text-[#1C1917] dark:text-white border-[#E6E2D8] dark:border-[#383838] hover:border-black/20'
+                      ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
+                      : 'bg-white dark:bg-[#161324] text-[#1C1917] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   {mode.icon}
@@ -361,10 +361,10 @@ export function SettingsView({
                   onClick={() => {
                     setConfig({ ...config, themeColor: theme.hex });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[16px] border transition-all cursor-pointer active:scale-95 ${
+                  className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[18px] border-none transition-all cursor-pointer active:scale-95 ${
                     isSelected
-                      ? 'bg-white dark:bg-[#242424] border-[var(--accent-color)] shadow-xs'
-                      : 'bg-white/60 dark:bg-[#242424]/60 border-[#E6E2D8] dark:border-[#383838] hover:border-black/20 dark:hover:border-white/20'
+                      ? 'bg-white dark:bg-[#161324] ring-2 ring-[var(--accent-color)] shadow-none'
+                      : 'bg-white dark:bg-[#161324] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   <div
@@ -417,7 +417,7 @@ export function SettingsView({
           {isEn ? 'Select Currency' : 'Välj valuta'}
         </h3>
 
-        <div className="bg-white dark:bg-[#242424] rounded-[20px] border border-[#E2DDD4] dark:border-[#383838] shadow-none divide-y divide-[#E2DDD4] dark:divide-[#383838] overflow-hidden">
+        <div className="bg-white dark:bg-[#161324] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrency === c.symbol || activeCurrency === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
@@ -427,8 +427,8 @@ export function SettingsView({
                 key={`${c.code}-${c.symbol}`}
                 type="button"
                 onClick={() => handleSelectCurrency(c.symbol)}
-                className={`w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-[var(--surface-muted)]/50 dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left ${
-                  isSelected ? 'bg-[#635BFF]/5 dark:bg-[#7C75FF]/10' : ''
+                className={`w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-left ${
+                  isSelected ? 'bg-accent/10' : ''
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -451,8 +451,8 @@ export function SettingsView({
                 <div className="flex items-center gap-2 shrink-0 pl-2">
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
                     isSelected
-                      ? 'bg-[#635BFF] dark:bg-[#7C75FF] text-white'
-                      : 'border border-[#E2DDD4] dark:border-[#383838]'
+                      ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)]'
+                      : 'border border-black/10 dark:border-white/10'
                   }`}>
                     {isSelected && <Check size={12} strokeWidth={3} />}
                   </div>
@@ -470,14 +470,14 @@ export function SettingsView({
        <div>
         {activeSection === 'salary' && (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-[#242424] p-5 rounded-[20px] border border-[#E6E2D8] dark:border-[#383838] space-y-5">
+            <div className="bg-white dark:bg-[#161324] p-5 rounded-[22px] border-none shadow-none space-y-5">
               <h2 className="text-sm font-bold text-[#1C1917] dark:text-white">Lönedag & Period</h2>
               
               {/* Payday Setting Row */}
               <div className="space-y-1.5">
                 <button
                   onClick={() => setIsPaydayModalOpen(true)}
-                  className="w-full flex items-center justify-between p-4 rounded-[16px] bg-[#F7F5F0] dark:bg-[#2D2D2D] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center justify-between p-4 rounded-[16px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-colors cursor-pointer text-left border-none"
                 >
                   <div className="flex flex-col">
                     <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">Lönedag</span>
@@ -492,9 +492,8 @@ export function SettingsView({
                 </button>
               </div>
 
-
               {/* Weekend Handling Row */}
-              <div className="pt-3 border-t border-[#E6E2D8] dark:border-[#383838]">
+              <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.04]">
                 <div className="flex items-center justify-between p-1">
                   <div className="flex flex-col pr-4">
                     <span className="text-xs font-semibold text-[#1C1917] dark:text-white">

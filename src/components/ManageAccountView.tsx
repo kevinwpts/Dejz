@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { User, Mail, LogOut, Camera, Unlink, MailCheck, Globe, Lock } from 'lucide-react';
+import { User, Mail, LogOut, Camera, Unlink, MailCheck, Globe, Lock, ChevronRight } from 'lucide-react';
 
 import { ConfirmModal } from './ConfirmModal';
 import { PasswordChangeView } from './PasswordChangeView';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { User as SupabaseUser } from '@supabase/supabase-js';
-import { Button, Input, IconButton, Card, ListRow } from './ui';
+import { Button, Input, IconButton } from './ui';
 
 interface ManageAccountViewProps {
   onBack: () => void;
@@ -135,7 +135,7 @@ export function ManageAccountView({
           {/* Profile Avatar Upload */}
           <div className="text-center py-2 flex flex-col items-center justify-center">
             <label htmlFor="avatar-manage" className="relative w-20 h-20 mb-2 block cursor-pointer group">
-              <div className="w-20 h-20 rounded-[20px] overflow-hidden border border-[var(--border-color)] bg-[var(--surface-color)] relative group-hover:scale-105 active:scale-95 transition-all shadow-sm">
+              <div className="w-20 h-20 rounded-[22px] overflow-hidden border-none bg-black/[0.04] dark:bg-white/[0.06] relative group-hover:scale-105 active:scale-95 transition-all shadow-none">
                 {avatarUrl ? (
                   <img 
                     src={avatarUrl} 
@@ -188,14 +188,23 @@ export function ManageAccountView({
             </div>
 
             {/* Password */}
-            <Card padding="none" className="overflow-hidden rounded-[24px] bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 shadow-sm">
-              <ListRow
-                icon={<Lock size={16} strokeWidth={1.75} />}
-                title={t('changePassword' as any) || 'Ändra lösenord'}
-                showChevron
+            <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl border-none shadow-none">
+              <button
+                type="button"
                 onClick={() => setShowPasswordChange(true)}
-              />
-            </Card>
+                className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0 pr-2">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)]">
+                    <Lock size={16} strokeWidth={1.8} />
+                  </div>
+                  <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                    {t('changePassword' as any) || 'Ändra lösenord'}
+                  </span>
+                </div>
+                <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform shrink-0" />
+              </button>
+            </div>
 
             {/* Connected Accounts */}
             {identities.length > 0 && (
@@ -203,46 +212,54 @@ export function ManageAccountView({
                 <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1.5 opacity-60 block">
                   {t('connectedAccounts' as any) || 'Kopplade konton'}
                 </span>
-                <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/30 rounded-[24px] bg-[var(--surface-color)] backdrop-blur-xl border border-[var(--border-color)]/60 shadow-sm">
+                <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl border-none shadow-none">
                   {identities.map((identity) => (
-                    <ListRow
+                    <div
                       key={identity.id}
-                      icon={
-                        identity.provider === 'google' ? (
-                          <Globe size={16} strokeWidth={1.75} className="text-[var(--accent-color)]" />
-                        ) : identity.provider === 'facebook' ? (
-                          <svg className="w-4 h-4 shrink-0 text-[#1877F2]" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                          </svg>
-                        ) : (
-                          <MailCheck size={16} strokeWidth={1.75} className="text-[var(--text-secondary)]" />
-                        )
-                      }
-                      title={
-                        identity.provider === 'email'
-                          ? t('providerEmail' as any) || 'E-post'
-                          : identity.provider === 'google'
-                          ? t('providerGoogle' as any) || 'Google'
-                          : identity.provider === 'facebook'
-                          ? 'Facebook'
-                          : identity.provider
-                      }
-                      subtitle={identity.identity_data?.email}
-                      rightElement={
-                        identities.length > 1 ? (
-                          <IconButton
-                            icon={<Unlink size={14} />}
-                            onClick={() => handleUnlink(identity)}
-                            disabled={isUpdating}
-                            variant="danger"
-                            size="xs"
-                            aria-label="Koppla från konto"
-                          />
-                        ) : undefined
-                      }
-                    />
+                      className="p-4 flex items-center justify-between hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors"
+                    >
+                      <div className="flex items-center gap-3.5 min-w-0 pr-2">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)]">
+                          {identity.provider === 'google' ? (
+                            <Globe size={16} strokeWidth={1.75} className="text-[var(--accent-color)]" />
+                          ) : identity.provider === 'facebook' ? (
+                            <svg className="w-4 h-4 shrink-0 text-[#1877F2]" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                          ) : (
+                            <MailCheck size={16} strokeWidth={1.75} className="text-[var(--text-secondary)]" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex flex-col justify-center">
+                          <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                            {identity.provider === 'email'
+                              ? t('providerEmail' as any) || 'E-post'
+                              : identity.provider === 'google'
+                              ? t('providerGoogle' as any) || 'Google'
+                              : identity.provider === 'facebook'
+                              ? 'Facebook'
+                              : identity.provider}
+                          </span>
+                          {identity.identity_data?.email && (
+                            <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                              {identity.identity_data?.email}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {identities.length > 1 && (
+                        <IconButton
+                          icon={<Unlink size={14} />}
+                          onClick={() => handleUnlink(identity)}
+                          disabled={isUpdating}
+                          variant="danger"
+                          size="xs"
+                          aria-label="Koppla från konto"
+                        />
+                      )}
+                    </div>
                   ))}
-                </Card>
+                </div>
               </div>
             )}
 
