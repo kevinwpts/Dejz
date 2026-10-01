@@ -4179,13 +4179,13 @@ export default function App() {
 
   return (
     <div 
-      className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-clip bg-[var(--bg-color)] transition-colors duration-500 !bg-[#0b0b0b]"
-      style={{ backgroundColor: '#0b0b0b' }}
+      className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-clip bg-[var(--bg-color)] transition-colors duration-500 !bg-[#141118]"
+      style={{ backgroundColor: '#141118' }}
     >
       {/* Shared Fixed Dark Mode Background Layer */}
       <div 
         className="dark-app-bg-layer" 
-        style={{ backgroundColor: '#0b0b0b', backgroundImage: 'none' }}
+        style={{ backgroundColor: '#141118', backgroundImage: 'none' }}
         aria-hidden="true" 
       />
 

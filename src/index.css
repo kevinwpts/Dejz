@@ -273,11 +273,11 @@ h6 {
 }
 
 .dark {
-  /* Premium Dark Theme (#0b0b0b) */
-  --bg-top-color: #0b0b0b;
-  --bg-color: #0b0b0b;
-  --bg-secondary: #0b0b0b;
-  --bg-gradient: #0b0b0b;
+  /* Premium Dark Theme (#141118) */
+  --bg-top-color: #141118;
+  --bg-color: #141118;
+  --bg-secondary: #141118;
+  --bg-gradient: #141118;
 
   --surface-color: #1D1A23;
   --surface-gradient: #1D1A23;
@@ -401,7 +401,7 @@ h6 {
   pointer-events: none;
   z-index: 0;
   display: none;
-  background-color: #0b0b0b;
+  background-color: #141118;
   background-image: none;
 }
 
