@@ -645,9 +645,10 @@ export function TransactionModal({
         {/* Drawer Handle on Mobile */}
         <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
-        {/* Header Section */}
-        <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between gap-3 border-b border-black/[0.06] dark:border-white/[0.06] relative z-10">
-          <div className="flex items-center gap-3 min-w-0">
+        {/* Header Section: Centered Title, Logo on Left, Close on Right */}
+        <div className="px-5 sm:px-6 pt-3.5 sm:pt-4 pb-3 relative flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] z-10 min-h-[52px]">
+          {/* Logo on Left */}
+          <div className="flex items-center z-10">
             <button
               type="button"
               onClick={() => setShowIconSelector(true)}
@@ -656,63 +657,58 @@ export function TransactionModal({
               aria-label={t('chooseIcon')}
             >
               <TransactionLogo 
-                size="lg"
+                size="sm"
                 config={config}
                 transaction={previewTransaction} 
               />
             </button>
-
-            <div className="min-w-0">
-              <AnimatePresence mode="wait">
-                {!transaction && onChangeType ? (
-                  <motion.div 
-                    key="type-selector"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                  >
-                    <SegmentedControl
-                      options={[
-                        { value: 'expense', label: t('expense') },
-                        { value: 'income', label: t('income') }
-                      ]}
-                      value={type}
-                      onChange={(val) => onChangeType(val as 'expense' | 'income')}
-                      size="sm"
-                    />
-                  </motion.div>
-                ) : (
-                  <motion.h2 
-                    key="title-form"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="text-[16px] sm:text-[17px] font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate"
-                  >
-                    {transaction 
-                      ? (currentLang === 'en' ? 'Edit transaction' : (type === 'income' ? 'Redigera inkomst' : 'Redigera transaktion'))
-                      : (type === 'income' ? t('newIncome') : t('newExpense'))
-                    }
-                  </motion.h2>
-                )}
-              </AnimatePresence>
-            </div>
           </div>
 
-          <div className="flex justify-end shrink-0">
-            <button 
-              type="button"
-              onClick={onClose} 
-              className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95"
-              aria-label={t('close')}
-            >
-              <X size={15} strokeWidth={2.2} />
-            </button>
+          {/* Title dead-centered */}
+          <div className="absolute inset-x-14 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+            <AnimatePresence mode="wait">
+              {!transaction && onChangeType ? (
+                <div className="pointer-events-auto">
+                  <SegmentedControl
+                    options={[
+                      { value: 'expense', label: t('expense') },
+                      { value: 'income', label: t('income') }
+                    ]}
+                    value={type}
+                    onChange={(val) => onChangeType(val as 'expense' | 'income')}
+                    size="sm"
+                  />
+                </div>
+              ) : (
+                <motion.h2 
+                  key="title-form"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="text-[16px] sm:text-[17px] font-semibold tracking-tight text-[var(--text-primary)] dark:text-white text-center pointer-events-auto truncate px-2"
+                >
+                  {transaction 
+                    ? (currentLang === 'en' ? 'Edit transaction' : (type === 'income' ? 'Redigera inkomst' : 'Redigera transaktion'))
+                    : (type === 'income' ? t('newIncome') : t('newExpense'))
+                  }
+                </motion.h2>
+              )}
+            </AnimatePresence>
           </div>
+
+          {/* Close Button on Right */}
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 z-10 shrink-0"
+            aria-label={t('close')}
+          >
+            <X size={15} strokeWidth={2.2} />
+          </button>
         </div>
 
-        {/* Main Content Area: Consistent Vertical Spacing & Card-styled Inputs */}
-        <div className="shrink overflow-y-auto px-5 sm:px-6 py-3.5 space-y-3 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+        {/* Main Content Area: Grouped Unified Module (Profile Style with subtle dividing lines) */}
+        <div className="shrink overflow-y-auto px-5 sm:px-6 py-4 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
               {/* Hidden file input for tickets, receipts and documents */}
               <input 
                 ref={receiptInputRef}
@@ -722,14 +718,12 @@ export function TransactionModal({
                 onChange={handleReceiptFileChange}
               />
 
-              {/* Amount Input */}
-              <div className="space-y-1">
-                <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
-                  {currentLang === 'en' ? 'Amount' : 'Belopp'}
-                </label>
+              {/* Unified Form Module */}
+              <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] divide-y divide-black/[0.06] dark:divide-white/[0.06] overflow-hidden shadow-none border-none">
+                {/* 1. Beloppsrutan (Amount Input) - slightly taller for prominence */}
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="bg-white dark:bg-[#1E1B22] rounded-[16px] h-[80px] sm:h-[84px] px-4 sm:px-5 flex items-center justify-between transition-all border-none shadow-none group cursor-text"
+                  className="h-[82px] sm:h-[88px] px-4 sm:px-5 flex items-center justify-between cursor-text"
                 >
                   <div className="shrink-0 flex items-center min-w-[56px]">
                     {type === 'expense' && (
@@ -775,234 +769,75 @@ export function TransactionModal({
                   </div>
                   <div className="shrink-0 min-w-[56px]" />
                 </div>
-              </div>
 
-              {/* Merchant Input */}
-              <div className="space-y-1">
-                <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
-                  {type === 'income' ? t('incomeSource') : t('merchant')}
-                </label>
-                <div className="relative group">
-                  <input 
-                    ref={merchantInputRef}
-                    type="text" 
-                    value={merchant}
-                    onChange={(e) => setMerchant(e.target.value)}
-                    placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="w-full h-[54px] sm:h-[56px] bg-white dark:bg-[#1E1B22] text-[13.5px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 rounded-[16px] px-4 border-none shadow-none"
-                  />
-                  {merchant && (
-                    <button 
-                      onClick={() => setMerchant('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
-                    >
-                      <X size={14} strokeWidth={2} />
-                    </button>
-                  )}
+                {/* 2. Mottagare / Butik Input */}
+                <div className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex flex-col justify-center">
+                  <label className="text-[11px] font-medium text-[#777168] dark:text-[#A8A8A8] block">
+                    {type === 'income' ? t('incomeSource') : t('merchant')}
+                  </label>
+                  <div className="flex items-center justify-between gap-2 mt-0.5">
+                    <input 
+                      ref={merchantInputRef}
+                      type="text" 
+                      value={merchant}
+                      onChange={(e) => setMerchant(e.target.value)}
+                      placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
+                      className="w-full bg-transparent text-[13.5px] font-normal text-[var(--text-primary)] outline-none placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50"
+                    />
+                    {merchant && (
+                      <button 
+                        onClick={() => setMerchant('')}
+                        className="text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer shrink-0"
+                      >
+                        <X size={14} strokeWidth={2} />
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Note Input */}
-              <div className="space-y-1">
-                <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
-                  {t('ownNote')}
-                </label>
-                <div className="relative group">
-                  <input 
-                    ref={noteInputRef}
-                    type="text" 
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                    className={`w-full h-[54px] sm:h-[56px] bg-white dark:bg-[#1E1B22] text-[13.5px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 rounded-[16px] px-4 ${
-                      validationError === 'note' ? 'ring-2 ring-rose-500 bg-rose-500/5' : 'border-none shadow-none'
-                    }`}
-                  />
-                  {note && (
-                    <button 
-                      onClick={() => setNote('')}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer"
-                    >
-                      <X size={14} strokeWidth={2} />
-                    </button>
-                  )}
+                {/* 3. Egen anteckning Input */}
+                <div className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex flex-col justify-center">
+                  <label className="text-[11px] font-medium text-[#777168] dark:text-[#A8A8A8] block">
+                    {t('ownNote')}
+                  </label>
+                  <div className="flex items-center justify-between gap-2 mt-0.5">
+                    <input 
+                      ref={noteInputRef}
+                      type="text" 
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
+                      className={`w-full bg-transparent text-[13.5px] font-normal text-[var(--text-primary)] outline-none placeholder:font-normal placeholder:text-[13px] placeholder-[#777168]/50 dark:placeholder-[#A8A8A8]/50 ${
+                        validationError === 'note' ? 'text-rose-500' : ''
+                      }`}
+                    />
+                    {note && (
+                      <button 
+                        onClick={() => setNote('')}
+                        className="text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-1 cursor-pointer shrink-0"
+                      >
+                        <X size={14} strokeWidth={2} />
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Split Transaction */}
-              {type === 'expense' && (
-                <div className="space-y-4 pt-2">
-                  {splits.length > 0 && (
-                    <motion.div 
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      className="space-y-6 bg-white dark:bg-[#1E1B22] p-4 rounded-[16px] border-none shadow-none overflow-hidden"
-                    >
-                      {/* Splits List with Sliders */}
-                      <div className="space-y-6">
-                        {splits.map((split, index) => {
-                          const catData = categories.find(c => c.name === split.category);
-                          const totalVal = parseAmount(amount);
-                          
-                          return (
-                            <div key={split.id} className="space-y-3 p-3 bg-black/[0.03] dark:bg-white/[0.04] rounded-[14px] border-none shadow-none group">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <div 
-                                    className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white shadow-xs transition-all"
-                                    style={{ backgroundColor: split.category ? (catData?.color || COLORS[index % COLORS.length]) : 'var(--surface-muted)' }}
-                                  >
-                                    <CategoryIcon icon={catData?.icon || 'tag'} size="sm" color={split.category ? "#fff" : "var(--text-tertiary)"} />
-                                  </div>
-                                  <div className="flex flex-col">
-                                    <span className={`text-[13px] font-bold ${split.category ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}>
-                                      {split.category || 'Välj kategori'}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="flex flex-col items-end">
-                                    <div className="flex items-center gap-1">
-                                      <input
-                                        type="text"
-                                        inputMode="decimal"
-                                        value={split.amount || ''}
-                                        onChange={(e) => {
-                                          const val = parseAmount(e.target.value);
-                                          const newSplits = [...splits];
-                                          newSplits[index].amount = val;
-                                          setSplits(newSplits);
-                                        }}
-                                        className="w-24 bg-transparent border-none text-[16px] font-bold text-[var(--text-primary)] text-right outline-none p-0"
-                                      />
-                                      <span className="text-[12px] font-bold text-[var(--text-secondary)] opacity-40">{currency}</span>
-                                    </div>
-                                    <div className="h-0.5 w-full bg-[var(--accent-color)]/20 rounded-full mt-0.5" />
-                                  </div>
-                                  <button 
-                                    onClick={() => {
-                                      const newSplits = splits.filter((_, i) => i !== index);
-                                      if (newSplits.length === 1) {
-                                        newSplits[0].amount = totalVal;
-                                      }
-                                      setSplits(newSplits);
-                                    }}
-                                    className="w-8 h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-danger hover:bg-danger/10 rounded-full transition-all ml-1 cursor-pointer"
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                </div>
-                              </div>
-                              
-                              {/* Slider for Split */}
-                              <div className="px-1">
-                                <input 
-                                  type="range"
-                                  min="0"
-                                  max={totalVal}
-                                  step="1"
-                                  value={split.amount}
-                                  onChange={(e) => {
-                                    const newVal = parseFloat(e.target.value);
-                                    const newSplits = [...splits];
-                                    const diff = newVal - split.amount;
-                                    newSplits[index].amount = newVal;
-                                    
-                                    if (newSplits.length > 1) {
-                                      const otherIndices = newSplits.map((_, i) => i).filter(i => i !== index);
-                                      const otherSum = otherIndices.reduce((sum, i) => sum + newSplits[i].amount, 0);
-                                      
-                                      if (otherSum > 0) {
-                                        otherIndices.forEach(i => {
-                                          const share = newSplits[i].amount / otherSum;
-                                          newSplits[i].amount = Math.max(0, newSplits[i].amount - (diff * share));
-                                        });
-                                      } else {
-                                        const nextIdx = (index + 1) % newSplits.length;
-                                        newSplits[nextIdx].amount = Math.max(0, totalVal - newVal);
-                                      }
-                                      
-                                      const finalSum = newSplits.reduce((sum, s) => sum + s.amount, 0);
-                                      const finalDiff = totalVal - finalSum;
-                                      if (Math.abs(finalDiff) > 0.01) {
-                                         const lastIdx = otherIndices[otherIndices.length - 1] ?? index;
-                                         newSplits[lastIdx].amount = Math.max(0, newSplits[lastIdx].amount + finalDiff);
-                                      }
-                                    }
-                                    setSplits(newSplits);
-                                  }}
-                                  className="w-full accent-accent h-2 bg-black/10 dark:bg-white/10 rounded-full appearance-none cursor-pointer border border-black/10 dark:border-white/10"
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Quick Category Add */}
-                      <div className="space-y-3">
-                         <div className="flex items-center justify-between px-1">
-                           <span className="text-xs font-semibold text-[var(--text-secondary)]">Lägg till kategori</span>
-                           <span className="text-[11px] font-medium text-[var(--text-tertiary)]">{categories.length} tillgängliga</span>
-                         </div>
-                         <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar -mx-2 px-2">
-                           {categories.map(cat => {
-                             const isAlreadyInSplit = splits.some(s => s.category === cat.name);
-                             return (
-                               <button
-                                 key={cat.name}
-                                 disabled={isAlreadyInSplit}
-                                 type="button"
-                                 onClick={() => {
-                                    const emptySplitIndex = splits.findIndex(s => s.category === '');
-                                    if (emptySplitIndex !== -1) {
-                                      const newSplits = [...splits];
-                                      newSplits[emptySplitIndex].category = cat.name;
-                                      setSplits(newSplits);
-                                    } else {
-                                      const totalVal = parseAmount(amount);
-                                      const currentSum = splits.reduce((sum, s) => sum + s.amount, 0);
-                                      const remainder = Math.max(0, totalVal - currentSum);
-                                      setSplits([...splits, { id: Math.random().toString(), amount: remainder, category: cat.name, tags: [] }]);
-                                    }
-                                 }}
-                                 className={`flex-shrink-0 flex flex-col items-center gap-1.5 p-2 rounded-[14px] transition-all cursor-pointer ${
-                                   isAlreadyInSplit 
-                                     ? 'bg-black/5 dark:bg-white/5 border-transparent opacity-40' 
-                                     : 'bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.08] active:scale-95 shadow-none border-none'
-                                 }`}
-                               >
-                                 <div 
-                                   className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white"
-                                   style={{ backgroundColor: cat.color || COLORS[0] }}
-                                 >
-                                   <CategoryIcon icon={cat.icon} size="sm" color="#fff" />
-                                 </div>
-                                 <span className="text-[10px] font-bold tracking-tight max-w-[60px] truncate">{cat.name}</span>
-                               </button>
-                             );
-                           })}
-                         </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-              )}
-
-                  {/* Category Selection Row */}
-                  <div className={`space-y-1 ${splits.length > 0 ? 'hidden' : ''}`}>
-                    <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">{t('category')}</label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (typeof feedback?.light === 'function') feedback.light();
-                        setIsCategoryPickerOpen(true);
-                      }}
-                      className="w-full h-[54px] sm:h-[56px] bg-white dark:bg-[#1E1B22] rounded-[16px] px-4 border-none shadow-none flex items-center justify-between transition-all hover:bg-black/[0.02] dark:hover:bg-[#27242E] cursor-pointer text-left group"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                {/* 4. Kategori Selection */}
+                {splits.length === 0 && (
+                  <div 
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      setIsCategoryPickerOpen(true);
+                    }}
+                    className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex items-center justify-between cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group"
+                  >
+                    <div className="flex flex-col justify-center min-w-0 flex-1">
+                      <span className="text-[11px] font-medium text-[#777168] dark:text-[#A8A8A8] block">
+                        {t('category')}
+                      </span>
+                      <div className="flex items-center gap-2 mt-0.5 min-w-0">
                         <div 
-                          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                          className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
                           style={{ 
                             backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
                             color: currentCatData?.color || 'var(--text-primary)'
@@ -1011,206 +846,359 @@ export function TransactionModal({
                           <CategoryIcon 
                             icon={currentCatData?.icon || 'tag'} 
                             color={currentCatData?.color} 
-                            size="xs" 
+                            size="2xs" 
                           />
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <span className="text-[13.5px] font-medium text-[var(--text-primary)] block truncate">
-                            {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] shrink-0">
-                        <span className="text-[11.5px] font-normal">{currentLang === 'en' ? 'Change' : 'Ändra'}</span>
-                        <ChevronDown size={14} strokeWidth={2} />
-                      </div>
-                    </button>
-                  </div>
-            
-                  {/* Date Selection */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between px-0.5">
-                      <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8]">{t('date')}</label>
-                      {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
-                       new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
-                        <span className="text-[11.5px] font-medium text-[var(--text-primary)] tabular-nums">
-                          {formatFullDate(selectedDate, currentLang)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-1.5 flex gap-1.5 border-none shadow-none">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedDate(new Date());
-                          setShowFullCalendar(false);
-                        }}
-                        className={`flex-1 h-[42px] sm:h-[44px] rounded-xl text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                          !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
-                            ? 'bg-[var(--accent-color)] text-white shadow-xs'
-                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
-                        }`}
-                      >
-                        {t('todayLabel')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const yesterday = new Date();
-                          yesterday.setDate(yesterday.getDate() - 1);
-                          setSelectedDate(yesterday);
-                          setShowFullCalendar(false);
-                        }}
-                        className={`flex-1 h-[42px] sm:h-[44px] rounded-xl text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                          !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
-                            ? 'bg-[var(--accent-color)] text-white shadow-xs'
-                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
-                        }`}
-                      >
-                        {t('yesterdayLabel')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowFullCalendar(!showFullCalendar)}
-                        className={`w-12 h-[42px] sm:h-[44px] rounded-xl transition-all flex items-center justify-center cursor-pointer ${
-                          showFullCalendar 
-                            ? 'bg-[var(--accent-color)] text-white shadow-xs' 
-                            : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
-                        }`}
-                        title={t('chooseDate')}
-                      >
-                        <Calendar size={15} strokeWidth={2} />
-                      </button>
-                    </div>
-
-                    <AnimatePresence>
-                      {showFullCalendar && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] p-3.5 border-none shadow-none mt-1">
-                            <CalendarWidget 
-                              calendarDays={calendarDays}
-                              normalizedSelectedDate={selectedDate}
-                              setSelectedDate={setSelectedDate}
-                              t={t}
-                              currentLang={currentLang}
-                            />
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Attachment / File Upload Section ("Bifoga fil") */}
-                  <div className="space-y-1">
-                    <label className="text-[11.5px] font-medium text-[#777168] dark:text-[#A8A8A8] block px-0.5">
-                      {currentLang === 'en' ? 'Attach file' : 'Bifoga fil'}
-                    </label>
-                    {isScanningReceipt ? (
-                      <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] min-h-[54px] sm:min-h-[56px] px-4 py-2 border-none shadow-none flex items-center justify-between transition-all">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-7 h-7 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
-                            <Loader2 size={15} className="animate-spin text-[var(--accent-color)]" />
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="text-[12px] font-semibold text-[var(--text-primary)] tracking-tight">
-                              {currentLang === 'en' ? 'Uploading file…' : 'Laddar upp fil…'}
-                            </h4>
-                            <p className="text-[10.5px] text-[var(--accent-color)] truncate">
-                              {currentLang === 'en' ? 'Processing attachment' : 'Bearbetar bilagan'}
-                            </p>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2 py-0.5 rounded-full animate-pulse">
-                          {currentLang === 'en' ? 'Wait…' : 'Vänta…'}
+                        <span className="text-[13.5px] font-medium text-[var(--text-primary)] truncate">
+                          {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                         </span>
                       </div>
-                    ) : receiptUrl ? (
-                      <div className="bg-white dark:bg-[#1E1B22] rounded-[16px] min-h-[54px] sm:min-h-[56px] px-4 py-2 border-none shadow-none flex items-center justify-between transition-all">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-black/5 dark:border-white/5 shrink-0 bg-black/5 flex items-center justify-center">
-                            {receiptUrl.includes('.pdf') ? (
-                              <FileText size={18} className="text-[#777168] dark:text-[#A8A8A8]" />
-                            ) : (
-                              <img src={receiptUrl} alt="Attached file" className="w-full h-full object-cover" />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="text-[12.5px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
-                              {receiptFileName || (currentLang === 'en' ? 'File attached' : 'Fil bifogad')}
-                            </h4>
-                            <p className="text-[10.5px] text-[#777168] dark:text-[#A8A8A8] truncate">
-                              {currentLang === 'en' ? 'Ticket, receipt or document' : 'Biljett, kvitto eller dokument'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                          <a
-                            href={receiptUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2.5 py-1 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-medium rounded-lg transition-colors cursor-pointer"
-                          >
-                            {currentLang === 'en' ? 'View' : 'Visa'}
-                          </a>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setReceiptUrl(undefined);
-                              setReceiptFileName(undefined);
-                              setScanFeedback(null);
-                            }}
-                            className="p-1 text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-                            title={currentLang === 'en' ? 'Remove' : 'Ta bort'}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div 
-                        className="bg-white dark:bg-[#1E1B22] rounded-[16px] min-h-[54px] sm:min-h-[56px] px-4 py-2 border-none shadow-none flex items-center justify-between transition-all"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
-                            <Paperclip size={14} strokeWidth={2} />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="text-[12.5px] font-medium text-[var(--text-primary)] block truncate">
-                              {currentLang === 'en' ? 'Concert tickets, receipts, PDFs' : 'Konsertbiljetter, kvitto, PDF m.m.'}
-                            </span>
-                            <p className="text-[10.5px] text-[#777168] dark:text-[#A8A8A8] truncate">
-                              {currentLang === 'en' ? 'Attach file or take photo' : 'Bifoga fil eller fotografera'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                          <button
-                            type="button"
-                            onClick={() => receiptInputRef.current?.click()}
-                            disabled={isUploadingReceipt}
-                            className="h-8 px-3 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11.5px] font-medium rounded-xl transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
-                          >
-                            <Paperclip size={12} strokeWidth={2} />
-                            <span>{currentLang === 'en' ? 'File' : 'Välj fil'}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setIsCameraModalOpen(true)}
-                            disabled={isUploadingReceipt}
-                            className="h-8 px-3 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11.5px] font-medium rounded-xl shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
-                          >
-                            <Camera size={12} strokeWidth={2} />
-                            <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
-                          </button>
-                        </div>
-                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] shrink-0 ml-3">
+                      <span className="text-[11.5px] font-normal">{currentLang === 'en' ? 'Change' : 'Ändra'}</span>
+                      <ChevronDown size={14} strokeWidth={2} />
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. Datum Selection */}
+                <div className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex flex-col justify-center">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-medium text-[#777168] dark:text-[#A8A8A8]">
+                      {t('date')}
+                    </span>
+                    {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
+                     new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
+                      <span className="text-[11.5px] font-medium text-[var(--text-primary)] tabular-nums">
+                        {formatFullDate(selectedDate, currentLang)}
+                      </span>
                     )}
                   </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedDate(new Date());
+                        setShowFullCalendar(false);
+                      }}
+                      className={`flex-1 h-[36px] rounded-lg text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
+                          ? 'bg-[var(--accent-color)] text-white shadow-xs'
+                          : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
+                      }`}
+                    >
+                      {t('todayLabel')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        setSelectedDate(yesterday);
+                        setShowFullCalendar(false);
+                      }}
+                      className={`flex-1 h-[36px] rounded-lg text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                        !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
+                          ? 'bg-[var(--accent-color)] text-white shadow-xs'
+                          : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
+                      }`}
+                    >
+                      {t('yesterdayLabel')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowFullCalendar(!showFullCalendar)}
+                      className={`w-10 h-[36px] rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+                        showFullCalendar 
+                          ? 'bg-[var(--accent-color)] text-white shadow-xs' 
+                          : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
+                      }`}
+                      title={t('chooseDate')}
+                    >
+                      <Calendar size={14} strokeWidth={2} />
+                    </button>
+                  </div>
+
+                  <AnimatePresence>
+                    {showFullCalendar && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden pt-2.5"
+                      >
+                        <CalendarWidget 
+                          calendarDays={calendarDays}
+                          normalizedSelectedDate={selectedDate}
+                          setSelectedDate={setSelectedDate}
+                          t={t}
+                          currentLang={currentLang}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* 6. Bifoga fil (Attach file) */}
+                <div className="px-4 sm:px-5 py-3 min-h-[58px] sm:min-h-[62px] flex items-center justify-between">
+                  {isScanningReceipt ? (
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-6 h-6 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-[var(--accent-color)] shrink-0">
+                          <Loader2 size={13} className="animate-spin text-[var(--accent-color)]" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-[12px] font-semibold text-[var(--text-primary)] tracking-tight">
+                            {currentLang === 'en' ? 'Uploading file…' : 'Laddar upp fil…'}
+                          </h4>
+                          <p className="text-[10px] text-[var(--accent-color)] truncate">
+                            {currentLang === 'en' ? 'Processing attachment' : 'Bearbetar bilagan'}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-medium text-[var(--accent-color)] bg-[var(--accent-color)]/10 px-2 py-0.5 rounded-full animate-pulse">
+                        {currentLang === 'en' ? 'Wait…' : 'Vänta…'}
+                      </span>
+                    </div>
+                  ) : receiptUrl ? (
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-black/5 dark:border-white/5 shrink-0 bg-black/5 flex items-center justify-center">
+                          {receiptUrl.includes('.pdf') ? (
+                            <FileText size={16} className="text-[#777168] dark:text-[#A8A8A8]" />
+                          ) : (
+                            <img src={receiptUrl} alt="Attached file" className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-[12.5px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
+                            {receiptFileName || (currentLang === 'en' ? 'File attached' : 'Fil bifogad')}
+                          </h4>
+                          <p className="text-[10px] text-[#777168] dark:text-[#A8A8A8] truncate">
+                            {currentLang === 'en' ? 'Ticket, receipt or document' : 'Biljett, kvitto eller dokument'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                        <a
+                          href={receiptUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-medium rounded-lg transition-colors cursor-pointer"
+                        >
+                          {currentLang === 'en' ? 'View' : 'Visa'}
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReceiptUrl(undefined);
+                            setReceiptFileName(undefined);
+                            setScanFeedback(null);
+                          }}
+                          className="p-1 text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                          title={currentLang === 'en' ? 'Remove' : 'Ta bort'}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-6 h-6 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+                          <Paperclip size={13} strokeWidth={2} />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-[12.5px] font-medium text-[var(--text-primary)] block truncate">
+                            {currentLang === 'en' ? 'Attach file' : 'Bifoga fil'}
+                          </span>
+                          <p className="text-[10px] text-[#777168] dark:text-[#A8A8A8] truncate">
+                            {currentLang === 'en' ? 'Tickets, receipts, PDFs' : 'Biljetter, kvitton, PDF m.m.'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                        <button
+                          type="button"
+                          onClick={() => receiptInputRef.current?.click()}
+                          disabled={isUploadingReceipt}
+                          className="h-7 px-2.5 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-medium rounded-lg transition-all cursor-pointer active:scale-95 flex items-center gap-1"
+                        >
+                          <Paperclip size={11} strokeWidth={2} />
+                          <span>{currentLang === 'en' ? 'File' : 'Välj fil'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsCameraModalOpen(true)}
+                          disabled={isUploadingReceipt}
+                          className="h-7 px-2.5 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11px] font-medium rounded-lg shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          <Camera size={11} strokeWidth={2} />
+                          <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Split Transaction Details if Active */}
+              {type === 'expense' && splits.length > 0 && (
+                <div className="space-y-4 pt-1">
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    className="space-y-6 bg-white dark:bg-[#1E1B22] p-4 rounded-[22px] border-none shadow-none overflow-hidden"
+                  >
+                    {/* Splits List with Sliders */}
+                    <div className="space-y-6">
+                      {splits.map((split, index) => {
+                        const catData = categories.find(c => c.name === split.category);
+                        const totalVal = parseAmount(amount);
+                        
+                        return (
+                          <div key={split.id} className="space-y-3 p-3 bg-black/[0.03] dark:bg-white/[0.04] rounded-[14px] border-none shadow-none group">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white shadow-xs transition-all"
+                                  style={{ backgroundColor: split.category ? (catData?.color || COLORS[index % COLORS.length]) : 'var(--surface-muted)' }}
+                                >
+                                  <CategoryIcon icon={catData?.icon || 'tag'} size="sm" color={split.category ? "#fff" : "var(--text-tertiary)"} />
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className={`text-[13px] font-bold ${split.category ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}>
+                                    {split.category || 'Välj kategori'}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="flex flex-col items-end">
+                                  <div className="flex items-center gap-1">
+                                    <input
+                                      type="text"
+                                      inputMode="decimal"
+                                      value={split.amount || ''}
+                                      onChange={(e) => {
+                                        const val = parseAmount(e.target.value);
+                                        const newSplits = [...splits];
+                                        newSplits[index].amount = val;
+                                        setSplits(newSplits);
+                                      }}
+                                      className="w-24 bg-transparent border-none text-[16px] font-bold text-[var(--text-primary)] text-right outline-none p-0"
+                                    />
+                                    <span className="text-[12px] font-bold text-[var(--text-secondary)] opacity-40">{currency}</span>
+                                  </div>
+                                  <div className="h-0.5 w-full bg-[var(--accent-color)]/20 rounded-full mt-0.5" />
+                                </div>
+                                <button 
+                                  onClick={() => {
+                                    const newSplits = splits.filter((_, i) => i !== index);
+                                    if (newSplits.length === 1) {
+                                      newSplits[0].amount = totalVal;
+                                    }
+                                    setSplits(newSplits);
+                                  }}
+                                  className="w-8 h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-danger hover:bg-danger/10 rounded-full transition-all ml-1 cursor-pointer"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                            
+                            {/* Slider for Split */}
+                            <div className="px-1">
+                              <input 
+                                type="range"
+                                min="0"
+                                max={totalVal}
+                                step="1"
+                                value={split.amount}
+                                onChange={(e) => {
+                                  const newVal = parseFloat(e.target.value);
+                                  const newSplits = [...splits];
+                                  const diff = newVal - split.amount;
+                                  newSplits[index].amount = newVal;
+                                  
+                                  if (newSplits.length > 1) {
+                                    const otherIndices = newSplits.map((_, i) => i).filter(i => i !== index);
+                                    const otherSum = otherIndices.reduce((sum, i) => sum + newSplits[i].amount, 0);
+                                    
+                                    if (otherSum > 0) {
+                                      otherIndices.forEach(i => {
+                                        const share = newSplits[i].amount / otherSum;
+                                        newSplits[i].amount = Math.max(0, newSplits[i].amount - (diff * share));
+                                      });
+                                    } else {
+                                      const nextIdx = (index + 1) % newSplits.length;
+                                      newSplits[nextIdx].amount = Math.max(0, totalVal - newVal);
+                                    }
+                                    
+                                    const finalSum = newSplits.reduce((sum, s) => sum + s.amount, 0);
+                                    const finalDiff = totalVal - finalSum;
+                                    if (Math.abs(finalDiff) > 0.01) {
+                                       const lastIdx = otherIndices[otherIndices.length - 1] ?? index;
+                                       newSplits[lastIdx].amount = Math.max(0, newSplits[lastIdx].amount + finalDiff);
+                                    }
+                                  }
+                                  setSplits(newSplits);
+                                }}
+                                className="w-full accent-accent h-2 bg-black/10 dark:bg-white/10 rounded-full appearance-none cursor-pointer border border-black/10 dark:border-white/10"
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Quick Category Add */}
+                    <div className="space-y-3">
+                       <div className="flex items-center justify-between px-1">
+                         <span className="text-xs font-semibold text-[var(--text-secondary)]">Lägg till kategori</span>
+                         <span className="text-[11px] font-medium text-[var(--text-tertiary)]">{categories.length} tillgängliga</span>
+                       </div>
+                       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar -mx-2 px-2">
+                         {categories.map(cat => {
+                           const isAlreadyInSplit = splits.some(s => s.category === cat.name);
+                           return (
+                             <button
+                               key={cat.name}
+                               disabled={isAlreadyInSplit}
+                               type="button"
+                               onClick={() => {
+                                  const emptySplitIndex = splits.findIndex(s => s.category === '');
+                                  if (emptySplitIndex !== -1) {
+                                    const newSplits = [...splits];
+                                    newSplits[emptySplitIndex].category = cat.name;
+                                    setSplits(newSplits);
+                                  } else {
+                                    const totalVal = parseAmount(amount);
+                                    const currentSum = splits.reduce((sum, s) => sum + s.amount, 0);
+                                    const remainder = Math.max(0, totalVal - currentSum);
+                                    setSplits([...splits, { id: Math.random().toString(), amount: remainder, category: cat.name, tags: [] }]);
+                                  }
+                               }}
+                               className={`flex-shrink-0 flex flex-col items-center gap-1.5 p-2 rounded-[14px] transition-all cursor-pointer ${
+                                 isAlreadyInSplit 
+                                   ? 'bg-black/5 dark:bg-white/5 border-transparent opacity-40' 
+                                   : 'bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.08] active:scale-95 shadow-none border-none'
+                               }`}
+                             >
+                               <div 
+                                 className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white"
+                                 style={{ backgroundColor: cat.color || COLORS[0] }}
+                               >
+                                 <CategoryIcon icon={cat.icon} size="sm" color="#fff" />
+                               </div>
+                               <span className="text-[10px] font-bold tracking-tight max-w-[60px] truncate">{cat.name}</span>
+                             </button>
+                           );
+                         })}
+                       </div>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
           </div>
 
           {/* Register / Save Button & Delete Button */}
