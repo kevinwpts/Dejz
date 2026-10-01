@@ -401,7 +401,7 @@ h6 {
   pointer-events: none;
   z-index: 0;
   display: none;
-  background-color: #050709;
+  background-color: #080611;
   background-image:
     radial-gradient(ellipse 75% 38% at 76% 68%, rgba(34, 51, 70, 0.62) 0%, rgba(22, 34, 46, 0.24) 48%, transparent 78%),
     radial-gradient(ellipse 60% 50% at 8% 34%, rgba(20, 31, 42, 0.40) 0%, transparent 80%),
