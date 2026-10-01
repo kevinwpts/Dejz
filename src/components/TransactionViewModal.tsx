@@ -121,7 +121,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -147,7 +147,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
           {/* Hero Section: Logo to the left, Title and Close Button inline, Price below */}
-          <div className="flex items-start gap-5 sm:gap-6 text-left pt-2 sm:pt-3 pb-3">
+          <div className="flex items-start gap-6 sm:gap-7 text-left pt-2 sm:pt-3 pb-3">
             <div className="shrink-0 pt-0.5 scale-125 sm:scale-130 origin-top-left">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
@@ -172,7 +172,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 </button>
               </div>
 
-              <p className={`text-[30px] sm:text-[36px] font-bold font-amount tabular-nums tracking-tight mt-0.5 flex items-baseline ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-[#E7E5E4]'}`}>
+              <p className={`text-[30px] sm:text-[36px] font-semibold font-amount tabular-nums tracking-tight mt-0 flex items-baseline ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-[#E7E5E4]'}`}>
                 <span className="opacity-80 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
                 <span>{formatAmount(transaction.amount, config.language)}</span>
                 <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans">{config.currency}</span>
