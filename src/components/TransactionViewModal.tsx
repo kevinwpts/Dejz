@@ -103,7 +103,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -111,8 +111,8 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
           className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
           style={{
             background: `
-              radial-gradient(120% 85% at 0% 0%, ${hexToRgba(brandColor, 0.28)} 0%, ${hexToRgba(brandColor, 0.14)} 28%, ${hexToRgba(brandColor, 0.05)} 52%, transparent 75%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.10)} 0%, transparent 45%)
+              radial-gradient(800px circle at 20% 0%, ${hexToRgba(brandColor, 0.35)} 0%, ${hexToRgba(brandColor, 0.16)} 35%, ${hexToRgba(brandColor, 0.05)} 65%, transparent 90%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.12)} 0%, transparent 55%)
             `
           }}
         />
@@ -183,7 +183,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete: _
                 </div>
               </div>
 
-              <p className={`text-[17px] sm:text-[19px] font-medium font-amount tabular-nums tracking-tight mt-1 flex items-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-secondary)]'}`}>
+              <p className={`text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
                 <span className="opacity-80 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
                 <span>{formatAmount(transaction.amount, config.language)}</span>
                 <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans">{config.currency}</span>
