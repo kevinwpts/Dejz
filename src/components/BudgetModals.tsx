@@ -200,7 +200,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                 </div>
               </div>
 
-              <p className="text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-center text-emerald-600 dark:text-emerald-400">
+              <p className="text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline text-emerald-600 dark:text-emerald-400">
                 <span className="opacity-80 mr-0.5">+</span>
                 <span>{formatAmount(displayAmount, config.language)}</span>
                 <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans">{currency}</span>
@@ -901,7 +901,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                 </div>
               </div>
 
-              <p className="text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-center text-[var(--text-primary)]">
+              <p className="text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline text-[var(--text-primary)]">
                 <span className="opacity-80 mr-0.5">−</span>
                 <span>{formatAmount(displayAmount, config.language)}</span>
                 <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans">{currency}</span>
