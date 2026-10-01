@@ -212,7 +212,7 @@ export function ProfileView({
       className="space-y-5 w-full pb-12 font-sans"
     >
       {/* User Header Module */}
-      <div className="bg-white dark:bg-[#161324] backdrop-blur-xl border-none rounded-[22px] p-5 shadow-none flex items-center gap-4">
+      <div className="bg-white dark:bg-[#191523] backdrop-blur-xl border-none rounded-[22px] p-5 shadow-none flex items-center gap-4">
         <div className="relative shrink-0">
           <label htmlFor="avatar-upload" className="cursor-pointer group block">
             <input 
@@ -275,7 +275,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('economy')}
           </h4>
-          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#191523] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem 
               icon={Calendar} 
               label={t('salary')} 
@@ -314,7 +314,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('appSettings')}
           </h4>
-          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#191523] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem 
               icon={SlidersHorizontal} 
               label={'Budget'} 
@@ -379,7 +379,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1.5 opacity-60">
             {t('support')}
           </h4>
-          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#191523] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem icon={Mail} label={t('feedback')} onClick={onFeedbackClick} />
             <SettingsMenuItem icon={Download} label={t('exportData')} onClick={onExportData} />
             <SettingsMenuItem icon={Shield} label={t('privacyPolicy')} onClick={() => onLegalClick('privacy')} />
@@ -392,7 +392,7 @@ export function ProfileView({
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-danger px-1.5 opacity-70">
             {t('dangerZone')}
           </h4>
-          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#191523] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             {isDemoMode && (
               <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-2.5">
                 <div className="flex items-center justify-between">

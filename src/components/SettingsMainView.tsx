@@ -117,7 +117,7 @@ export function SettingsMainView({
       exit={{ opacity: 0, y: -10 }}
       className="space-y-4 max-w-md mx-auto"
     >
-      <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-white dark:bg-[#161324] backdrop-blur-xl border-none shadow-none">
+      <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-white dark:bg-[#191523] backdrop-blur-xl border-none shadow-none">
         <button
           type="button"
           onClick={() => handleSectionClick('salary')}
