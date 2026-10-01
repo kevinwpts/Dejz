@@ -80,7 +80,7 @@ export function TransactionItem({
   const finalAmount = displayAmount !== undefined ? displayAmount : transaction.amount;
   const amountColor = transaction.type === 'income' 
     ? 'text-emerald-600 dark:text-emerald-400' 
-    : 'text-[#6D6962] dark:text-[#A8A8A8]';
+    : 'text-[#777168] dark:text-[#A8A8A8]';
 
   // Determine layout style classes with translucent glass surfaces
   let containerClasses = "";
@@ -208,7 +208,7 @@ export function TransactionItem({
               </p>
               
               {/* Secondary Details: smaller category icon & text */}
-              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#6D6962] dark:text-[#A8A8A8]">
+              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#777168] dark:text-[#A8A8A8]">
                 {hideCategoryBadge ? (
                   (transaction.timestamp || transaction.date) ? (
                     <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] tabular-nums">
