@@ -453,21 +453,11 @@ export function TodayView({
 
   return (
     <div className="relative font-sans">
-      {/* SOLID FLAT BACKGROUND LAYER (Light mode canvas) */}
+      {/* SOLID FLAT BACKGROUND LAYER */}
       <div 
-        className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-colors duration-300 dark:hidden"
+        className="fixed inset-0 z-0 pointer-events-none transition-colors duration-300 dark:hidden"
         style={{
-          height: '100vh',
           backgroundColor: 'var(--bg-color)',
-        }}
-      />
-
-      {/* SUBTLE THEME TINT GRADIENT ON UPPER HOME */}
-      <div 
-        className="fixed inset-x-0 top-0 z-0 pointer-events-none transition-opacity duration-500"
-        style={{
-          height: '65vh',
-          background: 'linear-gradient(180deg, var(--user-home-bg-from, rgba(99, 91, 255, 0.08)) 0%, var(--user-home-bg-to, rgba(99, 91, 255, 0.015)) 100%)',
         }}
       />
 
