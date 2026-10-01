@@ -478,8 +478,8 @@ export function TodayView({
         className="fixed left-0 right-0 z-10 pointer-events-auto"
         style={{
           top: isDemoMode 
-            ? 'calc(7.2rem + env(safe-area-inset-top, 0px))' 
-            : 'calc(4.75rem + env(safe-area-inset-top, 0px))',
+            ? 'calc(6.8rem + env(safe-area-inset-top, 0px))' 
+            : 'calc(3.75rem + env(safe-area-inset-top, 0px))',
         }}
       >
         <div className="max-w-2xl mx-auto px-3">
@@ -635,7 +635,7 @@ export function TodayView({
 
         {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
         {calendarDays && calendarDays.length > 0 && (
-          <div className={`sticky ${timelineStickyTop} z-20 bg-[var(--bg-color)]/95 dark:bg-[#050709]/80 backdrop-blur-md -mx-4 sm:-mx-6 px-4 sm:px-6 pt-0 pb-2.5 transition-all`}>
+          <div className={`sticky ${timelineStickyTop} z-20 bg-transparent -mx-4 sm:-mx-6 px-4 sm:px-6 pt-0 pb-2.5 transition-all`}>
             <PeriodTimeline
               calendarDays={calendarDays}
               selectedDate={normalizedSelectedDate}

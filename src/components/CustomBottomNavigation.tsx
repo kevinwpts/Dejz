@@ -41,7 +41,7 @@ export function CustomBottomNavigation({
   return (
     <div className="fixed bottom-0 left-0 right-0 z-30 pb-[max(0.85rem,env(safe-area-inset-bottom,0px))] px-4 sm:px-6 pointer-events-none flex justify-center">
       <motion.div
-        className="w-full max-w-[360px] h-[56px] rounded-full px-3 bg-white/80 dark:bg-white/[0.06] backdrop-blur-xl text-[#6D6962] dark:text-[#A8A8A8] flex items-center justify-between pointer-events-auto border-none shadow-xl shadow-black/[0.06] dark:shadow-2xl dark:shadow-black/80"
+        className="w-full max-w-[290px] h-[54px] rounded-full px-2.5 bg-white/80 dark:bg-white/[0.06] backdrop-blur-xl text-[#6D6962] dark:text-[#A8A8A8] flex items-center justify-between pointer-events-auto border-none shadow-xl shadow-black/[0.06] dark:shadow-2xl dark:shadow-black/80"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 380, damping: 28 }}
@@ -64,16 +64,16 @@ export function CustomBottomNavigation({
         />
 
         {/* 3. Centrerad Plusknapp */}
-        <div className="flex items-center justify-center px-1">
+        <div className="flex items-center justify-center">
           <button
             onClick={() => {
               if (onPlusClick) onPlusClick();
             }}
-            className="w-[42px] h-[42px] bg-[var(--accent-color)] hover:opacity-90 text-white rounded-full active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-[var(--accent-color)]/25"
+            className="w-[38px] h-[38px] bg-[var(--accent-color)] hover:opacity-90 text-white rounded-full active:scale-90 flex items-center justify-center transition-all cursor-pointer shadow-md shadow-[var(--accent-color)]/25"
             aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
             title={isEn ? "Add transaction" : "Lägg till transaktion"}
           >
-            <Plus size={22} strokeWidth={2.5} />
+            <Plus size={20} strokeWidth={2.5} />
           </button>
         </div>
 
@@ -121,20 +121,17 @@ function NavItem({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`relative w-10 h-10 flex flex-col items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer select-none rounded-full ${
+      className={`w-9 h-9 flex items-center justify-center transition-all duration-200 active:scale-90 cursor-pointer select-none rounded-full ${
         isActive
           ? 'text-[var(--accent-color)] dark:text-white'
           : 'text-[#8C867C] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white'
       }`}
     >
       <Icon 
-        size={21} 
+        size={20} 
         strokeWidth={isActive ? 2.2 : 1.8} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
       />
-      {isActive && (
-        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[var(--accent-color)] dark:bg-white" />
-      )}
     </button>
   );
 }
