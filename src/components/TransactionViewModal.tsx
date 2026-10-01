@@ -327,10 +327,10 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-8"
+                    className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-8 pt-[max(2.5rem,env(safe-area-inset-top,3rem))] pb-[max(2rem,env(safe-area-inset-bottom,2rem))]"
                     onClick={() => setShowReceiptLightbox(false)}
                   >
-                    <div className="w-full flex items-center justify-between max-w-5xl py-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="w-full flex items-center justify-between max-w-5xl py-3 px-2 sm:px-0" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-2 text-white">
                         <Paperclip size={18} />
                         <span className="text-sm font-medium">
