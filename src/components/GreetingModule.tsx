@@ -100,7 +100,7 @@ export function GreetingModule({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full -mt-7 sm:-mt-10 pt-0 mb-[2px] select-none px-1"
+        className="w-full -mt-2 sm:-mt-3 pt-0 mb-4 sm:mb-5 select-none px-1"
       >
         {/* Budget Gauge with info button */}
         <BudgetGauge
