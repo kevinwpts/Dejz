@@ -147,14 +147,14 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
           {/* Hero Section: Logo to the left, Title and Close Button inline, Price below */}
-          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
-            <div className="shrink-0 pt-0.5">
+          <div className="flex items-start gap-5 sm:gap-6 text-left pt-2 sm:pt-3 pb-3">
+            <div className="shrink-0 pt-0.5 scale-125 sm:scale-130 origin-top-left">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
 
             <div className="min-w-0 flex-1 flex flex-col justify-center">
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-[22px] sm:text-[26px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight truncate">
+                <h2 className="text-[26px] sm:text-[32px] font-bold tracking-tight text-[var(--text-primary)] leading-tight truncate">
                   {merchantName}
                 </h2>
 
@@ -172,10 +172,10 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 </button>
               </div>
 
-              <p className={`text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+              <p className={`text-[30px] sm:text-[36px] font-bold font-amount tabular-nums tracking-tight mt-0.5 flex items-baseline ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-[#E7E5E4]'}`}>
                 <span className="opacity-80 mr-0.5">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
                 <span>{formatAmount(transaction.amount, config.language)}</span>
-                <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans">{config.currency}</span>
+                <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans">{config.currency}</span>
               </p>
             </div>
           </div>
