@@ -80,7 +80,7 @@ export function TransactionItem({
   const finalAmount = displayAmount !== undefined ? displayAmount : transaction.amount;
   const amountColor = transaction.type === 'income' 
     ? 'text-emerald-600 dark:text-emerald-400' 
-    : 'text-[#777168] dark:text-[#A8A8A8]';
+    : 'text-[#4A453F] dark:text-[#D1D1D6]';
 
   // Determine layout style classes with translucent glass surfaces
   let containerClasses = "";

@@ -49,6 +49,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
   const isSavings = transaction.type === 'savings';
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showReceiptLightbox, setShowReceiptLightbox] = useState(false);
   const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(transaction, config));
 
   useEffect(() => {
@@ -276,41 +277,115 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               </div>
             )}
 
-            {/* Attached file / Receipt Section if exists */}
+            {/* Attached file / Receipt Section if exists (Option 2: Full-width card with Lightbox preview) */}
             {transaction.receiptUrl && (
-              <div className="py-3.5 space-y-2">
-                <div className="flex items-center gap-1.5 text-[var(--text-secondary)]">
-                  <Paperclip size={13} strokeWidth={1.75} />
-                  <span className="text-[13px] font-normal">
-                    {config.language === 'en' ? 'Attached file / Receipt' : 'Bifogad fil / Kvitto'}
-                  </span>
-                </div>
-                <div className="relative aspect-[3/4] max-w-[180px] rounded-[14px] overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 flex items-center justify-center">
-                  {transaction.receiptUrl.includes('.pdf') ? (
-                    <div className="flex flex-col items-center justify-center p-4 text-center space-y-2">
-                      <FileText size={32} className="text-[#777168] dark:text-[#A8A8A8]" />
-                      <span className="text-[11px] font-medium text-[var(--text-primary)]">PDF-dokument</span>
+              <>
+                <div className="py-3.5 space-y-2">
+                  <div className="flex items-center justify-between text-[var(--text-secondary)]">
+                    <div className="flex items-center gap-1.5">
+                      <Paperclip size={13} strokeWidth={1.75} />
+                      <span className="text-[13px] font-normal">
+                        {config.language === 'en' ? 'Attached file / Receipt' : 'Bifogad fil / Kvitto'}
+                      </span>
                     </div>
-                  ) : (
-                    <img 
-                      src={transaction.receiptUrl} 
-                      alt="Attachment" 
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  )}
-                  <a 
-                    href={transaction.receiptUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-all group"
+                    <button
+                      type="button"
+                      onClick={() => setShowReceiptLightbox(true)}
+                      className="text-[12px] font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
+                    >
+                      {config.language === 'en' ? 'View full screen' : 'Visa i helskärm'}
+                    </button>
+                  </div>
+                  <div 
+                    onClick={() => setShowReceiptLightbox(true)}
+                    className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-[16px] overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 flex items-center justify-center cursor-pointer group shadow-sm hover:shadow-md transition-all"
                   >
-                    <span className="bg-white/95 text-black px-3.5 py-2 rounded-xl text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-lg">
-                      {config.language === 'en' ? 'Open file' : 'Öppna fil'}
-                    </span>
-                  </a>
+                    {transaction.receiptUrl.includes('.pdf') ? (
+                      <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
+                        <FileText size={40} className="text-[#777168] dark:text-[#A8A8A8]" />
+                        <span className="text-[13px] font-medium text-[var(--text-primary)]">PDF-dokument (Klicka för att öppna)</span>
+                      </div>
+                    ) : (
+                      <img 
+                        src={transaction.receiptUrl} 
+                        alt="Attachment" 
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all">
+                      <span className="bg-white/95 dark:bg-zinc-900/95 text-black dark:text-white px-4 py-2.5 rounded-xl text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-xl">
+                        {config.language === 'en' ? 'Click to zoom' : 'Klicka för att förstora'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+
+                {/* Lightbox Modal Portal */}
+                {showReceiptLightbox && createPortal(
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-8"
+                    onClick={() => setShowReceiptLightbox(false)}
+                  >
+                    <div className="w-full flex items-center justify-between max-w-5xl py-2" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-2 text-white">
+                        <Paperclip size={18} />
+                        <span className="text-sm font-medium">
+                          {config.language === 'en' ? 'Receipt / Attachment' : 'Kvitto / Bilaga'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <a 
+                          href={transaction.receiptUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-xl text-xs font-medium transition-colors"
+                        >
+                          {config.language === 'en' ? 'Open original' : 'Öppna original'}
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => setShowReceiptLightbox(false)}
+                          className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div 
+                      className="flex-1 w-full max-w-5xl flex items-center justify-center overflow-auto p-2 sm:p-4 my-auto"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {transaction.receiptUrl.includes('.pdf') ? (
+                        <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl text-center space-y-4 shadow-2xl">
+                          <FileText size={64} className="mx-auto text-violet-500" />
+                          <p className="text-sm font-medium text-zinc-900 dark:text-white">PDF-dokument</p>
+                          <a 
+                            href={transaction.receiptUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-block bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg"
+                          >
+                            {config.language === 'en' ? 'Open PDF in new tab' : 'Öppna PDF i ny flik'}
+                          </a>
+                        </div>
+                      ) : (
+                        <img 
+                          src={transaction.receiptUrl} 
+                          alt="Receipt Fullscreen" 
+                          className="max-h-[80vh] max-w-full object-contain rounded-xl shadow-2xl"
+                          referrerPolicy="no-referrer"
+                        />
+                      )}
+                    </div>
+                  </motion.div>,
+                  document.body
+                )}
+              </>
             )}
           </div>
         </div>
