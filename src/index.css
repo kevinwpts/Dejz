@@ -614,8 +614,8 @@ h6 {
   .dark textarea:-webkit-autofill,
   .dark select:-webkit-autofill {
     -webkit-text-fill-color: #FFFFFF !important;
-    -webkit-box-shadow: 0 0 0px 1000px #2A2A2A inset !important;
-    box-shadow: 0 0 0px 1000px #2A2A2A inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px #2D2D2D inset !important;
+    box-shadow: 0 0 0px 1000px #2D2D2D inset !important;
     caret-color: #FFFFFF !important;
   }
 }
