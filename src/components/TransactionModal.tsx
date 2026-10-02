@@ -702,7 +702,7 @@ export function TransactionModal({
           />
 
           {/* Hero Section: Logo to the left, Merchant title and Close Button inline, Price below (matching preview) */}
-          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
+          <div className="flex items-start gap-4 text-left pt-3 sm:pt-4 pb-4">
             <div className="shrink-0 pt-0.5">
               <button
                 type="button"
@@ -728,7 +728,7 @@ export function TransactionModal({
                     value={merchant}
                     onChange={(e) => setMerchant(e.target.value)}
                     placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="text-[20px] sm:text-[24px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                    className="text-[24px] sm:text-[28px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                   />
                 </div>
 
@@ -743,10 +743,10 @@ export function TransactionModal({
               </div>
 
               {/* Amount display / input in the Hero */}
-              <div className="mt-1.5 flex items-baseline justify-between gap-2">
+              <div className="mt-2 flex items-baseline justify-between gap-2">
                 <div 
                   onClick={() => amountInputRef.current?.focus()}
-                  className="flex items-baseline font-amount text-[20px] sm:text-[24px] font-semibold tabular-nums tracking-tight cursor-text"
+                  className="flex items-baseline font-amount text-[24px] sm:text-[28px] font-semibold tabular-nums tracking-tight cursor-text"
                 >
                   <span className={`opacity-80 mr-0.5 select-none ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
                     {type === 'income' ? '+' : '−'}
@@ -764,10 +764,10 @@ export function TransactionModal({
                       }
                     }}
                     placeholder="0"
-                    className={`bg-transparent outline-none font-amount font-semibold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] max-w-[170px] sm:max-w-[210px] ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}
-                    style={{ width: `${Math.max(1, (amount || '0').length) * 1.1}ch` }}
+                    className={`bg-transparent outline-none font-amount font-semibold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] max-w-[200px] sm:max-w-[240px] ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}
+                    style={{ width: `${Math.max(1, (amount || '0').length) * 1.15}ch` }}
                   />
-                  <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans select-none">
+                  <span className="text-[14px] font-normal text-[var(--text-tertiary)] ml-1 font-sans select-none">
                     {currency}
                   </span>
                 </div>
@@ -776,8 +776,8 @@ export function TransactionModal({
             </div>
           </div>
 
-          {/* Details Section: Clean list with discrete subtle hairline divider lines, identical to TransactionViewModal */}
-          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+          {/* Details Section: Clean list without dividing lines */}
+          <div className="text-left space-y-0.5">
             {/* Category / Splits */}
             {splits.length === 0 ? (
               <div className="py-3">
