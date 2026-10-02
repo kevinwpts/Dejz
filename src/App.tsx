@@ -4189,6 +4189,12 @@ export default function App() {
         aria-hidden="true" 
       />
 
+      {/* Subtle top ambient gradient in accent color */}
+      <div 
+        className="fixed inset-x-0 top-0 h-[450px] pointer-events-none z-0 bg-gradient-to-b from-[var(--accent-color)]/16 via-[var(--accent-color)]/5 to-transparent transition-all duration-500"
+        aria-hidden="true"
+      />
+
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 
       <ConfirmModal
