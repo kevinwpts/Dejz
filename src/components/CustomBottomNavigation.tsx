@@ -131,7 +131,7 @@ function NavItem({
       title={label}
       className={`w-full flex flex-col items-center justify-center transition-colors active:scale-95 cursor-pointer select-none ${
         isActive
-          ? 'text-[var(--accent-color)] dark:text-white font-semibold'
+          ? 'text-[var(--accent-color)] font-semibold'
           : 'text-[#8C867C] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white font-medium'
       }`}
     >

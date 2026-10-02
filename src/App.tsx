@@ -1514,10 +1514,15 @@ export default function App() {
         }
       }
 
-      document.documentElement.classList.remove("dark", "light");
-      document.body.classList.remove("dark", "light");
+      document.documentElement.classList.remove("dark", "light", "black-theme");
+      document.body.classList.remove("dark", "light", "black-theme");
 
-      if (isDark) {
+      const isBlack = config?.themeMode === 'black';
+
+      if (isBlack) {
+        document.documentElement.classList.add("dark", "black-theme");
+        document.body.classList.add("dark", "black-theme");
+      } else if (isDark) {
         document.documentElement.classList.add("dark");
         document.body.classList.add("dark");
       } else {
@@ -1528,7 +1533,7 @@ export default function App() {
       const userThemeHex = config?.themeColor || '#635BFF';
       applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isDark ? "#141414" : "#EFECE6";
+      const themeColor = isBlack ? "#000000" : (isDark ? "#141414" : "#EFECE6");
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 

@@ -301,11 +301,14 @@ export function SettingsView({
     );
   };
 
+  const isEn = config.language === 'en';
+
   const THEME_COLOR_OPTIONS = [
     { id: 'dejz', name: 'Dejz', hex: '#635BFF' },
-    { id: 'blue', name: 'Blå', hex: '#3B82F6' },
-    { id: 'green', name: 'Grön', hex: '#16B878' },
-    { id: 'pink', name: 'Rosa', hex: '#EC5F8D' },
+    { id: 'black', name: isEn ? 'Black' : 'Svart', hex: '#1C1917' },
+    { id: 'blue', name: isEn ? 'Blue' : 'Blå', hex: '#3B82F6' },
+    { id: 'green', name: isEn ? 'Green' : 'Grön', hex: '#16B878' },
+    { id: 'pink', name: isEn ? 'Pink' : 'Rosa', hex: '#EC5F8D' },
     { id: 'orange', name: 'Orange', hex: '#F59E42' },
   ];
 
@@ -316,21 +319,22 @@ export function SettingsView({
           <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-1">
             Utseendeläge
           </label>
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {[
-              { id: 'system', label: 'System', icon: <Monitor size={18} /> },
-              { id: 'light', label: 'Ljust', icon: <Sun size={18} /> },
-              { id: 'dark', label: 'Mörkt', icon: <Moon size={18} /> },
+              { id: 'system', label: isEn ? 'System' : 'System', icon: <Monitor size={18} /> },
+              { id: 'light', label: isEn ? 'Light' : 'Ljust', icon: <Sun size={18} /> },
+              { id: 'dark', label: isEn ? 'Dark' : 'Mörkt', icon: <Moon size={18} /> },
+              { id: 'black', label: isEn ? 'Pitch Black' : 'Svart (OLED)', icon: <div className="w-4 h-4 rounded-full bg-black dark:bg-white border border-black/20 dark:border-white/20" /> },
             ].map((mode) => {
               const isSelected = config.themeMode === mode.id || (!config.themeMode && mode.id === 'system');
               return (
                 <button
                   key={mode.id}
                   onClick={() => {
-                    const isDark = mode.id === 'dark' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                    const isDark = mode.id === 'dark' || mode.id === 'black' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                     setConfig({ ...config, themeMode: mode.id as any, darkMode: isDark });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[18px] border-none transition-all cursor-pointer ${
+                  className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[18px] border-none transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
                       : 'bg-white dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
@@ -349,7 +353,7 @@ export function SettingsView({
           <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-1">
             Temafärg
           </label>
-          <div className="grid grid-cols-5 gap-2 sm:gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
             {THEME_COLOR_OPTIONS.map((theme) => {
               const currentHex = (config.themeColor || '#635BFF').toLowerCase();
               const isSelected = currentHex === theme.hex.toLowerCase();
@@ -361,14 +365,14 @@ export function SettingsView({
                   onClick={() => {
                     setConfig({ ...config, themeColor: theme.hex });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[18px] border-none transition-all cursor-pointer active:scale-95 ${
+                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[18px] border-none transition-all cursor-pointer active:scale-95 ${
                     isSelected
                       ? 'bg-white dark:bg-[#1C1C1C] ring-2 ring-[var(--accent-color)] shadow-none'
                       : 'bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   <div
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white transition-transform"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white transition-transform border border-black/10 dark:border-white/20 shadow-2xs"
                     style={{ backgroundColor: theme.hex }}
                   >
                     {isSelected && <Check size={15} strokeWidth={2.5} />}

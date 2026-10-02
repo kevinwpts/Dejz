@@ -247,26 +247,26 @@ h6 {
   --shadow-level-2: none;
   --shadow-level-3: none;
 
-  /* Brand Accents & Colors - Dejz Adapted Accent */
-  --accent-color: #1C1917;
-  --accent-hover: #2E2A27;
-  --accent-pressed: #2E2A27;
+  /* Brand Accents & Colors - Dejz Accent */
+  --accent-color: #635BFF;
+  --accent-hover: #524AE8;
+  --accent-pressed: #473FC7;
   --accent-gradient: var(--accent-color);
   --on-accent: #FFFFFF;
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(28, 25, 23, 0.08);
-  --accent-container: #EAE6DE;
-  --on-accent-container: #1C1917;
+  --accent-soft: rgba(99, 91, 255, 0.08);
+  --accent-container: #EDEBFB;
+  --on-accent-container: #635BFF;
   --accent-on-solid: #FFFFFF;
-  --dejz-accent: #1C1917;
+  --dejz-accent: #635BFF;
   --accent-glow: none;
-  --accent-secondary-color: #EAE6DE;
+  --accent-secondary-color: #EDEBFB;
 
   /* Primary button states (Light mode) */
-  --btn-primary-bg: #1C1917;
+  --btn-primary-bg: #635BFF;
   --btn-primary-text: #FFFFFF;
-  --btn-primary-hover: #2E2A27;
-  --btn-primary-pressed: #44403C;
+  --btn-primary-hover: #524AE8;
+  --btn-primary-pressed: #473FC7;
 
   --modal-bg: #FFFFFF;
   --bg-primary: var(--bg-color);
@@ -309,6 +309,28 @@ h6 {
   --ambient-glow: none;
   --ambient-glow-strong: none;
   --backdrop-blur: 22px;
+}
+
+.black-theme {
+  --bg-top-color: #000000;
+  --bg-color: #000000;
+  --bg-secondary: #000000;
+  --bg-gradient: #000000;
+  --surface-color: #0A0A0A;
+  --surface-gradient: #0A0A0A;
+  --surface-solid: #0A0A0A;
+  --surface-raised: #121212;
+  --surface-elevated: #121212;
+  --surface-elevated-gradient: #121212;
+  --modal-bg: #121212;
+  --surface-high: #1A1A1A;
+  --surface-muted: #1A1A1A;
+  --bg-hover: #222222;
+  --transaction-bg: #0A0A0A;
+  --card-nested-bg: #121212;
+  --card-bg: var(--surface-color);
+  --bg-primary: var(--bg-color);
+  --chip-bg: #121212;
 }
 
 .dark {
