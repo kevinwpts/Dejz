@@ -93,7 +93,7 @@ export const translations: Record<Language, any> = {
     category: 'Kategori',
     note: 'Notering',
     merchant: 'Leverantör',
-    merchantPlaceholder: 'T.ex. ICA, Spotify, Shell',
+    merchantPlaceholder: 'Namn',
     ownNote: 'Egen notering',
     date: 'Datum',
     backdated: 'Bakåtdaterad',

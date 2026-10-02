@@ -729,27 +729,24 @@ export function TransactionModal({
                 />
               </button>
               <div className="flex-1 min-w-0">
-                <label className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-0.5">
-                  {type === 'income' ? (currentLang === 'en' ? 'Source / Payer' : 'Inkomstkälla') : (currentLang === 'en' ? 'Merchant / Place' : 'Köpställe / Mottagare')}
-                </label>
                 <input 
                   ref={merchantInputRef}
                   type="text" 
                   value={merchant}
                   onChange={(e) => setMerchant(e.target.value)}
-                  placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                  className="text-[18px] sm:text-[20px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  placeholder={currentLang === 'en' ? 'Name' : 'Namn'}
+                  className="text-[19px] sm:text-[21px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
 
-            <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-between gap-2">
+            <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
-                className="flex items-baseline font-amount text-[36px] sm:text-[44px] font-bold tabular-nums tracking-tight cursor-text flex-1"
+                className="flex items-baseline font-amount text-[36px] sm:text-[44px] font-bold tabular-nums tracking-tight cursor-text w-full"
               >
-                <span className={`opacity-80 mr-1 select-none text-[36px] sm:text-[44px] leading-none ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
-                  {type === 'income' ? '+' : '−'}
+                <span className="text-[22px] sm:text-[26px] font-bold text-[var(--text-secondary)] select-none mr-2 font-sans shrink-0">
+                  {currency}
                 </span>
                 <input
                   ref={amountInputRef}
@@ -764,12 +761,9 @@ export function TransactionModal({
                     }
                   }}
                   placeholder="0"
-                  className={`bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] w-full max-w-[280px] leading-none ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}
+                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] text-[var(--text-primary)] w-full leading-none"
                 />
               </div>
-              <span className="text-[18px] sm:text-[20px] font-bold text-[var(--text-secondary)] font-sans select-none ml-2">
-                {currency}
-              </span>
             </div>
           </div>
 
