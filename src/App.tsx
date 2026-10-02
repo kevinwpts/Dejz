@@ -5551,7 +5551,7 @@ export default function App() {
                           ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
                             ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/30"
-                            : "bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/20 active:scale-95"
+                            : "bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] dark:text-white border-black/10 dark:border-white/10 active:scale-95"
                       }`}
                     >
                       {isAudioTranscribing ? (

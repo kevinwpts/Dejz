@@ -447,7 +447,7 @@ export function TodayView({
     ? 'top-[calc(7.2rem+env(safe-area-inset-top,0px))]'
     : 'top-[calc(4.75rem+env(safe-area-inset-top,0px))]';
 
-  const timelineStickyTop = isDemoMode
+  const _timelineStickyTop = isDemoMode
     ? 'top-[calc(6.8rem+env(safe-area-inset-top,0px))]'
     : 'top-[calc(4.25rem+env(safe-area-inset-top,0px))]';
 
@@ -569,16 +569,22 @@ export function TodayView({
         className="w-full shrink-0 pointer-events-none"
       />
 
-      {/* 2. SCROLL CONTAINER (Scrolls up seamlessly over static hero) */}
+      {/* 2. SCROLL CONTAINER / SHEET MODULE */}
       <div
         ref={sheetRef}
-        className="relative z-20 bg-transparent border-none shadow-none min-h-[calc(100vh-8rem)] pt-0 pb-40 space-y-3"
+        className="relative z-20 w-screen relative left-1/2 -translate-x-1/2 bg-white dark:bg-[#1E1B22] rounded-t-[32px] sm:rounded-t-[32px] shadow-sm flex flex-col"
+        style={{
+          position: 'sticky',
+          top: isDemoMode ? 'calc(7.2rem + env(safe-area-inset-top, 0px))' : 'calc(4.25rem + env(safe-area-inset-top, 0px))',
+          minHeight: 'calc(100vh - 7rem)',
+          maxHeight: isDemoMode ? 'calc(100vh - 7.2rem)' : 'calc(100vh - 4.25rem)',
+        }}
       >
-        <div className="w-screen relative left-1/2 -translate-x-1/2 bg-white dark:bg-[#1E1B22] rounded-t-[32px] sm:rounded-t-[32px] p-5 sm:p-6 shadow-sm space-y-5">
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 pb-36 scrollbar-hide">
 
-        {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
+        {/* 3. PERIOD TIMELINE */}
         {calendarDays && calendarDays.length > 0 && (
-          <div className={`sticky ${timelineStickyTop} z-20 bg-transparent pt-0 pb-2.5 transition-all`}>
+          <div className="sticky top-0 z-20 bg-white dark:bg-[#1E1B22] pt-0 pb-2.5 transition-all">
             <PeriodTimeline
               calendarDays={calendarDays}
               selectedDate={normalizedSelectedDate}
@@ -689,8 +695,6 @@ export function TodayView({
         </div>
       </div>
       </div>
-
-      {/* Close 2. EXPANDING BOTTOM SHEET */}
       </div>
 
       {/* Category Quick View Bottom Sheet Modal */}
