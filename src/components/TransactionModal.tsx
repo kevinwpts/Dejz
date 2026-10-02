@@ -691,7 +691,7 @@ export function TransactionModal({
         <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-6 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 max-w-xl mx-auto w-full">
           {/* Hidden file input for tickets, receipts and documents */}
           <input 
             ref={receiptInputRef}
@@ -701,9 +701,62 @@ export function TransactionModal({
             onChange={handleReceiptFileChange}
           />
 
-          {/* Hero Section: Logo to the left, Merchant title and Close Button inline, Price below (matching preview) */}
-          <div className="flex items-start gap-4 text-left pt-3 sm:pt-4 pb-4">
-            <div className="shrink-0 pt-0.5">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight">
+              {transaction 
+                ? (currentLang === 'en' ? 'Edit Transaction' : 'Redigera transaktion') 
+                : (type === 'income' 
+                    ? (currentLang === 'en' ? 'New Income' : 'Ny inkomst') 
+                    : (currentLang === 'en' ? 'New Expense' : 'Ny utgift'))}
+            </h2>
+            <button 
+              type="button"
+              onClick={onClose} 
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              aria-label={t('close')}
+            >
+              <X size={15} strokeWidth={2.2} />
+            </button>
+          </div>
+
+          {/* Type Segmented Grid (when creating new transaction) */}
+          {_onChangeType && !transaction && (
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-white/[0.06] rounded-[16px]">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  _onChangeType('expense');
+                }}
+                className={`py-2 rounded-[12px] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  type === 'expense'
+                    ? 'bg-white dark:bg-[#1E1B22] text-[#1C1917] dark:text-white shadow-xs'
+                    : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
+                }`}
+              >
+                {currentLang === 'en' ? 'Expense' : 'Utgift'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  _onChangeType('income');
+                }}
+                className={`py-2 rounded-[12px] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  type === 'income'
+                    ? 'bg-white dark:bg-[#1E1B22] text-emerald-600 dark:text-emerald-400 shadow-xs'
+                    : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
+                }`}
+              >
+                {currentLang === 'en' ? 'Income' : 'Inkomst'}
+              </button>
+            </div>
+          )}
+
+          {/* 1. Main Hero Card: Icon + Merchant & Amount Input */}
+          <div className="p-4 sm:p-5 rounded-[22px] bg-black/[0.03] dark:bg-white/[0.04] border-none shadow-none space-y-4">
+            <div className="flex items-center gap-3.5">
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
@@ -712,330 +765,209 @@ export function TransactionModal({
                 aria-label={t('chooseIcon')}
               >
                 <TransactionLogo 
-                  size="xl"
+                  size="lg"
                   config={config}
                   transaction={previewTransaction} 
                 />
               </button>
+              <div className="flex-1 min-w-0">
+                <label className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-0.5">
+                  {type === 'income' ? (currentLang === 'en' ? 'Source / Payer' : 'Inkomstkälla') : (currentLang === 'en' ? 'Merchant / Place' : 'Köpställe / Mottagare')}
+                </label>
+                <input 
+                  ref={merchantInputRef}
+                  type="text" 
+                  value={merchant}
+                  onChange={(e) => setMerchant(e.target.value)}
+                  placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
+                  className="text-[18px] sm:text-[20px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                />
+              </div>
             </div>
 
-            <div className="min-w-0 flex-1 flex flex-col justify-center">
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <input 
-                    ref={merchantInputRef}
-                    type="text" 
-                    value={merchant}
-                    onChange={(e) => setMerchant(e.target.value)}
-                    placeholder={type === 'income' ? t('incomeSourcePlaceholder') : t('merchantPlaceholder')}
-                    className="text-[24px] sm:text-[28px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
-                  />
-                </div>
-
-                <button 
-                  type="button"
-                  onClick={onClose} 
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
-                  aria-label={t('close')}
-                >
-                  <X size={15} strokeWidth={2.2} />
-                </button>
+            <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-between gap-2">
+              <div 
+                onClick={() => amountInputRef.current?.focus()}
+                className="flex items-baseline font-amount text-[28px] sm:text-[34px] font-bold tabular-nums tracking-tight cursor-text flex-1"
+              >
+                <span className={`opacity-80 mr-1 select-none ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+                  {type === 'income' ? '+' : '−'}
+                </span>
+                <input
+                  ref={amountInputRef}
+                  type="text"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(formatAmount(e.target.value))}
+                  onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setAmount(evaluateAndFormatAmount(amount));
+                    }
+                  }}
+                  placeholder="0"
+                  className={`bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] w-full max-w-[240px] ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}
+                />
               </div>
-
-              {/* Amount display / input in the Hero */}
-              <div className="mt-2 flex items-baseline justify-between gap-2">
-                <div 
-                  onClick={() => amountInputRef.current?.focus()}
-                  className="flex items-baseline font-amount text-[24px] sm:text-[28px] font-semibold tabular-nums tracking-tight cursor-text"
-                >
-                  <span className={`opacity-80 mr-0.5 select-none ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
-                    {type === 'income' ? '+' : '−'}
-                  </span>
-                  <input
-                    ref={amountInputRef}
-                    type="text"
-                    inputMode="decimal"
-                    value={amount}
-                    onChange={(e) => setAmount(formatAmount(e.target.value))}
-                    onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        setAmount(evaluateAndFormatAmount(amount));
-                      }
-                    }}
-                    placeholder="0"
-                    className={`bg-transparent outline-none font-amount font-semibold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] max-w-[200px] sm:max-w-[240px] ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}
-                    style={{ width: `${Math.max(1, (amount || '0').length) * 1.15}ch` }}
-                  />
-                  <span className="text-[14px] font-normal text-[var(--text-tertiary)] ml-1 font-sans select-none">
-                    {currency}
-                  </span>
-                </div>
-
-              </div>
+              <span className="text-[15px] font-semibold text-[var(--text-secondary)] font-sans select-none">
+                {currency}
+              </span>
             </div>
           </div>
 
-          {/* Details Section: Clean list without dividing lines */}
-          <div className="text-left space-y-0.5">
-            {/* Category / Splits */}
-            {splits.length === 0 ? (
-              <div className="py-3">
+          {/* 2. Grid for Category & Date Selection */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Category Grid Card */}
+            <div 
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setActiveSplitIndex(null);
+                setIsCategoryPickerOpen(true);
+              }}
+              className="p-4 rounded-[20px] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.07] transition-all cursor-pointer flex flex-col justify-between group min-h-[90px]"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                  {t('category')}
+                </span>
                 <div 
-                  onClick={() => {
-                    if (typeof feedback?.light === 'function') feedback.light();
-                    setActiveSplitIndex(null);
-                    setIsCategoryPickerOpen(true);
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                  style={{ 
+                    backgroundColor: currentCatData?.color ? `${currentCatData.color}25` : 'rgba(0,0,0,0.06)',
+                    color: currentCatData?.color || 'var(--text-primary)'
                   }}
-                  className="flex items-center justify-between gap-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors select-none group"
                 >
-                  <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                    {t('category')}
-                  </span>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div 
-                      className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-                      style={{ 
-                        backgroundColor: currentCatData?.color ? `${currentCatData.color}20` : 'rgba(0,0,0,0.05)',
-                        color: currentCatData?.color || 'var(--text-primary)'
-                      }}
-                    >
-                      <CategoryIcon 
-                        icon={currentCatData?.icon || 'tag'} 
-                        color={currentCatData?.color} 
-                        size="2xs" 
-                      />
-                    </div>
-                    <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
-                      {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
-                    </span>
-                    <ChevronDown size={14} strokeWidth={2} className="text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] transition-colors ml-0.5" />
-                  </div>
-                </div>
-
-                {type === 'expense' && (
-                  <div className="mt-2.5 pt-2.5 border-t border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between">
-                    <span className="text-[12.5px] text-[var(--text-secondary)]">
-                      {currentLang === 'en' ? 'Add another category' : 'Lägg till fler kategorier'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (typeof feedback?.light === 'function') feedback.light();
-                        const total = parseAmount(amount);
-                        setSplits([
-                          { id: Math.random().toString(), amount: total, category: category || categories[0]?.name || '', tags: [] },
-                          { id: Math.random().toString(), amount: 0, category: '', tags: [] }
-                        ]);
-                      }}
-                      className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/15 hover:bg-[var(--accent-color)] hover:text-white text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer"
-                      title={currentLang === 'en' ? 'Add category' : 'Lägg till kategori'}
-                    >
-                      <Plus size={13} strokeWidth={2.5} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="py-2.5 space-y-3">
-                <div className="flex items-center justify-between text-[13px] text-[var(--text-secondary)]">
-                  <span>{t('category')}</span>
-                </div>
-                {splits.map((split, index) => {
-                  const splitCatData = categories.find(c => c.name === split.category);
-                  return (
-                    <div key={split.id || index} className="flex items-center justify-between gap-4 py-1.5">
-                      <div 
-                        onClick={() => {
-                          if (typeof feedback?.light === 'function') feedback.light();
-                          setActiveSplitIndex(index);
-                          setIsCategoryPickerOpen(true);
-                        }}
-                        className="flex items-center gap-2 cursor-pointer group flex-1 min-w-0"
-                      >
-                        <div 
-                          className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-                          style={{ 
-                            backgroundColor: splitCatData?.color ? `${splitCatData.color}20` : 'rgba(0,0,0,0.05)',
-                            color: splitCatData?.color || 'var(--text-primary)'
-                          }}
-                        >
-                          <CategoryIcon 
-                            icon={splitCatData?.icon || 'tag'} 
-                            color={splitCatData?.color} 
-                            size="2xs" 
-                          />
-                        </div>
-                        <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate">
-                          {split.category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
-                        </span>
-                        <ChevronDown size={14} strokeWidth={2} className="text-[#777168] dark:text-[#A8A8A8] group-hover:text-[var(--text-primary)] transition-colors ml-0.5 shrink-0" />
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="flex items-center gap-1">
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            value={split.amount || ''}
-                            onChange={(e) => {
-                              const val = parseAmount(e.target.value);
-                              const newSplits = [...splits];
-                              newSplits[index].amount = val;
-                              setSplits(newSplits);
-                            }}
-                            className="w-20 bg-transparent border-none text-[14px] font-bold text-[var(--text-primary)] text-right outline-none p-0 tabular-nums"
-                            placeholder="0"
-                          />
-                          <span className="text-[12px] text-[var(--text-secondary)]">{currency}</span>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newSplits = splits.filter((_, i) => i !== index);
-                            if (newSplits.length <= 1) {
-                              if (newSplits.length === 1) {
-                                setCategory(newSplits[0].category);
-                              }
-                              setSplits([]);
-                            } else {
-                              setSplits(newSplits);
-                            }
-                          }}
-                          className="w-6 h-6 rounded-full text-[var(--text-tertiary)] hover:text-rose-500 hover:bg-rose-500/10 flex items-center justify-center transition-colors cursor-pointer"
-                          title={currentLang === 'en' ? 'Remove' : 'Ta bort'}
-                        >
-                          <Trash2 size={13} strokeWidth={1.9} />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                <div className="pt-2 border-t border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between">
-                  <span className="text-[12.5px] text-[var(--text-secondary)]">
-                    {currentLang === 'en' ? 'Add another category' : 'Lägg till fler kategorier'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback?.light === 'function') feedback.light();
-                      setSplits([
-                        ...splits,
-                        { id: Math.random().toString(), amount: 0, category: '', tags: [] }
-                      ]);
-                    }}
-                    className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/15 hover:bg-[var(--accent-color)] hover:text-white text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer"
-                    title={currentLang === 'en' ? 'Add category' : 'Lägg till kategori'}
-                  >
-                    <Plus size={13} strokeWidth={2.5} />
-                  </button>
+                  <CategoryIcon 
+                    icon={currentCatData?.icon || 'tag'} 
+                    color={currentCatData?.color} 
+                    size="2xs" 
+                  />
                 </div>
               </div>
-            )}
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate">
+                  {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
+                </span>
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors ml-1 shrink-0" />
+              </div>
+            </div>
 
-            {/* Date Selection */}
-            <div className="py-3 flex flex-col justify-center">
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+            {/* Date Grid Card */}
+            <div 
+              className="p-4 rounded-[20px] bg-black/[0.03] dark:bg-white/[0.04] transition-all flex flex-col justify-between min-h-[90px]"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                   {t('date')}
                 </span>
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1">
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setSelectedDate(new Date());
                       setShowFullCalendar(false);
                     }}
-                    className={`h-[30px] px-3 rounded-lg text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center cursor-pointer ${
+                    className={`h-[24px] px-2 rounded-md text-[10.5px] font-bold tracking-tight transition-all cursor-pointer ${
                       !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
-                        ? 'bg-[var(--accent-color)] text-white shadow-xs'
-                        : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
+                        ? 'bg-[var(--accent-color)] text-white'
+                        : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     {t('todayLabel')}
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       const yesterday = new Date();
                       yesterday.setDate(yesterday.getDate() - 1);
                       setSelectedDate(yesterday);
                       setShowFullCalendar(false);
                     }}
-                    className={`h-[30px] px-3 rounded-lg text-[11.5px] font-medium tracking-tight transition-all flex items-center justify-center cursor-pointer ${
+                    className={`h-[24px] px-2 rounded-md text-[10.5px] font-bold tracking-tight transition-all cursor-pointer ${
                       !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
-                        ? 'bg-[var(--accent-color)] text-white shadow-xs'
-                        : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
+                        ? 'bg-[var(--accent-color)] text-white'
+                        : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     {t('yesterdayLabel')}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowFullCalendar(!showFullCalendar)}
-                    className={`w-8 h-[30px] rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowFullCalendar(!showFullCalendar);
+                    }}
+                    className={`w-6 h-[24px] rounded-md transition-all flex items-center justify-center cursor-pointer ${
                       showFullCalendar 
-                        ? 'bg-[var(--accent-color)] text-white shadow-xs' 
-                        : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white'
+                        ? 'bg-[var(--accent-color)] text-white' 
+                        : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
-                    title={t('chooseDate')}
                   >
-                    <Calendar size={13.5} strokeWidth={2} />
+                    <Calendar size={12} strokeWidth={2} />
                   </button>
                 </div>
               </div>
 
-              {new Date(selectedDate).toDateString() !== new Date().toDateString() &&
-               new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
-                <div className="mt-1 text-right">
-                  <span className="text-[11.5px] font-medium text-[var(--text-primary)] tabular-nums">
-                    {formatFullDate(selectedDate, currentLang)}
-                  </span>
-                </div>
-              )}
-
-              <AnimatePresence>
-                {showFullCalendar && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden pt-3"
-                  >
-                    <CalendarWidget 
-                      calendarDays={calendarDays}
-                      normalizedSelectedDate={selectedDate}
-                      setSelectedDate={setSelectedDate}
-                      t={t}
-                      currentLang={currentLang}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div 
+                onClick={() => setShowFullCalendar(!showFullCalendar)}
+                className="flex items-center justify-between pt-2 cursor-pointer group"
+              >
+                <span className="text-[14px] font-bold text-[var(--text-primary)] truncate">
+                  {new Date(selectedDate).toDateString() === new Date().toDateString() 
+                    ? (currentLang === 'en' ? 'Today' : 'Idag')
+                    : new Date(selectedDate).toDateString() === new Date(Date.now() - 86400000).toDateString()
+                    ? (currentLang === 'en' ? 'Yesterday' : 'Igår')
+                    : formatFullDate(selectedDate, currentLang)}
+                </span>
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors ml-1 shrink-0" />
+              </div>
             </div>
+          </div>
 
-            {/* Note */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+          {/* Calendar Widget if open */}
+          <AnimatePresence>
+            {showFullCalendar && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden p-3 bg-black/[0.03] dark:bg-white/[0.04] rounded-[20px]"
+              >
+                <CalendarWidget 
+                  calendarDays={calendarDays}
+                  normalizedSelectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  t={t}
+                  currentLang={currentLang}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* 3. Grid for Note and Attachments */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Note Card */}
+            <div className="p-4 rounded-[20px] bg-black/[0.03] dark:bg-white/[0.04] flex flex-col justify-between">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {t('ownNote')}
               </span>
-              <div className="flex-1 flex items-center justify-end gap-1.5">
+              <div className="flex items-center gap-2">
                 <input 
                   ref={noteInputRef}
                   type="text" 
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder={type === 'income' ? t('incomeNotePlaceholder') : t('description')}
-                  className={`text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none placeholder:font-normal placeholder:text-[13px] placeholder-[var(--text-tertiary)] max-w-[70%] ${
+                  placeholder={type === 'income' ? t('incomeNotePlaceholder') : (currentLang === 'en' ? 'Add note...' : 'Skriv notering...')}
+                  className={`text-[13.5px] font-medium text-[var(--text-primary)] bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
                     validationError === 'note' ? 'text-rose-500' : ''
                   }`}
                 />
                 {note && (
                   <button 
                     onClick={() => setNote('')}
-                    className="text-[#777168] hover:text-[var(--text-primary)] dark:text-[#A8A8A8] dark:hover:text-white p-0.5 cursor-pointer shrink-0 transition-colors"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
                   >
                     <X size={13} strokeWidth={2} />
                   </button>
@@ -1043,39 +975,38 @@ export function TransactionModal({
               </div>
             </div>
 
-            {/* Attached file / Receipt */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-1.5 text-[var(--text-secondary)] shrink-0">
-                <Paperclip size={13} strokeWidth={1.75} />
-                <span className="text-[13px] font-normal">
-                  {currentLang === 'en' ? 'Attached file / Receipt' : 'Bifogad fil / Kvitto'}
-                </span>
-              </div>
+            {/* Receipt Card */}
+            <div className="p-4 rounded-[20px] bg-black/[0.03] dark:bg-white/[0.04] flex flex-col justify-between">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+                {currentLang === 'en' ? 'Receipt / Document' : 'Bifogat kvitto'}
+              </span>
 
               {isScanningReceipt ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 py-0.5">
                   <Loader2 size={13} className="animate-spin text-[var(--accent-color)]" />
                   <span className="text-[11px] text-[var(--accent-color)] font-medium">
                     {currentLang === 'en' ? 'Uploading…' : 'Laddar upp…'}
                   </span>
                 </div>
               ) : receiptUrl ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-md overflow-hidden bg-black/5 dark:bg-white/10 flex items-center justify-center">
-                    {receiptUrl.includes('.pdf') ? (
-                      <FileText size={13} className="text-[var(--text-secondary)]" />
-                    ) : (
-                      <img src={receiptUrl} alt="Attached" className="w-full h-full object-cover" />
-                    )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-6 h-6 rounded-md overflow-hidden bg-black/5 dark:bg-white/10 flex items-center justify-center shrink-0">
+                      {receiptUrl.includes('.pdf') ? (
+                        <FileText size={13} className="text-[var(--text-secondary)]" />
+                      ) : (
+                        <img src={receiptUrl} alt="Attached" className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                    <a
+                      href={receiptUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11.5px] font-semibold text-[var(--text-primary)] hover:underline truncate"
+                    >
+                      {currentLang === 'en' ? 'View file' : 'Visa kvitto'}
+                    </a>
                   </div>
-                  <a
-                    href={receiptUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] font-medium text-[var(--text-primary)] hover:underline"
-                  >
-                    {currentLang === 'en' ? 'View' : 'Visa'}
-                  </a>
                   <button
                     type="button"
                     onClick={() => {
@@ -1090,29 +1021,53 @@ export function TransactionModal({
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => receiptInputRef.current?.click()}
                     disabled={isUploadingReceipt}
-                    className="h-[30px] px-3 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11.5px] font-medium rounded-lg transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
+                    className="flex-1 h-[28px] px-2 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-semibold rounded-lg transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1"
                   >
-                    <Paperclip size={12} strokeWidth={2} />
-                    <span>{currentLang === 'en' ? 'File' : 'Välj fil'}</span>
+                    <Paperclip size={11} strokeWidth={2} />
+                    <span>{currentLang === 'en' ? 'File' : 'Fil'}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsCameraModalOpen(true)}
                     disabled={isUploadingReceipt}
-                    className="h-[30px] px-3 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11.5px] font-medium rounded-lg shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                    className="flex-1 h-[28px] px-2 bg-[var(--accent-color)] text-white hover:opacity-90 text-[11px] font-semibold rounded-lg shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1"
                   >
-                    <Camera size={12} strokeWidth={2} />
+                    <Camera size={11} strokeWidth={2} />
                     <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
                   </button>
                 </div>
               )}
             </div>
           </div>
+
+          {/* Category Split toggle if expense */}
+          {type === 'expense' && splits.length === 0 && (
+            <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[18px] flex items-center justify-between">
+              <span className="text-[12px] font-medium text-[var(--text-secondary)]">
+                {currentLang === 'en' ? 'Split across multiple categories' : 'Dela upp i fler kategorier'}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  const total = parseAmount(amount);
+                  setSplits([
+                    { id: Math.random().toString(), amount: total, category: category || categories[0]?.name || '', tags: [] },
+                    { id: Math.random().toString(), amount: 0, category: '', tags: [] }
+                  ]);
+                }}
+                className="px-3 py-1 rounded-full bg-black/5 dark:bg-white/10 hover:bg-[var(--accent-color)] hover:text-white text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+              >
+                <Plus size={12} strokeWidth={2.5} />
+                <span>{currentLang === 'en' ? 'Add' : 'Dela upp'}</span>
+              </button>
+            </div>
+          )}
 
               {/* Split Transaction Details if Active */}
               {type === 'expense' && splits.length > 0 && (
