@@ -165,7 +165,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             </div>
 
             {/* Centered Logo */}
-            <div className="scale-135 sm:scale-150 mb-3.5 pt-2">
+            <div className="scale-135 sm:scale-150 mb-7 pt-2">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
 
@@ -175,10 +175,10 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             </h2>
 
             {/* Price */}
-            <p className={`text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1 flex items-center justify-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-[#E7E5E4]'}`}>
+            <p className={`text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-[#E7E5E4]'}`}>
               <span className="opacity-80 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
               <span>{formatAmount(transaction.amount, config.language)}</span>
-              <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans">{config.currency}</span>
+              <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{config.currency}</span>
             </p>
           </div>
 
