@@ -1528,7 +1528,7 @@ export default function App() {
       const userThemeHex = config?.themeColor || '#635BFF';
       applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isDark ? "#232323" : "#F2EFE8";
+      const themeColor = isDark ? "#141118" : "#EFECE6";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -4206,13 +4206,11 @@ export default function App() {
 
   return (
     <div 
-      className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-clip bg-[var(--bg-color)] transition-colors duration-500 !bg-[#141118]"
-      style={{ backgroundColor: '#141118' }}
+      className="min-h-dvh font-sans pt-0 text-[var(--text-primary)] selection:bg-accent/30 relative overflow-x-clip bg-[var(--bg-color)] transition-colors duration-500"
     >
       {/* Shared Fixed Dark Mode Background Layer */}
       <div 
         className="dark-app-bg-layer" 
-        style={{ backgroundColor: '#141118', backgroundImage: 'none' }}
         aria-hidden="true" 
       />
 

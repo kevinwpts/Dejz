@@ -5,7 +5,7 @@
 
 export const DEJZ_COLORS = {
   light: {
-    canvas: '#F2EFE8',
+    canvas: '#EFECE6',
     surface: '#FFFFFF',
     surfaceMuted: '#EAE6DE',
     surfaceHover: '#DFD9CF',
@@ -23,22 +23,22 @@ export const DEJZ_COLORS = {
     success: '#05B862',
   },
   dark: {
-    canvas: '#181818',
-    surface: '#242424',
-    surfaceMuted: '#2D2D2D',
-    surfaceHover: '#333333',
+    canvas: '#141118',
+    surface: '#1D1A23',
+    surfaceMuted: '#24202B',
+    surfaceHover: '#292433',
     textPrimary: '#FFFFFF',
-    textSecondary: '#A8A8A8',
-    textTertiary: '#71717A',
-    border: '#383838',
-    borderStrong: '#3D3D3D',
+    textSecondary: '#A6A0AF',
+    textTertiary: '#7D7688',
+    border: '#2D2738',
+    borderStrong: '#3F374D',
     accent: '#7C75FF',
     accentSoft: 'rgba(99, 91, 255, 0.2)',
     accentPressed: '#5148E5',
     accentOnSolid: '#FFFFFF',
-    danger: '#F87171',
-    warning: '#FBBF24',
-    success: '#05B862',
+    danger: '#EF4444',
+    warning: '#F59E0B',
+    success: '#16A34A',
   },
 } as const;
 

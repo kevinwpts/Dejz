@@ -109,12 +109,12 @@ export function SearchModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.98 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="bg-white dark:bg-[#1E1B22] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[28px] border-0 sm:border border-black/[0.08] dark:border-white/[0.08] shadow-2xl flex flex-col overflow-hidden font-sans"
+            className="bg-[#EFECE6] dark:bg-[#141118] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[28px] border-0 sm:border border-black/[0.08] dark:border-white/[0.08] shadow-2xl flex flex-col overflow-hidden font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Search Bar */}
-            <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center gap-2.5 shrink-0">
-              <div className="flex-1 relative flex items-center bg-black/5 dark:bg-white/[0.06] rounded-full border border-black/10 dark:border-white/10 px-3.5 h-[44px] transition-all focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 shadow-none">
+            <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-black/[0.06] dark:border-white/[0.08] bg-[#EFECE6] dark:bg-[#141118] flex items-center gap-2.5 shrink-0">
+              <div className="flex-1 relative flex items-center bg-white dark:bg-[#1D1A23] rounded-full border border-black/10 dark:border-white/10 px-3.5 h-[44px] transition-all focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 shadow-none">
                 <Search size={18} className="text-[#8C867C] dark:text-[#71717A] shrink-0 mr-2.5" />
                 <input 
                   ref={inputRef}
@@ -139,7 +139,7 @@ export function SearchModal({
                       setQuery('');
                       inputRef.current?.focus();
                     }}
-                    className="w-6 h-6 rounded-full bg-[#EFECE6] dark:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 active:scale-90"
+                    className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 active:scale-90"
                     title={getL10n("Rensa", "Clear", "Tøm", "Ryd", "Tyhjennä")}
                   >
                     <X size={13} strokeWidth={2.5} />
@@ -150,14 +150,14 @@ export function SearchModal({
               <button 
                 type="button"
                 onClick={onClose} 
-                className="h-10 px-3 rounded-full text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all cursor-pointer shrink-0 active:scale-95"
+                className="h-10 px-3 rounded-full text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-all cursor-pointer shrink-0 active:scale-95"
               >
                 {getL10n("Avbryt", "Cancel", "Avbryt", "Annuller", "Peruuta")}
               </button>
             </div>
 
             {/* Results Scroll Container */}
-            <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-6 custom-scrollbar touch-pan-y overscroll-contain">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-6 custom-scrollbar touch-pan-y overscroll-contain bg-[#EFECE6] dark:bg-[#141118]">
               {!trimmedQuery ? (
                 <div className="text-center py-16 px-4">
                   <div className="w-12 h-12 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] opacity-60 flex items-center justify-center mx-auto mb-3">

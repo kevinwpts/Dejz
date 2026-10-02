@@ -35,8 +35,6 @@ export function AppHeader({
 }: AppHeaderProps) {
   const [isAtTop, setIsAtTop] = useState(true);
 
-  const isProfileOrSettings = activeTab === "profile" || activeTab === "settings";
-
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -54,9 +52,7 @@ export function AppHeader({
         isDemoMode ? '' : 'pt-[env(safe-area-inset-top,0px)]'
       } ${
         !isAtTop
-          ? isProfileOrSettings
-            ? "bg-[#141118]/90 backdrop-blur-xl border-b border-white/[0.08]"
-            : "bg-[#F2EFE8]/90 dark:bg-[#141118]/90 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
+          ? "bg-[#EFECE6]/90 dark:bg-[#141118]/90 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
           : "bg-transparent border-b border-transparent"
       }`}
     >
