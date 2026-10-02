@@ -155,3 +155,31 @@ export const isVariableItemDue = (
 
   return ref >= targetDueDate;
 };
+
+export const parseReceiptDate = (dateStr: any): Date | null => {
+  if (!dateStr) return null;
+  if (dateStr instanceof Date && !isNaN(dateStr.getTime())) return dateStr;
+  if (typeof dateStr !== 'string') return null;
+
+  const trimmed = dateStr.trim();
+  const ymdMatch = trimmed.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (ymdMatch) {
+    const y = parseInt(ymdMatch[1], 10);
+    const m = parseInt(ymdMatch[2], 10) - 1;
+    const d = parseInt(ymdMatch[3], 10);
+    const dateObj = new Date(y, m, d, 12, 0, 0);
+    if (!isNaN(dateObj.getTime())) return dateObj;
+  }
+
+  const dmyMatch = trimmed.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
+  if (dmyMatch) {
+    const d = parseInt(dmyMatch[1], 10);
+    const m = parseInt(dmyMatch[2], 10) - 1;
+    const y = parseInt(dmyMatch[3], 10);
+    const dateObj = new Date(y, m, d, 12, 0, 0);
+    if (!isNaN(dateObj.getTime())) return dateObj;
+  }
+
+  const parsed = new Date(trimmed);
+  return isNaN(parsed.getTime()) ? null : parsed;
+};

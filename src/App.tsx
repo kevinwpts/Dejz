@@ -98,7 +98,9 @@ import {
   getPeriodName,
   getPeriodId,
   isVariableItemDue,
+  parseReceiptDate,
 } from "./utils/date";
+import { uploadLogo } from "./services/storageService";
 import { verifyPayment, isPro } from "./utils/subscription";
 
 import {
@@ -351,50 +353,75 @@ export default function App() {
 
     try {
       const { base64, mimeType } = await prepareReceiptImage(file);
+
+      // Upload to storage in background or use local object URL
+      let receiptUrl: string | undefined = undefined;
+      try {
+        if (session?.user?.id && session.user.id !== 'demo-user') {
+          const uploaded = await uploadLogo(file, session.user.id);
+          if (uploaded) receiptUrl = uploaded;
+        }
+      } catch (uploadErr) {
+        console.warn('Storage upload error for receipt:', uploadErr);
+      }
+      if (!receiptUrl) {
+        receiptUrl = URL.createObjectURL(file);
+      }
+
       const { data, error } = await supabase.functions.invoke("scan-receipt", {
         body: { image: base64, mimeType },
       });
 
-      if (error || !data || !data.amount || Number(data.amount) <= 0) {
-        setIsScanningReceipt(false);
-        setIsReceiptCameraOpen(false);
-        setPlusSuccessMsg(null);
-        setTransactionType("expense");
-        setTargetDate(new Date());
-        setIsAddTransactionOpen(true);
-        setIsPlusMenuOpen(false);
-        return;
+      let amountVal: number | undefined = undefined;
+      let merchantVal: string = '';
+      let categoryVal: string = '';
+      let dateVal: Date = new Date();
+
+      if (!error && data) {
+        if (data.amount && !isNaN(Number(data.amount))) {
+          amountVal = Number(data.amount);
+        }
+        if (data.merchant && typeof data.merchant === 'string') {
+          merchantVal = data.merchant.trim();
+        }
+        if (data.category && typeof data.category === 'string') {
+          categoryVal = data.category.trim();
+        }
+        if (data.date) {
+          const parsed = parseReceiptDate(data.date);
+          if (parsed) {
+            dateVal = parsed;
+          }
+        }
       }
-
-      const amount = Number(data.amount);
-      const merchant = data.merchant || (config?.language === "en" ? "Receipt" : "Kvitto");
-      const category = data.category || (config?.language === "en" ? "Uncategorized" : "Okategoriserat");
-
-      await addTransaction({
-        amount,
-        type: "expense",
-        category: category.trim(),
-        merchant: merchant.trim(),
-        timestamp: Date.now(),
-        tags: []
-      });
 
       feedback.success();
       setIsReceiptCameraOpen(false);
-      setPlusSuccessMsg({
-        text: config?.language === "en" ? "Expense added" : "Utgift tillagd"
+      setPlusSuccessMsg(null);
+      setIsPlusMenuOpen(false);
+      setEditingTransaction(null);
+      setTransactionType("expense");
+      setTargetDate(dateVal);
+      setTransactionPrefill({
+        amount: amountVal,
+        name: merchantVal,
+        category: categoryVal,
+        receiptUrl: receiptUrl,
+        date: dateVal,
       });
-      setTimeout(() => {
-        setPlusSuccessMsg(null);
-        setIsPlusMenuOpen(false);
-      }, 1500);
+      setIsAddTransactionOpen(true);
     } catch (err) {
       console.error("Auto receipt scan error:", err);
       setIsReceiptCameraOpen(false);
+      setPlusSuccessMsg(null);
+      setIsPlusMenuOpen(false);
+      setEditingTransaction(null);
       setTransactionType("expense");
       setTargetDate(new Date());
+      setTransactionPrefill({
+        receiptUrl: URL.createObjectURL(file)
+      });
       setIsAddTransactionOpen(true);
-      setIsPlusMenuOpen(false);
     } finally {
       setIsScanningReceipt(false);
     }

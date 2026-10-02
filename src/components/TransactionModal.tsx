@@ -17,7 +17,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
-import { formatFullDate } from '../utils/date';
+import { formatFullDate, parseReceiptDate } from '../utils/date';
 import { ReceiptCameraModal } from './ReceiptCameraModal';
 import { ConfirmModal } from './ConfirmModal';
 import { feedback } from '../utils/feedback';
@@ -46,6 +46,8 @@ interface TransactionModalProps {
     name?: string;
     category?: string;
     note?: string;
+    receiptUrl?: string;
+    date?: Date;
   };
 }
 
@@ -140,34 +142,6 @@ const prepareReceiptImage = async (file: File): Promise<{ base64: string; mimeTy
   }
 };
 
-const parseReceiptDate = (dateStr: any): Date | null => {
-  if (!dateStr) return null;
-  if (dateStr instanceof Date && !isNaN(dateStr.getTime())) return dateStr;
-  if (typeof dateStr !== 'string') return null;
-
-  const trimmed = dateStr.trim();
-  const ymdMatch = trimmed.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
-  if (ymdMatch) {
-    const y = parseInt(ymdMatch[1], 10);
-    const m = parseInt(ymdMatch[2], 10) - 1;
-    const d = parseInt(ymdMatch[3], 10);
-    const dateObj = new Date(y, m, d, 12, 0, 0);
-    if (!isNaN(dateObj.getTime())) return dateObj;
-  }
-
-  const dmyMatch = trimmed.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
-  if (dmyMatch) {
-    const d = parseInt(dmyMatch[1], 10);
-    const m = parseInt(dmyMatch[2], 10) - 1;
-    const y = parseInt(dmyMatch[3], 10);
-    const dateObj = new Date(y, m, d, 12, 0, 0);
-    if (!isNaN(dateObj.getTime())) return dateObj;
-  }
-
-  const parsed = new Date(trimmed);
-  return isNaN(parsed.getTime()) ? null : parsed;
-};
-
 export function TransactionModal({ 
   transaction, 
   type = 'expense', 
@@ -212,7 +186,7 @@ export function TransactionModal({
   const [icon, setIcon] = useState(transaction?.icon || 'none');
   const [logo, setLogo] = useState<string | undefined>(transaction?.logo);
   const [_logoError, setLogoError] = useState(false);
-  const [receiptUrl, setReceiptUrl] = useState<string | undefined>(transaction?.receiptUrl);
+  const [receiptUrl, setReceiptUrl] = useState<string | undefined>(transaction?.receiptUrl || prefill?.receiptUrl);
   const [_receiptFileName, setReceiptFileName] = useState<string | undefined>();
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
   const [isScanningReceipt, setIsScanningReceipt] = useState(false);
@@ -221,6 +195,9 @@ export function TransactionModal({
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
     if (transaction?.timestamp) {
       return new Date(transaction.timestamp);
+    }
+    if (prefill?.date) {
+      return prefill.date;
     }
     return _date || new Date();
   });
