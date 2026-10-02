@@ -121,7 +121,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
