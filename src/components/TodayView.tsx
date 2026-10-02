@@ -572,7 +572,7 @@ export function TodayView({
       {/* 2. SCROLL CONTAINER / SHEET MODULE */}
       <div
         ref={sheetRef}
-        className="relative z-20 -mx-4 sm:-mx-6 w-[calc(100%+2rem)] sm:w-[calc(100%+3rem)] bg-white dark:bg-[#1C1C1C] rounded-t-[32px] sm:rounded-t-[32px] shadow-sm flex flex-col"
+        className="relative z-20 -mx-4 sm:-mx-6 w-[calc(100%+2rem)] sm:w-[calc(100%+3rem)] bg-white dark:bg-[#1C1C1C] rounded-t-[32px] sm:rounded-t-[32px] shadow-sm flex flex-col min-h-[calc(100vh-220px)] pb-12"
       >
         <div className="p-5 sm:p-6 space-y-5 pb-6 sm:pb-8">
 
