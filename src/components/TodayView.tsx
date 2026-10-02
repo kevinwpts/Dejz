@@ -572,7 +572,7 @@ export function TodayView({
       {/* 2. SCROLL CONTAINER / SHEET MODULE */}
       <div
         ref={sheetRef}
-        className="relative z-20 w-screen relative left-1/2 -translate-x-1/2 bg-white dark:bg-[#1E1B22] rounded-t-[32px] sm:rounded-t-[32px] shadow-sm flex flex-col"
+        className="relative z-20 -mx-4 sm:-mx-6 w-[calc(100%+2rem)] sm:w-[calc(100%+3rem)] bg-white dark:bg-[#1E1B22] rounded-t-[32px] sm:rounded-t-[32px] shadow-sm flex flex-col"
         style={{
           position: 'sticky',
           top: isDemoMode ? 'calc(7.2rem + env(safe-area-inset-top, 0px))' : 'calc(4.25rem + env(safe-area-inset-top, 0px))',
