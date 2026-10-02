@@ -63,7 +63,7 @@ export function AppHeader({
             <>
               <button
                 onClick={onBack}
-                className="w-9 h-9 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[#211F1C] dark:text-white flex items-center justify-center active:scale-90 transition-all cursor-pointer shrink-0"
+                className="w-9 h-9 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[#211F1C] dark:text-white flex items-center justify-center active:scale-90 transition-all cursor-pointer shrink-0"
                 aria-label="Tillbaka"
               >
                 <ChevronLeft size={18} strokeWidth={2.2} />
@@ -130,7 +130,7 @@ export function AppHeader({
             aria-label="Profil"
             title="Profil"
           >
-            <div className={`w-8 h-8 rounded-full overflow-hidden border border-[#E2DDD4] dark:border-white/[0.12] bg-white dark:bg-[#2D2D2D] flex items-center justify-center ${
+            <div className={`w-8 h-8 rounded-full overflow-hidden border border-[#E2DDD4] dark:border-white/[0.12] bg-white dark:bg-[#222222] flex items-center justify-center ${
               activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
             }`}>
               {avatarUrl ? (

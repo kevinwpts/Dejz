@@ -56,7 +56,7 @@ export function BudgetGauge({
             strokeWidth="36"
             strokeLinecap="butt"
             pathLength={100}
-            className="stroke-[#E2DDD4] dark:stroke-[#333333] transition-colors duration-300"
+            className="stroke-[#E2DDD4] dark:stroke-[#222222] transition-colors duration-300"
           />
 
           {/* Layer 2: Fill arc using accent color */}
@@ -88,7 +88,7 @@ export function BudgetGauge({
               <button
                 type="button"
                 onClick={onOpenInfo}
-                className="w-5 h-5 rounded-full flex items-center justify-center text-[#8C867C] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white bg-black/5 dark:bg-[#2D2D2D] transition-all cursor-pointer active:scale-90"
+                className="w-5 h-5 rounded-full flex items-center justify-center text-[#8C867C] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white bg-black/5 dark:bg-[#222222] transition-all cursor-pointer active:scale-90"
                 aria-label="Period- och löneinformation"
                 title="Period- och löneinformation"
               >

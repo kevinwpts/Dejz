@@ -47,12 +47,12 @@ export function CalendarModal({
             exit={{ opacity: 0, y: 40, scale: 0.98 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-[#2D2D2D] border-t sm:border border-black/[0.08] dark:border-white/[0.08] w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] font-sans"
+            className="bg-white dark:bg-[#222222] border-t sm:border border-black/[0.08] dark:border-white/[0.08] w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] font-sans"
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] border border-black/5 dark:border-white/[0.06] flex items-center justify-center text-[#1C1917] dark:text-white">
+                <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] border border-black/5 dark:border-white/[0.06] flex items-center justify-center text-[#1C1917] dark:text-white">
                   <CalendarIcon size={16} strokeWidth={2} />
                 </div>
                 <div>
@@ -74,7 +74,7 @@ export function CalendarModal({
                       onSelectDate(today);
                       if (onPeriodChange) onPeriodChange(today);
                     }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[var(--surface-muted)] dark:bg-[#2D2D2D] text-[11px] font-semibold text-[var(--text-primary)] dark:text-white hover:bg-[var(--border-color)] dark:hover:bg-white/[0.1] border border-[var(--border-color)] dark:border-white/[0.06] transition-all active:scale-95 cursor-pointer"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[var(--surface-muted)] dark:bg-[#222222] text-[11px] font-semibold text-[var(--text-primary)] dark:text-white hover:bg-[var(--border-color)] dark:hover:bg-white/[0.1] border border-[var(--border-color)] dark:border-white/[0.06] transition-all active:scale-95 cursor-pointer"
                   >
                     <RotateCcw size={12} strokeWidth={2} />
                     <span>{language === 'en' ? 'Current' : 'Nuvarande'}</span>
@@ -133,7 +133,7 @@ export function CalendarModal({
                         }}
                         className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer text-left border ${
                           isSelected
-                            ? 'bg-[#1C1917]/5 dark:bg-[#2D2D2D] border-[#1C1917]/20 dark:border-white/20 text-[#1C1917] dark:text-white'
+                            ? 'bg-[#1C1917]/5 dark:bg-[#222222] border-[#1C1917]/20 dark:border-white/20 text-[#1C1917] dark:text-white'
                             : 'bg-white dark:bg-white/[0.025] hover:bg-[#F7F5F0] dark:hover:bg-white/[0.05] border-[#E6E2D8] dark:border-white/[0.04] text-[#6E6961] dark:text-[#C7CDDC]'
                         }`}
                       >
@@ -151,7 +151,7 @@ export function CalendarModal({
                                 {mPart}
                               </span>
                               {p.isCurrent && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white tracking-tight">
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white tracking-tight">
                                   {language === 'en' ? 'Current' : 'Nuvarande'}
                                 </span>
                               )}

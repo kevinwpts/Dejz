@@ -58,14 +58,14 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   return (
     <div 
       onClick={onClick}
-      className="px-4 py-3.5 sm:py-4 min-h-[68px] relative z-10 flex items-center justify-between gap-3 group transition-colors duration-150 bg-white dark:bg-[#202020] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-[12px] shadow-none border-none cursor-pointer select-none"
+      className="px-4 py-3.5 sm:py-4 min-h-[68px] relative z-10 flex items-center justify-between gap-3 group transition-colors duration-150 bg-white dark:bg-[#191919] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-[12px] shadow-none border-none cursor-pointer select-none"
     >
       {/* Left side: Logo + Name + Category / Details */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="relative flex-shrink-0">
           <BudgetItemLogo item={item} type={type} config={config} />
           {item.isVariable && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#1C1917] dark:bg-white border border-white dark:border-[#202020] rounded-full flex items-center justify-center z-10 select-none">
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#1C1917] dark:bg-white border border-white dark:border-[#191919] rounded-full flex items-center justify-center z-10 select-none">
               <span className="text-[8px] font-extrabold text-white dark:text-[#1C1917] leading-none flex items-center justify-center text-center -translate-y-[0.5px]">
                 {t('variableShort' as any)}
               </span>

@@ -368,7 +368,7 @@ export function AnalysisView({
       />
 
       {/* HORISONTELLT STAPELDIAGRAM (FÖRDELNING) */}
-      <div className="bg-white dark:bg-[#2D2D2D] rounded-[22px] p-4 sm:p-5 border-none shadow-none space-y-4">
+      <div className="bg-white dark:bg-[#222222] rounded-[22px] p-4 sm:p-5 border-none shadow-none space-y-4">
         <div className="flex items-center justify-between px-0.5">
           <h2 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
             {isEn ? 'Distribution' : 'Fördelning'}
@@ -412,7 +412,7 @@ export function AnalysisView({
                   </div>
 
                   {/* Horizontal Bar */}
-                  <div className="w-full h-2 rounded-full bg-black/5 dark:bg-[#2D2D2D] overflow-hidden">
+                  <div className="w-full h-2 rounded-full bg-black/5 dark:bg-[#222222] overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${barWidth}%` }}
@@ -441,7 +441,7 @@ export function AnalysisView({
         </div>
 
         {categoryData.length > 0 ? (
-          <div className="bg-white dark:bg-[#2D2D2D] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+          <div className="bg-white dark:bg-[#222222] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               
@@ -542,7 +542,7 @@ export function AnalysisView({
                                 <div
                                   key={fe.id}
                                   onClick={() => onViewFixedExpense?.(fe)}
-                                  className="flex items-center justify-between p-3 rounded-[16px] bg-white dark:bg-[#252525] hover:bg-black/[0.02] dark:hover:bg-[#2D2D2D] transition-colors cursor-pointer border-none shadow-none"
+                                  className="flex items-center justify-between p-3 rounded-[16px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] transition-colors cursor-pointer border-none shadow-none"
                                 >
                                   <div className="min-w-0">
                                     <p className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight">

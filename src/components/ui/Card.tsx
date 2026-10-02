@@ -22,11 +22,11 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const baseStyles = 'overflow-hidden transition-all duration-150 border-none shadow-none';
 
     const variantStyles = {
-      default: 'bg-white dark:bg-[#252525] border-none rounded-[20px] shadow-none',
-      hero: 'bg-white dark:bg-[#252525] border-none rounded-[24px] shadow-none',
+      default: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[20px] shadow-none',
+      hero: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[24px] shadow-none',
       nested: 'bg-black/5 dark:bg-[#26232B] border-none rounded-[16px]',
-      flat: 'bg-white dark:bg-[#252525] border-none rounded-[20px]',
-      elevated: 'bg-white dark:bg-[#252525] border-none rounded-[20px] shadow-none',
+      flat: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[20px]',
+      elevated: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[20px] shadow-none',
     }[variant];
 
     const paddingStyles = {
@@ -37,7 +37,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     }[padding];
 
     const interactiveStyles = interactive
-      ? 'cursor-pointer hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] active:scale-[0.99] select-none'
+      ? 'cursor-pointer hover:bg-[var(--bg-hover)] dark:hover:bg-[#222222] active:scale-[0.99] select-none'
       : '';
 
     return (

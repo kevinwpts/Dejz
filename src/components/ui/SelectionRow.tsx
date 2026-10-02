@@ -32,8 +32,8 @@ export function SelectionRow<T = string>({
       }}
       className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] ${
         isSelected
-          ? 'bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white font-semibold'
-          : 'bg-transparent hover:bg-black/5 dark:hover:bg-[#2D2D2D] text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white font-medium'
+          ? 'bg-[#EAE6DE] dark:bg-[#222222] text-[#1C1917] dark:text-white font-semibold'
+          : 'bg-transparent hover:bg-black/5 dark:hover:bg-[#222222] text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white font-medium'
       } ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -42,7 +42,7 @@ export function SelectionRow<T = string>({
             className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
               isSelected
                 ? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
-                : 'bg-black/5 dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#B8B8B8]'
+                : 'bg-black/5 dark:bg-[#222222] text-[#6E6961] dark:text-[#B8B8B8]'
             }`}
           >
             {icon}
@@ -54,7 +54,7 @@ export function SelectionRow<T = string>({
               {label}
             </span>
             {badge && (
-              <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white shrink-0">
+              <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white shrink-0">
                 {badge}
               </span>
             )}

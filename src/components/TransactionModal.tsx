@@ -51,7 +51,7 @@ interface TransactionModalProps {
   };
 }
 
-const COLORS = ['#252525', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#333333', '#222222', '#555555', '#444444'];
+const COLORS = ['#1C1C1C', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#222222', '#222222', '#555555', '#444444'];
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -648,7 +648,7 @@ export function TransactionModal({
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
               aria-label={t('close')}
             >
               <X size={15} strokeWidth={2.2} />
@@ -657,7 +657,7 @@ export function TransactionModal({
 
           {/* Type Segmented Grid (when creating new transaction) */}
           {_onChangeType && !transaction && (
-            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-[#2D2D2D] rounded-[16px]">
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-[#222222] rounded-[16px]">
               <button
                 type="button"
                 onClick={() => {
@@ -666,7 +666,7 @@ export function TransactionModal({
                 }}
                 className={`py-2 rounded-[12px] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'expense'
-                    ? 'bg-white dark:bg-[#252525] text-[#1C1917] dark:text-white shadow-xs'
+                    ? 'bg-white dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white shadow-xs'
                     : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
                 }`}
               >
@@ -680,7 +680,7 @@ export function TransactionModal({
                 }}
                 className={`py-2 rounded-[12px] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'income'
-                    ? 'bg-white dark:bg-[#252525] text-emerald-600 dark:text-emerald-400 shadow-xs'
+                    ? 'bg-white dark:bg-[#1C1C1C] text-emerald-600 dark:text-emerald-400 shadow-xs'
                     : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
                 }`}
               >
@@ -690,7 +690,7 @@ export function TransactionModal({
           )}
 
           {/* 1. Main Hero Card: Icon + Merchant & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#252525] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
@@ -753,7 +753,7 @@ export function TransactionModal({
                 setActiveSplitIndex(null);
                 setIsCategoryPickerOpen(true);
               }}
-              className="p-4 rounded-[20px] bg-white dark:bg-[#252525] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+              className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('category')}
@@ -781,7 +781,7 @@ export function TransactionModal({
 
             {/* Date Grid Card: Simplified, no redundant left text */}
             <div 
-              className="p-4 rounded-[20px] bg-white dark:bg-[#252525] transition-all flex items-center justify-between min-h-[76px]"
+              className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] transition-all flex items-center justify-between min-h-[76px]"
             >
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('date')}
@@ -796,7 +796,7 @@ export function TransactionModal({
                   className={`h-[28px] px-2.5 rounded-lg text-[11px] font-bold tracking-tight transition-all cursor-pointer ${
                     !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
                       ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-                      : 'bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      : 'bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   {t('todayLabel')}
@@ -812,7 +812,7 @@ export function TransactionModal({
                   className={`h-[28px] px-2.5 rounded-lg text-[11px] font-bold tracking-tight transition-all cursor-pointer ${
                     !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
                       ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
-                      : 'bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      : 'bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   {t('yesterdayLabel')}
@@ -823,7 +823,7 @@ export function TransactionModal({
                   className={`h-[28px] px-2 rounded-lg transition-all flex items-center justify-center cursor-pointer gap-1 ${
                     showFullCalendar || (new Date(selectedDate).toDateString() !== new Date().toDateString() && new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString())
                       ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs' 
-                      : 'bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      : 'bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                   title={t('chooseDate')}
                 >
@@ -845,7 +845,7 @@ export function TransactionModal({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden p-3 bg-white dark:bg-[#252525] rounded-[20px]"
+                className="overflow-hidden p-3 bg-white dark:bg-[#1C1C1C] rounded-[20px]"
               >
                 <CalendarWidget 
                   calendarDays={calendarDays}
@@ -861,7 +861,7 @@ export function TransactionModal({
           {/* 3. Grid for Note and Attachments */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Note Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#252525] flex flex-col justify-between">
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] flex flex-col justify-between">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {t('ownNote')}
               </span>
@@ -888,7 +888,7 @@ export function TransactionModal({
             </div>
 
             {/* Receipt Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#252525] flex flex-col justify-between">
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] flex flex-col justify-between">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {currentLang === 'en' ? 'Receipt / Document' : 'Bifogat kvitto'}
               </span>
@@ -903,7 +903,7 @@ export function TransactionModal({
               ) : receiptUrl ? (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-6 h-6 rounded-md overflow-hidden bg-black/5 dark:bg-[#2D2D2D] flex items-center justify-center shrink-0">
+                    <div className="w-6 h-6 rounded-md overflow-hidden bg-black/5 dark:bg-[#222222] flex items-center justify-center shrink-0">
                       {receiptUrl.includes('.pdf') ? (
                         <FileText size={13} className="text-[var(--text-secondary)]" />
                       ) : (
@@ -938,7 +938,7 @@ export function TransactionModal({
                     type="button"
                     onClick={() => receiptInputRef.current?.click()}
                     disabled={isUploadingReceipt}
-                    className="flex-1 h-[28px] px-2 bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-semibold rounded-lg transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1"
+                    className="flex-1 h-[28px] px-2 bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-semibold rounded-lg transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1"
                   >
                     <Paperclip size={11} strokeWidth={2} />
                     <span>{currentLang === 'en' ? 'File' : 'Fil'}</span>
@@ -959,7 +959,7 @@ export function TransactionModal({
 
           {/* Category Split toggle if expense */}
           {type === 'expense' && splits.length === 0 && (
-            <div className="p-3.5 bg-white dark:bg-[#252525] rounded-[18px] flex items-center justify-between">
+            <div className="p-3.5 bg-white dark:bg-[#1C1C1C] rounded-[18px] flex items-center justify-between">
               <span className="text-[12px] font-medium text-[var(--text-secondary)]">
                 {currentLang === 'en' ? 'Split across multiple categories' : 'Dela upp i fler kategorier'}
               </span>
@@ -973,7 +973,7 @@ export function TransactionModal({
                     { id: Math.random().toString(), amount: 0, category: '', tags: [] }
                   ]);
                 }}
-                className="px-3 py-1 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-[var(--accent-color)] hover:text-white text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                className="px-3 py-1 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-[var(--accent-color)] hover:text-white text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
               >
                 <Plus size={12} strokeWidth={2.5} />
                 <span>{currentLang === 'en' ? 'Add' : 'Dela upp'}</span>
@@ -987,7 +987,7 @@ export function TransactionModal({
                   <motion.div 
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
-                    className="space-y-6 bg-white dark:bg-[#252525] p-4 rounded-[22px] border-none shadow-none overflow-hidden"
+                    className="space-y-6 bg-white dark:bg-[#1C1C1C] p-4 rounded-[22px] border-none shadow-none overflow-hidden"
                   >
                     {/* Splits List with Sliders */}
                     <div className="space-y-6">
@@ -1082,7 +1082,7 @@ export function TransactionModal({
                                   }
                                   setSplits(newSplits);
                                 }}
-                                className="w-full accent-accent h-2 bg-black/10 dark:bg-[#2D2D2D] rounded-full appearance-none cursor-pointer border border-black/10 dark:border-white/10"
+                                className="w-full accent-accent h-2 bg-black/10 dark:bg-[#222222] rounded-full appearance-none cursor-pointer border border-black/10 dark:border-white/10"
                               />
                             </div>
                           </div>
@@ -1119,7 +1119,7 @@ export function TransactionModal({
                                }}
                                className={`flex-shrink-0 flex flex-col items-center gap-1.5 p-2 rounded-[14px] transition-all cursor-pointer ${
                                  isAlreadyInSplit 
-                                   ? 'bg-black/5 dark:bg-[#2D2D2D] border-transparent opacity-40' 
+                                   ? 'bg-black/5 dark:bg-[#222222] border-transparent opacity-40' 
                                    : 'bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.08] active:scale-95 shadow-none border-none'
                                }`}
                              >
@@ -1181,7 +1181,7 @@ export function TransactionModal({
                   if (typeof feedback?.light === 'function') feedback.light();
                   setShowDeleteConfirm(true);
                 }}
-                className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#2D2D2D] text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                 title={currentLang === 'en' ? 'Delete' : 'Ta bort'}
                 aria-label={currentLang === 'en' ? 'Delete' : 'Ta bort'}
               >
@@ -1217,7 +1217,7 @@ export function TransactionModal({
                   <button
                     type="button"
                     onClick={() => setShowIconSelector(false)}
-                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-colors cursor-pointer"
                     aria-label={t('close')}
                   >
                     <X size={16} strokeWidth={2} />
@@ -1274,7 +1274,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.94, opacity: 0, y: 16 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white dark:bg-[#2D2D2D] w-full max-w-sm rounded-[24px] border border-black/10 dark:border-white/10 relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
+                className="bg-white dark:bg-[#222222] w-full max-w-sm rounded-[24px] border border-black/10 dark:border-white/10 relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
               >
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
                   <div>
@@ -1288,7 +1288,7 @@ export function TransactionModal({
                   <button
                     type="button"
                     onClick={() => setIsCategoryPickerOpen(false)}
-                    className="w-7 h-7 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-7 h-7 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                     aria-label={t('close')}
                   >
                     <X size={15} strokeWidth={2.2} />

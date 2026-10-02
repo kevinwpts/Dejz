@@ -165,7 +165,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                   if (typeof feedback?.light === 'function') feedback.light();
                   onClose();
                 }} 
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
                 title={t('close')}
                 aria-label={t('close')}
               >
@@ -280,7 +280,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 </div>
                 <div className="flex flex-wrap justify-end gap-1.5">
                   {(transaction.tags || []).map((tag, index) => (
-                    <span key={index} className="bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-primary)] px-2.5 py-1 rounded-[8px] text-[11px] font-medium">
+                    <span key={index} className="bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] px-2.5 py-1 rounded-[8px] text-[11px] font-medium">
                       {tag}
                     </span>
                   ))}
@@ -409,7 +409,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(transaction);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
           >
             <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
             <span>{t('edit')}</span>
@@ -421,7 +421,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               if (typeof feedback?.light === 'function') feedback.light();
               onDuplicate(transaction);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
             title={t('duplicate')}
             aria-label={t('duplicate')}
           >
@@ -435,7 +435,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }} 
-              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
               title={config.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
             >

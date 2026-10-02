@@ -117,14 +117,14 @@ export function SettingsMainView({
       exit={{ opacity: 0, y: -10 }}
       className="space-y-4 max-w-md mx-auto"
     >
-      <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-white dark:bg-[#202020] backdrop-blur-xl border-none shadow-none">
+      <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-white dark:bg-[#191919] backdrop-blur-xl border-none shadow-none">
         <button
           type="button"
           onClick={() => handleSectionClick('salary')}
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#2D2D2D] text-white">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#222222] text-white">
               <Calendar size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -143,7 +143,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#2D2D2D] text-white">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#222222] text-white">
               <Tag size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -162,7 +162,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#2D2D2D] text-white">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#222222] text-white">
               <CreditCard size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -181,7 +181,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#2D2D2D] text-white">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#222222] text-white">
               <Coins size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -200,7 +200,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#2D2D2D] text-white">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#222222] text-white">
               <Globe size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -219,7 +219,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#2D2D2D] text-white">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-[#222222] text-white">
               <Palette size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">

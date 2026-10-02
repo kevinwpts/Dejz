@@ -191,7 +191,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             placeholder={placeholder}
             disabled={disabled || isProcessing}
             autoFocus={autoFocus}
-            className={`w-full bg-white dark:bg-[#252525] border border-black/10 dark:border-white/10 rounded-[16px] text-xs sm:text-sm font-normal text-[var(--text-primary)] dark:text-white placeholder:font-normal placeholder-[var(--text-tertiary)] dark:placeholder-[#71717A] focus:border-[#05B862] dark:focus:border-[#05B862] focus:ring-2 focus:ring-[#05B862]/15 outline-none transition-all shadow-none ${
+            className={`w-full bg-white dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] text-xs sm:text-sm font-normal text-[var(--text-primary)] dark:text-white placeholder:font-normal placeholder-[var(--text-tertiary)] dark:placeholder-[#71717A] focus:border-[#05B862] dark:focus:border-[#05B862] focus:ring-2 focus:ring-[#05B862]/15 outline-none transition-all shadow-none ${
               leftElement ? 'pl-13 sm:pl-15' : 'px-3.5'
             } ${
               hasInsideSubmit ? (value && !isProcessing ? 'pr-22 sm:pr-24' : 'pr-13 sm:pr-15') : (value && !isProcessing ? 'pr-9' : 'pr-3.5')

@@ -168,7 +168,7 @@ export function IconSelector({
                 referrerPolicy="no-referrer" 
               />
               {isAutoLogoSelected && (
-                <div className="absolute inset-0 bg-black/10 dark:bg-[#2D2D2D] flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/10 dark:bg-[#222222] flex items-center justify-center">
                   <div className="w-5 h-5 bg-[#1C1917] dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center scale-110 shadow-xs">
                     <Check size={12} strokeWidth={2.5} />
                   </div>
@@ -187,7 +187,7 @@ export function IconSelector({
               }}
               className={`relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all border cursor-pointer ${
                 isIconSelected(suggestedEmoji)
-                  ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-[#2D2D2D] ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
+                  ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-[#222222] ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
                   : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[#1C1917]/40 dark:hover:border-white/40 text-[var(--text-primary)]'
               }`}
             >
@@ -219,7 +219,7 @@ export function IconSelector({
             }}
             className={`flex-1 h-16 rounded-[14px] border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
               isCustomLogoSelected
-                ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/5 dark:bg-[#2D2D2D] ring-1 ring-[#1C1917] dark:ring-white text-[#1C1917] dark:text-white'
+                ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/5 dark:bg-[#222222] ring-1 ring-[#1C1917] dark:ring-white text-[#1C1917] dark:text-white'
                 : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[#1C1917]/30 dark:hover:border-white/30'
             }`}
           >
@@ -265,7 +265,7 @@ export function IconSelector({
                 }}
                 className={`relative aspect-square rounded-[14px] flex items-center justify-center text-[var(--text-primary)] transition-all border cursor-pointer ${
                   selected
-                    ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-[#2D2D2D] ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
+                    ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-[#222222] ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
                     : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[#1C1917]/30 dark:hover:border-white/30'
                 }`}
               >
@@ -284,7 +284,7 @@ export function IconSelector({
             onClick={() => setShowEmojiPicker(true)}
             className={`relative aspect-square rounded-[14px] flex items-center justify-center transition-all border border-solid cursor-pointer ${
               hasManualIcon && !QUICK_ICONS.includes(currentIcon) && !isAutoLogoSelected && !isCustomLogoSelected
-                ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-[#2D2D2D] ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
+                ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-[#222222] ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
                 : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-tertiary)] hover:border-[#1C1917]/40 dark:hover:border-white/40'
             }`}
           >

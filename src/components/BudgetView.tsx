@@ -310,7 +310,7 @@ export function BudgetView({
           </div>
 
           {/* Simple progress bar */}
-          <div className="w-full h-1.5 bg-black/5 dark:bg-[#2D2D2D] rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-black/5 dark:bg-[#222222] rounded-full overflow-hidden">
             <div 
               className={`h-full rounded-full transition-all duration-300 ${
                 isOverAllocated ? "bg-rose-500" : "bg-[#1C1917] dark:bg-white"
@@ -334,7 +334,7 @@ export function BudgetView({
               <button
                 type="button"
                 onClick={handleAutoDistribute}
-                className="text-[11px] font-bold text-[#1C1917] dark:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/20 border border-[#E6E2D8] dark:border-white/10 transition-all cursor-pointer active:scale-95"
+                className="text-[11px] font-bold text-[#1C1917] dark:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/20 border border-[#E6E2D8] dark:border-white/10 transition-all cursor-pointer active:scale-95"
               >
                 <Sparkles size={11} />
                 Fördela automatiskt
@@ -370,7 +370,7 @@ export function BudgetView({
             Kategorier ({config.categories?.length || 0})
           </span>
           
-          <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#252525] shadow-none border-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] shadow-none border-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             {sortedCategoriesForManage.map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
@@ -461,7 +461,7 @@ export function BudgetView({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-20 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#2D2D2D] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                            className="w-20 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
                           />
                         ) : (
                           <button
@@ -525,7 +525,7 @@ export function BudgetView({
                               e.currentTarget.blur();
                             }
                           }}
-                          className="w-24 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#2D2D2D] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                          className="w-24 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
                         />
                       ) : (
                         <button
@@ -665,7 +665,7 @@ export function BudgetView({
                     else if (incomeSortBy === 'name') setIncomeSortBy('amount');
                     else setIncomeSortBy('day');
                   }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white dark:bg-[#252525] hover:bg-black/5 dark:hover:bg-[#241F32] border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-[#241F32] border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
@@ -731,7 +731,7 @@ export function BudgetView({
                     else if (fixedSortBy === 'name') setFixedSortBy('amount');
                     else setFixedSortBy('day');
                   }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white dark:bg-[#252525] hover:bg-black/5 dark:hover:bg-[#241F32] border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-[#241F32] border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
@@ -815,7 +815,7 @@ export function BudgetView({
                     else if (savingSortBy === 'name') setSavingSortBy('amount');
                     else setSavingSortBy('day');
                   }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white dark:bg-[#252525] hover:bg-black/5 dark:hover:bg-[#241F32] border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-[#241F32] border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />

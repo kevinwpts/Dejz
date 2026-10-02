@@ -150,7 +150,7 @@ export function SettingsView({
           </span>
           <button
             onClick={() => handleAddCategory(type)}
-            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-black/[0.04] dark:bg-[#2D2D2D] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] px-3.5 py-1.5 rounded-[12px] transition-colors cursor-pointer border-none"
+            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-black/[0.04] dark:bg-[#222222] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] px-3.5 py-1.5 rounded-[12px] transition-colors cursor-pointer border-none"
           >
             <Plus size={14} strokeWidth={2} />
             {t('newCategory')}
@@ -179,7 +179,7 @@ export function SettingsView({
   const renderCategoriesSettings = () => {
     return (
       <div className="space-y-6 w-full py-2">
-        <div className="flex p-1 bg-black/[0.04] dark:bg-[#2D2D2D] rounded-[16px]">
+        <div className="flex p-1 bg-black/[0.04] dark:bg-[#222222] rounded-[16px]">
           <button
             onClick={() => setCategoryTab('expense')}
             className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer ${
@@ -229,14 +229,14 @@ export function SettingsView({
               setPaymentMethodModalData({ name: '' });
               setIsPaymentMethodModalOpen(true);
             }}
-            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-black/[0.04] dark:bg-[#2D2D2D] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] px-3.5 py-1.5 rounded-[12px] transition-colors cursor-pointer border-none"
+            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-black/[0.04] dark:bg-[#222222] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] px-3.5 py-1.5 rounded-[12px] transition-colors cursor-pointer border-none"
           >
             <Plus size={14} strokeWidth={2} />
             Ny betalmetod
           </button>
         </div>
 
-        <div className="bg-white dark:bg-[#2D2D2D] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-white dark:bg-[#222222] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {methodsList.map((method: any, index: number) => (
             <div
               key={method.name || index}
@@ -270,7 +270,7 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="bg-white dark:bg-[#2D2D2D] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-white dark:bg-[#222222] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {languages.map((l) => (
             <div
               key={l.code}
@@ -329,7 +329,7 @@ export function SettingsView({
                   className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[18px] border-none transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
-                      : 'bg-white dark:bg-[#252525] text-[#1C1917] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                      : 'bg-white dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   {mode.icon}
@@ -359,8 +359,8 @@ export function SettingsView({
                   }}
                   className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[18px] border-none transition-all cursor-pointer active:scale-95 ${
                     isSelected
-                      ? 'bg-white dark:bg-[#252525] ring-2 ring-[var(--accent-color)] shadow-none'
-                      : 'bg-white dark:bg-[#252525] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                      ? 'bg-white dark:bg-[#1C1C1C] ring-2 ring-[var(--accent-color)] shadow-none'
+                      : 'bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   <div
@@ -413,7 +413,7 @@ export function SettingsView({
           {isEn ? 'Select Currency' : 'Välj valuta'}
         </h3>
 
-        <div className="bg-white dark:bg-[#2D2D2D] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+        <div className="bg-white dark:bg-[#222222] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrency === c.symbol || activeCurrency === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
@@ -466,14 +466,14 @@ export function SettingsView({
        <div>
         {activeSection === 'salary' && (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-[#2D2D2D] p-5 rounded-[22px] border-none shadow-none space-y-5">
+            <div className="bg-white dark:bg-[#222222] p-5 rounded-[22px] border-none shadow-none space-y-5">
               <h2 className="text-sm font-bold text-[#1C1917] dark:text-white">Lönedag & Period</h2>
               
               {/* Payday Setting Row */}
               <div className="space-y-1.5">
                 <button
                   onClick={() => setIsPaydayModalOpen(true)}
-                  className="w-full flex items-center justify-between p-4 rounded-[16px] bg-black/[0.04] dark:bg-[#2D2D2D] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-colors cursor-pointer text-left border-none"
+                  className="w-full flex items-center justify-between p-4 rounded-[16px] bg-black/[0.04] dark:bg-[#222222] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-colors cursor-pointer text-left border-none"
                 >
                   <div className="flex flex-col">
                     <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">Lönedag</span>
@@ -558,7 +558,7 @@ export function SettingsView({
       {/* Category Deletion Migration Modal */}
       {deleteMigrationData && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#2D2D2D] w-full max-w-sm rounded-[24px] p-6 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans">
+          <div className="bg-white dark:bg-[#222222] w-full max-w-sm rounded-[24px] p-6 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans">
             <h3 className="text-lg font-bold text-[#1C1917] dark:text-white mb-2">
               Ta bort {deleteMigrationData.category.name}?
             </h3>
@@ -570,7 +570,7 @@ export function SettingsView({
               <select
                 value={targetMigrationId}
                 onChange={(e) => setTargetMigrationId(e.target.value)}
-                className="w-full h-[48px] bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 rounded-[14px] px-3 text-[14px] font-normal text-[#1C1917] dark:text-white outline-none"
+                className="w-full h-[48px] bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[14px] px-3 text-[14px] font-normal text-[#1C1917] dark:text-white outline-none"
               >
                 {(deleteMigrationData.type === 'income' ? (config.incomeCategories || []) : (config.categories || []))
                   .filter(c => c.id !== deleteMigrationData.category.id)
@@ -662,7 +662,7 @@ export function SettingsView({
                 className={`py-3 rounded-[14px] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
                   isSelected
                     ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-md scale-105'
-                    : 'bg-black/5 dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/15'
+                    : 'bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/15'
                 }`}
               >
                 {day}

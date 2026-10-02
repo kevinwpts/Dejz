@@ -101,12 +101,12 @@ export function CalculatorModal({ _isOpen, onClose, _t }: CalculatorModalProps) 
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative bg-white dark:bg-[#252525] w-full max-w-[320px] rounded-[28px] overflow-hidden border border-black/[0.08] dark:border-white/[0.08] overscroll-contain shadow-2xl font-sans"
+            className="relative bg-white dark:bg-[#1C1C1C] w-full max-w-[320px] rounded-[28px] overflow-hidden border border-black/[0.08] dark:border-white/[0.08] overscroll-contain shadow-2xl font-sans"
           >
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-bold text-[#1C1917] dark:text-white">Kalkylator</h3>
-                <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white transition-colors cursor-pointer">
+                <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white transition-colors cursor-pointer">
                   <X size={16} strokeWidth={2} />
                 </button>
               </div>

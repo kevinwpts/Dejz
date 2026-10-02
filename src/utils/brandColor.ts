@@ -66,7 +66,7 @@ export const BRAND_COLORS: Record<string, string> = {
   zara: '#1A1A1A',
   zalando: '#FF6900',
   amazon: '#FF9900',
-  asos: '#2D2D2D',
+  asos: '#222222',
   shein: '#1A1A1A',
   boozt: '#1A1A1A',
   nk: '#1A1A1A',

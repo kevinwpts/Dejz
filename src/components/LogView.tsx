@@ -428,7 +428,7 @@ export function LogView({
         calendarContent={
           <div className="space-y-2.5">
             {/* Period Stepper (Left / Right) */}
-            <div className="flex items-center justify-between bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 rounded-2xl p-1.5">
+            <div className="flex items-center justify-between bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-2xl p-1.5">
               <button
                 type="button"
                 onClick={handleModalPrev}
@@ -450,7 +450,7 @@ export function LogView({
                     {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                   </span>
                   {modalPeriod?.isCurrent && (
-                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] border border-black/5 dark:border-white/5">
+                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] border border-black/5 dark:border-white/5">
                       {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
                     </span>
                   )}
@@ -492,7 +492,7 @@ export function LogView({
                 className={`inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer border active:scale-95 ${
                   selectedPeriod?.name === modalPeriod?.name && !selectedDate
                     ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-transparent shadow-xs'
-                    : 'bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 border-black/10 dark:border-white/10'
+                    : 'bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 border-black/10 dark:border-white/10'
                 }`}
               >
                 <Layers size={13} strokeWidth={2} />
@@ -539,7 +539,7 @@ export function LogView({
                         isSelected 
                           ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-bold shadow-xs z-10' 
                           : isToday
-                          ? 'bg-black/5 dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white border border-black/10 dark:border-white/20 font-bold'
+                          ? 'bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white border border-black/10 dark:border-white/20 font-bold'
                           : 'bg-transparent text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.06] hover:text-[#1C1917] dark:hover:text-white font-medium'
                       }`}
                     >

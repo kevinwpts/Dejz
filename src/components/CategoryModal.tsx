@@ -66,7 +66,7 @@ export function CategoryModal({
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-white dark:bg-[#2D2D2D] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
+          className="bg-white dark:bg-[#222222] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -137,7 +137,7 @@ export function CategoryModal({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSave();
                   }}
-                  className="w-full h-[48px] bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40 rounded-[16px] px-4 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all"
+                  className="w-full h-[48px] bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40 rounded-[16px] px-4 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all"
                 />
               </div>
 

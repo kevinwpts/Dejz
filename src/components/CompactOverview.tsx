@@ -26,7 +26,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
   return (
     <div className="space-y-8 px-4">
       {/* Budget Status */}
-      <div className="p-5 rounded-[18px] bg-white dark:bg-[#202020] border-none shadow-none">
+      <div className="p-5 rounded-[18px] bg-white dark:bg-[#191919] border-none shadow-none">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8]">
             {t('budgetUsage')}
@@ -36,7 +36,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
           </span>
         </div>
         
-        <div className="relative h-2 w-full bg-black/5 dark:bg-[#2D2D2D] rounded-full overflow-hidden mb-3.5">
+        <div className="relative h-2 w-full bg-black/5 dark:bg-[#222222] rounded-full overflow-hidden mb-3.5">
           <div 
             className="absolute top-0 left-0 h-full bg-[#05B862] transition-all duration-1000 ease-out rounded-full"
             style={{ width: `${Math.min(budgetUsage, 100)}%` }}
@@ -58,7 +58,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
         </h3>
         <div className="grid grid-cols-1 gap-2">
           {Object.entries(categoryTotals).slice(0, 4).map(([cat, amount]) => (
-            <div key={cat} className="flex items-center justify-between p-3.5 sm:p-4 rounded-[20px] bg-white dark:bg-[#252525] hover:bg-black/[0.02] dark:hover:bg-[#2D2D2D] active:scale-[0.99] transition-all group border-none shadow-none">
+            <div key={cat} className="flex items-center justify-between p-3.5 sm:p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] active:scale-[0.99] transition-all group border-none shadow-none">
               <span className="text-sm font-medium text-[#1C1917] dark:text-white leading-tight truncate tracking-tight">
                 {cat}
               </span>

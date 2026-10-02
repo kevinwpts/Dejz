@@ -211,7 +211,7 @@ export function DejziSummaryModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 12 }}
             transition={{ duration: 0.2 }}
-            className="bg-white dark:bg-[#2D2D2D] border border-black/[0.08] dark:border-white/[0.08] rounded-[28px] p-6 sm:p-7 w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden font-sans"
+            className="bg-white dark:bg-[#222222] border border-black/[0.08] dark:border-white/[0.08] rounded-[28px] p-6 sm:p-7 w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header with Close Button */}
@@ -300,7 +300,7 @@ export function DejziSummaryModal({
 
             {/* Dejzi Proactive Tip */}
             {dejziInfo?.actionTip && (
-              <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-black/5 dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white text-xs font-medium border border-black/10 dark:border-white/10">
+              <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white text-xs font-medium border border-black/10 dark:border-white/10">
                 <Zap size={14} className="shrink-0 text-[#1C1917] dark:text-white mt-0.5" />
                 <span>{dejziInfo.actionTip}</span>
               </div>

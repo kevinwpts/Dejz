@@ -114,7 +114,7 @@ export function SearchModal({
           >
             {/* Top Search Bar */}
             <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-black/[0.06] dark:border-white/[0.08] bg-[#EFECE6] dark:bg-[#141414] flex items-center gap-2.5 shrink-0">
-              <div className="flex-1 relative flex items-center bg-white dark:bg-[#2D2D2D] rounded-full border border-black/10 dark:border-white/10 px-3.5 h-[44px] transition-all focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 shadow-none">
+              <div className="flex-1 relative flex items-center bg-white dark:bg-[#222222] rounded-full border border-black/10 dark:border-white/10 px-3.5 h-[44px] transition-all focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 shadow-none">
                 <Search size={18} className="text-[#8C867C] dark:text-[#71717A] shrink-0 mr-2.5" />
                 <input 
                   ref={inputRef}
@@ -139,7 +139,7 @@ export function SearchModal({
                       setQuery('');
                       inputRef.current?.focus();
                     }}
-                    className="w-6 h-6 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 active:scale-90"
+                    className="w-6 h-6 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 active:scale-90"
                     title={getL10n("Rensa", "Clear", "Tøm", "Ryd", "Tyhjennä")}
                   >
                     <X size={13} strokeWidth={2.5} />

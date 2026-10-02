@@ -319,20 +319,20 @@ h6 {
   --bg-gradient: #141414;
 
   /* Layer 1: Surface */
-  --surface-color: #202020;
-  --surface-gradient: #202020;
-  --surface-solid: #202020;
+  --surface-color: #191919;
+  --surface-gradient: #191919;
+  --surface-solid: #191919;
 
   /* Layer 2: Surface Raised (Bottom sheets, modals, popups, dropdowns, chips) */
-  --surface-raised: #252525;
-  --surface-elevated: #252525;
-  --surface-elevated-gradient: #252525;
-  --modal-bg: #252525;
+  --surface-raised: #1C1C1C;
+  --surface-elevated: #1C1C1C;
+  --surface-elevated-gradient: #1C1C1C;
+  --modal-bg: #1C1C1C;
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
-  --surface-high: #2D2D2D;
-  --surface-muted: #2D2D2D;
-  --bg-hover: #2D2D2D;
+  --surface-high: #222222;
+  --surface-muted: #222222;
+  --bg-hover: #282828;
   --surface-tint: transparent;
 
   /* Typography */
@@ -344,20 +344,20 @@ h6 {
   --text-inactive: #707070;
 
   /* Borders */
-  --border-subtle: #353535;
-  --border-color: #353535;
+  --border-subtle: #2A2A2A;
+  --border-color: #2A2A2A;
   --border-control: #858585;
   --border-strong: #858585;
   --inner-highlight: transparent;
 
-  --chip-bg: #252525;
+  --chip-bg: #1C1C1C;
   --chip-text: #B8B8B8;
-  --chip-active-bg: #2D2D2D;
+  --chip-active-bg: #222222;
   --chip-active-text: #FFFFFF;
 
-  --transaction-bg: #202020;
-  --card-nested-bg: #252525;
-  --remaining-today-gradient: #202020;
+  --transaction-bg: #191919;
+  --card-nested-bg: #1C1C1C;
+  --remaining-today-gradient: #191919;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
 
@@ -376,12 +376,12 @@ h6 {
   --on-accent: #141414;
   --text-on-accent: #141414;
   --accent-soft: rgba(255, 255, 255, 0.12);
-  --accent-container: #2D2D2D;
+  --accent-container: #222222;
   --on-accent-container: #FFFFFF;
   --accent-on-solid: #141414;
   --dejz-accent: #FFFFFF;
   --accent-glow: none;
-  --accent-secondary-color: #2D2D2D;
+  --accent-secondary-color: #222222;
 
   /* Primary button states (Dark mode: White background + Dark text #141414) */
   --btn-primary-bg: #FFFFFF;
@@ -400,7 +400,7 @@ h6 {
   --danger-color: #FF8080;
   --danger-container: #381F1F;
   --info-color: #FFFFFF;
-  --info-container: #252525;
+  --info-container: #1C1C1C;
   --scrim-color: rgba(0, 0, 0, 0.60);
 
   --nav-active-color: #FFFFFF;
@@ -419,8 +419,8 @@ h6 {
   --date-active-bg: #FFFFFF;
   --date-active-color: #141414;
   --date-active-shadow: none;
-  --date-inactive-bg: #202020;
-  --date-inactive-border: #353535;
+  --date-inactive-bg: #191919;
+  --date-inactive-border: #2A2A2A;
   --date-inactive-color: #B8B8B8;
 }
 
@@ -436,7 +436,7 @@ h6 {
 
 .dark .glass-card,
 .dark .surface-card {
-  background: #202020 !important;
+  background: #191919 !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -604,7 +604,7 @@ h6 {
   }
 
   .dark ::selection {
-    background: #353535;
+    background: #2A2A2A;
     color: #FFFFFF;
   }
 
@@ -614,8 +614,8 @@ h6 {
   .dark textarea:-webkit-autofill,
   .dark select:-webkit-autofill {
     -webkit-text-fill-color: #FFFFFF !important;
-    -webkit-box-shadow: 0 0 0px 1000px #2D2D2D inset !important;
-    box-shadow: 0 0 0px 1000px #2D2D2D inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px #222222 inset !important;
+    box-shadow: 0 0 0px 1000px #222222 inset !important;
     caret-color: #FFFFFF !important;
   }
 }
