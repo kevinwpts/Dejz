@@ -121,7 +121,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -426,11 +426,11 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }} 
-              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
               title={config.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
             >
-              <Trash2 size={16} strokeWidth={1.9} />
+              <Trash2 size={16} strokeWidth={1.9} className="dark:text-white" />
             </button>
           )}
         </div>
