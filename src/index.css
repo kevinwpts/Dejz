@@ -847,6 +847,8 @@ h6 {
 
 /* Hide native scrollbars and scroll indicators on iOS PWA / mobile / desktop */
 html, body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
