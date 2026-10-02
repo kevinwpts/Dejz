@@ -67,10 +67,10 @@ export function AppHeader({
             <>
               <button
                 onClick={onBack}
-                className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-[12px] bg-white/80 dark:bg-white/[0.06] border border-[#E2DDD4] dark:border-white/[0.08] flex items-center justify-center text-[#211F1C] dark:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer shrink-0"
+                className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[#211F1C] dark:text-white flex items-center justify-center active:scale-90 transition-all cursor-pointer shrink-0"
                 aria-label="Tillbaka"
               >
-                <ChevronLeft size={20} strokeWidth={2} />
+                <ChevronLeft size={18} strokeWidth={2.2} />
               </button>
               {title && (
                 <h1 className="text-[16px] sm:text-[17px] font-semibold tracking-tight truncate select-none leading-tight text-[#211F1C] dark:text-white">
