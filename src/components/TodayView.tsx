@@ -500,9 +500,6 @@ export function TodayView({
                   <div className="flex items-center gap-3.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
                     {categoryBudgetData.map((cat, index) => {
                       const Icon = ICON_MAP[cat.iconName];
-                      const spentPct = cat.budgetInKronor > 0 
-                        ? Math.min(100, Math.max(0, (cat.spent / cat.budgetInKronor) * 100))
-                        : (cat.spent > 0 ? 100 : 0);
 
                       return (
                         <motion.button
@@ -511,55 +508,27 @@ export function TodayView({
                           animate={{ opacity: 1, scale: 1, x: 0 }}
                           transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                           onClick={() => handleCategoryClick(cat.name)}
-                          className="flex-shrink-0 flex flex-col items-center text-center group cursor-pointer border-none bg-transparent shadow-none p-0 focus:outline-none"
+                          style={{ backgroundColor: cat.color || '#6E6961' }}
+                          className="flex-shrink-0 w-[100px] sm:w-[110px] h-[100px] sm:h-[110px] p-3 rounded-[22px] flex flex-col items-center justify-between text-center group cursor-pointer border-none shadow-sm transition-transform active:scale-95"
                         >
-                          {/* Delicate, understated circular progress & icon (~50px) */}
-                          <div className="relative w-[50px] h-[50px] flex items-center justify-center mb-1">
-                            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
-                              {/* Background track */}
-                              <path
-                                className="text-black/[0.04] dark:text-white/[0.06]"
-                                strokeWidth="1.5"
-                                stroke="currentColor"
-                                fill="none"
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                              />
-                              {/* Delicate progress arc with muted tone */}
-                              <path
-                                stroke={cat.isOverBudget ? '#f43f5e' : 'currentColor'}
-                                className={cat.isOverBudget ? '' : 'text-[#8C867C]/35 dark:text-[#A8A8A8]/35'}
-                                strokeWidth="1.5"
-                                strokeDasharray="100"
-                                strokeDashoffset={100 - spentPct}
-                                strokeLinecap="round"
-                                fill="none"
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                style={{
-                                  transition: 'stroke-dashoffset 0.5s ease',
-                                }}
-                              />
-                            </svg>
-                            {/* Center Icon inside ultra-soft circle */}
-                            <div className="w-[38px] h-[38px] rounded-full bg-black/[0.025] dark:bg-white/[0.035] flex items-center justify-center text-[#6D6962] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors">
-                              {isEmojiString(cat.iconName) ? (
-                                <span className="text-[11px] leading-none opacity-80">{cat.iconName}</span>
-                              ) : Icon ? (
-                                <Icon size={14} strokeWidth={1.6} />
-                              ) : (
-                                <div className="w-1.5 h-1.5 rounded-full bg-[#8C867C] dark:bg-[#A8A8A8]" />
-                              )}
-                            </div>
+                          {/* Icon without circle, white */}
+                          <div className="flex items-center justify-center pt-1 text-white">
+                            {isEmojiString(cat.iconName) ? (
+                              <span className="text-[20px] leading-none">{cat.iconName}</span>
+                            ) : Icon ? (
+                              <Icon size={22} strokeWidth={1.8} />
+                            ) : (
+                              <div className="w-2 h-2 rounded-full bg-white" />
+                            )}
                           </div>
 
-                          {/* Category Name - soft secondary tone */}
-                          <span className="text-[11px] font-normal tracking-tight text-[#6D6962] dark:text-[#A8A8A8] max-w-[64px] truncate mb-0.5">
+                          {/* Category Name */}
+                          <span className="text-[12px] font-bold text-white tracking-tight max-w-[90px] truncate px-0.5 drop-shadow-xs">
                             {cat.name}
                           </span>
 
-                          {/* Remaining Amount */}
-                          <span className={`text-[10px] font-normal tabular-nums tracking-tight whitespace-nowrap ${
-                            cat.isOverBudget ? 'text-rose-500 dark:text-rose-400 font-medium' : 'text-[#8C867C] dark:text-[#71717A]'
-                          }`}>
+                          {/* Remaining / Spent Amount */}
+                          <span className="text-[10px] font-medium text-white/95 tabular-nums tracking-tight whitespace-nowrap bg-black/15 px-2 py-0.5 rounded-full">
                             {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} ${config?.currency || 'kr'}` : `${formatAmount(cat.spent, lang)} ${config?.currency || 'kr'}`}
                           </span>
                         </motion.button>
