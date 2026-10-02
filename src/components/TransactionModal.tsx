@@ -640,7 +640,7 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-none rounded-t-[32px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -713,7 +713,7 @@ export function TransactionModal({
           )}
 
           {/* 1. Main Hero Card: Icon + Merchant & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[22px] bg-black/[0.03] dark:bg-white/[0.04] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#1E1B22] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
@@ -746,9 +746,9 @@ export function TransactionModal({
             <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-between gap-2">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
-                className="flex items-baseline font-amount text-[28px] sm:text-[34px] font-bold tabular-nums tracking-tight cursor-text flex-1"
+                className="flex items-baseline font-amount text-[36px] sm:text-[44px] font-bold tabular-nums tracking-tight cursor-text flex-1"
               >
-                <span className={`opacity-80 mr-1 select-none ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+                <span className={`opacity-80 mr-1 select-none text-[36px] sm:text-[44px] leading-none ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
                   {type === 'income' ? '+' : '−'}
                 </span>
                 <input
@@ -764,10 +764,10 @@ export function TransactionModal({
                     }
                   }}
                   placeholder="0"
-                  className={`bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] w-full max-w-[240px] ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}
+                  className={`bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] w-full max-w-[280px] leading-none ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}
                 />
               </div>
-              <span className="text-[15px] font-semibold text-[var(--text-secondary)] font-sans select-none">
+              <span className="text-[18px] sm:text-[20px] font-bold text-[var(--text-secondary)] font-sans select-none ml-2">
                 {currency}
               </span>
             </div>
@@ -775,19 +775,19 @@ export function TransactionModal({
 
           {/* 2. Grid for Category & Date Selection */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Category Grid Card */}
+            {/* Category Grid Card: Icon and text aligned to the right */}
             <div 
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setActiveSplitIndex(null);
                 setIsCategoryPickerOpen(true);
               }}
-              className="p-4 rounded-[20px] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.07] transition-all cursor-pointer flex flex-col justify-between group min-h-[90px]"
+              className="p-4 rounded-[20px] bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  {t('category')}
-                </span>
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('category')}
+              </span>
+              <div className="flex items-center gap-2 min-w-0">
                 <div 
                   className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
                   style={{ 
@@ -801,85 +801,68 @@ export function TransactionModal({
                     size="2xs" 
                   />
                 </div>
-              </div>
-              <div className="flex items-center justify-between pt-2">
-                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate">
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
                   {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors ml-1 shrink-0" />
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
             </div>
 
-            {/* Date Grid Card */}
+            {/* Date Grid Card: Simplified, no redundant left text */}
             <div 
-              className="p-4 rounded-[20px] bg-black/[0.03] dark:bg-white/[0.04] transition-all flex flex-col justify-between min-h-[90px]"
+              className="p-4 rounded-[20px] bg-white dark:bg-[#1E1B22] transition-all flex items-center justify-between min-h-[76px]"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                  {t('date')}
-                </span>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedDate(new Date());
-                      setShowFullCalendar(false);
-                    }}
-                    className={`h-[24px] px-2 rounded-md text-[10.5px] font-bold tracking-tight transition-all cursor-pointer ${
-                      !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
-                        ? 'bg-[var(--accent-color)] text-white'
-                        : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
-                  >
-                    {t('todayLabel')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const yesterday = new Date();
-                      yesterday.setDate(yesterday.getDate() - 1);
-                      setSelectedDate(yesterday);
-                      setShowFullCalendar(false);
-                    }}
-                    className={`h-[24px] px-2 rounded-md text-[10.5px] font-bold tracking-tight transition-all cursor-pointer ${
-                      !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
-                        ? 'bg-[var(--accent-color)] text-white'
-                        : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
-                  >
-                    {t('yesterdayLabel')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowFullCalendar(!showFullCalendar);
-                    }}
-                    className={`w-6 h-[24px] rounded-md transition-all flex items-center justify-center cursor-pointer ${
-                      showFullCalendar 
-                        ? 'bg-[var(--accent-color)] text-white' 
-                        : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    }`}
-                  >
-                    <Calendar size={12} strokeWidth={2} />
-                  </button>
-                </div>
-              </div>
-
-              <div 
-                onClick={() => setShowFullCalendar(!showFullCalendar)}
-                className="flex items-center justify-between pt-2 cursor-pointer group"
-              >
-                <span className="text-[14px] font-bold text-[var(--text-primary)] truncate">
-                  {new Date(selectedDate).toDateString() === new Date().toDateString() 
-                    ? (currentLang === 'en' ? 'Today' : 'Idag')
-                    : new Date(selectedDate).toDateString() === new Date(Date.now() - 86400000).toDateString()
-                    ? (currentLang === 'en' ? 'Yesterday' : 'Igår')
-                    : formatFullDate(selectedDate, currentLang)}
-                </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors ml-1 shrink-0" />
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('date')}
+              </span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDate(new Date());
+                    setShowFullCalendar(false);
+                  }}
+                  className={`h-[28px] px-2.5 rounded-lg text-[11px] font-bold tracking-tight transition-all cursor-pointer ${
+                    !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
+                      ? 'bg-[var(--accent-color)] text-white shadow-xs'
+                      : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  {t('todayLabel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    setSelectedDate(yesterday);
+                    setShowFullCalendar(false);
+                  }}
+                  className={`h-[28px] px-2.5 rounded-lg text-[11px] font-bold tracking-tight transition-all cursor-pointer ${
+                    !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
+                      ? 'bg-[var(--accent-color)] text-white shadow-xs'
+                      : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  {t('yesterdayLabel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowFullCalendar(!showFullCalendar)}
+                  className={`h-[28px] px-2 rounded-lg transition-all flex items-center justify-center cursor-pointer gap-1 ${
+                    showFullCalendar || (new Date(selectedDate).toDateString() !== new Date().toDateString() && new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString())
+                      ? 'bg-[var(--accent-color)] text-white shadow-xs' 
+                      : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                  title={t('chooseDate')}
+                >
+                  <Calendar size={13} strokeWidth={2} />
+                  {new Date(selectedDate).toDateString() !== new Date().toDateString() && new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString() && (
+                    <span className="text-[11px] font-bold tabular-nums">
+                      {formatFullDate(selectedDate, currentLang)}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -891,7 +874,7 @@ export function TransactionModal({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden p-3 bg-black/[0.03] dark:bg-white/[0.04] rounded-[20px]"
+                className="overflow-hidden p-3 bg-white dark:bg-[#1E1B22] rounded-[20px]"
               >
                 <CalendarWidget 
                   calendarDays={calendarDays}
@@ -907,7 +890,7 @@ export function TransactionModal({
           {/* 3. Grid for Note and Attachments */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Note Card */}
-            <div className="p-4 rounded-[20px] bg-black/[0.03] dark:bg-white/[0.04] flex flex-col justify-between">
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1E1B22] flex flex-col justify-between">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {t('ownNote')}
               </span>
@@ -934,7 +917,7 @@ export function TransactionModal({
             </div>
 
             {/* Receipt Card */}
-            <div className="p-4 rounded-[20px] bg-black/[0.03] dark:bg-white/[0.04] flex flex-col justify-between">
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1E1B22] flex flex-col justify-between">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {currentLang === 'en' ? 'Receipt / Document' : 'Bifogat kvitto'}
               </span>
@@ -1005,7 +988,7 @@ export function TransactionModal({
 
           {/* Category Split toggle if expense */}
           {type === 'expense' && splits.length === 0 && (
-            <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[18px] flex items-center justify-between">
+            <div className="p-3.5 bg-white dark:bg-[#1E1B22] rounded-[18px] flex items-center justify-between">
               <span className="text-[12px] font-medium text-[var(--text-secondary)]">
                 {currentLang === 'en' ? 'Split across multiple categories' : 'Dela upp i fler kategorier'}
               </span>
