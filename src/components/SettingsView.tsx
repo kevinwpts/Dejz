@@ -144,17 +144,18 @@ export function SettingsView({
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-4">
           <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
             {list.length} {t('categories').toLowerCase()}
           </span>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Plus size={14} strokeWidth={2.5} />}
             onClick={() => handleAddCategory(type)}
-            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-black/[0.04] dark:bg-[#1C1C1C] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] px-3.5 py-1.5 rounded-[12px] transition-colors cursor-pointer border-none"
           >
-            <Plus size={14} strokeWidth={2} />
             {t('newCategory')}
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-2 gap-3.5">
@@ -224,20 +225,21 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-4">
           <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
             {methodsList.length} betalmetodsval
           </span>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Plus size={14} strokeWidth={2.5} />}
             onClick={() => {
               setPaymentMethodModalData({ name: '' });
               setIsPaymentMethodModalOpen(true);
             }}
-            className="text-xs font-bold text-[#1C1917] dark:text-white flex items-center gap-1 bg-black/[0.04] dark:bg-[#1C1C1C] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] px-3.5 py-1.5 rounded-[12px] transition-colors cursor-pointer border-none"
           >
-            <Plus size={14} strokeWidth={2} />
             Ny betalmetod
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-2 gap-3.5">
@@ -401,13 +403,13 @@ export function SettingsView({
     { code: 'ISK', symbol: 'kr', name: { sv: 'Isländska krónur (kr)', en: 'Icelandic Króna (kr)' }, flag: '🇮🇸', example: '1 250 kr' },
   ];
 
-  const handleSelectCurrency = (newSymbol: string) => {
-    setConfig({ ...config, currency: newSymbol });
+  const handleSelectCurrency = (c: typeof PRESET_CURRENCIES[0]) => {
+    setConfig({ ...config, currency: c.symbol, currencyCode: c.code });
   };
 
   const renderCurrencySettings = () => {
     const isEn = config.language === 'en';
-    const activeCurrency = config.currency || 'kr';
+    const activeCurrencyCode = config.currencyCode || (config.currency === 'kr' ? 'SEK' : PRESET_CURRENCIES.find(p => p.symbol === config.currency)?.code || 'SEK');
 
     return (
       <div className="space-y-3 w-full py-2">
@@ -417,14 +419,14 @@ export function SettingsView({
 
         <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
           {PRESET_CURRENCIES.map((c) => {
-            const isSelected = activeCurrency === c.symbol || activeCurrency === c.code;
+            const isSelected = activeCurrencyCode === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
 
             return (
               <button
                 key={`${c.code}-${c.symbol}`}
                 type="button"
-                onClick={() => handleSelectCurrency(c.symbol)}
+                onClick={() => handleSelectCurrency(c)}
                 className={`w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-left ${
                   isSelected ? 'bg-accent/10' : ''
                 }`}

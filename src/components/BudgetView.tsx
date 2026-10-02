@@ -7,7 +7,7 @@ import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
-import { FilterSelectButton, FilterMenuModal } from './ui';
+import { FilterSelectButton, FilterMenuModal, Button } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 
@@ -591,26 +591,22 @@ export function BudgetView({
           isOpen={isBudgetFilterModalOpen}
           onClose={() => setIsBudgetFilterModalOpen(false)}
           title={config?.language === 'en' ? 'Select section' : 'Välj budgetkategori'}
-          subtitle={config?.language === 'en' ? 'Switch between fixed expenses, income and savings' : 'Växla mellan fasta utgifter, inkomster och sparande'}
           selectedId={budgetFilter}
           onSelect={(id) => setBudgetFilter(id as 'fixed' | 'income' | 'savings')}
           options={[
             {
               id: 'fixed',
               label: config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter',
-              subtitle: config?.language === 'en' ? 'Recurring rent, bills and subscriptions' : 'Återkommande hyra, räkningar och abonnemang',
               icon: <Calendar size={16} strokeWidth={2} />,
             },
             {
               id: 'income',
               label: config?.language === 'en' ? 'Income' : 'Inkomster',
-              subtitle: config?.language === 'en' ? 'Salary, benefits and extra income' : 'Lön, bidrag och extra inkomster',
               icon: <ArrowDownLeft size={16} strokeWidth={2} />,
             },
             {
               id: 'savings',
               label: config?.language === 'en' ? 'Monthly savings' : 'Månadssparande',
-              subtitle: config?.language === 'en' ? 'Savings goals and auto savings' : 'Målsparande och automatiskt sparande',
               icon: <PiggyBank size={16} strokeWidth={2} />,
             },
           ]}
@@ -722,7 +718,7 @@ export function BudgetView({
           {/* Fixed Expenses Section */}
           {budgetFilter === 'fixed' && (
             <div className="space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-1 mb-4">
                 {/* Single compact sort toggle button */}
                 <button
                   type="button"
@@ -747,14 +743,14 @@ export function BudgetView({
                     }
                   </span>
                 </button>
-                <button 
-                  type="button"
-                  onClick={onAddFixedExpense} 
-                  className="h-9 px-4 rounded-xl bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<Plus size={14} strokeWidth={2.5} />}
+                  onClick={onAddFixedExpense}
                 >
-                  <Plus size={14} strokeWidth={2.5} />
-                  <span>{t('newFixedExpense')}</span>
-                </button>
+                  {t('newFixedExpense')}
+                </Button>
               </div>
 
               {sortedFixedExpenses.length > 0 ? (
@@ -806,7 +802,7 @@ export function BudgetView({
           {/* Monthly Savings Section */}
           {budgetFilter === 'savings' && (
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-1 mb-4">
                 {/* Single compact sort toggle button */}
                 <button
                   type="button"
@@ -831,14 +827,14 @@ export function BudgetView({
                   </span>
                 </button>
 
-                <button 
-                  type="button"
-                  onClick={onAddMonthlySaving} 
-                  className="h-9 px-4 rounded-xl bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<Plus size={14} strokeWidth={2.5} />}
+                  onClick={onAddMonthlySaving}
                 >
-                  <Plus size={14} strokeWidth={2.5} />
-                  <span>{t('newMonthlySaving')}</span>
-                </button>
+                  {t('newMonthlySaving')}
+                </Button>
               </div>
 
               {sortedSavings.length > 0 ? (

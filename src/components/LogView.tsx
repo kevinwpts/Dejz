@@ -279,32 +279,27 @@ export function LogView({
           isOpen={isTypeFilterModalOpen}
           onClose={() => setIsTypeFilterModalOpen(false)}
           title={getL10n('Filtrera transaktioner', 'Filter transactions', 'Filtrer transaksjoner', 'Filtrer transaktioner', 'Suodata tapahtumia')}
-          subtitle={getL10n('Välj vilka typer av transaktioner som ska visas', 'Choose transaction types to display')}
           selectedId={typeFilter}
           onSelect={(id) => setTypeFilter(id as 'all' | 'expense' | 'income' | 'receipt')}
           options={[
             {
               id: 'all',
               label: t('all' as TranslationKey) || (config.language === 'en' ? 'All transactions' : 'Alla transaktioner'),
-              subtitle: getL10n('Visa alla utgifter och inkomster', 'Show all income and expenses'),
               icon: <LayoutGrid size={16} strokeWidth={2} />,
             },
             {
               id: 'expense',
               label: t('expense' as TranslationKey) || (config.language === 'en' ? 'Expenses' : 'Utgifter'),
-              subtitle: getL10n('Visa endast utgifter', 'Only expense transactions'),
               icon: <ArrowDownLeft size={16} strokeWidth={2} />,
             },
             {
               id: 'income',
               label: t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster'),
-              subtitle: getL10n('Visa endast inkomster', 'Only income deposits'),
               icon: <ArrowUpRight size={16} strokeWidth={2} />,
             },
             {
               id: 'receipt',
               label: t('receipt' as TranslationKey) || (config.language === 'en' ? 'Receipts' : 'Kvitton'),
-              subtitle: getL10n('Endast transaktioner med kvitto', 'Only transactions with receipt image'),
               icon: <FileText size={16} strokeWidth={2} />,
             },
           ]}

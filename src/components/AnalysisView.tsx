@@ -68,19 +68,16 @@ export function AnalysisView({
     {
       id: 'all' as const,
       label: t('all' as TranslationKey) || (isEn ? 'All expenses' : 'Alla utgifter'),
-      subtitle: isEn ? 'Variable and fixed expenses' : 'Både rörliga och fasta kostnader',
       icon: <LayoutGrid size={16} strokeWidth={2} />,
     },
     {
       id: 'variable' as const,
       label: t('variableExpenses' as TranslationKey) || (isEn ? 'Variable expenses' : 'Rörliga utgifter'),
-      subtitle: isEn ? 'Purchases, groceries, daily spending' : 'Köp, mat och vardagskostnader',
       icon: <TrendingUp size={16} strokeWidth={2} />,
     },
     {
       id: 'fixed' as const,
       label: t('fixedExpenses' as TranslationKey) || (isEn ? 'Fixed expenses' : 'Fasta utgifter'),
-      subtitle: isEn ? 'Rent, bills and recurring contracts' : 'Hyra, räkningar och abonnemang',
       icon: <Calendar size={16} strokeWidth={2} />,
     },
   ], [isEn, t]);
@@ -322,7 +319,6 @@ export function AnalysisView({
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         title={isEn ? 'Filter spending' : 'Filtrera utgifter'}
-        subtitle={isEn ? 'Choose which expenses to include in analysis' : 'Välj vilka kostnader som ska visas i analysen'}
         selectedId={analysisFilter}
         onSelect={(id) => {
           setAnalysisFilter(id as 'all' | 'variable' | 'fixed');

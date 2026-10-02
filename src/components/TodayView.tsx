@@ -529,7 +529,7 @@ export function TodayView({
 
                           {/* Remaining / Spent Amount */}
                           <span className="text-[10px] font-medium text-white/95 tabular-nums tracking-tight whitespace-nowrap bg-black/15 px-2 py-0.5 rounded-full">
-                            {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} ${config?.currency || 'kr'}` : `${formatAmount(cat.spent, lang)} ${config?.currency || 'kr'}`}
+                            {cat.hasBudget ? `${formatAmount(cat.remaining, lang)} ${config?.currency || 'kr'} ${lang === 'en' ? 'left' : 'kvar'}` : `${formatAmount(cat.spent, lang)} ${config?.currency || 'kr'}`}
                           </span>
                         </motion.button>
                       );

@@ -20,6 +20,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
   onClick,
   className = '',
   disabled = false,
+  variant = 'default',
 }) => {
   return (
     <button
@@ -31,17 +32,21 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
           onClick();
         }
       }}
-      className={`h-11 px-3.5 rounded-2xl transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans bg-white dark:bg-white border border-[#E2DDD4] dark:border-white/20 text-[#1C1917] shadow-xs hover:bg-[#F9F8F6] dark:hover:bg-[#F0F0F0] ${className}`}
+      className={`h-11 px-3.5 rounded-2xl transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans ${
+        variant === 'cardDarker'
+          ? 'bg-white dark:bg-[#191919] border border-[#E2DDD4] dark:border-white/[0.08] text-[#211F1C] dark:text-white shadow-xs hover:bg-[#F9F8F6] dark:hover:bg-[#222222]'
+          : 'bg-white dark:bg-[#1C1C1C] border border-[#E2DDD4] dark:border-white/[0.08] text-[#211F1C] dark:text-white shadow-xs hover:bg-[#F9F8F6] dark:hover:bg-[#222222]'
+      } ${className}`}
     >
       <div className="flex items-center gap-2.5 min-w-0 flex-1">
-        {icon && <span className="text-[#1C1917] shrink-0">{icon}</span>}
+        {icon && <span className="text-[#6E6961] dark:text-[#A8A8A8] shrink-0">{icon}</span>}
         <div className="min-w-0 flex-1">
           {label && (
-            <span className="block text-[10px] uppercase font-medium tracking-wider text-[#6E6961] leading-tight truncate">
+            <span className="block text-[10px] uppercase font-medium tracking-wider text-[#8C867C] dark:text-[#A8A8A8] leading-tight truncate">
               {label}
             </span>
           )}
-          <span className="block text-xs sm:text-[13px] font-semibold text-[#1C1917] truncate leading-tight">
+          <span className="block text-xs sm:text-[13px] font-semibold text-[#211F1C] dark:text-white truncate leading-tight">
             {value}
           </span>
         </div>
@@ -49,7 +54,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
       <ChevronDown
         size={14}
         strokeWidth={2.2}
-        className="text-[#1C1917] shrink-0 ml-1"
+        className="text-[#6E6961] dark:text-[#A8A8A8] shrink-0 ml-1"
       />
     </button>
   );

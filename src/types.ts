@@ -85,6 +85,7 @@ export interface PaymentMethod {
 
 export interface Config {
   currency: string;
+  currencyCode?: string;
   language: string;
   payday: number;
   paydayType: PaydayType;
