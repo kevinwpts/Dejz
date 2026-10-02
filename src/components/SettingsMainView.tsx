@@ -124,7 +124,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)]">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-white">
               <Calendar size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -143,7 +143,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)]">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-white">
               <Tag size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -162,7 +162,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)]">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-white">
               <CreditCard size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -181,7 +181,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-amber-500/10 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-white">
               <Coins size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -200,7 +200,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)]">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-white">
               <Globe size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -219,7 +219,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-purple-500/10 dark:bg-purple-400/10 text-purple-600 dark:text-purple-400">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-white">
               <Palette size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">

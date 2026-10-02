@@ -314,9 +314,9 @@ export function SettingsView({
           </label>
           <div className="grid grid-cols-3 gap-2.5">
             {[
-              { id: 'system', label: 'System', icon: <Monitor size={18} /> },
-              { id: 'light', label: 'Ljust', icon: <Sun size={18} /> },
-              { id: 'dark', label: 'Mörkt', icon: <Moon size={18} /> },
+              { id: 'system', label: 'System', icon: <Monitor size={18} className="text-white" /> },
+              { id: 'light', label: 'Ljust', icon: <Sun size={18} className="text-white" /> },
+              { id: 'dark', label: 'Mörkt', icon: <Moon size={18} className="text-white" /> },
             ].map((mode) => {
               const isSelected = config.themeMode === mode.id || (!config.themeMode && mode.id === 'system');
               return (

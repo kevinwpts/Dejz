@@ -189,7 +189,7 @@ export function ProfileView({
     onNavigate('profile', section);
   };
 
-  const SettingsMenuItem = ({ icon: Icon, label, onClick, rightNode, iconBgColor = "bg-black/[0.04] dark:bg-white/[0.06]", iconTextColor = "text-[var(--text-primary)]" }: { icon: any, label: string, onClick?: () => void, rightNode?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) => (
+  const SettingsMenuItem = ({ icon: Icon, label, onClick, rightNode, iconBgColor = "bg-black/[0.04] dark:bg-white/[0.06]", iconTextColor = "text-white" }: { icon: any, label: string, onClick?: () => void, rightNode?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) => (
     <button 
       onClick={onClick}
       className={`w-full flex items-center justify-between py-3.5 px-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
@@ -294,8 +294,6 @@ export function ProfileView({
             <SettingsMenuItem 
               icon={Coins} 
               label={config.language === 'en' ? 'Currency' : 'Valuta'} 
-              iconBgColor="bg-amber-500/10 dark:bg-amber-400/10"
-              iconTextColor="text-amber-600 dark:text-amber-400"
               onClick={() => handleSectionClick('currency')} 
               rightNode={(
                 <div className="flex items-center gap-1 text-[var(--text-secondary)]">
@@ -318,15 +316,11 @@ export function ProfileView({
             <SettingsMenuItem 
               icon={SlidersHorizontal} 
               label={'Budget'} 
-              iconBgColor="bg-accent/10"
-              iconTextColor="text-[var(--accent-color)]"
               onClick={() => onNavigate('budget', 'allocate')} 
             />
             <SettingsMenuItem 
               icon={Palette} 
               label={t('appearance' as any) || 'Utseende'} 
-              iconBgColor="bg-purple-500/10 dark:bg-purple-400/10"
-              iconTextColor="text-purple-600 dark:text-purple-400"
               onClick={() => handleSectionClick('appearance')}
               rightNode={(
                 <div className="flex items-center gap-1 text-[var(--text-secondary)]">
@@ -350,7 +344,7 @@ export function ProfileView({
             <div className="py-3.5 px-4 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border-none flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-white border-none flex items-center justify-center shrink-0">
                     <Calendar size={16} strokeWidth={1.8} />
                   </div>
                   <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInCalendar')}</span>
@@ -420,7 +414,7 @@ export function ProfileView({
               onClick={onLogout}
               className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-none flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-white border-none flex items-center justify-center shrink-0">
                 <LogOut size={16} strokeWidth={1.8} />
               </div>
               <span className="text-[13.5px] font-semibold text-[var(--text-primary)]">{t('logout')}</span>
@@ -429,7 +423,7 @@ export function ProfileView({
               onClick={onDeleteAccount}
               className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-danger/5 transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-9 h-9 rounded-xl bg-danger/10 text-danger border-none flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-white border-none flex items-center justify-center shrink-0">
                 <Trash2 size={16} strokeWidth={1.8} />
               </div>
               <span className="text-[13.5px] font-semibold text-danger">{t('deleteAccount')}</span>
