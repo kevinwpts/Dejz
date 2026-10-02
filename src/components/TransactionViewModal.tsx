@@ -155,10 +155,10 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section: Left-aligned Logo, Title below, Price below title */}
-          <div className="relative flex flex-col items-start text-left pt-6 sm:pt-8 pb-4">
+          {/* Hero Section: Centered Logo, Title below, Price below title */}
+          <div className="relative flex flex-col items-center text-center pt-6 sm:pt-8 pb-4">
             {/* Close Button top-right */}
-            <div className="absolute top-2 right-0 z-10">
+            <div className="absolute top-0 right-0 z-10">
               <button 
                 type="button"
                 onClick={() => {
@@ -173,18 +173,18 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               </button>
             </div>
 
-            {/* Logo */}
-            <div className="scale-125 sm:scale-135 mb-6 pt-3 pl-1">
+            {/* Centered Logo */}
+            <div className="scale-135 sm:scale-150 mb-7 pt-3">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
 
             {/* Title */}
-            <h2 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[var(--text-primary)] leading-tight max-w-[90%] truncate pr-8">
+            <h2 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[var(--text-primary)] leading-tight max-w-[90%] truncate px-2">
               {merchantName}
             </h2>
 
             {/* Price */}
-            <p className={`text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-start ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-[#E7E5E4]'}`}>
+            <p className={`text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-[#E7E5E4]'}`}>
               <span className="opacity-80 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
               <span>{formatAmount(transaction.amount, config.language)}</span>
               <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{config.currency}</span>
