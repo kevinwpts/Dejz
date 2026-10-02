@@ -252,6 +252,7 @@ export function LogView({
             setIsPeriodPickerOpen(true);
           }}
           className="flex-[1.25] min-w-0"
+          variant="cardDarker"
         />
 
         {/* Right: Type Filter Button */}
@@ -270,6 +271,7 @@ export function LogView({
           }
           onClick={() => setIsTypeFilterModalOpen(true)}
           className="flex-1 min-w-0"
+          variant="cardDarker"
         />
 
         {/* Type Filter Modal */}

@@ -10,6 +10,7 @@ export interface FilterSelectButtonProps {
   className?: string;
   disabled?: boolean;
   active?: boolean;
+  variant?: 'default' | 'cardDarker';
 }
 
 export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
@@ -20,6 +21,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
   className = '',
   disabled = false,
   active = false,
+  variant = 'default',
 }) => {
   return (
     <button
@@ -34,7 +36,9 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
       className={`h-11 px-3.5 rounded-2xl border transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none shadow-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans ${
         active
           ? 'bg-[var(--accent-color)]/15 border-none text-[var(--accent-color)] font-semibold'
-          : 'bg-white dark:bg-[#1E1B22] border-none text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-[#27242E]'
+          : variant === 'cardDarker'
+            ? 'bg-white dark:bg-[#1A1722] border-none text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-[#221E2B]'
+            : 'bg-white dark:bg-[#1E1B22] border-none text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-[#27242E]'
       } ${className}`}
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">
