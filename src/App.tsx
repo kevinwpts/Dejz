@@ -5461,7 +5461,7 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-5"
+              className="bg-[#EFECE6] dark:bg-[#1C1C1C] w-full rounded-t-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-5"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle */}
@@ -5496,10 +5496,10 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-[#222222] group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
-                    <ArrowDownLeft size={24} strokeWidth={1.8} className="text-[var(--text-primary)] dark:text-white" />
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-[#E2DDD4] dark:border-white/10 hover:bg-[#F9F8F6] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                    <ArrowDownLeft size={24} strokeWidth={1.8} className="text-[#211F1C] dark:text-white" />
                   </div>
-                  <span className="text-xs font-semibold text-[var(--text-primary)] dark:text-white text-center">
+                  <span className="text-xs font-semibold text-[#211F1C] dark:text-white text-center">
                     {config?.language === "en" ? "Expense" : "Utgift"}
                   </span>
                 </button>
@@ -5516,10 +5516,10 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-[#222222] group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
-                    <ArrowUpRight size={24} strokeWidth={1.8} className="text-[var(--text-primary)] dark:text-white" />
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-[#E2DDD4] dark:border-white/10 hover:bg-[#F9F8F6] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                    <ArrowUpRight size={24} strokeWidth={1.8} className="text-[#211F1C] dark:text-white" />
                   </div>
-                  <span className="text-xs font-semibold text-[var(--text-primary)] dark:text-white text-center">
+                  <span className="text-xs font-semibold text-[#211F1C] dark:text-white text-center">
                     {config?.language === "en" ? "Income" : "Inkomst"}
                   </span>
                 </button>
@@ -5531,14 +5531,14 @@ export default function App() {
                   disabled={isScanningReceipt}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-[#222222] group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-[#E2DDD4] dark:border-white/10 hover:bg-[#F9F8F6] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     {isScanningReceipt ? (
-                      <Loader2 size={24} className="animate-spin text-[var(--text-primary)] dark:text-white" />
+                      <Loader2 size={24} className="animate-spin text-[#211F1C] dark:text-white" />
                     ) : (
-                      <Camera size={24} strokeWidth={1.8} className="text-[var(--text-primary)] dark:text-white" />
+                      <Camera size={24} strokeWidth={1.8} className="text-[#211F1C] dark:text-white" />
                     )}
                   </div>
-                  <span className="text-xs font-semibold text-[var(--text-primary)] dark:text-white text-center">
+                  <span className="text-xs font-semibold text-[#211F1C] dark:text-white text-center">
                     {isScanningReceipt ? (config?.language === "en" ? "Scanning..." : "Scannar...") : (config?.language === "en" ? "Receipt" : "Kvitto")}
                   </span>
                 </button>
@@ -5580,7 +5580,7 @@ export default function App() {
                           ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
                             ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/30"
-                            : "bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] dark:text-white border-black/10 dark:border-white/10 active:scale-95"
+                            : "bg-white dark:bg-[#222222] hover:bg-[#F9F8F6] dark:hover:bg-white/15 text-[var(--text-secondary)] dark:text-white border-[#E2DDD4] dark:border-white/10 active:scale-95 shadow-xs"
                       }`}
                     >
                       {isAudioTranscribing ? (
@@ -5601,8 +5601,8 @@ export default function App() {
                         ? { type: 'error', message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-[22px] bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] dark:text-white placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] ${
-                    isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-black/10 dark:border-white/10"
+                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-[22px] bg-white dark:bg-[#222222] text-[#211F1C] dark:text-white placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
+                    isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-[#E2DDD4] dark:border-white/10"
                   }`}
                 />
               </div>
