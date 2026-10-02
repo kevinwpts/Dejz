@@ -10,6 +10,7 @@ interface CategoryIconProps {
   isActive?: boolean;
   solidBackground?: boolean;
   whiteIcon?: boolean;
+  noBackground?: boolean;
 }
 
 export function CategoryIcon({ 
@@ -20,6 +21,7 @@ export function CategoryIcon({
   isActive = false,
   solidBackground = false,
   whiteIcon = false,
+  noBackground = false,
 }: CategoryIconProps) {
   const iconKey = icon ? resolveLucideIcon(icon) : 'receipt';
   const IconComp = (iconKey && ICON_MAP[iconKey]) ? ICON_MAP[iconKey] : Tag;
@@ -52,6 +54,13 @@ export function CategoryIcon({
   const strokeWidth = 1.8;
 
   const getMatureStyles = () => {
+    if (noBackground) {
+      return {
+        backgroundColor: 'transparent',
+        color: whiteIcon ? '#ffffff' : (color || 'currentColor'),
+      };
+    }
+
     if (size === '2xs' || size === 'xs') {
       return {
         backgroundColor: 'transparent',

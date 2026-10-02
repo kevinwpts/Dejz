@@ -157,15 +157,16 @@ export function SettingsView({
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3.5">
           {list.map((cat: any, index: number) => (
             <div
               key={cat.id || index}
               onClick={() => handleEditCategory(type, index, cat.name, cat.icon, cat.color)}
-              className="bg-white dark:bg-[#1E1B22] p-4 rounded-[22px] flex items-center gap-3.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer border border-black/[0.04] dark:border-white/[0.04] shadow-xs"
+              style={{ backgroundColor: cat.color || '#6E6961' }}
+              className="h-32 sm:h-36 p-4 rounded-[24px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
             >
-              <CategoryIcon icon={cat.icon} color={cat.color} size="md" solidBackground whiteIcon />
-              <span className="text-[14px] font-semibold text-[#1C1917] dark:text-white truncate">
+              <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />
+              <span className="text-[14px] sm:text-[15px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
                 {cat.name}
               </span>
             </div>
