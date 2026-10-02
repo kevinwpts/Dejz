@@ -5419,27 +5419,26 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center px-4 pb-24"
+            className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
+            onClick={() => {
+              feedback.tap();
+              setIsPlusMenuOpen(false);
+            }}
           >
-            {/* Click outside to close */}
-            <div 
-              className="absolute inset-0 cursor-pointer" 
-              onClick={() => {
-                feedback.tap();
-                setIsPlusMenuOpen(false);
-              }}
-            />
-
             <motion.div
-              initial={{ y: 80, scale: 0.96 }}
-              animate={{ y: 0, scale: 1 }}
-              exit={{ y: 80, scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="w-full max-w-[420px] rounded-3xl bg-white dark:bg-[#242424] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl p-5 relative z-10 space-y-5"
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+              className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-5"
+              onClick={(e) => e.stopPropagation()}
             >
-              {/* Header with X Close Button */}
+              {/* Drawer Handle */}
+              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mb-1 shrink-0" />
+
+              {/* Header with Title and X Close Button */}
               <div className="flex items-center justify-between pb-1">
-                <span className="text-xs font-semibold tracking-tight text-[#6E6961] dark:text-[#A8A8A8] select-none">
+                <span className="text-[14px] font-semibold tracking-tight text-[var(--text-secondary)] select-none">
                   {config?.language === "en" ? "Add transaction" : "Ny transaktion"}
                 </span>
                 <button
@@ -5448,14 +5447,14 @@ export default function App() {
                     feedback.tap();
                     setIsPlusMenuOpen(false);
                   }}
-                  className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white flex items-center justify-center cursor-pointer transition-colors"
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors"
                 >
-                  <X size={15} />
+                  <X size={16} />
                 </button>
               </div>
 
               {/* The 3 Action Buttons */}
-              <div className="grid grid-cols-3 gap-3 justify-items-center py-1">
+              <div className="grid grid-cols-3 gap-3 justify-items-center py-2">
                 {/* Utgift */}
                 <button
                   type="button"
@@ -5466,12 +5465,12 @@ export default function App() {
                     setTargetDate(new Date());
                     setIsAddTransactionOpen(true);
                   }}
-                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
+                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-14 h-14 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] group-hover:bg-[#EDE9DF] dark:group-hover:bg-[#383838] border border-[#E6E2D8] dark:border-[#383838] flex items-center justify-center transition-colors">
-                    <ArrowDownLeft size={20} strokeWidth={1.75} className="text-[#1C1917] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:text-white dark:group-hover:text-white transition-colors" />
+                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
+                    <ArrowDownLeft size={24} strokeWidth={1.8} className="text-[var(--text-primary)] dark:text-white" />
                   </div>
-                  <span className="text-xs font-medium text-[#1C1917] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors text-center">
+                  <span className="text-xs font-semibold text-[var(--text-primary)] dark:text-white text-center">
                     {config?.language === "en" ? "Expense" : "Utgift"}
                   </span>
                 </button>
@@ -5486,12 +5485,12 @@ export default function App() {
                     setTargetDate(new Date());
                     setIsAddTransactionOpen(true);
                   }}
-                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
+                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-14 h-14 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] group-hover:bg-[#EDE9DF] dark:group-hover:bg-[#383838] border border-[#E6E2D8] dark:border-[#383838] flex items-center justify-center transition-colors">
-                    <ArrowUpRight size={20} strokeWidth={1.75} className="text-[#1C1917] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:text-white dark:group-hover:text-white transition-colors" />
+                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
+                    <ArrowUpRight size={24} strokeWidth={1.8} className="text-[var(--text-primary)] dark:text-white" />
                   </div>
-                  <span className="text-xs font-medium text-[#1C1917] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors text-center">
+                  <span className="text-xs font-semibold text-[var(--text-primary)] dark:text-white text-center">
                     {config?.language === "en" ? "Income" : "Inkomst"}
                   </span>
                 </button>
@@ -5501,16 +5500,16 @@ export default function App() {
                   type="button"
                   onClick={handlePlusKvittoClick}
                   disabled={isScanningReceipt}
-                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform"
+                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-14 h-14 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] group-hover:bg-[#EDE9DF] dark:group-hover:bg-[#383838] border border-[#E6E2D8] dark:border-[#383838] flex items-center justify-center transition-colors">
+                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
                     {isScanningReceipt ? (
-                      <Loader2 size={20} className="animate-spin text-[#1C1917] dark:text-white" />
+                      <Loader2 size={24} className="animate-spin text-[var(--text-primary)] dark:text-white" />
                     ) : (
-                      <Camera size={20} strokeWidth={1.75} className="text-[#1C1917] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:text-white dark:group-hover:text-white transition-colors" />
+                      <Camera size={24} strokeWidth={1.8} className="text-[var(--text-primary)] dark:text-white" />
                     )}
                   </div>
-                  <span className="text-xs font-medium text-[#1C1917] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors text-center">
+                  <span className="text-xs font-semibold text-[var(--text-primary)] dark:text-white text-center">
                     {isScanningReceipt ? (config?.language === "en" ? "Scanning..." : "Scannar...") : (config?.language === "en" ? "Receipt" : "Kvitto")}
                   </span>
                 </button>
@@ -5526,7 +5525,7 @@ export default function App() {
               </div>
 
               {/* Snabbutgift Form with Mic using Reusable SmartInput */}
-              <div className="pt-2 border-t border-[#E6E2D8] dark:border-[#383838]">
+              <div className="pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
                 <SmartInput
                   hideLabel
                   value={plusQuickText}
@@ -5573,8 +5572,8 @@ export default function App() {
                         ? { type: 'error', message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-11 sm:h-12 rounded-2xl bg-[#F6F4EE] dark:bg-white/[0.04] text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#A8A8A8]/70 ${
-                    isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-[#E6E2D8] dark:border-[#383838]"
+                  inputClassName={`h-11 sm:h-12 rounded-2xl bg-black/5 dark:bg-white/[0.06] text-[var(--text-primary)] dark:text-white placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] ${
+                    isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-black/10 dark:border-white/10"
                   }`}
                 />
               </div>
