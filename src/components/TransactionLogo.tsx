@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, Config } from '../types';
 import { resolveEntityVisual } from '../utils/resolver';
+import { getTransactionDominantColor } from '../utils/brandColor';
 import { Receipt } from 'lucide-react';
 
 export function TransactionLogo({ transaction, config, size = 'md' }: { transaction: Transaction, config?: Config, size?: 'sm' | 'md' | 'lg' | 'xl' }) {
@@ -14,14 +15,21 @@ export function TransactionLogo({ transaction, config, size = 'md' }: { transact
   const iconSize = size === 'xl' ? 32 : size === 'lg' ? 24 : size === 'sm' ? 16 : 21;
 
   const visual = resolveEntityVisual(transaction, config);
+  const brandColor = getTransactionDominantColor(transaction, config);
 
   if (visual.logoUrl && !imgError) {
+    const hasBrandBg = brandColor && brandColor !== '#7C3AED' && brandColor !== '#6E6961' && brandColor !== '#1C1917';
+    const bgStyle = hasBrandBg ? { backgroundColor: brandColor } : { backgroundColor: '#ffffff' };
+
     return (
-      <div className={`${containerSize} bg-white flex items-center justify-center overflow-hidden flex-shrink-0 border-none outline-none ring-0 shadow-none`}>
+      <div 
+        className={`${containerSize} flex items-center justify-center overflow-hidden flex-shrink-0 border-none outline-none ring-0 shadow-none p-1.5 sm:p-2`}
+        style={bgStyle}
+      >
         <img 
           src={visual.logoUrl} 
           alt={transaction.merchant || 'Logo'} 
-          className="w-full h-full object-cover rounded-full border-none outline-none ring-0"
+          className="w-full h-full object-contain object-center border-none outline-none ring-0 select-none pointer-events-none"
           onError={() => setImgError(true)}
           referrerPolicy="no-referrer"
         />
