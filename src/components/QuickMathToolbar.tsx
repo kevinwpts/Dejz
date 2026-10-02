@@ -90,7 +90,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           onMouseDown={preventBlur}
           onClick={handleEvaluate}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-xs font-bold border border-[var(--accent-color)]/30 hover:bg-[var(--accent-color)] hover:text-white transition-all shadow-sm cursor-pointer active:scale-95"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-xs font-bold border border-[var(--accent-color)]/30 hover:bg-[var(--accent-color)] hover:text-[var(--text-on-accent)] transition-all shadow-sm cursor-pointer active:scale-95"
           title="Klicka för att använda beräknat belopp"
         >
           <span className="font-extrabold text-sm">=</span>

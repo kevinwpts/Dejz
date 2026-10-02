@@ -684,7 +684,7 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddIncome} 
-                  className="h-9 px-4 rounded-xl bg-[var(--accent-color)] hover:brightness-105 text-white text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
+                  className="h-9 px-4 rounded-xl bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
                 >
                   <Plus size={14} strokeWidth={2.5} />
                   <span>{t('newIncome')}</span>
@@ -750,7 +750,7 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddFixedExpense} 
-                  className="h-9 px-4 rounded-xl bg-[var(--accent-color)] hover:brightness-105 text-white text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
+                  className="h-9 px-4 rounded-xl bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
                 >
                   <Plus size={14} strokeWidth={2.5} />
                   <span>{t('newFixedExpense')}</span>
@@ -834,7 +834,7 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddMonthlySaving} 
-                  className="h-9 px-4 rounded-xl bg-[var(--accent-color)] hover:brightness-105 text-white text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
+                  className="h-9 px-4 rounded-xl bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
                 >
                   <Plus size={14} strokeWidth={2.5} />
                   <span>{t('newMonthlySaving')}</span>

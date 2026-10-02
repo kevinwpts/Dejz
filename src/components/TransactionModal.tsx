@@ -973,7 +973,7 @@ export function TransactionModal({
                     { id: Math.random().toString(), amount: 0, category: '', tags: [] }
                   ]);
                 }}
-                className="px-3 py-1 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-[var(--accent-color)] hover:text-white text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                className="px-3 py-1 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-[var(--accent-color)] hover:text-[var(--text-on-accent)] text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
               >
                 <Plus size={12} strokeWidth={2.5} />
                 <span>{currentLang === 'en' ? 'Add' : 'Dela upp'}</span>
@@ -1164,7 +1164,7 @@ export function TransactionModal({
                 });
                 onClose();
               }}
-              className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-none"
+              className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-none"
             >
               <Check size={15} strokeWidth={2} />
               <span>

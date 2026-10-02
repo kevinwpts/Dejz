@@ -669,7 +669,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           <button 
             type="button"
             onClick={handleSave} 
-            className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
+            className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
           >
             <Check size={15} strokeWidth={2} />
             <span>{income ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add income' : 'Lägg till inkomst')}</span>
@@ -1540,7 +1540,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setIsCancelModalOpen(true)}
-                className="w-full p-3.5 rounded-[16px] bg-black/5 dark:bg-[#1C1C1C] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
+                className="w-full p-3.5 rounded-[16px] bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
               >
                 <div>
                   <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -1561,7 +1561,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           <button 
             type="button"
             onClick={handleSave} 
-            className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-white text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
+            className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
           >
             <Check size={15} strokeWidth={2} />
             <span>{expense ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add fixed expense' : 'Lägg till fast kostnad')}</span>
@@ -2020,7 +2020,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             <div className="flex flex-col gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
-                className="bg-black/5 dark:bg-[#1C1C1C] rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
+                className="bg-black/5 dark:bg-[#222222] rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
               >
                 <div className="shrink-0 min-w-[48px]" />
                 <div className="flex-1 flex items-baseline justify-center gap-1.5">
@@ -2049,7 +2049,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               <QuickMathToolbar value={amount} onChange={setAmount} inputRef={amountInputRef} currency={currency} showMathTools={false} />
             </div>
 
-            <div className="flex items-center justify-between px-4 py-3.5 bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] transition-all">
+            <div className="flex items-center justify-between px-4 py-3.5 bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] transition-all">
               <div className="flex flex-col gap-0.5 pr-2">
                 <span className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight">Varierande belopp</span>
                 <span className="text-[12px] font-normal text-[var(--text-secondary)]">Ändras månad till månad</span>
@@ -2085,7 +2085,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 placeholder={t('savingsGoalPlaceholder')} 
-                className="w-full h-[48px] bg-black/5 dark:bg-[#1C1C1C] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40" 
+                className="w-full h-[48px] bg-black/5 dark:bg-[#222222] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40" 
               />
               {name && (
                 <button 
@@ -2106,7 +2106,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               <select
                 value={deductionDay}
                 onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                   <option key={day} value={day}>{day}</option>
@@ -2123,7 +2123,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
                     <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
@@ -2140,7 +2140,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                    className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
@@ -2181,7 +2181,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
                 >
                   {paymentMethods.map((pm: any) => {
                     const pmName = typeof pm === 'string' ? pm : pm.name;
