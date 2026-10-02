@@ -247,20 +247,20 @@ h6 {
   --shadow-level-2: none;
   --shadow-level-3: none;
 
-  /* Brand Accents & Colors - Dejz Purple Accent */
-  --accent-color: #635BFF;
-  --accent-hover: #5148E5;
-  --accent-pressed: #5148E5;
+  /* Brand Accents & Colors - Dejz Adapted Accent */
+  --accent-color: #1C1917;
+  --accent-hover: #2E2A27;
+  --accent-pressed: #2E2A27;
   --accent-gradient: var(--accent-color);
   --on-accent: #FFFFFF;
   --text-on-accent: #FFFFFF;
-  --accent-soft: #EEECFF;
-  --accent-container: #EEECFF;
-  --on-accent-container: #635BFF;
+  --accent-soft: rgba(28, 25, 23, 0.08);
+  --accent-container: #EAE6DE;
+  --on-accent-container: #1C1917;
   --accent-on-solid: #FFFFFF;
-  --dejz-accent: #635BFF;
+  --dejz-accent: #1C1917;
   --accent-glow: none;
-  --accent-secondary-color: #EEECFF;
+  --accent-secondary-color: #EAE6DE;
 
   /* Primary button states (Light mode) */
   --btn-primary-bg: #1C1917;

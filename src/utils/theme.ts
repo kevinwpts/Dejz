@@ -3,7 +3,7 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   if (clean.length === 3) {
     clean = clean.split('').map((c) => c + c).join('');
   }
-  const num = parseInt(clean, 16) || 0x635bff;
+  const num = parseInt(clean, 16) || 0x1c1917;
   return {
     r: (num >> 16) & 255,
     g: (num >> 8) & 255,
@@ -11,7 +11,7 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   };
 }
 
-export function applyThemeColor(themeColorHex: string = '#635BFF', isDark: boolean = false) {
+export function applyThemeColor(themeColorHex: string = '#1C1917', isDark: boolean = false) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
 
@@ -43,7 +43,8 @@ export function applyThemeColor(themeColorHex: string = '#635BFF', isDark: boole
     root.style.setProperty('--nav-plus-bg', '#FFFFFF');
     root.style.setProperty('--nav-plus-color', '#141414');
   } else {
-    const effectiveAccent = themeColorHex || '#635BFF';
+    // Light mode: remove blue entirely and adapt accent color to app's dark charcoal / warm neutral theme (#1C1917)
+    const effectiveAccent = (!themeColorHex || themeColorHex.toLowerCase() === '#635bff') ? '#1C1917' : themeColorHex;
     const { r, g, b } = hexToRgb(effectiveAccent);
 
     root.style.setProperty('--user-accent-hex', effectiveAccent);
@@ -53,14 +54,14 @@ export function applyThemeColor(themeColorHex: string = '#635BFF', isDark: boole
     root.style.setProperty('--app-bg-tint', 'transparent');
 
     root.style.setProperty('--user-accent', effectiveAccent);
-    root.style.setProperty('--user-accent-soft', `rgba(${r}, ${g}, ${b}, 0.12)`);
-    root.style.setProperty('--user-accent-surface', `rgba(${r}, ${g}, ${b}, 0.05)`);
+    root.style.setProperty('--user-accent-soft', `rgba(${r}, ${g}, ${b}, 0.08)`);
+    root.style.setProperty('--user-accent-surface', `rgba(${r}, ${g}, ${b}, 0.04)`);
 
     root.style.setProperty('--accent-color', effectiveAccent);
-    root.style.setProperty('--accent-soft', `rgba(${r}, ${g}, ${b}, 0.12)`);
+    root.style.setProperty('--accent-soft', `rgba(${r}, ${g}, ${b}, 0.08)`);
     root.style.setProperty('--on-accent', '#FFFFFF');
     root.style.setProperty('--text-on-accent', '#FFFFFF');
-    root.style.setProperty('--accent-container', '#EEECFF');
+    root.style.setProperty('--accent-container', '#EAE6DE');
     root.style.setProperty('--on-accent-container', effectiveAccent);
 
     root.style.setProperty('--btn-primary-bg', '#1C1917');

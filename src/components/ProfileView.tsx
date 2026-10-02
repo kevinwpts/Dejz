@@ -231,7 +231,7 @@ export function ProfileView({
                 }
               }}
             />
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-[18px] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-[#1C1C1C] border-none group-hover:scale-[1.02] transition-all duration-300 shadow-none">
+            <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[22px] sm:rounded-[24px] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-[#1C1C1C] border-none group-hover:scale-[1.02] transition-all duration-300 shadow-none">
               {avatarUrl ? (
                 <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
               ) : (
