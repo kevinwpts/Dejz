@@ -223,7 +223,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
           <div
             className="text-center py-4 space-y-6"
           >
-            <div className="w-16 h-16 bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white rounded-[20px] flex items-center justify-center mx-auto border border-black/10 dark:border-white/10 shadow-xs">
+            <div className="w-16 h-16 bg-black/5 dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white rounded-[20px] flex items-center justify-center mx-auto border border-black/10 dark:border-white/10 shadow-xs">
               <CheckCircle2 size={30} />
             </div>
 

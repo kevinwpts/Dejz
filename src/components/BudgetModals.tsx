@@ -120,7 +120,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#222222] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -424,7 +424,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#222222] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -859,7 +859,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#222222] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -1227,7 +1227,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#222222] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -1540,7 +1540,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setIsCancelModalOpen(true)}
-                className="w-full p-3.5 rounded-[16px] bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
+                className="w-full p-3.5 rounded-[16px] bg-black/5 dark:bg-[#1C1C1C] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
               >
                 <div>
                   <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -1599,7 +1599,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white dark:bg-[#222222] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
                   <div>
@@ -1733,7 +1733,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#222222] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -1965,7 +1965,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#222222] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -2020,7 +2020,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             <div className="flex flex-col gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
-                className="bg-black/5 dark:bg-[#222222] rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
+                className="bg-black/5 dark:bg-[#1C1C1C] rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
               >
                 <div className="shrink-0 min-w-[48px]" />
                 <div className="flex-1 flex items-baseline justify-center gap-1.5">
@@ -2049,7 +2049,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               <QuickMathToolbar value={amount} onChange={setAmount} inputRef={amountInputRef} currency={currency} showMathTools={false} />
             </div>
 
-            <div className="flex items-center justify-between px-4 py-3.5 bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] transition-all">
+            <div className="flex items-center justify-between px-4 py-3.5 bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] transition-all">
               <div className="flex flex-col gap-0.5 pr-2">
                 <span className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight">Varierande belopp</span>
                 <span className="text-[12px] font-normal text-[var(--text-secondary)]">Ändras månad till månad</span>
@@ -2085,7 +2085,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 placeholder={t('savingsGoalPlaceholder')} 
-                className="w-full h-[48px] bg-black/5 dark:bg-[#222222] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40" 
+                className="w-full h-[48px] bg-black/5 dark:bg-[#1C1C1C] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40" 
               />
               {name && (
                 <button 
@@ -2106,7 +2106,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               <select
                 value={deductionDay}
                 onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                   <option key={day} value={day}>{day}</option>
@@ -2123,7 +2123,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
                     <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
@@ -2140,7 +2140,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                    className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
@@ -2181,7 +2181,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
                 >
                   {paymentMethods.map((pm: any) => {
                     const pmName = typeof pm === 'string' ? pm : pm.name;
@@ -2328,7 +2328,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-white dark:bg-[#222222] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
+          className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10">

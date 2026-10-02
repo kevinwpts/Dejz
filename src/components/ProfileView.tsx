@@ -231,7 +231,7 @@ export function ProfileView({
                 }
               }}
             />
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-[18px] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-[#222222] border-none group-hover:scale-[1.02] transition-all duration-300 shadow-none">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-[18px] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-[#1C1C1C] border-none group-hover:scale-[1.02] transition-all duration-300 shadow-none">
               {avatarUrl ? (
                 <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
               ) : (
@@ -261,7 +261,7 @@ export function ProfileView({
           </p>
           <button 
             onClick={() => handleSectionClick('manageAccount')}
-            className="px-3 py-1.5 bg-black/[0.04] dark:bg-[#222222] text-[11px] font-semibold text-[var(--text-primary)] rounded-[12px] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
+            className="px-3 py-1.5 bg-black/[0.04] dark:bg-[#1C1C1C] text-[11px] font-semibold text-[var(--text-primary)] rounded-[12px] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
           >
             {t('manageAccount')}
             <ChevronRight size={11} strokeWidth={2.5} />

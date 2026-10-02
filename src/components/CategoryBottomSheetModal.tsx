@@ -199,7 +199,7 @@ export function CategoryBottomSheetModal({
             {/* Scrollable Body Content */}
             <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0">
               {/* Category Budget Status Card - Ultra-compact, clean & lightweight */}
-              <div className="py-2.5 px-3.5 rounded-[18px] bg-black/[0.03] dark:bg-[#222222] border border-black/5 dark:border-white/10 shrink-0 space-y-1.5">
+              <div className="py-2.5 px-3.5 rounded-[18px] bg-black/[0.03] dark:bg-[#1C1C1C] border border-black/5 dark:border-white/10 shrink-0 space-y-1.5">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-baseline gap-1.5">
                     {categoryData?.hasBudget ? (

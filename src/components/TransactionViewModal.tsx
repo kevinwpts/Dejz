@@ -280,7 +280,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 </div>
                 <div className="flex flex-wrap justify-end gap-1.5">
                   {(transaction.tags || []).map((tag, index) => (
-                    <span key={index} className="bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] px-2.5 py-1 rounded-[8px] text-[11px] font-medium">
+                    <span key={index} className="bg-black/5 dark:bg-[#1C1C1C] text-[var(--text-primary)] px-2.5 py-1 rounded-[8px] text-[11px] font-medium">
                       {tag}
                     </span>
                   ))}

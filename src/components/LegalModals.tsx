@@ -169,7 +169,7 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
             {/* Header */}
             <div className="p-6 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#222222] flex items-center justify-center border border-black/10 dark:border-white/10">
+                <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#1C1C1C] flex items-center justify-center border border-black/10 dark:border-white/10">
                   {getIcon()}
                 </div>
                 <div>

@@ -205,7 +205,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 15 }}
             transition={{ type: 'spring', damping: 28, stiffness: 360 }}
-            className="bg-white dark:bg-[#222222] w-full max-w-[420px] rounded-t-[28px] sm:rounded-[26px] p-6 sm:p-7 border-t sm:border border-black/[0.08] dark:border-white/[0.08] shadow-2xl relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7"
+            className="bg-white dark:bg-[#1C1C1C] w-full max-w-[420px] rounded-t-[28px] sm:rounded-[26px] p-6 sm:p-7 border-t sm:border border-black/[0.08] dark:border-white/[0.08] shadow-2xl relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Drag Handle for mobile */}

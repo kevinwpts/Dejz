@@ -368,7 +368,7 @@ export function AnalysisView({
       />
 
       {/* HORISONTELLT STAPELDIAGRAM (FÖRDELNING) */}
-      <div className="bg-white dark:bg-[#222222] rounded-[22px] p-4 sm:p-5 border-none shadow-none space-y-4">
+      <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 sm:p-5 border-none shadow-none space-y-4">
         <div className="flex items-center justify-between px-0.5">
           <h2 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
             {isEn ? 'Distribution' : 'Fördelning'}
@@ -441,7 +441,7 @@ export function AnalysisView({
         </div>
 
         {categoryData.length > 0 ? (
-          <div className="bg-white dark:bg-[#222222] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+          <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               

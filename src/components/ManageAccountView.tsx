@@ -135,7 +135,7 @@ export function ManageAccountView({
           {/* Profile Avatar Upload */}
           <div className="text-center py-2 flex flex-col items-center justify-center">
             <label htmlFor="avatar-manage" className="relative w-20 h-20 mb-2 block cursor-pointer group">
-              <div className="w-20 h-20 rounded-[22px] overflow-hidden border-none bg-black/[0.04] dark:bg-[#222222] relative group-hover:scale-105 active:scale-95 transition-all shadow-none">
+              <div className="w-20 h-20 rounded-[22px] overflow-hidden border-none bg-black/[0.04] dark:bg-[#1C1C1C] relative group-hover:scale-105 active:scale-95 transition-all shadow-none">
                 {avatarUrl ? (
                   <img 
                     src={avatarUrl} 

@@ -51,7 +51,7 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm, t, isSocialUser
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="bg-white dark:bg-[#222222] w-full max-w-sm rounded-[24px] p-6 sm:p-8 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl"
+        className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[24px] p-6 sm:p-8 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="absolute right-4 top-4">
@@ -86,7 +86,7 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm, t, isSocialUser
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-[48px] bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
+                  className="w-full h-[48px] bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
                   placeholder={t('password')}
                 />
               </div>

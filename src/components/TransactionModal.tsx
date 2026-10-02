@@ -657,7 +657,7 @@ export function TransactionModal({
 
           {/* Type Segmented Grid (when creating new transaction) */}
           {_onChangeType && !transaction && (
-            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-[#222222] rounded-[16px]">
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-[#1C1C1C] rounded-[16px]">
               <button
                 type="button"
                 onClick={() => {
@@ -1274,7 +1274,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.94, opacity: 0, y: 16 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white dark:bg-[#222222] w-full max-w-sm rounded-[24px] border border-black/10 dark:border-white/10 relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
+                className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[24px] border border-black/10 dark:border-white/10 relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
               >
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
                   <div>

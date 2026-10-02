@@ -42,7 +42,7 @@ export function FeedbackModal({ onClose, onSubmit, t }: FeedbackModalProps) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#222222] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border border-black/[0.08] dark:border-white/[0.08] relative shadow-2xl overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0"
+        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border border-black/[0.08] dark:border-white/[0.08] relative shadow-2xl overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -77,7 +77,7 @@ export function FeedbackModal({ onClose, onSubmit, t }: FeedbackModalProps) {
                 value={message} 
                 onChange={(e) => setMessage(e.target.value)} 
                 placeholder={t('feedbackPlaceholder')} 
-                className="w-full h-32 bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 py-3.5 pl-11 text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] resize-none" 
+                className="w-full h-32 bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 py-3.5 pl-11 text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] resize-none" 
               />
             </div>
 
