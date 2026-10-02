@@ -201,7 +201,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       const iconKey = cat?.icon || getCategoryIconName(splitCatName);
                       return (
                         <div key={split.id || idx} className="flex items-center justify-end gap-2">
-                          {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />}
+                          {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="sm" solidBackground whiteIcon />}
                           <span className="text-[14px] font-medium text-[var(--text-primary)]">{splitCatName}</span>
                           <span className="text-[12px] font-normal text-[var(--text-secondary)]">({formatAmount(split.amount, config.language)} {config.currency})</span>
                         </div>
@@ -218,7 +218,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       );
                       const iconKey = cat?.icon || getCategoryIconName(catName);
                       if (!iconKey) return null;
-                      return <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />;
+                      return <CategoryIcon icon={iconKey} color={cat?.color} size="sm" solidBackground whiteIcon />;
                     })()}
                     <span className="text-[14px] font-medium text-[var(--text-primary)]">
                       {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}

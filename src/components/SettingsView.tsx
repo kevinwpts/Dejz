@@ -143,7 +143,7 @@ export function SettingsView({
     const list = config[field] || [];
 
     return (
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
             {list.length} {t('categories').toLowerCase()}
@@ -157,21 +157,16 @@ export function SettingsView({
           </button>
         </div>
 
-        <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="grid grid-cols-2 gap-3">
           {list.map((cat: any, index: number) => (
             <div
               key={cat.id || index}
               onClick={() => handleEditCategory(type, index, cat.name, cat.icon, cat.color)}
-              className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
+              className="bg-white dark:bg-[#1E1B22] p-4 rounded-[22px] flex items-center gap-3.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer border border-black/[0.04] dark:border-white/[0.04] shadow-xs"
             >
-              <div className="flex items-center gap-3">
-                <CategoryIcon icon={cat.icon} color={cat.color} size="md" solidBackground whiteIcon />
-                <span className="text-sm font-semibold text-[#1C1917] dark:text-white">
-                  {cat.name}
-                </span>
-              </div>
-              <span className="text-xs font-medium text-[#8C867C] dark:text-[#A8A8A8]">
-                Redigera →
+              <CategoryIcon icon={cat.icon} color={cat.color} size="md" solidBackground whiteIcon />
+              <span className="text-[14px] font-semibold text-[#1C1917] dark:text-white truncate">
+                {cat.name}
               </span>
             </div>
           ))}
