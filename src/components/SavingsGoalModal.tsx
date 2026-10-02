@@ -119,7 +119,7 @@ export function SavingsGoalModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-            className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0 font-sans text-[var(--text-primary)]"
+            className="bg-white dark:bg-[#2D2D2D] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0 font-sans text-[var(--text-primary)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Handle on Mobile */}
@@ -135,7 +135,7 @@ export function SavingsGoalModal({
                     e.stopPropagation();
                     setShowIconSelector(true);
                   }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-2xl transition-all active:scale-95 overflow-hidden bg-black/5 dark:bg-white/[0.08] border border-black/10 dark:border-white/10 shrink-0"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-2xl transition-all active:scale-95 overflow-hidden bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 shrink-0"
                 >
                   {logo ? (
                     <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -178,7 +178,7 @@ export function SavingsGoalModal({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder={t('savingGoalExample')}
-                        className="w-full h-[48px] bg-black/5 dark:bg-white/[0.06] border border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
+                        className="w-full h-[48px] bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -189,7 +189,7 @@ export function SavingsGoalModal({
                     </label>
                     <div 
                       onClick={() => amountInputRef.current?.focus()}
-                      className="bg-black/5 dark:bg-white/[0.06] rounded-[14px] py-6 px-6 flex items-center justify-between transition-all cursor-pointer select-none border border-black/10 dark:border-white/10 focus-within:border-[#1C1917] dark:focus-within:border-white group"
+                      className="bg-black/5 dark:bg-[#2D2D2D] rounded-[14px] py-6 px-6 flex items-center justify-between transition-all cursor-pointer select-none border border-black/10 dark:border-white/10 focus-within:border-[#1C1917] dark:focus-within:border-white group"
                     >
                       <div className="flex-1 flex justify-center translate-x-4">
                         <input

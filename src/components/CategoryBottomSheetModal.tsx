@@ -159,7 +159,7 @@ export function CategoryBottomSheetModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#2A2A2A] border-t sm:border border-black/[0.08] dark:border-white/[0.08] rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
+            className="relative w-full max-w-lg bg-white dark:bg-[#252525] border-t sm:border border-black/[0.08] dark:border-white/[0.08] rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
           >
             {/* Top Grab Handle */}
             <div className="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20 mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
@@ -167,7 +167,7 @@ export function CategoryBottomSheetModal({
             {/* Header: Category Identity & Close Button */}
             <div className="flex items-center justify-between px-5 sm:px-6 pt-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/[0.08] border border-black/10 dark:border-white/10 text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 text-[var(--text-primary)] flex items-center justify-center shrink-0">
                   {isEmojiString(iconKey) ? (
                     <span className="text-xl leading-none">{iconKey}</span>
                   ) : IconComponent ? (
@@ -189,7 +189,7 @@ export function CategoryBottomSheetModal({
                   if (typeof feedback.light === 'function') feedback.light();
                   onClose();
                 }}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Stäng"
               >
                 <X size={17} strokeWidth={2.2} />
@@ -199,7 +199,7 @@ export function CategoryBottomSheetModal({
             {/* Scrollable Body Content */}
             <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0">
               {/* Category Budget Status Card - Ultra-compact, clean & lightweight */}
-              <div className="py-2.5 px-3.5 rounded-[18px] bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 shrink-0 space-y-1.5">
+              <div className="py-2.5 px-3.5 rounded-[18px] bg-black/[0.03] dark:bg-[#2D2D2D] border border-black/5 dark:border-white/10 shrink-0 space-y-1.5">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-baseline gap-1.5">
                     {categoryData?.hasBudget ? (
@@ -231,7 +231,7 @@ export function CategoryBottomSheetModal({
                 </div>
 
                 {categoryData?.hasBudget && (
-                  <div className="w-full h-1 bg-black/10 dark:bg-white/[0.08] rounded-full overflow-hidden">
+                  <div className="w-full h-1 bg-black/10 dark:bg-[#2D2D2D] rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
                         categoryData.isOverBudget ? 'bg-rose-500' : 'bg-[#1C1917] dark:bg-white'

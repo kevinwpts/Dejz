@@ -164,12 +164,12 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="relative w-full max-w-lg bg-white dark:bg-[#2A2A2A] max-h-[85vh] sm:max-h-[90vh] mt-[env(safe-area-inset-top,0px)] rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-2xl"
+        className="relative w-full max-w-lg bg-white dark:bg-[#252525] max-h-[85vh] sm:max-h-[90vh] mt-[env(safe-area-inset-top,0px)] rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-2xl"
       >
             {/* Header */}
             <div className="p-6 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-white/[0.08] flex items-center justify-center border border-black/10 dark:border-white/10">
+                <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#2D2D2D] flex items-center justify-center border border-black/10 dark:border-white/10">
                   {getIcon()}
                 </div>
                 <div>
@@ -179,7 +179,7 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white transition-all cursor-pointer"
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white transition-all cursor-pointer"
               >
                 <X size={16} strokeWidth={2} />
               </button>

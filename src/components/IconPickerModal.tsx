@@ -113,7 +113,7 @@ export function IconPickerModal({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.94, opacity: 0, y: 16 }}
           transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-          className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl overflow-hidden flex flex-col max-h-[88vh] font-sans"
+          className="bg-white dark:bg-[#2D2D2D] w-full max-w-lg rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl overflow-hidden flex flex-col max-h-[88vh] font-sans"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
@@ -130,7 +130,7 @@ export function IconPickerModal({
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-white/10 rounded-full transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-[#2D2D2D] rounded-full transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
               aria-label="Stäng"
             >
               <X size={18} strokeWidth={2} />
@@ -149,7 +149,7 @@ export function IconPickerModal({
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Sök bland över 1 000+ stilrena ikoner (t.ex. nässpray, bil, fika)..."
-                className="w-full h-[44px] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40 rounded-[16px] pl-9.5 pr-9 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none transition-all"
+                className="w-full h-[44px] bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40 rounded-[16px] pl-9.5 pr-9 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none transition-all"
               />
               {searchQuery && (
                 <button

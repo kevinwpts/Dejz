@@ -54,7 +54,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
-            className={`w-full h-[48px] bg-black/5 dark:bg-[#353535] border ${
+            className={`w-full h-[48px] bg-black/5 dark:bg-[#2D2D2D] border ${
               error
                 ? 'border-[#FF808B] focus:border-[#FF808B] focus:ring-2 focus:ring-[#FF808B]/20'
                 : 'border-black/10 dark:border-[#383838] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20'
@@ -63,7 +63,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           >
             {options
               ? options.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#2A2A2A] text-[#1C1917] dark:text-white">
+                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#252525] text-[#1C1917] dark:text-white">
                     {opt.label}
                   </option>
                 ))

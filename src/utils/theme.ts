@@ -33,7 +33,7 @@ export function applyThemeColor(themeColorHex: string = '#635BFF', isDark: boole
     root.style.setProperty('--accent-soft', 'rgba(255, 255, 255, 0.12)');
     root.style.setProperty('--on-accent', '#141414');
     root.style.setProperty('--text-on-accent', '#141414');
-    root.style.setProperty('--accent-container', '#353535');
+    root.style.setProperty('--accent-container', '#2D2D2D');
     root.style.setProperty('--on-accent-container', '#FFFFFF');
 
     root.style.setProperty('--btn-primary-bg', '#FFFFFF');

@@ -58,7 +58,7 @@ export function FilterMenuModal<T = string>({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#2A2A2A] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+          className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#252525] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
         >
           {/* Mobile Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -81,7 +81,7 @@ export function FilterMenuModal<T = string>({
                 if (typeof feedback?.light === 'function') feedback.light();
                 onClose();
               }}
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
               aria-label="Stäng"
             >
               <X size={16} strokeWidth={2.2} />
@@ -120,7 +120,7 @@ export function FilterMenuModal<T = string>({
                         className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                           isSelected
                             ? 'text-white'
-                            : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'
+                            : 'bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)]'
                         }`}
                       >
                         {opt.icon}
@@ -132,7 +132,7 @@ export function FilterMenuModal<T = string>({
                           {opt.label}
                         </span>
                         {opt.badge && (
-                          <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] shrink-0">
+                          <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-primary)] shrink-0">
                             {opt.badge}
                           </span>
                         )}

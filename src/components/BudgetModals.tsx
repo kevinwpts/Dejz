@@ -120,7 +120,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-white dark:bg-[#2D2D2D] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -163,7 +163,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                     if (typeof feedback?.light === 'function') feedback.light();
                     onClose();
                   }} 
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
                   title={t('close')}
                   aria-label={t('close')}
                 >
@@ -251,7 +251,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(income);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
           >
             <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
             <span>{t('edit')}</span>
@@ -263,7 +263,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               if (typeof feedback?.light === 'function') feedback.light();
               setShowDeleteConfirm(true);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#2D2D2D] text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
             title={config.language === 'en' ? 'Delete' : 'Ta bort'}
             aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
           >
@@ -424,7 +424,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#2D2D2D] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -449,7 +449,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-2xl transition-all duration-300 active:scale-95 bg-black/5 dark:bg-white/10 hover:ring-2 hover:ring-[var(--accent-color)]/30 group cursor-pointer shrink-0"
+                className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-2xl transition-all duration-300 active:scale-95 bg-black/5 dark:bg-[#2D2D2D] hover:ring-2 hover:ring-[var(--accent-color)]/30 group cursor-pointer shrink-0"
                 title={t('chooseIcon')}
               >
                 {logo ? (
@@ -481,7 +481,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 <button 
                   type="button"
                   onClick={onClose} 
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
                   aria-label={t('close')}
                 >
                   <X size={15} strokeWidth={2.2} />
@@ -581,7 +581,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] tabular-nums outline-none pr-5 text-right cursor-pointer"
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                    <option key={day} value={day} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">{day}:e</option>
+                    <option key={day} value={day} className="bg-white dark:bg-[#2D2D2D] text-[var(--text-primary)]">{day}:e</option>
                   ))}
                 </select>
                 <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
@@ -600,7 +600,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">
+                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#2D2D2D] text-[var(--text-primary)]">
                       {t(`freq_${key.toLowerCase()}` as TranslationKey)}
                     </option>
                   ))}
@@ -626,7 +626,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                       const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                       const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                       return (
-                        <option key={i} value={i} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">
+                        <option key={i} value={i} className="bg-white dark:bg-[#2D2D2D] text-[var(--text-primary)]">
                           {capitalizedMonth}
                         </option>
                       );
@@ -682,7 +682,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#2D2D2D] text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             >
@@ -859,7 +859,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-white dark:bg-[#2D2D2D] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -902,7 +902,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                     if (typeof feedback?.light === 'function') feedback.light();
                     onClose();
                   }} 
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
                   title={t('close')}
                   aria-label={t('close')}
                 >
@@ -1015,7 +1015,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           <button
             type="button"
             onClick={() => setIsCancelModalOpen(true)}
-            className="w-full mt-2 p-3.5 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] rounded-xl flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left"
+            className="w-full mt-2 p-3.5 bg-black/[0.03] dark:bg-[#2D2D2D] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] rounded-xl flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left"
           >
             <div>
               <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -1037,7 +1037,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(expense);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
           >
             <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
             <span>{t('edit')}</span>
@@ -1049,7 +1049,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               if (typeof feedback?.light === 'function') feedback.light();
               setShowDeleteConfirm(true);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#2D2D2D] text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
             title={config.language === 'en' ? 'Delete' : 'Ta bort'}
             aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
           >
@@ -1227,7 +1227,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#2D2D2D] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -1252,7 +1252,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-2xl transition-all duration-300 active:scale-95 bg-black/5 dark:bg-white/10 hover:ring-2 hover:ring-[var(--accent-color)]/30 group cursor-pointer shrink-0"
+                className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-2xl transition-all duration-300 active:scale-95 bg-black/5 dark:bg-[#2D2D2D] hover:ring-2 hover:ring-[var(--accent-color)]/30 group cursor-pointer shrink-0"
                 title={t('chooseIcon')}
               >
                 {logo ? (
@@ -1284,7 +1284,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <button 
                   type="button"
                   onClick={onClose} 
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
                   aria-label={t('close')}
                 >
                   <X size={15} strokeWidth={2.2} />
@@ -1374,7 +1374,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">
+                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#2D2D2D] text-[var(--text-primary)]">
                       {t(`freq_${key.toLowerCase()}` as TranslationKey)}
                     </option>
                   ))}
@@ -1400,7 +1400,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                       const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                       const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                       return (
-                        <option key={i} value={i} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">
+                        <option key={i} value={i} className="bg-white dark:bg-[#2D2D2D] text-[var(--text-primary)]">
                           {capitalizedMonth}
                         </option>
                       );
@@ -1425,7 +1425,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] tabular-nums outline-none pr-5 text-right cursor-pointer"
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                    <option key={day} value={day} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">{day}:e</option>
+                    <option key={day} value={day} className="bg-white dark:bg-[#2D2D2D] text-[var(--text-primary)]">{day}:e</option>
                   ))}
                 </select>
                 <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
@@ -1446,7 +1446,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   {(paymentMethods || []).map((method, idx) => {
                     const methodName = typeof method === 'string' ? method : method?.name || '';
                     return (
-                      <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">{methodName}</option>
+                      <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#2D2D2D] text-[var(--text-primary)]">{methodName}</option>
                     );
                   })}
                 </select>
@@ -1488,7 +1488,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#2A2A2A] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[80dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#252525] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[80dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -1497,7 +1497,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   <button
                     type="button"
                     onClick={() => setIsCategorySelectorOpen(false)}
-                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                   >
                     <X size={16} strokeWidth={2.2} />
                   </button>
@@ -1522,7 +1522,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                           <span className="text-[15px] font-normal">{cat.name}</span>
                         </div>
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-white flex items-center justify-center shrink-0">
+                          <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] flex items-center justify-center shrink-0">
                             <Check size={12} strokeWidth={2.5} />
                           </div>
                         )}
@@ -1540,7 +1540,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setIsCancelModalOpen(true)}
-                className="w-full p-3.5 rounded-[16px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
+                className="w-full p-3.5 rounded-[16px] bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
               >
                 <div>
                   <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -1574,7 +1574,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/10 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#2D2D2D] text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             >
@@ -1599,7 +1599,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white dark:bg-[#353535] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                className="bg-white dark:bg-[#2D2D2D] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
                   <div>
@@ -1609,7 +1609,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   <button 
                     type="button"
                     onClick={() => setShowIconSelector(false)}
-                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                     aria-label={t('close')}
                   >
                     <X size={16} strokeWidth={2} />
@@ -1733,7 +1733,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-white dark:bg-[#2D2D2D] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -1759,7 +1759,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
               aria-label={t('close')}
             >
               <X size={17} strokeWidth={2.2} />
@@ -1774,7 +1774,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             <button 
               type="button"
               onClick={() => onEdit(saving)} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
               aria-label={t('edit')}
               title={t('edit')}
             >
@@ -1791,7 +1791,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             </button>
           </div>
 
-          <div className="bg-black/5 dark:bg-white/5 p-4 sm:p-5 rounded-2xl border border-black/10 dark:border-white/10 shadow-xs">
+          <div className="bg-black/5 dark:bg-[#2D2D2D] p-4 sm:p-5 rounded-2xl border border-black/10 dark:border-white/10 shadow-xs">
             <p className="text-[13px] font-normal text-[var(--text-secondary)] mb-1">{t('amount')}</p>
             <p className="text-[22px] sm:text-[24px] font-semibold text-[var(--text-primary)] font-amount tabular-nums">
               <span className="opacity-75 mr-0.5">→</span>
@@ -1801,12 +1801,12 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-black/5 dark:bg-white/5 p-4 rounded-2xl border border-black/10 dark:border-white/10 col-span-2 shadow-xs">
+            <div className="bg-black/5 dark:bg-[#2D2D2D] p-4 rounded-2xl border border-black/10 dark:border-white/10 col-span-2 shadow-xs">
               <p className="text-xs font-normal text-[var(--text-secondary)] mb-1.5">{t('savingsGoal') || 'Sparmål'}</p>
               <p className="text-base font-medium text-[var(--text-primary)] break-words">{saving.name}</p>
             </div>
 
-            <div className="bg-black/5 dark:bg-white/5 p-4 rounded-2xl border border-black/10 dark:border-white/10 col-span-2 shadow-xs">
+            <div className="bg-black/5 dark:bg-[#2D2D2D] p-4 rounded-2xl border border-black/10 dark:border-white/10 col-span-2 shadow-xs">
               <p className="text-xs font-normal text-[var(--text-secondary)] mb-1.5">{t('type')}</p>
               <div className="flex items-center gap-2.5">
                 <CategoryIcon 
@@ -1820,14 +1820,14 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             </div>
 
             {saving.deductionDay ? (
-              <div className="bg-black/5 dark:bg-white/5 p-4 rounded-2xl border border-black/10 dark:border-white/10 shadow-xs">
+              <div className="bg-black/5 dark:bg-[#2D2D2D] p-4 rounded-2xl border border-black/10 dark:border-white/10 shadow-xs">
                 <p className="text-xs font-normal text-[var(--text-secondary)] mb-1.5">{t('deductionDay')}</p>
                 <p className="text-base font-medium text-[var(--text-primary)]">{`${saving.deductionDay}e`}</p>
               </div>
             ) : null}
 
             {saving.paymentMethod ? (
-              <div className="bg-black/5 dark:bg-white/5 p-4 rounded-2xl border border-black/10 dark:border-white/10 shadow-xs">
+              <div className="bg-black/5 dark:bg-[#2D2D2D] p-4 rounded-2xl border border-black/10 dark:border-white/10 shadow-xs">
                 <p className="text-xs font-normal text-[var(--text-secondary)] mb-1.5">{t('paymentMethod')}</p>
                 <div className="flex items-center gap-2">
                   {(() => {
@@ -1965,7 +1965,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#2D2D2D] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -1981,7 +1981,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 e.stopPropagation();
                 setShowIconSelector(true);
               }}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-2xl overflow-hidden transition-all duration-300 active:scale-95 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 shrink-0"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-2xl overflow-hidden transition-all duration-300 active:scale-95 bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 shrink-0"
               title={t('chooseIcon')}
             >
               {logo ? (
@@ -2005,7 +2005,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
               aria-label={t('close')}
             >
               <X size={17} strokeWidth={2.2} />
@@ -2020,7 +2020,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             <div className="flex flex-col gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
-                className="bg-black/5 dark:bg-white/5 rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
+                className="bg-black/5 dark:bg-[#2D2D2D] rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
               >
                 <div className="shrink-0 min-w-[48px]" />
                 <div className="flex-1 flex items-baseline justify-center gap-1.5">
@@ -2049,7 +2049,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               <QuickMathToolbar value={amount} onChange={setAmount} inputRef={amountInputRef} currency={currency} showMathTools={false} />
             </div>
 
-            <div className="flex items-center justify-between px-4 py-3.5 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] transition-all">
+            <div className="flex items-center justify-between px-4 py-3.5 bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 rounded-[16px] transition-all">
               <div className="flex flex-col gap-0.5 pr-2">
                 <span className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight">Varierande belopp</span>
                 <span className="text-[12px] font-normal text-[var(--text-secondary)]">Ändras månad till månad</span>
@@ -2085,7 +2085,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 placeholder={t('savingsGoalPlaceholder')} 
-                className="w-full h-[48px] bg-black/5 dark:bg-white/5 text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40" 
+                className="w-full h-[48px] bg-black/5 dark:bg-[#2D2D2D] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40" 
               />
               {name && (
                 <button 
@@ -2106,7 +2106,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               <select
                 value={deductionDay}
                 onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                   <option key={day} value={day}>{day}</option>
@@ -2123,7 +2123,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <select
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
                     <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
@@ -2140,7 +2140,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   <select
                     value={startMonth}
                     onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                    className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => {
                       const date = new Date(2024, i, 1);
@@ -2181,7 +2181,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#2D2D2D] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
                 >
                   {paymentMethods.map((pm: any) => {
                     const pmName = typeof pm === 'string' ? pm : pm.name;
@@ -2328,7 +2328,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-white dark:bg-[#353535] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
+          className="bg-white dark:bg-[#2D2D2D] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10">

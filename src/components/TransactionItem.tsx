@@ -92,9 +92,9 @@ export function TransactionItem({
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
     paddingClasses = "px-4 py-2.5 sm:py-3 min-h-[52px]";
   } else if (variant === 'nested') {
-    containerClasses = "bg-white dark:bg-[#202020] hover:bg-black/[0.02] dark:hover:bg-[#353535] shadow-none border-none rounded-[12px]";
+    containerClasses = "bg-white dark:bg-[#202020] hover:bg-black/[0.02] dark:hover:bg-[#2D2D2D] shadow-none border-none rounded-[12px]";
   } else {
-    containerClasses = "bg-white dark:bg-[#202020] hover:bg-black/[0.02] dark:hover:bg-[#353535] rounded-[12px] shadow-none border-none";
+    containerClasses = "bg-white dark:bg-[#202020] hover:bg-black/[0.02] dark:hover:bg-[#2D2D2D] rounded-[12px] shadow-none border-none";
   }
 
   // Neutral discreet category display

@@ -49,9 +49,9 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
               }}
               className={`aspect-square w-full rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
                 isSelected 
-                  ? 'bg-[var(--accent-color)] text-white shadow-xs z-10' 
+                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs z-10' 
                   : isToday
-                  ? 'bg-black/5 dark:bg-white/10 text-[var(--text-primary)] border border-black/10 dark:border-white/10'
+                  ? 'bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-primary)] border border-black/10 dark:border-white/10'
                   : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
               }`}
             >

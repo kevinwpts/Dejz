@@ -5461,7 +5461,7 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-5"
+              className="bg-white dark:bg-[#2D2D2D] w-full max-w-lg rounded-t-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-5"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle */}
@@ -5475,7 +5475,7 @@ export default function App() {
                     feedback.tap();
                     setIsPlusMenuOpen(false);
                   }}
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors"
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors"
                   aria-label={config?.language === "en" ? "Close" : "Stäng"}
                 >
                   <X size={16} />
@@ -5496,7 +5496,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
+                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-[#2D2D2D] group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
                     <ArrowDownLeft size={24} strokeWidth={1.8} className="text-[var(--text-primary)] dark:text-white" />
                   </div>
                   <span className="text-xs font-semibold text-[var(--text-primary)] dark:text-white text-center">
@@ -5516,7 +5516,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
+                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-[#2D2D2D] group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
                     <ArrowUpRight size={24} strokeWidth={1.8} className="text-[var(--text-primary)] dark:text-white" />
                   </div>
                   <span className="text-xs font-semibold text-[var(--text-primary)] dark:text-white text-center">
@@ -5531,7 +5531,7 @@ export default function App() {
                   disabled={isScanningReceipt}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
+                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-[#2D2D2D] group-hover:bg-black/10 dark:group-hover:bg-white/15 flex items-center justify-center transition-colors">
                     {isScanningReceipt ? (
                       <Loader2 size={24} className="animate-spin text-[var(--text-primary)] dark:text-white" />
                     ) : (
@@ -5580,7 +5580,7 @@ export default function App() {
                           ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
                             ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/30"
-                            : "bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] dark:text-white border-black/10 dark:border-white/10 active:scale-95"
+                            : "bg-black/5 dark:bg-[#2D2D2D] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] dark:text-white border-black/10 dark:border-white/10 active:scale-95"
                       }`}
                     >
                       {isAudioTranscribing ? (
@@ -5601,7 +5601,7 @@ export default function App() {
                         ? { type: 'error', message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-[22px] bg-black/5 dark:bg-white/[0.06] text-[var(--text-primary)] dark:text-white placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] ${
+                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-[22px] bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-primary)] dark:text-white placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] ${
                     isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-black/10 dark:border-white/10"
                   }`}
                 />

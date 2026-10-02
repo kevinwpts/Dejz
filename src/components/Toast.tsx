@@ -26,7 +26,7 @@ const ToastItem: React.FC<ToastProps> = ({ toast, onDismiss }) => {
   const configMap = {
     success: {
       icon: <CheckCircle2 size={18} className="text-[#1C1917] dark:text-white" />,
-      bgIcon: 'bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white',
+      bgIcon: 'bg-black/5 dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white',
     },
     error: {
       icon: <AlertCircle size={18} className="text-rose-500 dark:text-rose-400" />,

@@ -125,7 +125,7 @@ export function GreetingModule({
             className="fixed inset-0" 
             onClick={() => setIsPeriodInfoOpen(false)} 
           />
-          <div className="relative w-full max-w-[320px] bg-white dark:bg-[#2A2A2A] rounded-[24px] p-5 border border-[#E2DDD4] dark:border-white/[0.1] shadow-2xl space-y-4 z-10 text-left">
+          <div className="relative w-full max-w-[320px] bg-white dark:bg-[#252525] rounded-[24px] p-5 border border-[#E2DDD4] dark:border-white/[0.1] shadow-2xl space-y-4 z-10 text-left">
             {/* Header */}
             <div className="flex items-center justify-between pb-1 border-b border-[#E2DDD4]/60 dark:border-white/[0.08]">
               <div className="flex items-center gap-2 text-[#1C1917] dark:text-white font-semibold text-[15px]">
@@ -144,8 +144,8 @@ export function GreetingModule({
             {/* Content items */}
             <div className="space-y-2.5 pt-1">
               {/* Period */}
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/5 dark:bg-white/[0.05]">
-                <div className="w-8 h-8 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center text-[#1C1917] dark:text-white shrink-0 shadow-xs">
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/5 dark:bg-[#2D2D2D]">
+                <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#2D2D2D] flex items-center justify-center text-[#1C1917] dark:text-white shrink-0 shadow-xs">
                   <Calendar size={16} strokeWidth={2} />
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -159,8 +159,8 @@ export function GreetingModule({
               </div>
 
               {/* Payday / Next Salary */}
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/5 dark:bg-white/[0.05]">
-                <div className="w-8 h-8 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center text-[#1C1917] dark:text-white shrink-0 shadow-xs">
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/5 dark:bg-[#2D2D2D]">
+                <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#2D2D2D] flex items-center justify-center text-[#1C1917] dark:text-white shrink-0 shadow-xs">
                   <Clock size={16} strokeWidth={2} />
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -178,7 +178,7 @@ export function GreetingModule({
             <button
               type="button"
               onClick={() => setIsPeriodInfoOpen(false)}
-              className="w-full py-2.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-xs transition-opacity hover:opacity-90 active:scale-95 cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs transition-opacity hover:opacity-90 active:scale-95 cursor-pointer"
             >
               {isEn ? 'Close' : 'Stäng'}
             </button>

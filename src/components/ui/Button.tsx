@@ -38,21 +38,21 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary:
-        'bg-[#1C1917] dark:bg-[var(--accent-color)] text-white dark:text-[var(--on-accent)] hover:bg-[#2E2A27] dark:hover:bg-[var(--accent-hover)] active:bg-[#44403C] dark:active:bg-[var(--accent-pressed)] shadow-none border-none',
+        'bg-[#1C1917] dark:bg-[var(--accent-color)] text-[var(--text-on-accent)] dark:text-[var(--on-accent)] hover:bg-[#2E2A27] dark:hover:bg-[var(--accent-hover)] active:bg-[#44403C] dark:active:bg-[var(--accent-pressed)] shadow-none border-none',
       secondary:
-        'bg-[#EAE6DE] dark:bg-[#2A2A2A] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#353535] active:bg-[#D5CF84] dark:active:bg-[#353535] border-none',
+        'bg-[#EAE6DE] dark:bg-[#252525] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#2D2D2D] active:bg-[#D5CF84] dark:active:bg-[#2D2D2D] border-none',
       pill:
-        'bg-[#EAE6DE] dark:bg-[#2A2A2A] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#353535] border-none rounded-full',
+        'bg-[#EAE6DE] dark:bg-[#252525] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#2D2D2D] border-none rounded-full',
       accent:
         'bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] border-none',
       danger:
         'bg-rose-500/10 dark:bg-[#381F26] text-rose-600 dark:text-[#FF808B] hover:bg-rose-500/20 dark:hover:bg-[#4A2631] border-none',
       ghost:
-        'bg-transparent text-[var(--accent-color)] hover:bg-black/5 dark:hover:bg-[#2A2A2A]',
+        'bg-transparent text-[var(--accent-color)] hover:bg-black/5 dark:hover:bg-[#252525]',
       outline:
-        'bg-transparent text-[#1C1917] dark:text-white border border-[#E2DDD4] dark:border-[#383838] hover:bg-black/5 dark:hover:bg-[#2A2A2A]',
+        'bg-transparent text-[#1C1917] dark:text-white border border-[#E2DDD4] dark:border-[#383838] hover:bg-black/5 dark:hover:bg-[#252525]',
       subtle:
-        'bg-[#EAE6DE] dark:bg-[#2A2A2A] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#353535]',
+        'bg-[#EAE6DE] dark:bg-[#252525] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#2D2D2D]',
     }[variant];
 
     const widthStyle = fullWidth ? 'w-full' : '';

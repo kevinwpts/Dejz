@@ -38,7 +38,7 @@ export function SegmentedControl<T extends string = string>({
 
   return (
     <div
-      className={`bg-black/5 dark:bg-[#2A2A2A] border border-black/5 dark:border-[#383838] flex items-center relative ${sizeStyles} ${
+      className={`bg-black/5 dark:bg-[#252525] border border-black/5 dark:border-[#383838] flex items-center relative ${sizeStyles} ${
         fullWidth ? 'w-full' : 'inline-flex'
       } ${className}`}
     >
@@ -65,7 +65,7 @@ export function SegmentedControl<T extends string = string>({
                 className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${
                   isSelected
                     ? 'bg-black/15 text-inherit'
-                    : 'bg-black/5 dark:bg-[#353535] text-[#6E6961] dark:text-[#B8B8B8]'
+                    : 'bg-black/5 dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#B8B8B8]'
                 }`}
               >
                 {option.badge}

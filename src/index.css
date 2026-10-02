@@ -324,15 +324,15 @@ h6 {
   --surface-solid: #202020;
 
   /* Layer 2: Surface Raised (Bottom sheets, modals, popups, dropdowns, chips) */
-  --surface-raised: #2A2A2A;
-  --surface-elevated: #2A2A2A;
-  --surface-elevated-gradient: #2A2A2A;
-  --modal-bg: #2A2A2A;
+  --surface-raised: #252525;
+  --surface-elevated: #252525;
+  --surface-elevated-gradient: #252525;
+  --modal-bg: #252525;
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
-  --surface-high: #353535;
-  --surface-muted: #353535;
-  --bg-hover: #353535;
+  --surface-high: #2D2D2D;
+  --surface-muted: #2D2D2D;
+  --bg-hover: #2D2D2D;
   --surface-tint: transparent;
 
   /* Typography */
@@ -344,19 +344,19 @@ h6 {
   --text-inactive: #707070;
 
   /* Borders */
-  --border-subtle: #383838;
-  --border-color: #383838;
+  --border-subtle: #353535;
+  --border-color: #353535;
   --border-control: #858585;
   --border-strong: #858585;
   --inner-highlight: transparent;
 
-  --chip-bg: #2A2A2A;
+  --chip-bg: #252525;
   --chip-text: #B8B8B8;
-  --chip-active-bg: #353535;
+  --chip-active-bg: #2D2D2D;
   --chip-active-text: #FFFFFF;
 
   --transaction-bg: #202020;
-  --card-nested-bg: #2A2A2A;
+  --card-nested-bg: #252525;
   --remaining-today-gradient: #202020;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
@@ -376,12 +376,12 @@ h6 {
   --on-accent: #141414;
   --text-on-accent: #141414;
   --accent-soft: rgba(255, 255, 255, 0.12);
-  --accent-container: #353535;
+  --accent-container: #2D2D2D;
   --on-accent-container: #FFFFFF;
   --accent-on-solid: #141414;
   --dejz-accent: #FFFFFF;
   --accent-glow: none;
-  --accent-secondary-color: #353535;
+  --accent-secondary-color: #2D2D2D;
 
   /* Primary button states (Dark mode: White background + Dark text #141414) */
   --btn-primary-bg: #FFFFFF;
@@ -400,7 +400,7 @@ h6 {
   --danger-color: #FF8080;
   --danger-container: #381F1F;
   --info-color: #FFFFFF;
-  --info-container: #2A2A2A;
+  --info-container: #252525;
   --scrim-color: rgba(0, 0, 0, 0.60);
 
   --nav-active-color: #FFFFFF;
@@ -420,7 +420,7 @@ h6 {
   --date-active-color: #141414;
   --date-active-shadow: none;
   --date-inactive-bg: #202020;
-  --date-inactive-border: #383838;
+  --date-inactive-border: #353535;
   --date-inactive-color: #B8B8B8;
 }
 

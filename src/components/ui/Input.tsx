@@ -49,7 +49,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             disabled={disabled}
-            className={`w-full h-[48px] bg-black/5 dark:bg-[#353535] border ${
+            className={`w-full h-[48px] bg-black/5 dark:bg-[#2D2D2D] border ${
               error
                 ? 'border-[#FF808B] focus:border-[#FF808B] focus:ring-2 focus:ring-[#FF808B]/20'
                 : 'border-black/10 dark:border-[#383838] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20'

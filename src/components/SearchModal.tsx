@@ -139,7 +139,7 @@ export function SearchModal({
                       setQuery('');
                       inputRef.current?.focus();
                     }}
-                    className="w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 active:scale-90"
+                    className="w-6 h-6 rounded-full bg-black/5 dark:bg-[#2D2D2D] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors shrink-0 active:scale-90"
                     title={getL10n("Rensa", "Clear", "Tøm", "Ryd", "Tyhjennä")}
                   >
                     <X size={13} strokeWidth={2.5} />

@@ -184,7 +184,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
               type="button"
               onMouseDown={preventBlur}
               onClick={handleEvaluate}
-              className="px-3.5 py-1.5 rounded-xl bg-[var(--accent-color)] text-white text-xs font-extrabold transition-all active:scale-95 shrink-0 shadow-md cursor-pointer ml-1"
+              className="px-3.5 py-1.5 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-extrabold transition-all active:scale-95 shrink-0 shadow-md cursor-pointer ml-1"
               title="Verkställ beräkning"
             >
               =
