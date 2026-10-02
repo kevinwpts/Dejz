@@ -35,15 +35,15 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 
     const variantStyles = {
       muted:
-        'bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/15 border-none shadow-none',
+        'bg-black/5 dark:bg-[#25292E] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-[#30353B] border-none shadow-none',
       default:
-        'bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/15 border-none shadow-none',
+        'bg-black/5 dark:bg-[#25292E] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-[#30353B] border-none shadow-none',
       ghost:
-        'bg-transparent text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10',
+        'bg-transparent text-[#6E6961] dark:text-[#B3BAC3] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-[#25292E]',
       accent:
-        'bg-[#05B862] text-white hover:opacity-90 shadow-none border-none',
+        'bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] shadow-none border-none',
       danger:
-        'bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 border-none',
+        'bg-rose-500/10 dark:bg-[#381F26] text-rose-600 dark:text-[#FF808B] hover:bg-rose-500/20 dark:hover:bg-[#4A2631] border-none',
     }[variant];
 
     return (

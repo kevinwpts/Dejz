@@ -4,7 +4,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-black: #181818;
+  --color-black: #121416;
   --font-sans:
     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display:
@@ -30,18 +30,39 @@
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  --color-accent: var(--accent-color);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-secondary: var(--accent-secondary-color);
-  --color-success: var(--success-color);
-  --color-danger: var(--danger-color);
-  --color-warning: var(--warning-color);
   --color-canvas: var(--bg-color);
   --color-surface: var(--surface-color);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-high: var(--surface-high);
   --color-surface-muted: var(--surface-muted);
   --color-surface-hover: var(--bg-hover);
-  --color-border-subtle: var(--border-color);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-control: var(--border-control);
   --color-border-strong: var(--border-strong);
+
+  --color-accent: var(--accent-color);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-pressed: var(--accent-pressed);
+  --color-on-accent: var(--on-accent);
+  --color-accent-container: var(--accent-container);
+  --color-on-accent-container: var(--on-accent-container);
+  --color-accent-secondary: var(--accent-secondary-color);
+
+  --color-success: var(--success-color);
+  --color-success-container: var(--success-container);
+  --color-warning: var(--warning-color);
+  --color-warning-container: var(--warning-container);
+  --color-danger: var(--danger-color);
+  --color-danger-container: var(--danger-container);
+  --color-info: var(--info-color);
+  --color-info-container: var(--info-container);
+  --color-scrim: var(--scrim-color);
 
   --radius-4xl: 24px;
   --radius-3xl: 22px;
@@ -192,6 +213,8 @@ h6 {
  
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --surface-high: #EAE6DE;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
@@ -201,13 +224,20 @@ h6 {
   --text-primary: #211F1C;
   --text-secondary: #6D6962;
   --text-tertiary: #777168;
+  --text-muted: #777168;
+  --text-disabled: #A8A39D;
   --text-inactive: #A8A39D;
 
+  --border-subtle: #E2DDD4;
   --border-color: #E2DDD4;
+  --border-control: #D5CFC4;
   --border-strong: #D5CFC4;
   --inner-highlight: #FFFFFF;
 
   --chip-bg: #EAE6DE;
+  --chip-text: #6D6962;
+  --chip-active-bg: #1C1917;
+  --chip-active-text: #FFFFFF;
   --transaction-bg: #FFFFFF;
   --card-nested-bg: #EAE6DE;
   --remaining-today-gradient: #FFFFFF;
@@ -222,8 +252,11 @@ h6 {
   --accent-hover: #5148E5;
   --accent-pressed: #5148E5;
   --accent-gradient: var(--accent-color);
+  --on-accent: #FFFFFF;
   --text-on-accent: #FFFFFF;
   --accent-soft: #EEECFF;
+  --accent-container: #EEECFF;
+  --on-accent-container: #635BFF;
   --accent-on-solid: #FFFFFF;
   --dejz-accent: #635BFF;
   --accent-glow: none;
@@ -244,13 +277,19 @@ h6 {
   --card-inner-stroke: none;
 
   --success-color: #05B862;
+  --success-container: #DCFCE7;
   --danger-color: #EF4444;
+  --danger-container: #FEE2E2;
   --warning-color: #F59E0B;
+  --warning-container: #FEF3C7;
   --info-color: #1C1917;
+  --info-container: #DBEAFE;
+  --scrim-color: rgba(0, 0, 0, 0.60);
 
   --nav-active-color: #635BFF;
   --nav-inactive-color: #8C867C;
   --nav-plus-bg: #635BFF;
+  --nav-plus-color: #FFFFFF;
   --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
@@ -273,33 +312,54 @@ h6 {
 }
 
 .dark {
-  /* Premium Dark Theme (#141118) */
-  --bg-top-color: #141118;
-  --bg-color: #141118;
-  --bg-secondary: #141118;
-  --bg-gradient: #141118;
+  /* Neutral Dark Graphite Theme (Specification) */
+  --bg-top-color: #121416;
+  --bg-color: #121416;
+  --bg-secondary: #121416;
+  --bg-gradient: #121416;
 
-  --surface-color: #1D1A23;
-  --surface-gradient: #1D1A23;
-  --surface-elevated: #24202B;
-  --surface-elevated-gradient: #24202B;
-  --surface-solid: #1D1A23;
-  --surface-muted: #292433;
-  --surface-tint: rgba(255, 255, 255, 0.01);
+  /* Layer 1: Surface */
+  --surface-color: #1C1F23;
+  --surface-gradient: #1C1F23;
+  --surface-solid: #1C1F23;
 
+  /* Layer 2: Surface Raised (Bottom sheets, modals, popups, dropdowns, chips) */
+  --surface-raised: #25292E;
+  --surface-elevated: #25292E;
+  --surface-elevated-gradient: #25292E;
+  --modal-bg: #25292E;
+
+  /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
+  --surface-high: #30353B;
+  --surface-muted: #30353B;
+  --bg-hover: #30353B;
+  --surface-tint: transparent;
+
+  /* Typography */
   --text-primary: #FFFFFF;
-  --text-secondary: #A6A0AF;
-  --text-tertiary: #7D7688;
-  --text-inactive: #555060;
+  --text-secondary: #B3BAC3;
+  --text-tertiary: #929BA6;
+  --text-muted: #929BA6;
+  --text-disabled: #69717C;
+  --text-inactive: #69717C;
 
-  --border-color: #2D2738;
-  --border-strong: #3F374D;
+  /* Borders */
+  --border-subtle: #343A42;
+  --border-color: #343A42;
+  --border-control: #7B8592;
+  --border-strong: #7B8592;
   --inner-highlight: transparent;
 
-  --chip-bg: #24202B;
-  --transaction-bg: var(--surface-color);
-  --card-nested-bg: #24202B;
-  --remaining-today-gradient: #1D1A23;
+  --chip-bg: #25292E;
+  --chip-text: #B3BAC3;
+  --chip-active-bg: #292640;
+  --chip-active-text: #D5D1FF;
+
+  --transaction-bg: #1C1F23;
+  --card-nested-bg: #25292E;
+  --remaining-today-gradient: #1C1F23;
+  --card-bg: var(--surface-color);
+  --bg-primary: var(--bg-color);
 
   /* Custom Elevation Levels - Dark Mode */
   --shadow-level-1: none;
@@ -308,40 +368,45 @@ h6 {
 
   --logo-color: #FFFFFF;
 
-  /* Brand Accents & Colors (Dark) */
+  /* Brand Accents & Colors (Dark Mode) */
   --accent-color: #7C75FF;
-  --accent-hover: #5148E5;
-  --accent-pressed: #5148E5;
+  --accent-hover: #8C86FF;
+  --accent-pressed: #6D66EF;
   --accent-gradient: var(--accent-color);
-  --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(99, 91, 255, 0.2);
-  --accent-on-solid: #FFFFFF;
-  --dejz-accent: #635BFF;
+  --on-accent: #121416;
+  --text-on-accent: #121416;
+  --accent-soft: rgba(124, 117, 255, 0.2);
+  --accent-container: #292640;
+  --on-accent-container: #D5D1FF;
+  --accent-on-solid: #121416;
+  --dejz-accent: #7C75FF;
   --accent-glow: none;
-  --accent-secondary-color: rgba(99, 91, 255, 0.15);
+  --accent-secondary-color: #292640;
 
-  /* Primary button states (Dark mode) */
-  --btn-primary-bg: #FFFFFF;
-  --btn-primary-text: #181818;
-  --btn-primary-hover: #EBEAE8;
-  --btn-primary-pressed: #D7D6D4;
-
-  --modal-bg: #1D1A23;
-  --bg-primary: var(--bg-color);
-  --card-bg: var(--surface-color);
-  --bg-hover: #292433; /* active brand subtle in dark mode */
+  /* Primary button states (Dark mode: Accent background + Dark text on-accent) */
+  --btn-primary-bg: #7C75FF;
+  --btn-primary-text: #121416;
+  --btn-primary-hover: #8C86FF;
+  --btn-primary-pressed: #6D66EF;
 
   --card-shadow: none;
   --card-inner-stroke: none;
 
-  --success-color: #16A34A;
-  --danger-color: #EF4444;
-  --warning-color: #F59E0B;
-  --info-color: #F9F8F6;
+  /* Status Colors */
+  --success-color: #4ADE80;
+  --success-container: #163025;
+  --warning-color: #FBBF24;
+  --warning-container: #342A16;
+  --danger-color: #FF808B;
+  --danger-container: #381F26;
+  --info-color: #93C5FD;
+  --info-container: #1C2B3E;
+  --scrim-color: rgba(0, 0, 0, 0.60);
 
-  --nav-active-color: #7C75FF;
-  --nav-inactive-color: #A6A0AF;
+  --nav-active-color: #FFFFFF;
+  --nav-inactive-color: #B3BAC3;
   --nav-plus-bg: #7C75FF;
+  --nav-plus-color: #121416;
   --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
@@ -351,12 +416,12 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #292433;
-  --date-active-color: #FFFFFF;
+  --date-active-bg: #7C75FF;
+  --date-active-color: #121416;
   --date-active-shadow: none;
-  --date-inactive-bg: var(--surface-color);
-  --date-inactive-border: var(--border-color);
-  --date-inactive-color: var(--text-secondary);
+  --date-inactive-bg: #1C1F23;
+  --date-inactive-border: #343A42;
+  --date-inactive-color: #B3BAC3;
 }
 
 /* Glass-Card Surface Utility (borderless translucent glass) */
@@ -371,7 +436,7 @@ h6 {
 
 .dark .glass-card,
 .dark .surface-card {
-  background: #1D1A23 !important;
+  background: #1C1F23 !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -387,7 +452,7 @@ h6 {
   box-shadow: none !important;
 }
 .dark .glass-nav {
-  background: rgba(20, 17, 24, 0.85) !important;
+  background: rgba(18, 20, 22, 0.94) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -401,7 +466,7 @@ h6 {
   pointer-events: none;
   z-index: 0;
   display: none;
-  background-color: #141118;
+  background-color: #121416;
   background-image: none;
 }
 

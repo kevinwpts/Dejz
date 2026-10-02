@@ -49,13 +49,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             disabled={disabled}
-            className={`w-full h-[48px] bg-black/5 dark:bg-white/[0.06] border ${
+            className={`w-full h-[48px] bg-black/5 dark:bg-[#30353B] border ${
               error
-                ? 'border-rose-500 focus:border-rose-500'
-                : 'border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white'
+                ? 'border-[#FF808B] focus:border-[#FF808B] focus:ring-2 focus:ring-[#FF808B]/20'
+                : 'border-black/10 dark:border-[#343A42] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20'
             } rounded-[14px] ${icon ? 'pl-10' : 'px-4'} ${
               iconRight ? 'pr-10' : 'px-4'
-            } font-normal text-sm text-[#1C1917] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+            } font-normal text-sm text-[#1C1917] dark:text-white caret-[var(--accent-color)] outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#B3BAC3] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
             {...props}
           />
 

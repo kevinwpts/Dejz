@@ -58,7 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-xs"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
           />
 
           {/* Modal / Bottom Sheet Card */}
@@ -67,7 +67,7 @@ export const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.98 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`relative w-full ${sizeStyles} bg-white dark:bg-[#1E1B22] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
+            className={`relative w-full ${sizeStyles} bg-white dark:bg-[#25292E] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-[#343A42] shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Pill */}
             <div className="w-10 h-1 bg-black/15 dark:bg-white/15 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
@@ -82,7 +82,7 @@ export const Modal: React.FC<ModalProps> = ({
                     </h2>
                   )}
                   {subtitle && (
-                    <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8] font-medium mt-0.5">
+                    <p className="text-xs text-[#6E6961] dark:text-[#B3BAC3] font-medium mt-0.5">
                       {subtitle}
                     </p>
                   )}
@@ -107,7 +107,7 @@ export const Modal: React.FC<ModalProps> = ({
 
             {/* Footer / Actions */}
             {footer && (
-              <div className="px-5 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] bg-white dark:bg-[#1E1B22] shrink-0">
+              <div className="px-5 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] bg-white dark:bg-[#25292E] shrink-0">
                 {footer}
               </div>
             )}

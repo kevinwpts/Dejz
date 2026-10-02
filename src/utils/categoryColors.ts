@@ -4,13 +4,13 @@
  */
 
 export const DEFAULT_CATEGORY_PALETTE = [
-  '#6658E8', // Lila (Primary Purple Accent)
-  '#367ACB', // Blå
-  '#168A91', // Turkos
-  '#34845C', // Grön
-  '#C56B2B', // Orange
-  '#BC527D', // Rosa
-  '#79728D', // Grålila
+  '#A89BFF', // Lila
+  '#79B8FF', // Blå
+  '#5BCBC6', // Turkos
+  '#83C995', // Grön
+  '#E9A66C', // Orange
+  '#E99BBD', // Rosa
+  '#B5ADC9', // Grålila
 ] as const;
 
 /**

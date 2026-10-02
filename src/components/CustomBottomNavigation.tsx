@@ -54,11 +54,11 @@ export function CustomBottomNavigation({
           onClick={() => {
             if (onPlusClick) onPlusClick();
           }}
-          className="w-[56px] h-[56px] rounded-full bg-[var(--accent-color)] text-white flex items-center justify-center cursor-pointer active:scale-95 transition-transform border-none outline-none shadow-none"
+          className="w-[56px] h-[56px] rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center cursor-pointer active:scale-95 transition-transform border-none outline-none shadow-none"
           aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
           title={isEn ? "Add transaction" : "Lägg till transaktion"}
         >
-          <Plus size={28} strokeWidth={3.3} className="text-white" />
+          <Plus size={28} strokeWidth={3.3} className="text-[var(--on-accent)]" />
         </button>
       </div>
 
@@ -132,14 +132,14 @@ function NavItem({
       className={`w-full flex flex-col items-center justify-center transition-colors active:scale-95 cursor-pointer select-none ${
         isActive
           ? 'text-[var(--accent-color)] dark:text-white font-semibold'
-          : 'text-[#8C867C] dark:text-white/80 hover:text-[#1C1917] dark:hover:text-white font-medium'
+          : 'text-[#8C867C] dark:text-[#B3BAC3] hover:text-[#1C1917] dark:hover:text-white font-medium'
       }`}
     >
       <Icon 
         size={20} 
         strokeWidth={isActive ? 2.2 : 1.8} 
         fill={isActive && fillOnActive ? "currentColor" : "none"}
-        className="transition-colors dark:text-white"
+        className="transition-colors"
       />
       <span className="text-[10.5px] leading-none tracking-tight mt-[3px]">
         {label}
