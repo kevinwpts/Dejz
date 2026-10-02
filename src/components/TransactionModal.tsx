@@ -720,11 +720,8 @@ export function TransactionModal({
             <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
-                className="flex items-baseline font-amount text-[36px] sm:text-[44px] font-bold tabular-nums tracking-tight cursor-text w-full"
+                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full"
               >
-                <span className="text-[22px] sm:text-[26px] font-bold text-[var(--text-secondary)] select-none mr-2 font-sans shrink-0">
-                  {currency}
-                </span>
                 <input
                   ref={amountInputRef}
                   type="text"
@@ -740,6 +737,9 @@ export function TransactionModal({
                   placeholder="0"
                   className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] text-[var(--text-primary)] w-full leading-none"
                 />
+                <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] select-none ml-2 mb-1.5 font-sans shrink-0">
+                  {currency}
+                </span>
               </div>
             </div>
           </div>

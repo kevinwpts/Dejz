@@ -62,22 +62,7 @@ export function AnalysisView({
 
   const isEn = config.language === 'en';
 
-  // Format date range (e.g. "24 sep–22 okt")
-  const periodDateRange = useMemo(() => {
-    const start = currentPeriod?.start || stats?.periodStart;
-    const end = currentPeriod?.end || stats?.periodEnd;
-    if (!start || !end) return '';
-    try {
-      const startDate = new Date(start);
-      const endDate = new Date(end);
-      const locale = isEn ? 'en-US' : 'sv-SE';
-      const sStr = startDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' }).replace(/\.$/, '');
-      const eStr = endDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' }).replace(/\.$/, '');
-      return `${sStr} \u2013 ${eStr}`;
-    } catch {
-      return '';
-    }
-  }, [currentPeriod, stats?.periodStart, stats?.periodEnd, isEn]);
+
 
   const filterOptions = useMemo(() => [
     {
@@ -312,14 +297,7 @@ export function AnalysisView({
           />
         </div>
 
-        {/* Selected date range directly under period selector */}
-        {periodDateRange && (
-          <div className="text-center pt-0.5">
-            <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] select-none">
-              {periodDateRange}
-            </span>
-          </div>
-        )}
+
       </div>
 
       {/* Period Selector Modal */}
@@ -428,42 +406,6 @@ export function AnalysisView({
                   {formatAmount(Math.round(totalSpent), config.language)} {config.currency}
                 </span>
               </div>
-            </div>
-
-            {/* Compact List under Donut Chart */}
-            <div className="space-y-1.5 pt-2">
-              {chartItems.map((item) => {
-                const isSelected = expandedCategory === item.name;
-
-                return (
-                  <div 
-                    key={item.name}
-                    onClick={() => {
-                      if (!item.isOther) {
-                        setExpandedCategory(expandedCategory === item.name ? null : item.name);
-                      }
-                    }}
-                    className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-all ${
-                      item.isOther ? '' : 'cursor-pointer hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
-                    } ${isSelected ? 'bg-black/[0.04] dark:bg-white/[0.06]' : ''}`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                      <CategoryIcon icon={item.icon} color={item.color} size="xs" />
-                      <span className={`text-[13.5px] truncate ${isSelected ? 'font-semibold text-[#211F1C] dark:text-white' : 'font-normal text-[#211F1C] dark:text-white'}`}>
-                        {item.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 tabular-nums">
-                      <span className="text-[13.5px] font-medium text-[#211F1C] dark:text-white">
-                        {formatAmount(Math.round(item.value), config.language)} {config.currency}
-                      </span>
-                      <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] min-w-[36px] text-right">
-                        {item.pct}%
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
         ) : (

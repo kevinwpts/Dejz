@@ -210,16 +210,20 @@ export function SettingsView({
   };
 
   const renderPaymentMethodsSettings = () => {
-    const methodsList = (config.paymentMethods || []).map((method) => {
+    const methodsList = (config.paymentMethods || []).map((method, index) => {
       if (typeof method === 'string') {
         const found = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === (method as string).toLowerCase());
         return found || { name: method, icon: 'credit-card', color: '#6366f1' };
       }
-      return method;
+      return {
+        ...method,
+        color: method.color || DEFAULT_PAYMENT_METHODS[index % DEFAULT_PAYMENT_METHODS.length]?.color || '#6366f1',
+        icon: method.icon || 'credit-card'
+      };
     });
 
     return (
-      <div className="space-y-6 w-full py-2">
+      <div className="space-y-4 w-full py-2">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
             {methodsList.length} betalmetodsval
@@ -236,7 +240,7 @@ export function SettingsView({
           </button>
         </div>
 
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="grid grid-cols-2 gap-3.5">
           {methodsList.map((method: any, index: number) => (
             <div
               key={method.name || index}
@@ -244,16 +248,12 @@ export function SettingsView({
                 setPaymentMethodModalData({ index, name: method.name });
                 setIsPaymentMethodModalOpen(true);
               }}
-              className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
+              style={{ backgroundColor: method.color || '#6366f1' }}
+              className="h-32 sm:h-36 p-4 rounded-[24px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
             >
-              <div className="flex items-center gap-3">
-                <CategoryIcon icon={method.icon} color={method.color} size="md" />
-                <span className="text-sm font-semibold text-[#1C1917] dark:text-white">
-                  {method.name}
-                </span>
-              </div>
-              <span className="text-xs font-medium text-[#8C867C] dark:text-[#A8A8A8]">
-                Redigera →
+              <CategoryIcon icon={method.icon} size="lg" noBackground whiteIcon />
+              <span className="text-[14px] sm:text-[15px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
+                {method.name}
               </span>
             </div>
           ))}
@@ -266,6 +266,8 @@ export function SettingsView({
     const languages: { code: Language; label: string }[] = [
       { code: 'sv', label: 'Svenska' },
       { code: 'en', label: 'English' },
+      { code: 'no', label: 'Norsk' },
+      { code: 'fi', label: 'Suomi' },
     ];
 
     return (
@@ -314,9 +316,9 @@ export function SettingsView({
           </label>
           <div className="grid grid-cols-3 gap-2.5">
             {[
-              { id: 'system', label: 'System', icon: <Monitor size={18} className="text-white" /> },
-              { id: 'light', label: 'Ljust', icon: <Sun size={18} className="text-white" /> },
-              { id: 'dark', label: 'Mörkt', icon: <Moon size={18} className="text-white" /> },
+              { id: 'system', label: 'System', icon: <Monitor size={18} /> },
+              { id: 'light', label: 'Ljust', icon: <Sun size={18} /> },
+              { id: 'dark', label: 'Mörkt', icon: <Moon size={18} /> },
             ].map((mode) => {
               const isSelected = config.themeMode === mode.id || (!config.themeMode && mode.id === 'system');
               return (
@@ -535,14 +537,20 @@ export function SettingsView({
         isOpen={isPaymentMethodModalOpen}
         onClose={() => setIsPaymentMethodModalOpen(false)}
         initialName={paymentMethodModalData?.name}
-        initialIcon={paymentMethodModalData?.index !== undefined ? config.paymentMethods[paymentMethodModalData.index].icon : 'credit-card'}
-        initialColor={paymentMethodModalData?.index !== undefined ? config.paymentMethods[paymentMethodModalData.index].color : '#6366f1'}
-        onSave={(data) => {
-          const methods = [...(config.paymentMethods || [])];
+        initialIcon={paymentMethodModalData?.index !== undefined ? (typeof config.paymentMethods[paymentMethodModalData.index] === 'string' ? 'credit-card' : (config.paymentMethods[paymentMethodModalData.index]?.icon || 'credit-card')) : 'credit-card'}
+        initialColor={paymentMethodModalData?.index !== undefined ? (typeof config.paymentMethods[paymentMethodModalData.index] === 'string' ? '#6366f1' : (config.paymentMethods[paymentMethodModalData.index]?.color || '#6366f1')) : '#6366f1'}
+        onSave={(name, icon, color) => {
+          const methods = [...(config.paymentMethods || [])].map((m) => {
+            if (typeof m === 'string') {
+              const found = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === m.toLowerCase());
+              return found || { name: m, icon: 'credit-card', color: '#6366f1' };
+            }
+            return m;
+          });
           if (paymentMethodModalData?.index !== undefined) {
-            methods[paymentMethodModalData.index] = data;
+            methods[paymentMethodModalData.index] = { name, icon, color };
           } else {
-            methods.push(data);
+            methods.push({ name, icon, color });
           }
           setConfig({ ...config, paymentMethods: methods });
           setIsPaymentMethodModalOpen(false);

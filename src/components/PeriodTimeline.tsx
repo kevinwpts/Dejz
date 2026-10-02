@@ -283,7 +283,7 @@ export function PeriodTimeline({
               <span
                 className={`text-[8.5px] sm:text-[9px] tracking-wider uppercase leading-none font-medium ${
                   isSelected
-                    ? 'text-white'
+                    ? 'text-[var(--text-on-accent)]'
                     : hasCategoryMatch
                     ? 'text-[#242321] dark:text-white'
                     : isRealToday
@@ -295,14 +295,16 @@ export function PeriodTimeline({
               </span>
 
               {/* Day Number */}
-              <span className="text-[13px] sm:text-[14px] leading-none font-medium tabular-nums font-amount">
+              <span className={`text-[13px] sm:text-[14px] leading-none font-medium tabular-nums font-amount ${
+                isSelected ? 'text-[var(--text-on-accent)]' : ''
+              }`}>
                 {dayNumber}
               </span>
 
               {/* Fixed Item or Category Match Indicator Dot */}
               {((showFixedInCalendar && day.hasFixedItems) || (hasCategoryMatch && !isSelected)) && (
                 <span className={`w-1 h-1 rounded-full absolute bottom-0.5 shadow-none ${
-                  isSelected ? 'bg-white' : 'bg-[var(--accent-color)]'
+                  isSelected ? 'bg-[var(--text-on-accent)]' : 'bg-[var(--accent-color)]'
                 }`} />
               )}
             </button>

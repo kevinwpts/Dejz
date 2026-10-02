@@ -2,7 +2,8 @@ import React from 'react';
 import { Language, languageInfo } from '../i18n';
 
 interface LanguageFlagProps {
-  language: Language;
+  language?: Language;
+  code?: Language;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   showCode?: boolean;
@@ -10,11 +11,13 @@ interface LanguageFlagProps {
 
 export const LanguageFlag: React.FC<LanguageFlagProps> = ({
   language,
+  code,
   className = '',
   size = 'md',
   showCode = false,
 }) => {
-  const info = languageInfo[language] || languageInfo.sv;
+  const langKey = language || code || 'sv';
+  const info = languageInfo[langKey] || languageInfo.sv;
 
   const sizeClasses = {
     sm: 'w-4 h-3',
