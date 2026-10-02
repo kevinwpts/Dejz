@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 
-import { X, Check, Trash2, ChevronDown, Receipt, PiggyBank, Banknote, Pencil, ChevronRight } from 'lucide-react';
+import { X, Check, Trash2, ChevronDown, PiggyBank, Pencil, ChevronRight } from 'lucide-react';
 import { Income, FixedExpense, Frequency, Category, Config, MonthlySaving } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
@@ -120,16 +120,16 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Smooth, Seamless Ambient Brand Color Glow */}
+        {/* Smooth, Seamless Ambient Brand Color Glow adapted to app background */}
         <div 
           className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
           style={{
             background: `
-              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+              radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.08)} 0%, var(--bg-color) 60%)
             `
           }}
         />
@@ -145,43 +145,45 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section */}
-          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
-            <div className="shrink-0 pt-0.5">
+          {/* Hero Section: Centered Logo, Title below, Price below title */}
+          <div className="relative flex flex-col items-center text-center pt-6 sm:pt-8 pb-4">
+            {/* Close Button top-right */}
+            <div className="absolute top-0 right-0 z-10">
+              <button 
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  onClose();
+                }} 
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                title={t('close')}
+                aria-label={t('close')}
+              >
+                <X size={15} strokeWidth={2.2} />
+              </button>
+            </div>
+
+            {/* Centered Logo */}
+            <div className="scale-135 sm:scale-150 mb-7 pt-3">
               <TransactionLogo transaction={expenseCompatible as any} config={config} size="xl" />
             </div>
 
-            <div className="min-w-0 flex-1 flex flex-col justify-center">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-[22px] sm:text-[26px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight truncate">
-                  {income.name}
-                </h2>
+            {/* Title */}
+            <h2 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[var(--text-primary)] leading-tight max-w-[90%] truncate px-2">
+              {income.name}
+            </h2>
 
-                <button 
-                  type="button"
-                  onClick={() => {
-                    if (typeof feedback?.light === 'function') feedback.light();
-                    onClose();
-                  }} 
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
-                  title={t('close')}
-                  aria-label={t('close')}
-                >
-                  <X size={15} strokeWidth={2.2} />
-                </button>
-              </div>
-
-              <p className="text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline text-emerald-600 dark:text-emerald-400">
-                <span className="opacity-80 mr-0.5">+</span>
-                <span>{formatAmount(displayAmount, config.language)}</span>
-                <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans">{currency}</span>
+            {/* Price */}
+            <p className="text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center text-emerald-600 dark:text-emerald-400">
+              <span className="opacity-80 mr-1">+</span>
+              <span>{formatAmount(displayAmount, config.language)}</span>
+              <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
+            </p>
+            {hasAdjustment && (
+              <p className="text-[12px] font-normal text-[var(--text-secondary)] mt-1 tabular-nums">
+                {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(income.amount, config.language)} {currency})
               </p>
-              {hasAdjustment && (
-                <p className="text-[12px] font-normal text-[var(--text-tertiary)] mt-0.5 tabular-nums">
-                  {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(income.amount, config.language)} {currency})
-                </p>
-              )}
-            </div>
+            )}
           </div>
 
           {/* Details Section: Clean list with discrete subtle divider lines */}
@@ -424,16 +426,16 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] sm:rounded-[32px] sm:max-w-xl sm:mx-auto relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
         <div 
-          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[32px] sm:rounded-[32px] overflow-hidden"
           style={{
             background: `
-              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+              radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.08)} 0%, var(--bg-color) 60%)
             `
           }}
         />
@@ -442,85 +444,81 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-6 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section: Logo to the left, Payer name and Close Button inline, Price below */}
-          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
-            <div className="shrink-0 pt-0.5">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 max-w-xl mx-auto w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight">
+              {income 
+                ? (config?.language === 'en' ? 'Edit Income' : 'Redigera inkomst') 
+                : (config?.language === 'en' ? 'New Income' : 'Ny inkomst')}
+            </h2>
+            <button 
+              type="button"
+              onClick={onClose} 
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              aria-label={t('close')}
+            >
+              <X size={15} strokeWidth={2.2} />
+            </button>
+          </div>
+
+          {/* 1. Main Hero Card: Icon + Name & Amount Input */}
+          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border-none shadow-none space-y-4">
+            <div className="flex items-center gap-3.5">
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-2xl transition-all duration-300 active:scale-95 bg-black/5 dark:bg-[#222222] hover:ring-2 hover:ring-[var(--accent-color)]/30 group cursor-pointer shrink-0"
+                className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
+                aria-label={t('chooseIcon')}
               >
-                {logo ? (
-                  <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                ) : isEmojiString(icon) ? (
-                  icon
-                ) : (
-                  (() => {
-                    const Icon = ICON_MAP[icon] || Banknote;
-                    return <Icon size={22} className="text-accent" />;
-                  })()
-                )}
+                <TransactionLogo 
+                  size="lg"
+                  config={config}
+                  transaction={incomeCompatible as any} 
+                />
               </button>
+              <div className="flex-1 min-w-0">
+                <input 
+                  ref={nameInputRef}
+                  type="text" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  placeholder={t('incomePayerPlaceholder')} 
+                  className="text-[19px] sm:text-[21px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                />
+              </div>
             </div>
 
-            <div className="min-w-0 flex-1 flex flex-col justify-center">
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <input 
-                    ref={nameInputRef}
-                    type="text" 
-                    value={name} 
-                    onChange={(e) => setName(e.target.value)} 
-                    placeholder={t('incomePayerPlaceholder')} 
-                    className="text-[20px] sm:text-[24px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
-                  />
-                </div>
-
-                <button 
-                  type="button"
-                  onClick={onClose} 
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
-                  aria-label={t('close')}
-                >
-                  <X size={15} strokeWidth={2.2} />
-                </button>
-              </div>
-
-              {/* Amount display / input in the Hero */}
-              <div className="mt-1.5 flex items-baseline justify-between gap-2">
-                <div 
-                  onClick={() => amountInputRef.current?.focus()}
-                  className="flex items-baseline font-amount text-[20px] sm:text-[24px] font-semibold tabular-nums tracking-tight cursor-text text-emerald-600 dark:text-emerald-400"
-                >
-                  <span className="opacity-80 mr-0.5 select-none">+</span>
-                  <input
-                    ref={amountInputRef}
-                    type="text"
-                    inputMode="decimal"
-                    value={amount}
-                    onChange={(e) => setAmount(formatAmount(e.target.value))}
-                    onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        setAmount(evaluateAndFormatAmount(amount));
-                      }
-                    }}
-                    placeholder="0"
-                    className="bg-transparent outline-none font-amount font-semibold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400 placeholder:font-normal placeholder-[var(--text-tertiary)] max-w-[170px] sm:max-w-[210px]"
-                    style={{ width: `${Math.max(1, (amount || '0').length) * 1.1}ch` }}
-                  />
-                  <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans select-none">
-                    {currency}
-                  </span>
-                </div>
+            <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
+              <div 
+                onClick={() => amountInputRef.current?.focus()}
+                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full text-emerald-600 dark:text-emerald-400"
+              >
+                <input
+                  ref={amountInputRef}
+                  type="text"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(formatAmount(e.target.value))}
+                  onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setAmount(evaluateAndFormatAmount(amount));
+                    }
+                  }}
+                  placeholder="0"
+                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400 placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full"
+                />
+                <span className="text-[18px] sm:text-[22px] font-normal text-[var(--text-tertiary)] ml-2 font-sans select-none">
+                  {currency}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Details Section: Clean list with discrete subtle hairline divider lines */}
-          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+          {/* Details Section: Clean card with subtle hairline divider lines */}
+          <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 sm:p-5 divide-y divide-black/[0.05] dark:divide-white/[0.05] text-left">
             {/* Category */}
             <div className="py-3 flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
@@ -859,7 +857,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -867,8 +865,8 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
           style={{
             background: `
-              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+              radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.08)} 0%, var(--bg-color) 60%)
             `
           }}
         />
@@ -884,43 +882,45 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section: Logo to the left, Title and Close Button inline, Price below */}
-          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
-            <div className="shrink-0 pt-0.5">
+          {/* Hero Section: Centered Logo, Title below, Price below title */}
+          <div className="relative flex flex-col items-center text-center pt-6 sm:pt-8 pb-4">
+            {/* Close Button top-right */}
+            <div className="absolute top-0 right-0 z-10">
+              <button 
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  onClose();
+                }} 
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                title={t('close')}
+                aria-label={t('close')}
+              >
+                <X size={15} strokeWidth={2.2} />
+              </button>
+            </div>
+
+            {/* Centered Logo */}
+            <div className="scale-135 sm:scale-150 mb-7 pt-3">
               <TransactionLogo transaction={expenseCompatible as any} config={config} size="xl" />
             </div>
 
-            <div className="min-w-0 flex-1 flex flex-col justify-center">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-[22px] sm:text-[26px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight truncate">
-                  {expense.name}
-                </h2>
+            {/* Title */}
+            <h2 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[var(--text-primary)] leading-tight max-w-[90%] truncate px-2">
+              {expense.name}
+            </h2>
 
-                <button 
-                  type="button"
-                  onClick={() => {
-                    if (typeof feedback?.light === 'function') feedback.light();
-                    onClose();
-                  }} 
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
-                  title={t('close')}
-                  aria-label={t('close')}
-                >
-                  <X size={15} strokeWidth={2.2} />
-                </button>
-              </div>
-
-              <p className="text-[20px] sm:text-[24px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline text-[var(--text-primary)]">
-                <span className="opacity-80 mr-0.5">−</span>
-                <span>{formatAmount(displayAmount, config.language)}</span>
-                <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans">{currency}</span>
+            {/* Price */}
+            <p className="text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center text-[var(--text-primary)]">
+              <span className="opacity-80 mr-1">−</span>
+              <span>{formatAmount(displayAmount, config.language)}</span>
+              <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
+            </p>
+            {hasAdjustment && (
+              <p className="text-[12px] font-normal text-[var(--text-secondary)] mt-1 tabular-nums">
+                {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
               </p>
-              {hasAdjustment && (
-                <p className="text-[12px] font-normal text-[var(--text-tertiary)] mt-0.5 tabular-nums">
-                  {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
-                </p>
-              )}
-            </div>
+            )}
           </div>
 
           {/* Details Section: Clean list with discrete subtle divider lines */}
@@ -1227,16 +1227,16 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] sm:rounded-[32px] sm:max-w-xl sm:mx-auto relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
         <div 
-          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[32px] sm:rounded-[32px] overflow-hidden"
           style={{
             background: `
-              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+              radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.08)} 0%, var(--bg-color) 60%)
             `
           }}
         />
@@ -1245,85 +1245,81 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-6 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section: Logo to the left, Provider name and Close Button inline, Price below */}
-          <div className="flex items-start gap-4 text-left pt-2 sm:pt-3 pb-3">
-            <div className="shrink-0 pt-0.5">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 max-w-xl mx-auto w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight">
+              {expense 
+                ? (config?.language === 'en' ? 'Edit Fixed Expense' : 'Redigera fast utgift') 
+                : (config?.language === 'en' ? 'New Fixed Expense' : 'Ny fast utgift')}
+            </h2>
+            <button 
+              type="button"
+              onClick={onClose} 
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              aria-label={t('close')}
+            >
+              <X size={15} strokeWidth={2.2} />
+            </button>
+          </div>
+
+          {/* 1. Main Hero Card: Icon + Name & Amount Input */}
+          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border-none shadow-none space-y-4">
+            <div className="flex items-center gap-3.5">
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center text-2xl transition-all duration-300 active:scale-95 bg-black/5 dark:bg-[#222222] hover:ring-2 hover:ring-[var(--accent-color)]/30 group cursor-pointer shrink-0"
+                className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
+                aria-label={t('chooseIcon')}
               >
-                {logo ? (
-                  <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                ) : isEmojiString(icon) ? (
-                  icon
-                ) : (
-                  (() => {
-                    const Icon = ICON_MAP[icon] || Receipt;
-                    return <Icon size={22} className="text-accent" />;
-                  })()
-                )}
+                <TransactionLogo 
+                  size="lg"
+                  config={config}
+                  transaction={expenseCompatible as any} 
+                />
               </button>
+              <div className="flex-1 min-w-0">
+                <input 
+                  ref={nameInputRef}
+                  type="text" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  placeholder={t('fixedExpensePlaceholder')} 
+                  className="text-[19px] sm:text-[21px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                />
+              </div>
             </div>
 
-            <div className="min-w-0 flex-1 flex flex-col justify-center">
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <input 
-                    ref={nameInputRef}
-                    type="text" 
-                    value={name} 
-                    onChange={(e) => setName(e.target.value)} 
-                    placeholder={t('fixedExpensePlaceholder')} 
-                    className="text-[20px] sm:text-[24px] font-semibold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
-                  />
-                </div>
-
-                <button 
-                  type="button"
-                  onClick={onClose} 
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
-                  aria-label={t('close')}
-                >
-                  <X size={15} strokeWidth={2.2} />
-                </button>
-              </div>
-
-              {/* Amount display / input in the Hero */}
-              <div className="mt-1.5 flex items-baseline justify-between gap-2">
-                <div 
-                  onClick={() => amountInputRef.current?.focus()}
-                  className="flex items-baseline font-amount text-[20px] sm:text-[24px] font-semibold tabular-nums tracking-tight cursor-text"
-                >
-                  <span className="opacity-80 mr-0.5 select-none text-[var(--text-primary)]">−</span>
-                  <input
-                    ref={amountInputRef}
-                    type="text"
-                    inputMode="decimal"
-                    value={amount}
-                    onChange={(e) => setAmount(formatAmount(e.target.value))}
-                    onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        setAmount(evaluateAndFormatAmount(amount));
-                      }
-                    }}
-                    placeholder="0"
-                    className="bg-transparent outline-none font-amount font-semibold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder-[var(--text-tertiary)] max-w-[170px] sm:max-w-[210px]"
-                    style={{ width: `${Math.max(1, (amount || '0').length) * 1.1}ch` }}
-                  />
-                  <span className="text-[13px] font-normal text-[var(--text-tertiary)] ml-1 font-sans select-none">
-                    {currency}
-                  </span>
-                </div>
+            <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
+              <div 
+                onClick={() => amountInputRef.current?.focus()}
+                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full text-[var(--text-primary)]"
+              >
+                <input
+                  ref={amountInputRef}
+                  type="text"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(formatAmount(e.target.value))}
+                  onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setAmount(evaluateAndFormatAmount(amount));
+                    }
+                  }}
+                  placeholder="0"
+                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full"
+                />
+                <span className="text-[18px] sm:text-[22px] font-normal text-[var(--text-tertiary)] ml-2 font-sans select-none">
+                  {currency}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Details Section: Clean list with discrete subtle hairline divider lines */}
-          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+          {/* Details Section: Clean card with subtle hairline divider lines */}
+          <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 sm:p-5 divide-y divide-black/[0.05] dark:divide-white/[0.05] text-left">
             {/* Category */}
             <div 
               onClick={() => setIsCategorySelectorOpen(true)}

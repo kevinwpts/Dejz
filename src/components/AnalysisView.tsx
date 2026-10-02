@@ -267,34 +267,30 @@ export function AnalysisView({
   return (
     <div className="space-y-6 font-sans">
       {/* Top Selectors: Period (Left) & Content Filter (Right) */}
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-2 w-full">
-          {/* Left: Period Button */}
-          <FilterSelectButton
-            icon={<Calendar size={15} strokeWidth={2} />}
-            value={stats.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}
-            onClick={() => setIsPeriodModalOpen(true)}
-            className="flex-[1.25] min-w-0"
-          />
+      <div className="flex items-center gap-2 w-full">
+        {/* Left: Period Button */}
+        <FilterSelectButton
+          icon={<Calendar size={15} strokeWidth={2} />}
+          value={stats.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}
+          onClick={() => setIsPeriodModalOpen(true)}
+          className="flex-[1.25] min-w-0"
+        />
 
-          {/* Right: Content Filter Button */}
-          <FilterSelectButton
-            icon={
-              analysisFilter === 'all' ? <LayoutGrid size={15} strokeWidth={2} /> :
-              analysisFilter === 'variable' ? <TrendingUp size={15} strokeWidth={2} /> :
-              <Calendar size={15} strokeWidth={2} />
-            }
-            value={
-              analysisFilter === 'all' ? (t('all' as TranslationKey) || (isEn ? 'All' : 'Alla')) :
-              analysisFilter === 'variable' ? (isEn ? 'Variable' : 'Rörliga') :
-              (isEn ? 'Fixed' : 'Fasta')
-            }
-            onClick={() => setIsFilterModalOpen(true)}
-            className="flex-1 min-w-0"
-          />
-        </div>
-
-
+        {/* Right: Content Filter Button */}
+        <FilterSelectButton
+          icon={
+            analysisFilter === 'all' ? <LayoutGrid size={15} strokeWidth={2} /> :
+            analysisFilter === 'variable' ? <TrendingUp size={15} strokeWidth={2} /> :
+            <Calendar size={15} strokeWidth={2} />
+          }
+          value={
+            analysisFilter === 'all' ? (t('all' as TranslationKey) || (isEn ? 'All' : 'Alla')) :
+            analysisFilter === 'variable' ? (isEn ? 'Variable' : 'Rörliga') :
+            (isEn ? 'Fixed' : 'Fasta')
+          }
+          onClick={() => setIsFilterModalOpen(true)}
+          className="flex-1 min-w-0"
+        />
       </div>
 
       {/* Period Selector Modal */}
