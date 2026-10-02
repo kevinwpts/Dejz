@@ -1533,7 +1533,7 @@ export default function App() {
       const userThemeHex = config?.themeColor || '#635BFF';
       applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isBlack ? "#000000" : (isDark ? "#141414" : "#EFECE6");
+      const themeColor = isBlack ? "#0A0A0A" : (isDark ? "#191919" : "#FFFFFF");
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
