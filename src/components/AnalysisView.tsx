@@ -243,7 +243,7 @@ export function AnalysisView({
     return effectiveBudget > 0 ? Math.round((totalSpent / effectiveBudget) * 100) : 0;
   }, [stats, analysisFilter, effectiveBudget, remainingBudget, totalSpent]);
 
-  // Horizontal bar chart data: Top 5 categories + "Övriga kategorier"
+  // Donut chart / list items data: Top 5 categories + "Övriga kategorier"
   const chartItems = useMemo(() => {
     if (categoryData.length <= 5) {
       return categoryData.map(c => ({
@@ -367,8 +367,8 @@ export function AnalysisView({
         filterMode={analysisFilter}
       />
 
-      {/* HORISONTELLT STAPELDIAGRAM (FÖRDELNING) */}
-      <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 sm:p-5 border-none shadow-none space-y-4">
+      {/* DONUT DIAGRAM & FÖRDELNING */}
+      <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-6">
         <div className="flex items-center justify-between px-0.5">
           <h2 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
             {isEn ? 'Distribution' : 'Fördelning'}
@@ -379,51 +379,92 @@ export function AnalysisView({
         </div>
 
         {chartItems.length > 0 ? (
-          <div className="space-y-3.5 pt-1">
-            {chartItems.map((item) => {
-              const barWidth = totalSpent > 0 ? Math.min(100, Math.max(4, (item.value / totalSpent) * 100)) : 0;
-              const isSelected = expandedCategory === item.name;
+          <div className="space-y-6">
+            {/* Donut Chart */}
+            <div className="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto flex items-center justify-center">
+              <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+                {(() => {
+                  const radius = 38;
+                  const circumference = 2 * Math.PI * radius;
+                  let accumulatedPercent = 0;
 
-              return (
-                <div 
-                  key={item.name}
-                  onClick={() => {
-                    if (!item.isOther) {
-                      setExpandedCategory(expandedCategory === item.name ? null : item.name);
-                    }
-                  }}
-                  className={`space-y-1.5 transition-all ${item.isOther ? '' : 'cursor-pointer hover:opacity-90'}`}
-                >
-                  <div className="flex items-center justify-between text-[13px] gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
+                  return chartItems.map((item) => {
+                    const fraction = totalSpent > 0 ? item.value / totalSpent : 0;
+                    const strokeLength = fraction * circumference;
+                    const dashArray = `${Math.max(0, strokeLength - 2.5)} ${circumference}`;
+                    const dashOffset = -accumulatedPercent * circumference;
+                    accumulatedPercent += fraction;
+
+                    return (
+                      <circle
+                        key={item.name}
+                        cx="50"
+                        cy="50"
+                        r={radius}
+                        fill="none"
+                        stroke={item.color}
+                        strokeWidth="13"
+                        strokeDasharray={dashArray}
+                        strokeDashoffset={dashOffset}
+                        strokeLinecap="round"
+                        className="transition-all duration-300 hover:opacity-85 cursor-pointer"
+                        onClick={() => {
+                          if (!item.isOther) {
+                            setExpandedCategory(expandedCategory === item.name ? null : item.name);
+                          }
+                        }}
+                      />
+                    );
+                  });
+                })()}
+              </svg>
+
+              {/* Airy Center */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4">
+                <span className="text-[11px] font-medium text-[#6D6962] dark:text-[#A8A8A8] uppercase tracking-wider">
+                  {isEn ? 'Total' : 'Totalt'}
+                </span>
+                <span className="text-[16px] sm:text-[19px] font-bold text-[#211F1C] dark:text-white tabular-nums tracking-tight">
+                  {formatAmount(Math.round(totalSpent), config.language)} {config.currency}
+                </span>
+              </div>
+            </div>
+
+            {/* Compact List under Donut Chart */}
+            <div className="space-y-1.5 pt-2">
+              {chartItems.map((item) => {
+                const isSelected = expandedCategory === item.name;
+
+                return (
+                  <div 
+                    key={item.name}
+                    onClick={() => {
+                      if (!item.isOther) {
+                        setExpandedCategory(expandedCategory === item.name ? null : item.name);
+                      }
+                    }}
+                    className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-all ${
+                      item.isOther ? '' : 'cursor-pointer hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                    } ${isSelected ? 'bg-black/[0.04] dark:bg-white/[0.06]' : ''}`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
                       <CategoryIcon icon={item.icon} color={item.color} size="xs" />
-                      <span className={`font-normal truncate ${isSelected ? 'text-[#635BFF] dark:text-white font-medium' : 'text-[#211F1C] dark:text-white'}`}>
+                      <span className={`text-[13.5px] truncate ${isSelected ? 'font-semibold text-[#211F1C] dark:text-white' : 'font-normal text-[#211F1C] dark:text-white'}`}>
                         {item.name}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0 tabular-nums">
-                      <span className="font-medium text-[#211F1C] dark:text-white text-[13.5px]">
+                    <div className="flex items-center gap-2 shrink-0 tabular-nums">
+                      <span className="text-[13.5px] font-medium text-[#211F1C] dark:text-white">
                         {formatAmount(Math.round(item.value), config.language)} {config.currency}
                       </span>
-                      <span className="font-normal text-[#6D6962] dark:text-[#A8A8A8] text-[12px]">
-                        ({item.pct}%)
+                      <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] min-w-[36px] text-right">
+                        {item.pct}%
                       </span>
                     </div>
                   </div>
-
-                  {/* Horizontal Bar */}
-                  <div className="w-full h-2 rounded-full bg-black/5 dark:bg-[#222222] overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${barWidth}%` }}
-                      transition={{ duration: 0.45, ease: 'easeOut' }}
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         ) : (
           <div className="py-8 text-center text-[13px] text-[#6D6962] dark:text-[#A8A8A8]">
@@ -433,7 +474,7 @@ export function AnalysisView({
       </div>
 
       {/* FULLSTÄNDIG KATEGORILISTA */}
-      <div className="space-y-3">
+      <div className="space-y-3 pb-8">
         <div className="flex items-center justify-between px-1">
           <h3 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
             {t('categories')} ({categoryData.length})
@@ -445,7 +486,6 @@ export function AnalysisView({
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               
-              // Get transactions for this category
               const categoryTransactions = analysisFilter === 'fixed' ? [] : filteredExpenses
                 .filter(t => {
                   const catName = item.name;
@@ -463,7 +503,6 @@ export function AnalysisView({
                 })
                 .sort((a, b) => b.timestamp - a.timestamp);
                 
-              // Get fixed expenses for this category
               const categoryFixedExpenses = analysisFilter === 'variable' ? [] : fixedExpenses
                   .filter(e => {
                     const catName = e.category || t('fixedExpenses');
@@ -518,7 +557,6 @@ export function AnalysisView({
                         className="overflow-hidden bg-black/[0.02] dark:bg-white/[0.02] border-t border-black/[0.04] dark:divide-white/[0.04]"
                       >
                         <div className="p-3 sm:p-4 space-y-2">
-                          {/* Transactions list */}
                           {categoryTransactions.length > 0 && (
                             <div className="space-y-1.5">
                               {categoryTransactions.map((t) => (
@@ -535,7 +573,6 @@ export function AnalysisView({
                             </div>
                           )}
 
-                          {/* Fixed expenses list */}
                           {categoryFixedExpenses.length > 0 && (
                             <div className="space-y-1.5">
                               {categoryFixedExpenses.map((fe) => (
