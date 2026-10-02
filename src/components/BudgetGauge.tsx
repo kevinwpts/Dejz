@@ -59,11 +59,11 @@ export function BudgetGauge({
             className="stroke-[#E2DDD4] dark:stroke-[#333333] transition-colors duration-300"
           />
 
-          {/* Layer 2: Orange fill arc (#FF7518) on top of the exact same path */}
+          {/* Layer 2: Fill arc using accent color */}
           <path
             d={gaugePath}
             fill="none"
-            stroke="#FF7518"
+            stroke="var(--accent-color)"
             strokeWidth="36"
             strokeLinecap="butt"
             pathLength={100}
