@@ -27,7 +27,6 @@ interface LandingPageProps {
   onLanguageChange: (lang: Language) => void;
 }
 
-// Clean Minimalistic Mockup Placeholder for user's real screenshot / future screenshots
 const MockupPlaceholder = ({ 
   id = 'HERO_MOCKUP', 
   imageSrc,
@@ -47,7 +46,7 @@ const MockupPlaceholder = ({
     return (
       <div 
         data-mockup-id={id}
-        className={`relative w-full rounded-[24px] sm:rounded-[32px] overflow-hidden flex items-center justify-center ${className}`}
+        className={`relative w-full rounded-[24px] sm:rounded-[32px] overflow-hidden flex items-center justify-center bg-white border border-[#E2DDD4] shadow-sm ${className}`}
       >
         <img 
           src={imageSrc} 
@@ -61,22 +60,20 @@ const MockupPlaceholder = ({
   return (
     <div 
       data-mockup-id={id}
-      className={`relative w-full ${aspectRatio} rounded-[28px] sm:rounded-[36px] bg-[#F4F3F0] border border-[#E5E3DE] overflow-hidden flex flex-col items-center justify-center p-8 select-none ${className}`}
+      className={`relative w-full ${aspectRatio} rounded-[28px] sm:rounded-[36px] bg-white border border-[#E2DDD4] overflow-hidden flex flex-col items-center justify-center p-8 select-none shadow-sm ${className}`}
     >
-      {/* Subtle architectural grid pattern */}
-      <div className="absolute inset-0 opacity-[0.35] bg-[radial-gradient(#0B0A12_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+      <div className="absolute inset-0 opacity-[0.2] bg-[radial-gradient(#211F1C_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
       
-      {/* Corner crop marks */}
-      <div className="absolute top-4 left-4 w-3 h-3 border-t-2 border-l-2 border-[#0B0A12]/20 rounded-tl-xs" />
-      <div className="absolute top-4 right-4 w-3 h-3 border-t-2 border-r-2 border-[#0B0A12]/20 rounded-tr-xs" />
-      <div className="absolute bottom-4 left-4 w-3 h-3 border-b-2 border-l-2 border-[#0B0A12]/20 rounded-bl-xs" />
-      <div className="absolute bottom-4 right-4 w-3 h-3 border-b-2 border-r-2 border-[#0B0A12]/20 rounded-br-xs" />
+      <div className="absolute top-4 left-4 w-3 h-3 border-t-2 border-l-2 border-[#211F1C]/20 rounded-tl-xs" />
+      <div className="absolute top-4 right-4 w-3 h-3 border-t-2 border-r-2 border-[#211F1C]/20 rounded-tr-xs" />
+      <div className="absolute bottom-4 left-4 w-3 h-3 border-b-2 border-l-2 border-[#211F1C]/20 rounded-bl-xs" />
+      <div className="absolute bottom-4 right-4 w-3 h-3 border-b-2 border-r-2 border-[#211F1C]/20 rounded-br-xs" />
 
       <div className="relative z-10 flex flex-col items-center gap-1.5 text-center">
-        <span className="text-xs font-mono font-bold tracking-[0.2em] text-[#0B0A12]/70 uppercase">
+        <span className="text-xs font-mono font-bold tracking-[0.2em] text-[#211F1C]/75 uppercase">
           [ {id} ]
         </span>
-        <span className="text-xs text-[#6B7280]">
+        <span className="text-xs text-[#6E6961]">
           {sublabel}
         </span>
       </div>
@@ -84,20 +81,19 @@ const MockupPlaceholder = ({
   );
 };
 
-// Ultra-clean FAQ Accordion Item (minimal lines, no boxes)
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   
   return (
-    <div className="border-b border-[#E5E3DE]">
+    <div className="border-b border-[#E2DDD4]">
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="w-full py-6 sm:py-7 flex items-center justify-between text-left group cursor-pointer focus:outline-none"
       >
-        <span className={`text-lg sm:text-xl font-bold tracking-tight transition-colors pr-6 ${isOpen ? 'text-[#0B0A12]' : 'text-[#0B0A12]/80 group-hover:text-[#0B0A12]'}`}>
+        <span className={`text-lg sm:text-xl font-bold tracking-tight transition-colors pr-6 ${isOpen ? 'text-[#211F1C]' : 'text-[#211F1C]/80 group-hover:text-[#211F1C]'}`}>
           {question}
         </span>
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform shrink-0 ${isOpen ? 'rotate-180 text-[#FF8A00]' : 'text-[#0B0A12]/40 group-hover:text-[#0B0A12]'}`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform shrink-0 ${isOpen ? 'rotate-180 text-[#1C1917]' : 'text-[#6E6961] group-hover:text-[#211F1C]'}`}>
           <ChevronDown size={18} />
         </div>
       </button>
@@ -110,7 +106,7 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             <div className="pb-6 pr-8">
-              <p className="text-[#6B7280] leading-relaxed font-medium text-base sm:text-lg">
+              <p className="text-[#6E6961] leading-relaxed font-normal text-base sm:text-lg">
                 {answer}
               </p>
             </div>
@@ -139,36 +135,31 @@ export function LandingPage({
   }, []);
 
   return (
-    <div className="min-h-dvh bg-[#FAFAF8] text-[#0B0A12] font-sans overflow-x-hidden relative selection:bg-[#FF8A00] selection:text-white antialiased">
+    <div className="min-h-dvh bg-[#EFECE6] text-[#211F1C] font-sans overflow-x-hidden relative selection:bg-[#1C1917] selection:text-white antialiased">
       
-      {/* ==================================================
-          1. HEADER (Kompakt, Modern & Luftig)
-          ================================================== */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FAFAF8]/90 backdrop-blur-md border-b border-[#E5E3DE] pt-[env(safe-area-inset-top)]">
+      {/* HEADER */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#EFECE6]/90 backdrop-blur-md border-b border-[#E2DDD4] pt-[env(safe-area-inset-top)]">
         <div className="max-w-6xl mx-auto px-6 sm:px-10 h-20 flex items-center justify-between">
-          
-          {/* Vänster: Dejz-logotyp */}
           <button 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-center cursor-pointer text-left focus:outline-none"
             aria-label="Dejz Hem"
           >
-            <DejzLogo className="text-2xl font-black tracking-tight" textColor="#0B0A12" />
+            <DejzLogo className="text-2xl font-black tracking-tight" textColor="#211F1C" />
           </button>
 
-          {/* Höger: Logga in & Kom igång gratis */}
           <div className="flex items-center gap-4">
             {onLogin && (
               <button 
                 onClick={onLogin}
-                className="text-sm font-semibold text-[#0B0A12] hover:text-[#FF8A00] transition-colors px-2 py-2 cursor-pointer"
+                className="text-sm font-semibold text-[#211F1C] hover:text-[#1C1917] transition-colors px-2 py-2 cursor-pointer"
               >
                 Logga in
               </button>
             )}
             <button 
               onClick={onGetStarted}
-              className="px-5 py-2.5 rounded-[12px] bg-[#0B0A12] text-[#FFFFFF] hover:bg-[#24222B] active:bg-[#35323C] transition-all font-semibold text-sm cursor-pointer shadow-2xs active:scale-95"
+              className="px-5 py-2.5 rounded-[14px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-sm cursor-pointer shadow-xs active:scale-95"
             >
               Kom igång gratis
             </button>
@@ -179,28 +170,24 @@ export function LandingPage({
       {/* Main Streamlined Content Flow */}
       <main className="flex flex-col min-h-dvh">
 
-        {/* ==================================================
-            2. HERO (Vad är Dejz?)
-            ================================================== */}
-        <section className="w-full pt-[calc(7.5rem+env(safe-area-inset-top))] pb-16 md:pb-24 lg:pb-32 px-6 sm:px-10 bg-[#FAFAF8]">
+        {/* HERO */}
+        <section className="w-full pt-[calc(7.5rem+env(safe-area-inset-top))] pb-16 md:pb-24 lg:pb-32 px-6 sm:px-10 bg-[#EFECE6]">
           <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
             
-            {/* Vänster: Stor headline + text + CTA */}
             <div className="w-full lg:w-[50%] space-y-6 sm:space-y-8 text-left">
-              <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-[#0B0A12] leading-[1.03]">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-[#211F1C] leading-[1.03]">
                 Hela din ekonomi.<br />
                 Svart på vitt.
               </h1>
               
-              <p className="text-lg sm:text-xl text-[#6B7280] font-normal leading-relaxed max-w-xl">
+              <p className="text-lg sm:text-xl text-[#6E6961] font-normal leading-relaxed max-w-xl">
                 Samla inkomster, utgifter, sparande och budget på ett ställe. Se vart pengarna går och få koll på ekonomin mellan två löner.
               </p>
 
-              {/* CTAs */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
                 <button 
                   onClick={onGetStarted} 
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[14px] bg-[#0B0A12] text-[#FFFFFF] hover:bg-[#24222B] active:bg-[#35323C] transition-all font-semibold text-base cursor-pointer text-center shadow-xs"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
                 >
                   <span>Kom igång gratis</span>
                   <ChevronRight size={16} />
@@ -209,20 +196,18 @@ export function LandingPage({
                 {onStartDemo && (
                   <button
                     onClick={onStartDemo}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[14px] bg-[#FFFFFF] hover:bg-[#F4F3F0] text-[#0B0A12] border border-[#E5E3DE] hover:border-[#FF8A00]/40 transition-all font-semibold text-base cursor-pointer text-center"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-white hover:bg-[#F9F8F6] text-[#211F1C] border border-[#E2DDD4] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
                   >
                     <span>Testa demo</span>
                   </button>
                 )}
               </div>
 
-              {/* Microcopy */}
-              <p className="text-xs sm:text-sm font-medium text-[#6B7280] pt-1">
+              <p className="text-xs sm:text-sm font-medium text-[#6E6961] pt-1">
                 Ingen bankkoppling • Gratis att komma igång
               </p>
             </div>
 
-            {/* Höger: HERO_MOCKUP */}
             <div className="w-full lg:w-[50%] flex items-center justify-center">
               <MockupPlaceholder 
                 id="HERO_MOCKUP" 
@@ -234,17 +219,14 @@ export function LandingPage({
           </div>
         </section>
 
-        {/* ==================================================
-            3. SÅ FUNGERAR DEJZ / KALKYL (Hur mycket kan jag spendera?)
-            ================================================== */}
-        <section id="sa-fungerar-det" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-[#FFFFFF] border-t border-b border-[#E5E3DE] scroll-mt-20">
+        {/* SÅ FUNGERAR DEJZ */}
+        <section id="sa-fungerar-det" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-white border-t border-b border-[#E2DDD4] scroll-mt-20">
           <div className="max-w-6xl mx-auto space-y-12 md:space-y-16">
             
-            <h2 className="text-3xl sm:text-5xl md:text-5xl font-extrabold tracking-tight text-[#0B0A12] leading-[1.08] text-left">
+            <h2 className="text-3xl sm:text-5xl md:text-5xl font-extrabold tracking-tight text-[#211F1C] leading-[1.08] text-left">
               Se vad du faktiskt kan spendera.
             </h2>
 
-            {/* Mockup för kalkylen */}
             <div className="w-full max-w-3xl text-left">
               <MockupPlaceholder 
                 id="CALCULATION_MOCKUP" 
@@ -255,130 +237,120 @@ export function LandingPage({
               />
             </div>
 
-            {/* 3 Steg */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 pt-6 border-t border-[#E5E3DE]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 pt-6 border-t border-[#E2DDD4]">
               <div className="space-y-2 text-left">
-                <span className="text-2xl sm:text-3xl font-mono font-bold text-[#FF8A00] block">
+                <span className="text-2xl sm:text-3xl font-mono font-bold text-[#211F1C] block">
                   01
                 </span>
-                <h3 className="text-lg sm:text-xl font-bold text-[#0B0A12]">
+                <h3 className="text-lg sm:text-xl font-bold text-[#211F1C]">
                   Lägg in din ekonomi
                 </h3>
               </div>
 
               <div className="space-y-2 text-left">
-                <span className="text-2xl sm:text-3xl font-mono font-bold text-[#FF8A00] block">
+                <span className="text-2xl sm:text-3xl font-mono font-bold text-[#211F1C] block">
                   02
                 </span>
-                <h3 className="text-lg sm:text-xl font-bold text-[#0B0A12]">
+                <h3 className="text-lg sm:text-xl font-bold text-[#211F1C]">
                   Registrera dina utgifter
                 </h3>
               </div>
 
               <div className="space-y-2 text-left">
-                <span className="text-2xl sm:text-3xl font-mono font-bold text-[#FF8A00] block">
+                <span className="text-2xl sm:text-3xl font-mono font-bold text-[#211F1C] block">
                   03
                 </span>
-                <h3 className="text-lg sm:text-xl font-bold text-[#0B0A12]">
+                <h3 className="text-lg sm:text-xl font-bold text-[#211F1C]">
                   Se vad du faktiskt har kvar
                 </h3>
               </div>
             </div>
 
-            {/* En enda kort förklaring under kalkylen */}
-            <p className="text-base sm:text-lg text-[#6B7280] font-medium text-left pt-2">
+            <p className="text-base sm:text-lg text-[#6E6961] font-medium text-left pt-2">
               När du registrerar nya utgifter uppdaterar Dejz automatiskt hur mycket du har kvar.
             </p>
 
           </div>
         </section>
 
-        {/* ==================================================
-            4. FUNKTIONER (Vad kan jag göra i Dejz?)
-            ================================================== */}
-        <section id="funktioner" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-[#FAFAF8] scroll-mt-20">
+        {/* FUNKTIONER */}
+        <section id="funktioner" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-[#EFECE6] scroll-mt-20">
           <div className="max-w-6xl mx-auto space-y-12 md:space-y-16">
             
-            <h2 className="text-3xl sm:text-5xl md:text-5xl font-extrabold tracking-tight text-[#0B0A12] leading-[1.08] text-left">
+            <h2 className="text-3xl sm:text-5xl md:text-5xl font-extrabold tracking-tight text-[#211F1C] leading-[1.08] text-left">
               Allt samlat på ett ställe.
             </h2>
 
-            {/* Ren grid med whitespace */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 sm:gap-y-12 text-left">
               
-              {/* BUDGET */}
-              <div className="space-y-3">
-                <div className="w-8 h-8 flex items-center justify-center text-[#0B0A12]">
-                  <Wallet size={22} />
+              <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4]">
+                <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
+                  <Wallet size={20} />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-xl font-bold text-[#0B0A12]">
+                  <h3 className="text-xl font-bold text-[#211F1C]">
                     Budget
                   </h3>
-                  <p className="text-base text-[#6B7280] font-normal leading-relaxed">
+                  <p className="text-base text-[#6E6961] font-normal leading-relaxed">
                     Planera inkomster, fasta utgifter och sparande.
                   </p>
                 </div>
               </div>
 
-              {/* TRANSAKTIONER */}
-              <div className="space-y-3">
-                <div className="w-8 h-8 flex items-center justify-center text-[#0B0A12]">
-                  <CreditCard size={22} />
+              <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4]">
+                <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
+                  <CreditCard size={20} />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-xl font-bold text-[#0B0A12]">
+                  <h3 className="text-xl font-bold text-[#211F1C]">
                     Transaktioner
                   </h3>
-                  <p className="text-base text-[#6B7280] font-normal leading-relaxed">
+                  <p className="text-base text-[#6E6961] font-normal leading-relaxed">
                     Registrera och kategorisera dina köp.
                   </p>
                 </div>
               </div>
 
-              {/* ANALYS */}
-              <div className="space-y-3">
-                <div className="w-8 h-8 flex items-center justify-center text-[#0B0A12]">
-                  <PieChart size={22} />
+              <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4]">
+                <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
+                  <PieChart size={20} />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-xl font-bold text-[#0B0A12]">
+                  <h3 className="text-xl font-bold text-[#211F1C]">
                     Analys
                   </h3>
-                  <p className="text-base text-[#6B7280] font-normal leading-relaxed">
+                  <p className="text-base text-[#6E6961] font-normal leading-relaxed">
                     Se vart pengarna faktiskt går.
                   </p>
                 </div>
               </div>
 
-              {/* HISTORIK */}
-              <div className="space-y-3">
-                <div className="w-8 h-8 flex items-center justify-center text-[#0B0A12]">
-                  <Calendar size={22} />
+              <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4]">
+                <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
+                  <Calendar size={20} />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-xl font-bold text-[#0B0A12]">
+                  <h3 className="text-xl font-bold text-[#211F1C]">
                     Historik
                   </h3>
-                  <p className="text-base text-[#6B7280] font-normal leading-relaxed">
+                  <p className="text-base text-[#6E6961] font-normal leading-relaxed">
                     Följ din ekonomi över tid.
                   </p>
                 </div>
               </div>
 
-              {/* DEJZI */}
-              <div className="space-y-3 md:col-span-2 lg:col-span-2">
-                <div className="w-8 h-8 flex items-center justify-center text-[#FF8A00]">
-                  <Sparkles size={22} />
+              <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4] md:col-span-2 lg:col-span-2">
+                <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
+                  <Sparkles size={20} />
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-bold text-[#0B0A12]">
+                    <h3 className="text-xl font-bold text-[#211F1C]">
                       Dejzi
                     </h3>
-                    <span className="w-2 h-2 rounded-full bg-[#FF8A00]" />
+                    <span className="w-2 h-2 rounded-full bg-[#1C1917]" />
                   </div>
-                  <p className="text-base text-[#6B7280] font-normal leading-relaxed max-w-xl">
+                  <p className="text-base text-[#6E6961] font-normal leading-relaxed max-w-xl">
                     Få hjälp att förstå din ekonomi och upptäcka sådant som är värt att uppmärksamma.
                   </p>
                 </div>
@@ -389,37 +361,33 @@ export function LandingPage({
           </div>
         </section>
 
-        {/* ==================================================
-            5. INTEGRITET (Måste jag koppla banken? Mörk visuell paus)
-            ================================================== */}
-        <section id="integritet" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-[#0B0A12] text-[#F9F8F6] scroll-mt-20">
+        {/* INTEGRITET */}
+        <section id="integritet" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-[#1C1917] text-white scroll-mt-20">
           <div className="max-w-4xl mx-auto text-left space-y-5">
-            <h2 className="text-3xl sm:text-5xl md:text-5xl font-extrabold tracking-tight text-[#F9F8F6] leading-[1.08]">
+            <h2 className="text-3xl sm:text-5xl md:text-5xl font-extrabold tracking-tight text-white leading-[1.08]">
               Ingen bankkoppling behövs.
             </h2>
-            <p className="text-lg sm:text-xl text-[#B5B2BC] font-normal leading-relaxed max-w-2xl">
+            <p className="text-lg sm:text-xl text-[#B8B8B8] font-normal leading-relaxed max-w-2xl">
               Du bestämmer själv vad du lägger in i Dejz. Samla den ekonomi du vill hålla koll på utan att koppla ditt bankkonto.
             </p>
           </div>
         </section>
 
-        {/* ==================================================
-            6. SLUTLIG CTA (Hur börjar jag?)
-            ================================================== */}
-        <section className="w-full py-24 md:py-32 px-6 sm:px-10 bg-[#FAFAF8] text-center border-b border-[#E5E3DE]">
+        {/* SLUTLIG CTA */}
+        <section className="w-full py-24 md:py-32 px-6 sm:px-10 bg-[#EFECE6] text-center border-b border-[#E2DDD4]">
           <div className="max-w-3xl mx-auto space-y-8">
-            <h2 className="text-4xl sm:text-6xl md:text-6xl font-extrabold tracking-tight leading-[1.05] text-[#0B0A12]">
+            <h2 className="text-4xl sm:text-6xl md:text-6xl font-extrabold tracking-tight leading-[1.05] text-[#211F1C]">
               Redo att få koll?
             </h2>
             
-            <p className="text-lg sm:text-xl text-[#6B7280] font-normal max-w-xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl text-[#6E6961] font-normal max-w-xl mx-auto leading-relaxed">
               Börja med din egen ekonomi eller testa Dejz direkt med exempeldata.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
               <button 
                 onClick={onGetStarted} 
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[14px] bg-[#0B0A12] text-[#FFFFFF] hover:bg-[#24222B] active:bg-[#35323C] transition-all font-semibold text-base cursor-pointer text-center shadow-xs"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
               >
                 <span>Kom igång gratis</span>
                 <ChevronRight size={16} />
@@ -428,29 +396,27 @@ export function LandingPage({
               {onStartDemo && (
                 <button
                   onClick={onStartDemo}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[14px] bg-[#FFFFFF] hover:bg-[#F4F3F0] text-[#0B0A12] border border-[#E5E3DE] hover:border-[#FF8A00]/40 transition-all font-semibold text-base cursor-pointer text-center"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-white hover:bg-[#F9F8F6] text-[#211F1C] border border-[#E2DDD4] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
                 >
                   <span>Testa demo</span>
                 </button>
               )}
             </div>
 
-            <p className="text-xs sm:text-sm text-[#6B7280] font-medium pt-1">
+            <p className="text-xs sm:text-sm text-[#6E6961] font-medium pt-1">
               Du kan testa demoläget utan att skapa ett konto.
             </p>
           </div>
         </section>
 
-        {/* ==================================================
-            7. FAQ (Mina sista frågor)
-            ================================================== */}
-        <section id="faq" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-[#FFFFFF] scroll-mt-20">
+        {/* FAQ */}
+        <section id="faq" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-white scroll-mt-20">
           <div className="max-w-4xl mx-auto space-y-10">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0B0A12] text-left">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#211F1C] text-left">
               Vanliga frågor
             </h2>
 
-            <div className="border-t border-[#E5E3DE]">
+            <div className="border-t border-[#E2DDD4]">
               <FAQItem 
                 question="Vad är Dejz?" 
                 answer="Dejz är en webbapp som hjälper dig hålla koll på hur mycket du faktiskt har att spendera mellan två löner." 
@@ -473,40 +439,38 @@ export function LandingPage({
 
       </main>
 
-      {/* ==================================================
-          8. FOOTER
-          ================================================== */}
-      <footer className="w-full bg-[#FAFAF8] border-t border-[#E5E3DE] py-14 px-6 sm:px-10 text-[#0B0A12]">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-10 border-b border-[#E5E3DE]">
+      {/* FOOTER */}
+      <footer className="w-full bg-[#EFECE6] border-t border-[#E2DDD4] py-14 px-6 sm:px-10 text-[#211F1C]">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-10 border-b border-[#E2DDD4]">
           
           <div className="space-y-1 text-left">
-            <DejzLogo className="text-2xl font-black tracking-tight" textColor="#0B0A12" />
-            <p className="text-sm text-[#6B7280]">
+            <DejzLogo className="text-2xl font-black tracking-tight" textColor="#211F1C" />
+            <p className="text-sm text-[#6E6961]">
               Hela din ekonomi. Svart på vitt.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-[#6B7280]">
+          <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-[#6E6961]">
             <button 
               onClick={() => onLegalClick ? onLegalClick('privacy') : setActivePolicy('privacy')} 
-              className="hover:text-[#0B0A12] transition-colors cursor-pointer"
+              className="hover:text-[#211F1C] transition-colors cursor-pointer"
             >
               Integritetspolicy
             </button>
             <button 
               onClick={() => onLegalClick ? onLegalClick('terms') : setActivePolicy('terms')} 
-              className="hover:text-[#0B0A12] transition-colors cursor-pointer"
+              className="hover:text-[#211F1C] transition-colors cursor-pointer"
             >
               Användarvillkor
             </button>
-            <a href="mailto:hej@dejz.se" className="hover:text-[#0B0A12] transition-colors">
+            <a href="mailto:hej@dejz.se" className="hover:text-[#211F1C] transition-colors">
               Kontakt
             </a>
             <a 
               href="https://instagram.com/dejz.se" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 hover:text-[#0B0A12] transition-colors"
+              className="inline-flex items-center gap-1.5 hover:text-[#211F1C] transition-colors"
             >
               <Instagram size={14} className="text-[#E1306C]" />
               <span>Instagram</span>
@@ -515,12 +479,12 @@ export function LandingPage({
 
         </div>
 
-        <div className="max-w-6xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6B7280]">
+        <div className="max-w-6xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6E6961]">
           <span>© 2026 Dejz. Alla rättigheter förbehållna.</span>
           
           <button 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="inline-flex items-center gap-1 hover:text-[#0B0A12] transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 hover:text-[#211F1C] transition-colors cursor-pointer"
             title="Till toppen"
           >
             <ArrowUp size={13} />
@@ -537,25 +501,25 @@ export function LandingPage({
           }
           content={
             activePolicy === 'terms' ? (
-              <div className="space-y-6 text-sm text-[#0B0A12]">
+              <div className="space-y-6 text-sm text-[#211F1C]">
                 <section className="space-y-2 text-left">
                   <h3 className="text-base font-bold">1. Godkännande av villkor</h3>
-                  <p className="text-[#6B7280] font-medium">
+                  <p className="text-[#6E6961] font-medium">
                     Genom att registrera ett konto eller använda Dejz godkänner du dessa användarvillkor.
                   </p>
                 </section>
                 <section className="space-y-2 text-left">
                   <h3 className="text-base font-bold">2. Tjänstens omfattning</h3>
-                  <p className="text-[#6B7280] font-medium">
+                  <p className="text-[#6E6961] font-medium">
                     Dejz är ett digitalt verktyg för personlig budgetering och ekonomisk överblick. Beräkningar och prognoser är vägledande och utgör inte professionell finansiell rådgivning.
                   </p>
                 </section>
               </div>
             ) : (
-              <div className="space-y-6 text-sm text-left text-[#0B0A12]">
+              <div className="space-y-6 text-sm text-left text-[#211F1C]">
                 <section className="space-y-2">
                   <h3 className="text-base font-bold">Integritets- och cookiepolicy</h3>
-                  <p className="text-[#6B7280] font-medium">
+                  <p className="text-[#6E6961] font-medium">
                     Vi sparar endast den information som krävs för att driva appen och din budget. Inga bankkopplingar görs och inga tredjepartsspårare används.
                   </p>
                 </section>
