@@ -8,6 +8,8 @@ interface CategoryIconProps {
   size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   isActive?: boolean;
+  solidBackground?: boolean;
+  whiteIcon?: boolean;
 }
 
 export function CategoryIcon({ 
@@ -15,7 +17,9 @@ export function CategoryIcon({
   color, 
   size = 'md', 
   className = '',
-  isActive = false 
+  isActive = false,
+  solidBackground = false,
+  whiteIcon = false,
 }: CategoryIconProps) {
   const iconKey = icon ? resolveLucideIcon(icon) : 'receipt';
   const IconComp = (iconKey && ICON_MAP[iconKey]) ? ICON_MAP[iconKey] : Tag;
@@ -52,6 +56,13 @@ export function CategoryIcon({
       return {
         backgroundColor: 'transparent',
         color: color || 'currentColor',
+      };
+    }
+
+    if (solidBackground && color) {
+      return {
+        backgroundColor: color,
+        color: whiteIcon ? '#ffffff' : color,
       };
     }
 

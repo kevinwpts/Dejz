@@ -165,7 +165,7 @@ export function SettingsView({
               className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <CategoryIcon icon={cat.icon} color={cat.color} size="md" />
+                <CategoryIcon icon={cat.icon} color={cat.color} size="md" solidBackground whiteIcon />
                 <span className="text-sm font-semibold text-[#1C1917] dark:text-white">
                   {cat.name}
                 </span>
