@@ -5558,7 +5558,7 @@ export default function App() {
               </div>
 
               {/* Snabbutgift Form with Mic using Reusable SmartInput */}
-              <div className="pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
+              <div className="pt-2">
                 <SmartInput
                   hideLabel
                   value={plusQuickText}
@@ -5579,7 +5579,7 @@ export default function App() {
                       type="button"
                       onClick={handlePlusMicClick}
                       disabled={isSubmittingQuick || isAudioTranscribing}
-                      className={`w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all cursor-pointer border select-none ${
+                      className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-[14px] flex items-center justify-center transition-all cursor-pointer border select-none ${
                         isRecording
                           ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
@@ -5588,16 +5588,16 @@ export default function App() {
                       }`}
                     >
                       {isAudioTranscribing ? (
-                        <Loader2 size={14} className="animate-spin text-rose-500 dark:text-rose-400" />
+                        <Loader2 size={15} className="animate-spin text-rose-500 dark:text-rose-400" />
                       ) : isRecording ? (
-                        <Square size={12} className="fill-current" />
+                        <Square size={13} className="fill-current" />
                       ) : (
-                        <Mic size={15} strokeWidth={2} />
+                        <Mic size={17} strokeWidth={2} />
                       )}
                     </button>
                   }
                   submitVariant="inside"
-                  submitIcon={<Plus size={16} strokeWidth={2.2} />}
+                  submitIcon={<Plus size={18} strokeWidth={2.4} />}
                   feedback={
                     plusSuccessMsg
                       ? { type: 'success', message: plusSuccessMsg.text }
@@ -5605,7 +5605,7 @@ export default function App() {
                         ? { type: 'error', message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-11 sm:h-12 rounded-2xl bg-black/5 dark:bg-white/[0.06] text-[var(--text-primary)] dark:text-white placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] ${
+                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-[22px] bg-black/5 dark:bg-white/[0.06] text-[var(--text-primary)] dark:text-white placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] ${
                     isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-black/10 dark:border-white/10"
                   }`}
                 />

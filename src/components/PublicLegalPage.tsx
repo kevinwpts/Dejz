@@ -58,7 +58,7 @@ export function PublicLegalPage({
   return (
     <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]">
       {/* Sticky Public Header */}
-      <header className="sticky top-0 z-50 bg-[var(--surface-color)]/90 backdrop-blur-md border-b border-[var(--border-color)] px-4 sm:px-8 py-3.5 transition-colors">
+      <header className="sticky top-0 z-50 bg-[var(--surface-color)]/90 backdrop-blur-md border-b border-[var(--border-color)] px-4 sm:px-8 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3.5 transition-colors">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button

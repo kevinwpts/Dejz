@@ -174,7 +174,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
         <div className="relative flex-1 flex items-center">
           {/* Optional Left Element (e.g. Mic or action button) */}
           {leftElement && (
-            <div className="absolute left-1.5 z-10 flex items-center justify-center">
+            <div className="absolute left-2 z-10 flex items-center justify-center">
               {leftElement}
             </div>
           )}
@@ -192,9 +192,9 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             disabled={disabled || isProcessing}
             autoFocus={autoFocus}
             className={`w-full bg-[var(--surface-color)] dark:bg-[#242424] border border-[var(--border-color)] dark:border-[#383838] rounded-[16px] text-xs sm:text-sm font-normal text-[var(--text-primary)] dark:text-white placeholder:font-normal placeholder-[var(--text-tertiary)] dark:placeholder-[#71717A] focus:border-[#05B862] dark:focus:border-[#05B862] focus:ring-2 focus:ring-[#05B862]/15 outline-none transition-all shadow-none ${
-              leftElement ? 'pl-12' : 'px-3.5'
+              leftElement ? 'pl-13 sm:pl-15' : 'px-3.5'
             } ${
-              hasInsideSubmit ? (value && !isProcessing ? 'pr-20' : 'pr-12') : (value && !isProcessing ? 'pr-8' : 'pr-3.5')
+              hasInsideSubmit ? (value && !isProcessing ? 'pr-22 sm:pr-24' : 'pr-13 sm:pr-15') : (value && !isProcessing ? 'pr-9' : 'pr-3.5')
             } py-3 disabled:opacity-50 disabled:cursor-not-allowed ${inputClassName}`}
           />
 
@@ -205,7 +205,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
               onClick={handleClear}
               aria-label="Rensa"
               className={`absolute top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] dark:hover:text-white p-1 cursor-pointer transition-colors z-10 ${
-                hasInsideSubmit ? 'right-11' : 'right-2.5'
+                hasInsideSubmit ? 'right-12 sm:right-13.5' : 'right-2.5'
               }`}
             >
               <X size={14} />
@@ -217,7 +217,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             <button
               type="submit"
               disabled={!value.trim() || isProcessing || disabled}
-              className="absolute right-1.5 z-10 w-8.5 h-8.5 rounded-xl bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[#1C1917] dark:border-white"
+              className="absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[#1C1917] dark:border-white"
             >
               {isProcessing ? (
                 <Loader2 size={14} className="animate-spin" />
