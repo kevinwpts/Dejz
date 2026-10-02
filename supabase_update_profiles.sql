@@ -21,6 +21,7 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS notifications JSONB DEFAULT
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS security_lock BOOLEAN DEFAULT false;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS dark_mode BOOLEAN DEFAULT true;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS theme_mode TEXT DEFAULT 'system';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS theme_color TEXT DEFAULT '#635BFF';
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS quick_choices JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS savings_pot NUMERIC DEFAULT 0;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS savings_goals JSONB DEFAULT '[]'::jsonb;

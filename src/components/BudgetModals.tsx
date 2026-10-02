@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 
-import { X, Check, Trash2, ChevronDown, PiggyBank, Pencil, ChevronRight } from 'lucide-react';
+import { X, Check, Trash2, ChevronDown, PiggyBank, Pencil, ChevronRight, Calendar, Repeat, CreditCard } from 'lucide-react';
 import { Income, FixedExpense, Frequency, Category, Config, MonthlySaving } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
@@ -13,9 +13,7 @@ import { ICON_MAP, isEmojiString, getPaymentMethodIcon, getCategoryIconName } fr
 import { ConfirmModal } from './ConfirmModal';
 import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
-import { CategoryTile } from './CategoryTile';
 import { useScrollLock } from '../hooks/useScrollLock';
-import { QuickMathToolbar } from './QuickMathToolbar';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { Button, IconButton } from './ui';
 import { CancelSubscriptionModal } from './CancelSubscriptionModal';
@@ -334,6 +332,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const [showIconSelector, setShowIconSelector] = useState(false);
+  const [isCategorySelectorOpen, setIsCategorySelectorOpen] = useState(false);
   const amountInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -411,7 +410,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -426,12 +425,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] sm:rounded-[32px] sm:max-w-xl sm:mx-auto relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
         <div 
-          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[32px] sm:rounded-[32px] overflow-hidden"
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[32px] overflow-hidden"
           style={{
             background: `
               radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
@@ -493,7 +492,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
-                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full text-emerald-600 dark:text-emerald-400"
+                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-emerald-600 dark:text-emerald-400"
               >
                 <input
                   ref={amountInputRef}
@@ -508,52 +507,114 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     }
                   }}
                   placeholder="0"
-                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400 placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full"
+                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400 placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none"
                 />
-                <span className="text-[18px] sm:text-[22px] font-normal text-[var(--text-tertiary)] ml-2 font-sans select-none">
+                <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] select-none ml-2 mb-1.5 font-sans shrink-0">
                   {currency}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Details Section: Clean card with subtle hairline divider lines */}
-          <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 sm:p-5 divide-y divide-black/[0.05] dark:divide-white/[0.05] text-left">
-            {/* Category */}
-            <div className="py-3 flex flex-col gap-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                  {t('category')}
-                </span>
-                <span className="text-[13px] font-medium text-[var(--text-primary)]">
+          {/* 2. Grid for Category & Arrival Day */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Category Card */}
+            <div 
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setIsCategorySelectorOpen(true);
+              }}
+              className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+            >
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('category')}
+              </span>
+              <div className="flex items-center gap-2 min-w-0">
+                <div 
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                  style={{ 
+                    backgroundColor: (categories || []).find(c => c.name === category)?.color ? `${(categories || []).find(c => c.name === category)?.color}25` : 'rgba(0,0,0,0.06)',
+                    color: (categories || []).find(c => c.name === category)?.color || 'var(--text-primary)'
+                  }}
+                >
+                  <CategoryIcon 
+                    icon={(categories || []).find(c => c.name === category)?.icon || 'tag'} 
+                    color={(categories || []).find(c => c.name === category)?.color} 
+                    size="2xs" 
+                  />
+                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
                   {category || t('income')}
                 </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2 pt-1">
-                {(categories || []).map(cat => {
-                  const isActive = category === cat.name;
-                  return (
-                    <CategoryTile
-                      key={cat.name}
-                      name={cat.name}
-                      icon={cat.icon}
-                      color={cat.color}
-                      isActive={isActive}
-                      onClick={() => setCategory(cat.name)}
-                    />
-                  );
-                })}
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
             </div>
 
-            {/* Type: Fixed / Variable */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('type')}
+            {/* Arrival Day Card */}
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('arrivalDay')}
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[13px] font-medium text-[var(--text-primary)]">
-                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <Calendar size={14} strokeWidth={2.2} />
+                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
+                  {deductionDay}:e
+                </span>
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+              </div>
+              <select
+                value={deductionDay}
+                onChange={(e) => setDeductionDay(parseInt(e.target.value))}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                title={t('arrivalDay')}
+              >
+                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                  <option key={day} value={day} className="bg-white dark:bg-[#222222] text-[var(--text-primary)] font-bold">{day}:e</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* 3. Grid for Frequency & Type */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Frequency Card */}
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('frequency')}
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <Repeat size={14} strokeWidth={2.2} />
+                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                  {t(`freq_${frequency.toLowerCase()}` as TranslationKey)}
+                </span>
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+              </div>
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value as Frequency)}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                title={t('frequency')}
+              >
+                {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
+                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                    {t(`freq_${key.toLowerCase()}` as TranslationKey)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Type: Fixed / Variable Card */}
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] transition-all flex items-center justify-between min-h-[76px]">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('type')}
+              </span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[14px] font-bold text-[var(--text-primary)]">
+                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
                 <button
                   type="button"
@@ -566,93 +627,62 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 </button>
               </div>
             </div>
+          </div>
 
-            {/* Arrival Day */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('arrivalDay')}
-              </span>
-              <div className="relative">
-                <select
-                  value={deductionDay}
-                  onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                  className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] tabular-nums outline-none pr-5 text-right cursor-pointer"
-                >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                    <option key={day} value={day} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">{day}:e</option>
-                  ))}
-                </select>
-                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
-              </div>
-            </div>
-
-            {/* Frequency */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('frequency')}
-              </span>
-              <div className="relative">
-                <select
-                  value={frequency}
-                  onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
-                >
-                  {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
-                      {t(`freq_${key.toLowerCase()}` as TranslationKey)}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
-              </div>
-            </div>
-
-            {/* Start Month if not monthly */}
+          {/* 4. Grid for Start Month (if applicable) & Note */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {frequency !== Frequency.MONTHLY && (
-              <div className="py-3 flex items-center justify-between gap-4">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('startMonthLabel')}
                 </span>
-                <div className="relative">
-                  <select
-                    value={startMonth}
-                    onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
-                  >
-                    {Array.from({ length: 12 }, (_, i) => {
-                      const date = new Date(2024, i, 1);
-                      const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
-                      const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-                      return (
-                        <option key={i} value={i} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
-                          {capitalizedMonth}
-                        </option>
-                      );
-                    })}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    <Calendar size={14} strokeWidth={2.2} />
+                  </div>
+                  <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
+                  </span>
+                  <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
                 </div>
+                <select
+                  value={startMonth}
+                  onChange={(e) => setStartMonth(parseInt(e.target.value))}
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                  title={t('startMonthLabel')}
+                >
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const date = new Date(2024, i, 1);
+                    const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
+                    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                    return (
+                      <option key={i} value={i} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                        {capitalizedMonth}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
             )}
 
-            {/* Note */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+            {/* Note Card */}
+            <div className={`p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] flex flex-col justify-between min-h-[76px] ${frequency === Frequency.MONTHLY ? 'sm:col-span-2' : ''}`}>
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {t('ownNote')}
               </span>
-              <div className="flex-1 flex items-center justify-end gap-1.5">
+              <div className="flex items-center gap-2">
                 <input 
                   type="text" 
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv en notering...'}
-                  className="text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none placeholder:font-normal placeholder:text-[13px] placeholder-[var(--text-tertiary)] max-w-[70%]"
+                  placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
+                  className="text-[13.5px] font-medium text-[var(--text-primary)] bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
                 />
                 {note && (
                   <button 
                     type="button"
                     onClick={() => setNote('')}
-                    className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
                   >
                     <X size={13} strokeWidth={2} />
                   </button>
@@ -660,10 +690,65 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               </div>
             </div>
           </div>
+
+          {/* Category Selector Bottom Sheet Modal */}
+          {isCategorySelectorOpen && createPortal(
+            <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategorySelectorOpen(false)} />
+              <motion.div
+                initial={{ y: '100%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: '100%', opacity: 0 }}
+                className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#1C1C1C] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[80dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
+                <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/5 dark:border-white/10 shrink-0">
+                  <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">{t('category')}</h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsCategorySelectorOpen(false)}
+                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <X size={16} strokeWidth={2.2} />
+                  </button>
+                </div>
+                <div className="p-3 overflow-y-auto space-y-1 shrink min-h-0 custom-scrollbar">
+                  {(categories || []).map(cat => {
+                    const isSelected = category === cat.name;
+                    return (
+                      <button
+                        key={cat.name}
+                        type="button"
+                        onClick={() => {
+                          setCategory(cat.name);
+                          setIsCategorySelectorOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all cursor-pointer text-left ${
+                          isSelected ? 'bg-[var(--accent-color)]/15 border border-[var(--accent-color)]/25 text-[var(--accent-color)] font-semibold' : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <CategoryIcon icon={cat.icon} color={cat.color} size="sm" />
+                          <span className="text-[15px] font-normal">{cat.name}</span>
+                        </div>
+                        {isSelected && (
+                          <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] flex items-center justify-center shrink-0">
+                            <Check size={12} strokeWidth={2.5} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </div>,
+            document.body
+          )}
         </div>
 
         {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
           <button 
             type="button"
             onClick={handleSave} 
@@ -1212,7 +1297,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -1227,12 +1312,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] sm:rounded-[32px] sm:max-w-xl sm:mx-auto relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
         <div 
-          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[32px] sm:rounded-[32px] overflow-hidden"
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[32px] overflow-hidden"
           style={{
             background: `
               radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
@@ -1294,7 +1379,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
-                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full text-[var(--text-primary)]"
+                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
               >
                 <input
                   ref={amountInputRef}
@@ -1309,42 +1394,150 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     }
                   }}
                   placeholder="0"
-                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full"
+                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder-[var(--text-tertiary)] w-full leading-none"
                 />
-                <span className="text-[18px] sm:text-[22px] font-normal text-[var(--text-tertiary)] ml-2 font-sans select-none">
+                <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] select-none ml-2 mb-1.5 font-sans shrink-0">
                   {currency}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Details Section: Clean card with subtle hairline divider lines */}
-          <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 sm:p-5 divide-y divide-black/[0.05] dark:divide-white/[0.05] text-left">
-            {/* Category */}
+          {/* 2. Grid for Category & Deduction Day */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Category Card */}
             <div 
-              onClick={() => setIsCategorySelectorOpen(true)}
-              className="py-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors rounded-xl -mx-2 px-2 select-none group"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setIsCategorySelectorOpen(true);
+              }}
+              className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('category')}
               </span>
-              <div className="flex items-center gap-2 shrink-0">
-                <CategoryIcon icon={categories.find(c => c.name === category)?.icon || 'receipt'} color={categories.find(c => c.name === category)?.color} size="xs" />
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+              <div className="flex items-center gap-2 min-w-0">
+                <div 
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                  style={{ 
+                    backgroundColor: categories.find(c => c.name === category)?.color ? `${categories.find(c => c.name === category)?.color}25` : 'rgba(0,0,0,0.06)',
+                    color: categories.find(c => c.name === category)?.color || 'var(--text-primary)'
+                  }}
+                >
+                  <CategoryIcon 
+                    icon={categories.find(c => c.name === category)?.icon || 'receipt'} 
+                    color={categories.find(c => c.name === category)?.color} 
+                    size="2xs" 
+                  />
+                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
                   {category || (config?.language === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
-                <ChevronRight size={14} className="text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] transition-colors" />
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
             </div>
 
-            {/* Type: Fixed / Variable */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('type')}
+            {/* Deduction Day Card */}
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {paymentMethod === 'autogiro' || (typeof paymentMethod === 'string' && (paymentMethod.toLowerCase().includes('autogiro') || paymentMethod.toLowerCase().includes('kort')))
+                  ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag')
+                  : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[13px] font-medium text-[var(--text-primary)]">
-                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <Calendar size={14} strokeWidth={2.2} />
+                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
+                  {deductionDay}:e
+                </span>
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+              </div>
+              <select
+                value={deductionDay}
+                onChange={(e) => setDeductionDay(parseInt(e.target.value))}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                title={paymentMethod === 'autogiro' ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag') : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
+              >
+                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                  <option key={day} value={day} className="bg-white dark:bg-[#222222] text-[var(--text-primary)] font-bold">{day}:e</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* 3. Grid for Frequency & Payment Method */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Frequency Card */}
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('frequency')}
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <Repeat size={14} strokeWidth={2.2} />
+                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                  {t(`freq_${frequency.toLowerCase()}` as TranslationKey)}
+                </span>
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+              </div>
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value as Frequency)}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                title={t('frequency')}
+              >
+                {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
+                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                    {t(`freq_${key.toLowerCase()}` as TranslationKey)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Payment Method Card */}
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('paymentMethod')}
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <CreditCard size={14} strokeWidth={2.2} />
+                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                  {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
+                </span>
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+              </div>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                title={t('paymentMethod')}
+              >
+                {(paymentMethods || []).map((method, idx) => {
+                  const methodName = typeof method === 'string' ? method : method?.name || '';
+                  return (
+                    <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                      {methodName}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          </div>
+
+          {/* 4. Grid for Type & (Start Month if non-monthly OR Note if monthly) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Type: Fixed / Variable Card */}
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] transition-all flex items-center justify-between min-h-[76px]">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('type')}
+              </span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[14px] font-bold text-[var(--text-primary)]">
+                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
                 <button
                   type="button"
@@ -1358,123 +1551,95 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               </div>
             </div>
 
-            {/* Frequency */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('frequency')}
-              </span>
-              <div className="relative">
-                <select
-                  value={frequency}
-                  onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
-                >
-                  {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
-                      {t(`freq_${key.toLowerCase()}` as TranslationKey)}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
-              </div>
-            </div>
-
-            {/* Start Month if not monthly */}
-            {frequency !== Frequency.MONTHLY && (
-              <div className="py-3 flex items-center justify-between gap-4">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+            {frequency !== Frequency.MONTHLY ? (
+              /* Start Month Card */
+              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('startMonthLabel')}
                 </span>
-                <div className="relative">
-                  <select
-                    value={startMonth}
-                    onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
-                  >
-                    {Array.from({ length: 12 }, (_, i) => {
-                      const date = new Date(2024, i, 1);
-                      const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
-                      const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-                      return (
-                        <option key={i} value={i} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
-                          {capitalizedMonth}
-                        </option>
-                      );
-                    })}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    <Calendar size={14} strokeWidth={2.2} />
+                  </div>
+                  <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
+                  </span>
+                  <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
                 </div>
-              </div>
-            )}
-
-            {/* Deduction Day / Payment Day */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                {paymentMethod === 'autogiro' || (typeof paymentMethod === 'string' && (paymentMethod.toLowerCase().includes('autogiro') || paymentMethod.toLowerCase().includes('kort')))
-                  ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag')
-                  : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
-              </span>
-              <div className="relative">
                 <select
-                  value={deductionDay}
-                  onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                  className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] tabular-nums outline-none pr-5 text-right cursor-pointer"
+                  value={startMonth}
+                  onChange={(e) => setStartMonth(parseInt(e.target.value))}
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                  title={t('startMonthLabel')}
                 >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                    <option key={day} value={day} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">{day}:e</option>
-                  ))}
-                </select>
-                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
-              </div>
-            </div>
-
-            {/* Payment Method */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('paymentMethod')}
-              </span>
-              <div className="relative">
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
-                >
-                  {(paymentMethods || []).map((method, idx) => {
-                    const methodName = typeof method === 'string' ? method : method?.name || '';
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const date = new Date(2024, i, 1);
+                    const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
+                    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                     return (
-                      <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">{methodName}</option>
+                      <option key={i} value={i} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                        {capitalizedMonth}
+                      </option>
                     );
                   })}
                 </select>
-                <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
               </div>
-            </div>
-
-            {/* Note */}
-            <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('ownNote')}
-              </span>
-              <div className="flex-1 flex items-center justify-end gap-1.5">
-                <input 
-                  type="text" 
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv en notering...'}
-                  className="text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none placeholder:font-normal placeholder:text-[13px] placeholder-[var(--text-tertiary)] max-w-[70%]"
-                />
-                {note && (
-                  <button 
-                    type="button"
-                    onClick={() => setNote('')}
-                    className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
-                  >
-                    <X size={13} strokeWidth={2} />
-                  </button>
-                )}
+            ) : (
+              /* Note Card when monthly: sits alongside Type in a balanced 2-column row! */
+              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] flex flex-col justify-between min-h-[76px]">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+                  {t('ownNote')}
+                </span>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="text" 
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
+                    className="text-[13.5px] font-medium text-[var(--text-primary)] bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  />
+                  {note && (
+                    <button 
+                      type="button"
+                      onClick={() => setNote('')}
+                      className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
+                    >
+                      <X size={13} strokeWidth={2} />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
+
+          {/* 5. Grid for Note Card when non-monthly (full-width) */}
+          {frequency !== Frequency.MONTHLY && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] flex flex-col justify-between min-h-[76px] sm:col-span-2">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+                  {t('ownNote')}
+                </span>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="text" 
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
+                    className="text-[13.5px] font-medium text-[var(--text-primary)] bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  />
+                  {note && (
+                    <button 
+                      type="button"
+                      onClick={() => setNote('')}
+                      className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
+                    >
+                      <X size={13} strokeWidth={2} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Category Selector Bottom Sheet Modal */}
           {isCategorySelectorOpen && createPortal(
@@ -1553,7 +1718,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         </div>
 
         {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
           <button 
             type="button"
             onClick={handleSave} 
@@ -1889,7 +2054,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
   const [manualSelectionThisSession, setManualSelectionThisSession] = useState(false);
   
   const [logo, setLogo] = useState<string | undefined>(saving?.logo);
-  const [autoLogo, setAutoLogo] = useState<string | undefined>(saving?.name ? getLogoUrl(saving.name) : undefined);
+  const [_autoLogo, setAutoLogo] = useState<string | undefined>(saving?.name ? getLogoUrl(saving.name) : undefined);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const [showIconSelector, setShowIconSelector] = useState(false);
@@ -1946,7 +2111,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -1961,247 +2126,293 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
 
-        {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/5 dark:border-white/10">
-          <div className="flex justify-start">
-            <button
-              key="icon"
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowIconSelector(true);
-              }}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-2xl overflow-hidden transition-all duration-300 active:scale-95 bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 shrink-0"
-              title={t('chooseIcon')}
-            >
-              {logo ? (
-                <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              ) : isEmojiString(icon) ? (
-                icon
-              ) : (
-                (() => {
-                  const Icon = ICON_MAP[icon] || PiggyBank;
-                  return <Icon size={20} className="text-accent" />;
-                })()
-              )}
-            </button>
-          </div>
-          <div className="flex justify-center overflow-hidden">
-            <h2 className="text-[18px] sm:text-[20px] font-semibold tracking-tight text-[var(--text-primary)] dark:text-white text-center truncate px-2">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 max-w-xl mx-auto w-full">
+          {/* Top Bar with Title & Close */}
+          <div className="flex items-center justify-between pb-1 px-1">
+            <h2 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight">
               {saving ? `${t('edit')} ${saving.name}` : `${t('new')} ${t('monthlySavings').toLowerCase()}`}
             </h2>
-          </div>
-          <div className="flex justify-end">
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
               aria-label={t('close')}
             >
-              <X size={17} strokeWidth={2.2} />
+              <X size={15} strokeWidth={2.2} />
             </button>
           </div>
-        </div>
 
-        {/* Main Content Area */}
-        <div className="shrink overflow-y-auto px-5 sm:px-6 py-5 space-y-5 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          {/* Amount Inputs Section */}
-          <div className="space-y-4">
-            <div className="flex flex-col gap-1">
-              <div 
-                onClick={() => amountInputRef.current?.focus()}
-                className="bg-black/5 dark:bg-[#222222] rounded-[16px] h-[88px] px-4 sm:px-5 flex items-center justify-between transition-all border border-black/10 dark:border-white/10 focus-within:border-[var(--accent-color)] dark:focus-within:border-white/40 group cursor-text"
-              >
-                <div className="shrink-0 min-w-[48px]" />
-                <div className="flex-1 flex items-baseline justify-center gap-1.5">
-                  <input 
-                    ref={amountInputRef}
-                    type="text" 
-                    inputMode="decimal"
-                    value={amount} 
-                    onChange={(e) => setAmount(formatAmount(e.target.value))}
-                    onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        setAmount(evaluateAndFormatAmount(amount));
-                      }
-                    }}
-                    placeholder="0" 
-                    className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-[32px] sm:text-[34px] font-medium text-center tracking-tight leading-none placeholder:font-normal placeholder-[var(--text-tertiary)]" 
-                  />
-                  <span className="text-[15px] font-normal text-[var(--text-secondary)] select-none font-sans shrink-0">
-                    {currency}
-                  </span>
-                </div>
-                <div className="shrink-0 min-w-[48px]" />
-              </div>
-
-              <QuickMathToolbar value={amount} onChange={setAmount} inputRef={amountInputRef} currency={currency} showMathTools={false} />
-            </div>
-
-            <div className="flex items-center justify-between px-4 py-3.5 bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] transition-all">
-              <div className="flex flex-col gap-0.5 pr-2">
-                <span className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight">Varierande belopp</span>
-                <span className="text-[12px] font-normal text-[var(--text-secondary)]">Ändras månad till månad</span>
-              </div>
+          {/* 1. Main Hero Card: Icon + Name & Amount Input */}
+          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border-none shadow-none space-y-4">
+            <div className="flex items-center gap-3.5">
               <button
                 type="button"
-                onClick={() => setIsVariable(!isVariable)}
-                className={`w-11 h-6 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
+                onClick={() => setShowIconSelector(true)}
+                className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                title={t('chooseIcon')}
+                aria-label={t('chooseIcon')}
               >
-                <div
-                  className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[22px]' : 'left-0.5'}`}
-                />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl overflow-hidden bg-black/5 dark:bg-[#222222]">
+                  {logo ? (
+                    <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : isEmojiString(icon) ? (
+                    icon
+                  ) : (
+                    (() => {
+                      const Icon = ICON_MAP[icon] || PiggyBank;
+                      return <Icon size={22} className="text-accent" />;
+                    })()
+                  )}
+                </div>
               </button>
+              <div className="flex-1 min-w-0">
+                <input 
+                  ref={nameInputRef}
+                  type="text" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  placeholder={t('savingsGoalPlaceholder')} 
+                  className="text-[19px] sm:text-[21px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Name Input */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between px-1">
-              <label className="text-[14px] font-normal text-[var(--text-secondary)]">
-                {t('whatAreYouSavingFor')}
-              </label>
-              {autoLogo && !manualSelectionThisSession && name !== originalName.current && (
-                <span className="text-[10px] font-semibold text-[#05B862] bg-[#E8F8F0] dark:bg-[#0D2E1F] px-2 py-0.5 rounded-full">
-                  Auto
+            <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
+              <div 
+                onClick={() => amountInputRef.current?.focus()}
+                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
+              >
+                <input
+                  ref={amountInputRef}
+                  type="text"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(formatAmount(e.target.value))}
+                  onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setAmount(evaluateAndFormatAmount(amount));
+                    }
+                  }}
+                  placeholder="0"
+                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder-[var(--text-tertiary)] w-full leading-none"
+                />
+                <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] select-none ml-2 mb-1.5 font-sans shrink-0">
+                  {currency}
                 </span>
-              )}
-            </div>
-            <div className="relative group">
-              <input 
-                ref={nameInputRef}
-                type="text" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                placeholder={t('savingsGoalPlaceholder')} 
-                className="w-full h-[48px] bg-black/5 dark:bg-[#222222] text-[14px] font-normal text-[var(--text-primary)] outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] rounded-[16px] px-4 border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40" 
-              />
-              {name && (
-                <button 
-                  type="button"
-                  onClick={() => setName('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1 cursor-pointer"
-                >
-                  <X size={16} strokeWidth={2} />
-                </button>
-              )}
+              </div>
             </div>
           </div>
 
-          {/* Deduction Day */}
-          <div className="space-y-2">
-            <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('deductionDay') || 'Dragningsdag'}</label>
-            <div className="relative">
+          {/* 2. Grid for Deduction Day & Frequency */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Deduction Day Card */}
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('deductionDay') || 'Dragningsdag'}
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <Calendar size={14} strokeWidth={2.2} />
+                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
+                  {deductionDay}:e
+                </span>
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+              </div>
               <select
                 value={deductionDay}
                 onChange={(e) => setDeductionDay(parseInt(e.target.value))}
-                className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                title={t('deductionDay') || 'Dragningsdag'}
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <option key={day} value={day}>{day}</option>
+                  <option key={day} value={day} className="bg-white dark:bg-[#222222] text-[var(--text-primary)] font-bold">{day}:e</option>
                 ))}
               </select>
-              <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+            </div>
+
+            {/* Frequency Card */}
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('frequency')}
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <Repeat size={14} strokeWidth={2.2} />
+                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                  {t(`freq_${frequency.toLowerCase()}` as TranslationKey)}
+                </span>
+                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+              </div>
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value as Frequency)}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                title={t('frequency')}
+              >
+                {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
+                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                    {t(`freq_${key.toLowerCase()}` as TranslationKey)}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          <div className={`grid gap-3 ${frequency !== Frequency.MONTHLY ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            <div className="space-y-2">
-              <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('frequency')}</label>
-              <div className="relative">
-                <select
-                  value={frequency}
-                  onChange={(e) => setFrequency(e.target.value as Frequency)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+          {/* 3. Grid for Type & (Start Month or Payment Method) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Type: Fixed / Variable Card */}
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] transition-all flex items-center justify-between min-h-[76px]">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                {t('type')}
+              </span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[14px] font-bold text-[var(--text-primary)]">
+                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsVariable(!isVariable)}
+                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
                 >
-                  {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                    <option key={key} value={Frequency[key]}>{t(`freq_${key.toLowerCase()}` as TranslationKey)}</option>
-                  ))}
-                </select>
-                <ChevronDown size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+                  <div
+                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
+                  />
+                </button>
               </div>
             </div>
 
+            {/* Start Month if not monthly */}
             {frequency !== Frequency.MONTHLY && (
-              <div className="space-y-2">
-                <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('startMonthLabel')}</label>
-                <div className="relative">
-                  <select
-                    value={startMonth}
-                    onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                    className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
-                  >
-                    {Array.from({ length: 12 }, (_, i) => {
-                      const date = new Date(2024, i, 1);
-                      const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
-                      const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-                      
-                      let cycleText = '';
-                      if (frequency === Frequency.QUARTERLY) {
-                        const m2 = (i + 3) % 12;
-                        const m3 = (i + 6) % 12;
-                        const m4 = (i + 9) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
-                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)}, ${getMonthShort(m3)}, ${getMonthShort(m4)})`;
-                      } else if (frequency === Frequency.SEMI_ANNUALLY) {
-                        const m2 = (i + 6) % 12;
-                        const getMonthShort = (idx: number) => new Date(2024, idx, 1).toLocaleString(config?.language || 'sv-SE', { month: 'short' });
-                        cycleText = ` (${getMonthShort(i)}, ${getMonthShort(m2)})`;
-                      }
-
-                      return (
-                        <option key={i} value={i}>
-                          {capitalizedMonth}{cycleText}
-                        </option>
-                      );
-                    })}
-                  </select>
-                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
+              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                  {t('startMonthLabel')}
+                </span>
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    <Calendar size={14} strokeWidth={2.2} />
+                  </div>
+                  <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
+                  </span>
+                  <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
                 </div>
+                <select
+                  value={startMonth}
+                  onChange={(e) => setStartMonth(parseInt(e.target.value))}
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                  title={t('startMonthLabel')}
+                >
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const date = new Date(2024, i, 1);
+                    const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
+                    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                    return (
+                      <option key={i} value={i} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                        {capitalizedMonth}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
+
+            {/* Payment Method Card */}
+            {paymentMethods && paymentMethods.length > 0 && frequency === Frequency.MONTHLY && (
+              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                  {t('paymentMethod') || 'Betalmetod'}
+                </span>
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    <CreditCard size={14} strokeWidth={2.2} />
+                  </div>
+                  <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                    {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
+                  </span>
+                  <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                </div>
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                  title={t('paymentMethod')}
+                >
+                  {paymentMethods.map((pm: any) => {
+                    const pmName = typeof pm === 'string' ? pm : pm.name;
+                    return <option key={pmName} value={pmName} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">{pmName}</option>;
+                  })}
+                </select>
               </div>
             )}
           </div>
 
-          {/* Payment Method */}
-          {paymentMethods && paymentMethods.length > 0 && (
-            <div className="space-y-2">
-              <label className="text-[14px] font-normal text-[var(--text-secondary)] block">{t('paymentMethod') || 'Betalsätt'}</label>
-              <div className="relative">
+          {/* 4. Grid for Payment Method if non-monthly (full-width) */}
+          {paymentMethods && paymentMethods.length > 0 && frequency !== Frequency.MONTHLY && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer sm:col-span-2">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                  {t('paymentMethod') || 'Betalmetod'}
+                </span>
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    <CreditCard size={14} strokeWidth={2.2} />
+                  </div>
+                  <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                    {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
+                  </span>
+                  <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                </div>
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full h-[48px] appearance-none bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-[16px] px-4 text-[14px] font-normal text-[var(--text-primary)] focus:border-[var(--accent-color)] dark:focus:border-white/40 outline-none transition-all pr-10 cursor-pointer"
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                  title={t('paymentMethod')}
                 >
                   {paymentMethods.map((pm: any) => {
                     const pmName = typeof pm === 'string' ? pm : pm.name;
-                    return <option key={pmName} value={pmName}>{pmName}</option>;
+                    return <option key={pmName} value={pmName} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">{pmName}</option>;
                   })}
                 </select>
-                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
               </div>
             </div>
           )}
         </div>
 
-        {/* Action Button Footer */}
-        <div className="shrink-0 px-6 pt-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/5 dark:border-white/10 bg-transparent">
-          <Button 
+        {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
+          <button 
             type="button"
             onClick={handleSave} 
-            variant="primary"
-            fullWidth
-            size="lg"
-            icon={<Check size={18} strokeWidth={2.5} />}
+            className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
           >
-            {saving ? t('saveChanges') : t('addSaving')}
-          </Button>
+            <Check size={15} strokeWidth={2} />
+            <span>{saving ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add saving' : 'Lägg till månadssparande')}</span>
+          </button>
+
+          {saving && onDelete && (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setShowDeleteConfirm(true);
+              }}
+              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
+              aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
+            >
+              <Trash2 size={16} strokeWidth={1.9} />
+            </button>
+          )}
         </div>
 
         {/* Compact Icon Selector Popover */}
