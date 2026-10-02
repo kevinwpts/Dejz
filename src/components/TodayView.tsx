@@ -572,13 +572,13 @@ export function TodayView({
       {/* 2. SCROLL CONTAINER (Scrolls up seamlessly over static hero) */}
       <div
         ref={sheetRef}
-        className="relative z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 bg-transparent border-none shadow-none min-h-[calc(100vh-8rem)] pt-0 pb-40 space-y-3"
+        className="relative z-20 bg-transparent border-none shadow-none min-h-[calc(100vh-8rem)] pt-0 pb-40 space-y-3"
       >
-        <div className="bg-white dark:bg-[#1E1B22] rounded-t-[32px] sm:rounded-t-[32px] p-5 sm:p-6 shadow-sm space-y-5">
+        <div className="w-screen relative left-1/2 -translate-x-1/2 bg-white dark:bg-[#1E1B22] rounded-t-[32px] sm:rounded-t-[32px] p-5 sm:p-6 shadow-sm space-y-5">
 
         {/* 3. PERIOD TIMELINE (Top of the sheet, stays sticky beneath header when expanded) */}
         {calendarDays && calendarDays.length > 0 && (
-          <div className={`sticky ${timelineStickyTop} z-20 bg-transparent -mx-4 sm:-mx-6 px-4 sm:px-6 pt-0 pb-2.5 transition-all`}>
+          <div className={`sticky ${timelineStickyTop} z-20 bg-transparent pt-0 pb-2.5 transition-all`}>
             <PeriodTimeline
               calendarDays={calendarDays}
               selectedDate={normalizedSelectedDate}
