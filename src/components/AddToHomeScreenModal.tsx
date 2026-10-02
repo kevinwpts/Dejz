@@ -205,17 +205,17 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 15 }}
             transition={{ type: 'spring', damping: 28, stiffness: 360 }}
-            className="bg-white dark:bg-[#242424] w-full max-w-[420px] rounded-t-[28px] sm:rounded-[26px] p-6 sm:p-7 border-t sm:border border-[#E6E2D8] dark:border-[#383838] shadow-2xl relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7"
+            className="bg-white dark:bg-[#1E1B22] w-full max-w-[420px] rounded-t-[28px] sm:rounded-[26px] p-6 sm:p-7 border-t sm:border border-black/[0.08] dark:border-white/[0.08] shadow-2xl relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Drag Handle for mobile */}
-            <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto -mt-2 mb-4 sm:hidden" />
+            <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto -mt-2 mb-4 sm:hidden" />
 
             {/* Close Button */}
             <button 
               onClick={handleClose}
               aria-label="Stäng"
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-all active:scale-90 z-20 cursor-pointer"
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all active:scale-90 z-20 cursor-pointer"
             >
               <X size={16} strokeWidth={2} />
             </button>

@@ -113,11 +113,11 @@ export function IconPickerModal({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.94, opacity: 0, y: 16 }}
           transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-          className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-[28px] border border-black/10 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[88vh] font-sans"
+          className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl overflow-hidden flex flex-col max-h-[88vh] font-sans"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-black/5 dark:border-white/10 shrink-0">
+          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-2xl bg-[#05B862]/15 text-[#05B862] flex items-center justify-center shrink-0">
                 <Sparkles size={18} />

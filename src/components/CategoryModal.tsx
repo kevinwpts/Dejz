@@ -66,11 +66,11 @@ export function CategoryModal({
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/10 dark:border-white/10 shadow-2xl font-sans"
+          className="bg-white dark:bg-[#1E1B22] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10">
+          <div className="flex items-center justify-between p-4 border-b border-black/[0.06] dark:border-white/[0.08]">
             <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
               {isEdit ? t('edit') : t('newCategory')}
             </h2>

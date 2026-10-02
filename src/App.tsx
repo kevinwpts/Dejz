@@ -5469,11 +5469,8 @@ export default function App() {
               {/* Drawer Handle */}
               <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mb-1 shrink-0" />
 
-              {/* Header with Title and X Close Button */}
-              <div className="flex items-center justify-between pb-1">
-                <span className="text-[14px] font-semibold tracking-tight text-[var(--text-secondary)] select-none">
-                  {config?.language === "en" ? "Add transaction" : "Ny transaktion"}
-                </span>
+              {/* Header with X Close Button */}
+              <div className="flex items-center justify-end -mt-1 -mb-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -5481,6 +5478,7 @@ export default function App() {
                     setIsPlusMenuOpen(false);
                   }}
                   className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors"
+                  aria-label={config?.language === "en" ? "Close" : "Stäng"}
                 >
                   <X size={16} />
                 </button>

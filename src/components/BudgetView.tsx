@@ -461,7 +461,7 @@ export function BudgetView({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-20 h-7 px-1.5 rounded-lg bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                            className="w-20 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-white/10 border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
                           />
                         ) : (
                           <button
@@ -525,7 +525,7 @@ export function BudgetView({
                               e.currentTarget.blur();
                             }
                           }}
-                          className="w-24 h-7 px-1.5 rounded-lg bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                          className="w-24 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-white/10 border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
                         />
                       ) : (
                         <button

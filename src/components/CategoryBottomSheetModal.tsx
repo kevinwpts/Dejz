@@ -159,13 +159,13 @@ export function CategoryBottomSheetModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl border-t sm:border border-black/10 dark:border-white/10 rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
+            className="relative w-full max-w-lg bg-white dark:bg-[#1E1B22] border-t sm:border border-black/[0.08] dark:border-white/[0.08] rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
           >
             {/* Top Grab Handle */}
             <div className="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20 mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
             {/* Header: Category Identity & Close Button */}
-            <div className="flex items-center justify-between px-5 sm:px-6 pt-3 pb-3 border-b border-black/5 dark:border-white/10 shrink-0">
+            <div className="flex items-center justify-between px-5 sm:px-6 pt-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/[0.08] border border-black/10 dark:border-white/10 text-[var(--text-primary)] flex items-center justify-center shrink-0">
                   {isEmojiString(iconKey) ? (

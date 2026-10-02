@@ -32,7 +32,7 @@ export function SelectionRow<T = string>({
       }}
       className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] ${
         isSelected
-          ? 'bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white font-medium'
+          ? 'bg-[#EAE6DE] dark:bg-white/10 text-[#1C1917] dark:text-white font-medium'
           : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white font-medium'
       } ${className}`}
     >

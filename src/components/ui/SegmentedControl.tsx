@@ -38,7 +38,7 @@ export function SegmentedControl<T extends string = string>({
 
   return (
     <div
-      className={`bg-[var(--surface-muted)] dark:bg-[#2D2D2D] flex items-center relative ${sizeStyles} ${
+      className={`bg-black/5 dark:bg-white/10 flex items-center relative ${sizeStyles} ${
         fullWidth ? 'w-full' : 'inline-flex'
       } ${className}`}
     >

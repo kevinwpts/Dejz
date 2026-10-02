@@ -558,7 +558,7 @@ export function SettingsView({
       {/* Category Deletion Migration Modal */}
       {deleteMigrationData && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#242424] w-full max-w-sm rounded-[24px] p-6 relative border border-[#E6E2D8] dark:border-[#383838] shadow-2xl font-sans">
+          <div className="bg-white dark:bg-[#1E1B22] w-full max-w-sm rounded-[24px] p-6 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans">
             <h3 className="text-lg font-bold text-[#1C1917] dark:text-white mb-2">
               Ta bort {deleteMigrationData.category.name}?
             </h3>
@@ -570,7 +570,7 @@ export function SettingsView({
               <select
                 value={targetMigrationId}
                 onChange={(e) => setTargetMigrationId(e.target.value)}
-                className="w-full h-[48px] bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] rounded-[14px] px-3 text-[14px] font-normal text-[#1C1917] dark:text-white outline-none"
+                className="w-full h-[48px] bg-black/5 dark:bg-white/[0.06] border border-black/10 dark:border-white/10 rounded-[14px] px-3 text-[14px] font-normal text-[#1C1917] dark:text-white outline-none"
               >
                 {(deleteMigrationData.type === 'income' ? (config.incomeCategories || []) : (config.categories || []))
                   .filter(c => c.id !== deleteMigrationData.category.id)
@@ -662,7 +662,7 @@ export function SettingsView({
                 className={`py-3 rounded-[14px] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
                   isSelected
                     ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-md scale-105'
-                    : 'bg-[#F7F5F0] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/10'
+                    : 'bg-black/5 dark:bg-white/[0.08] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/15'
                 }`}
               >
                 {day}

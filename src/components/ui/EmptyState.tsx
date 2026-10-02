@@ -23,7 +23,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       className={`bg-white dark:bg-[#1E1B22] rounded-[16px] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-none border-none ${className}`}
     >
       {Icon && (
-        <div className="w-12 h-12 rounded-2xl bg-[var(--surface-muted)] dark:bg-[#2D2D2D] border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] mb-3 shrink-0">
+        <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-white/10 border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] mb-3 shrink-0">
           <Icon size={20} strokeWidth={2} />
         </div>
       )}

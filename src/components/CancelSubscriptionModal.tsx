@@ -102,13 +102,13 @@ export function CancelSubscriptionModal({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg bg-white dark:bg-[#242424] rounded-t-[28px] sm:rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden"
+          className="relative w-full max-w-lg bg-white dark:bg-[#1E1B22] rounded-t-[28px] sm:rounded-[26px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden"
         >
           {/* Drag Handle */}
-          <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
+          <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-3 sm:pt-5 pb-4 border-b border-[#E2DDD4] dark:border-[#383838] shrink-0">
+          <div className="flex items-center justify-between px-5 pt-3 sm:pt-5 pb-4 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div>
               <h3 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
                 {isEn ? 'Show how to cancel' : 'Visa hur du säger upp'}
@@ -121,7 +121,7 @@ export function CancelSubscriptionModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6D6962] dark:text-[#A8A8A8] hover:text-[#211F1C] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Stäng"
             >
               <X size={16} strokeWidth={2} />
@@ -131,9 +131,9 @@ export function CancelSubscriptionModal({
           {/* Body */}
           <div className="p-5 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
             {/* Target Item Card */}
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#F6F4EE] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-[#383838]">
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-black/5 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08]">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-white dark:bg-[#242424] flex items-center justify-center shrink-0 border border-[#E6E2D8] dark:border-[#383838] overflow-hidden [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full">
+                <div className="w-10 h-10 rounded-full bg-white dark:bg-[#1E1B22] flex items-center justify-center shrink-0 border border-black/10 dark:border-white/10 overflow-hidden [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full">
                   <BudgetItemLogo item={expense} type="expense" config={config} />
                 </div>
                 <div className="min-w-0">
@@ -200,7 +200,7 @@ export function CancelSubscriptionModal({
 
                 {/* Step-by-Step Instructions */}
                 {details.steps && details.steps.length > 0 && (
-                  <div className="p-4 rounded-2xl bg-[#F6F4EE] dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-[#383838] space-y-3">
+                  <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] space-y-3">
                     <div className="flex items-center gap-2 text-xs font-bold text-[#1C1917] dark:text-white tracking-tight">
                       <HelpCircle size={14} className="text-[#1C1917] dark:text-white" />
                       <span>{isEn ? 'How to cancel step-by-step' : 'Så här säger du upp avtalet'}</span>
@@ -209,7 +209,7 @@ export function CancelSubscriptionModal({
                     <ol className="space-y-2.5">
                       {details.steps.map((step, idx) => (
                         <li key={idx} className="flex items-start gap-2.5 text-xs text-[#6E6961] dark:text-[#A8A8A8] leading-relaxed">
-                          <span className="w-5 h-5 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white font-bold text-[10.5px] flex items-center justify-center shrink-0 mt-0.5 border border-[#E6E2D8] dark:border-[#383838]">
+                          <span className="w-5 h-5 rounded-full bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-white font-bold text-[10.5px] flex items-center justify-center shrink-0 mt-0.5 border border-black/10 dark:border-white/10">
                             {idx + 1}
                           </span>
                           <span className="text-[#1C1917] dark:text-white">{step}</span>
@@ -262,7 +262,7 @@ export function CancelSubscriptionModal({
 
             {/* Confirm Delete Section */}
             {onDeleteExpense && (
-              <div className="pt-2 border-t border-[#E6E2D8] dark:border-[#383838]">
+              <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
                 {!showConfirmDelete ? (
                   <button
                     type="button"
@@ -281,7 +281,7 @@ export function CancelSubscriptionModal({
                       <button
                         type="button"
                         onClick={() => setShowConfirmDelete(false)}
-                        className="py-2 px-3 rounded-lg bg-white dark:bg-[#242424] text-[#1C1917] dark:text-white text-xs font-medium border border-[#E6E2D8] dark:border-[#383838] cursor-pointer"
+                        className="py-2 px-3 rounded-lg bg-white dark:bg-[#1E1B22] text-[#1C1917] dark:text-white text-xs font-medium border border-black/10 dark:border-white/10 cursor-pointer"
                       >
                         {isEn ? 'Keep in budget' : 'Behåll'}
                       </button>
@@ -300,11 +300,11 @@ export function CancelSubscriptionModal({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-[#E6E2D8] dark:border-[#383838] bg-white dark:bg-[#242424] flex justify-end shrink-0 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
+          <div className="p-4 border-t border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1E1B22] flex justify-end shrink-0 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#1C1917] dark:text-white text-sm font-semibold border border-[#E6E2D8] dark:border-[#383838] active:scale-95 transition-all cursor-pointer"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[#1C1917] dark:text-white text-sm font-semibold border border-black/10 dark:border-white/10 active:scale-95 transition-all cursor-pointer"
             >
               {isEn ? 'Close' : 'Stäng'}
             </button>

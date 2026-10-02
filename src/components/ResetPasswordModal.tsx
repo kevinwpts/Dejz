@@ -70,7 +70,7 @@ export function ResetPasswordModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="bg-white dark:bg-[#242424] border border-[#E6E2D8] dark:border-[#383838] rounded-[24px] p-6 sm:p-7 w-full max-w-md shadow-2xl relative"
+          className="bg-white dark:bg-[#1E1B22] border border-black/[0.08] dark:border-white/[0.08] rounded-[24px] p-6 sm:p-7 w-full max-w-md shadow-2xl relative"
         >
           <div className="absolute top-5 right-5">
             <IconButton
@@ -99,7 +99,7 @@ export function ResetPasswordModal({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1 text-left pr-8">
-                <div className="w-10 h-10 rounded-[14px] bg-[#EFECE6] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white flex items-center justify-center mb-3">
+                <div className="w-10 h-10 rounded-[14px] bg-black/5 dark:bg-white/[0.08] text-[#1C1917] dark:text-white flex items-center justify-center mb-3 border border-black/10 dark:border-white/10">
                   <Lock size={20} />
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white">

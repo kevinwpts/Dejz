@@ -265,7 +265,7 @@ export function BudgetSummaryModule({
                 ? 'This shows your remaining disposable amount for the selected period after deducting recorded expenses.'
                 : 'Detta visar hur mycket du har kvar att spendera under den valda perioden utifrån din tillgängliga pott minus registrerade utgifter.'}
             </p>
-            <div className="p-3 bg-[var(--surface-muted)] dark:bg-[#2D2D2D] rounded-[12px] space-y-1.5 text-[13px] text-[#211F1C] dark:text-white">
+            <div className="p-3 bg-black/5 dark:bg-white/[0.06] rounded-[12px] space-y-1.5 text-[13px] text-[#211F1C] dark:text-white border border-black/5 dark:border-white/[0.06]">
               <div className="flex justify-between">
                 <span>{isEn ? 'Period budget' : 'Periodbudget'}:</span>
                 <span className="font-medium">{formatAmount(Math.round(effectiveBudget), config.language)} {config.currency}</span>
@@ -274,7 +274,7 @@ export function BudgetSummaryModule({
                 <span>{isEn ? 'Spent so far' : 'Spenderat hittills'}:</span>
                 <span className="font-medium">−{formatAmount(Math.round(totalSpent), config.language)} {config.currency}</span>
               </div>
-              <div className="h-px bg-[#E2DDD4] dark:bg-[#383838] my-1" />
+              <div className="h-px bg-[#E2DDD4] dark:bg-white/[0.08] my-1" />
               <div className="flex justify-between font-semibold">
                 <span>{isEn ? 'Remaining' : 'Kvar'}:</span>
                 <span>{formatAmount(Math.round(remainingBudget), config.language)} {config.currency}</span>

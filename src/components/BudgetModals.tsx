@@ -1488,7 +1488,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full max-w-sm sm:max-w-md bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 shadow-2xl max-h-[80dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#1E1B22] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[80dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -1599,7 +1599,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-sm rounded-[28px] border border-black/10 dark:border-white/10 relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                className="bg-white dark:bg-[#1E1B22] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
                   <div>
@@ -1733,7 +1733,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -1965,7 +1965,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/10 dark:border-white/10 relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -2328,7 +2328,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/10 dark:border-white/10 shadow-2xl font-sans"
+          className="bg-white dark:bg-[#1E1B22] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10">

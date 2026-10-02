@@ -27,12 +27,12 @@ export const PolicyModal = ({ isOpen, onClose, title, content }: PolicyModalProp
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed inset-0 z-[120] flex items-center justify-center p-4"
           >
-            <div className="bg-white dark:bg-[#242424] border border-[#E6E2D8] dark:border-[#383838] rounded-[26px] shadow-2xl p-6 sm:p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="bg-white dark:bg-[#1E1B22] border border-black/[0.08] dark:border-white/[0.08] rounded-[26px] shadow-2xl p-6 sm:p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white">{title}</h2>
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full flex items-center justify-center bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] transition-all text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white cursor-pointer"
                 >
                   <X size={16} strokeWidth={2} />
                 </button>

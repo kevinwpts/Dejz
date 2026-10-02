@@ -65,13 +65,13 @@ export function PeriodSelectorModal({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm sm:max-w-md bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+          className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#1E1B22] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
         >
           {/* Mobile Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/5 dark:border-white/10 shrink-0">
+          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div className="flex items-center gap-2.5 min-w-0 pr-2">
               {viewMode === 'calendar' ? (
                 <button
@@ -80,14 +80,14 @@ export function PeriodSelectorModal({
                     if (typeof feedback?.light === 'function') feedback.light();
                     setViewMode('list');
                   }}
-                  className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
                   title={currentLang === 'en' ? 'Back to period list' : 'Tillbaka till periodlistan'}
                   aria-label={currentLang === 'en' ? 'Back to period list' : 'Tillbaka till periodlistan'}
                 >
                   <ChevronLeft size={18} strokeWidth={2.2} />
                 </button>
               ) : (
-                <div className="w-8 h-8 rounded-xl bg-black/5 dark:bg-white/[0.05] border border-[#E6E2D8] dark:border-white/[0.06] flex items-center justify-center text-[#1C1917] dark:text-white shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-black/5 dark:bg-white/[0.08] border border-black/5 dark:border-white/[0.06] flex items-center justify-center text-[#1C1917] dark:text-white shrink-0">
                   <CalendarIcon size={16} strokeWidth={1.8} />
                 </div>
               )}
@@ -111,7 +111,7 @@ export function PeriodSelectorModal({
                 if (typeof feedback?.light === 'function') feedback.light();
                 onClose();
               }}
-              className="w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
               aria-label="Stäng"
             >
               <X size={16} strokeWidth={2.2} />

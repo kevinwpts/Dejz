@@ -42,11 +42,11 @@ export function FeedbackModal({ onClose, onSubmit, t }: FeedbackModalProps) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#242424] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border border-[#E6E2D8] dark:border-[#383838] relative shadow-2xl overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0"
+        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[26px] border border-black/[0.08] dark:border-white/[0.08] relative shadow-2xl overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
-        <div className="w-10 h-1 bg-[#D6D1C7] dark:bg-[#3D3D3D] rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+        <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
         
         <div className="p-6 sm:p-8">
           <div className="flex items-center justify-between mb-6">
@@ -77,7 +77,7 @@ export function FeedbackModal({ onClose, onSubmit, t }: FeedbackModalProps) {
                 value={message} 
                 onChange={(e) => setMessage(e.target.value)} 
                 placeholder={t('feedbackPlaceholder')} 
-                className="w-full h-32 bg-[#F7F5F0] dark:bg-[#2D2D2D] border border-[#E6E2D8] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 py-3.5 pl-11 text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] resize-none" 
+                className="w-full h-32 bg-black/5 dark:bg-white/[0.06] border border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 py-3.5 pl-11 text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] resize-none" 
               />
             </div>
 

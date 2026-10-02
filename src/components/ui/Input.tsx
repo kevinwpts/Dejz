@@ -49,10 +49,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             disabled={disabled}
-            className={`w-full h-[48px] bg-[var(--surface-muted)] dark:bg-[#2D2D2D] border ${
+            className={`w-full h-[48px] bg-black/5 dark:bg-white/[0.06] border ${
               error
                 ? 'border-rose-500 focus:border-rose-500'
-                : 'border-[var(--border-color)] dark:border-[#383838] focus:border-[#1C1917] dark:focus:border-white'
+                : 'border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white'
             } rounded-[14px] ${icon ? 'pl-10' : 'px-4'} ${
               iconRight ? 'pr-10' : 'px-4'
             } font-normal text-sm text-[#1C1917] dark:text-white outline-none transition-all placeholder:font-normal placeholder-[var(--text-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}

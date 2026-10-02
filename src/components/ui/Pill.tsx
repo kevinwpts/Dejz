@@ -25,7 +25,7 @@ export const Pill: React.FC<PillProps> = ({
 
   const activeStyles = active
     ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-medium shadow-none'
-    : 'bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#333333] font-medium';
+    : 'bg-[#EAE6DE] dark:bg-white/10 text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[#DFD9CF] dark:hover:bg-white/15 font-medium';
 
   return (
     <button

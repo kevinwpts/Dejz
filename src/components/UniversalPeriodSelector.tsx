@@ -80,14 +80,14 @@ export function UniversalPeriodSelector({
 
   if (variant === 'header') {
     return (
-      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] bg-white dark:bg-[#242424] border-[var(--border-color)] dark:border-[#383838] text-[#1C1917] dark:text-white shadow-none">
+      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border backdrop-blur-[16px] bg-white dark:bg-[#1E1B22] border-[var(--border-color)] dark:border-white/[0.08] text-[#1C1917] dark:text-white shadow-none">
         <button 
           type="button"
           onClick={handlePrevPeriod}
           disabled={!canGoPrev}
           className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
             canGoPrev 
-              ? 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D]' 
+              ? 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-white/10' 
               : 'text-[#8C867C]/40 dark:text-[#71717A]/40 cursor-not-allowed'
           }`}
           aria-label="Föregående period"
@@ -131,7 +131,7 @@ export function UniversalPeriodSelector({
           disabled={!canGoNext}
           className={`p-1 sm:p-1.5 rounded-full transition-all active:scale-90 cursor-pointer ${
             canGoNext 
-              ? 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-[#2D2D2D]' 
+              ? 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-white/10' 
               : 'text-[#8C867C]/40 dark:text-[#71717A]/40 cursor-not-allowed'
           }`}
           aria-label="Nästa period"
@@ -148,7 +148,7 @@ export function UniversalPeriodSelector({
       <button 
         type="button"
         onClick={handleCenterClick}
-        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#242424] hover:bg-[var(--bg-hover)] dark:hover:bg-[#333333] border border-[var(--border-color)] dark:border-[#383838] transition-all cursor-pointer group select-none active:scale-95"
+        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#1E1B22] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.08] border border-[var(--border-color)] dark:border-white/[0.08] transition-all cursor-pointer group select-none active:scale-95"
       >
         <CalendarIcon size={13} className="text-[#6E6961] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors" />
         <span className="text-xs sm:text-[13px] font-bold uppercase tracking-wider text-[#1C1917] dark:text-white">

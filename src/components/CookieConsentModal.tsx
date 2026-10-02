@@ -44,16 +44,16 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-[150] pointer-events-auto"
         >
-          <div className="bg-white/95 dark:bg-[#242424]/95 backdrop-blur-2xl border border-[#E6E2D8] dark:border-[#383838] rounded-[24px] p-5 sm:p-6 shadow-2xl space-y-4 relative">
+          <div className="bg-white dark:bg-[#1E1B22] border border-black/[0.08] dark:border-white/[0.08] rounded-[24px] p-5 sm:p-6 shadow-2xl space-y-4 relative">
             <button
               onClick={handleDismiss}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#EFECE6] dark:bg-[#2D2D2D] hover:bg-[#EDE9DF] dark:hover:bg-[#383838] text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white transition-colors flex items-center justify-center shrink-0 cursor-pointer"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white transition-colors flex items-center justify-center shrink-0 cursor-pointer"
               title={t('close') || 'Stäng'}
             >
               <X size={15} strokeWidth={2} />
             </button>
             <div className="flex items-start gap-3 pr-6">
-              <div className="w-10 h-10 rounded-[12px] bg-[#EFECE6] dark:bg-[#2D2D2D] flex items-center justify-center shrink-0 text-[#1C1917] dark:text-white">
+              <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-white/[0.08] flex items-center justify-center shrink-0 text-[#1C1917] dark:text-white border border-black/10 dark:border-white/10">
                 <Cookie size={20} />
               </div>
               <div className="space-y-1">

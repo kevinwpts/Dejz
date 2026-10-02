@@ -40,19 +40,19 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       primary:
         'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] hover:opacity-90 shadow-none border-none',
       secondary:
-        'bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#333333] border-none',
+        'bg-[#EAE6DE] dark:bg-white/10 text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-white/15 border-none',
       pill:
-        'bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#333333] border-none rounded-full',
+        'bg-[#EAE6DE] dark:bg-white/10 text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-white/15 border-none rounded-full',
       accent:
         'bg-[#05B862] text-white hover:opacity-90 border-none',
       danger:
         'bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 border-none',
       ghost:
-        'bg-transparent text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[#EAE6DE] dark:hover:bg-[#2D2D2D]',
+        'bg-transparent text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white hover:bg-[#EAE6DE] dark:hover:bg-white/10',
       outline:
-        'bg-transparent text-[#1C1917] dark:text-white border border-[#E2DDD4] dark:border-[#383838] hover:bg-[#EAE6DE] dark:hover:bg-[#2D2D2D]',
+        'bg-transparent text-[#1C1917] dark:text-white border border-[#E2DDD4] dark:border-white/10 hover:bg-[#EAE6DE] dark:hover:bg-white/10',
       subtle:
-        'bg-[#EAE6DE] dark:bg-[#2D2D2D] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#333333]',
+        'bg-[#EAE6DE] dark:bg-white/10 text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-white/15',
     }[variant];
 
     const widthStyle = fullWidth ? 'w-full' : '';

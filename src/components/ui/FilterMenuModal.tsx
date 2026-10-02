@@ -58,13 +58,13 @@ export function FilterMenuModal<T = string>({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm sm:max-w-md bg-white/80 dark:bg-[#1C1A17]/85 backdrop-blur-2xl rounded-t-[28px] sm:rounded-[28px] border border-black/10 dark:border-white/10 shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+          className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#1E1B22] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
         >
           {/* Mobile Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/5 dark:border-white/10 shrink-0">
+          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div className="min-w-0 pr-2">
               <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight truncate">
                 {title}
@@ -159,7 +159,7 @@ export function FilterMenuModal<T = string>({
           </div>
 
           {footerNode && (
-            <div className="px-4 pt-2 pb-1 border-t border-[var(--border-color)] dark:border-[#383838]">
+            <div className="px-4 pt-2 pb-1 border-t border-black/[0.06] dark:border-white/[0.08]">
               {footerNode}
             </div>
           )}
