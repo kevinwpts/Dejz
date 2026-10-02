@@ -10,7 +10,6 @@ import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { getCategoryIconName } from '../utils/icons';
-import { formatFullDate } from '../utils/date';
 import { feedback } from '../utils/feedback';
 import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
 import { resolveEntityVisual } from '../utils/resolver';
@@ -79,7 +78,17 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
   };
 
   const date = new Date(transaction.timestamp);
-  const formattedDate = formatFullDate(transaction.timestamp, config.language, { includeYear: true });
+  const formatDateLike1Nov2026 = (timestamp: number, lang: string) => {
+    const d = new Date(timestamp);
+    const day = d.getDate();
+    const monthsSv = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+    const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = lang === 'en' ? monthsEn : monthsSv;
+    const monthStr = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day}. ${monthStr} ${year}`;
+  };
+  const formattedDate = formatDateLike1Nov2026(transaction.timestamp, config.language);
   const formattedTime = date.toLocaleTimeString(getLocale(), {
     hour: '2-digit',
     minute: '2-digit'
@@ -124,13 +133,13 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
         className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Smooth, Seamless Ambient Brand Color Glow */}
+        {/* Smooth, Seamless Ambient Brand Color Glow adapted to app background */}
         <div 
           className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
           style={{
             background: `
-              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
+              radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.08)} 0%, var(--bg-color) 60%)
             `
           }}
         />
@@ -146,10 +155,10 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
-          {/* Hero Section: Centered Logo, Title below, Price below title */}
-          <div className="relative flex flex-col items-center text-center pt-3 pb-4">
+          {/* Hero Section: Left-aligned Logo, Title below, Price below title */}
+          <div className="relative flex flex-col items-start text-left pt-6 sm:pt-8 pb-4">
             {/* Close Button top-right */}
-            <div className="absolute top-0 right-0 z-10">
+            <div className="absolute top-2 right-0 z-10">
               <button 
                 type="button"
                 onClick={() => {
@@ -164,18 +173,18 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               </button>
             </div>
 
-            {/* Centered Logo */}
-            <div className="scale-135 sm:scale-150 mb-7 pt-2">
+            {/* Logo */}
+            <div className="scale-125 sm:scale-135 mb-6 pt-3 pl-1">
               <TransactionLogo transaction={transaction} config={config} size="xl" />
             </div>
 
             {/* Title */}
-            <h2 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[var(--text-primary)] leading-tight max-w-[90%] truncate px-2">
+            <h2 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[var(--text-primary)] leading-tight max-w-[90%] truncate pr-8">
               {merchantName}
             </h2>
 
             {/* Price */}
-            <p className={`text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-[#E7E5E4]'}`}>
+            <p className={`text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-start ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-[#E7E5E4]'}`}>
               <span className="opacity-80 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
               <span>{formatAmount(transaction.amount, config.language)}</span>
               <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{config.currency}</span>
