@@ -21,24 +21,6 @@ import { formatFullDate } from '../utils/date';
 import { ReceiptCameraModal } from './ReceiptCameraModal';
 import { ConfirmModal } from './ConfirmModal';
 import { feedback } from '../utils/feedback';
-import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
-import { resolveEntityVisual } from '../utils/resolver';
-
-function hexToRgba(hex: string, alpha: number): string {
-  if (!hex) return `rgba(124, 58, 237, ${alpha})`;
-  if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
-  let clean = hex.replace('#', '');
-  if (clean.length === 3) {
-    clean = clean.split('').map(c => c + c).join('');
-  }
-  if (clean.length === 6) {
-    const r = parseInt(clean.substring(0, 2), 16) || 0;
-    const g = parseInt(clean.substring(2, 4), 16) || 0;
-    const b = parseInt(clean.substring(4, 6), 16) || 0;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-  return `rgba(124, 58, 237, ${alpha})`;
-}
 
 interface TransactionModalProps {
   transaction: Transaction | null;
@@ -633,21 +615,6 @@ export function TransactionModal({
     splits: splits
   }), [transaction, merchant, note, category, amount, type, logo, icon, selectedDate, splits]);
 
-  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(previewTransaction as any, config || {}));
-
-  useEffect(() => {
-    const initial = getTransactionDominantColor(previewTransaction as any, config || {});
-    setBrandColor(initial);
-
-    const visual = resolveEntityVisual(previewTransaction as any, config || {});
-    if (visual.logoUrl && !visual.logoUrl.startsWith('data:image/svg+xml')) {
-      extractDominantColorFromImage(visual.logoUrl).then((extracted) => {
-        if (extracted) {
-          setBrandColor(extracted);
-        }
-      });
-    }
-  }, [previewTransaction, config]);
 
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
@@ -676,16 +643,7 @@ export function TransactionModal({
         className="bg-white dark:bg-[#1E1B22] w-full max-w-none rounded-t-[32px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Smooth, Seamless Ambient Brand Color Glow */}
-        <div 
-          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
-          style={{
-            background: `
-              radial-gradient(350px circle at 18% 18%, ${hexToRgba(brandColor, 0.22)} 0%, ${hexToRgba(brandColor, 0.08)} 40%, transparent 70%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.06)} 0%, transparent 30%)
-            `
-          }}
-        />
+
 
         {/* Drawer Handle on Mobile */}
         <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden relative z-20" />
