@@ -205,11 +205,11 @@ h6 {
   /* Dejz Official Brand Logo Color */
   --logo-color: #211F1C;
 
-  /* Premium Warm Sand Light Theme */
-  --bg-top-color: #EFECE6;
-  --bg-color: #EFECE6;
-  --bg-secondary: #EFECE6;
-  --bg-gradient: #EFECE6;
+  /* Seamless Light Theme Background */
+  --bg-top-color: #FFFFFF;
+  --bg-color: #FFFFFF;
+  --bg-secondary: #FFFFFF;
+  --bg-gradient: #FFFFFF;
  
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
@@ -312,10 +312,10 @@ h6 {
 }
 
 .black-theme {
-  --bg-top-color: #000000;
-  --bg-color: #000000;
-  --bg-secondary: #000000;
-  --bg-gradient: #000000;
+  --bg-top-color: #0A0A0A;
+  --bg-color: #0A0A0A;
+  --bg-secondary: #0A0A0A;
+  --bg-gradient: #0A0A0A;
   --surface-color: #0A0A0A;
   --surface-gradient: #0A0A0A;
   --surface-solid: #0A0A0A;
@@ -335,10 +335,10 @@ h6 {
 
 .dark {
   /* Neutral Dark Graphite Theme (Specification) */
-  --bg-top-color: #141414;
-  --bg-color: #141414;
-  --bg-secondary: #141414;
-  --bg-gradient: #141414;
+  --bg-top-color: #191919;
+  --bg-color: #191919;
+  --bg-secondary: #191919;
+  --bg-gradient: #191919;
 
   /* Layer 1: Surface */
   --surface-color: #191919;
