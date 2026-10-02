@@ -125,7 +125,7 @@ export function GreetingModule({
             className="fixed inset-0" 
             onClick={() => setIsPeriodInfoOpen(false)} 
           />
-          <div className="relative w-full max-w-[320px] bg-white/95 dark:bg-[#181818]/95 backdrop-blur-2xl rounded-[24px] p-5 border border-[#E2DDD4] dark:border-white/[0.1] shadow-2xl space-y-4 z-10 text-left">
+          <div className="relative w-full max-w-[320px] bg-white dark:bg-[#2A2A2A] rounded-[24px] p-5 border border-[#E2DDD4] dark:border-white/[0.1] shadow-2xl space-y-4 z-10 text-left">
             {/* Header */}
             <div className="flex items-center justify-between pb-1 border-b border-[#E2DDD4]/60 dark:border-white/[0.08]">
               <div className="flex items-center gap-2 text-[#1C1917] dark:text-white font-semibold text-[15px]">

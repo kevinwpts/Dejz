@@ -80,7 +80,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast, _userEmail }: Secu
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="bg-white dark:bg-[#1E1B22] w-full max-w-sm rounded-[24px] p-6 sm:p-8 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl"
+            className="bg-white dark:bg-[#353535] w-full max-w-sm rounded-[24px] p-6 sm:p-8 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
           <div className="absolute right-4 top-4">

@@ -32,8 +32,8 @@ export function SelectionRow<T = string>({
       }}
       className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] ${
         isSelected
-          ? 'bg-[#EAE6DE] dark:bg-[#292640] text-[#1C1917] dark:text-[#D5D1FF] font-medium'
-          : 'bg-transparent hover:bg-black/5 dark:hover:bg-[#30353B] text-[#6E6961] dark:text-[#B3BAC3] hover:text-[#1C1917] dark:hover:text-white font-medium'
+          ? 'bg-[#EAE6DE] dark:bg-[#353535] text-[#1C1917] dark:text-white font-semibold'
+          : 'bg-transparent hover:bg-black/5 dark:hover:bg-[#353535] text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white font-medium'
       } ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -42,7 +42,7 @@ export function SelectionRow<T = string>({
             className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
               isSelected
                 ? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
-                : 'bg-black/5 dark:bg-[#30353B] text-[#6E6961] dark:text-[#B3BAC3]'
+                : 'bg-black/5 dark:bg-[#353535] text-[#6E6961] dark:text-[#B8B8B8]'
             }`}
           >
             {icon}
@@ -50,11 +50,11 @@ export function SelectionRow<T = string>({
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className={`text-xs sm:text-[13.5px] tracking-tight truncate ${isSelected ? 'text-[#1C1917] dark:text-white font-semibold' : 'text-[#6E6961] dark:text-[#B3BAC3]'}`}>
+            <span className={`text-xs sm:text-[13.5px] tracking-tight truncate ${isSelected ? 'text-[#1C1917] dark:text-white font-semibold' : 'text-[#6E6961] dark:text-[#B8B8B8]'}`}>
               {label}
             </span>
             {badge && (
-              <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#30353B] text-[#1C1917] dark:text-white shrink-0">
+              <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#353535] text-[#1C1917] dark:text-white shrink-0">
                 {badge}
               </span>
             )}

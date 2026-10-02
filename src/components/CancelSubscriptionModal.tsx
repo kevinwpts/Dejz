@@ -102,7 +102,7 @@ export function CancelSubscriptionModal({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg bg-white dark:bg-[#1E1B22] rounded-t-[28px] sm:rounded-[26px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden"
+          className="relative w-full max-w-lg bg-white dark:bg-[#2A2A2A] rounded-t-[28px] sm:rounded-[26px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden"
         >
           {/* Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -133,7 +133,7 @@ export function CancelSubscriptionModal({
             {/* Target Item Card */}
             <div className="flex items-center justify-between p-3.5 rounded-2xl bg-black/5 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08]">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-white dark:bg-[#1E1B22] flex items-center justify-center shrink-0 border border-black/10 dark:border-white/10 overflow-hidden [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full">
+                <div className="w-10 h-10 rounded-full bg-white dark:bg-[#2A2A2A] flex items-center justify-center shrink-0 border border-black/10 dark:border-white/10 overflow-hidden [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full">
                   <BudgetItemLogo item={expense} type="expense" config={config} />
                 </div>
                 <div className="min-w-0">
@@ -281,7 +281,7 @@ export function CancelSubscriptionModal({
                       <button
                         type="button"
                         onClick={() => setShowConfirmDelete(false)}
-                        className="py-2 px-3 rounded-lg bg-white dark:bg-[#1E1B22] text-[#1C1917] dark:text-white text-xs font-medium border border-black/10 dark:border-white/10 cursor-pointer"
+                        className="py-2 px-3 rounded-lg bg-white dark:bg-[#2A2A2A] text-[#1C1917] dark:text-white text-xs font-medium border border-black/10 dark:border-white/10 cursor-pointer"
                       >
                         {isEn ? 'Keep in budget' : 'Behåll'}
                       </button>
@@ -300,7 +300,7 @@ export function CancelSubscriptionModal({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1E1B22] flex justify-end shrink-0 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
+          <div className="p-4 border-t border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#2A2A2A] flex justify-end shrink-0 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
             <button
               type="button"
               onClick={onClose}

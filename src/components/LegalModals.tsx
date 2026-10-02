@@ -164,7 +164,7 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="relative w-full max-w-lg bg-white dark:bg-[#1E1B22] max-h-[85vh] sm:max-h-[90vh] mt-[env(safe-area-inset-top,0px)] rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-2xl"
+        className="relative w-full max-w-lg bg-white dark:bg-[#2A2A2A] max-h-[85vh] sm:max-h-[90vh] mt-[env(safe-area-inset-top,0px)] rounded-t-[28px] sm:rounded-[26px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-2xl"
       >
             {/* Header */}
             <div className="p-6 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between shrink-0">

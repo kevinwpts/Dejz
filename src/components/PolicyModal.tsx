@@ -27,7 +27,7 @@ export const PolicyModal = ({ isOpen, onClose, title, content }: PolicyModalProp
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed inset-0 z-[120] flex items-center justify-center p-4"
           >
-            <div className="bg-white dark:bg-[#1E1B22] border border-black/[0.08] dark:border-white/[0.08] rounded-[26px] shadow-2xl p-6 sm:p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="bg-white dark:bg-[#353535] border border-black/[0.08] dark:border-white/[0.08] rounded-[26px] shadow-2xl p-6 sm:p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white">{title}</h2>
                 <button

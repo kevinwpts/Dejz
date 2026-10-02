@@ -52,7 +52,7 @@ export function AppHeader({
         isDemoMode ? '' : 'pt-[env(safe-area-inset-top,0px)]'
       } ${
         !isAtTop
-          ? "bg-[#EFECE6]/90 dark:bg-[#141118]/90 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
+          ? "bg-[#EFECE6]/90 dark:bg-[#141414]/94 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
           : "bg-transparent border-b border-transparent"
       }`}
     >

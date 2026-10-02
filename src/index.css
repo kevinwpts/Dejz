@@ -4,7 +4,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-black: #121416;
+  --color-black: #141414;
   --font-sans:
     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display:
@@ -313,51 +313,51 @@ h6 {
 
 .dark {
   /* Neutral Dark Graphite Theme (Specification) */
-  --bg-top-color: #121416;
-  --bg-color: #121416;
-  --bg-secondary: #121416;
-  --bg-gradient: #121416;
+  --bg-top-color: #141414;
+  --bg-color: #141414;
+  --bg-secondary: #141414;
+  --bg-gradient: #141414;
 
   /* Layer 1: Surface */
-  --surface-color: #1C1F23;
-  --surface-gradient: #1C1F23;
-  --surface-solid: #1C1F23;
+  --surface-color: #202020;
+  --surface-gradient: #202020;
+  --surface-solid: #202020;
 
   /* Layer 2: Surface Raised (Bottom sheets, modals, popups, dropdowns, chips) */
-  --surface-raised: #25292E;
-  --surface-elevated: #25292E;
-  --surface-elevated-gradient: #25292E;
-  --modal-bg: #25292E;
+  --surface-raised: #2A2A2A;
+  --surface-elevated: #2A2A2A;
+  --surface-elevated-gradient: #2A2A2A;
+  --modal-bg: #2A2A2A;
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
-  --surface-high: #30353B;
-  --surface-muted: #30353B;
-  --bg-hover: #30353B;
+  --surface-high: #353535;
+  --surface-muted: #353535;
+  --bg-hover: #353535;
   --surface-tint: transparent;
 
   /* Typography */
   --text-primary: #FFFFFF;
-  --text-secondary: #B3BAC3;
-  --text-tertiary: #929BA6;
-  --text-muted: #929BA6;
-  --text-disabled: #69717C;
-  --text-inactive: #69717C;
+  --text-secondary: #B8B8B8;
+  --text-tertiary: #999999;
+  --text-muted: #999999;
+  --text-disabled: #707070;
+  --text-inactive: #707070;
 
   /* Borders */
-  --border-subtle: #343A42;
-  --border-color: #343A42;
-  --border-control: #7B8592;
-  --border-strong: #7B8592;
+  --border-subtle: #383838;
+  --border-color: #383838;
+  --border-control: #858585;
+  --border-strong: #858585;
   --inner-highlight: transparent;
 
-  --chip-bg: #25292E;
-  --chip-text: #B3BAC3;
-  --chip-active-bg: #292640;
-  --chip-active-text: #D5D1FF;
+  --chip-bg: #2A2A2A;
+  --chip-text: #B8B8B8;
+  --chip-active-bg: #353535;
+  --chip-active-text: #FFFFFF;
 
-  --transaction-bg: #1C1F23;
-  --card-nested-bg: #25292E;
-  --remaining-today-gradient: #1C1F23;
+  --transaction-bg: #202020;
+  --card-nested-bg: #2A2A2A;
+  --remaining-today-gradient: #202020;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
 
@@ -368,26 +368,26 @@ h6 {
 
   --logo-color: #FFFFFF;
 
-  /* Brand Accents & Colors (Dark Mode) */
-  --accent-color: #7C75FF;
-  --accent-hover: #8C86FF;
-  --accent-pressed: #6D66EF;
-  --accent-gradient: var(--accent-color);
-  --on-accent: #121416;
-  --text-on-accent: #121416;
-  --accent-soft: rgba(124, 117, 255, 0.2);
-  --accent-container: #292640;
-  --on-accent-container: #D5D1FF;
-  --accent-on-solid: #121416;
-  --dejz-accent: #7C75FF;
+  /* Brand Accents & Colors (Dark Mode: Pure Neutral Monochrome) */
+  --accent-color: #FFFFFF;
+  --accent-hover: #E8E8E8;
+  --accent-pressed: #D0D0D0;
+  --accent-gradient: #FFFFFF;
+  --on-accent: #141414;
+  --text-on-accent: #141414;
+  --accent-soft: rgba(255, 255, 255, 0.12);
+  --accent-container: #353535;
+  --on-accent-container: #FFFFFF;
+  --accent-on-solid: #141414;
+  --dejz-accent: #FFFFFF;
   --accent-glow: none;
-  --accent-secondary-color: #292640;
+  --accent-secondary-color: #353535;
 
-  /* Primary button states (Dark mode: Accent background + Dark text on-accent) */
-  --btn-primary-bg: #7C75FF;
-  --btn-primary-text: #121416;
-  --btn-primary-hover: #8C86FF;
-  --btn-primary-pressed: #6D66EF;
+  /* Primary button states (Dark mode: White background + Dark text #141414) */
+  --btn-primary-bg: #FFFFFF;
+  --btn-primary-text: #141414;
+  --btn-primary-hover: #E8E8E8;
+  --btn-primary-pressed: #D0D0D0;
 
   --card-shadow: none;
   --card-inner-stroke: none;
@@ -397,16 +397,16 @@ h6 {
   --success-container: #163025;
   --warning-color: #FBBF24;
   --warning-container: #342A16;
-  --danger-color: #FF808B;
-  --danger-container: #381F26;
-  --info-color: #93C5FD;
-  --info-container: #1C2B3E;
+  --danger-color: #FF8080;
+  --danger-container: #381F1F;
+  --info-color: #FFFFFF;
+  --info-container: #2A2A2A;
   --scrim-color: rgba(0, 0, 0, 0.60);
 
   --nav-active-color: #FFFFFF;
-  --nav-inactive-color: #B3BAC3;
-  --nav-plus-bg: #7C75FF;
-  --nav-plus-color: #121416;
+  --nav-inactive-color: #B8B8B8;
+  --nav-plus-bg: #FFFFFF;
+  --nav-plus-color: #141414;
   --nav-plus-shadow: none;
 
   --income-card-bg: var(--surface-color);
@@ -416,12 +416,12 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #7C75FF;
-  --date-active-color: #121416;
+  --date-active-bg: #FFFFFF;
+  --date-active-color: #141414;
   --date-active-shadow: none;
-  --date-inactive-bg: #1C1F23;
-  --date-inactive-border: #343A42;
-  --date-inactive-color: #B3BAC3;
+  --date-inactive-bg: #202020;
+  --date-inactive-border: #383838;
+  --date-inactive-color: #B8B8B8;
 }
 
 /* Glass-Card Surface Utility (borderless translucent glass) */
@@ -436,7 +436,7 @@ h6 {
 
 .dark .glass-card,
 .dark .surface-card {
-  background: #1C1F23 !important;
+  background: #202020 !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -452,7 +452,7 @@ h6 {
   box-shadow: none !important;
 }
 .dark .glass-nav {
-  background: rgba(18, 20, 22, 0.94) !important;
+  background: rgba(20, 20, 20, 0.94) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: none !important;
@@ -466,7 +466,7 @@ h6 {
   pointer-events: none;
   z-index: 0;
   display: none;
-  background-color: #121416;
+  background-color: #141414;
   background-image: none;
 }
 
@@ -600,7 +600,23 @@ h6 {
 
   ::selection {
     background: var(--accent-soft);
-    color: var(--accent-color);
+    color: var(--text-primary);
+  }
+
+  .dark ::selection {
+    background: #353535;
+    color: #FFFFFF;
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover, 
+  .dark input:-webkit-autofill:focus, 
+  .dark textarea:-webkit-autofill,
+  .dark select:-webkit-autofill {
+    -webkit-text-fill-color: #FFFFFF !important;
+    -webkit-box-shadow: 0 0 0px 1000px #2A2A2A inset !important;
+    box-shadow: 0 0 0px 1000px #2A2A2A inset !important;
+    caret-color: #FFFFFF !important;
   }
 }
 

@@ -101,7 +101,7 @@ export function CalculatorModal({ _isOpen, onClose, _t }: CalculatorModalProps) 
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative bg-white dark:bg-[#1E1B22] w-full max-w-[320px] rounded-[28px] overflow-hidden border border-black/[0.08] dark:border-white/[0.08] overscroll-contain shadow-2xl font-sans"
+            className="relative bg-white dark:bg-[#2A2A2A] w-full max-w-[320px] rounded-[28px] overflow-hidden border border-black/[0.08] dark:border-white/[0.08] overscroll-contain shadow-2xl font-sans"
           >
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between">

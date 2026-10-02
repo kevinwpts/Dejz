@@ -20,10 +20,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      className={`bg-white dark:bg-[#1C1F23] rounded-[16px] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-none border border-transparent dark:border-[#343A42]/50 ${className}`}
+      className={`bg-white dark:bg-[#202020] rounded-[16px] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-none border border-transparent dark:border-[#383838]/50 ${className}`}
     >
       {Icon && (
-        <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-[#25292E] border-none flex items-center justify-center text-[#6E6961] dark:text-[#B3BAC3] mb-3 shrink-0">
+        <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-[#2A2A2A] border-none flex items-center justify-center text-[#6E6961] dark:text-[#B8B8B8] mb-3 shrink-0">
           <Icon size={20} strokeWidth={2} />
         </div>
       )}
@@ -33,11 +33,11 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         </h3>
         {description && (
           typeof description === 'string' ? (
-            <p className="text-xs font-medium text-[#6E6961] dark:text-[#B3BAC3] leading-relaxed">
+            <p className="text-xs font-medium text-[#6E6961] dark:text-[#B8B8B8] leading-relaxed">
               {description}
             </p>
           ) : (
-            <div className="text-xs font-medium text-[#6E6961] dark:text-[#B3BAC3] leading-relaxed">
+            <div className="text-xs font-medium text-[#6E6961] dark:text-[#B8B8B8] leading-relaxed">
               {description}
             </div>
           )

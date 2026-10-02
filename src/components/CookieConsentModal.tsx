@@ -44,7 +44,7 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-[150] pointer-events-auto"
         >
-          <div className="bg-white dark:bg-[#1E1B22] border border-black/[0.08] dark:border-white/[0.08] rounded-[24px] p-5 sm:p-6 shadow-2xl space-y-4 relative">
+          <div className="bg-white dark:bg-[#353535] border border-black/[0.08] dark:border-white/[0.08] rounded-[24px] p-5 sm:p-6 shadow-2xl space-y-4 relative">
             <button
               onClick={handleDismiss}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white transition-colors flex items-center justify-center shrink-0 cursor-pointer"

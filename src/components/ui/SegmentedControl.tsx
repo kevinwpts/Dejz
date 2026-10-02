@@ -38,7 +38,7 @@ export function SegmentedControl<T extends string = string>({
 
   return (
     <div
-      className={`bg-black/5 dark:bg-[#25292E] border border-black/5 dark:border-[#343A42] flex items-center relative ${sizeStyles} ${
+      className={`bg-black/5 dark:bg-[#2A2A2A] border border-black/5 dark:border-[#383838] flex items-center relative ${sizeStyles} ${
         fullWidth ? 'w-full' : 'inline-flex'
       } ${className}`}
     >
@@ -55,7 +55,7 @@ export function SegmentedControl<T extends string = string>({
             } ${
               isSelected
                 ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none font-semibold'
-                : 'text-[#6E6961] dark:text-[#B3BAC3] hover:text-[#1C1917] dark:hover:text-white'
+                : 'text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white'
             }`}
           >
             {option.icon && <span className="shrink-0">{option.icon}</span>}
@@ -65,7 +65,7 @@ export function SegmentedControl<T extends string = string>({
                 className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${
                   isSelected
                     ? 'bg-black/15 text-inherit'
-                    : 'bg-black/5 dark:bg-[#30353B] text-[#6E6961] dark:text-[#B3BAC3]'
+                    : 'bg-black/5 dark:bg-[#353535] text-[#6E6961] dark:text-[#B8B8B8]'
                 }`}
               >
                 {option.badge}

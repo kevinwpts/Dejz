@@ -120,7 +120,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -424,7 +424,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -581,7 +581,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] tabular-nums outline-none pr-5 text-right cursor-pointer"
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                    <option key={day} value={day} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">{day}:e</option>
+                    <option key={day} value={day} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">{day}:e</option>
                   ))}
                 </select>
                 <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
@@ -600,7 +600,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">
+                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">
                       {t(`freq_${key.toLowerCase()}` as TranslationKey)}
                     </option>
                   ))}
@@ -626,7 +626,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                       const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                       const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                       return (
-                        <option key={i} value={i} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">
+                        <option key={i} value={i} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">
                           {capitalizedMonth}
                         </option>
                       );
@@ -859,7 +859,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -1227,7 +1227,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Smooth, Seamless Ambient Brand Color Glow */}
@@ -1374,7 +1374,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] outline-none pr-5 text-right cursor-pointer"
                 >
                   {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">
+                    <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">
                       {t(`freq_${key.toLowerCase()}` as TranslationKey)}
                     </option>
                   ))}
@@ -1400,7 +1400,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                       const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                       const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                       return (
-                        <option key={i} value={i} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">
+                        <option key={i} value={i} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">
                           {capitalizedMonth}
                         </option>
                       );
@@ -1425,7 +1425,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   className="appearance-none bg-transparent text-[14px] font-medium text-[var(--text-primary)] tabular-nums outline-none pr-5 text-right cursor-pointer"
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                    <option key={day} value={day} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">{day}:e</option>
+                    <option key={day} value={day} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">{day}:e</option>
                   ))}
                 </select>
                 <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
@@ -1446,7 +1446,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   {(paymentMethods || []).map((method, idx) => {
                     const methodName = typeof method === 'string' ? method : method?.name || '';
                     return (
-                      <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#1E1B22] text-[var(--text-primary)]">{methodName}</option>
+                      <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#353535] text-[var(--text-primary)]">{methodName}</option>
                     );
                   })}
                 </select>
@@ -1488,7 +1488,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#1E1B22] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[80dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#2A2A2A] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[80dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -1599,7 +1599,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white dark:bg-[#1E1B22] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                className="bg-white dark:bg-[#353535] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
                   <div>
@@ -1733,7 +1733,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -1965,7 +1965,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -2328,7 +2328,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-white dark:bg-[#1E1B22] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
+          className="bg-white dark:bg-[#353535] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10">

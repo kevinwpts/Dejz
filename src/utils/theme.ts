@@ -15,42 +15,43 @@ export function applyThemeColor(themeColorHex: string = '#635BFF', isDark: boole
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
 
-  // In dark mode with default brand purple, use #7C75FF as standard dark accent
-  const effectiveAccent = isDark && (themeColorHex === '#635BFF' || !themeColorHex)
-    ? '#7C75FF'
-    : themeColorHex || '#635BFF';
-
-  const { r, g, b } = hexToRgb(effectiveAccent);
-
-  // Set base RGB variables
-  root.style.setProperty('--user-accent-hex', effectiveAccent);
-  root.style.setProperty('--user-accent-rgb', `${r}, ${g}, ${b}`);
-
-  root.style.setProperty('--user-home-bg-from', 'transparent');
-  root.style.setProperty('--user-home-bg-to', 'transparent');
-  root.style.setProperty('--app-bg-tint', 'transparent');
-
-  // Calculate perceived luminance to ensure WCAG compliant on-accent text
-  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  const onAccent = lum > 0.38 ? '#121416' : '#FFFFFF';
-
   if (isDark) {
-    root.style.setProperty('--user-accent', effectiveAccent);
-    root.style.setProperty('--user-accent-soft', `rgba(${r}, ${g}, ${b}, 0.2)`);
-    root.style.setProperty('--user-accent-surface', `rgba(${r}, ${g}, ${b}, 0.08)`);
+    // Pure neutral monochrome dark mode specification
+    root.style.setProperty('--user-accent-hex', '#FFFFFF');
+    root.style.setProperty('--user-accent-rgb', '255, 255, 255');
+    root.style.setProperty('--user-home-bg-from', 'transparent');
+    root.style.setProperty('--user-home-bg-to', 'transparent');
+    root.style.setProperty('--app-bg-tint', 'transparent');
 
-    root.style.setProperty('--accent-color', effectiveAccent);
-    root.style.setProperty('--accent-soft', `rgba(${r}, ${g}, ${b}, 0.2)`);
-    root.style.setProperty('--on-accent', onAccent);
-    root.style.setProperty('--text-on-accent', onAccent);
-    root.style.setProperty('--accent-container', `rgba(${r}, ${g}, ${b}, 0.18)`);
-    root.style.setProperty('--on-accent-container', lum > 0.6 ? '#121416' : '#D5D1FF');
+    root.style.setProperty('--user-accent', '#FFFFFF');
+    root.style.setProperty('--user-accent-soft', 'rgba(255, 255, 255, 0.12)');
+    root.style.setProperty('--user-accent-surface', 'rgba(255, 255, 255, 0.05)');
 
-    root.style.setProperty('--btn-primary-bg', effectiveAccent);
-    root.style.setProperty('--btn-primary-text', onAccent);
-    root.style.setProperty('--nav-plus-bg', effectiveAccent);
-    root.style.setProperty('--nav-plus-color', onAccent);
+    root.style.setProperty('--accent-color', '#FFFFFF');
+    root.style.setProperty('--accent-hover', '#E8E8E8');
+    root.style.setProperty('--accent-pressed', '#D0D0D0');
+    root.style.setProperty('--accent-soft', 'rgba(255, 255, 255, 0.12)');
+    root.style.setProperty('--on-accent', '#141414');
+    root.style.setProperty('--text-on-accent', '#141414');
+    root.style.setProperty('--accent-container', '#353535');
+    root.style.setProperty('--on-accent-container', '#FFFFFF');
+
+    root.style.setProperty('--btn-primary-bg', '#FFFFFF');
+    root.style.setProperty('--btn-primary-text', '#141414');
+    root.style.setProperty('--btn-primary-hover', '#E8E8E8');
+    root.style.setProperty('--btn-primary-pressed', '#D0D0D0');
+    root.style.setProperty('--nav-plus-bg', '#FFFFFF');
+    root.style.setProperty('--nav-plus-color', '#141414');
   } else {
+    const effectiveAccent = themeColorHex || '#635BFF';
+    const { r, g, b } = hexToRgb(effectiveAccent);
+
+    root.style.setProperty('--user-accent-hex', effectiveAccent);
+    root.style.setProperty('--user-accent-rgb', `${r}, ${g}, ${b}`);
+    root.style.setProperty('--user-home-bg-from', 'transparent');
+    root.style.setProperty('--user-home-bg-to', 'transparent');
+    root.style.setProperty('--app-bg-tint', 'transparent');
+
     root.style.setProperty('--user-accent', effectiveAccent);
     root.style.setProperty('--user-accent-soft', `rgba(${r}, ${g}, ${b}, 0.12)`);
     root.style.setProperty('--user-accent-surface', `rgba(${r}, ${g}, ${b}, 0.05)`);

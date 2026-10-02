@@ -159,7 +159,7 @@ export function CategoryBottomSheetModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#1E1B22] border-t sm:border border-black/[0.08] dark:border-white/[0.08] rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
+            className="relative w-full max-w-lg bg-white dark:bg-[#2A2A2A] border-t sm:border border-black/[0.08] dark:border-white/[0.08] rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
           >
             {/* Top Grab Handle */}
             <div className="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20 mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />

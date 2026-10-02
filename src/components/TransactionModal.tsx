@@ -666,7 +666,7 @@ export function TransactionModal({
                 }}
                 className={`py-2 rounded-[12px] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'expense'
-                    ? 'bg-white dark:bg-[#1E1B22] text-[#1C1917] dark:text-white shadow-xs'
+                    ? 'bg-white dark:bg-[#2A2A2A] text-[#1C1917] dark:text-white shadow-xs'
                     : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
                 }`}
               >
@@ -680,7 +680,7 @@ export function TransactionModal({
                 }}
                 className={`py-2 rounded-[12px] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'income'
-                    ? 'bg-white dark:bg-[#1E1B22] text-emerald-600 dark:text-emerald-400 shadow-xs'
+                    ? 'bg-white dark:bg-[#2A2A2A] text-emerald-600 dark:text-emerald-400 shadow-xs'
                     : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
                 }`}
               >
@@ -690,7 +690,7 @@ export function TransactionModal({
           )}
 
           {/* 1. Main Hero Card: Icon + Merchant & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#1E1B22] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#2A2A2A] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
@@ -753,7 +753,7 @@ export function TransactionModal({
                 setActiveSplitIndex(null);
                 setIsCategoryPickerOpen(true);
               }}
-              className="p-4 rounded-[20px] bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+              className="p-4 rounded-[20px] bg-white dark:bg-[#2A2A2A] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('category')}
@@ -781,7 +781,7 @@ export function TransactionModal({
 
             {/* Date Grid Card: Simplified, no redundant left text */}
             <div 
-              className="p-4 rounded-[20px] bg-white dark:bg-[#1E1B22] transition-all flex items-center justify-between min-h-[76px]"
+              className="p-4 rounded-[20px] bg-white dark:bg-[#2A2A2A] transition-all flex items-center justify-between min-h-[76px]"
             >
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('date')}
@@ -845,7 +845,7 @@ export function TransactionModal({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden p-3 bg-white dark:bg-[#1E1B22] rounded-[20px]"
+                className="overflow-hidden p-3 bg-white dark:bg-[#2A2A2A] rounded-[20px]"
               >
                 <CalendarWidget 
                   calendarDays={calendarDays}
@@ -861,7 +861,7 @@ export function TransactionModal({
           {/* 3. Grid for Note and Attachments */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Note Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1E1B22] flex flex-col justify-between">
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#2A2A2A] flex flex-col justify-between">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {t('ownNote')}
               </span>
@@ -888,7 +888,7 @@ export function TransactionModal({
             </div>
 
             {/* Receipt Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1E1B22] flex flex-col justify-between">
+            <div className="p-4 rounded-[20px] bg-white dark:bg-[#2A2A2A] flex flex-col justify-between">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {currentLang === 'en' ? 'Receipt / Document' : 'Bifogat kvitto'}
               </span>
@@ -959,7 +959,7 @@ export function TransactionModal({
 
           {/* Category Split toggle if expense */}
           {type === 'expense' && splits.length === 0 && (
-            <div className="p-3.5 bg-white dark:bg-[#1E1B22] rounded-[18px] flex items-center justify-between">
+            <div className="p-3.5 bg-white dark:bg-[#2A2A2A] rounded-[18px] flex items-center justify-between">
               <span className="text-[12px] font-medium text-[var(--text-secondary)]">
                 {currentLang === 'en' ? 'Split across multiple categories' : 'Dela upp i fler kategorier'}
               </span>
@@ -987,7 +987,7 @@ export function TransactionModal({
                   <motion.div 
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
-                    className="space-y-6 bg-white dark:bg-[#1E1B22] p-4 rounded-[22px] border-none shadow-none overflow-hidden"
+                    className="space-y-6 bg-white dark:bg-[#2A2A2A] p-4 rounded-[22px] border-none shadow-none overflow-hidden"
                   >
                     {/* Splits List with Sliders */}
                     <div className="space-y-6">
@@ -1274,7 +1274,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.94, opacity: 0, y: 16 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white dark:bg-[#1E1B22] w-full max-w-sm rounded-[24px] border border-black/10 dark:border-white/10 relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
+                className="bg-white dark:bg-[#353535] w-full max-w-sm rounded-[24px] border border-black/10 dark:border-white/10 relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
               >
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
                   <div>

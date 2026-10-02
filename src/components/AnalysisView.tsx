@@ -368,7 +368,7 @@ export function AnalysisView({
       />
 
       {/* HORISONTELLT STAPELDIAGRAM (FÖRDELNING) */}
-      <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] p-4 sm:p-5 border-none shadow-none space-y-4">
+      <div className="bg-white dark:bg-[#353535] rounded-[22px] p-4 sm:p-5 border-none shadow-none space-y-4">
         <div className="flex items-center justify-between px-0.5">
           <h2 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
             {isEn ? 'Distribution' : 'Fördelning'}
@@ -397,7 +397,7 @@ export function AnalysisView({
                   <div className="flex items-center justify-between text-[13px] gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <CategoryIcon icon={item.icon} color={item.color} size="xs" />
-                      <span className={`font-normal truncate ${isSelected ? 'text-[#635BFF] dark:text-[#7C75FF] font-medium' : 'text-[#211F1C] dark:text-white'}`}>
+                      <span className={`font-normal truncate ${isSelected ? 'text-[#635BFF] dark:text-white font-medium' : 'text-[#211F1C] dark:text-white'}`}>
                         {item.name}
                       </span>
                     </div>
@@ -441,7 +441,7 @@ export function AnalysisView({
         </div>
 
         {categoryData.length > 0 ? (
-          <div className="bg-white dark:bg-[#1E1B22] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+          <div className="bg-white dark:bg-[#353535] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               
@@ -542,7 +542,7 @@ export function AnalysisView({
                                 <div
                                   key={fe.id}
                                   onClick={() => onViewFixedExpense?.(fe)}
-                                  className="flex items-center justify-between p-3 rounded-[16px] bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] transition-colors cursor-pointer border-none shadow-none"
+                                  className="flex items-center justify-between p-3 rounded-[16px] bg-white dark:bg-[#2A2A2A] hover:bg-black/[0.02] dark:hover:bg-[#353535] transition-colors cursor-pointer border-none shadow-none"
                                 >
                                   <div className="min-w-0">
                                     <p className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight">

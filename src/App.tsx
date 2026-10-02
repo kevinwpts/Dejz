@@ -1528,7 +1528,7 @@ export default function App() {
       const userThemeHex = config?.themeColor || '#635BFF';
       applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isDark ? "#141118" : "#EFECE6";
+      const themeColor = isDark ? "#141414" : "#EFECE6";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -5461,7 +5461,7 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-white dark:bg-[#1E1B22] w-full max-w-lg rounded-t-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-5"
+              className="bg-white dark:bg-[#353535] w-full max-w-lg rounded-t-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-5"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle */}

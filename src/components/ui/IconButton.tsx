@@ -35,11 +35,11 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 
     const variantStyles = {
       muted:
-        'bg-black/5 dark:bg-[#25292E] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-[#30353B] border-none shadow-none',
+        'bg-black/5 dark:bg-[#2A2A2A] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-[#353535] border-none shadow-none',
       default:
-        'bg-black/5 dark:bg-[#25292E] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-[#30353B] border-none shadow-none',
+        'bg-black/5 dark:bg-[#2A2A2A] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-[#353535] border-none shadow-none',
       ghost:
-        'bg-transparent text-[#6E6961] dark:text-[#B3BAC3] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-[#25292E]',
+        'bg-transparent text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-[#2A2A2A]',
       accent:
         'bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] shadow-none border-none',
       danger:

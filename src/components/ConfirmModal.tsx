@@ -52,7 +52,7 @@ export function ConfirmModal({
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="bg-white dark:bg-[#1E1B22] w-full max-w-sm rounded-[28px] p-6 sm:p-7 relative max-h-[90vh] overflow-y-auto border border-black/[0.08] dark:border-white/[0.08] overscroll-contain shadow-2xl font-sans"
+        className="bg-white dark:bg-[#353535] w-full max-w-sm rounded-[28px] p-6 sm:p-7 relative max-h-[90vh] overflow-y-auto border border-black/[0.08] dark:border-white/[0.08] overscroll-contain shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative z-10 text-center">

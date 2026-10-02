@@ -22,12 +22,12 @@ export const Badge: React.FC<BadgeProps> = ({
   }[size];
 
   const variantStyles = {
-    default: 'bg-black/5 dark:bg-[#25292E] text-[#6E6961] dark:text-[#B3BAC3]',
-    accent: 'bg-[var(--accent-soft)] dark:bg-[#292640] text-[var(--accent-color)] dark:text-[#D5D1FF]',
+    default: 'bg-black/5 dark:bg-[#2A2A2A] text-[#6E6961] dark:text-[#B8B8B8]',
+    accent: 'bg-[var(--accent-soft)] dark:bg-[#353535] text-[var(--accent-color)] dark:text-[#FFFFFF]',
     success: 'bg-emerald-500/10 dark:bg-[#163025] text-emerald-600 dark:text-[#4ADE80]',
     danger: 'bg-rose-500/10 dark:bg-[#381F26] text-rose-600 dark:text-[#FF808B]',
     warning: 'bg-amber-500/10 dark:bg-[#342A16] text-amber-600 dark:text-[#FBBF24]',
-    muted: 'bg-black/5 dark:bg-[#25292E] text-[#6E6961] dark:text-[#B3BAC3]',
+    muted: 'bg-black/5 dark:bg-[#2A2A2A] text-[#6E6961] dark:text-[#B8B8B8]',
   }[variant];
 
   return (

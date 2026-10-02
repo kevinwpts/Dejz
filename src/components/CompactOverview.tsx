@@ -26,7 +26,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
   return (
     <div className="space-y-8 px-4">
       {/* Budget Status */}
-      <div className="p-5 rounded-[18px] bg-white dark:bg-[#1E1B22] border-none shadow-none">
+      <div className="p-5 rounded-[18px] bg-white dark:bg-[#202020] border-none shadow-none">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8]">
             {t('budgetUsage')}
@@ -58,7 +58,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
         </h3>
         <div className="grid grid-cols-1 gap-2">
           {Object.entries(categoryTotals).slice(0, 4).map(([cat, amount]) => (
-            <div key={cat} className="flex items-center justify-between p-3.5 sm:p-4 rounded-[20px] bg-white dark:bg-[#1E1B22] hover:bg-black/[0.02] dark:hover:bg-[#27242E] active:scale-[0.99] transition-all group border-none shadow-none">
+            <div key={cat} className="flex items-center justify-between p-3.5 sm:p-4 rounded-[20px] bg-white dark:bg-[#2A2A2A] hover:bg-black/[0.02] dark:hover:bg-[#353535] active:scale-[0.99] transition-all group border-none shadow-none">
               <span className="text-sm font-medium text-[#1C1917] dark:text-white leading-tight truncate tracking-tight">
                 {cat}
               </span>
