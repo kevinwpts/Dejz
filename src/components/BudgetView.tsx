@@ -264,7 +264,7 @@ export function BudgetView({
     .filter((cat) => {
       if (!config?.hideEmptyCategories) return true;
       const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
-      const budgetVal = Number(cat.budget) || 0;
+      const budgetVal = cat.budget !== undefined && cat.budget !== null ? Number(cat.budget) || 0 : 0;
       return budgetVal > 0 || fixedSpent > 0;
     })
     .sort((a, b) => {
