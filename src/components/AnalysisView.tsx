@@ -217,14 +217,9 @@ export function AnalysisView({
 
   const budgetUsedPct = useMemo(() => {
     if (!stats) return 0;
-    if (analysisFilter === 'all') {
-      const pot = stats.disposablePot || 0;
-      if (pot <= 0) return 0;
-      const spent = pot - remainingBudget;
-      return Math.max(0, Math.round((spent / pot) * 100));
-    }
-    return effectiveBudget > 0 ? Math.round((totalSpent / effectiveBudget) * 100) : 0;
-  }, [stats, analysisFilter, effectiveBudget, remainingBudget, totalSpent]);
+    if (effectiveBudget <= 0) return 0;
+    return Math.max(0, Math.round((totalSpent / effectiveBudget) * 100));
+  }, [stats, effectiveBudget, totalSpent]);
 
   // Donut chart / list items data: Top 5 categories + "Övriga kategorier"
   const chartItems = useMemo(() => {
