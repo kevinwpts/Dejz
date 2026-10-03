@@ -4239,7 +4239,7 @@ export default function App() {
 
       {/* Subtle top ambient gradient in accent color */}
       <div 
-        className="fixed inset-x-0 top-0 h-[320px] pointer-events-none z-0 bg-gradient-to-b from-[rgba(var(--user-accent-rgb),0.18)] via-[rgba(var(--user-accent-rgb),0.06)] to-transparent transition-all duration-500"
+        className="absolute inset-x-0 top-0 h-[320px] pointer-events-none z-0 bg-gradient-to-b from-[rgba(var(--user-accent-rgb),0.18)] via-[rgba(var(--user-accent-rgb),0.06)] to-transparent transition-all duration-500"
         aria-hidden="true"
       />
 

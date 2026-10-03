@@ -206,18 +206,18 @@ h6 {
   --logo-color: #211F1C;
 
   /* Seamless Light Theme Background */
-  --bg-top-color: #FFFFFF;
-  --bg-color: #FFFFFF;
-  --bg-secondary: #FFFFFF;
-  --bg-gradient: #FFFFFF;
+  --bg-top-color: #F7F5F0;
+  --bg-color: #F7F5F0;
+  --bg-secondary: #F7F5F0;
+  --bg-gradient: #F7F5F0;
  
-  --surface-color: #FFFFFF;
-  --surface-gradient: #FFFFFF;
-  --surface-raised: #FFFFFF;
+  --surface-color: #FAF8F5;
+  --surface-gradient: #FAF8F5;
+  --surface-raised: #FAF8F5;
   --surface-high: #EAE6DE;
-  --surface-elevated: #FFFFFF;
-  --surface-elevated-gradient: #FFFFFF;
-  --surface-solid: #FFFFFF;
+  --surface-elevated: #FAF8F5;
+  --surface-elevated-gradient: #FAF8F5;
+  --surface-solid: #FAF8F5;
   --surface-muted: #EAE6DE;
   --surface-tint: rgba(33, 31, 28, 0.02);
 
@@ -238,9 +238,9 @@ h6 {
   --chip-text: #6D6962;
   --chip-active-bg: #1C1917;
   --chip-active-text: #FFFFFF;
-  --transaction-bg: #FFFFFF;
+  --transaction-bg: #FAF8F5;
   --card-nested-bg: #EAE6DE;
-  --remaining-today-gradient: #FFFFFF;
+  --remaining-today-gradient: #FAF8F5;
 
   /* Custom Elevation Levels - Light Mode */
   --shadow-level-1: none;
