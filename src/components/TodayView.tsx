@@ -443,7 +443,7 @@ export function TodayView({
           {/* Fixed transactions for the day */}
           {displayedFixedTransactions.length > 0 && (
             <div className="space-y-2 pt-1">
-              <h4 className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[#6E6961] dark:text-[#A8A8A8] px-1">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] px-1">
                 {lang === "en" ? "Fixed transactions" : "Fasta transaktioner"}
               </h4>
               <div className="space-y-2.5">

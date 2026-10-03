@@ -555,9 +555,9 @@ export function BudgetView({
           <button
             type="button"
             onClick={handleCloseCategoryBudgets}
-            className="w-full h-12 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-none"
+            className="w-full h-12 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-none"
           >
-            <Check size={14} strokeWidth={2.5} />
+            <Check size={16} strokeWidth={2.5} />
             {config.language === 'en' ? 'Done, save budget' : 'Klar, spara budgeten'}
           </button>
         </div>

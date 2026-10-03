@@ -56,7 +56,7 @@ export function ReceiptsView({
       {receiptTransactions.length > 0 && (
         <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] p-5 border-none shadow-none space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
               {config.language === 'sv' ? 'Sammanställning' : 'Summary'}
             </span>
             <span className="text-[11px] font-bold text-[#05B862] bg-[#05B862]/10 px-2 py-0.5 rounded-full">
@@ -64,10 +64,10 @@ export function ReceiptsView({
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#1C1917] dark:text-white tracking-tight font-amount tabular-nums">
+            <span className="text-3xl font-extrabold text-[var(--text-primary)] tracking-tight font-amount tabular-nums">
               {formatDisplayAmount(totalAmount)}
             </span>
-            <span className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8]">
+            <span className="text-xs font-medium text-[var(--text-secondary)]">
               {config.language === 'sv' ? 'totalt belopp' : 'total amount'}
             </span>
           </div>
@@ -77,7 +77,7 @@ export function ReceiptsView({
       {/* Search Input */}
       {receiptTransactions.length > 0 && (
         <div className="relative">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#8C867C] dark:text-[#71717A]">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[var(--text-tertiary)]">
             <Search size={18} strokeWidth={1.5} />
           </div>
           <input
@@ -85,7 +85,7 @@ export function ReceiptsView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={config.language === 'sv' ? 'Sök köpställe, kategori eller belopp...' : 'Search merchant, category, or amount...'}
-            className="w-full h-[46px] pl-11 pr-4 bg-white dark:bg-[#222222] border-none rounded-full text-xs font-semibold placeholder-[#8C867C] dark:placeholder-[#71717A] focus:outline-none shadow-none transition-all text-[#1C1917] dark:text-white"
+            className="w-full h-[46px] pl-11 pr-4 bg-white dark:bg-[#222222] border-none rounded-full text-xs font-semibold placeholder-[var(--text-tertiary)] focus:outline-none shadow-none transition-all text-[var(--text-primary)]"
             id="receipts_search_input"
           />
         </div>
@@ -104,7 +104,7 @@ export function ReceiptsView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={() => onViewTransaction(item)}
-                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-[#1C1C1C] rounded-[12px] shadow-none border-none hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer"
+                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-[#1C1C1C] rounded-[14px] shadow-none border-none hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.98] transition-all cursor-pointer"
                   id={`receipt_item_${item.id}`}
                 >
                   <div className="flex items-center gap-4 min-w-0">

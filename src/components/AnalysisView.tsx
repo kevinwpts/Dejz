@@ -340,10 +340,10 @@ export function AnalysisView({
       {/* DONUT DIAGRAM & FÖRDELNING */}
       <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-6">
         <div className="flex items-center justify-between px-0.5">
-          <h2 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
+          <h2 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Distribution' : 'Fördelning'}
           </h2>
-          <span className="text-[13px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
+          <span className="text-[13px] font-normal text-[var(--text-secondary)]">
             {categoryData.filter(c => c.value > 0).length} {isEn ? 'categories' : 'kategorier'}
           </span>
         </div>
@@ -391,17 +391,17 @@ export function AnalysisView({
 
               {/* Airy Center */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4">
-                <span className="text-[11px] font-medium text-[#6D6962] dark:text-[#A8A8A8] uppercase tracking-wider">
+                <span className="text-[11px] font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                   {isEn ? 'Total' : 'Totalt'}
                 </span>
-                <span className="text-[16px] sm:text-[19px] font-bold text-[#211F1C] dark:text-white tabular-nums tracking-tight">
+                <span className="text-[16px] sm:text-[19px] font-bold text-[var(--text-primary)] tabular-nums tracking-tight">
                   {formatAmount(Math.round(totalSpent), config.language)} {config.currency}
                 </span>
               </div>
             </div>
           </div>
         ) : (
-          <div className="py-8 text-center text-[13px] text-[#6D6962] dark:text-[#A8A8A8]">
+          <div className="py-8 text-center text-[13px] text-[var(--text-secondary)]">
             {isEn ? 'No spending recorded for this period' : 'Inga utgifter registrerade för denna period'}
           </div>
         )}
@@ -410,7 +410,7 @@ export function AnalysisView({
       {/* FULLSTÄNDIG KATEGORILISTA */}
       <div className="space-y-3 pb-8">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
+          <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
             {t('categories')} ({categoryData.length})
           </h3>
         </div>

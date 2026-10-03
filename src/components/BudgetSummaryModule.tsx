@@ -157,16 +157,16 @@ export function BudgetSummaryModule({
     <div className="space-y-6 font-sans">
       {/* 1. HUVUDBELOPP (SPENDERAT HITTILLS) */}
       <div className="text-center flex flex-col items-center gap-1">
-        <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block select-none">
+        <span className="text-[14px] font-normal text-[var(--text-secondary)] block select-none">
           {isPastPeriod 
             ? (isEn ? 'Totalt spenderat' : 'Totalt spenderat')
             : (isEn ? 'Spenderat hittills' : 'Spenderat hittills')}
         </span>
         <div className="flex items-baseline justify-center gap-1.5">
-          <span className="text-[34px] sm:text-[38px] md:text-[42px] leading-tight font-semibold font-amount tabular-nums text-[#211F1C] dark:text-white tracking-tight">
+          <span className="text-[34px] sm:text-[38px] md:text-[42px] leading-tight font-semibold font-amount tabular-nums text-[var(--text-primary)] tracking-tight">
             {formatAmount(Math.round(totalSpent), config.language)}
           </span>
-          <span className="text-sm sm:text-base font-normal text-[#6D6962] dark:text-[#A8A8A8]">
+          <span className="text-sm sm:text-base font-normal text-[var(--text-secondary)]">
             {config.currency || "kr"}
           </span>
         </div>
@@ -177,7 +177,7 @@ export function BudgetSummaryModule({
         {/* Rad 1: Kvar att spendera */}
         <div className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
+            <span className="text-[14px] font-normal text-[var(--text-secondary)]">
               {isPastPeriod ? (
                 isOverBudget 
                   ? (isEn ? 'Över budget vid slut' : 'Över budget vid slut')
@@ -189,7 +189,7 @@ export function BudgetSummaryModule({
             <button
               type="button"
               onClick={() => setActiveInfoModal('remaining')}
-              className="w-5 h-5 rounded-full text-[#6D6962] dark:text-[#A8A8A8] hover:text-[#211F1C] dark:hover:text-white inline-flex items-center justify-center transition-colors cursor-pointer"
+              className="w-5 h-5 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Information om kvar att spendera"
               title="Förklaring"
             >
@@ -197,10 +197,10 @@ export function BudgetSummaryModule({
             </button>
           </div>
           <div className="text-right shrink-0">
-            <span className="text-[16px] font-medium font-amount tabular-nums text-[#211F1C] dark:text-white">
+            <span className="text-[16px] font-medium font-amount tabular-nums text-[var(--text-primary)]">
               {formatAmount(Math.round(isOverBudget && isPastPeriod ? Math.abs(remainingBudget) : Math.max(0, remainingBudget)), config.language)}
             </span>
-            <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-1">
+            <span className="text-[14px] font-normal text-[var(--text-secondary)] ml-1">
               {config.currency || "kr"}
             </span>
           </div>
@@ -208,21 +208,21 @@ export function BudgetSummaryModule({
 
         {/* Rad 2: Största kategori */}
         <div className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
-          <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
+          <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
             {isEn ? 'Största kategori' : 'Största kategori'}
           </span>
           <div className="text-right min-w-0 flex-1 flex items-center justify-end gap-1.5 flex-wrap">
             {largestCategory.name ? (
               <>
-                <span className="text-[16px] font-medium text-[#211F1C] dark:text-white break-words text-right">
+                <span className="text-[16px] font-medium text-[var(--text-primary)] break-words text-right">
                   {largestCategory.name}
                 </span>
-                <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] shrink-0">
+                <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
                   · {formatAmount(Math.round(largestCategory.amount), config.language)} {config.currency || "kr"}
                 </span>
               </>
             ) : (
-              <span className="text-[14px] font-normal text-[#777168] dark:text-[#71717A]">—</span>
+              <span className="text-[14px] font-normal text-[var(--text-tertiary)]">—</span>
             )}
           </div>
         </div>
@@ -230,13 +230,13 @@ export function BudgetSummaryModule({
         {/* Rad 3: Budget använd */}
         <div className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
+            <span className="text-[14px] font-normal text-[var(--text-secondary)]">
               {budgetUsageLabel}
             </span>
             <button
               type="button"
               onClick={() => setActiveInfoModal('budgetUsed')}
-              className="w-5 h-5 rounded-full text-[#6D6962] dark:text-[#A8A8A8] hover:text-[#211F1C] dark:hover:text-white inline-flex items-center justify-center transition-colors cursor-pointer"
+              className="w-5 h-5 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Information om budgetanvändning"
               title="Förklaring"
             >
@@ -244,7 +244,7 @@ export function BudgetSummaryModule({
             </button>
           </div>
           <div className="text-right shrink-0">
-            <span className="text-[16px] font-medium font-amount tabular-nums text-[#211F1C] dark:text-white">
+            <span className="text-[16px] font-medium font-amount tabular-nums text-[var(--text-primary)]">
               {budgetUsedPct}%
             </span>
           </div>
