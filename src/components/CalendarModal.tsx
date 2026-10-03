@@ -74,7 +74,7 @@ export function CalendarModal({
                       onSelectDate(today);
                       if (onPeriodChange) onPeriodChange(today);
                     }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[var(--surface-muted)] dark:bg-[#222222] text-[11px] font-semibold text-[var(--text-primary)] dark:text-white hover:bg-[var(--border-color)] dark:hover:bg-white/[0.1] border border-[var(--border-color)] dark:border-white/[0.06] transition-all active:scale-95 cursor-pointer"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[var(--surface-muted)] dark:bg-[#222222] text-[11px] font-semibold text-[var(--text-primary)] dark:text-white hover:bg-[var(--border-color)] dark:hover:bg-white/[0.1] border-none transition-all active:scale-95 cursor-pointer shadow-none"
                   >
                     <RotateCcw size={12} strokeWidth={2} />
                     <span>{language === 'en' ? 'Current' : 'Nuvarande'}</span>
@@ -93,7 +93,7 @@ export function CalendarModal({
 
             {/* Stepper with arrows inside modal */}
             {periods && onPeriodChange && currentPeriodDate && (
-              <div className="pt-3 pb-1 border-b border-[var(--border-color)]/60 dark:border-white/[0.04]">
+              <div className="pt-3 pb-1 border-none">
                 <UniversalPeriodSelector
                   periods={periods}
                   currentDate={currentPeriodDate}
@@ -131,10 +131,10 @@ export function CalendarModal({
                           onSelectDate(p.date);
                           onClose();
                         }}
-                        className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer text-left border ${
+                        className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer text-left border-none shadow-none ${
                           isSelected
-                            ? 'bg-[#1C1917]/5 dark:bg-[#222222] border-[#1C1917]/20 dark:border-white/20 text-[#1C1917] dark:text-white'
-                            : 'bg-white dark:bg-white/[0.025] hover:bg-[#F7F5F0] dark:hover:bg-white/[0.05] border-[#E6E2D8] dark:border-white/[0.04] text-[#6E6961] dark:text-[#C7CDDC]'
+                            ? 'bg-[#1C1917]/5 dark:bg-[#222222] text-[#1C1917] dark:text-white font-semibold'
+                            : 'bg-white dark:bg-white/[0.025] hover:bg-[#F7F5F0] dark:hover:bg-white/[0.05] text-[#6E6961] dark:text-[#C7CDDC]'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">

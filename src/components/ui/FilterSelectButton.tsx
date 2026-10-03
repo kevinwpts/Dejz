@@ -32,10 +32,10 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
           onClick();
         }
       }}
-      className={`h-11 px-3.5 rounded-2xl transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans ${
+      className={`h-11 px-3.5 rounded-2xl transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans border-none shadow-none ${
         variant === 'cardDarker'
-          ? 'bg-white dark:bg-[#191919] border border-[#E2DDD4] dark:border-white/[0.08] text-[#211F1C] dark:text-white shadow-xs hover:bg-[#F9F8F6] dark:hover:bg-[#222222]'
-          : 'bg-white dark:bg-[#1C1C1C] border border-[#E2DDD4] dark:border-white/[0.08] text-[#211F1C] dark:text-white shadow-xs hover:bg-[#F9F8F6] dark:hover:bg-[#222222]'
+          ? 'bg-white dark:bg-[#191919] text-[#211F1C] dark:text-white hover:bg-[#F9F8F6] dark:hover:bg-[#222222]'
+          : 'bg-white dark:bg-[#1C1C1C] text-[#211F1C] dark:text-white hover:bg-[#F9F8F6] dark:hover:bg-[#222222]'
       } ${className}`}
     >
       <div className="flex items-center gap-2.5 min-w-0 flex-1">

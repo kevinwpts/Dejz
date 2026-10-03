@@ -423,7 +423,7 @@ export function LogView({
         calendarContent={
           <div className="space-y-2.5">
             {/* Period Stepper (Left / Right) */}
-            <div className="flex items-center justify-between bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-2xl p-1.5">
+            <div className="flex items-center justify-between bg-black/5 dark:bg-[#222222] border-none shadow-none rounded-2xl p-1.5">
               <button
                 type="button"
                 onClick={handleModalPrev}
@@ -445,7 +445,7 @@ export function LogView({
                     {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                   </span>
                   {modalPeriod?.isCurrent && (
-                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] border border-black/5 dark:border-white/5">
+                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] border-none">
                       {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
                     </span>
                   )}
@@ -534,7 +534,7 @@ export function LogView({
                         isSelected 
                           ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-bold shadow-xs z-10' 
                           : isToday
-                          ? 'bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white border border-black/10 dark:border-white/20 font-bold'
+                          ? 'bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white border-none font-bold'
                           : 'bg-transparent text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.06] hover:text-[#1C1917] dark:hover:text-white font-medium'
                       }`}
                     >
