@@ -941,6 +941,10 @@ export default function App() {
             dbSettings.showFixedExpensesInCalendar !== undefined
               ? dbSettings.showFixedExpensesInCalendar
               : true,
+          hideEmptyCategories:
+            dbSettings.hideEmptyCategories !== undefined
+              ? dbSettings.hideEmptyCategories
+              : false,
         });
       }
 
@@ -1900,6 +1904,7 @@ export default function App() {
       includeFixedExpensesInAnalysis: true,
       showFixedExpensesInTodayView: true,
       showFixedExpensesInCalendar: true,
+      hideEmptyCategories: false,
     };
 
     try {
@@ -1989,6 +1994,8 @@ export default function App() {
           monthly_savings: defaultConfig.monthlySavings,
           include_fixed_expenses_in_analysis:
             defaultConfig.includeFixedExpensesInAnalysis,
+          hide_empty_categories:
+            defaultConfig.hideEmptyCategories,
           updated_at: new Date().toISOString(),
         };
 
@@ -2217,10 +2224,19 @@ export default function App() {
             includeFixedExpensesInAnalysis: dbProfile.include_fixed_expenses_in_analysis !== false,
             showFixedExpensesInTodayView: dbProfile.show_fixed_expenses_in_today_view !== false,
             showFixedExpensesInCalendar: dbProfile.show_fixed_expenses_in_calendar !== false,
+            hideEmptyCategories: dbProfile.hide_empty_categories !== undefined ? dbProfile.hide_empty_categories : false,
             appIconTheme: dbProfile.app_icon_theme,
           }).catch((err) => {
             console.error("[Migration fetchData] Failed to save migrated settings:", err);
           });
+        }
+
+        let localSavedConfig: any = null;
+        try {
+          const cached = localStorage.getItem(`user_settings_${session.user.id}`);
+          if (cached) localSavedConfig = JSON.parse(cached);
+        } catch {
+          // ignore
         }
 
         const mappedConfig = {
@@ -2275,6 +2291,10 @@ export default function App() {
             dbProfile.show_fixed_expenses_in_calendar !== undefined
               ? dbProfile.show_fixed_expenses_in_calendar
               : true,
+          hideEmptyCategories:
+            dbProfile.hide_empty_categories !== undefined
+              ? dbProfile.hide_empty_categories
+              : (localSavedConfig?.hideEmptyCategories !== undefined ? localSavedConfig.hideEmptyCategories : false),
         };
 
         // Ensure monthlySavings is consistent with monthlySavingsItems
@@ -3843,6 +3863,7 @@ export default function App() {
           includeFixedExpensesInAnalysis: true,
           showFixedExpensesInTodayView: true,
           showFixedExpensesInCalendar: true,
+          hideEmptyCategories: false,
           paymentMethods: DEFAULT_PAYMENT_METHODS,
         };
 
