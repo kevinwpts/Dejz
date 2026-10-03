@@ -251,6 +251,10 @@ export function TodayView({
           color: cat.color || '#6E6961',
         };
       })
+      .filter((cat: any) => {
+        if (!config?.hideEmptyCategories) return true;
+        return cat.spent > 0 || cat.hasBudget;
+      })
       .sort((a: any, b: any) => {
         const aOver = a.hasBudget && a.isOverBudget;
         const bOver = b.hasBudget && b.isOverBudget;
@@ -260,7 +264,7 @@ export function TodayView({
         const bPct = b.hasBudget ? b.percentage : 0;
         return bPct - aPct;
       });
-  }, [stats, fixedExpenses]);
+  }, [stats, fixedExpenses, config?.hideEmptyCategories]);
 
   const displayedVariableTransactions = useMemo(() => {
     return stats?.isPastPeriod

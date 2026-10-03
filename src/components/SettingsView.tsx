@@ -515,6 +515,26 @@ export function SettingsView({
                   />
                 </div>
               </div>
+
+              {/* Hide Empty Categories Setting */}
+              <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.04]">
+                <div className="flex items-center justify-between p-1">
+                  <div className="flex flex-col pr-4">
+                    <span className="text-xs font-semibold text-[var(--text-primary)]">
+                      {t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
+                    </span>
+                    <span className="text-[11px] text-[var(--text-secondary)] mt-0.5 font-medium">
+                      {t('hideEmptyCategoriesDesc' as any) || 'Dölj kategorier som inte har några utgifter eller aktiv budget under perioden.'}
+                    </span>
+                  </div>
+                  <ToggleSwitch
+                    isOn={!!config.hideEmptyCategories}
+                    onToggle={() => {
+                      setConfig({ ...config, hideEmptyCategories: !config.hideEmptyCategories });
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}

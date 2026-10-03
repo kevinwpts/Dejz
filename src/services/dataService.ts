@@ -87,6 +87,9 @@ export const dataService = {
             ? localSavedConfig.showFixedExpensesInCalendar 
             : (profileData.show_fixed_expenses_in_today_view !== undefined ? profileData.show_fixed_expenses_in_today_view : false)),
       homeWidgets: profileData.home_widgets || localSavedConfig?.homeWidgets || undefined,
+      hideEmptyCategories: profileData.hide_empty_categories !== undefined
+        ? profileData.hide_empty_categories
+        : (localSavedConfig?.hideEmptyCategories !== undefined ? localSavedConfig.hideEmptyCategories : false),
     };
   },
 
@@ -196,6 +199,7 @@ export const dataService = {
       show_fixed_expenses_in_today_view: config.showFixedExpensesInTodayView,
       show_fixed_expenses_in_calendar: config.showFixedExpensesInCalendar,
       home_widgets: config.homeWidgets,
+      hide_empty_categories: config.hideEmptyCategories,
       updated_at: new Date().toISOString()
     };
 
