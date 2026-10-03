@@ -17,7 +17,25 @@ import { useScrollLock } from '../hooks/useScrollLock';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
 import { Button, IconButton } from './ui';
 import { CancelSubscriptionModal } from './CancelSubscriptionModal';
+import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
+import { resolveEntityVisual } from '../utils/resolver';
 import { feedback } from '../utils/feedback';
+
+function hexToRgba(hex: string, alpha: number): string {
+  if (!hex) return `rgba(124, 58, 237, ${alpha})`;
+  if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
+  let clean = hex.replace('#', '');
+  if (clean.length === 3) {
+    clean = clean.split('').map(c => c + c).join('');
+  }
+  if (clean.length === 6) {
+    const r = parseInt(clean.substring(0, 2), 16) || 0;
+    const g = parseInt(clean.substring(2, 4), 16) || 0;
+    const b = parseInt(clean.substring(4, 6), 16) || 0;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return `rgba(124, 58, 237, ${alpha})`;
+}
 
 // --- Income View Modal ---
 
@@ -45,6 +63,22 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
   };
 
 
+
+  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
+
+  useEffect(() => {
+    const initial = getTransactionDominantColor(expenseCompatible as any, config);
+    setBrandColor(initial);
+
+    const visual = resolveEntityVisual(expenseCompatible as any, config);
+    if (visual.logoUrl && !visual.logoUrl.startsWith('data:image/svg+xml')) {
+      extractDominantColorFromImage(visual.logoUrl).then((extracted) => {
+        if (extracted) {
+          setBrandColor(extracted);
+        }
+      });
+    }
+  }, [income, config]);
 
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
@@ -89,6 +123,16 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
         className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Smooth, Seamless Ambient Brand Color Glow adapted to app background */}
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.08)} 0%, var(--bg-color) 60%)
+            `
+          }}
+        />
 
 
         {/* Drawer Handle on Mobile */}
@@ -818,6 +862,22 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
 
 
+  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
+
+  useEffect(() => {
+    const initial = getTransactionDominantColor(expenseCompatible as any, config);
+    setBrandColor(initial);
+
+    const visual = resolveEntityVisual(expenseCompatible as any, config);
+    if (visual.logoUrl && !visual.logoUrl.startsWith('data:image/svg+xml')) {
+      extractDominantColorFromImage(visual.logoUrl).then((extracted) => {
+        if (extracted) {
+          setBrandColor(extracted);
+        }
+      });
+    }
+  }, [expense, config]);
+
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
   const displayAmount = (expense.isVariable && expense.periodOverrides && currentPeriodId && expense.periodOverrides[currentPeriodId] !== undefined)
@@ -867,6 +927,16 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
         className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Smooth, Seamless Ambient Brand Color Glow adapted to app background */}
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
+              linear-gradient(180deg, ${hexToRgba(brandColor, 0.08)} 0%, var(--bg-color) 60%)
+            `
+          }}
+        />
 
 
         {/* Drawer Handle on Mobile */}
