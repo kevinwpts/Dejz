@@ -50,7 +50,7 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
       >
         <button 
           onClick={() => onAction(false)}
-          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-4 rounded-[18px] font-bold text-sm sm:text-base active:scale-[0.98] hover:opacity-95 transition-all flex items-center justify-center gap-2 group shadow-xs cursor-pointer"
+          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-13 rounded-[14px] font-semibold text-sm sm:text-base active:scale-[0.98] hover:opacity-95 transition-all flex items-center justify-center gap-2 group shadow-xs cursor-pointer"
         >
           <span>Kom igång gratis</span>
           <ChevronRight size={18} className="group-hover:translate-x-0.5 transition-transform" />

@@ -85,7 +85,7 @@ export function CancelSubscriptionModal({
 
   const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm">
         {/* Backdrop click */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -102,13 +102,13 @@ export function CancelSubscriptionModal({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg bg-white dark:bg-[#1C1C1C] rounded-t-[28px] sm:rounded-[26px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden"
+          className="relative w-full max-w-lg bg-white dark:bg-[#1C1C1C] rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans"
         >
           {/* Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0 font-sans">
+          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div>
               <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
                 {isEn ? 'Show how to cancel' : 'Visa hur du säger upp'}

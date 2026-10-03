@@ -1207,7 +1207,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[18px] border border-[var(--border-color)] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl"
+                className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
                   <div>
@@ -1274,14 +1274,14 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.94, opacity: 0, y: 16 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[24px] border border-black/10 dark:border-white/10 relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
+                className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
               >
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
                   <div>
                     <h3 className="text-[16px] font-semibold text-[var(--text-primary)] tracking-tight">
                       {t('category')}
                     </h3>
-                    <p className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] mt-0.5">
+                    <p className="text-[11px] font-normal text-[var(--text-secondary)] mt-0.5">
                       {currentLang === 'en' ? 'Choose category for transaction' : 'Välj kategori för transaktionen'}
                     </p>
                   </div>

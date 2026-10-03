@@ -26,12 +26,12 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
   return (
     <div className="space-y-8 px-4">
       {/* Budget Status */}
-      <div className="p-5 rounded-[18px] bg-white dark:bg-[#1C1C1C] border-none shadow-none">
+      <div className="p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] shadow-none">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8]">
+          <h3 className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)]">
             {t('budgetUsage')}
           </h3>
-          <span className="text-xs font-medium text-[#05B862] bg-[#05B862]/10 px-2 py-0.5 rounded-full">
+          <span className="text-xs font-bold text-[#05B862] bg-[#05B862]/10 px-2.5 py-0.5 rounded-full">
             {budgetUsage.toFixed(0)}%
           </span>
         </div>
@@ -43,8 +43,8 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
           />
         </div>
         
-        <p className="text-[13px] text-[#6E6961] dark:text-[#A8A8A8] font-normal">
-          <span className="text-[#1C1917] dark:text-white font-medium font-amount tabular-nums">
+        <p className="text-[13px] text-[var(--text-secondary)] font-normal">
+          <span className="text-[var(--text-primary)] font-medium font-amount tabular-nums">
             {formatAmount(totalExpenses, config.language)}
           </span>
           {' '}{t('ofBudgetUsed')}
@@ -53,16 +53,16 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
 
       {/* Category Totals */}
       <div className="space-y-3">
-        <h3 className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8] ml-1">
+        <h3 className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)] ml-1">
           {t('categories')}
         </h3>
         <div className="grid grid-cols-1 gap-2">
           {Object.entries(categoryTotals).slice(0, 4).map(([cat, amount]) => (
-            <div key={cat} className="flex items-center justify-between p-3.5 sm:p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] active:scale-[0.99] transition-all group border-none shadow-none">
-              <span className="text-sm font-medium text-[#1C1917] dark:text-white leading-tight truncate tracking-tight">
+            <div key={cat} className="flex items-center justify-between p-3.5 sm:p-4 rounded-[14px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] active:scale-[0.99] transition-all group border border-black/[0.06] dark:border-white/[0.08] shadow-none">
+              <span className="text-sm font-medium text-[var(--text-primary)] leading-tight truncate tracking-tight">
                 {cat}
               </span>
-              <span className="text-sm font-medium text-[#1C1917] dark:text-white font-amount tabular-nums">
+              <span className="text-sm font-medium text-[var(--text-primary)] font-amount tabular-nums">
                 {formatAmount(amount, config.language)}
               </span>
             </div>
