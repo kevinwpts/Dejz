@@ -146,107 +146,96 @@ export function BudgetSummaryModule({
   const isOverBudget = remainingBudget < 0;
   const isEn = config.language === 'en';
 
-  // Specific label for budget usage based on filter
   const budgetUsageLabel = filterMode === 'variable'
-    ? (isEn ? 'Variable budget used' : 'Rörlig budget använd')
+    ? (isEn ? 'Variable budget' : 'Rörlig budget')
     : filterMode === 'fixed'
-    ? (isEn ? 'Fixed costs allocated' : 'Fasta utgifter av budget')
-    : (isEn ? 'Period budget used' : 'Av periodbudgeten använt');
+    ? (isEn ? 'Fixed costs' : 'Fasta utgifter')
+    : (isEn ? 'Period budget' : 'Periodbudget');
 
   return (
-    <div className="space-y-6 font-sans">
-      {/* 1. HUVUDBELOPP (SPENDERAT HITTILLS) */}
-      <div className="text-center flex flex-col items-center gap-1">
-        <span className="text-[14px] font-normal text-[var(--text-secondary)] block select-none">
-          {isPastPeriod 
-            ? (isEn ? 'Totalt spenderat' : 'Totalt spenderat')
-            : (isEn ? 'Spenderat hittills' : 'Spenderat hittills')}
-        </span>
-        <div className="flex items-baseline justify-center gap-1.5">
-          <span className="text-[34px] sm:text-[38px] md:text-[42px] leading-tight font-semibold font-amount tabular-nums text-[var(--text-primary)] tracking-tight">
-            {formatAmount(Math.round(totalSpent), config.language)}
-          </span>
-          <span className="text-sm sm:text-base font-normal text-[var(--text-secondary)]">
-            {config.currency || "kr"}
-          </span>
-        </div>
-      </div>
-
-      {/* 2. GEMENSAMT SAMMANFATTNINGSKORT MED 3 HORISONTELLA INFORMATIONSRADER */}
-      <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
-        {/* Rad 1: Kvar att spendera */}
-        <div className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[14px] font-normal text-[var(--text-secondary)]">
-              {isPastPeriod ? (
-                isOverBudget 
-                  ? (isEn ? 'Över budget vid slut' : 'Över budget vid slut')
-                  : (isEn ? 'Kvar vid periodens slut' : 'Kvar vid periodens slut')
-              ) : (
-                isEn ? 'Kvar att spendera' : 'Kvar att spendera'
-              )}
+    <div className="space-y-3 font-sans">
+      {/* Super Compact Side-by-Side Summary Card */}
+      <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 sm:p-5 border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-3.5">
+        {/* Top Split: Spenderat vs Kvar att spendera */}
+        <div className="grid grid-cols-2 gap-4 pb-3.5 border-b border-black/[0.05] dark:border-white/[0.06]">
+          {/* Spenderat */}
+          <div className="space-y-0.5">
+            <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block">
+              {isPastPeriod ? (isEn ? 'Total spent' : 'Spenderat') : (isEn ? 'Spent so far' : 'Spenderat')}
             </span>
-            <button
-              type="button"
-              onClick={() => setActiveInfoModal('remaining')}
-              className="w-5 h-5 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center justify-center transition-colors cursor-pointer"
-              aria-label="Information om kvar att spendera"
-              title="Förklaring"
-            >
-              <Info size={14} strokeWidth={1.8} />
-            </button>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[22px] sm:text-[26px] font-bold font-amount tabular-nums text-[var(--text-primary)] tracking-tight">
+                {formatAmount(Math.round(totalSpent), config.language)}
+              </span>
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
+                {config.currency || "kr"}
+              </span>
+            </div>
           </div>
-          <div className="text-right shrink-0">
-            <span className="text-[16px] font-medium font-amount tabular-nums text-[var(--text-primary)]">
-              {formatAmount(Math.round(isOverBudget && isPastPeriod ? Math.abs(remainingBudget) : Math.max(0, remainingBudget)), config.language)}
-            </span>
-            <span className="text-[14px] font-normal text-[var(--text-secondary)] ml-1">
-              {config.currency || "kr"}
-            </span>
+
+          {/* Kvar att spendera */}
+          <div className="space-y-0.5 text-right">
+            <div className="flex items-center justify-end gap-1">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                {isPastPeriod ? (isOverBudget ? (isEn ? 'Over budget' : 'Över budget') : (isEn ? 'Left' : 'Kvar')) : (isEn ? 'Remaining' : 'Kvar')}
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveInfoModal('remaining')}
+                className="w-4 h-4 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center justify-center transition-colors cursor-pointer"
+                title="Förklaring"
+                aria-label="Förklaring"
+              >
+                <Info size={12} strokeWidth={2} />
+              </button>
+            </div>
+            <div className="flex items-baseline justify-end gap-1">
+              <span className={`text-[22px] sm:text-[26px] font-bold font-amount tabular-nums tracking-tight ${
+                isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
+              }`}>
+                {isOverBudget ? '−' : ''}
+                {formatAmount(Math.round(isOverBudget && isPastPeriod ? Math.abs(remainingBudget) : Math.max(0, remainingBudget)), config.language)}
+              </span>
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
+                {config.currency || "kr"}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Rad 2: Största kategori */}
-        <div className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
-          <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
-            {isEn ? 'Största kategori' : 'Största kategori'}
-          </span>
-          <div className="text-right min-w-0 flex-1 flex items-center justify-end gap-1.5 flex-wrap">
-            {largestCategory.name ? (
-              <>
-                <span className="text-[16px] font-medium text-[var(--text-primary)] break-words text-right">
-                  {largestCategory.name}
-                </span>
-                <span className="text-[14px] font-normal text-[var(--text-secondary)] shrink-0">
-                  · {formatAmount(Math.round(largestCategory.amount), config.language)} {config.currency || "kr"}
-                </span>
-              </>
-            ) : (
-              <span className="text-[14px] font-normal text-[var(--text-tertiary)]">—</span>
+        {/* Bottom Split: Budget Used % vs Largest Category */}
+        <div className="grid grid-cols-2 gap-3 pt-0.5">
+          {/* Budget Used */}
+          <div 
+            onClick={() => setActiveInfoModal('budgetUsed')}
+            className="p-3 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all cursor-pointer flex items-center justify-between"
+          >
+            <div>
+              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block">
+                {isEn ? 'Budget used' : 'Använt'}
+              </span>
+              <span className="text-[15px] sm:text-[16px] font-bold font-amount tabular-nums text-[var(--text-primary)]">
+                {budgetUsedPct}%
+              </span>
+            </div>
+            <div className={`w-2 h-2 rounded-full ${isOverBudget ? 'bg-rose-500' : budgetUsedPct > 85 ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+          </div>
+
+          {/* Largest Category */}
+          <div className="p-3 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.03] flex items-center justify-between min-w-0">
+            <div className="min-w-0 pr-1">
+              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block truncate">
+                {largestCategory.name || (isEn ? 'Largest' : 'Största')}
+              </span>
+              <span className="text-[14px] sm:text-[15px] font-bold text-[var(--text-primary)] truncate block">
+                {largestCategory.name || '—'}
+              </span>
+            </div>
+            {largestCategory.amount > 0 && (
+              <span className="text-[13px] font-medium font-amount tabular-nums text-[var(--text-secondary)] shrink-0">
+                {formatAmount(Math.round(largestCategory.amount), config.language)} {config.currency || 'kr'}
+              </span>
             )}
-          </div>
-        </div>
-
-        {/* Rad 3: Budget använd */}
-        <div className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[14px] font-normal text-[var(--text-secondary)]">
-              {budgetUsageLabel}
-            </span>
-            <button
-              type="button"
-              onClick={() => setActiveInfoModal('budgetUsed')}
-              className="w-5 h-5 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center justify-center transition-colors cursor-pointer"
-              aria-label="Information om budgetanvändning"
-              title="Förklaring"
-            >
-              <Info size={14} strokeWidth={1.8} />
-            </button>
-          </div>
-          <div className="text-right shrink-0">
-            <span className="text-[16px] font-medium font-amount tabular-nums text-[var(--text-primary)]">
-              {budgetUsedPct}%
-            </span>
           </div>
         </div>
       </div>
@@ -256,28 +245,28 @@ export function BudgetSummaryModule({
         <Modal
           isOpen={true}
           onClose={() => setActiveInfoModal(null)}
-          title={isEn ? 'Kvar att spendera' : 'Kvar att spendera'}
+          title={isEn ? 'Remaining to spend' : 'Kvar att spendera'}
           size="sm"
         >
-          <div className="space-y-3 text-[14px] text-[var(--text-secondary)]">
+          <div className="space-y-3.5 text-[14px] text-[var(--text-secondary)]">
             <p>
               {isEn 
                 ? 'This shows your remaining disposable amount for the selected period after deducting recorded expenses.'
                 : 'Detta visar hur mycket du har kvar att spendera under den valda perioden utifrån din tillgängliga pott minus registrerade utgifter.'}
             </p>
-            <div className="p-3 bg-black/5 dark:bg-[#222222] rounded-[14px] space-y-1.5 text-[13px] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08]">
+            <div className="p-3.5 bg-black/5 dark:bg-[#222222] rounded-[16px] space-y-2 text-[13px] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08]">
               <div className="flex justify-between">
-                <span>{isEn ? 'Period budget' : 'Periodbudget'}:</span>
-                <span className="font-medium">{formatAmount(Math.round(effectiveBudget), config.language)} {config.currency}</span>
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Period budget' : 'Periodbudget'}:</span>
+                <span className="font-semibold font-amount tabular-nums">{formatAmount(Math.round(effectiveBudget), config.language)} {config.currency}</span>
               </div>
               <div className="flex justify-between">
-                <span>{isEn ? 'Spent so far' : 'Spenderat hittills'}:</span>
-                <span className="font-medium">−{formatAmount(Math.round(totalSpent), config.language)} {config.currency}</span>
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Spent so far' : 'Spenderat hittills'}:</span>
+                <span className="font-semibold font-amount tabular-nums text-rose-500">−{formatAmount(Math.round(totalSpent), config.language)} {config.currency}</span>
               </div>
-              <div className="h-px bg-[#E2DDD4] dark:bg-[#222222] my-1" />
-              <div className="flex justify-between font-semibold">
+              <div className="h-px bg-black/10 dark:bg-white/10 my-1" />
+              <div className="flex justify-between font-bold text-[14px]">
                 <span>{isEn ? 'Remaining' : 'Kvar'}:</span>
-                <span>{formatAmount(Math.round(remainingBudget), config.language)} {config.currency}</span>
+                <span className="font-amount tabular-nums text-[var(--accent-color)]">{formatAmount(Math.round(remainingBudget), config.language)} {config.currency}</span>
               </div>
             </div>
           </div>
@@ -292,13 +281,13 @@ export function BudgetSummaryModule({
           title={budgetUsageLabel}
           size="sm"
         >
-          <div className="space-y-3 text-[14px] text-[#6D6962] dark:text-[#A8A8A8]">
+          <div className="space-y-3.5 text-[14px] text-[var(--text-secondary)]">
             <p>
               {isEn 
                 ? `Shows what percentage of your budget (${formatAmount(Math.round(effectiveBudget), config.language)} ${config.currency}) has been consumed so far.`
                 : `Visar hur stor andel av din totala budget (${formatAmount(Math.round(effectiveBudget), config.language)} ${config.currency}) som har förbrukats hittills under perioden.`}
             </p>
-            <p className="text-[13px]">
+            <p className="text-[13px] font-medium text-[var(--text-primary)]">
               {budgetUsedPct <= 100 
                 ? (isEn ? `You have ${100 - budgetUsedPct}% left of the budget.` : `Du har ${100 - budgetUsedPct}% kvar av budgeten.`)
                 : (isEn ? `You have exceeded the budget by ${budgetUsedPct - 100}%.` : `Du har överskridit budgeten med ${budgetUsedPct - 100}%.`)}

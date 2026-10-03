@@ -2915,6 +2915,16 @@ export default function App() {
           }
         });
 
+        if (fixedExpenses) {
+          fixedExpenses.forEach((fe) => {
+            const isPaid = fe.paidInPeriods?.[periodId];
+            if (isPaid || (!isPaid && fe.deductionDay < new Date().getDate())) {
+              const catName = fe.category ? fe.category.trim() : "Fasta utgifter";
+              categorySpending[catName] = (categorySpending[catName] || 0) + (Number(fe.amount) || 0);
+            }
+          });
+        }
+
         const categoriesMap: Record<string, any> = {};
         (config.categories || []).forEach((c) => {
           const spent = categorySpending[c.name] || 0;

@@ -1181,7 +1181,7 @@ export function TransactionModal({
                   if (typeof feedback?.light === 'function') feedback.light();
                   setShowDeleteConfirm(true);
                 }}
-                className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
                 title={currentLang === 'en' ? 'Delete' : 'Ta bort'}
                 aria-label={currentLang === 'en' ? 'Delete' : 'Ta bort'}
               >
