@@ -168,8 +168,8 @@ export function IconSelector({
                 referrerPolicy="no-referrer" 
               />
               {isAutoLogoSelected && (
-                <div className="absolute inset-0 bg-black/10 dark:bg-[#222222] flex items-center justify-center">
-                  <div className="w-5 h-5 bg-[#1C1917] dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center scale-110 shadow-xs">
+                <div className="absolute inset-0 bg-black/10 dark:bg-black/30 flex items-center justify-center">
+                  <div className="w-5 h-5 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110 shadow-xs">
                     <Check size={12} strokeWidth={2.5} />
                   </div>
                 </div>
@@ -187,8 +187,8 @@ export function IconSelector({
               }}
               className={`relative shrink-0 w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-all border cursor-pointer ${
                 isIconSelected(suggestedEmoji)
-                  ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-[#222222] ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
-                  : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[#1C1917]/40 dark:hover:border-white/40 text-[var(--text-primary)]'
+                  ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 ring-2 ring-[var(--accent-color)]/20 text-[var(--accent-color)]'
+                  : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[var(--accent-color)]/40 text-[var(--text-primary)]'
               }`}
             >
               {(() => {
@@ -197,7 +197,7 @@ export function IconSelector({
                 return <Icon size={26} strokeWidth={1.75} />;
               })()}
               {isIconSelected(suggestedEmoji) && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#1C1917] dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center scale-110 shadow-xs">
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110 shadow-xs">
                   <Check size={12} strokeWidth={2.5} />
                 </div>
               )}
@@ -219,18 +219,18 @@ export function IconSelector({
             }}
             className={`flex-1 h-16 rounded-[14px] border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer select-none ${
               isCustomLogoSelected
-                ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/5 dark:bg-[#222222] ring-1 ring-[#1C1917] dark:ring-white text-[#1C1917] dark:text-white'
-                : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[#1C1917]/30 dark:hover:border-white/30'
+                ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 ring-1 ring-[var(--accent-color)] text-[var(--accent-color)]'
+                : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--accent-color)]/30'
             }`}
           >
             {isUploading ? (
-              <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-[var(--accent-color)] border-t-transparent rounded-full animate-spin" />
             ) : customUserLogo && !isAutomaticMerchantLogo(customUserLogo, name) ? (
               <div className="relative w-full h-full flex flex-col items-center justify-center">
                 <img src={customUserLogo} alt="Custom" className="w-8 h-8 object-contain rounded-full" />
                 <span className="text-[10px] font-semibold mt-0.5">{t('customLogo')}</span>
                 {isCustomLogoSelected && (
-                  <div className="absolute top-1.5 right-2 w-4 h-4 bg-[#1C1917] dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center scale-90 shadow-xs">
+                  <div className="absolute top-1.5 right-2 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-90 shadow-xs">
                     <Check size={10} strokeWidth={2.5} />
                   </div>
                 )}
@@ -265,13 +265,13 @@ export function IconSelector({
                 }}
                 className={`relative aspect-square rounded-[14px] flex items-center justify-center text-[var(--text-primary)] transition-all border cursor-pointer ${
                   selected
-                    ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-[#222222] ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
-                    : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[#1C1917]/30 dark:hover:border-white/30'
+                    ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 ring-2 ring-[var(--accent-color)]/20 text-[var(--accent-color)]'
+                    : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[var(--accent-color)]/30'
                 }`}
               >
                 <Icon size={22} strokeWidth={1.75} />
                 {selected && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#1C1917] dark:bg-white text-white dark:text-black rounded-[4px] flex items-center justify-center scale-110 shadow-xs">
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[4px] flex items-center justify-center scale-110 shadow-xs">
                     <Check size={10} strokeWidth={2.5} />
                   </div>
                 )}
