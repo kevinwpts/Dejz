@@ -155,7 +155,7 @@ export function BudgetSummaryModule({
   return (
     <div className="space-y-3 font-sans">
       {/* Super Compact Side-by-Side Summary Card */}
-      <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 sm:p-5 border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-3.5">
+      <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 sm:p-5 border-none shadow-none space-y-3.5">
         {/* Top Split: Spenderat vs Kvar att spendera */}
         <div className="grid grid-cols-2 gap-4 pb-3.5 border-b border-black/[0.05] dark:border-white/[0.06]">
           {/* Spenderat */}
