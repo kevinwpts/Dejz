@@ -1207,7 +1207,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[28px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
                   <div>
@@ -1274,7 +1274,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.94, opacity: 0, y: 16 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
+                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[28px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
               >
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
                   <div>

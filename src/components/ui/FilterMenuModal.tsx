@@ -104,8 +104,8 @@ export function FilterMenuModal<T = string>({
                   }}
                   className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-[14px] transition-all cursor-pointer text-left active:scale-[0.99] ${
                     isSelected
-                      ? 'bg-[var(--surface-color)] text-[var(--text-primary)] font-semibold shadow-xs'
-                      : 'bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
+                      ? 'bg-blue-500/10 dark:bg-blue-500/15 text-[var(--text-primary)] font-semibold'
+                      : 'bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] text-[var(--text-secondary)] font-medium'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
