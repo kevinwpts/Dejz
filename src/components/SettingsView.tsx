@@ -528,9 +528,14 @@ export function SettingsView({
                     </span>
                   </div>
                   <ToggleSwitch
-                    isOn={!!config.hideEmptyCategories}
+                    isOn={Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'))}
                     onToggle={() => {
-                      setConfig({ ...config, hideEmptyCategories: !config.hideEmptyCategories });
+                      const currentVal = Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'));
+                      const nextVal = !currentVal;
+                      try {
+                        localStorage.setItem('dejz_hide_empty_categories', nextVal ? 'true' : 'false');
+                      } catch {}
+                      setConfig({ ...config, hideEmptyCategories: nextVal });
                     }}
                   />
                 </div>

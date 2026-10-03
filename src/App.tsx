@@ -942,9 +942,9 @@ export default function App() {
               ? dbSettings.showFixedExpensesInCalendar
               : true,
           hideEmptyCategories:
-            dbSettings.hideEmptyCategories !== undefined
-              ? dbSettings.hideEmptyCategories
-              : false,
+            dbSettings.hideEmptyCategories !== undefined && dbSettings.hideEmptyCategories !== null
+              ? Boolean(dbSettings.hideEmptyCategories)
+              : (localStorage.getItem('dejz_hide_empty_categories') === 'true'),
         });
       }
 
@@ -1904,7 +1904,7 @@ export default function App() {
       includeFixedExpensesInAnalysis: true,
       showFixedExpensesInTodayView: true,
       showFixedExpensesInCalendar: true,
-      hideEmptyCategories: false,
+      hideEmptyCategories: localStorage.getItem('dejz_hide_empty_categories') === 'true',
     };
 
     try {
@@ -2292,9 +2292,9 @@ export default function App() {
               ? dbProfile.show_fixed_expenses_in_calendar
               : true,
           hideEmptyCategories:
-            dbProfile.hide_empty_categories !== undefined
-              ? dbProfile.hide_empty_categories
-              : (localSavedConfig?.hideEmptyCategories !== undefined ? localSavedConfig.hideEmptyCategories : false),
+            dbProfile.hide_empty_categories !== undefined && dbProfile.hide_empty_categories !== null
+              ? Boolean(dbProfile.hide_empty_categories)
+              : (localStorage.getItem('dejz_hide_empty_categories') === 'true' || localSavedConfig?.hideEmptyCategories === true),
         };
 
         // Ensure monthlySavings is consistent with monthlySavingsItems
@@ -4619,13 +4619,18 @@ export default function App() {
                 config={config}
                 initialSection={settingsSection as any}
                 setConfig={async (newConfig) => {
-                  if (!session) return;
                   try {
                     setConfig(newConfig);
+                    if (newConfig.hideEmptyCategories !== undefined) {
+                      localStorage.setItem('dejz_hide_empty_categories', newConfig.hideEmptyCategories ? 'true' : 'false');
+                    }
                     if (newConfig.language) {
                       setLandingLanguage(newConfig.language as Language);
                     }
-                    await dataService.saveSettings(session.user.id, newConfig);
+                    const activeUserId = session?.user?.id || (isDemoMode ? "demo-user" : "local-user");
+                    if (activeUserId) {
+                      await dataService.saveSettings(activeUserId, newConfig);
+                    }
                   } catch (err) {
                     console.error("Error saving config:", err);
                   }
@@ -4664,16 +4669,21 @@ export default function App() {
                 config={config}
                 initialSection={profileSection}
                 setConfig={async (newConfig) => {
-                  if (!session) return;
                   try {
                     setConfig(newConfig);
+                    if (newConfig.hideEmptyCategories !== undefined) {
+                      localStorage.setItem('dejz_hide_empty_categories', newConfig.hideEmptyCategories ? 'true' : 'false');
+                    }
                     if (newConfig.language) {
                       setLandingLanguage(newConfig.language as Language);
                     }
-                    await dataService.saveSettings(
-                      session.user.id,
-                      newConfig,
-                    );
+                    const activeUserId = session?.user?.id || (isDemoMode ? "demo-user" : "local-user");
+                    if (activeUserId) {
+                      await dataService.saveSettings(
+                        activeUserId,
+                        newConfig,
+                      );
+                    }
                   } catch (err) {
                     console.error("Error saving config:", err);
                   }

@@ -255,7 +255,10 @@ export function TodayView({
         };
       })
       .filter((cat: any) => {
-        if (!config?.hideEmptyCategories) return true;
+        const shouldHide = config?.hideEmptyCategories !== undefined
+          ? config.hideEmptyCategories
+          : (localStorage.getItem('dejz_hide_empty_categories') === 'true');
+        if (!shouldHide) return true;
         // Inaktiv om den varken har några rörliga utgifter eller någon kvarvarande budget att spendera
         return cat.variableSpent > 0 || cat.remaining > 0;
       })
