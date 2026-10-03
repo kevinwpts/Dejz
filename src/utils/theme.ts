@@ -3,7 +3,7 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   if (clean.length === 3) {
     clean = clean.split('').map((c) => c + c).join('');
   }
-  const num = parseInt(clean, 16) || 0x635bff;
+  const num = parseInt(clean, 16) || 0x3b82f6;
   return {
     r: (num >> 16) & 255,
     g: (num >> 8) & 255,
@@ -11,11 +11,11 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   };
 }
 
-export function applyThemeColor(themeColorHex: string = '#635BFF', isDark: boolean = false) {
+export function applyThemeColor(themeColorHex: string = '#3B82F6', isDark: boolean = false) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
 
-  const hex = (themeColorHex || '#635BFF').trim();
+  const hex = (themeColorHex || '#3B82F6').trim();
   const lowerHex = hex.toLowerCase();
   const isBlackTheme = lowerHex === '#1c1917' || lowerHex === '#000000' || lowerHex === '#141414';
 

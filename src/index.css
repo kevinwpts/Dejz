@@ -248,25 +248,25 @@ h6 {
   --shadow-level-3: none;
 
   /* Brand Accents & Colors - Dejz Accent */
-  --accent-color: #635BFF;
-  --accent-hover: #524AE8;
-  --accent-pressed: #473FC7;
+  --accent-color: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-pressed: #1D4ED8;
   --accent-gradient: var(--accent-color);
   --on-accent: #FFFFFF;
   --text-on-accent: #FFFFFF;
-  --accent-soft: rgba(99, 91, 255, 0.08);
-  --accent-container: #EDEBFB;
-  --on-accent-container: #635BFF;
+  --accent-soft: rgba(59, 130, 246, 0.08);
+  --accent-container: #EFF6FF;
+  --on-accent-container: #3B82F6;
   --accent-on-solid: #FFFFFF;
-  --dejz-accent: #635BFF;
+  --dejz-accent: #3B82F6;
   --accent-glow: none;
-  --accent-secondary-color: #EDEBFB;
+  --accent-secondary-color: #EFF6FF;
 
   /* Primary button states (Light mode) */
-  --btn-primary-bg: #635BFF;
+  --btn-primary-bg: #3B82F6;
   --btn-primary-text: #FFFFFF;
-  --btn-primary-hover: #524AE8;
-  --btn-primary-pressed: #473FC7;
+  --btn-primary-hover: #2563EB;
+  --btn-primary-pressed: #1D4ED8;
 
   --modal-bg: #FFFFFF;
   --bg-primary: var(--bg-color);
@@ -286,9 +286,9 @@ h6 {
   --info-container: #DBEAFE;
   --scrim-color: rgba(0, 0, 0, 0.60);
 
-  --nav-active-color: #635BFF;
+  --nav-active-color: #3B82F6;
   --nav-inactive-color: #8C867C;
-  --nav-plus-bg: #635BFF;
+  --nav-plus-bg: #3B82F6;
   --nav-plus-color: #FFFFFF;
   --nav-plus-shadow: none;
 
@@ -390,26 +390,26 @@ h6 {
 
   --logo-color: #FFFFFF;
 
-  /* Brand Accents & Colors (Dark Mode: Pure Neutral Monochrome) */
-  --accent-color: #FFFFFF;
-  --accent-hover: #E8E8E8;
-  --accent-pressed: #D0D0D0;
-  --accent-gradient: #FFFFFF;
-  --on-accent: #141414;
-  --text-on-accent: #141414;
-  --accent-soft: rgba(255, 255, 255, 0.12);
-  --accent-container: #222222;
+  /* Brand Accents & Colors (Dark Mode) */
+  --accent-color: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-pressed: #1D4ED8;
+  --accent-gradient: #3B82F6;
+  --on-accent: #FFFFFF;
+  --text-on-accent: #FFFFFF;
+  --accent-soft: rgba(59, 130, 246, 0.16);
+  --accent-container: rgba(59, 130, 246, 0.2);
   --on-accent-container: #FFFFFF;
-  --accent-on-solid: #141414;
-  --dejz-accent: #FFFFFF;
+  --accent-on-solid: #FFFFFF;
+  --dejz-accent: #3B82F6;
   --accent-glow: none;
   --accent-secondary-color: #222222;
 
-  /* Primary button states (Dark mode: White background + Dark text #141414) */
-  --btn-primary-bg: #FFFFFF;
-  --btn-primary-text: #141414;
-  --btn-primary-hover: #E8E8E8;
-  --btn-primary-pressed: #D0D0D0;
+  /* Primary button states (Dark mode) */
+  --btn-primary-bg: #3B82F6;
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-hover: #2563EB;
+  --btn-primary-pressed: #1D4ED8;
 
   --card-shadow: none;
   --card-inner-stroke: none;

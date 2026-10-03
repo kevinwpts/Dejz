@@ -63,7 +63,7 @@ export const dataService = {
       securityLock: profileData.security_lock,
       darkMode: (profileData.dark_mode !== undefined && profileData.dark_mode !== null) ? profileData.dark_mode : true,
       themeMode: profileData.theme_mode || localSavedConfig?.themeMode || 'system',
-      themeColor: profileData.theme_color || localSavedConfig?.themeColor || '#635BFF',
+      themeColor: profileData.theme_color || localSavedConfig?.themeColor || '#3B82F6',
       quickChoices: profileData.quick_choices || [],
       savingsGoals: (profileData.savings_goals && Array.isArray(profileData.savings_goals) && profileData.savings_goals.length > 0)
         ? profileData.savings_goals
@@ -183,7 +183,7 @@ export const dataService = {
       security_lock: config.securityLock,
       dark_mode: config.darkMode,
       theme_mode: config.themeMode || 'system',
-      theme_color: config.themeColor || '#635BFF',
+      theme_color: config.themeColor || '#3B82F6',
       quick_choices: config.quickChoices,
       savings_pot: config.savingsPot,
       savings_goals: config.savingsGoals,

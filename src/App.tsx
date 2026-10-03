@@ -1265,7 +1265,7 @@ export default function App() {
   // Dynamically update CSS variables and background tint when theme color or dark mode changes
   useEffect(() => {
     if (!config) return;
-    applyThemeColor(config.themeColor || '#635BFF', !!config.darkMode);
+    applyThemeColor(config.themeColor || '#3B82F6', !!config.darkMode);
   }, [config?.themeColor, config?.darkMode]);
 
   const handleFeedbackSubmit = async (message: string) => {
@@ -1525,7 +1525,7 @@ export default function App() {
         document.body.classList.add("light");
       }
 
-      const userThemeHex = config?.themeColor || '#635BFF';
+      const userThemeHex = config?.themeColor || '#3B82F6';
       applyThemeColor(userThemeHex, isDark);
 
       const themeColor = isDark ? "#191919" : "#FFFFFF";

@@ -103,9 +103,9 @@ export function FilterMenuModal<T = string>({
                     onClose();
                   }}
                   style={isSelected ? {
-                    backgroundColor: 'var(--user-accent-soft, rgba(99, 91, 255, 0.15))',
-                    borderColor: 'rgba(var(--user-accent-rgb, 99, 91, 255), 0.25)',
-                    color: 'var(--accent-color, #635BFF)'
+                    backgroundColor: 'var(--user-accent-soft, rgba(59, 130, 246, 0.15))',
+                    borderColor: 'rgba(var(--user-accent-rgb, 59, 130, 246), 0.25)',
+                    color: 'var(--accent-color, #3B82F6)'
                   } : undefined}
                   className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] border ${
                     isSelected
@@ -116,7 +116,7 @@ export function FilterMenuModal<T = string>({
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     {opt.icon && (
                       <div
-                        style={isSelected ? { backgroundColor: 'var(--accent-color, #635BFF)' } : undefined}
+                        style={isSelected ? { backgroundColor: 'var(--accent-color, #3B82F6)' } : undefined}
                         className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                           isSelected
                             ? 'text-white'
@@ -128,7 +128,7 @@ export function FilterMenuModal<T = string>({
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'font-semibold' : ''}`} style={isSelected ? { color: 'var(--accent-color, #635BFF)' } : undefined}>
+                        <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'font-semibold' : ''}`} style={isSelected ? { color: 'var(--accent-color, #3B82F6)' } : undefined}>
                           {opt.label}
                         </span>
                         {opt.badge && (
@@ -147,7 +147,7 @@ export function FilterMenuModal<T = string>({
 
                   {isSelected && (
                     <div 
-                      style={{ backgroundColor: 'var(--accent-color, #635BFF)' }}
+                      style={{ backgroundColor: 'var(--accent-color, #3B82F6)' }}
                       className="w-5 h-5 rounded-full text-white flex items-center justify-center shrink-0 ml-2"
                     >
                       <Check size={12} strokeWidth={3} />

@@ -304,9 +304,9 @@ export function SettingsView({
   const isEn = config.language === 'en';
 
   const THEME_COLOR_OPTIONS = [
-    { id: 'dejz', name: 'Dejz', hex: '#635BFF' },
+    { id: 'dejz', name: 'Dejz', hex: '#3B82F6' },
+    { id: 'purple', name: isEn ? 'Purple' : 'Lila', hex: '#635BFF' },
     { id: 'black', name: isEn ? 'Black' : 'Svart', hex: '#1C1917' },
-    { id: 'blue', name: isEn ? 'Blue' : 'Blå', hex: '#3B82F6' },
     { id: 'green', name: isEn ? 'Green' : 'Grön', hex: '#16B878' },
     { id: 'pink', name: isEn ? 'Pink' : 'Rosa', hex: '#EC5F8D' },
     { id: 'orange', name: 'Orange', hex: '#F59E42' },
@@ -354,7 +354,7 @@ export function SettingsView({
           </label>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
             {THEME_COLOR_OPTIONS.map((theme) => {
-              const currentHex = (config.themeColor || '#635BFF').toLowerCase();
+              const currentHex = (config.themeColor || '#3B82F6').toLowerCase();
               const isSelected = currentHex === theme.hex.toLowerCase();
 
               return (

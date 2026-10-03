@@ -143,9 +143,9 @@ export function PeriodSelectorModal({
                         onClose();
                       }}
                       style={isSelected ? {
-                        backgroundColor: 'var(--user-accent-soft, rgba(99, 91, 255, 0.15))',
-                        borderColor: 'rgba(var(--user-accent-rgb, 99, 91, 255), 0.3)',
-                        color: 'var(--accent-color, #635BFF)'
+                        backgroundColor: 'var(--user-accent-soft, rgba(59, 130, 246, 0.15))',
+                        borderColor: 'rgba(var(--user-accent-rgb, 59, 130, 246), 0.3)',
+                        color: 'var(--accent-color, #3B82F6)'
                       } : undefined}
                       className={`w-full flex items-center justify-between py-3 px-4 rounded-2xl transition-all cursor-pointer text-left active:scale-[0.99] min-h-[52px] border shadow-xs ${
                         isSelected
@@ -155,7 +155,7 @@ export function PeriodSelectorModal({
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div 
-                          style={isSelected ? { backgroundColor: 'var(--accent-color, #635BFF)' } : undefined}
+                          style={isSelected ? { backgroundColor: 'var(--accent-color, #3B82F6)' } : undefined}
                           className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                             isSelected ? 'text-white' : 'bg-black/5 dark:bg-[#1C1C1C] text-[#6E6961] dark:text-[#A8A8A8]'
                           }`}
@@ -164,7 +164,7 @@ export function PeriodSelectorModal({
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className={`text-sm tracking-tight truncate ${isSelected ? 'font-semibold' : ''}`} style={isSelected ? { color: 'var(--accent-color, #635BFF)' } : undefined}>
+                            <span className={`text-sm tracking-tight truncate ${isSelected ? 'font-semibold' : ''}`} style={isSelected ? { color: 'var(--accent-color, #3B82F6)' } : undefined}>
                               {title}
                             </span>
                             {p.isCurrent && (
@@ -183,7 +183,7 @@ export function PeriodSelectorModal({
 
                       {isSelected && (
                         <div 
-                          style={{ backgroundColor: 'var(--accent-color, #635BFF)' }}
+                          style={{ backgroundColor: 'var(--accent-color, #3B82F6)' }}
                           className="w-5 h-5 rounded-full text-white flex items-center justify-center shrink-0 ml-2"
                         >
                           <Check size={12} strokeWidth={3} />
