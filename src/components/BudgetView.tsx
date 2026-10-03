@@ -260,14 +260,21 @@ export function BudgetView({
   
 
 
-  const sortedCategoriesForManage = [...(config.categories || [])].sort((a, b) => {
-    const aFixed = Math.round(getFixedSpentForCategory(a.name));
-    const bFixed = Math.round(getFixedSpentForCategory(b.name));
-    if (bFixed !== aFixed) {
-      return bFixed - aFixed;
-    }
-    return (a.name || "").localeCompare(b.name || "");
-  });
+  const sortedCategoriesForManage = [...(config.categories || [])]
+    .filter((cat) => {
+      if (!config?.hideEmptyCategories) return true;
+      const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
+      const budgetVal = Number(cat.budget) || 0;
+      return budgetVal > 0 || fixedSpent > 0;
+    })
+    .sort((a, b) => {
+      const aFixed = Math.round(getFixedSpentForCategory(a.name));
+      const bFixed = Math.round(getFixedSpentForCategory(b.name));
+      if (bFixed !== aFixed) {
+        return bFixed - aFixed;
+      }
+      return (a.name || "").localeCompare(b.name || "");
+    });
 
   if (showCategoryBudgets) {
     return (
