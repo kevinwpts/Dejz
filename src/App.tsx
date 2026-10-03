@@ -2909,6 +2909,28 @@ export default function App() {
           };
         });
 
+        const categorySpending: Record<string, number> = {};
+        pTransactions.forEach((tx) => {
+          if (tx.type === 'expense' && tx.category) {
+            categorySpending[tx.category] = (categorySpending[tx.category] || 0) + (Number(tx.amount) || 0);
+          }
+        });
+
+        const categoriesMap: Record<string, any> = {};
+        (config.categories || []).forEach((c) => {
+          const spent = categorySpending[c.name] || 0;
+          const budgetVal = c.budget !== undefined && c.budget !== null 
+            ? Number(String(c.budget).replace(/[^0-9.]/g, "")) 
+            : 0;
+          categoriesMap[c.name] = {
+            name: c.name,
+            spent,
+            budget: !isNaN(budgetVal) ? budgetVal : 0,
+            icon: c.icon,
+            color: c.color,
+          };
+        });
+
         return {
           periodStart,
           periodEnd,
@@ -2937,6 +2959,7 @@ export default function App() {
           ),
           days,
           periodId,
+          categories: categoriesMap,
         };
       } catch (_error) {
         console.error("Error calculating stats:", _error);
