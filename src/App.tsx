@@ -2911,11 +2911,16 @@ export default function App() {
         const fixedExpenseCategoryMap: Record<string, number> = {};
         if (fixedExpenses) {
           fixedExpenses.forEach((fe) => {
-            const isPaid = fe.paidInPeriods?.[periodId];
-            if (isPaid || (!isPaid && fe.deductionDay < new Date().getDate())) {
-              const catName = fe.category ? fe.category.trim() : "Fasta utgifter";
-              fixedExpenseCategoryMap[catName] = (fixedExpenseCategoryMap[catName] || 0) + (Number(fe.amount) || 0);
+            const amount = getAmountForPeriod(fe);
+            let periodAmount = amount;
+            switch (fe.frequency) {
+              case Frequency.QUARTERLY: periodAmount = amount / 3; break;
+              case Frequency.SEMI_ANNUALLY: periodAmount = amount / 6; break;
+              case Frequency.ANNUALLY: periodAmount = amount / 12; break;
+              default: periodAmount = amount; break;
             }
+            const catName = fe.category ? fe.category.trim() : "Fasta utgifter";
+            fixedExpenseCategoryMap[catName] = (fixedExpenseCategoryMap[catName] || 0) + periodAmount;
           });
         }
 
