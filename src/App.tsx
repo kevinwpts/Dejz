@@ -2924,13 +2924,14 @@ export default function App() {
           });
         }
 
-        const categorySpending: Record<string, number> = {};
+        const categoryVariableSpending: Record<string, number> = {};
         pTransactions.forEach((tx) => {
           if (tx.type === 'expense' && tx.category) {
-            categorySpending[tx.category] = (categorySpending[tx.category] || 0) + (Number(tx.amount) || 0);
+            categoryVariableSpending[tx.category] = (categoryVariableSpending[tx.category] || 0) + (Number(tx.amount) || 0);
           }
         });
 
+        const categorySpending: Record<string, number> = { ...categoryVariableSpending };
         Object.entries(fixedExpenseCategoryMap).forEach(([catName, amount]) => {
           categorySpending[catName] = (categorySpending[catName] || 0) + amount;
         });
@@ -2938,6 +2939,7 @@ export default function App() {
         const categoriesMap: Record<string, any> = {};
         (config.categories || []).forEach((c) => {
           const spent = categorySpending[c.name] || 0;
+          const variableSpent = categoryVariableSpending[c.name] || 0;
           const fixedSpent = fixedExpenseCategoryMap[c.name] || 0;
           const budgetVal = c.budget !== undefined && c.budget !== null 
             ? Number(String(c.budget).replace(/[^0-9.]/g, "")) 
@@ -2947,6 +2949,9 @@ export default function App() {
           categoriesMap[c.name] = {
             name: c.name,
             spent,
+            variableSpent,
+            fixedSpent,
+            userBudget: budgetVal,
             budget,
             icon: c.icon,
             color: c.color,

@@ -234,6 +234,7 @@ export function TodayView({
       .map((cat: any) => {
         const spent = cat.spent || 0;
         const budget = cat.budget || 0;
+        const variableSpent = cat.variableSpent !== undefined ? cat.variableSpent : Math.max(0, spent - (cat.fixedSpent || 0));
         const remaining = budget - spent;
         const hasBudget = budget > 0;
         const percentage = hasBudget ? Math.min(100, Math.round((spent / budget) * 100)) : 0;
@@ -243,6 +244,8 @@ export function TodayView({
           name: cat.name,
           spent,
           budget,
+          variableSpent,
+          fixedSpent: cat.fixedSpent || 0,
           remaining,
           hasBudget,
           percentage,
@@ -253,9 +256,8 @@ export function TodayView({
       })
       .filter((cat: any) => {
         if (!config?.hideEmptyCategories) return true;
-        const rawCategory = (config.categories || []).find((c: any) => c.name === cat.name);
-        const userBudget = rawCategory && rawCategory.budget !== undefined && rawCategory.budget !== null && rawCategory.budget !== '' ? Number(rawCategory.budget) : 0;
-        return cat.spent > 0 || userBudget > 0;
+        // Inaktiv om den varken har några rörliga utgifter eller någon kvarvarande budget att spendera
+        return cat.variableSpent > 0 || cat.remaining > 0;
       })
       .sort((a: any, b: any) => {
         const aOver = a.hasBudget && a.isOverBudget;
@@ -266,7 +268,7 @@ export function TodayView({
         const bPct = b.hasBudget ? b.percentage : 0;
         return bPct - aPct;
       });
-  }, [stats, fixedExpenses, config?.hideEmptyCategories]);
+  }, [stats?.categories, config?.hideEmptyCategories]);
 
   const displayedVariableTransactions = useMemo(() => {
     return stats?.isPastPeriod
