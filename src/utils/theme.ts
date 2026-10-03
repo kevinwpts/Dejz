@@ -13,9 +13,13 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
 
 export function applyThemeColor(themeColorHex: string = '#3B82F6', isDark: boolean = false) {
   if (typeof document === 'undefined') return;
-  const targets = [document.documentElement, document.body].filter(Boolean);
-
   const hex = (themeColorHex || '#3B82F6').trim();
+  try {
+    localStorage.setItem('dejz_theme_color', hex);
+  } catch {
+    // Ignore storage errors
+  }
+  const targets = [document.documentElement, document.body].filter(Boolean);
   const { r, g, b } = hexToRgb(hex);
 
   targets.forEach((target) => {

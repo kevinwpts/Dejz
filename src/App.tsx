@@ -919,6 +919,7 @@ export default function App() {
           darkMode:
             (dbSettings.darkMode !== undefined && dbSettings.darkMode !== null) ? dbSettings.darkMode : false,
           themeMode: dbSettings.themeMode || 'system',
+          themeColor: dbSettings.themeColor || localStorage.getItem('dejz_theme_color') || '#3B82F6',
           quickChoices: dbSettings.quickChoices || [],
           savingsPot: dbSettings.savingsPot || 0,
           savingsGoals: dbSettings.savingsGoals || [],
@@ -1888,6 +1889,7 @@ export default function App() {
       securityLock: false,
       darkMode: false,
       themeMode: 'system',
+      themeColor: localStorage.getItem('dejz_theme_color') || '#3B82F6',
       quickChoices: [],
       savingsPot: 0,
       savingsGoals: [],
@@ -2234,6 +2236,7 @@ export default function App() {
           securityLock: dbProfile.security_lock,
           darkMode: (dbProfile.dark_mode !== undefined && dbProfile.dark_mode !== null) ? dbProfile.dark_mode : true,
           themeMode: dbProfile.theme_mode || 'system',
+          themeColor: dbProfile.theme_color || localStorage.getItem('dejz_theme_color') || '#3B82F6',
           quickChoices: dbProfile.quick_choices || [],
           savingsPot: dbProfile.savings_pot || 0,
           paymentMethods: normalizePaymentMethods(dbProfile.payment_methods),
