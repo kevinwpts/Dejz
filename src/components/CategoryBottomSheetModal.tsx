@@ -234,7 +234,7 @@ export function CategoryBottomSheetModal({
                   <div className="w-full h-1 bg-black/10 dark:bg-[#222222] rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        categoryData.isOverBudget ? 'bg-rose-500' : 'bg-[#1C1917] dark:bg-white'
+                        categoryData.isOverBudget ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
                       }`}
                       style={{ width: `${spentPct}%` }}
                     />

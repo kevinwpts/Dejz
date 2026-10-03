@@ -185,7 +185,7 @@ export function SettingsView({
             onClick={() => setCategoryTab('expense')}
             className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer ${
               categoryTab === 'expense'
-                ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
+                ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none'
                 : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
             }`}
           >
@@ -195,7 +195,7 @@ export function SettingsView({
             onClick={() => setCategoryTab('income')}
             className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer ${
               categoryTab === 'income'
-                ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
+                ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none'
                 : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
             }`}
           >
@@ -290,7 +290,7 @@ export function SettingsView({
                 </span>
               </div>
               {config.language === l.code && (
-                <div className="w-6 h-6 rounded-full bg-[#1C1917] dark:bg-white flex items-center justify-center text-white dark:text-[#1C1917]">
+                <div className="w-6 h-6 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center">
                   <Check size={14} strokeWidth={2.5} />
                 </div>
               )}
@@ -335,7 +335,7 @@ export function SettingsView({
                   }}
                   className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[18px] border-none transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-none'
+                      ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none'
                       : 'bg-white dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
@@ -674,7 +674,7 @@ export function SettingsView({
                 }}
                 className={`py-3 rounded-[14px] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
                   isSelected
-                    ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] shadow-md scale-105'
+                    ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-md scale-105'
                     : 'bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/15'
                 }`}
               >

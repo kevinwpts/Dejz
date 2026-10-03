@@ -217,7 +217,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             <button
               type="submit"
               disabled={!value.trim() || isProcessing || disabled}
-              className="absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[#1C1917] dark:border-white"
+              className="absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[var(--accent-color)]"
             >
               {isProcessing ? (
                 <Loader2 size={14} className="animate-spin" />

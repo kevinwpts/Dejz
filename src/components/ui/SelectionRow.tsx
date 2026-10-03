@@ -68,7 +68,7 @@ export function SelectionRow<T = string>({
       </div>
 
       {isSelected && (
-        <div className="w-5 h-5 rounded-full bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] flex items-center justify-center shrink-0 ml-2">
+        <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center shrink-0 ml-2">
           <Check size={12} strokeWidth={3} />
         </div>
       )}

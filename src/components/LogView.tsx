@@ -532,14 +532,14 @@ export function LogView({
                       }}
                       className={`aspect-square w-full rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
                         isSelected 
-                          ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-bold shadow-xs z-10' 
+                          ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-bold shadow-xs z-10' 
                           : isToday
                           ? 'bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white border border-black/10 dark:border-white/20 font-bold'
                           : 'bg-transparent text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.06] hover:text-[#1C1917] dark:hover:text-white font-medium'
                       }`}
                     >
                       <span className={`text-xs sm:text-[13px] leading-none tabular-nums ${
-                        isSelected ? 'text-white dark:text-[#1C1917]' : isToday ? 'text-[#1C1917] dark:text-white font-bold' : 'text-[#1C1917] dark:text-white'
+                        isSelected ? 'text-[var(--on-accent)]' : isToday ? 'text-[#1C1917] dark:text-white font-bold' : 'text-[#1C1917] dark:text-white'
                       }`}>
                         {dayNum}
                       </span>
@@ -547,10 +547,10 @@ export function LogView({
                       {/* Transaction Dots */}
                       <div className="flex items-center justify-center gap-0.5 pointer-events-none h-1 w-full">
                         {dayTx?.hasIncome && (
-                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white dark:bg-[#1C1917]' : 'bg-emerald-500'}`} />
+                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-emerald-500'}`} />
                         )}
                         {dayTx?.hasExpense && (
-                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white dark:bg-[#1C1917]' : 'bg-rose-500'}`} />
+                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-rose-500'}`} />
                         )}
                       </div>
                     </button>

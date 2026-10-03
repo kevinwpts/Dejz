@@ -313,7 +313,7 @@ export function BudgetView({
           <div className="w-full h-1.5 bg-black/5 dark:bg-[#222222] rounded-full overflow-hidden">
             <div 
               className={`h-full rounded-full transition-all duration-300 ${
-                isOverAllocated ? "bg-rose-500" : "bg-[#1C1917] dark:bg-white"
+                isOverAllocated ? "bg-rose-500" : "bg-[var(--accent-color)]"
               }`}
               style={{ width: `${Math.min(100, Math.round((totalAllocated / (totalIncomeSum || 1)) * 100))}%` }}
             />
@@ -553,7 +553,7 @@ export function BudgetView({
           <button
             type="button"
             onClick={handleCloseCategoryBudgets}
-            className="w-full h-12 rounded-full bg-[#1C1917] text-white dark:bg-white dark:text-[#0B0A12] font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
+            className="w-full h-12 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
           >
             <Check size={14} strokeWidth={2.5} />
             Klar, spara budgeten

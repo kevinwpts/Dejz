@@ -191,7 +191,7 @@ export function CancelSubscriptionModal({
                   <button
                     type="button"
                     onClick={handleOpenLink}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-[#1C1917] dark:bg-white text-white dark:text-[#1C1917] font-bold text-sm shadow-none hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full py-3.5 px-4 rounded-2xl bg-[var(--accent-color)] text-[var(--on-accent)] font-bold text-sm shadow-none hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <ExternalLink size={17} strokeWidth={2.4} />
                     <span>{isEn ? 'Open cancellation portal' : 'Öppna uppsägningssidan'}</span>
