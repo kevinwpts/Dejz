@@ -4,6 +4,7 @@ import { ChevronDown, LayoutGrid, TrendingUp, Calendar } from 'lucide-react';
 import { Transaction, FixedExpense, Config, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
+import { TransactionLogo } from './TransactionLogo';
 import { EmptyState } from './EmptyState';
 import { BudgetSummaryModule } from './BudgetSummaryModule';
 import { FilterSelectButton, FilterMenuModal } from './ui';
@@ -509,27 +510,40 @@ export function AnalysisView({
 
                           {categoryFixedExpenses.length > 0 && (
                             <div className="space-y-1.5">
-                              {categoryFixedExpenses.map((fe) => (
-                                <div
-                                  key={fe.id}
-                                  onClick={() => onViewFixedExpense?.(fe)}
-                                  className="flex items-center justify-between p-3 rounded-[14px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] transition-colors cursor-pointer border border-black/[0.04] dark:border-white/[0.06] shadow-none"
-                                >
-                                  <div className="min-w-0">
-                                    <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug truncate tracking-tight">
-                                      {fe.name}
-                                    </p>
-                                    <p className="text-[12px] font-normal text-[var(--text-secondary)] truncate mt-0.5 tracking-tight">
-                                      {isEn ? 'Fixed expense' : 'Fast utgift'}
+                              {categoryFixedExpenses.map((fe) => {
+                                const feCompatible = {
+                                  ...fe,
+                                  note: fe.name,
+                                  type: 'expense' as const,
+                                  timestamp: Date.now()
+                                };
+                                return (
+                                  <div
+                                    key={fe.id}
+                                    onClick={() => onViewFixedExpense?.(fe)}
+                                    className="flex items-center justify-between p-3 rounded-[14px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] transition-colors cursor-pointer border border-black/[0.04] dark:border-white/[0.06] shadow-none"
+                                  >
+                                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                                      <div className="flex-shrink-0">
+                                        <TransactionLogo transaction={feCompatible as any} config={config} />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug truncate tracking-tight">
+                                          {fe.name}
+                                        </p>
+                                        <p className="text-[12px] font-normal text-[var(--text-secondary)] truncate mt-0.5 tracking-tight">
+                                          {isEn ? 'Fixed expense' : 'Fast utgift'}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <p className="text-[14px] font-medium whitespace-nowrap tracking-tight text-[var(--text-primary)] pl-2">
+                                      <span className="opacity-75 mr-0.5">−</span>
+                                      <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(fe.amount), config.language)}</span>
+                                      <span className="text-[12px] font-normal text-[var(--text-secondary)] ml-[2.5px]">{config.currency}</span>
                                     </p>
                                   </div>
-                                  <p className="text-[14px] font-medium whitespace-nowrap tracking-tight text-[var(--text-primary)] pl-2">
-                                    <span className="opacity-75 mr-0.5">−</span>
-                                    <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(fe.amount), config.language)}</span>
-                                    <span className="text-[12px] font-normal text-[var(--text-secondary)] ml-[2.5px]">{config.currency}</span>
-                                  </p>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           )}
 
