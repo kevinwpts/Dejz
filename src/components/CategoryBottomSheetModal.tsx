@@ -218,24 +218,7 @@ export function CategoryBottomSheetModal({
                         : (isEn ? 'spent' : 'totalt spenderat')}
                     </span>
                   </div>
-                  {categoryData?.hasBudget && (
-                    <span className="text-xs font-semibold text-[var(--text-tertiary)] tabular-nums">
-                      {spentPct} {isEn ? '% used' : '% använt'}
-                    </span>
-                  )}
                 </div>
-
-                {categoryData?.hasBudget && (
-                  <div className="w-full h-1 bg-black/10 dark:bg-[#222222] rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${spentPct}%`,
-                        backgroundColor: categoryData.isOverBudget ? '#f43f5e' : categoryColor,
-                      }}
-                    />
-                  </div>
-                )}
               </div>
 
               {/* Transactions List */}
