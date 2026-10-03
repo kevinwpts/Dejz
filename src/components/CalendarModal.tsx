@@ -47,7 +47,7 @@ export function CalendarModal({
             exit={{ opacity: 0, y: 40, scale: 0.98 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-[#1C1C1C] border-none w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] font-sans"
+            className="bg-[var(--bg-color)] border-none w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] font-sans"
           >
             {/* Mobile Drag Handle */}
             <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-3 sm:hidden shrink-0" />
@@ -134,10 +134,10 @@ export function CalendarModal({
                           onSelectDate(p.date);
                           onClose();
                         }}
-                        className={`w-full flex items-center justify-between p-3 rounded-[16px] transition-all cursor-pointer text-left border ${
+                        className={`w-full flex items-center justify-between p-3 rounded-[16px] transition-all cursor-pointer text-left ${
                           isSelected
-                            ? 'bg-black/5 dark:bg-white/[0.08] text-[var(--text-primary)] border-black/10 dark:border-white/15 font-semibold shadow-xs'
-                            : 'bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] text-[var(--text-secondary)] border-black/[0.04] dark:border-white/[0.06]'
+                            ? 'bg-[var(--surface-color)] text-[var(--text-primary)] font-semibold shadow-xs'
+                            : 'bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] text-[var(--text-secondary)]'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">

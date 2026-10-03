@@ -65,7 +65,7 @@ export function PeriodSelectorModal({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full rounded-t-[28px] sm:rounded-[28px] bg-white dark:bg-[#1C1C1C] border-t sm:border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,20px))] font-sans p-5 sm:p-6 space-y-4"
+          className="relative w-full rounded-t-[28px] sm:rounded-[28px] bg-[var(--bg-color)] border-none shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,20px))] font-sans p-5 sm:p-6 space-y-4"
         >
           {/* Mobile Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto shrink-0" />
@@ -142,10 +142,10 @@ export function PeriodSelectorModal({
                         onSelectDate(null);
                         onClose();
                       }}
-                      className={`w-full flex items-center justify-between py-3 px-4 rounded-[16px] transition-all cursor-pointer text-left active:scale-[0.99] min-h-[52px] border ${
+                      className={`w-full flex items-center justify-between py-3 px-4 rounded-[16px] transition-all cursor-pointer text-left active:scale-[0.99] min-h-[52px] ${
                         isSelected
-                          ? 'bg-black/5 dark:bg-white/[0.08] text-[var(--text-primary)] border-black/10 dark:border-white/15 font-semibold shadow-xs'
-                          : 'bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] text-[var(--text-secondary)] border-black/[0.04] dark:border-white/[0.06] font-medium'
+                          ? 'bg-[var(--surface-color)] text-[var(--text-primary)] font-semibold shadow-xs'
+                          : 'bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] text-[var(--text-secondary)] font-medium'
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">

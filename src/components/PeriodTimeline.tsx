@@ -227,7 +227,7 @@ export function PeriodTimeline({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
-        className="relative flex items-center gap-2 overflow-x-auto py-3 sm:py-3.5 px-1.5 no-scrollbar select-none -my-2 active:cursor-grabbing"
+        className="relative flex items-center gap-2.5 overflow-x-auto py-3 sm:py-3.5 px-1.5 no-scrollbar select-none -my-2 active:cursor-grabbing"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -267,7 +267,7 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`flex flex-col items-center justify-center gap-0.5 w-[44px] sm:w-[48px] h-[46px] sm:h-[50px] p-1 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative border-none shadow-none ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[54px] h-[50px] sm:h-[56px] p-1.5 rounded-2xl transition-all duration-200 cursor-pointer select-none shrink-0 relative border-none shadow-none ${
                 isSelected
                   ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-none scale-105 font-medium z-10 opacity-100'
                   : hasCategoryMatch
@@ -281,7 +281,7 @@ export function PeriodTimeline({
             >
               {/* Day of Week */}
               <span
-                className={`text-[8.5px] sm:text-[9px] tracking-wider uppercase leading-none font-medium ${
+                className={`text-[9.5px] sm:text-[10px] tracking-wider uppercase leading-none font-medium ${
                   isSelected
                     ? 'text-[var(--text-on-accent)]'
                     : hasCategoryMatch
@@ -295,7 +295,7 @@ export function PeriodTimeline({
               </span>
 
               {/* Day Number */}
-              <span className={`text-[13px] sm:text-[14px] leading-none font-medium tabular-nums font-amount ${
+              <span className={`text-[15px] sm:text-[16px] leading-none font-medium tabular-nums font-amount ${
                 isSelected ? 'text-[var(--text-on-accent)]' : ''
               }`}>
                 {dayNumber}
@@ -303,7 +303,7 @@ export function PeriodTimeline({
 
               {/* Fixed Item or Category Match Indicator Dot */}
               {((showFixedInCalendar && day.hasFixedItems) || (hasCategoryMatch && !isSelected)) && (
-                <span className={`w-1 h-1 rounded-full absolute bottom-0.5 shadow-none ${
+                <span className={`w-1 h-1 rounded-full absolute bottom-1 shadow-none ${
                   isSelected ? 'bg-[var(--text-on-accent)]' : 'bg-[var(--accent-color)]'
                 }`} />
               )}
@@ -313,10 +313,10 @@ export function PeriodTimeline({
 
         {/* Lön / Payday Box at the end of the timeline */}
         <div
-          className="flex flex-col items-center justify-center gap-0.5 w-[44px] sm:w-[48px] h-[46px] sm:h-[50px] p-1 rounded-xl bg-black/5 dark:bg-white/[0.04] text-[#242321] dark:text-white border-none select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5 shadow-none"
+          className="flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[54px] h-[50px] sm:h-[56px] p-1.5 rounded-2xl bg-black/5 dark:bg-white/[0.04] text-[#242321] dark:text-white border-none select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5 shadow-none"
         >
-          <span className="text-[11px] leading-none">💰</span>
-          <span className="text-[8px] sm:text-[8.5px] font-medium tracking-wider uppercase">
+          <span className="text-[12px] leading-none">💰</span>
+          <span className="text-[9px] sm:text-[9.5px] font-medium tracking-wider uppercase">
             {isEn ? 'Payday' : 'Lön'}
           </span>
         </div>

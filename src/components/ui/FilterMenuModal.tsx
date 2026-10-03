@@ -58,7 +58,7 @@ export function FilterMenuModal<T = string>({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm sm:max-w-md bg-white dark:bg-[#1C1C1C] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+          className="relative w-full max-w-sm sm:max-w-md bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
         >
           {/* Mobile Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -102,10 +102,10 @@ export function FilterMenuModal<T = string>({
                     onSelect(opt.id);
                     onClose();
                   }}
-                  className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-[14px] transition-all cursor-pointer text-left active:scale-[0.99] border ${
+                  className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-[14px] transition-all cursor-pointer text-left active:scale-[0.99] ${
                     isSelected
-                      ? 'bg-black/5 dark:bg-white/[0.08] text-[var(--text-primary)] border-black/10 dark:border-white/15 font-semibold'
-                      : 'bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-transparent font-medium'
+                      ? 'bg-[var(--surface-color)] text-[var(--text-primary)] font-semibold shadow-xs'
+                      : 'bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
