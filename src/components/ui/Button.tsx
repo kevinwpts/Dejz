@@ -40,7 +40,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       primary:
         'bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 active:opacity-80 shadow-none border-none',
       secondary:
-        'bg-[#EAE6DE] dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#222222] active:bg-[#D5CF84] dark:active:bg-[#222222] border-none',
+        'bg-[#EAE6DE] dark:bg-[#252525] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#333333] active:bg-[#D5CF84] dark:active:bg-[#333333] border-none',
       pill:
         'bg-[#EAE6DE] dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#222222] border-none rounded-full',
       accent:
@@ -52,7 +52,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       outline:
         'bg-transparent text-[#1C1917] dark:text-white border border-[#E2DDD4] dark:border-[#383838] hover:bg-black/5 dark:hover:bg-[#1C1C1C]',
       subtle:
-        'bg-[#EAE6DE] dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#222222]',
+        'bg-[#EAE6DE] dark:bg-[#252525] text-[#1C1917] dark:text-white hover:bg-[#DFD9CF] dark:hover:bg-[#333333]',
     }[variant];
 
     const widthStyle = fullWidth ? 'w-full' : '';

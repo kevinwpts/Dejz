@@ -218,14 +218,13 @@ export function BudgetSummaryModule({
                 {budgetUsedPct}%
               </span>
             </div>
-            <div className={`w-2 h-2 rounded-full ${isOverBudget ? 'bg-rose-500' : budgetUsedPct > 85 ? 'bg-amber-500' : 'bg-emerald-500'}`} />
           </div>
 
           {/* Largest Category */}
           <div className="p-3 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.03] flex items-center justify-between min-w-0">
             <div className="min-w-0 pr-1">
               <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block truncate">
-                {largestCategory.name || (isEn ? 'Largest' : 'Största')}
+                {isEn ? 'Largest category' : 'Största kategori'}
               </span>
               <span className="text-[14px] sm:text-[15px] font-bold text-[var(--text-primary)] truncate block">
                 {largestCategory.name || '—'}
