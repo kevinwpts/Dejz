@@ -213,32 +213,33 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
 
             {/* Close Button */}
             <button 
+              type="button"
               onClick={handleClose}
               aria-label="Stäng"
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all active:scale-90 z-20 cursor-pointer"
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors z-20 cursor-pointer"
             >
-              <X size={16} strokeWidth={2} />
+              <X size={17} strokeWidth={2.2} />
             </button>
 
             {/* Header: Title & Description */}
-            <div className="flex flex-col items-center text-center mb-6 pt-1">
-              <h3 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+            <div className="flex flex-col items-center text-center mb-5 pt-1">
+              <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
                 {localized.title}
               </h3>
-              <p className="text-sm text-[var(--text-secondary)] opacity-70 mt-1.5 max-w-[280px] mx-auto leading-relaxed">
+              <p className="text-xs font-medium text-[var(--text-tertiary)] mt-1 max-w-[280px] mx-auto leading-relaxed">
                 {localized.desc}
               </p>
             </div>
 
             {/* Platform Switcher */}
-            <div className="flex justify-center mb-6">
-              <div className="inline-flex p-1 bg-[var(--surface-muted)] rounded-[14px] border-none shadow-none">
+            <div className="flex justify-center mb-5">
+              <div className="inline-flex p-1 bg-black/[0.04] dark:bg-white/[0.06] rounded-[14px] border border-black/5 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setActivePlatform('ios')}
-                  className={`py-2 px-5 rounded-[10px] transition-all flex items-center gap-2.5 text-xs font-bold cursor-pointer ${
+                  className={`py-1.5 px-4 rounded-[10px] transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer ${
                     activePlatform === 'ios'
-                      ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-xs border border-[var(--border-color)]'
+                      ? 'bg-white dark:bg-[#222222] text-[var(--text-primary)] shadow-xs border border-black/5 dark:border-white/5'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -250,9 +251,9 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                 <button
                   type="button"
                   onClick={() => setActivePlatform('android')}
-                  className={`py-2 px-5 rounded-[10px] transition-all flex items-center gap-2.5 text-xs font-bold cursor-pointer ${
+                  className={`py-1.5 px-4 rounded-[10px] transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer ${
                     activePlatform === 'android'
-                      ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-xs border border-[var(--border-color)]'
+                      ? 'bg-white dark:bg-[#222222] text-[var(--text-primary)] shadow-xs border border-black/5 dark:border-white/5'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -265,49 +266,51 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
             {deferredPrompt && activePlatform === 'android' ? (
               <div className="w-full space-y-3">
                 <button
+                  type="button"
                   onClick={handleInstallClick}
-                  className="w-full bg-[var(--text-primary)] text-[var(--bg-color)] py-3.5 px-6 rounded-[12px] font-bold text-sm tracking-wide shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full h-12 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[14px] font-semibold text-sm shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Download size={18} strokeWidth={2.5} />
                   <span>{localized.installBtn}</span>
                 </button>
                 <button
+                  type="button"
                   onClick={handleClose}
-                  className="w-full bg-transparent text-[var(--text-secondary)] py-2 rounded-[12px] font-medium text-xs hover:text-[var(--text-primary)] transition-all cursor-pointer"
+                  className="w-full h-10 bg-transparent text-[var(--text-secondary)] rounded-[14px] font-medium text-xs hover:text-[var(--text-primary)] transition-all cursor-pointer"
                 >
                   {localized.maybeLater}
                 </button>
               </div>
             ) : (
-              <div className="w-full space-y-5">
-                <div className="space-y-3">
+              <div className="w-full space-y-4">
+                <div className="space-y-2.5">
                   {/* Step 1 */}
-                  <div className="flex items-center gap-3.5 group p-2.5 rounded-[14px] bg-[var(--surface-muted)] border border-[var(--border-color)]">
-                    <div className="w-8 h-8 rounded-[8px] bg-[var(--surface-color)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
+                  <div className="flex items-center gap-3 group p-2.5 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
+                    <div className="w-8 h-8 rounded-[10px] bg-white dark:bg-[#222222] border border-black/5 dark:border-white/10 flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
                       1
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
+                      <div className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                         {activePlatform === 'ios' ? <Share size={13} className="text-[var(--accent-color)]" /> : <MoreVertical size={13} className="text-[var(--accent-color)]" />}
                         {activePlatform === 'ios' ? localized.iosStep1Title : localized.androidStep1Title}
                       </div>
-                      <div className="text-[11px] text-[var(--text-secondary)] opacity-70 truncate">
+                      <div className="text-[11px] text-[var(--text-tertiary)] truncate">
                         {activePlatform === 'ios' ? localized.iosStep1Desc : localized.androidStep1Desc}
                       </div>
                     </div>
                   </div>
 
                   {/* Step 2 */}
-                  <div className="flex items-center gap-3.5 group p-2.5 rounded-[14px] bg-[var(--surface-muted)] border border-[var(--border-color)]">
-                    <div className="w-8 h-8 rounded-[8px] bg-[var(--surface-color)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
+                  <div className="flex items-center gap-3 group p-2.5 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
+                    <div className="w-8 h-8 rounded-[10px] bg-white dark:bg-[#222222] border border-black/5 dark:border-white/10 flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
                       2
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                        <PlusSquare size={13} className="text-neutral-800 dark:text-white" />
+                      <div className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                        <PlusSquare size={13} className="text-[var(--text-primary)]" />
                         {activePlatform === 'ios' ? localized.iosStep2Title : localized.androidStep2Title}
                       </div>
-                      <div className="text-[11px] text-[var(--text-secondary)] opacity-70 truncate">
+                      <div className="text-[11px] text-[var(--text-tertiary)] truncate">
                         {activePlatform === 'ios' ? localized.iosStep2Desc : localized.androidStep2Desc}
                       </div>
                     </div>
@@ -315,8 +318,9 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                 </div>
 
                 <button
+                  type="button"
                   onClick={handleClose}
-                  className="w-full bg-[var(--text-primary)] text-[var(--bg-color)] py-3 px-6 rounded-[12px] font-bold text-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shadow-xs"
+                  className="w-full h-12 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[14px] font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shadow-xs"
                 >
                   {localized.gotIt}
                 </button>

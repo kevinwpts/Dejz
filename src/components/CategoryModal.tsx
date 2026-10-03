@@ -5,7 +5,6 @@ import { TranslationKey } from '../i18n';
 import { suggestIcon } from '../utils/icons';
 import { IconPickerModal } from './IconPickerModal';
 import { CategoryIcon } from './CategoryIcon';
-import { Button, IconButton } from './ui';
 
 import { DEFAULT_CATEGORY_PALETTE } from '../utils/categoryColors';
 
@@ -70,48 +69,51 @@ export function CategoryModal({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-black/[0.06] dark:border-white/[0.08]">
-            <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
+          <div className="flex items-center justify-between p-4 px-5 border-b border-black/[0.06] dark:border-white/[0.08]">
+            <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
               {isEdit ? t('edit') : t('newCategory')}
             </h2>
             <div className="flex items-center gap-2">
               {isEdit && onDelete && (
-                <IconButton 
-                  icon={<Trash2 size={16} />}
+                <button 
+                  type="button"
                   onClick={() => {
                     onDelete(initialData.index!);
                     onClose();
                   }}
-                  variant="danger"
-                  size="sm"
+                  className="w-8 h-8 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors cursor-pointer hover:bg-rose-500/20"
                   aria-label={t('delete')}
-                />
+                >
+                  <Trash2 size={15} />
+                </button>
               )}
-              <IconButton 
-                icon={<X size={18} strokeWidth={2} />}
+              <button 
+                type="button"
                 onClick={onClose}
-                variant="muted"
-                size="sm"
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                 aria-label={t('close')}
-              />
+              >
+                <X size={17} strokeWidth={2.2} />
+              </button>
             </div>
           </div>
 
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-5">
             {/* Preview */}
             <div className="flex flex-col items-center justify-center">
               <button 
+                type="button"
                 onClick={() => setShowIconPicker(true)}
                 className="flex flex-col items-center justify-center gap-2 transition-transform active:scale-95 group cursor-pointer"
               >
-                <div className="relative group-hover:ring-4 group-hover:ring-accent/20 transition-all rounded-[14px]">
+                <div className="relative group-hover:ring-4 group-hover:ring-[var(--accent-color)]/20 transition-all rounded-[14px]">
                   <CategoryIcon 
                     icon={icon} 
                     color={color} 
                     size="xl" 
                   />
                   <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-[14px]">
-                    <span className="text-xs font-medium text-[var(--text-on-accent)] bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-sm">Ändra</span>
+                    <span className="text-xs font-medium text-white bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-sm">Ändra</span>
                   </div>
                 </div>
               </button>
@@ -137,7 +139,7 @@ export function CategoryModal({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSave();
                   }}
-                  className="w-full h-[48px] bg-black/5 dark:bg-[#222222] border-none rounded-[16px] px-4 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all"
+                  className="w-full h-12 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-4 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
                 />
               </div>
 
@@ -161,7 +163,7 @@ export function CategoryModal({
                         onClick={() => setColor(c)}
                         className={`w-7 h-7 rounded-full transition-all relative cursor-pointer ${
                           isSelected 
-                            ? 'scale-110 ring-2 ring-offset-2 ring-offset-[var(--bg-color)] ring-accent' 
+                            ? 'scale-110 ring-2 ring-offset-2 ring-offset-[var(--bg-color)] ring-[var(--accent-color)]' 
                             : 'hover:scale-105 opacity-80 hover:opacity-100'
                         }`}
                         style={{ backgroundColor: c }}
@@ -178,7 +180,7 @@ export function CategoryModal({
 
                   {/* Custom color picker button */}
                   <label 
-                    className="w-7 h-7 rounded-full border border-dashed border-[var(--border-color)] flex items-center justify-center cursor-pointer hover:border-accent transition-colors relative overflow-hidden bg-[var(--surface-muted)] group" 
+                    className="w-7 h-7 rounded-full border border-dashed border-black/20 dark:border-white/20 flex items-center justify-center cursor-pointer hover:border-[var(--accent-color)] transition-colors relative overflow-hidden bg-black/[0.04] dark:bg-white/[0.06] group" 
                     title="Anpassad färg"
                   >
                     <input
@@ -195,16 +197,15 @@ export function CategoryModal({
                 </div>
               </div>
 
-              <Button
+              <button
+                type="button"
                 onClick={handleSave}
                 disabled={!name.trim()}
-                variant="primary"
-                fullWidth
-                size="lg"
-                icon={<Check size={18} strokeWidth={2.5} />}
+                className="w-full h-12 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
-                {t('save')}
-              </Button>
+                <Check size={18} strokeWidth={2.5} />
+                <span>{t('save')}</span>
+              </button>
             </div>
           </div>
         </motion.div>

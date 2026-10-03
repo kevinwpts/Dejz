@@ -94,7 +94,7 @@ export function CalculatorModal({ _isOpen, onClose, _t }: CalculatorModalProps) 
     >
           <div
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
           />
           <motion.div
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -105,33 +105,40 @@ export function CalculatorModal({ _isOpen, onClose, _t }: CalculatorModalProps) 
           >
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-[#1C1917] dark:text-white">Kalkylator</h3>
-                <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white transition-colors cursor-pointer">
-                  <X size={16} strokeWidth={2} />
+                <h3 className="text-base font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+                  Kalkylator
+                </h3>
+                <button 
+                  type="button"
+                  onClick={onClose} 
+                  className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                >
+                  <X size={17} strokeWidth={2.2} />
                 </button>
               </div>
 
-              <div className="bg-[var(--surface-muted)] p-5 rounded-[16px] border border-[var(--border-color)] text-right space-y-1">
-                <div className="text-xs font-medium text-[var(--text-tertiary)] h-4 overflow-hidden">
+              <div className="bg-black/[0.04] dark:bg-white/[0.06] p-4 rounded-[16px] border border-black/5 dark:border-white/10 text-right space-y-1">
+                <div className="text-xs font-medium text-[var(--text-tertiary)] h-4 overflow-hidden tabular-nums">
                   {equation}
                 </div>
-                <div className="text-3xl font-semibold text-[var(--text-primary)] font-amount truncate">
+                <div className="text-3xl font-bold text-[var(--text-primary)] font-amount tabular-nums truncate">
                   {display}
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-4 gap-2">
                 {buttons.map((btn, i) => (
                   <button
                     key={i}
+                    type="button"
                     onClick={btn.action}
                     className={`
-                      h-12 flex items-center justify-center rounded-[12px] font-semibold text-base transition-all active:scale-95 cursor-pointer
+                      h-12 flex items-center justify-center rounded-[14px] font-semibold text-base transition-all active:scale-[0.95] cursor-pointer
                       ${btn.wide ? 'col-span-2' : ''}
-                      ${btn.type === 'number' ? 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]' : ''}
-                      ${btn.type === 'operator' ? 'bg-accent/10 text-accent hover:bg-accent/20 border border-accent/20' : ''}
-                      ${btn.type === 'special' ? 'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]' : ''}
-                      ${btn.type === 'equal' ? 'bg-accent text-[var(--text-on-accent)]' : ''}
+                      ${btn.type === 'number' ? 'bg-white dark:bg-[#222222] text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 border border-black/5 dark:border-white/5 shadow-xs' : ''}
+                      ${btn.type === 'operator' ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)] hover:bg-[var(--accent-color)]/20 border border-[var(--accent-color)]/20' : ''}
+                      ${btn.type === 'special' ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-black/5 dark:border-white/5' : ''}
+                      ${btn.type === 'equal' ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-xs' : ''}
                     `}
                   >
                     {btn.label}

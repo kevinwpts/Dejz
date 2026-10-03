@@ -41,22 +41,23 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
           return (
             <button
               key={`${day.date}-${i}`}
+              type="button"
               onClick={() => {
                 const target = new Date(dayDate);
                 const now = new Date();
                 target.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
                 setSelectedDate(target);
               }}
-              className={`aspect-square w-full rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
+              className={`aspect-square w-full rounded-[14px] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-[0.94] cursor-pointer text-center ${
                 isSelected 
-                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs z-10' 
+                  ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-xs z-10' 
                   : isToday
-                  ? 'bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] border border-black/10 dark:border-white/10'
+                  ? 'bg-black/[0.06] dark:bg-white/[0.08] text-[var(--text-primary)] border border-black/5 dark:border-white/10'
                   : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
               }`}
             >
-              <span className={`text-[13px] sm:text-[14px] font-medium tabular-nums leading-none text-center ${
-                isSelected ? 'text-white font-medium' : isToday ? 'text-[var(--accent-color)] font-medium' : 'text-[var(--text-primary)] font-normal'
+              <span className={`text-[13px] sm:text-[14px] font-semibold tabular-nums leading-none text-center ${
+                isSelected ? 'text-[var(--on-accent)] font-semibold' : isToday ? 'text-[var(--accent-color)] font-bold' : 'text-[var(--text-primary)] font-medium'
               }`}>
                 {dayDate.getDate()}
               </span>
@@ -67,10 +68,10 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
                   <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
                 )}
                 {hasSpend && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/80' : 'bg-[var(--accent-color)]'}`} />
+                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/90' : 'bg-[var(--accent-color)]'}`} />
                 )}
                 {hasFixed && !hasIncome && !hasSpend && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/80' : 'bg-amber-500'}`} />
+                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/90' : 'bg-amber-500'}`} />
                 )}
               </div>
             </button>

@@ -6,7 +6,6 @@ import { TranslationKey } from '../i18n';
 import { hasPin, removePin, isBiometricsEnabled, setBiometricsEnabled } from '../utils/security';
 import { PinLockScreen } from './PinLockScreen';
 import { useScrollLock } from '../hooks/useScrollLock';
-import { IconButton } from './ui';
 
 interface SecurityModalProps {
   isOpen: boolean;
@@ -80,54 +79,57 @@ export function SecurityModal({ isOpen, onClose, t, addToast, _userEmail }: Secu
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="bg-white dark:bg-[#222222] w-full max-w-sm rounded-[24px] p-6 sm:p-8 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl"
+            className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[28px] p-6 sm:p-7 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans"
             onClick={(e) => e.stopPropagation()}
           >
           <div className="absolute right-4 top-4">
-            <IconButton 
-              icon={<X size={18} />}
+            <button 
+              type="button"
               onClick={onClose}
-              variant="muted"
-              size="sm"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
               aria-label={t('close')}
-            />
+            >
+              <X size={17} strokeWidth={2.2} />
+            </button>
           </div>
 
         <div className="text-center">
-          <div className="w-14 h-14 bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white rounded-[16px] flex items-center justify-center mx-auto mb-5 border border-black/10 dark:border-white/10">
-            <Lock size={28} />
+          <div className="w-12 h-12 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] rounded-[14px] flex items-center justify-center mx-auto mb-4 border border-black/5 dark:border-white/10">
+            <Lock size={24} />
           </div>
 
-          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#1C1917] dark:text-white mb-5">
+          <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] mb-5">
             {t('security')}
           </h2>
 
           {view === 'menu' && (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <button
+                type="button"
                 onClick={() => setView(pinEnabled ? 'pin-disable' : 'pin-setup')}
-                className="w-full flex items-center justify-between p-4 bg-[var(--bg-color)] rounded-xl hover:bg-[var(--bg-hover)] transition-colors"
+                className="w-full flex items-center justify-between p-3.5 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] hover:bg-black/[0.08] dark:hover:bg-white/[0.10] active:scale-[0.99] transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <Smartphone size={20} className="text-[var(--text-secondary)]" />
-                  <span className="font-semibold text-[var(--text-primary)]">{t('appLock')}</span>
+                  <Smartphone size={18} className="text-[var(--text-secondary)]" />
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">{t('appLock')}</span>
                 </div>
-                <div className={`w-10 h-6 rounded-full p-1 transition-all ${pinEnabled ? 'bg-accent' : 'bg-[var(--border-color)]'}`}>
-                  <div className={`w-4 h-4 bg-white rounded-full transition-all transform ${pinEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                <div className={`w-10 h-6 rounded-full p-1 transition-all ${pinEnabled ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}>
+                  <div className={`w-4 h-4 bg-white rounded-full transition-all transform ${pinEnabled ? 'translate-x-4' : 'translate-x-0'} shadow-xs`} />
                 </div>
               </button>
 
               {pinEnabled && (
                 <button
+                  type="button"
                   onClick={toggleBiometrics}
-                  className="w-full flex items-center justify-between p-4 bg-[var(--bg-color)] rounded-xl hover:bg-[var(--bg-hover)] transition-colors"
+                  className="w-full flex items-center justify-between p-3.5 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] hover:bg-black/[0.08] dark:hover:bg-white/[0.10] active:scale-[0.99] transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <Fingerprint size={20} className="text-[var(--text-secondary)]" />
-                    <span className="font-semibold text-[var(--text-primary)]">{t('biometrics')}</span>
+                    <Fingerprint size={18} className="text-[var(--text-secondary)]" />
+                    <span className="text-sm font-semibold text-[var(--text-primary)]">{t('biometrics')}</span>
                   </div>
-                  <div className={`w-10 h-6 rounded-full p-1 transition-all ${biometricsEnabled ? 'bg-accent' : 'bg-[var(--border-color)]'}`}>
-                    <div className={`w-4 h-4 bg-white rounded-full transition-all transform ${biometricsEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                  <div className={`w-10 h-6 rounded-full p-1 transition-all ${biometricsEnabled ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full transition-all transform ${biometricsEnabled ? 'translate-x-4' : 'translate-x-0'} shadow-xs`} />
                   </div>
                 </button>
               )}

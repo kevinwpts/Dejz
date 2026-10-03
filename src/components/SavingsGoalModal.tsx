@@ -7,7 +7,6 @@ import { IconSelector } from './IconSelector';
 import { fetchLogoForName } from '../utils/logo';
 import { suggestIcon, isEmojiString, ICON_MAP } from '../utils/icons';
 import { formatAmount, parseAmount } from '../utils/format';
-import { Button, IconButton } from './ui';
 
 interface SavingsGoalModalProps {
   isOpen: boolean;
@@ -126,7 +125,7 @@ export function SavingsGoalModal({
             <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
             {/* Header Section */}
-            <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/[0.06] dark:border-white/[0.08]">
+            <div className="px-6 pt-3 sm:pt-4 pb-3 grid grid-cols-[40px_1fr_40px] items-center shrink-0 border-b border-black/[0.06] dark:border-white/[0.08]">
               <div className="flex justify-start">
                 <button
                   key="icon"
@@ -135,7 +134,7 @@ export function SavingsGoalModal({
                     e.stopPropagation();
                     setShowIconSelector(true);
                   }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-2xl transition-all active:scale-95 overflow-hidden bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 shrink-0"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-2xl transition-all active:scale-95 overflow-hidden bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 shrink-0 text-[var(--accent-color)]"
                 >
                   {logo ? (
                     <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -144,98 +143,97 @@ export function SavingsGoalModal({
                   ) : (
                     (() => {
                       const Icon = ICON_MAP[icon] || Target;
-                      return <Icon size={20} className="text-accent" />;
+                      return <Icon size={20} className="text-[var(--accent-color)]" strokeWidth={2} />;
                     })()
                   )}
                 </button>
               </div>
               <div className="flex justify-center overflow-hidden">
-                <h2 className="text-base sm:text-lg font-bold tracking-tight text-[#1C1917] dark:text-white text-center truncate px-2">
+                <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] text-center truncate px-2">
                   {editingGoal ? t('editSavingsGoal') : t('newSavingsGoal')}
                 </h2>
               </div>
               <div className="flex justify-end">
-                <IconButton 
-                  icon={<X size={18} strokeWidth={2} />} 
-                  onClick={onClose} 
-                  variant="muted" 
-                  size="sm" 
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                   aria-label={t('close')}
-                />
+                >
+                  <X size={17} strokeWidth={2.2} />
+                </button>
               </div>
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-                <div className="space-y-6">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
-                      {t('whatAreYouSavingFor')}
-                    </label>
-                    <div className="relative group">
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
+                    {t('whatAreYouSavingFor')}
+                  </label>
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder={t('savingGoalExample')}
+                      className="w-full h-12 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-4 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
+                    Målbelopp
+                  </label>
+                  <div 
+                    onClick={() => amountInputRef.current?.focus()}
+                    className="bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] py-5 px-5 flex items-center justify-between transition-all cursor-pointer select-none group"
+                  >
+                    <div className="flex-1 flex justify-center translate-x-4">
                       <input
+                        ref={amountInputRef}
                         type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder={t('savingGoalExample')}
-                        className="w-full h-[48px] bg-black/5 dark:bg-[#222222] border-none rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
+                        inputMode="decimal"
+                        value={targetAmount}
+                        onChange={(e) => setTargetAmount(formatAmount(e.target.value))}
+                        placeholder="0"
+                        className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-4xl sm:text-5xl font-bold text-center tabular-nums"
                       />
                     </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-0.5">
-                      Målbelopp
-                    </label>
-                    <div 
-                      onClick={() => amountInputRef.current?.focus()}
-                      className="bg-black/5 dark:bg-[#222222] rounded-[14px] py-6 px-6 flex items-center justify-between transition-all cursor-pointer select-none border-none group"
-                    >
-                      <div className="flex-1 flex justify-center translate-x-4">
-                        <input
-                          ref={amountInputRef}
-                          type="text"
-                          inputMode="decimal"
-                          value={targetAmount}
-                          onChange={(e) => setTargetAmount(formatAmount(e.target.value))}
-                          placeholder="0"
-                          className="w-full bg-transparent text-[#1C1917] dark:text-white outline-none font-amount text-5xl font-bold text-center"
-                        />
-                      </div>
-                      <span className="text-xs font-bold text-white bg-[#05B862] px-3 py-1.5 rounded-full shrink-0 ml-4 transition-colors">
-                        {currency}
-                      </span>
-                    </div>
+                    <span className="text-xs font-bold text-white bg-emerald-500 px-3 py-1.5 rounded-full shrink-0 ml-4 transition-colors">
+                      {currency}
+                    </span>
                   </div>
                 </div>
               </div>
+            </div>
 
             {/* Action Footer */}
-            <div className="shrink-0 p-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom)+0.5rem)] sm:pb-5 border-t border-[var(--border-color)] bg-[var(--bg-color)] space-y-2.5">
-              <Button 
+            <div className="shrink-0 p-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom)+0.5rem)] sm:pb-5 border-t border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1C] space-y-2.5">
+              <button 
+                type="button"
                 onClick={handleConfirm} 
                 disabled={!title || !targetAmount}
-                variant="primary"
-                fullWidth
-                size="lg"
-                icon={<Check size={18} strokeWidth={2.5} />}
+                className="w-full h-12 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
-                {editingGoal ? t('saveChanges') : t('addSavingsGoal')}
-              </Button>
+                <Check size={18} strokeWidth={2.5} />
+                <span>{editingGoal ? t('saveChanges') : t('addSavingsGoal')}</span>
+              </button>
 
               {editingGoal && onDelete && (
-                <Button
+                <button
+                  type="button"
                   onClick={() => {
                     onDelete(editingGoal.id);
                     onClose();
                   }}
-                  variant="danger"
-                  fullWidth
-                  size="md"
-                  icon={<Trash2 size={16} />}
+                  className="w-full h-11 rounded-[14px] bg-rose-500/10 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer hover:bg-rose-500/20"
                 >
-                  {t('deleteSavingsGoal')}
-                </Button>
+                  <Trash2 size={16} />
+                  <span>{t('deleteSavingsGoal')}</span>
+                </button>
               )}
             </div>
 
@@ -262,13 +260,14 @@ export function SavingsGoalModal({
                         <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
                         <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">{t('chooseLogoOrIcon')}</p>
                       </div>
-                      <IconButton 
-                        icon={<X size={18} strokeWidth={2} />}
+                      <button 
+                        type="button"
                         onClick={() => setShowIconSelector(false)}
-                        variant="muted"
-                        size="sm"
+                        className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                         aria-label={t('close')}
-                      />
+                      >
+                        <X size={17} strokeWidth={2.2} />
+                      </button>
                     </div>
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-8 min-h-0">
                       <IconSelector

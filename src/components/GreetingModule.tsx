@@ -125,49 +125,50 @@ export function GreetingModule({
             className="fixed inset-0" 
             onClick={() => setIsPeriodInfoOpen(false)} 
           />
-          <div className="relative w-full max-w-[320px] bg-white dark:bg-[#1C1C1C] rounded-[28px] p-5 border-none shadow-2xl space-y-4 z-10 text-left">
+          <div className="relative w-full max-w-[320px] bg-white dark:bg-[#1C1C1C] rounded-[28px] p-5 border border-black/[0.08] dark:border-white/[0.08] shadow-2xl space-y-4 z-10 text-left font-sans">
             {/* Header */}
-            <div className="flex items-center justify-between pb-1 border-none">
-              <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold text-[15px]">
+            <div className="flex items-center justify-between pb-1">
+              <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold font-display uppercase tracking-wider text-sm">
                 <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2.2} />
                 <span>{isEn ? 'Period & Payday' : 'Period & Nästa Lön'}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsPeriodInfoOpen(false)}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                aria-label="Stäng"
               >
-                <X size={16} strokeWidth={2} />
+                <X size={17} strokeWidth={2.2} />
               </button>
             </div>
 
             {/* Content items */}
             <div className="space-y-2.5 pt-1">
               {/* Period */}
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/5 dark:bg-[#222222]">
-                <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#222222] flex items-center justify-center text-[#1C1917] dark:text-white shrink-0 shadow-xs">
+              <div className="flex items-center gap-3 p-3 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
+                <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#222222] flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
                   <Calendar size={16} strokeWidth={2} />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-semibold text-[#8C867C] dark:text-[#A8A8A8] uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
                     {isEn ? 'CURRENT PERIOD' : 'AKTUELL PERIOD'}
                   </span>
-                  <span className="text-[13.5px] font-semibold text-[#1C1917] dark:text-white truncate">
+                  <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate">
                     {periodIntervalText}
                   </span>
                 </div>
               </div>
 
               {/* Payday / Next Salary */}
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/5 dark:bg-[#222222]">
-                <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#222222] flex items-center justify-center text-[#1C1917] dark:text-white shrink-0 shadow-xs">
+              <div className="flex items-center gap-3 p-3 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
+                <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#222222] flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
                   <Clock size={16} strokeWidth={2} />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-semibold text-[#8C867C] dark:text-[#A8A8A8] uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
                     {isEn ? 'NEXT PAYDAY' : 'NÄSTA LÖN'}
                   </span>
-                  <span className="text-[13.5px] font-semibold text-[#1C1917] dark:text-white truncate">
+                  <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate">
                     {daysValueText} {isEn ? 'until payday' : 'kvar till lön'}
                   </span>
                 </div>
@@ -178,7 +179,7 @@ export function GreetingModule({
             <button
               type="button"
               onClick={() => setIsPeriodInfoOpen(false)}
-              className="w-full py-2.5 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs transition-opacity hover:opacity-90 active:scale-95 cursor-pointer"
+              className="w-full h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-xs flex items-center justify-center"
             >
               {isEn ? 'Close' : 'Stäng'}
             </button>

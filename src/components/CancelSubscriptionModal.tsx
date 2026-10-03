@@ -108,12 +108,12 @@ export function CancelSubscriptionModal({
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-3 sm:pt-5 pb-4 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
+          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0 font-sans">
             <div>
-              <h3 className="text-[18px] font-semibold text-[#211F1C] dark:text-white tracking-tight">
+              <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
                 {isEn ? 'Show how to cancel' : 'Visa hur du säger upp'}
               </h3>
-              <p className="text-[13px] text-[#6D6962] dark:text-[#A8A8A8]">
+              <p className="text-xs font-medium text-[var(--text-tertiary)] mt-0.5">
                 {isEn ? 'Instructions and link to provider' : 'Instruktioner och länk till leverantören'}
               </p>
             </div>
@@ -121,10 +121,10 @@ export function CancelSubscriptionModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Stäng"
             >
-              <X size={16} strokeWidth={2} />
+              <X size={17} strokeWidth={2.2} />
             </button>
           </div>
 
@@ -267,28 +267,28 @@ export function CancelSubscriptionModal({
                   <button
                     type="button"
                     onClick={() => setShowConfirmDelete(true)}
-                    className="w-full py-2.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="w-full py-3 px-4 rounded-[14px] bg-rose-500/10 hover:bg-rose-500/15 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={14} />
                     <span>{isEn ? 'Already cancelled? Remove from budget' : 'Redan uppsagt? Ta bort från budgeten'}</span>
                   </button>
                 ) : (
-                  <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/25 space-y-2.5">
-                    <p className="text-xs font-bold text-rose-600 dark:text-rose-400 text-center">
+                  <div className="p-4 rounded-[16px] bg-rose-500/10 border border-rose-500/20 space-y-3">
+                    <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 text-center">
                       {isEn ? 'Are you sure you want to remove this expense from your budget?' : 'Vill du ta bort denna fasta utgift från din framtida budget?'}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => setShowConfirmDelete(false)}
-                        className="py-2 px-3 rounded-lg bg-white dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white text-xs font-medium border border-black/10 dark:border-white/10 cursor-pointer"
+                        className="py-2.5 px-3 rounded-[12px] bg-white dark:bg-[#222222] text-[var(--text-primary)] text-xs font-semibold border border-black/5 dark:border-white/5 cursor-pointer active:scale-[0.98]"
                       >
                         {isEn ? 'Keep in budget' : 'Behåll'}
                       </button>
                       <button
                         type="button"
                         onClick={handleConfirmCancelAndDelete}
-                        className="py-2 px-3 rounded-lg bg-rose-600 text-white text-xs font-bold shadow-none hover:bg-rose-500 cursor-pointer"
+                        className="py-2.5 px-3 rounded-[12px] bg-rose-600 text-white text-xs font-semibold shadow-none hover:bg-rose-500 cursor-pointer active:scale-[0.98]"
                       >
                         {isEn ? 'Yes, remove' : 'Ja, ta bort'}
                       </button>
@@ -304,7 +304,7 @@ export function CancelSubscriptionModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[#1C1917] dark:text-white text-sm font-semibold border border-black/10 dark:border-white/10 active:scale-95 transition-all cursor-pointer"
+              className="w-full sm:w-auto px-6 h-11 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-primary)] text-sm font-semibold border border-black/5 dark:border-white/10 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center"
             >
               {isEn ? 'Close' : 'Stäng'}
             </button>

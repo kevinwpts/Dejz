@@ -94,70 +94,78 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="fixed inset-0 z-[100] bg-[var(--bg-color)] flex flex-col items-center justify-center p-4"
+      className="fixed inset-0 z-[100] bg-[var(--bg-color)] flex flex-col items-center justify-center p-4 font-sans select-none"
     >
       {onCancel && (
         <button 
+          type="button"
           onClick={onCancel}
-          className="absolute top-4 right-4 p-2 text-[var(--text-secondary)]"
+          className="absolute top-6 right-6 w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+          aria-label="Stäng"
         >
-          <X size={24} />
+          <X size={17} strokeWidth={2.2} />
         </button>
       )}
 
       <div className="mb-8 flex flex-col items-center">
-        <div className="w-16 h-16 bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-          <Lock size={32} />
+        <div className="w-14 h-14 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border border-black/5 dark:border-white/10 rounded-[16px] flex items-center justify-center mb-5 shadow-xs">
+          <Lock size={26} />
         </div>
-        <h2 className="text-2xl font-semibold text-[var(--text-primary)] mb-2">
+        <h2 className="text-lg sm:text-xl font-bold font-display uppercase tracking-wider text-[var(--text-primary)] mb-1 text-center">
           {getTitle()}
         </h2>
-        <p className="text-[var(--text-secondary)] h-6 text-sm font-medium">
+        <p className="text-[var(--text-secondary)] h-5 text-xs font-medium">
           {error || (step === 'confirm' ? t('confirmPin') : '')}
         </p>
       </div>
 
-      <div className="flex gap-4 mb-12">
+      <div className="flex gap-4 mb-10">
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className={`w-4 h-4 rounded-full transition-all duration-200 ${
+            className={`w-3.5 h-3.5 rounded-full transition-all duration-200 ${
               i < pin.length 
                 ? 'bg-[var(--text-primary)] scale-110' 
-                : 'bg-[var(--border-color)]'
-            } ${error ? 'bg-danger' : ''}`}
+                : 'bg-black/15 dark:bg-white/20'
+            } ${error ? 'bg-rose-500' : ''}`}
           />
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-6 max-w-[280px] w-full">
+      <div className="grid grid-cols-3 gap-5 max-w-[280px] w-full">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
           <button
             key={num}
+            type="button"
             onClick={() => handleNumberClick(num)}
-            className="w-16 h-16 rounded-full text-2xl font-semibold text-[var(--text-primary)] bg-[var(--card-bg)] hover:bg-[var(--bg-hover)] active:scale-95 transition-all flex items-center justify-center border border-[var(--border-color)]"
+            className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-[#222222] active:scale-[0.92] transition-all flex items-center justify-center border border-black/5 dark:border-white/10 shadow-xs cursor-pointer"
           >
             {num}
           </button>
         ))}
         <div className="flex items-center justify-center">
           {mode === 'unlock' && isBiometricsEnabled() && (
-            <button className="w-16 h-16 text-[var(--text-primary)] flex items-center justify-center">
-              <Fingerprint size={32} />
+            <button 
+              type="button"
+              className="w-16 h-16 text-[var(--text-primary)] flex items-center justify-center cursor-pointer"
+            >
+              <Fingerprint size={28} />
             </button>
           )}
         </div>
         <button
+          type="button"
           onClick={() => handleNumberClick(0)}
-          className="w-16 h-16 rounded-full text-2xl font-semibold text-[var(--text-primary)] bg-[var(--card-bg)] hover:bg-[var(--bg-hover)] active:scale-95 transition-all flex items-center justify-center border border-[var(--border-color)]"
+          className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-[#222222] active:scale-[0.92] transition-all flex items-center justify-center border border-black/5 dark:border-white/10 shadow-xs cursor-pointer"
         >
           0
         </button>
         <button
+          type="button"
           onClick={handleDelete}
-          className="w-16 h-16 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all flex items-center justify-center"
+          className="w-16 h-16 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-[0.92] transition-all flex items-center justify-center cursor-pointer"
         >
-          <Delete size={24} />
+          <Delete size={22} />
         </button>
       </div>
     </motion.div>
