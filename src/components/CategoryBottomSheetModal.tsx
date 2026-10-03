@@ -108,23 +108,6 @@ export function CategoryBottomSheetModal({
 
   const displayTransactions = periodTransactions;
 
-  // Total sum calculation: if split, add split amount for this category, else tx.amount
-  const totalDisplaySum = useMemo(() => {
-    if (!targetCategoryName) return 0;
-    const normCat = targetCategoryName.trim().toLowerCase();
-
-    return periodTransactions.reduce((acc, t) => {
-      const splits = (t as any).splits;
-      if (splits && Array.isArray(splits) && splits.length > 0) {
-        const splitAmount = splits
-          .filter((s: any) => (s.category || '').trim().toLowerCase() === normCat)
-          .reduce((sSum: number, s: any) => sSum + (Number(s.amount) || 0), 0);
-        return acc + splitAmount;
-      }
-      return acc + (Number(t.amount) || 0);
-    }, 0);
-  }, [periodTransactions, targetCategoryName]);
-
   // Icon calculation
   const iconKey = categoryData?.iconName || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');
   const IconComponent = ICON_MAP[iconKey] || ICON_MAP['Tag'];
@@ -242,31 +225,8 @@ export function CategoryBottomSheetModal({
                 )}
               </div>
 
-              {/* Transactions List: Expanded natural space for Periodens utgifter */}
+              {/* Transactions List */}
               <div className="space-y-2 flex-1 flex flex-col min-h-0 pt-0.5">
-                <div className="flex items-center justify-between shrink-0 pb-0.5">
-                  <div className="flex items-center gap-1.5 text-[11px] text-[#6E6961] dark:text-[#9CA6BC]">
-                    <span className="font-bold uppercase tracking-wider font-display">
-                      {isEn ? 'Period purchases' : 'Periodens utgifter'}
-                    </span>
-                    <span className="opacity-60">·</span>
-                    <span className="font-medium">
-                      {isEn
-                        ? `${periodTransactions.length} transaction${periodTransactions.length === 1 ? '' : 's'}`
-                        : `${periodTransactions.length} transaktion${periodTransactions.length === 1 ? '' : 'er'}`}
-                    </span>
-                  </div>
-
-                  {totalDisplaySum > 0 && (
-                    <span className="text-[11px] font-semibold text-[#6E6961] dark:text-[#9CA6BC]">
-                      {isEn ? 'Sum:' : 'Summa:'}{' '}
-                      <span className="font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
-                        {formatAmount(totalDisplaySum, language)} {curr}
-                      </span>
-                    </span>
-                  )}
-                </div>
-
                 {displayTransactions.length > 0 ? (
                   <div className="space-y-2.5 overflow-y-auto no-scrollbar pr-0.5 flex-1">
                     {displayTransactions.map((tx) => (
