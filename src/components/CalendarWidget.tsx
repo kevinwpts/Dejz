@@ -33,7 +33,11 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
     const d = new Date(viewYear, viewMonth, i + 1);
     // Find matching calendarDay if available from stats for indicators
     const dateStr = d.toISOString().split('T')[0];
-    const match = (calendarDays || []).find((cd: any) => cd.date && cd.date.startsWith(dateStr));
+    const match = (calendarDays || []).find((cd: any) => {
+      if (!cd?.date) return false;
+      const cdStr = typeof cd.date === 'string' ? cd.date : new Date(cd.date).toISOString();
+      return cdStr.startsWith(dateStr);
+    });
     return {
       date: d,
       hasIncome: match?.income > 0,
