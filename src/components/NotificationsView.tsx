@@ -69,7 +69,7 @@ export function NotificationsView({
         if (isIncome) {
           if (isToday) {
             statusBadgeText = config.language === 'en' ? 'Arrives today' : 'Kommer idag';
-            statusBadgeStyle = 'bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white';
+            statusBadgeStyle = 'bg-black/5 dark:bg-[#222222] text-[var(--text-primary)]';
           } else if (isPast) {
             statusBadgeText = config.language === 'en' ? `Arrived on the ${n.deductionDay}th` : `Kom den ${n.deductionDay}:e`;
             statusBadgeStyle = 'bg-amber-500/10 text-amber-600 dark:text-amber-400';

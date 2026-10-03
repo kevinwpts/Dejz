@@ -979,14 +979,10 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                                       <TransactionLogo transaction={mockTx} config={config} size="sm" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                      <p className={`text-xs font-bold leading-tight break-words ${
-                                        isAdded ? 'text-[#1C1917]' : 'text-[var(--text-primary)]'
-                                      }`}>
+                                      <p className="text-xs font-bold leading-tight break-words text-[var(--text-primary)]">
                                         {preset.name}
                                       </p>
-                                      <p className={`text-[10.5px] font-amount font-semibold mt-0.5 ${
-                                        isAdded ? 'text-[#44403C]' : 'text-[var(--text-secondary)]'
-                                      }`}>
+                                      <p className="text-[10.5px] font-amount font-semibold mt-0.5 text-[var(--text-secondary)]">
                                         {formatAmount(preset.defaultAmount, lang)} kr
                                       </p>
                                     </div>

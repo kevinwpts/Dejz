@@ -137,20 +137,20 @@ export function CancelSubscriptionModal({
                   <BudgetItemLogo item={expense} type="expense" config={config} />
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-[15px] font-bold text-[#1C1917] dark:text-white truncate">
+                  <h4 className="text-[15px] font-bold text-[var(--text-primary)] truncate">
                     {expense.name}
                   </h4>
-                  <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8]">
+                  <p className="text-xs text-[var(--text-secondary)] font-medium">
                     {typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || (isEn ? 'Fixed expense' : 'Fast utgift'))}
                   </p>
                 </div>
               </div>
 
               <div className="text-right shrink-0">
-                <span className="text-sm font-bold font-amount text-rose-500">
+                <span className="text-sm font-bold font-amount tabular-nums text-rose-500">
                   -{expense.amount} {config.currency || 'kr'}
                 </span>
-                <span className="block text-[10.5px] text-[#6E6961] dark:text-[#A8A8A8]">
+                <span className="block text-[10.5px] text-[var(--text-secondary)] font-medium">
                   /{isEn ? 'mo' : 'mån'}
                 </span>
               </div>
@@ -158,11 +158,11 @@ export function CancelSubscriptionModal({
 
             {loading ? (
               <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="w-8 h-8 rounded-full border-2 border-[#1C1917] dark:border-white border-t-transparent animate-spin" />
-                <p className="text-sm font-semibold text-[#1C1917] dark:text-white">
+                <div className="w-8 h-8 rounded-full border-2 border-[var(--text-primary)] border-t-transparent animate-spin" />
+                <p className="text-sm font-semibold text-[var(--text-primary)]">
                   {isEn ? 'Searching for cancellation portal and guide...' : 'Hittar officiell uppsägningslänk och villkor...'}
                 </p>
-                <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8]">
+                <p className="text-xs text-[var(--text-secondary)]">
                   {isEn ? 'Scanning direct links & customer service...' : 'Söker efter direktlänk till kontoinställningar...'}
                 </p>
               </div>
@@ -173,7 +173,7 @@ export function CancelSubscriptionModal({
                   <a
                     href={`tel:${details.phoneNumber.replace(/\s+/g, '')}`}
                     onClick={() => feedback.tap()}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-none flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full h-12 px-4 rounded-[14px] bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-none flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Phone size={17} strokeWidth={2.4} />
                     <span>{isEn ? `Call Kundservice: ${details.phoneNumber}` : `Ring kundservice: ${details.phoneNumber}`}</span>
@@ -182,7 +182,7 @@ export function CancelSubscriptionModal({
                   <a
                     href={`mailto:${details.supportEmail}?subject=${encodeURIComponent(`Uppsägning av abonnemang - ${expense.name}`)}`}
                     onClick={() => feedback.tap()}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-none flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full h-12 px-4 rounded-[14px] bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-none flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Mail size={17} strokeWidth={2.4} />
                     <span>{isEn ? `Email Cancellation: ${details.supportEmail}` : `Skicka uppsägning: ${details.supportEmail}`}</span>
@@ -191,7 +191,7 @@ export function CancelSubscriptionModal({
                   <button
                     type="button"
                     onClick={handleOpenLink}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-[var(--accent-color)] text-[var(--on-accent)] font-bold text-sm shadow-none hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full h-12 px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-sm hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <ExternalLink size={17} strokeWidth={2.4} />
                     <span>{isEn ? 'Open cancellation portal' : 'Öppna uppsägningssidan'}</span>
@@ -200,19 +200,19 @@ export function CancelSubscriptionModal({
 
                 {/* Step-by-Step Instructions */}
                 {details.steps && details.steps.length > 0 && (
-                  <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] space-y-3">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#1C1917] dark:text-white tracking-tight">
-                      <HelpCircle size={14} className="text-[#1C1917] dark:text-white" />
+                  <div className="p-4 rounded-[16px] bg-black/5 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] space-y-3">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)] tracking-tight">
+                      <HelpCircle size={14} className="text-[var(--text-primary)]" />
                       <span>{isEn ? 'How to cancel step-by-step' : 'Så här säger du upp avtalet'}</span>
                     </div>
 
                     <ol className="space-y-2.5">
                       {details.steps.map((step, idx) => (
-                        <li key={idx} className="flex items-start gap-2.5 text-xs text-[#6E6961] dark:text-[#A8A8A8] leading-relaxed">
-                          <span className="w-5 h-5 rounded-full bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white font-bold text-[10.5px] flex items-center justify-center shrink-0 mt-0.5 border border-black/10 dark:border-white/10">
+                        <li key={idx} className="flex items-start gap-2.5 text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
+                          <span className="w-5 h-5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] font-bold text-[10.5px] flex items-center justify-center shrink-0 mt-0.5 border border-black/10 dark:border-white/10">
                             {idx + 1}
                           </span>
-                          <span className="text-[#1C1917] dark:text-white">{step}</span>
+                          <span className="text-[var(--text-primary)]">{step}</span>
                         </li>
                       ))}
                     </ol>
@@ -221,7 +221,7 @@ export function CancelSubscriptionModal({
 
                 {/* Notice Period & Tips Box */}
                 {(details.noticePeriod || details.tips) && (
-                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+                  <div className="p-3.5 rounded-[16px] bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 space-y-2">
                     {details.noticePeriod && (
                       <div className="flex items-start gap-2">
                         <Clock size={14} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
@@ -250,7 +250,7 @@ export function CancelSubscriptionModal({
                       href={details.supportUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-[#6E6961] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white underline inline-flex items-center gap-1 transition-colors"
+                      className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline inline-flex items-center gap-1 transition-colors font-medium"
                     >
                       <span>{isEn ? 'Read full cancellation policy' : 'Läs fullständiga uppsägningsvillkor'}</span>
                       <ExternalLink size={11} />

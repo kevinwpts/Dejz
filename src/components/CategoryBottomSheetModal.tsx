@@ -203,23 +203,23 @@ export function CategoryBottomSheetModal({
                           +{formatAmount(Math.abs(categoryData.remaining), language)} {curr}
                         </span>
                       ) : (
-                        <span className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
+                        <span className="text-lg sm:text-xl font-bold text-[var(--text-primary)] font-amount tabular-nums">
                           {formatAmount(categoryData.remaining, language)} {curr}
                         </span>
                       )
                     ) : (
-                      <span className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white font-amount tabular-nums">
+                      <span className="text-lg sm:text-xl font-bold text-[var(--text-primary)] font-amount tabular-nums">
                         {formatAmount(categoryData?.spent || 0, language)} {curr}
                       </span>
                     )}
-                    <span className="text-xs font-medium text-[#6E6961] dark:text-[#9CA6BC]">
+                    <span className="text-xs font-medium text-[var(--text-secondary)]">
                       {categoryData?.hasBudget
                         ? (categoryData.isOverBudget ? (isEn ? 'over budget' : 'över budget') : (isEn ? 'left' : 'kvar'))
                         : (isEn ? 'spent' : 'totalt spenderat')}
                     </span>
                   </div>
                   {categoryData?.hasBudget && (
-                    <span className="text-xs font-semibold text-[#8C867C] dark:text-[#A8A8A8] tabular-nums">
+                    <span className="text-xs font-semibold text-[var(--text-tertiary)] tabular-nums">
                       {spentPct} {isEn ? '% used' : '% använt'}
                     </span>
                   )}

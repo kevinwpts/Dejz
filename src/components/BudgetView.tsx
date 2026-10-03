@@ -283,17 +283,17 @@ export function BudgetView({
 
           {/* Large dynamic status amount focused on "[spent] av [income] fördelat" */}
           <div className="space-y-1">
-            <div className="text-[26px] sm:text-[32px] leading-tight font-bold tracking-tight text-[#1C1917] dark:text-white tabular-nums">
+            <div className="text-[26px] sm:text-[32px] leading-tight font-bold tracking-tight text-[var(--text-primary)] font-amount tabular-nums">
               {isOverAllocated ? (
                 <>
                   <span className="text-rose-600 dark:text-rose-400">{formatAmount(totalAllocated, config.language)} {curr}</span>
-                  <span className="text-[#6E6961] dark:text-[#A8A8A8] text-lg sm:text-xl font-medium"> fördelat av </span>
+                  <span className="text-[var(--text-secondary)] text-lg sm:text-xl font-medium"> fördelat av </span>
                   <span>{formatAmount(totalIncomeSum, config.language)} {curr}</span>
                 </>
               ) : (
                 <>
-                  <span className="text-[#1C1917] dark:text-white">{formatAmount(totalAllocated, config.language)} {curr}</span>
-                  <span className="text-[#6E6961] dark:text-[#A8A8A8] text-lg sm:text-xl font-medium"> fördelat av </span>
+                  <span className="text-[var(--text-primary)]">{formatAmount(totalAllocated, config.language)} {curr}</span>
+                  <span className="text-[var(--text-secondary)] text-lg sm:text-xl font-medium"> fördelat av </span>
                   <span>{formatAmount(totalIncomeSum, config.language)} {curr}</span>
                 </>
               )}
@@ -303,7 +303,7 @@ export function BudgetView({
                 ⚠️ Du har fördelat {formatAmount(Math.abs(remainingToAllocate), config.language)} {curr} mer än din inkomst ({formatAmount(totalIncomeSum, config.language)} {curr})
               </span>
             ) : (
-              <span className="text-xs font-semibold tracking-wide text-[#6E6961] dark:text-[#A8A8A8] block mt-1">
+              <span className="text-xs font-semibold tracking-wide text-[var(--text-secondary)] block mt-1">
                 ✓ {formatAmount(remainingToAllocate, config.language)} {curr} kvar att fördela av din inkomst ({formatAmount(totalIncomeSum, config.language)} {curr})
               </span>
             )}
@@ -372,7 +372,7 @@ export function BudgetView({
             {config.language === 'en' ? 'Categories' : 'Kategorier'} ({config.categories?.length || 0})
           </span>
           
-          <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] shadow-none border-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             {sortedCategoriesForManage.map((cat) => {
               const iconName = cat.icon;
               const Icon = ICON_MAP[iconName];
@@ -389,22 +389,22 @@ export function BudgetView({
                 >
                   {/* Left: Icon, Name, Fixed text */}
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.04] border-none shadow-none text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-[12px] bg-black/5 dark:bg-white/[0.04] border-none shadow-none text-[var(--text-primary)] flex items-center justify-center shrink-0">
                       {isEmojiString(iconName) ? (
                         <span className="text-sm leading-none">{iconName}</span>
                       ) : Icon ? (
-                        <Icon size={15} strokeWidth={1.8} className="text-[#1C1917] dark:text-white" />
+                        <Icon size={15} strokeWidth={1.8} className="text-[var(--text-primary)]" />
                       ) : (
-                        <div className="w-2 h-2 rounded-full bg-[#1C1917] dark:bg-white" />
+                        <div className="w-2 h-2 rounded-full bg-[var(--text-primary)]" />
                       )}
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <span className="text-[13px] sm:text-[13.5px] font-semibold text-[#1C1917] dark:text-white truncate block tracking-tight">
+                      <span className="text-[13px] sm:text-[13.5px] font-semibold text-[var(--text-primary)] truncate block tracking-tight">
                         {cat.name}
                       </span>
                       {fixedSpent > 0 && (
-                        <span className="text-[11px] font-medium text-[#6E6961] dark:text-[#A8A8A8] opacity-80 block truncate mt-0.5">
+                        <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-80 block truncate mt-0.5 font-amount tabular-nums">
                           {formatAmount(fixedSpent, config.language)} {curr} fast
                         </span>
                       )}
@@ -430,7 +430,7 @@ export function BudgetView({
                             });
                             setConfig({ ...config, categories: updatedCategories });
                           }}
-                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border-none hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
+                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border-none hover:bg-black/10 dark:hover:bg-white/[0.07] text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
                         >
                           −
                         </button>
@@ -463,7 +463,7 @@ export function BudgetView({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-20 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border-none text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                            className="w-20 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border-none text-center text-xs font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none"
                           />
                         ) : (
                           <button
@@ -473,7 +473,7 @@ export function BudgetView({
                               setEditingCategoryName(cat.name);
                               setInlineInputValue(catBudget > 0 ? String(catBudget) : "");
                             }}
-                            className="px-2 py-1 rounded-lg transition-all text-xs font-bold font-amount tabular-nums text-center text-[#1C1917] dark:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] cursor-pointer"
+                            className="px-2 py-1 rounded-lg transition-all text-xs font-bold font-amount tabular-nums text-center text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.06] cursor-pointer"
                           >
                             {formatAmount(catBudget, config.language)} {curr}
                           </button>
@@ -494,7 +494,7 @@ export function BudgetView({
                             });
                             setConfig({ ...config, categories: updatedCategories });
                           }}
-                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border-none hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
+                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border-none hover:bg-black/10 dark:hover:bg-white/[0.07] text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
                         >
                           +
                         </button>
@@ -527,7 +527,7 @@ export function BudgetView({
                               e.currentTarget.blur();
                             }
                           }}
-                          className="w-24 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border-none text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                          className="w-24 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border-none text-center text-xs font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none"
                         />
                       ) : (
                         <button
@@ -537,7 +537,7 @@ export function BudgetView({
                             setEditingCategoryName(cat.name);
                             setInlineInputValue("");
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[#1C1917] dark:text-white text-xs font-semibold border-none transition-all cursor-pointer active:scale-95"
+                          className="px-3 py-1.5 rounded-lg bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[var(--text-primary)] text-xs font-semibold border-none transition-all cursor-pointer active:scale-95"
                         >
                           Ange budget
                         </button>
@@ -629,13 +629,13 @@ export function BudgetView({
               budgetFilter === 'income' ? totalIncomeSum :
               totalSavingsSum
             )} 
-            className="text-[34px] sm:text-[38px] md:text-[42px] leading-tight font-semibold font-amount tabular-nums tracking-tight text-[#1C1917] dark:text-white"
+            className="text-[34px] sm:text-[38px] md:text-[42px] leading-tight font-semibold font-amount tabular-nums tracking-tight text-[var(--text-primary)]"
             formatter={(val) => {
               const prefix = budgetFilter === 'income' ? '+' : '−';
               return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
-          <span className="text-sm sm:text-base font-normal text-[#6D6962] dark:text-[#A8A8A8]">
+          <span className="text-sm sm:text-base font-normal text-[var(--text-secondary)]">
             {config?.currency || 'kr'}
           </span>
         </div>
@@ -766,7 +766,7 @@ export function BudgetView({
                 ).map(([freq, items]) => (
                   <div key={freq} className="space-y-2">
                     <div className="flex items-center gap-3 px-1 pt-1">
-                      <span className="text-xs font-medium text-[#6E6961] dark:text-[#A8A8A8]">
+                      <span className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)]">
                         {Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq) 
                           ? t(`freq_${Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq)!.toLowerCase()}` as TranslationKey)
                           : freq}

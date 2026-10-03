@@ -88,7 +88,7 @@ export function BudgetGauge({
               <button
                 type="button"
                 onClick={onOpenInfo}
-                className="w-5 h-5 rounded-full flex items-center justify-center text-[#8C867C] hover:text-[#1C1917] dark:text-[#A8A8A8] dark:hover:text-white bg-black/5 dark:bg-[#222222] transition-all cursor-pointer active:scale-90"
+                className="w-5 h-5 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-black/5 dark:bg-[#222222] transition-all cursor-pointer active:scale-90"
                 aria-label="Period- och löneinformation"
                 title="Period- och löneinformation"
               >
@@ -104,7 +104,7 @@ export function BudgetGauge({
               className={`text-[34px] sm:text-[38px] font-semibold leading-none font-amount tabular-nums tracking-tight ${
                 isNegative
                   ? 'text-rose-500 dark:text-rose-400'
-                  : 'text-[#1C1917] dark:text-white'
+                  : 'text-[var(--text-primary)]'
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
@@ -112,7 +112,7 @@ export function BudgetGauge({
               className={`text-[18px] sm:text-[20px] font-normal leading-none ${
                 isNegative
                   ? 'text-rose-500/80 dark:text-rose-400/80'
-                  : 'text-[#6D6962] dark:text-[#A8A8A8]'
+                  : 'text-[var(--text-secondary)]'
               }`}
             >
               {currency || 'kr'}

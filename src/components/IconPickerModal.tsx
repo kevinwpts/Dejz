@@ -123,17 +123,17 @@ export function IconPickerModal({
                 <Sparkles size={18} />
               </div>
               <div>
-                <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
+                <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
                   Välj ikon
                 </h3>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-[#222222] rounded-full transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 rounded-full transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
               aria-label="Stäng"
             >
-              <X size={18} strokeWidth={2} />
+              <X size={16} strokeWidth={2} />
             </button>
           </div>
 
@@ -142,21 +142,23 @@ export function IconPickerModal({
             <div className="relative">
               <Search 
                 size={16} 
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] dark:text-[#71717A] pointer-events-none" 
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none" 
               />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Sök bland över 1 000+ stilrena ikoner (t.ex. nässpray, bil, fika)..."
-                className="w-full h-[44px] bg-black/5 dark:bg-[#222222] border-none rounded-[16px] pl-9.5 pr-9 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none transition-all"
+                className="w-full h-[44px] bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] pl-9.5 pr-9 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent-color)] transition-all"
               />
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-[#EFECE6] dark:bg-[#383838] hover:bg-[#EDE9DF] dark:hover:bg-[#444444] flex items-center justify-center text-xs text-[#6E6961] dark:text-[#A8A8A8] transition-colors cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/10 dark:bg-white/15 hover:bg-black/15 dark:hover:bg-white/20 flex items-center justify-center text-xs text-[var(--text-secondary)] transition-colors cursor-pointer"
+                  aria-label="Rensa sökning"
                 >
-                  <X size={12} />
+                  <X size={12} strokeWidth={2} />
                 </button>
               )}
             </div>
@@ -170,10 +172,11 @@ export function IconPickerModal({
                 return (
                   <button
                     key={cat.id}
+                    type="button"
                     onClick={() => setActiveCategory(cat.id)}
                     className={`whitespace-nowrap px-3 py-1.5 rounded-[10px] text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
                       isActive
-                        ? 'bg-accent text-[var(--text-on-accent)] font-semibold shadow-xs scale-[1.02]'
+                        ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold shadow-xs scale-[1.02]'
                         : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
                     }`}
                   >

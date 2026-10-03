@@ -64,13 +64,13 @@ export function FilterMenuModal<T = string>({
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-none shrink-0">
+          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div className="min-w-0 pr-2">
-              <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight truncate">
+              <h3 className="text-base font-bold font-display uppercase tracking-wider text-[var(--text-primary)] truncate">
                 {title}
               </h3>
               {subtitle && (
-                <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">
+                <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5 font-medium">
                   {subtitle}
                 </p>
               )}
@@ -81,7 +81,7 @@ export function FilterMenuModal<T = string>({
                 if (typeof feedback?.light === 'function') feedback.light();
                 onClose();
               }}
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
               aria-label="Stäng"
             >
               <X size={16} strokeWidth={2.2} />
@@ -102,23 +102,18 @@ export function FilterMenuModal<T = string>({
                     onSelect(opt.id);
                     onClose();
                   }}
-                  style={isSelected ? {
-                    backgroundColor: 'var(--user-accent-soft, rgba(59, 130, 246, 0.15))',
-                    color: 'var(--accent-color, #3B82F6)'
-                  } : undefined}
-                  className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-xl transition-all cursor-pointer text-left active:scale-[0.99] border-none shadow-none ${
+                  className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-[14px] transition-all cursor-pointer text-left active:scale-[0.99] border ${
                     isSelected
-                      ? 'font-semibold'
-                      : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
+                      ? 'bg-black/5 dark:bg-white/[0.08] text-[var(--text-primary)] border-black/10 dark:border-white/15 font-semibold'
+                      : 'bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-transparent font-medium'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     {opt.icon && (
                       <div
-                        style={isSelected ? { backgroundColor: 'var(--accent-color, #3B82F6)' } : undefined}
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                        className={`w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-colors ${
                           isSelected
-                            ? 'text-white'
+                            ? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
                             : 'bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)]'
                         }`}
                       >
@@ -127,7 +122,7 @@ export function FilterMenuModal<T = string>({
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'font-semibold' : ''}`} style={isSelected ? { color: 'var(--accent-color, #3B82F6)' } : undefined}>
+                        <span className={`text-xs sm:text-[13px] tracking-tight truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
                           {opt.label}
                         </span>
                         {opt.badge && (
@@ -137,7 +132,7 @@ export function FilterMenuModal<T = string>({
                         )}
                       </div>
                       {opt.subtitle && (
-                        <p className="text-[11px] text-[#8C867C] dark:text-[#71717A] truncate mt-0.5 font-normal">
+                        <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5 font-normal">
                           {opt.subtitle}
                         </p>
                       )}
@@ -146,8 +141,7 @@ export function FilterMenuModal<T = string>({
 
                   {isSelected && (
                     <div 
-                      style={{ backgroundColor: 'var(--accent-color, #3B82F6)' }}
-                      className="w-5 h-5 rounded-full text-white flex items-center justify-center shrink-0 ml-2"
+                      className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center shrink-0 ml-2 shadow-2xs"
                     >
                       <Check size={12} strokeWidth={3} />
                     </div>

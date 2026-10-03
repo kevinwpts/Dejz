@@ -65,13 +65,13 @@ export function PeriodSelectorModal({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full rounded-t-[32px] bg-[#EFECE6] dark:bg-[#1C1C1C] border-none shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,20px))] font-sans p-6 space-y-4"
+          className="relative w-full rounded-t-[28px] sm:rounded-[28px] bg-white dark:bg-[#1C1C1C] border-t sm:border border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,20px))] font-sans p-5 sm:p-6 space-y-4"
         >
           {/* Mobile Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between pb-2 shrink-0">
+          <div className="flex items-center justify-between pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div className="flex items-center gap-3 min-w-0 pr-2">
               {viewMode === 'calendar' ? (
                 <button
@@ -80,24 +80,24 @@ export function PeriodSelectorModal({
                     if (typeof feedback?.light === 'function') feedback.light();
                     setViewMode('list');
                   }}
-                  className="w-9 h-9 rounded-full bg-white dark:bg-[#222222] border-none hover:bg-[#F9F8F6] dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95 shadow-none"
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
                   title={currentLang === 'en' ? 'Back to period list' : 'Tillbaka till periodlistan'}
                   aria-label={currentLang === 'en' ? 'Back to period list' : 'Tillbaka till periodlistan'}
                 >
-                  <ChevronLeft size={18} strokeWidth={2.2} />
+                  <ChevronLeft size={16} strokeWidth={2.2} />
                 </button>
               ) : (
-                <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#222222] border-none flex items-center justify-center text-[#1C1917] dark:text-white shrink-0 shadow-none">
-                  <CalendarIcon size={17} strokeWidth={1.8} />
+                <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] flex items-center justify-center text-[var(--text-primary)] shrink-0">
+                  <CalendarIcon size={16} strokeWidth={1.8} />
                 </div>
               )}
               <div className="min-w-0">
-                <h3 className="text-base sm:text-lg font-bold text-[#211F1C] dark:text-white tracking-tight truncate">
+                <h3 className="text-base font-bold font-display uppercase tracking-wider text-[var(--text-primary)] leading-tight truncate">
                   {viewMode === 'calendar' 
                     ? (currentLang === 'en' ? 'Select date' : 'Välj datum')
                     : (currentLang === 'en' ? 'Select period' : 'Välj period')}
                 </h3>
-                <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8] truncate mt-0.5">
+                <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5 font-medium">
                   {viewMode === 'calendar'
                     ? (currentLang === 'en' ? 'Pick a day or view full period' : 'Välj en dag eller visa hela perioden')
                     : (currentLang === 'en' ? 'Pay periods' : 'Dina löneperioder')}
@@ -111,7 +111,7 @@ export function PeriodSelectorModal({
                 if (typeof feedback?.light === 'function') feedback.light();
                 onClose();
               }}
-              className="w-9 h-9 rounded-full bg-white dark:bg-[#222222] border-none hover:bg-[#F9F8F6] dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95 shadow-none"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
               aria-label="Stäng"
             >
               <X size={16} strokeWidth={2.2} />
@@ -142,38 +142,33 @@ export function PeriodSelectorModal({
                         onSelectDate(null);
                         onClose();
                       }}
-                      style={isSelected ? {
-                        backgroundColor: 'var(--user-accent-soft, rgba(59, 130, 246, 0.15))',
-                        color: 'var(--accent-color, #3B82F6)'
-                      } : undefined}
-                      className={`w-full flex items-center justify-between py-3 px-4 rounded-2xl transition-all cursor-pointer text-left active:scale-[0.99] min-h-[52px] border-none shadow-none ${
+                      className={`w-full flex items-center justify-between py-3 px-4 rounded-[16px] transition-all cursor-pointer text-left active:scale-[0.99] min-h-[52px] border ${
                         isSelected
-                          ? 'font-semibold'
-                          : 'bg-white dark:bg-[#222222] hover:bg-[#F9F8F6] dark:hover:bg-white/[0.08] text-[#211F1C] dark:text-white font-medium'
+                          ? 'bg-black/5 dark:bg-white/[0.08] text-[var(--text-primary)] border-black/10 dark:border-white/15 font-semibold shadow-xs'
+                          : 'bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] text-[var(--text-secondary)] border-black/[0.04] dark:border-white/[0.06] font-medium'
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div 
-                          style={isSelected ? { backgroundColor: 'var(--accent-color, #3B82F6)' } : undefined}
                           className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                            isSelected ? 'text-white' : 'bg-black/5 dark:bg-[#1C1C1C] text-[#6E6961] dark:text-[#A8A8A8]'
+                            isSelected ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold shadow-xs' : 'bg-black/5 dark:bg-[#1C1C1C] text-[var(--text-secondary)]'
                           }`}
                         >
                           <CalendarIcon size={15} strokeWidth={1.8} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className={`text-sm tracking-tight truncate ${isSelected ? 'font-semibold' : ''}`} style={isSelected ? { color: 'var(--accent-color, #3B82F6)' } : undefined}>
+                            <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
                               {title}
                             </span>
                             {p.isCurrent && (
-                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#EFECE6] dark:bg-[#1C1C1C] text-[#211F1C] dark:text-white border-none shrink-0">
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] tracking-tight shrink-0">
                                 {currentLang === 'en' ? 'Current' : 'Nu'}
                               </span>
                             )}
                           </div>
                           {sub && (
-                            <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8] truncate mt-0.5 font-normal">
+                            <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5 font-normal">
                               {sub}
                             </p>
                           )}
@@ -182,8 +177,7 @@ export function PeriodSelectorModal({
 
                       {isSelected && (
                         <div 
-                          style={{ backgroundColor: 'var(--accent-color, #3B82F6)' }}
-                          className="w-5 h-5 rounded-full text-white flex items-center justify-center shrink-0 ml-2"
+                          className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center shrink-0 ml-2 shadow-2xs"
                         >
                           <Check size={12} strokeWidth={3} />
                         </div>
@@ -206,7 +200,7 @@ export function PeriodSelectorModal({
                   if (typeof feedback?.light === 'function') feedback.light();
                   setViewMode('calendar');
                 }}
-                className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-[#222222] hover:bg-[#F9F8F6] dark:hover:bg-white/10 text-[#211F1C] dark:text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border-none active:scale-[0.99] shadow-none"
+                className="w-full h-12 px-4 rounded-[14px] bg-white dark:bg-[#222222] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border border-black/[0.06] dark:border-white/[0.08] active:scale-[0.98] shadow-none"
               >
                 <CalendarIcon size={16} strokeWidth={2} />
                 <span>{currentLang === 'en' ? 'Select day' : 'Välj dag'}</span>

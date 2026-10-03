@@ -75,14 +75,14 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           <p 
-            className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight"
+            className="text-[14px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight"
             title={displayName}
           >
             {displayName}
           </p>
-          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#777168] dark:text-[#A8A8A8]">
+          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)]">
             {!isSaving && item.category && (
-              <div className="flex items-center gap-1 shrink-0 text-[#777168] dark:text-[#A8A8A8]">
+              <div className="flex items-center gap-1 shrink-0 text-[var(--text-secondary)]">
                 {(() => {
                   const searchCategory = (item.category || '').trim().toLowerCase();
                   const category = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(

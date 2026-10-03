@@ -657,17 +657,17 @@ export function TransactionModal({
 
           {/* Type Segmented Grid (when creating new transaction) */}
           {_onChangeType && !transaction && (
-            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-[#1C1C1C] rounded-[16px]">
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-[#1C1C1C] rounded-[16px] border border-black/[0.04] dark:border-white/[0.06]">
               <button
                 type="button"
                 onClick={() => {
                   if (typeof feedback?.light === 'function') feedback.light();
                   _onChangeType('expense');
                 }}
-                className={`py-2 rounded-[12px] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 rounded-[12px] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'expense'
-                    ? 'bg-white dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white shadow-xs'
-                    : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
+                    ? 'bg-white dark:bg-[#2A2A2A] text-[var(--text-primary)] shadow-xs'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 {currentLang === 'en' ? 'Expense' : 'Utgift'}
@@ -678,10 +678,10 @@ export function TransactionModal({
                   if (typeof feedback?.light === 'function') feedback.light();
                   _onChangeType('income');
                 }}
-                className={`py-2 rounded-[12px] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 rounded-[12px] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'income'
-                    ? 'bg-white dark:bg-[#1C1C1C] text-emerald-600 dark:text-emerald-400 shadow-xs'
-                    : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
+                    ? 'bg-white dark:bg-[#2A2A2A] text-emerald-600 dark:text-emerald-400 shadow-xs'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 {currentLang === 'en' ? 'Income' : 'Inkomst'}

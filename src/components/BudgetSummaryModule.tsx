@@ -259,13 +259,13 @@ export function BudgetSummaryModule({
           title={isEn ? 'Kvar att spendera' : 'Kvar att spendera'}
           size="sm"
         >
-          <div className="space-y-3 text-[14px] text-[#6D6962] dark:text-[#A8A8A8]">
+          <div className="space-y-3 text-[14px] text-[var(--text-secondary)]">
             <p>
               {isEn 
                 ? 'This shows your remaining disposable amount for the selected period after deducting recorded expenses.'
                 : 'Detta visar hur mycket du har kvar att spendera under den valda perioden utifrån din tillgängliga pott minus registrerade utgifter.'}
             </p>
-            <div className="p-3 bg-black/5 dark:bg-[#222222] rounded-[12px] space-y-1.5 text-[13px] text-[#211F1C] dark:text-white border border-black/5 dark:border-white/[0.06]">
+            <div className="p-3 bg-black/5 dark:bg-[#222222] rounded-[14px] space-y-1.5 text-[13px] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08]">
               <div className="flex justify-between">
                 <span>{isEn ? 'Period budget' : 'Periodbudget'}:</span>
                 <span className="font-medium">{formatAmount(Math.round(effectiveBudget), config.language)} {config.currency}</span>

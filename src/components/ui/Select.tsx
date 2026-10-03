@@ -38,7 +38,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="text-xs font-medium text-[#6E6961] dark:text-[#B8B8B8]"
+            className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)]"
           >
             {label}
           </label>
@@ -46,7 +46,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 
         <div className="relative flex items-center w-full">
           {icon && (
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] dark:text-[#B8B8B8] pointer-events-none flex items-center justify-center">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none flex items-center justify-center">
               {icon}
             </div>
           )}
@@ -54,19 +54,19 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
-            className={`w-full h-[48px] bg-black/5 dark:bg-[#222222] border-none rounded-[14px] ${icon ? 'pl-10' : 'px-4'} pr-10 font-normal text-[14px] text-[#1C1917] dark:text-white outline-none transition-all cursor-pointer appearance-none ${className}`}
+            className={`w-full h-[48px] bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] ${icon ? 'pl-10' : 'px-4'} pr-10 font-normal text-[14px] text-[var(--text-primary)] outline-none transition-all cursor-pointer appearance-none ${className}`}
             {...props}
           >
             {options
               ? options.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white">
+                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
                     {opt.label}
                   </option>
                 ))
               : children}
           </select>
 
-          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C867C] dark:text-[#B8B8B8] pointer-events-none flex items-center justify-center">
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none flex items-center justify-center">
             <ChevronDown size={16} />
           </div>
         </div>

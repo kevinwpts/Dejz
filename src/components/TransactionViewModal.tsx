@@ -184,7 +184,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             </h2>
 
             {/* Price */}
-            <p className={`text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#1C1917] dark:text-[#E7E5E4]'}`}>
+            <p className={`text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-80 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
               <span>{formatAmount(transaction.amount, config.language)}</span>
               <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{config.currency}</span>

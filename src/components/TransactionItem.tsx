@@ -203,19 +203,19 @@ export function TransactionItem({
             
             <div className="min-w-0 flex-1 flex flex-col justify-center">
               {/* Primary Merchant Name: 14px, weight 500 */}
-              <p className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
+              <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
                 {merchantName}
               </p>
               
               {/* Secondary Details: smaller category icon & text */}
-              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[#777168] dark:text-[#A8A8A8]">
+              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)]">
                 {hideCategoryBadge ? (
                   (transaction.timestamp || transaction.date) ? (
-                    <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] tabular-nums">
+                    <span className="text-[11px] font-normal text-[var(--text-tertiary)] tabular-nums">
                       {new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
                     </span>
                   ) : isFixed ? (
-                    <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8]">
+                    <span className="text-[11px] font-normal text-[var(--text-tertiary)]">
                       {getL10n('Fast utgift', 'Fixed expense', 'Fast utgift', 'Fast udgift', 'Kiinteä kulu')}
                     </span>
                   ) : null
@@ -230,12 +230,12 @@ export function TransactionItem({
                 )}
 
                 {transaction.note && !isFixed && (
-                  <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] truncate min-w-0 flex-1">
+                  <span className="text-[11px] font-normal text-[var(--text-tertiary)] truncate min-w-0 flex-1">
                     • {transaction.note}
                   </span>
                 )}
                 {transaction.receiptUrl && (
-                  <Paperclip className="w-3 h-3 text-[#777168] dark:text-[#A8A8A8] shrink-0" />
+                  <Paperclip className="w-3 h-3 text-[var(--text-tertiary)] shrink-0" />
                 )}
               </div>
             </div>
@@ -243,13 +243,13 @@ export function TransactionItem({
           
           {/* Primary Amount: matching title size and color, normal weight */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-            <p className={`text-[14px] font-normal whitespace-nowrap tracking-tight ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#211F1C] dark:text-white'}`}>
+            <p className={`text-[14px] font-normal whitespace-nowrap tracking-tight ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-75 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
               <span className="font-amount tabular-nums font-normal tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
               <span className="text-[11px] font-normal opacity-75 ml-[2px]">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixed ? (
-              <p className="text-[9.5px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 tabular-nums">
+              <p className="text-[9.5px] font-normal text-[var(--text-tertiary)] mt-0.5 tabular-nums">
                 {showDate 
                   ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
                   : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}

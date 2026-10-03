@@ -53,13 +53,13 @@ export function CalendarModal({
             <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-3 sm:hidden shrink-0" />
 
             {/* Header */}
-            <div className="flex items-center justify-between pb-3.5 border-none shrink-0">
+            <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] border-none flex items-center justify-center text-[var(--text-primary)]">
+                <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] flex items-center justify-center text-[var(--text-primary)]">
                   <CalendarIcon size={16} strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[var(--text-primary)] leading-tight">
+                  <h3 className="text-base font-bold font-display uppercase tracking-wider text-[var(--text-primary)] leading-tight">
                     {language === 'en' ? 'Select period' : 'Välj period'}
                   </h3>
                   <p className="text-xs font-semibold text-[var(--text-secondary)] mt-0.5">
@@ -77,7 +77,7 @@ export function CalendarModal({
                       onSelectDate(today);
                       if (onPeriodChange) onPeriodChange(today);
                     }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[var(--surface-muted)] dark:bg-[#222222] text-[11px] font-semibold text-[var(--text-primary)] dark:text-white hover:bg-[var(--border-color)] dark:hover:bg-white/[0.1] border-none transition-all active:scale-95 cursor-pointer shadow-none"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-[var(--surface-muted)] text-xs font-semibold text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/[0.1] border border-black/[0.06] dark:border-white/[0.08] transition-all active:scale-95 cursor-pointer"
                   >
                     <RotateCcw size={12} strokeWidth={2} />
                     <span>{language === 'en' ? 'Current' : 'Nuvarande'}</span>
@@ -86,7 +86,7 @@ export function CalendarModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] dark:text-[#9CA6BC] hover:text-[var(--text-primary)] dark:hover:text-white hover:bg-[var(--surface-muted)] dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 transition-colors cursor-pointer"
                   aria-label="Stäng"
                 >
                   <X size={16} strokeWidth={2} />
@@ -134,33 +134,33 @@ export function CalendarModal({
                           onSelectDate(p.date);
                           onClose();
                         }}
-                        className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer text-left border-none shadow-none ${
+                        className={`w-full flex items-center justify-between p-3 rounded-[16px] transition-all cursor-pointer text-left border ${
                           isSelected
-                            ? 'bg-[#1C1917]/5 dark:bg-[#222222] text-[#1C1917] dark:text-white font-semibold'
-                            : 'bg-white dark:bg-white/[0.025] hover:bg-[#F7F5F0] dark:hover:bg-white/[0.05] text-[#6E6961] dark:text-[#C7CDDC]'
+                            ? 'bg-black/5 dark:bg-white/[0.08] text-[var(--text-primary)] border-black/10 dark:border-white/15 font-semibold shadow-xs'
+                            : 'bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] text-[var(--text-secondary)] border-black/[0.04] dark:border-white/[0.06]'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                             isSelected 
                               ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold shadow-xs' 
-                              : 'bg-black/5 dark:bg-white/[0.04] text-[#6E6961] dark:text-[#9CA6BC]'
+                              : 'bg-black/5 dark:bg-white/[0.04] text-[var(--text-secondary)]'
                           }`}>
                             <CalendarIcon size={15} strokeWidth={1.8} />
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-[13.5px] font-semibold text-[#1C1917] dark:text-white tracking-tight truncate">
+                              <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight truncate">
                                 {mPart}
                               </span>
                               {p.isCurrent && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white tracking-tight">
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] tracking-tight">
                                   {language === 'en' ? 'Current' : 'Nuvarande'}
                                 </span>
                               )}
                             </div>
                             {dRange && (
-                              <div className="text-[11px] text-[#6E6961] dark:text-[#9CA6BC] truncate mt-0.5">
+                              <div className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">
                                 {dRange}
                               </div>
                             )}

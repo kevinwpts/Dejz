@@ -6,8 +6,7 @@ import { Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
 import { useScrollLock } from '../hooks/useScrollLock';
-import { evaluateAndFormatAmount } from '../utils/mathUtils';
-import { Button, IconButton } from './ui';
+import { Button } from './ui';
 
 interface VariableAmountUpdateModalProps {
   isOpen: boolean;
@@ -78,12 +77,12 @@ export function VariableAmountUpdateModal({
             <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
 
             {/* Clean Header */}
-            <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/[0.06] dark:border-white/[0.08]">
-               <div className="w-10 h-10 bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-full flex items-center justify-center shadow-none shrink-0 overflow-hidden">
+            <div className="px-6 pt-3 sm:pt-4 pb-3 grid grid-cols-[40px_1fr_40px] items-center shrink-0 border-b border-black/[0.06] dark:border-white/[0.08]">
+               <div className="w-9 h-9 bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-full flex items-center justify-center shadow-none shrink-0 overflow-hidden">
                  <BudgetItemLogo item={item} type={item.budgetType === 'income' ? 'income' : 'expense'} config={config} />
                </div>
                <div className="flex flex-col items-center overflow-hidden px-2 text-center">
-                 <h2 className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-white truncate tracking-tight">
+                 <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] truncate">
                    {item.name}
                  </h2>
                  <span className="text-xs font-semibold text-[#05B862]">
@@ -91,13 +90,14 @@ export function VariableAmountUpdateModal({
                  </span>
                </div>
                <div className="flex justify-end">
-                 <IconButton 
-                   icon={<X size={18} strokeWidth={2} />}
+                 <button
+                   type="button"
                    onClick={onClose}
-                   variant="muted"
-                   size="sm"
+                   className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                    aria-label={t('close')}
-                 />
+                 >
+                   <X size={16} strokeWidth={2} />
+                 </button>
                </div>
             </div>
 

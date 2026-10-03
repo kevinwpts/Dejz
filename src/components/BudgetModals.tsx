@@ -2539,7 +2539,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10">
-            <h2 className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-white tracking-tight">
+            <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
               {initialName ? t('edit') : 'Ny betalningsmetod'}
             </h2>
             <div className="flex items-center gap-2">

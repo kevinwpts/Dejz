@@ -284,8 +284,8 @@ export function IconSelector({
             onClick={() => setShowEmojiPicker(true)}
             className={`relative aspect-square rounded-[14px] flex items-center justify-center transition-all border border-solid cursor-pointer ${
               hasManualIcon && !QUICK_ICONS.includes(currentIcon) && !isAutoLogoSelected && !isCustomLogoSelected
-                ? 'border-[#1C1917] dark:border-white bg-[#1C1917]/10 dark:bg-[#222222] ring-2 ring-[#1C1917]/20 dark:ring-white/20 text-[#1C1917] dark:text-white'
-                : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-tertiary)] hover:border-[#1C1917]/40 dark:hover:border-white/40'
+                ? 'border-[var(--accent-color)] bg-[var(--accent-light)] ring-2 ring-[var(--accent-color)]/20 text-[var(--accent-color)]'
+                : 'bg-[var(--surface-muted)] border-[var(--border-color)] text-[var(--text-tertiary)] hover:border-black/20 dark:hover:border-white/20'
             }`}
           >
             {hasManualIcon && !QUICK_ICONS.includes(currentIcon) && !isAutoLogoSelected && !isCustomLogoSelected ? (

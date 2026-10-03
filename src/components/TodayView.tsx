@@ -346,22 +346,22 @@ export function TodayView({
               <button
                 type="button"
                 onClick={() => onNavigate("budget", "category-budgets")}
-                className="w-full p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] border-none text-[#1C1917] dark:text-white shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
+                className="w-full p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-[#222222] border-none flex items-center justify-center text-[#6E6961] dark:text-[#A8A8A8] transition-colors">
+                  <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-[#222222] border-none flex items-center justify-center text-[var(--text-secondary)] transition-colors">
                     <SlidersHorizontal size={15} strokeWidth={1.75} />
                   </div>
                   <div>
-                    <p className="text-xs sm:text-sm font-semibold text-[#1C1917] dark:text-white leading-snug">
+                    <p className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
                       {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
                     </p>
-                    <p className="text-[11px] font-normal text-[#8C867C] dark:text-[#A8A8A8]">
+                    <p className="text-[11px] font-normal text-[var(--text-secondary)]">
                       {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
                     </p>
                   </div>
                 </div>
-                <ChevronRight size={15} className="text-[#8C867C] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors" />
+                <ChevronRight size={15} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
               </button>
             )}
           </div>
@@ -399,7 +399,7 @@ export function TodayView({
           {!isTodaySelected && (
             <button
               onClick={handleGoToToday}
-              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white dark:bg-white/[0.04] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.07] border-none backdrop-blur-[18px] text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC] hover:text-black dark:hover:text-white transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
+              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white dark:bg-white/[0.04] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.07] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-[18px] text-xs font-medium text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
             >
               <RotateCcw size={11} strokeWidth={1.75} />
               <span>{lang === "en" ? "Today" : "Idag"}</span>

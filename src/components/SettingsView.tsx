@@ -145,7 +145,7 @@ export function SettingsView({
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
+          <span className="text-xs font-semibold text-[var(--text-secondary)]">
             {list.length} {t('categories').toLowerCase()}
           </span>
           <Button
@@ -164,7 +164,7 @@ export function SettingsView({
               key={cat.id || index}
               onClick={() => handleEditCategory(type, index, cat.name, cat.icon, cat.color)}
               style={{ backgroundColor: cat.color || '#6E6961' }}
-              className="h-32 sm:h-36 p-4 rounded-[24px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
+              className="h-32 sm:h-36 p-4 rounded-[20px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
             >
               <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />
               <span className="text-[14px] sm:text-[15px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
@@ -186,7 +186,7 @@ export function SettingsView({
             className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer ${
               categoryTab === 'expense'
                 ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none'
-                : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             {t('expenses')}
@@ -196,7 +196,7 @@ export function SettingsView({
             className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer ${
               categoryTab === 'income'
                 ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none'
-                : 'text-[#6E6961] dark:text-[#A8A8A8] hover:text-[#1C1917] dark:hover:text-white'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
             {t('incomes')}
@@ -226,7 +226,7 @@ export function SettingsView({
     return (
       <div className="space-y-4 w-full py-2">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
+          <span className="text-xs font-semibold text-[var(--text-secondary)]">
             {methodsList.length} betalmetodsval
           </span>
           <Button
@@ -251,7 +251,7 @@ export function SettingsView({
                 setIsPaymentMethodModalOpen(true);
               }}
               style={{ backgroundColor: method.color || '#6366f1' }}
-              className="h-32 sm:h-36 p-4 rounded-[24px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
+              className="h-32 sm:h-36 p-4 rounded-[20px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
             >
               <CategoryIcon icon={method.icon} size="lg" noBackground whiteIcon />
               <span className="text-[14px] sm:text-[15px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
@@ -274,7 +274,7 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] border-none shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {languages.map((l) => (
             <div
               key={l.code}
@@ -285,7 +285,7 @@ export function SettingsView({
             >
               <div className="flex items-center gap-3">
                 <LanguageFlag code={l.code} size="md" />
-                <span className="text-sm font-semibold text-[#1C1917] dark:text-white">
+                <span className="text-sm font-semibold text-[var(--text-primary)]">
                   {l.label}
                 </span>
               </div>
@@ -316,7 +316,7 @@ export function SettingsView({
     return (
       <div className="space-y-6 w-full py-2">
         <div className="space-y-3">
-          <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-1">
+          <label className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)] ml-1">
             Utseendeläge
           </label>
           <div className="grid grid-cols-3 gap-2.5">
@@ -333,10 +333,10 @@ export function SettingsView({
                     const isDark = mode.id === 'dark' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                     setConfig({ ...config, themeMode: mode.id as any, darkMode: isDark });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[18px] border-none transition-all cursor-pointer ${
+                  className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none'
-                      : 'bg-white dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                      ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none border-[var(--accent-color)]'
+                      : 'bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   {mode.icon}
@@ -349,7 +349,7 @@ export function SettingsView({
 
         {/* Temafärg */}
         <div className="space-y-3 pt-2">
-          <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-1">
+          <label className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)] ml-1">
             Temafärg
           </label>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
@@ -364,7 +364,7 @@ export function SettingsView({
                   onClick={() => {
                     setConfig({ ...config, themeColor: theme.hex });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[18px] border-none transition-all cursor-pointer active:scale-95 ${
+                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer active:scale-95 ${
                     isSelected
                       ? 'bg-white dark:bg-[#1C1C1C] ring-2 ring-[var(--accent-color)] shadow-none'
                       : 'bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
@@ -377,7 +377,7 @@ export function SettingsView({
                     {isSelected && <Check size={15} strokeWidth={2.5} />}
                   </div>
                   <span className={`text-[11px] font-medium tracking-tight truncate w-full text-center ${
-                    isSelected ? 'text-[#1C1917] dark:text-white font-semibold' : 'text-[#6E6961] dark:text-[#A8A8A8]'
+                    isSelected ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-secondary)]'
                   }`}>
                     {theme.name}
                   </span>
@@ -416,11 +416,11 @@ export function SettingsView({
 
     return (
       <div className="space-y-3 w-full py-2">
-        <h3 className="text-[14px] font-semibold text-[#211F1C] dark:text-white px-1 tracking-tight">
+        <h3 className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)] px-1">
           {isEn ? 'Select Currency' : 'Välj valuta'}
         </h3>
 
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrencyCode === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
@@ -438,14 +438,14 @@ export function SettingsView({
                   <span className="text-xl shrink-0 select-none">{c.flag}</span>
                   <div className="min-w-0 flex flex-col justify-center">
                     <div className="flex items-center gap-2">
-                      <span className="text-[14px] font-medium text-[#211F1C] dark:text-white tracking-tight">
+                      <span className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight">
                         {c.code}
                       </span>
-                      <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8]">
+                      <span className="text-[12px] font-normal text-[var(--text-secondary)]">
                         ({c.symbol})
                       </span>
                     </div>
-                    <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5">
+                    <span className="text-[12px] font-normal text-[var(--text-secondary)] truncate mt-0.5">
                       {nameText}
                     </span>
                   </div>
@@ -473,22 +473,23 @@ export function SettingsView({
        <div>
         {activeSection === 'salary' && (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-[#1C1C1C] p-5 rounded-[22px] border-none shadow-none space-y-5">
-              <h2 className="text-sm font-bold text-[#1C1917] dark:text-white">Lönedag & Period</h2>
+            <div className="bg-white dark:bg-[#1C1C1C] p-5 rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-5">
+              <h2 className="text-xs sm:text-sm font-bold font-display uppercase tracking-wider text-[var(--text-secondary)]">Lönedag & Period</h2>
               
               {/* Payday Setting Row */}
               <div className="space-y-1.5">
                 <button
+                  type="button"
                   onClick={() => setIsPaydayModalOpen(true)}
-                  className="w-full flex items-center justify-between p-4 rounded-[16px] bg-black/[0.04] dark:bg-[#1C1C1C] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-colors cursor-pointer text-left border-none"
+                  className="w-full flex items-center justify-between p-4 rounded-[14px] bg-[var(--surface-muted)] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-colors cursor-pointer text-left border border-black/[0.04] dark:border-white/[0.06]"
                 >
                   <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">Lönedag</span>
-                    <span className="text-sm font-bold text-[#1C1917] dark:text-white mt-0.5">
+                    <span className="text-xs font-semibold text-[var(--text-secondary)]">Lönedag</span>
+                    <span className="text-sm font-bold text-[var(--text-primary)] mt-0.5">
                       {config.language === 'en' ? `The ${config.payday}` : `Den ${config.payday}:e`}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
                     <span>Ändra</span>
                     <span className="text-base">›</span>
                   </div>
@@ -499,10 +500,10 @@ export function SettingsView({
               <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.04]">
                 <div className="flex items-center justify-between p-1">
                   <div className="flex flex-col pr-4">
-                    <span className="text-xs font-semibold text-[#1C1917] dark:text-white">
+                    <span className="text-xs font-semibold text-[var(--text-primary)]">
                       {config.language === 'en' ? 'Pay early if payday is on a weekend' : 'Helghantering'}
                     </span>
-                    <span className="text-[11px] text-[#6E6961] dark:text-[#A8A8A8] mt-0.5">
+                    <span className="text-[11px] text-[var(--text-secondary)] mt-0.5 font-medium">
                       {config.language === 'en' ? 'Get paid the Friday before if payday is a weekend' : 'Få lön fredagen innan om lönedagen är helg'}
                     </span>
                   </div>
@@ -571,19 +572,19 @@ export function SettingsView({
       {/* Category Deletion Migration Modal */}
       {deleteMigrationData && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[24px] p-6 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans">
-            <h3 className="text-lg font-bold text-[#1C1917] dark:text-white mb-2">
+          <div className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[28px] p-6 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans">
+            <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] mb-2">
               Ta bort {deleteMigrationData.category.name}?
             </h3>
-            <p className="text-xs text-[#6E6961] dark:text-[#A8A8A8] mb-4 leading-relaxed">
+            <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed font-medium">
               Kategorin används av {deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till innan den tas bort.
             </p>
             <div className="space-y-4 mb-6">
-              <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8]">Flytta transaktioner till:</label>
+              <label className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)]">Flytta transaktioner till:</label>
               <select
                 value={targetMigrationId}
                 onChange={(e) => setTargetMigrationId(e.target.value)}
-                className="w-full h-[48px] bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[14px] px-3 text-[14px] font-normal text-[#1C1917] dark:text-white outline-none"
+                className="w-full h-[48px] bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] px-3 text-[14px] font-normal text-[var(--text-primary)] outline-none"
               >
                 {(deleteMigrationData.type === 'income' ? (config.incomeCategories || []) : (config.categories || []))
                   .filter(c => c.id !== deleteMigrationData.category.id)
@@ -668,6 +669,7 @@ export function SettingsView({
             return (
               <button
                 key={day}
+                type="button"
                 onClick={() => {
                   handleUpdatePayday(day);
                   setIsPaydayModalOpen(false);
@@ -675,7 +677,7 @@ export function SettingsView({
                 className={`py-3 rounded-[14px] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
                   isSelected
                     ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-md scale-105'
-                    : 'bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/15'
+                    : 'bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/15'
                 }`}
               >
                 {day}

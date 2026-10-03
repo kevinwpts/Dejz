@@ -456,10 +456,10 @@ export function AnalysisView({
                         <CategoryIcon icon={item.icon} color={item.color} size="md" />
 
                         <div className="min-w-0 flex-1 flex flex-col justify-center">
-                          <p className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-tight truncate tracking-tight">
+                          <p className="text-[14px] font-medium text-[var(--text-primary)] leading-tight truncate tracking-tight">
                             {item.name}
                           </p>
-                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[12px] text-[#6D6962] dark:text-[#A8A8A8]">
+                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[12px] text-[var(--text-secondary)]">
                             <span>
                               {totalItemCount} {isEn ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
                             </span>
@@ -469,12 +469,12 @@ export function AnalysisView({
 
                       <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
                         <div className="text-right flex flex-col items-end justify-center">
-                          <p className="text-[14px] font-medium font-amount tabular-nums text-[#211F1C] dark:text-white leading-tight">
+                          <p className="text-[14px] font-medium font-amount tabular-nums text-[var(--text-primary)] leading-tight">
                             {formatAmount(Math.round(item.value), config.language)}
-                            <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[2.5px]">{config.currency}</span>
+                            <span className="text-[12px] font-normal text-[var(--text-secondary)] ml-[2.5px]">{config.currency}</span>
                           </p>
                         </div>
-                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[#211F1C] dark:text-white' : 'text-[#6D6962] dark:text-[#A8A8A8]'}`}>
+                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
                           <ChevronDown size={18} strokeWidth={1.8} />
                         </div>
                       </div>
@@ -513,20 +513,20 @@ export function AnalysisView({
                                 <div
                                   key={fe.id}
                                   onClick={() => onViewFixedExpense?.(fe)}
-                                  className="flex items-center justify-between p-3 rounded-[16px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] transition-colors cursor-pointer border-none shadow-none"
+                                  className="flex items-center justify-between p-3 rounded-[14px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] transition-colors cursor-pointer border border-black/[0.04] dark:border-white/[0.06] shadow-none"
                                 >
                                   <div className="min-w-0">
-                                    <p className="text-[14px] font-medium text-[#211F1C] dark:text-white leading-snug truncate tracking-tight">
+                                    <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug truncate tracking-tight">
                                       {fe.name}
                                     </p>
-                                    <p className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] truncate mt-0.5 tracking-tight">
+                                    <p className="text-[12px] font-normal text-[var(--text-secondary)] truncate mt-0.5 tracking-tight">
                                       {isEn ? 'Fixed expense' : 'Fast utgift'}
                                     </p>
                                   </div>
-                                  <p className="text-[14px] font-medium whitespace-nowrap tracking-tight text-[#211F1C] dark:text-white pl-2">
+                                  <p className="text-[14px] font-medium whitespace-nowrap tracking-tight text-[var(--text-primary)] pl-2">
                                     <span className="opacity-75 mr-0.5">−</span>
                                     <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(fe.amount), config.language)}</span>
-                                    <span className="text-[12px] font-normal text-[#6D6962] dark:text-[#A8A8A8] ml-[2.5px]">{config.currency}</span>
+                                    <span className="text-[12px] font-normal text-[var(--text-secondary)] ml-[2.5px]">{config.currency}</span>
                                   </p>
                                 </div>
                               ))}

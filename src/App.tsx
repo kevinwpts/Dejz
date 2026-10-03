@@ -5516,10 +5516,10 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-[#E2DDD4] dark:border-white/10 hover:bg-[#F9F8F6] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
-                    <ArrowDownLeft size={24} strokeWidth={1.8} className="text-[#211F1C] dark:text-white" />
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                    <ArrowDownLeft size={24} strokeWidth={1.8} className="text-[var(--text-primary)]" />
                   </div>
-                  <span className="text-xs font-semibold text-[#211F1C] dark:text-white text-center">
+                  <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
                     {config?.language === "en" ? "Expense" : "Utgift"}
                   </span>
                 </button>
@@ -5536,10 +5536,10 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-[#E2DDD4] dark:border-white/10 hover:bg-[#F9F8F6] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
-                    <ArrowUpRight size={24} strokeWidth={1.8} className="text-[#211F1C] dark:text-white" />
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                    <ArrowUpRight size={24} strokeWidth={1.8} className="text-[var(--text-primary)]" />
                   </div>
-                  <span className="text-xs font-semibold text-[#211F1C] dark:text-white text-center">
+                  <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
                     {config?.language === "en" ? "Income" : "Inkomst"}
                   </span>
                 </button>
@@ -5551,14 +5551,14 @@ export default function App() {
                   disabled={isScanningReceipt}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-[#E2DDD4] dark:border-white/10 hover:bg-[#F9F8F6] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     {isScanningReceipt ? (
-                      <Loader2 size={24} className="animate-spin text-[#211F1C] dark:text-white" />
+                      <Loader2 size={24} className="animate-spin text-[var(--text-primary)]" />
                     ) : (
-                      <Camera size={24} strokeWidth={1.8} className="text-[#211F1C] dark:text-white" />
+                      <Camera size={24} strokeWidth={1.8} className="text-[var(--text-primary)]" />
                     )}
                   </div>
-                  <span className="text-xs font-semibold text-[#211F1C] dark:text-white text-center">
+                  <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
                     {isScanningReceipt ? (config?.language === "en" ? "Scanning..." : "Scannar...") : (config?.language === "en" ? "Receipt" : "Kvitto")}
                   </span>
                 </button>
@@ -5600,7 +5600,7 @@ export default function App() {
                           ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
                             ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/30"
-                            : "bg-white dark:bg-[#222222] hover:bg-[#F9F8F6] dark:hover:bg-white/15 text-[var(--text-secondary)] dark:text-white border-[#E2DDD4] dark:border-white/10 active:scale-95 shadow-xs"
+                            : "bg-white dark:bg-[#222222] hover:bg-black/[0.03] dark:hover:bg-white/15 text-[var(--text-secondary)] border-black/[0.06] dark:border-white/10 active:scale-95 shadow-xs"
                       }`}
                     >
                       {isAudioTranscribing ? (
@@ -5621,8 +5621,8 @@ export default function App() {
                         ? { type: 'error', message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-[22px] bg-white dark:bg-[#222222] text-[#211F1C] dark:text-white placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
-                    isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-[#E2DDD4] dark:border-white/10"
+                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-[22px] bg-white dark:bg-[#222222] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
+                    isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-black/[0.06] dark:border-white/10"
                   }`}
                 />
               </div>
