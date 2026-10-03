@@ -2908,6 +2908,17 @@ export default function App() {
           };
         });
 
+        const fixedExpenseCategoryMap: Record<string, number> = {};
+        if (fixedExpenses) {
+          fixedExpenses.forEach((fe) => {
+            const isPaid = fe.paidInPeriods?.[periodId];
+            if (isPaid || (!isPaid && fe.deductionDay < new Date().getDate())) {
+              const catName = fe.category ? fe.category.trim() : "Fasta utgifter";
+              fixedExpenseCategoryMap[catName] = (fixedExpenseCategoryMap[catName] || 0) + (Number(fe.amount) || 0);
+            }
+          });
+        }
+
         const categorySpending: Record<string, number> = {};
         pTransactions.forEach((tx) => {
           if (tx.type === 'expense' && tx.category) {
@@ -2915,26 +2926,23 @@ export default function App() {
           }
         });
 
-        if (fixedExpenses) {
-          fixedExpenses.forEach((fe) => {
-            const isPaid = fe.paidInPeriods?.[periodId];
-            if (isPaid || (!isPaid && fe.deductionDay < new Date().getDate())) {
-              const catName = fe.category ? fe.category.trim() : "Fasta utgifter";
-              categorySpending[catName] = (categorySpending[catName] || 0) + (Number(fe.amount) || 0);
-            }
-          });
-        }
+        Object.entries(fixedExpenseCategoryMap).forEach(([catName, amount]) => {
+          categorySpending[catName] = (categorySpending[catName] || 0) + amount;
+        });
 
         const categoriesMap: Record<string, any> = {};
         (config.categories || []).forEach((c) => {
           const spent = categorySpending[c.name] || 0;
+          const fixedSpent = fixedExpenseCategoryMap[c.name] || 0;
           const budgetVal = c.budget !== undefined && c.budget !== null 
             ? Number(String(c.budget).replace(/[^0-9.]/g, "")) 
             : 0;
+          const budget = Math.max(budgetVal, fixedSpent);
+
           categoriesMap[c.name] = {
             name: c.name,
             spent,
-            budget: !isNaN(budgetVal) ? budgetVal : 0,
+            budget,
             icon: c.icon,
             color: c.color,
           };
