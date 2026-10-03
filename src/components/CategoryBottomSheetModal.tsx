@@ -22,6 +22,7 @@ interface CategoryBottomSheetModalProps {
     remaining: number;
     hasBudget: boolean;
     isOverBudget: boolean;
+    color?: string;
   } | null;
   selectedDate: Date;
   allTransactions: Transaction[];
@@ -64,6 +65,14 @@ export function CategoryBottomSheetModal({
   }, [isOpen, onClose]);
 
   const targetCategoryName = categoryName || categoryData?.name;
+
+  const matchedCategory = useMemo(() => {
+    if (!targetCategoryName || !config?.categories) return null;
+    const norm = targetCategoryName.trim().toLowerCase();
+    return config.categories.find((c) => (c.name || '').trim().toLowerCase() === norm);
+  }, [targetCategoryName, config?.categories]);
+
+  const categoryColor = categoryData?.color || matchedCategory?.color || '#6E6961';
 
   // Filter transactions for this category strictly within the current period
   const periodTransactions = useMemo(() => {
@@ -109,7 +118,7 @@ export function CategoryBottomSheetModal({
   const displayTransactions = periodTransactions;
 
   // Icon calculation
-  const iconKey = categoryData?.iconName || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');
+  const iconKey = categoryData?.iconName || matchedCategory?.icon || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');
   const IconComponent = ICON_MAP[iconKey] || ICON_MAP['Tag'];
 
   const spentPct = useMemo(() => {
@@ -150,13 +159,16 @@ export function CategoryBottomSheetModal({
             {/* Header: Category Identity & Close Button */}
             <div className="flex items-center justify-between px-5 sm:px-6 pt-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white shadow-xs"
+                  style={{ backgroundColor: categoryColor }}
+                >
                   {isEmojiString(iconKey) ? (
                     <span className="text-xl leading-none">{iconKey}</span>
                   ) : IconComponent ? (
-                    <IconComponent size={20} className="text-[var(--text-primary)]" />
+                    <IconComponent size={20} className="text-white" strokeWidth={2} />
                   ) : (
-                    <ShoppingBag size={20} className="text-[var(--text-primary)]" />
+                    <ShoppingBag size={20} className="text-white" strokeWidth={2} />
                   )}
                 </div>
                 <div className="min-w-0">
@@ -216,10 +228,11 @@ export function CategoryBottomSheetModal({
                 {categoryData?.hasBudget && (
                   <div className="w-full h-1 bg-black/10 dark:bg-[#222222] rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        categoryData.isOverBudget ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
-                      }`}
-                      style={{ width: `${spentPct}%` }}
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${spentPct}%`,
+                        backgroundColor: categoryData.isOverBudget ? '#f43f5e' : categoryColor,
+                      }}
                     />
                   </div>
                 )}
