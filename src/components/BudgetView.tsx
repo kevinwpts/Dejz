@@ -484,7 +484,7 @@ export function BudgetView({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const currentAmount = Number(cat.budget) || 0;
+                            const currentAmount = Math.max(Number(cat.budget) || 0, fixedSpent);
                             const newAmount = currentAmount + 100;
                             const updatedCategories = (config.categories || []).map((c) => {
                               if (c.name === cat.name) {
