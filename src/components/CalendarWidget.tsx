@@ -11,7 +11,7 @@ interface CalendarWidgetProps {
   showFixedInCalendar?: boolean;
 }
 
-export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelectedDate, t, showFixedInCalendar = true }: CalendarWidgetProps) {
+export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelectedDate, t, currentLang, showFixedInCalendar = true }: CalendarWidgetProps) {
   const today = new Date();
 
   // View state for month/year navigation when picking past/future dates
