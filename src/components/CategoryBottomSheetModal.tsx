@@ -151,7 +151,7 @@ export function CategoryBottomSheetModal({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#1C1C1C] border-t sm:border border-black/[0.08] dark:border-white/[0.08] rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
+            className="relative w-full max-w-lg bg-[var(--bg-color)] border-t sm:border border-black/[0.08] dark:border-white/[0.08] rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
           >
             {/* Top Grab Handle */}
             <div className="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20 mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
@@ -194,7 +194,7 @@ export function CategoryBottomSheetModal({
             {/* Scrollable Body Content */}
             <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0">
               {/* Category Budget Status Card - Ultra-compact, clean & lightweight */}
-              <div className="py-2.5 px-3.5 rounded-[18px] bg-black/[0.03] dark:bg-[#1C1C1C] border border-black/5 dark:border-white/10 shrink-0 space-y-1.5">
+              <div className="py-2.5 px-3.5 rounded-[18px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shrink-0 space-y-1.5">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-baseline gap-1.5">
                     {categoryData?.hasBudget ? (
