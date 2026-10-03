@@ -211,7 +211,7 @@ export function PeriodTimeline({
           <button
             type="button"
             onClick={() => handleStep('prev')}
-            className="pointer-events-auto w-6 h-6 rounded-full bg-white/[0.035] hover:bg-white/[0.07] text-[#C7CDDC] border border-white/[0.035] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-none"
+            className="pointer-events-auto w-6 h-6 rounded-full bg-white/[0.035] hover:bg-white/[0.07] text-[#C7CDDC] border-none flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-none"
             aria-label="Föregående dag"
             title="Föregående dag"
           >
@@ -267,16 +267,16 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`flex flex-col items-center justify-center gap-0.5 w-[44px] sm:w-[48px] h-[46px] sm:h-[50px] p-1 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-[44px] sm:w-[48px] h-[46px] sm:h-[50px] p-1 rounded-xl transition-all duration-200 cursor-pointer select-none shrink-0 relative border-none shadow-none ${
                 isSelected
-                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-transparent shadow-xs scale-105 font-medium z-10 opacity-100'
+                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-none scale-105 font-medium z-10 opacity-100'
                   : hasCategoryMatch
-                  ? 'bg-black/5 text-[#242321] border border-[#242321]/20 dark:bg-[#222222] dark:text-white dark:border-white/20 hover:bg-black/10 dark:hover:bg-white/[0.1] scale-100 opacity-100'
+                  ? 'bg-black/5 text-[#242321] dark:bg-[#222222] dark:text-white hover:bg-black/10 dark:hover:bg-white/[0.1] scale-100 opacity-100'
                   : isRealToday
-                  ? 'bg-white text-[#242321] border border-[#E5E2DC] dark:bg-white/[0.04] dark:text-[#C7CDDC] dark:border-white/[0.08] hover:bg-black/5 dark:hover:bg-white/[0.07] scale-95 opacity-90'
+                  ? 'bg-white text-[#242321] dark:bg-white/[0.04] dark:text-[#C7CDDC] hover:bg-black/5 dark:hover:bg-white/[0.07] scale-95 opacity-90'
                   : categoryFilter
-                  ? 'bg-white/40 text-[#716E68]/50 hover:text-[#242321] dark:bg-white/[0.015] dark:text-[#9CA6BC]/40 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.04] border border-[#E5E2DC]/40 dark:border-white/[0.02] scale-95 opacity-60'
-                  : 'bg-white/60 text-[#716E68] hover:text-[#242321] dark:bg-white/[0.02] dark:text-[#9CA6BC]/70 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.045] border border-[#E5E2DC] dark:border-white/[0.025] scale-95 opacity-85'
+                  ? 'bg-white/40 text-[#716E68]/50 hover:text-[#242321] dark:bg-white/[0.015] dark:text-[#9CA6BC]/40 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.04] scale-95 opacity-60'
+                  : 'bg-white/60 text-[#716E68] hover:text-[#242321] dark:bg-white/[0.02] dark:text-[#9CA6BC]/70 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.045] scale-95 opacity-85'
               }`}
             >
               {/* Day of Week */}
@@ -313,7 +313,7 @@ export function PeriodTimeline({
 
         {/* Lön / Payday Box at the end of the timeline */}
         <div
-          className="flex flex-col items-center justify-center gap-0.5 w-[44px] sm:w-[48px] h-[46px] sm:h-[50px] p-1 rounded-xl bg-black/5 dark:bg-white/[0.04] text-[#242321] dark:text-white border border-[#E5E2DC] dark:border-white/[0.08] select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5"
+          className="flex flex-col items-center justify-center gap-0.5 w-[44px] sm:w-[48px] h-[46px] sm:h-[50px] p-1 rounded-xl bg-black/5 dark:bg-white/[0.04] text-[#242321] dark:text-white border-none select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5 shadow-none"
         >
           <span className="text-[11px] leading-none">💰</span>
           <span className="text-[8px] sm:text-[8.5px] font-medium tracking-wider uppercase">
@@ -328,7 +328,7 @@ export function PeriodTimeline({
           <button
             type="button"
             onClick={() => handleStep('next')}
-            className="pointer-events-auto w-6 h-6 rounded-full bg-white/[0.035] hover:bg-white/[0.07] text-[#C7CDDC] border border-white/[0.035] flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-none"
+            className="pointer-events-auto w-6 h-6 rounded-full bg-white/[0.035] hover:bg-white/[0.07] text-[#C7CDDC] border-none flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-none"
             aria-label="Nästa dag"
             title="Nästa dag"
           >

@@ -20,7 +20,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      className={`bg-white dark:bg-[#191919] rounded-[16px] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-none border border-transparent dark:border-[#383838]/50 ${className}`}
+      className={`bg-white dark:bg-[#1C1C1C] rounded-[16px] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-none border-none ${className}`}
     >
       {Icon && (
         <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-[#1C1C1C] border-none flex items-center justify-center text-[#6E6961] dark:text-[#B8B8B8] mb-3 shrink-0">

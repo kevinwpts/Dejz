@@ -178,7 +178,7 @@ export function SavingsGoalModal({
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder={t('savingGoalExample')}
-                        className="w-full h-[48px] bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
+                        className="w-full h-[48px] bg-black/5 dark:bg-[#222222] border-none rounded-[14px] px-4 text-sm font-semibold text-[#1C1917] dark:text-white placeholder-[#8C867C] dark:placeholder-[#71717A] outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -189,7 +189,7 @@ export function SavingsGoalModal({
                     </label>
                     <div 
                       onClick={() => amountInputRef.current?.focus()}
-                      className="bg-black/5 dark:bg-[#1C1C1C] rounded-[14px] py-6 px-6 flex items-center justify-between transition-all cursor-pointer select-none border border-black/10 dark:border-white/10 focus-within:border-[#1C1917] dark:focus-within:border-white group"
+                      className="bg-black/5 dark:bg-[#222222] rounded-[14px] py-6 px-6 flex items-center justify-between transition-all cursor-pointer select-none border-none group"
                     >
                       <div className="flex-1 flex justify-center translate-x-4">
                         <input

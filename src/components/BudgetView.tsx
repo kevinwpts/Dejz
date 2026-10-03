@@ -325,19 +325,19 @@ export function BudgetView({
               <button
                 type="button"
                 onClick={handleAutoAdaptDown}
-                className="text-[11px] font-bold text-rose-600 dark:text-rose-300 hover:text-rose-700 dark:hover:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-rose-50 dark:bg-rose-500/[0.08] border border-rose-200 dark:border-rose-500/15 transition-all cursor-pointer active:scale-95"
+                className="text-[11px] font-bold text-rose-600 dark:text-rose-300 hover:text-rose-700 dark:hover:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-rose-50 dark:bg-rose-500/[0.08] border-none shadow-none transition-all cursor-pointer active:scale-95"
               >
                 <Sparkles size={11} />
-                Anpassa automatiskt
+                {config.language === 'en' ? 'Auto-adapt' : 'Anpassa automatiskt'}
               </button>
             ) : (
               <button
                 type="button"
                 onClick={handleAutoDistribute}
-                className="text-[11px] font-bold text-[#1C1917] dark:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/20 border border-[#E6E2D8] dark:border-white/10 transition-all cursor-pointer active:scale-95"
+                className="text-[11px] font-bold text-[var(--text-primary)] flex items-center gap-1.5 py-1 px-3 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/20 border-none shadow-none transition-all cursor-pointer active:scale-95"
               >
                 <Sparkles size={11} />
-                Fördela automatiskt
+                {config.language === 'en' ? 'Auto-distribute' : 'Fördela automatiskt'}
               </button>
             )}
 
@@ -352,22 +352,24 @@ export function BudgetView({
                   setConfirmReset(false);
                 }
               }}
-              className={`text-[11px] font-bold flex items-center gap-1.5 py-1 px-3 rounded-full border transition-all cursor-pointer active:scale-95 ${
+              className={`text-[11px] font-bold flex items-center gap-1.5 py-1 px-3 rounded-full border-none shadow-none transition-all cursor-pointer active:scale-95 ${
                 confirmReset 
-                  ? "bg-rose-500/20 border-rose-500/30 text-rose-600 dark:text-rose-400 animate-pulse" 
-                  : "bg-white dark:bg-white/[0.03] border-[#E6E2D8] dark:border-white/[0.05] text-[#6E6961] dark:text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400"
+                  ? "bg-rose-500/20 text-rose-600 dark:text-rose-400 animate-pulse" 
+                  : "bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400"
               }`}
             >
               <RotateCcw size={11} />
-              {confirmReset ? "Klicka igen för att nollställa" : "Nollställ"}
+              {confirmReset 
+                ? (config.language === 'en' ? 'Click again to reset' : 'Klicka igen för att nollställa') 
+                : (config.language === 'en' ? 'Reset' : 'Nollställ')}
             </button>
           </div>
         </div>
 
         {/* Continuous Category List */}
         <div className="space-y-3">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-[#6E6961] dark:text-[var(--text-secondary)] px-1 opacity-50 block">
-            Kategorier ({config.categories?.length || 0})
+          <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1 opacity-60 block">
+            {config.language === 'en' ? 'Categories' : 'Kategorier'} ({config.categories?.length || 0})
           </span>
           
           <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] shadow-none border-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
@@ -387,7 +389,7 @@ export function BudgetView({
                 >
                   {/* Left: Icon, Name, Fixed text */}
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.04] border border-[#E6E2D8] dark:border-white/[0.035] text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/[0.04] border-none shadow-none text-[#1C1917] dark:text-white flex items-center justify-center shrink-0">
                       {isEmojiString(iconName) ? (
                         <span className="text-sm leading-none">{iconName}</span>
                       ) : Icon ? (
@@ -428,7 +430,7 @@ export function BudgetView({
                             });
                             setConfig({ ...config, categories: updatedCategories });
                           }}
-                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
+                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border-none hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
                         >
                           −
                         </button>
@@ -461,7 +463,7 @@ export function BudgetView({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-20 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                            className="w-20 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border-none text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
                           />
                         ) : (
                           <button
@@ -492,7 +494,7 @@ export function BudgetView({
                             });
                             setConfig({ ...config, categories: updatedCategories });
                           }}
-                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border border-[#E6E2D8] dark:border-white/[0.05] hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
+                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border-none hover:bg-black/10 dark:hover:bg-white/[0.07] text-[#1C1917] dark:text-[#A8A8A8] hover:text-black dark:hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
                         >
                           +
                         </button>
@@ -525,7 +527,7 @@ export function BudgetView({
                               e.currentTarget.blur();
                             }
                           }}
-                          className="w-24 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border border-[#1C1917] dark:border-white text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
+                          className="w-24 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border-none text-center text-xs font-bold text-[#1C1917] dark:text-white font-amount tabular-nums outline-none"
                         />
                       ) : (
                         <button
@@ -535,7 +537,7 @@ export function BudgetView({
                             setEditingCategoryName(cat.name);
                             setInlineInputValue("");
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[#1C1917] dark:text-white text-xs font-semibold border border-[#E6E2D8] dark:border-white/[0.06] transition-all cursor-pointer active:scale-95"
+                          className="px-3 py-1.5 rounded-lg bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[#1C1917] dark:text-white text-xs font-semibold border-none transition-all cursor-pointer active:scale-95"
                         >
                           Ange budget
                         </button>
@@ -553,10 +555,10 @@ export function BudgetView({
           <button
             type="button"
             onClick={handleCloseCategoryBudgets}
-            className="w-full h-12 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
+            className="w-full h-12 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-none"
           >
             <Check size={14} strokeWidth={2.5} />
-            Klar, spara budgeten
+            {config.language === 'en' ? 'Done, save budget' : 'Klar, spara budgeten'}
           </button>
         </div>
       </motion.div>

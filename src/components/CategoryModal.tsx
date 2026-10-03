@@ -137,7 +137,7 @@ export function CategoryModal({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSave();
                   }}
-                  className="w-full h-[48px] bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40 rounded-[16px] px-4 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all"
+                  className="w-full h-[48px] bg-black/5 dark:bg-[#222222] border-none rounded-[16px] px-4 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all"
                 />
               </div>
 

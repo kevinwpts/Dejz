@@ -85,7 +85,7 @@ export function ReceiptsView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={config.language === 'sv' ? 'Sök köpställe, kategori eller belopp...' : 'Search merchant, category, or amount...'}
-            className="w-full h-[46px] pl-11 pr-4 bg-white dark:bg-[#1C1C1C] border-none rounded-full text-xs font-semibold placeholder-[#8C867C] dark:placeholder-[#71717A] focus:outline-none shadow-none transition-all text-[#1C1917] dark:text-white"
+            className="w-full h-[46px] pl-11 pr-4 bg-white dark:bg-[#222222] border-none rounded-full text-xs font-semibold placeholder-[#8C867C] dark:placeholder-[#71717A] focus:outline-none shadow-none transition-all text-[#1C1917] dark:text-white"
             id="receipts_search_input"
           />
         </div>

@@ -58,7 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
           />
 
           {/* Modal / Bottom Sheet Card */}
@@ -67,22 +67,22 @@ export const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.98 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`relative w-full ${sizeStyles} bg-white dark:bg-[#1C1C1C] rounded-t-[28px] sm:rounded-[28px] border border-black/[0.08] dark:border-[#383838] shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
+            className={`relative w-full ${sizeStyles} bg-white dark:bg-[#1C1C1C] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Pill */}
-            <div className="w-10 h-1 bg-black/15 dark:bg-white/15 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+            <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-3 shrink-0 sm:hidden" />
 
             {/* Header */}
             {(title || showCloseButton) && (
               <div className="flex items-center justify-between px-5 pt-4 pb-2 shrink-0">
                 <div className="flex flex-col pr-4">
                   {title && (
-                    <h2 className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-white tracking-tight">
+                    <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
                       {title}
                     </h2>
                   )}
                   {subtitle && (
-                    <p className="text-xs text-[#6E6961] dark:text-[#B8B8B8] font-medium mt-0.5">
+                    <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
                       {subtitle}
                     </p>
                   )}

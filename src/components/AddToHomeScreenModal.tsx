@@ -197,7 +197,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-5 bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-5 bg-black/60 backdrop-blur-sm"
           onClick={handleClose}
         >
             <motion.div
@@ -205,11 +205,11 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 15 }}
             transition={{ type: 'spring', damping: 28, stiffness: 360 }}
-            className="bg-white dark:bg-[#1C1C1C] w-full max-w-[420px] rounded-t-[28px] sm:rounded-[26px] p-6 sm:p-7 border-t sm:border border-black/[0.08] dark:border-white/[0.08] shadow-2xl relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7"
+            className="bg-white dark:bg-[#1C1C1C] w-full max-w-[420px] rounded-t-[28px] sm:rounded-[28px] p-6 sm:p-7 border-none shadow-2xl relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Drag Handle for mobile */}
-            <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto -mt-2 mb-4 sm:hidden" />
+            <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-4 sm:hidden shrink-0" />
 
             {/* Close Button */}
             <button 
@@ -232,7 +232,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
 
             {/* Platform Switcher */}
             <div className="flex justify-center mb-6">
-              <div className="inline-flex p-1 bg-[var(--surface-muted)] rounded-[14px] border border-[var(--border-color)]">
+              <div className="inline-flex p-1 bg-[var(--surface-muted)] rounded-[14px] border-none shadow-none">
                 <button
                   type="button"
                   onClick={() => setActivePlatform('ios')}

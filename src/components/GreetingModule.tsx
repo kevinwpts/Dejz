@@ -120,22 +120,22 @@ export function GreetingModule({
 
       {/* Period & Payday Info Modal */}
       {isPeriodInfoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-fade-in select-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
           <div 
             className="fixed inset-0" 
             onClick={() => setIsPeriodInfoOpen(false)} 
           />
-          <div className="relative w-full max-w-[320px] bg-white dark:bg-[#1C1C1C] rounded-[24px] p-5 border border-[#E2DDD4] dark:border-white/[0.1] shadow-2xl space-y-4 z-10 text-left">
+          <div className="relative w-full max-w-[320px] bg-white dark:bg-[#1C1C1C] rounded-[28px] p-5 border-none shadow-2xl space-y-4 z-10 text-left">
             {/* Header */}
-            <div className="flex items-center justify-between pb-1 border-b border-[#E2DDD4]/60 dark:border-white/[0.08]">
-              <div className="flex items-center gap-2 text-[#1C1917] dark:text-white font-semibold text-[15px]">
+            <div className="flex items-center justify-between pb-1 border-none">
+              <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold text-[15px]">
                 <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2.2} />
                 <span>{isEn ? 'Period & Payday' : 'Period & Nästa Lön'}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsPeriodInfoOpen(false)}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[#6D6962] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <X size={16} strokeWidth={2} />
               </button>

@@ -341,9 +341,9 @@ h6 {
   --bg-gradient: #191919;
 
   /* Layer 1: Surface */
-  --surface-color: #191919;
-  --surface-gradient: #191919;
-  --surface-solid: #191919;
+  --surface-color: #1C1C1C;
+  --surface-gradient: #1C1C1C;
+  --surface-solid: #1C1C1C;
 
   /* Layer 2: Surface Raised (Bottom sheets, modals, popups, dropdowns, chips) */
   --surface-raised: #1C1C1C;
@@ -372,14 +372,14 @@ h6 {
   --border-strong: #858585;
   --inner-highlight: transparent;
 
-  --chip-bg: #1C1C1C;
+  --chip-bg: #222222;
   --chip-text: #B8B8B8;
-  --chip-active-bg: #222222;
+  --chip-active-bg: #2A2A2A;
   --chip-active-text: #FFFFFF;
 
-  --transaction-bg: #191919;
-  --card-nested-bg: #1C1C1C;
-  --remaining-today-gradient: #191919;
+  --transaction-bg: #1C1C1C;
+  --card-nested-bg: #222222;
+  --remaining-today-gradient: #1C1C1C;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
 

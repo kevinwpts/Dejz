@@ -149,7 +149,7 @@ export function IconPickerModal({
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Sök bland över 1 000+ stilrena ikoner (t.ex. nässpray, bil, fika)..."
-                className="w-full h-[44px] bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 focus:border-[var(--accent-color)] dark:focus:border-white/40 rounded-[16px] pl-9.5 pr-9 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none transition-all"
+                className="w-full h-[44px] bg-black/5 dark:bg-[#222222] border-none rounded-[16px] pl-9.5 pr-9 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none transition-all"
               />
               {searchQuery && (
                 <button

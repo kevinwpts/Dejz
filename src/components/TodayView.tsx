@@ -399,7 +399,7 @@ export function TodayView({
           {!isTodaySelected && (
             <button
               onClick={handleGoToToday}
-              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white dark:bg-white/[0.04] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.07] border border-[var(--border-color)] dark:border-white/[0.045] backdrop-blur-[18px] text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC] hover:text-black dark:hover:text-white transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
+              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white dark:bg-white/[0.04] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.07] border-none backdrop-blur-[18px] text-xs font-medium text-[#1C1917] dark:text-[#C7CDDC] hover:text-black dark:hover:text-white transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
             >
               <RotateCcw size={11} strokeWidth={1.75} />
               <span>{lang === "en" ? "Today" : "Idag"}</span>

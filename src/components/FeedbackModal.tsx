@@ -77,7 +77,7 @@ export function FeedbackModal({ onClose, onSubmit, t }: FeedbackModalProps) {
                 value={message} 
                 onChange={(e) => setMessage(e.target.value)} 
                 placeholder={t('feedbackPlaceholder')} 
-                className="w-full h-32 bg-black/5 dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 focus:border-[#1C1917] dark:focus:border-white rounded-[14px] px-4 py-3.5 pl-11 text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] resize-none" 
+                className="w-full h-32 bg-black/5 dark:bg-[#222222] border-none rounded-[14px] px-4 py-3.5 pl-11 text-sm font-semibold text-[#1C1917] dark:text-white outline-none transition-all placeholder-[#8C867C] dark:placeholder-[#71717A] resize-none" 
               />
             </div>
 

@@ -47,19 +47,22 @@ export function CalendarModal({
             exit={{ opacity: 0, y: 40, scale: 0.98 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-[#1C1C1C] border-t sm:border border-black/[0.08] dark:border-white/[0.08] w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] font-sans"
+            className="bg-white dark:bg-[#1C1C1C] border-none w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] font-sans"
           >
+            {/* Mobile Drag Handle */}
+            <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-3 sm:hidden shrink-0" />
+
             {/* Header */}
-            <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
+            <div className="flex items-center justify-between pb-3.5 border-none shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] border border-black/5 dark:border-white/[0.06] flex items-center justify-center text-[#1C1917] dark:text-white">
+                <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] border-none flex items-center justify-center text-[var(--text-primary)]">
                   <CalendarIcon size={16} strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#1C1917] dark:text-white leading-tight">
+                  <h3 className="text-base font-bold text-[var(--text-primary)] leading-tight">
                     {language === 'en' ? 'Select period' : 'Välj period'}
                   </h3>
-                  <p className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] mt-0.5">
+                  <p className="text-xs font-semibold text-[var(--text-secondary)] mt-0.5">
                     {periodName || (language === 'en' ? 'Choose period for analysis' : 'Välj period för analys')}
                   </p>
                 </div>

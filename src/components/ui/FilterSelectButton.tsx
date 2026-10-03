@@ -34,7 +34,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
       }}
       className={`h-11 px-3.5 rounded-2xl transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer select-none text-left active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none font-sans border-none shadow-none ${
         variant === 'cardDarker'
-          ? 'bg-white dark:bg-[#191919] text-[#211F1C] dark:text-white hover:bg-[#F9F8F6] dark:hover:bg-[#222222]'
+          ? 'bg-white dark:bg-[#1C1C1C] text-[#211F1C] dark:text-white hover:bg-[#F9F8F6] dark:hover:bg-[#222222]'
           : 'bg-white dark:bg-[#1C1C1C] text-[#211F1C] dark:text-white hover:bg-[#F9F8F6] dark:hover:bg-[#222222]'
       } ${className}`}
     >

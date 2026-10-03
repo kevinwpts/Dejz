@@ -80,7 +80,7 @@ export function UniversalPeriodSelector({
 
   if (variant === 'header') {
     return (
-      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border-none backdrop-blur-[16px] bg-white dark:bg-[#191919] text-[#1C1917] dark:text-white shadow-none">
+      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border-none backdrop-blur-[16px] bg-white dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white shadow-none">
         <button 
           type="button"
           onClick={handlePrevPeriod}
@@ -148,7 +148,7 @@ export function UniversalPeriodSelector({
       <button 
         type="button"
         onClick={handleCenterClick}
-        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#191919] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.08] border-none transition-all cursor-pointer group select-none active:scale-95 shadow-none"
+        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-[#1C1C1C] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.08] border-none transition-all cursor-pointer group select-none active:scale-95 shadow-none"
       >
         <CalendarIcon size={13} className="text-[#6E6961] dark:text-[#A8A8A8] group-hover:text-[#1C1917] dark:group-hover:text-white transition-colors" />
         <span className="text-xs sm:text-[13px] font-bold uppercase tracking-wider text-[#1C1917] dark:text-white">

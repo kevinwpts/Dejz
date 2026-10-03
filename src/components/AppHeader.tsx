@@ -130,7 +130,7 @@ export function AppHeader({
             aria-label="Profil"
             title="Profil"
           >
-            <div className={`w-8 h-8 rounded-full overflow-hidden border border-[#E2DDD4] dark:border-white/[0.12] bg-white dark:bg-[#222222] flex items-center justify-center ${
+            <div className={`w-8 h-8 rounded-full overflow-hidden border-none bg-white dark:bg-[#222222] flex items-center justify-center ${
               activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
             }`}>
               {avatarUrl ? (
