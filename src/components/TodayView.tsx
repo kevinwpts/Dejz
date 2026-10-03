@@ -273,7 +273,7 @@ export function TodayView({
   if (!stats) return null;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-4 sm:pt-6 pb-32 space-y-6 font-sans">
+    <div className="space-y-6 font-sans pb-32">
       {/* 1. Greeting & Hero Module */}
       <GreetingModule
         userName={userName}
