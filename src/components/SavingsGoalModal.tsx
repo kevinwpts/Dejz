@@ -118,7 +118,7 @@ export function SavingsGoalModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-            className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0 font-sans text-[var(--text-primary)]"
+            className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-none relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0 font-sans text-[var(--text-primary)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Handle on Mobile */}
@@ -211,7 +211,7 @@ export function SavingsGoalModal({
             </div>
 
             {/* Action Footer */}
-            <div className="shrink-0 p-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom)+0.5rem)] sm:pb-5 border-t border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1C] space-y-2.5">
+            <div className="shrink-0 p-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom)+0.5rem)] sm:pb-5 border-t border-black/[0.06] dark:border-white/[0.08] bg-[var(--bg-color)] space-y-2.5">
               <button 
                 type="button"
                 onClick={handleConfirm} 
