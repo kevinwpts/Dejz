@@ -16,5 +16,6 @@ export * from './SmartInput';
 export * from './SelectionRow';
 export * from './BottomSheetHeader';
 export * from './MerchantLogo';
+export * from './Skeleton';
 
 

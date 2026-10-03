@@ -83,6 +83,7 @@ import { PublicLegalPage, LegalDocType } from "./components/PublicLegalPage";
 import { PullToRefresh } from "./components/PullToRefresh";
 import { Session } from "@supabase/supabase-js";
 import { ToastContainer, ToastMessage, ToastType } from "./components/Toast";
+import { AppSkeleton } from "./components/ui/Skeleton";
 import { ConfirmModal } from "./components/ConfirmModal";
 import { ReceiptCameraModal } from "./components/ReceiptCameraModal";
 
@@ -4198,15 +4199,8 @@ export default function App() {
 
   if (isLoading || !config || !stats) {
     return (
-      <div className="min-h-dvh font-sans text-[var(--text-primary)] relative pt-[env(safe-area-inset-top)] bg-[var(--bg-color)]">
-        <div className="min-h-dvh flex items-center justify-center relative z-10">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 text-[var(--text-secondary)] animate-spin" />
-            <p className="text-sm text-[var(--text-secondary)] font-medium">
-              Laddar din ekonomi...
-            </p>
-          </div>
-        </div>
+      <div className="relative">
+        <AppSkeleton language={config?.language || 'sv'} />
 
         {isResetPasswordOpen && (
           <ResetPasswordModal
