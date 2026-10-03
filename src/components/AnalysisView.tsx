@@ -344,9 +344,6 @@ export function AnalysisView({
           <h2 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Distribution' : 'Fördelning'}
           </h2>
-          <span className="text-[13px] font-normal text-[var(--text-secondary)]">
-            {categoryData.filter(c => c.value > 0).length} {isEn ? 'categories' : 'kategorier'}
-          </span>
         </div>
 
         {chartItems.length > 0 ? (
@@ -412,7 +409,7 @@ export function AnalysisView({
       <div className="space-y-3 pb-8">
         <div className="flex items-center justify-between px-1">
           <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
-            {t('categories')} ({categoryData.length})
+            {t('categories')} ({categoryData.filter(c => c.value > 0).length})
           </h3>
         </div>
 
