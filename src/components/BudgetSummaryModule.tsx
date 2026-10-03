@@ -221,17 +221,17 @@ export function BudgetSummaryModule({
           </div>
 
           {/* Largest Category */}
-          <div className="p-3 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.03] flex items-center justify-between min-w-0">
-            <div className="min-w-0 pr-1">
-              <span className="text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block truncate">
+          <div className="p-3 rounded-[14px] bg-black/[0.02] dark:bg-white/[0.03] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 min-w-0">
+            <div className="min-w-0">
+              <span className="text-[10px] sm:text-[10.5px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block truncate">
                 {isEn ? 'Largest category' : 'Största kategori'}
               </span>
-              <span className="text-[14px] sm:text-[15px] font-bold text-[var(--text-primary)] truncate block">
+              <span className="text-[13px] sm:text-[15px] font-bold text-[var(--text-primary)] truncate block">
                 {largestCategory.name || '—'}
               </span>
             </div>
             {largestCategory.amount > 0 && (
-              <span className="text-[13px] font-medium font-amount tabular-nums text-[var(--text-secondary)] shrink-0">
+              <span className="text-[12px] sm:text-[13px] font-medium font-amount tabular-nums text-[var(--text-secondary)] shrink-0 sm:text-right">
                 {formatAmount(Math.round(largestCategory.amount), config.language)} {config.currency || 'kr'}
               </span>
             )}
