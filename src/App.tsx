@@ -1514,15 +1514,10 @@ export default function App() {
         }
       }
 
-      document.documentElement.classList.remove("dark", "light", "black-theme");
-      document.body.classList.remove("dark", "light", "black-theme");
+      document.documentElement.classList.remove("dark", "light");
+      document.body.classList.remove("dark", "light");
 
-      const isBlack = config?.themeMode === 'black';
-
-      if (isBlack) {
-        document.documentElement.classList.add("dark", "black-theme");
-        document.body.classList.add("dark", "black-theme");
-      } else if (isDark) {
+      if (isDark) {
         document.documentElement.classList.add("dark");
         document.body.classList.add("dark");
       } else {
@@ -1533,7 +1528,7 @@ export default function App() {
       const userThemeHex = config?.themeColor || '#635BFF';
       applyThemeColor(userThemeHex, isDark);
 
-      const themeColor = isBlack ? "#0A0A0A" : (isDark ? "#191919" : "#FFFFFF");
+      const themeColor = isDark ? "#191919" : "#FFFFFF";
       document.documentElement.style.backgroundColor = themeColor;
       document.body.style.backgroundColor = themeColor;
 
@@ -4244,7 +4239,7 @@ export default function App() {
 
       {/* Subtle top ambient gradient in accent color */}
       <div 
-        className="fixed inset-x-0 top-0 h-[280px] pointer-events-none z-0 bg-gradient-to-b from-[var(--accent-color)]/7 via-[var(--accent-color)]/2 to-transparent transition-all duration-500"
+        className="fixed inset-x-0 top-0 h-[280px] pointer-events-none z-0 bg-gradient-to-b from-[rgba(var(--user-accent-rgb),0.07)] via-[rgba(var(--user-accent-rgb),0.02)] to-transparent transition-all duration-500"
         aria-hidden="true"
       />
 

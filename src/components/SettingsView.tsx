@@ -319,19 +319,18 @@ export function SettingsView({
           <label className="text-xs font-semibold text-[#6E6961] dark:text-[#A8A8A8] ml-1">
             Utseendeläge
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-3 gap-2.5">
             {[
               { id: 'system', label: isEn ? 'System' : 'System', icon: <Monitor size={18} /> },
               { id: 'light', label: isEn ? 'Light' : 'Ljust', icon: <Sun size={18} /> },
               { id: 'dark', label: isEn ? 'Dark' : 'Mörkt', icon: <Moon size={18} /> },
-              { id: 'black', label: isEn ? 'Pitch Black' : 'Svart (OLED)', icon: <div className="w-4 h-4 rounded-full bg-black dark:bg-white border border-black/20 dark:border-white/20" /> },
             ].map((mode) => {
               const isSelected = config.themeMode === mode.id || (!config.themeMode && mode.id === 'system');
               return (
                 <button
                   key={mode.id}
                   onClick={() => {
-                    const isDark = mode.id === 'dark' || mode.id === 'black' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                    const isDark = mode.id === 'dark' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                     setConfig({ ...config, themeMode: mode.id as any, darkMode: isDark });
                   }}
                   className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[18px] border-none transition-all cursor-pointer ${
