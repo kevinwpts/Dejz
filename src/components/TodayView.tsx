@@ -254,8 +254,8 @@ export function TodayView({
       .filter((cat: any) => {
         if (!config?.hideEmptyCategories) return true;
         const rawCategory = (config.categories || []).find((c: any) => c.name === cat.name);
-        const hasExplicitBudget = rawCategory && rawCategory.budget !== undefined && rawCategory.budget !== null && Number(rawCategory.budget) > 0;
-        return cat.spent > 0 || hasExplicitBudget;
+        const userBudget = rawCategory && rawCategory.budget !== undefined && rawCategory.budget !== null && rawCategory.budget !== '' ? Number(rawCategory.budget) : 0;
+        return cat.spent > 0 || userBudget > 0;
       })
       .sort((a: any, b: any) => {
         const aOver = a.hasBudget && a.isOverBudget;
