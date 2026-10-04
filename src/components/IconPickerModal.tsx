@@ -105,15 +105,15 @@ export function IconPickerModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md"
+        className="fixed inset-0 z-[130] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md"
         onClick={onClose}
       >
         <motion.div
-          initial={{ scale: 0.94, opacity: 0, y: 16 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.94, opacity: 0, y: 16 }}
-          transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-          className="bg-[var(--bg-color)] w-full max-w-lg rounded-[28px] border-none shadow-2xl overflow-hidden flex flex-col max-h-[88vh] font-sans"
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+          className="bg-[var(--bg-color)] w-full max-w-2xl rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl overflow-hidden flex flex-col h-[92vh] sm:h-[90vh] font-sans"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}

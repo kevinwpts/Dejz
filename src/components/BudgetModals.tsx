@@ -759,20 +759,20 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         {/* Compact Icon Selector Popover */}
         <AnimatePresence>
           {showIconSelector && (
-            <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
+            <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setShowIconSelector(false)}
-                className="absolute inset-0 bg-black/60"
+                className="absolute inset-0 bg-black/60 backdrop-blur-xs"
               />
               <motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[28px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                initial={{ y: '100%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: '100%', opacity: 0 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[28px] sm:rounded-[28px] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]">
                   <div>
@@ -1698,20 +1698,20 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         {/* Compact Icon Selector Popover */}
         <AnimatePresence>
           {showIconSelector && (
-            <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
+            <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setShowIconSelector(false)}
-                className="absolute inset-0 bg-black/60"
+                className="absolute inset-0 bg-black/60 backdrop-blur-xs"
               />
               <motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[28px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                initial={{ y: '100%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: '100%', opacity: 0 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[28px] sm:rounded-[28px] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
                   <div>
@@ -2408,20 +2408,20 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         {/* Compact Icon Selector Popover */}
         <AnimatePresence>
           {showIconSelector && (
-            <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
+            <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setShowIconSelector(false)}
-                className="absolute inset-0 bg-black/60"
+                className="absolute inset-0 bg-black/60 backdrop-blur-xs"
               />
               <motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[28px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                initial={{ y: '100%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: '100%', opacity: 0 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[28px] sm:rounded-[28px] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]">
                   <div>
