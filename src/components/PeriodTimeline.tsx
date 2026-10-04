@@ -281,7 +281,7 @@ export function PeriodTimeline({
             >
               {/* Day of Week */}
               <span
-                className={`text-[9.5px] sm:text-[10px] tracking-wider uppercase leading-none font-medium ${
+                className={`text-[8px] sm:text-[8.5px] tracking-wider uppercase leading-none font-medium ${
                   isSelected
                     ? 'text-[var(--text-on-accent)]'
                     : hasCategoryMatch
@@ -316,7 +316,7 @@ export function PeriodTimeline({
           className="flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[54px] h-[50px] sm:h-[56px] p-1.5 rounded-2xl bg-black/5 dark:bg-white/[0.04] text-[#242321] dark:text-white border-none select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5 shadow-none"
         >
           <span className="text-[12px] leading-none">💰</span>
-          <span className="text-[9px] sm:text-[9.5px] font-medium tracking-wider uppercase">
+          <span className="text-[8px] sm:text-[8.5px] font-medium tracking-wider uppercase">
             {isEn ? 'Payday' : 'Lön'}
           </span>
         </div>

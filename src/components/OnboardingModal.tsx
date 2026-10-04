@@ -722,7 +722,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
                             {s.paydayQuestion}
                           </h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-normal">
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
                             {s.paydayDesc}
                           </p>
                         </div>
@@ -912,7 +912,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                           <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
                             {s.expensesQuestion}
                           </h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-normal">
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
                             {s.expensesDesc}
                           </p>
                         </div>

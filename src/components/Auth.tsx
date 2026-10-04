@@ -199,11 +199,11 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               <Mail size={28} />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
                 {t('checkEmailTitle' as any)}
               </h2>
-              <p className="text-[var(--text-secondary)] text-sm font-medium leading-normal max-w-[320px] mx-auto">
+              <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
                 {t('checkEmailDesc' as any)}
               </p>
             </div>
@@ -227,11 +227,11 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               <CheckCircle2 size={30} />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
                 {t('checkInboxTitle' as any)}
               </h2>
-              <p className="text-[var(--text-secondary)] text-sm font-medium leading-normal max-w-[320px] mx-auto">
+              <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
                 {t('checkInboxDesc' as any, { email })}
               </p>
             </div>
