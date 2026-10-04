@@ -21,7 +21,7 @@ import { getTransactionDominantColor, extractDominantColorFromImage } from '../u
 import { resolveEntityVisual } from '../utils/resolver';
 import { feedback } from '../utils/feedback';
 
-function hexToRgba(hex: string, alpha: number): string {
+function _hexToRgba(hex: string, alpha: number): string {
   if (!hex) return `rgba(124, 58, 237, ${alpha})`;
   if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
   let clean = hex.replace('#', '');
@@ -75,7 +75,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
 
 
 
-  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
+  const [_brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
 
   useEffect(() => {
     const initial = getTransactionDominantColor(expenseCompatible as any, config);
@@ -864,7 +864,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
 
 
-  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
+  const [_brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
 
   useEffect(() => {
     const initial = getTransactionDominantColor(expenseCompatible as any, config);
@@ -1814,7 +1814,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
     timestamp: Date.now()
   };
 
-  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
+  const [_brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
 
   useEffect(() => {
     const initial = getTransactionDominantColor(expenseCompatible as any, config);

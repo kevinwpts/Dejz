@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins } from 'lucide-react';
+import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -363,6 +362,34 @@ export function ProfileView({
               </div>
               <p className="text-[11px] text-[var(--text-secondary)] opacity-70 leading-relaxed pl-12">
                 {t('showFixedExpensesInCalendarDesc')}
+              </p>
+            </div>
+            <div className="py-3.5 px-4 space-y-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-[#222222] text-[#1C1917] dark:text-white border-none flex items-center justify-center shrink-0">
+                    <EyeOff size={16} strokeWidth={1.8} />
+                  </div>
+                  <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight">
+                    {t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
+                  </span>
+                </div>
+                <ToggleSwitch 
+                  isOn={Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'))} 
+                  onToggle={() => {
+                    const currentVal = Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'));
+                    const nextVal = !currentVal;
+                    try {
+                      localStorage.setItem('dejz_hide_empty_categories', nextVal ? 'true' : 'false');
+                    } catch (err) {
+                      void err;
+                    }
+                    setConfig({ ...config, hideEmptyCategories: nextVal });
+                  }} 
+                />
+              </div>
+              <p className="text-[11px] text-[var(--text-secondary)] opacity-70 leading-relaxed pl-12">
+                {t('hideEmptyCategoriesDesc' as any) || 'Dölj kategorier som inte har några utgifter eller aktiv budget under perioden.'}
               </p>
             </div>
           </div>

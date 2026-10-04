@@ -273,10 +273,7 @@ export function SettingsView({
     ];
 
     return (
-      <div className="space-y-3 w-full py-2">
-        <h3 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1">
-          {config.language === 'en' ? 'Select language' : 'Välj språk'}
-        </h3>
+      <div className="w-full py-2">
         <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {languages.map((l) => {
             const isSelected = config.language === l.code;
@@ -422,11 +419,7 @@ export function SettingsView({
     const activeCurrencyCode = config.currencyCode || (config.currency === 'kr' ? 'SEK' : PRESET_CURRENCIES.find(p => p.symbol === config.currency)?.code || 'SEK');
 
     return (
-      <div className="space-y-3 w-full py-2">
-        <h3 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1">
-          {isEn ? 'Select currency' : 'Välj valuta'}
-        </h3>
-
+      <div className="w-full py-2">
         <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrencyCode === c.code;
@@ -473,10 +466,7 @@ export function SettingsView({
     <div className="space-y-6 font-sans pb-12">
        <div>
         {activeSection === 'salary' && (
-          <div className="space-y-3 w-full py-2">
-            <h3 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1">
-              {config.language === 'en' ? 'Payday & period' : 'Lönedag & period'}
-            </h3>
+          <div className="w-full py-2 space-y-4">
             <div className="bg-[var(--surface-color)] p-5 rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-5">
               
               {/* Payday Setting Row */}
@@ -514,31 +504,6 @@ export function SettingsView({
                     isOn={!!config.paydayBeforeWeekend}
                     onToggle={() => {
                       setConfig({ ...config, paydayBeforeWeekend: !config.paydayBeforeWeekend });
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Hide Empty Categories Setting */}
-              <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.04]">
-                <div className="flex items-center justify-between p-1">
-                  <div className="flex flex-col pr-4">
-                    <span className="text-xs font-semibold text-[var(--text-primary)]">
-                      {t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
-                    </span>
-                    <span className="text-[11px] text-[var(--text-secondary)] mt-0.5 font-medium">
-                      {t('hideEmptyCategoriesDesc' as any) || 'Dölj kategorier som inte har några utgifter eller aktiv budget under perioden.'}
-                    </span>
-                  </div>
-                  <ToggleSwitch
-                    isOn={Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'))}
-                    onToggle={() => {
-                      const currentVal = Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'));
-                      const nextVal = !currentVal;
-                      try {
-                        localStorage.setItem('dejz_hide_empty_categories', nextVal ? 'true' : 'false');
-                      } catch {}
-                      setConfig({ ...config, hideEmptyCategories: nextVal });
                     }}
                   />
                 </div>

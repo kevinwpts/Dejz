@@ -1,8 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-
-import { Check, Sparkles, RotateCcw, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, MoreVertical, ChevronDown } from 'lucide-react';
-import { ICON_MAP, isEmojiString, getCategoryIconName } from '../utils/icons';
+import { Check, Sparkles, RotateCcw, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, MoreVertical } from 'lucide-react';
+import { isEmojiString, getCategoryIconName } from '../utils/icons';
 import { CategoryIcon } from './CategoryIcon';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';

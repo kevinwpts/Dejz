@@ -25,7 +25,7 @@ interface TransactionViewModalProps {
   config: Config;
 }
 
-function hexToRgba(hex: string, alpha: number): string {
+function _hexToRgba(hex: string, alpha: number): string {
   if (!hex) return `rgba(124, 58, 237, ${alpha})`;
   if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
   let clean = hex.replace('#', '');
@@ -49,7 +49,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReceiptLightbox, setShowReceiptLightbox] = useState(false);
-  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(transaction, config));
+  const [_brandColor, setBrandColor] = useState(() => getTransactionDominantColor(transaction, config));
 
   useEffect(() => {
     const initial = getTransactionDominantColor(transaction, config);

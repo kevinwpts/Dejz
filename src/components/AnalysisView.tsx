@@ -4,7 +4,6 @@ import { ChevronDown, LayoutGrid, TrendingUp, Calendar } from 'lucide-react';
 import { Transaction, FixedExpense, Config, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
-import { TransactionLogo } from './TransactionLogo';
 import { EmptyState } from './EmptyState';
 import { BudgetSummaryModule } from './BudgetSummaryModule';
 import { FilterSelectButton, FilterMenuModal } from './ui';

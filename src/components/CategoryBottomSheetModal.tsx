@@ -121,7 +121,7 @@ export function CategoryBottomSheetModal({
   const iconKey = categoryData?.iconName || matchedCategory?.icon || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');
   const IconComponent = ICON_MAP[iconKey] || ICON_MAP['Tag'];
 
-  const spentPct = useMemo(() => {
+  const _spentPct = useMemo(() => {
     if (!categoryData?.hasBudget || !categoryData?.budget || categoryData.budget <= 0) return 0;
     return Math.min(100, Math.round((categoryData.spent / categoryData.budget) * 100));
   }, [categoryData]);
