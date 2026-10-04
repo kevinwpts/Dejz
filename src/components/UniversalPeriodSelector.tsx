@@ -80,7 +80,7 @@ export function UniversalPeriodSelector({
 
   if (variant === 'header') {
     return (
-      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-[16px] bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] shadow-none">
+      <div className="inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-1 sm:px-1.5 h-8 sm:h-9 transition-all select-none border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-[16px] bg-[var(--surface-color)] text-[var(--text-primary)] shadow-none">
         <button 
           type="button"
           onClick={handlePrevPeriod}
@@ -148,7 +148,7 @@ export function UniversalPeriodSelector({
       <button 
         type="button"
         onClick={handleCenterClick}
-        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[14px] bg-white dark:bg-[#1C1C1C] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer group select-none active:scale-95 shadow-none"
+        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer group select-none active:scale-95 shadow-none"
       >
         <CalendarIcon size={13} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
         <span className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">

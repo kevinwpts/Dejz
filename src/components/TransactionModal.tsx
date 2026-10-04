@@ -648,7 +648,7 @@ export function TransactionModal({
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               aria-label={t('close')}
             >
               <X size={15} strokeWidth={2.2} />
@@ -690,7 +690,7 @@ export function TransactionModal({
           )}
 
           {/* 1. Main Hero Card: Icon + Merchant & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[22px] bg-[var(--surface-color)] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
@@ -753,7 +753,7 @@ export function TransactionModal({
                 setActiveSplitIndex(null);
                 setIsCategoryPickerOpen(true);
               }}
-              className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+              className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('category')}
@@ -781,7 +781,7 @@ export function TransactionModal({
 
             {/* Date Grid Card: Simplified, no redundant left text */}
             <div 
-              className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] transition-all flex items-center justify-between min-h-[76px]"
+              className="p-4 rounded-[20px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]"
             >
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('date')}
@@ -845,7 +845,7 @@ export function TransactionModal({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden p-3 bg-white dark:bg-[#1C1C1C] rounded-[20px]"
+                className="overflow-hidden p-3 bg-[var(--surface-color)] rounded-[20px]"
               >
                 <CalendarWidget 
                   calendarDays={calendarDays}
@@ -861,7 +861,7 @@ export function TransactionModal({
           {/* 3. Grid for Note and Attachments */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Note Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] flex flex-col justify-between">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] flex flex-col justify-between">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {t('ownNote')}
               </span>
@@ -888,7 +888,7 @@ export function TransactionModal({
             </div>
 
             {/* Receipt Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] flex flex-col justify-between">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] flex flex-col justify-between">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {currentLang === 'en' ? 'Receipt / Document' : 'Bifogat kvitto'}
               </span>
@@ -959,7 +959,7 @@ export function TransactionModal({
 
           {/* Category Split toggle if expense */}
           {type === 'expense' && splits.length === 0 && (
-            <div className="p-3.5 bg-white dark:bg-[#1C1C1C] rounded-[18px] flex items-center justify-between">
+            <div className="p-3.5 bg-[var(--surface-color)] rounded-[18px] flex items-center justify-between">
               <span className="text-[12px] font-medium text-[var(--text-secondary)]">
                 {currentLang === 'en' ? 'Split across multiple categories' : 'Dela upp i fler kategorier'}
               </span>
@@ -987,7 +987,7 @@ export function TransactionModal({
                   <motion.div 
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
-                    className="space-y-6 bg-white dark:bg-[#1C1C1C] p-4 rounded-[22px] border-none shadow-none overflow-hidden"
+                    className="space-y-6 bg-[var(--surface-color)] p-4 rounded-[22px] border-none shadow-none overflow-hidden"
                   >
                     {/* Splits List with Sliders */}
                     <div className="space-y-6">

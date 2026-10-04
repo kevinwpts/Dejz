@@ -334,7 +334,7 @@ export function AnalysisView({
       />
 
       {/* DONUT DIAGRAM & FÖRDELNING */}
-      <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-6">
+      <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-6">
         <div className="flex items-center justify-between px-0.5">
           <h2 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Distribution' : 'Fördelning'}
@@ -409,7 +409,7 @@ export function AnalysisView({
         </div>
 
         {categoryData.length > 0 ? (
-          <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+          <div className="bg-[var(--surface-color)] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               

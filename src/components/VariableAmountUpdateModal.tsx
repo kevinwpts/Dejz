@@ -70,7 +70,7 @@ export function VariableAmountUpdateModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 26, stiffness: 220 }}
-            className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0 font-sans text-[var(--text-primary)]"
+            className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-none relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0 font-sans text-[var(--text-primary)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Handle on Mobile */}
@@ -78,7 +78,7 @@ export function VariableAmountUpdateModal({
 
             {/* Clean Header */}
             <div className="px-6 pt-3 sm:pt-4 pb-3 grid grid-cols-[40px_1fr_40px] items-center shrink-0 border-b border-black/[0.06] dark:border-white/[0.08]">
-               <div className="w-9 h-9 bg-black/5 dark:bg-[#222222] border border-black/10 dark:border-white/10 rounded-full flex items-center justify-center shadow-none shrink-0 overflow-hidden">
+               <div className="w-9 h-9 bg-[var(--surface-color)] rounded-full flex items-center justify-center shadow-none shrink-0 overflow-hidden border-none">
                  <BudgetItemLogo item={item} type={item.budgetType === 'income' ? 'income' : 'expense'} config={config} />
                </div>
                <div className="flex flex-col items-center overflow-hidden px-2 text-center">
@@ -93,7 +93,7 @@ export function VariableAmountUpdateModal({
                  <button
                    type="button"
                    onClick={onClose}
-                   className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                   className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer border-none shadow-none"
                    aria-label={t('close')}
                  >
                    <X size={16} strokeWidth={2} />

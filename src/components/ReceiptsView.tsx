@@ -54,7 +54,7 @@ export function ReceiptsView({
     >
       {/* Stats Summary Panel */}
       {receiptTransactions.length > 0 && (
-        <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] p-5 border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-2">
+        <div className="overflow-hidden rounded-[22px] bg-[var(--surface-color)] p-5 border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold font-display uppercase tracking-wider text-[var(--text-tertiary)]">
               {config.language === 'sv' ? 'Sammanställning' : 'Summary'}
@@ -104,7 +104,7 @@ export function ReceiptsView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={() => onViewTransaction(item)}
-                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-white dark:bg-[#1C1C1C] rounded-[14px] shadow-none border border-black/[0.06] dark:border-white/[0.08] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.98] transition-all cursor-pointer"
+                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-[var(--surface-color)] rounded-[14px] shadow-none border border-black/[0.06] dark:border-white/[0.08] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.98] transition-all cursor-pointer"
                   id={`receipt_item_${item.id}`}
                 >
                   <div className="flex items-center gap-4 min-w-0">

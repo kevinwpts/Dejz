@@ -130,20 +130,9 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Smooth, Seamless Ambient Brand Color Glow adapted to app background */}
-        <div 
-          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
-          style={{
-            background: `
-              radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.08)} 0%, var(--bg-color) 60%)
-            `
-          }}
-        />
-
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
@@ -165,7 +154,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                   if (typeof feedback?.light === 'function') feedback.light();
                   onClose();
                 }} 
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
                 title={t('close')}
                 aria-label={t('close')}
               >
@@ -280,7 +269,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 </div>
                 <div className="flex flex-wrap justify-end gap-1.5">
                   {(transaction.tags || []).map((tag, index) => (
-                    <span key={index} className="bg-black/5 dark:bg-[#1C1C1C] text-[var(--text-primary)] px-2.5 py-1 rounded-[8px] text-[11px] font-medium">
+                    <span key={index} className="bg-[var(--surface-color)] text-[var(--text-primary)] px-2.5 py-1 rounded-[8px] text-[11px] font-medium border-none shadow-none">
                       {tag}
                     </span>
                   ))}
@@ -409,7 +398,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(transaction);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+            className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
           >
             <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
             <span>{t('edit')}</span>
@@ -421,7 +410,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               if (typeof feedback?.light === 'function') feedback.light();
               onDuplicate(transaction);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+            className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
             title={t('duplicate')}
             aria-label={t('duplicate')}
           >
@@ -435,7 +424,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }} 
-              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               title={config.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
             >

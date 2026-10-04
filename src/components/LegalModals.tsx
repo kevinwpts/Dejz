@@ -164,12 +164,12 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="relative w-full max-w-lg bg-white dark:bg-[#1C1C1C] max-h-[85vh] sm:max-h-[90vh] mt-[env(safe-area-inset-top,0px)] rounded-t-[28px] sm:rounded-[28px] border-t sm:border border-black/[0.08] dark:border-white/[0.08] overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-2xl font-sans"
+        className="relative w-full max-w-lg bg-[var(--bg-color)] max-h-[85vh] sm:max-h-[90vh] mt-[env(safe-area-inset-top,0px)] rounded-t-[28px] sm:rounded-[28px] border-none overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-2xl font-sans"
       >
             {/* Header */}
             <div className="p-5 sm:p-6 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[14px] bg-black/5 dark:bg-[#222222] flex items-center justify-center border border-black/[0.06] dark:border-white/[0.08]">
+                <div className="w-10 h-10 rounded-[14px] bg-[var(--surface-color)] flex items-center justify-center border-none">
                   {getIcon()}
                 </div>
                 <div>
@@ -180,7 +180,7 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer border-none shadow-none"
                 aria-label="Stäng"
               >
                 <X size={16} strokeWidth={2} />

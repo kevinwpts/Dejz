@@ -48,7 +48,7 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
             <button
               type="button"
               onClick={handleDismiss}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center justify-center shrink-0 cursor-pointer"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center justify-center shrink-0 cursor-pointer border-none shadow-none"
               title={t('close') || 'Stäng'}
             >
               <X size={17} strokeWidth={2.2} />

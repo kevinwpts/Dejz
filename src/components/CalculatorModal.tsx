@@ -111,7 +111,7 @@ export function CalculatorModal({ _isOpen, onClose, _t }: CalculatorModalProps) 
                 <button 
                   type="button"
                   onClick={onClose} 
-                  className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                  className="w-8 h-8 flex items-center justify-center bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer border-none shadow-none"
                 >
                   <X size={17} strokeWidth={2.2} />
                 </button>

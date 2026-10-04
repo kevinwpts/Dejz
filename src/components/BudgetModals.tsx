@@ -37,6 +37,17 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(124, 58, 237, ${alpha})`;
 }
 
+function getFrequencyLabel(freq: Frequency | string | undefined, t: (key: TranslationKey) => string): string {
+  if (!freq) return t('freq_monthly' as TranslationKey);
+  const foundKey = (Object.keys(Frequency) as Array<keyof typeof Frequency>).find(
+    (k) => Frequency[k] === freq || k.toLowerCase() === String(freq).toLowerCase()
+  );
+  if (foundKey) {
+    return t(`freq_${foundKey.toLowerCase()}` as TranslationKey);
+  }
+  return String(freq);
+}
+
 // --- Income View Modal ---
 
 interface IncomeViewModalProps {
@@ -120,21 +131,9 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Smooth, Seamless Ambient Brand Color Glow adapted to app background */}
-        <div 
-          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
-          style={{
-            background: `
-              radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.08)} 0%, var(--bg-color) 60%)
-            `
-          }}
-        />
-
-
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
@@ -156,7 +155,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                   if (typeof feedback?.light === 'function') feedback.light();
                   onClose();
                 }} 
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
                 title={t('close')}
                 aria-label={t('close')}
               >
@@ -254,7 +253,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(income);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+            className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
           >
             <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
             <span>{t('edit')}</span>
@@ -266,7 +265,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               if (typeof feedback?.light === 'function') feedback.light();
               setShowDeleteConfirm(true);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+            className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
             title={config.language === 'en' ? 'Delete' : 'Ta bort'}
             aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
           >
@@ -434,7 +433,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               aria-label={t('close')}
             >
               <X size={15} strokeWidth={2.2} />
@@ -442,7 +441,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[22px] bg-[var(--surface-color)] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
@@ -504,7 +503,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 if (typeof feedback?.light === 'function') feedback.light();
                 setIsCategorySelectorOpen(true);
               }}
-              className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+              className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('category')}
@@ -531,7 +530,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             </div>
 
             {/* Arrival Day Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('arrivalDay')}
               </span>
@@ -560,7 +559,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           {/* 3. Grid for Frequency & Type */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Frequency Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('frequency')}
               </span>
@@ -569,7 +568,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   <Repeat size={14} strokeWidth={2.2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
-                  {t(`freq_${frequency.toLowerCase()}` as TranslationKey)}
+                  {getFrequencyLabel(frequency, t)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
@@ -588,7 +587,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             </div>
 
             {/* Type: Fixed / Variable Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] transition-all flex items-center justify-between min-h-[76px]">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('type')}
               </span>
@@ -612,7 +611,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           {/* 4. Grid for Start Month (if applicable) & Note */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {frequency !== Frequency.MONTHLY && (
-              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('startMonthLabel')}
                 </span>
@@ -646,7 +645,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             )}
 
             {/* Note Card */}
-            <div className={`p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] flex flex-col justify-between min-h-[76px] ${frequency === Frequency.MONTHLY ? 'sm:col-span-2' : ''}`}>
+            <div className={`p-4 rounded-[20px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px] ${frequency === Frequency.MONTHLY ? 'sm:col-span-2' : ''}`}>
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {t('ownNote')}
               </span>
@@ -745,7 +744,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             >
@@ -888,9 +887,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
   const methodStr = typeof expense.paymentMethod === 'object' ? (expense.paymentMethod as any)?.name : (expense.paymentMethod || '');
   const PaymentIcon = getPaymentMethodIcon(methodStr);
-
-  const freqKey = Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === expense.frequency)?.toLowerCase();
-  const freqText = freqKey ? t(`freq_${freqKey}` as TranslationKey) : 'Månadsvis';
+  const freqText = getFrequencyLabel(expense.frequency, t);
 
   if (typeof document === 'undefined') return null;
 
@@ -924,21 +921,9 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Smooth, Seamless Ambient Brand Color Glow adapted to app background */}
-        <div 
-          className="absolute inset-0 pointer-events-none transition-all duration-700 rounded-t-[28px] sm:rounded-[28px] overflow-hidden"
-          style={{
-            background: `
-              radial-gradient(450px circle at 15% 15%, ${hexToRgba(brandColor, 0.16)} 0%, ${hexToRgba(brandColor, 0.04)} 45%, transparent 75%),
-              linear-gradient(180deg, ${hexToRgba(brandColor, 0.08)} 0%, var(--bg-color) 60%)
-            `
-          }}
-        />
-
-
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
@@ -960,7 +945,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                   if (typeof feedback?.light === 'function') feedback.light();
                   onClose();
                 }} 
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0"
+                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
                 title={t('close')}
                 aria-label={t('close')}
               >
@@ -1083,7 +1068,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           <button
             type="button"
             onClick={() => setIsCancelModalOpen(true)}
-            className="w-full mt-2 p-3.5 bg-black/[0.03] dark:bg-[#222222] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] rounded-xl flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left"
+            className="w-full mt-2 p-3.5 bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-xl flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left border-none shadow-none"
           >
             <div>
               <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -1105,7 +1090,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(expense);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+            className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
           >
             <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
             <span>{t('edit')}</span>
@@ -1117,7 +1102,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               if (typeof feedback?.light === 'function') feedback.light();
               setShowDeleteConfirm(true);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+            className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
             title={config.language === 'en' ? 'Delete' : 'Ta bort'}
             aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
           >
@@ -1301,7 +1286,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               aria-label={t('close')}
             >
               <X size={15} strokeWidth={2.2} />
@@ -1309,7 +1294,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[22px] bg-[var(--surface-color)] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
@@ -1371,7 +1356,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 if (typeof feedback?.light === 'function') feedback.light();
                 setIsCategorySelectorOpen(true);
               }}
-              className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+              className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('category')}
@@ -1398,7 +1383,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             </div>
 
             {/* Deduction Day Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {paymentMethod === 'autogiro' || (typeof paymentMethod === 'string' && (paymentMethod.toLowerCase().includes('autogiro') || paymentMethod.toLowerCase().includes('kort')))
                   ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag')
@@ -1429,7 +1414,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           {/* 3. Grid for Frequency & Payment Method */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Frequency Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('frequency')}
               </span>
@@ -1438,7 +1423,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   <Repeat size={14} strokeWidth={2.2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
-                  {t(`freq_${frequency.toLowerCase()}` as TranslationKey)}
+                  {getFrequencyLabel(frequency, t)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
@@ -1457,7 +1442,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             </div>
 
             {/* Payment Method Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('paymentMethod')}
               </span>
@@ -1491,7 +1476,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           {/* 4. Grid for Type & (Start Month if non-monthly OR Note if monthly) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Type: Fixed / Variable Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] transition-all flex items-center justify-between min-h-[76px]">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('type')}
               </span>
@@ -1513,7 +1498,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
             {frequency !== Frequency.MONTHLY ? (
               /* Start Month Card */
-              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('startMonthLabel')}
                 </span>
@@ -1546,7 +1531,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               </div>
             ) : (
               /* Note Card when monthly: sits alongside Type in a balanced 2-column row! */
-              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] flex flex-col justify-between min-h-[76px]">
+              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px]">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                   {t('ownNote')}
                 </span>
@@ -1575,7 +1560,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           {/* 5. Grid for Note Card when non-monthly (full-width) */}
           {frequency !== Frequency.MONTHLY && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] flex flex-col justify-between min-h-[76px] sm:col-span-2">
+              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px] sm:col-span-2">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                   {t('ownNote')}
                 </span>
@@ -1695,7 +1680,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             >
@@ -1818,18 +1803,41 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
   const expenseCompatible = {
     ...saving,
     note: saving.name,
-    type: 'savings' as const,
+    category: t('savings'),
+    type: 'expense' as const,
     timestamp: Date.now()
   };
 
+  const [brandColor, setBrandColor] = useState(() => getTransactionDominantColor(expenseCompatible as any, config));
+
+  useEffect(() => {
+    const initial = getTransactionDominantColor(expenseCompatible as any, config);
+    setBrandColor(initial);
+
+    const visual = resolveEntityVisual(expenseCompatible as any, config);
+    if (visual.logoUrl && !visual.logoUrl.startsWith('data:image/svg+xml')) {
+      extractDominantColorFromImage(visual.logoUrl).then((extracted) => {
+        if (extracted) {
+          setBrandColor(extracted);
+        }
+      });
+    }
+  }, [saving, config]);
+
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
-  return (
+  const methodStr = typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : (saving.paymentMethod || '');
+  const PaymentIcon = getPaymentMethodIcon(methodStr);
+  const freqText = getFrequencyLabel(saving.frequency, t);
+
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
+      className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -1840,9 +1848,9 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
       }}
     >
       <motion.div
-        initial={{ y: '100%', opacity: 0 }}
+        initial={{ y: "100%", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: '100%', opacity: 0 }}
+        exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
         drag="y"
         dragListener={false}
@@ -1854,133 +1862,149 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-none relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
         <div 
           onPointerDown={(e) => dragControls.start(e)}
           onClick={onClose}
-          className="w-full py-2.5 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0"
+          className="w-full pt-3 pb-1.5 flex items-center justify-center sm:hidden cursor-grab active:cursor-grabbing touch-none shrink-0 relative z-20"
         >
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full transition-colors" />
         </div>
 
-        {/* Header Section */}
-        <div className="px-6 pt-3 sm:pt-5 pb-4 grid grid-cols-[44px_1fr_44px] items-center shrink-0 border-b border-black/5 dark:border-white/10">
-          <div className="flex justify-start">
-            <TransactionLogo transaction={expenseCompatible as any} config={config} size="sm" />
-          </div>
-          <div className="flex justify-center overflow-hidden">
-            <h2 className="text-lg font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate text-center px-2">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+          {/* Hero Section: Centered Logo, Title below, Price below title */}
+          <div className="relative flex flex-col items-center text-center pt-6 sm:pt-8 pb-4">
+            {/* Close Button top-right */}
+            <div className="absolute top-0 right-0 z-10">
+              <button 
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  onClose();
+                }} 
+                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+                title={t('close')}
+                aria-label={t('close')}
+              >
+                <X size={15} strokeWidth={2.2} />
+              </button>
+            </div>
+
+            {/* Centered Logo */}
+            <div className="scale-135 sm:scale-150 mb-7 pt-3">
+              <TransactionLogo transaction={expenseCompatible as any} config={config} size="xl" />
+            </div>
+
+            {/* Title */}
+            <h2 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[var(--text-primary)] leading-tight max-w-[90%] truncate px-2">
               {saving.name}
             </h2>
+
+            {/* Price */}
+            <p className="text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center text-[var(--text-primary)]">
+              <span className="opacity-80 mr-1">→</span>
+              <span>{formatAmount(saving.amount, config.language)}</span>
+              <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
+            </p>
           </div>
-          <div className="flex justify-end">
-            <button 
-              type="button"
-              onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
-              aria-label={t('close')}
-            >
-              <X size={17} strokeWidth={2.2} />
-            </button>
+
+          {/* Details Section: Clean list with discrete subtle divider lines */}
+          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+            {/* Type */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('type')}
+              </span>
+              <div className="flex items-center justify-end gap-2">
+                <CategoryIcon icon={saving.icon || 'piggy-bank'} size="xs" />
+                <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                  {t('monthlySavings')}
+                </span>
+              </div>
+            </div>
+
+            {/* Frequency */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {t('frequency')}
+              </span>
+              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right">
+                {freqText}
+              </span>
+            </div>
+
+            {/* Deduction Day */}
+            <div className="py-3 flex items-center justify-between gap-4">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {config.language === 'en' ? 'Deduction day' : 'Dragningsdag'}
+              </span>
+              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+                {saving.deductionDay ? `${saving.deductionDay}e` : '-'}
+              </span>
+            </div>
+
+            {/* Payment Method */}
+            {saving.paymentMethod && (
+              <div className="py-3 flex items-center justify-between gap-4">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                  {t('paymentMethod')}
+                </span>
+                <div className="flex items-center justify-end gap-2">
+                  {methodStr && <PaymentIcon size={14} className="text-[var(--text-secondary)]" />}
+                  <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                    {methodStr}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0">
-          {/* Actions Bar */}
-          <div className="flex justify-end gap-2 pt-1">
-            <button 
-              type="button"
-              onClick={() => onEdit(saving)} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer active:scale-95"
-              aria-label={t('edit')}
-              title={t('edit')}
-            >
-              <Pencil size={15} strokeWidth={1.8} />
-            </button>
-            <button 
-              type="button"
-              onClick={() => setShowDeleteConfirm(true)} 
-              className="w-8 h-8 rounded-full bg-rose-500/[0.1] hover:bg-rose-500/[0.2] flex items-center justify-center text-rose-500 dark:text-rose-400 transition-colors cursor-pointer active:scale-95"
-              aria-label={t('delete')}
-              title={t('delete')}
-            >
-              <Trash2 size={15} strokeWidth={1.8} />
-            </button>
-          </div>
-
-          <div className="bg-black/5 dark:bg-[#222222] p-4 sm:p-5 rounded-2xl border border-black/10 dark:border-white/10 shadow-xs">
-            <p className="text-[13px] font-normal text-[var(--text-secondary)] mb-1">{t('amount')}</p>
-            <p className="text-[22px] sm:text-[24px] font-semibold text-[var(--text-primary)] font-amount tabular-nums">
-              <span className="opacity-75 mr-0.5">→</span>
-              <span className="font-amount">{formatAmount(saving.amount)}</span>
-              <span className="text-[14px] font-normal text-[var(--text-secondary)] ml-[3px] font-sans">{currency}</span>
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-black/5 dark:bg-[#222222] p-4 rounded-2xl border border-black/10 dark:border-white/10 col-span-2 shadow-xs">
-              <p className="text-xs font-normal text-[var(--text-secondary)] mb-1.5">{t('savingsGoal') || 'Sparmål'}</p>
-              <p className="text-base font-medium text-[var(--text-primary)] break-words">{saving.name}</p>
-            </div>
-
-            <div className="bg-black/5 dark:bg-[#222222] p-4 rounded-2xl border border-black/10 dark:border-white/10 col-span-2 shadow-xs">
-              <p className="text-xs font-normal text-[var(--text-secondary)] mb-1.5">{t('type')}</p>
-              <div className="flex items-center gap-2.5">
-                <CategoryIcon 
-                  icon={saving.icon || 'piggy-bank'} 
-                  size="sm" 
-                />
-                <p className="text-base font-medium text-[var(--text-primary)] break-words">
-                  {t('monthlySavings')}
-                </p>
-              </div>
-            </div>
-
-            {saving.deductionDay ? (
-              <div className="bg-black/5 dark:bg-[#222222] p-4 rounded-2xl border border-black/10 dark:border-white/10 shadow-xs">
-                <p className="text-xs font-normal text-[var(--text-secondary)] mb-1.5">{t('deductionDay')}</p>
-                <p className="text-base font-medium text-[var(--text-primary)]">{`${saving.deductionDay}e`}</p>
-              </div>
-            ) : null}
-
-            {saving.paymentMethod ? (
-              <div className="bg-black/5 dark:bg-[#222222] p-4 rounded-2xl border border-black/10 dark:border-white/10 shadow-xs">
-                <p className="text-xs font-normal text-[var(--text-secondary)] mb-1.5">{t('paymentMethod')}</p>
-                <div className="flex items-center gap-2">
-                  {(() => {
-                    const methodStr = typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : (saving.paymentMethod || '');
-                    const PaymentIcon = getPaymentMethodIcon(methodStr);
-                    return <span className="text-[var(--text-secondary)]"><PaymentIcon size={16} /></span>;
-                  })()}
-                  <p className="text-base font-medium text-[var(--text-primary)] break-words">
-                    {typeof saving.paymentMethod === 'object' ? (saving.paymentMethod as any)?.name : saving.paymentMethod}
-                  </p>
-                </div>
-              </div>
-            ) : null}
-          </div>
+        {/* Action Buttons Footer: Bred Redigera-knapp och Radera */}
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+          <button 
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.tap === 'function') feedback.tap();
+              onEdit(saving);
+            }} 
+            className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
+          >
+            <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
+            <span>{t('edit')}</span>
+          </button>
+          <button 
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.light === 'function') feedback.light();
+              setShowDeleteConfirm(true);
+            }} 
+            className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+            title={t('delete')}
+            aria-label={t('delete')}
+          >
+            <Trash2 size={16} strokeWidth={1.9} />
+          </button>
         </div>
       </motion.div>
 
-      <div>
-        {showDeleteConfirm && (
-          <ConfirmModal
-            isOpen={showDeleteConfirm}
-            title={t('delete')}
-            message={t('deleteConfirm')}
-            onConfirm={() => {
-              onDelete(saving.id);
-              onClose();
-            }}
-            onCancel={() => setShowDeleteConfirm(false)}
-            t={t}
-          />
-        )}
-      </div>
+      {showDeleteConfirm && (
+        <ConfirmModal
+          isOpen={showDeleteConfirm}
+          title={t('delete')}
+          message={t('deleteConfirm')}
+          onConfirm={() => {
+            onDelete(saving.id);
+            onClose();
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+          t={t}
+        />
+      )}
     </motion.div>
   );
 }
@@ -2102,7 +2126,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             <button 
               type="button"
               onClick={onClose} 
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               aria-label={t('close')}
             >
               <X size={15} strokeWidth={2.2} />
@@ -2110,7 +2134,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[22px] bg-[var(--surface-color)] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
@@ -2174,7 +2198,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           {/* 2. Grid for Deduction Day & Frequency */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Deduction Day Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('deductionDay') || 'Dragningsdag'}
               </span>
@@ -2200,7 +2224,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             </div>
 
             {/* Frequency Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('frequency')}
               </span>
@@ -2209,7 +2233,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   <Repeat size={14} strokeWidth={2.2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
-                  {t(`freq_${frequency.toLowerCase()}` as TranslationKey)}
+                  {getFrequencyLabel(frequency, t)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
@@ -2231,7 +2255,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           {/* 3. Grid for Type & (Start Month or Payment Method) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Type: Fixed / Variable Card */}
-            <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] transition-all flex items-center justify-between min-h-[76px]">
+            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('type')}
               </span>
@@ -2253,7 +2277,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
 
             {/* Start Month if not monthly */}
             {frequency !== Frequency.MONTHLY && (
-              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('startMonthLabel')}
                 </span>
@@ -2288,7 +2312,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
 
             {/* Payment Method Card */}
             {paymentMethods && paymentMethods.length > 0 && frequency === Frequency.MONTHLY && (
-              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('paymentMethod') || 'Betalmetod'}
                 </span>
@@ -2319,7 +2343,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           {/* 4. Grid for Payment Method if non-monthly (full-width) */}
           {paymentMethods && paymentMethods.length > 0 && frequency !== Frequency.MONTHLY && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer sm:col-span-2">
+              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer sm:col-span-2">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('paymentMethod') || 'Betalmetod'}
                 </span>
@@ -2366,7 +2390,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+              className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             >

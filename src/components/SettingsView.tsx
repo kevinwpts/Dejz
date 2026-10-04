@@ -274,7 +274,7 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {languages.map((l) => (
             <div
               key={l.code}
@@ -336,7 +336,7 @@ export function SettingsView({
                   className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none border-[var(--accent-color)]'
-                      : 'bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                      : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   {mode.icon}
@@ -366,8 +366,8 @@ export function SettingsView({
                   }}
                   className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer active:scale-95 ${
                     isSelected
-                      ? 'bg-white dark:bg-[#1C1C1C] ring-2 ring-[var(--accent-color)] shadow-none'
-                      : 'bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                      ? 'bg-[var(--surface-color)] ring-2 ring-[var(--accent-color)] shadow-none'
+                      : 'bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   <div
@@ -420,7 +420,7 @@ export function SettingsView({
           {isEn ? 'Select Currency' : 'Välj valuta'}
         </h3>
 
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+        <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrencyCode === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
@@ -473,7 +473,7 @@ export function SettingsView({
        <div>
         {activeSection === 'salary' && (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-[#1C1C1C] p-5 rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-5">
+            <div className="bg-[var(--surface-color)] p-5 rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-5">
               <h2 className="text-xs sm:text-sm font-bold font-display uppercase tracking-wider text-[var(--text-secondary)]">Lönedag & Period</h2>
               
               {/* Payday Setting Row */}
@@ -597,7 +597,7 @@ export function SettingsView({
       {/* Category Deletion Migration Modal */}
       {deleteMigrationData && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#1C1C1C] w-full max-w-sm rounded-[28px] p-6 relative border border-black/[0.08] dark:border-white/[0.08] shadow-2xl font-sans">
+          <div className="bg-[var(--bg-color)] w-full max-w-sm rounded-[28px] p-6 relative border-none shadow-2xl font-sans">
             <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] mb-2">
               Ta bort {deleteMigrationData.category.name}?
             </h3>

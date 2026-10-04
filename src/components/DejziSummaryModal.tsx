@@ -231,7 +231,7 @@ export function DejziSummaryModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer border-none shadow-none"
                 aria-label="Stäng"
               >
                 <X size={16} strokeWidth={2} />
@@ -255,7 +255,7 @@ export function DejziSummaryModal({
             {/* Status Grid Cards (4 Metrics) */}
             <div className="grid grid-cols-2 gap-2.5">
               {/* Dagsbudget kvar */}
-              <div className="p-3.5 rounded-[16px] bg-[var(--surface-muted)] border border-black/[0.04] dark:border-white/[0.06] shadow-none flex flex-col gap-1">
+              <div className="p-3.5 rounded-[16px] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
                   <Coins size={13} className="text-amber-500" />
                   <span>{isEn ? "Today's balance" : 'Dagens saldo'}</span>
@@ -266,7 +266,7 @@ export function DejziSummaryModal({
               </div>
 
               {/* Dagar kvar till lön */}
-              <div className="p-3.5 rounded-[16px] bg-[var(--surface-muted)] border border-black/[0.04] dark:border-white/[0.06] shadow-none flex flex-col gap-1">
+              <div className="p-3.5 rounded-[16px] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
                   <Calendar size={13} className="text-[var(--text-primary)]" />
                   <span>{isEn ? 'Days to payday' : 'Dagar till lön'}</span>
@@ -277,7 +277,7 @@ export function DejziSummaryModal({
               </div>
 
               {/* Totalt kvar i perioden */}
-              <div className="p-3.5 rounded-[16px] bg-[var(--surface-muted)] border border-black/[0.04] dark:border-white/[0.06] shadow-none flex flex-col gap-1">
+              <div className="p-3.5 rounded-[16px] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
                   <Wallet size={13} className="text-[var(--text-secondary)]" />
                   <span>{isEn ? 'Total left' : 'Totalt kvar'}</span>
@@ -288,7 +288,7 @@ export function DejziSummaryModal({
               </div>
 
               {/* Grundbudget per dag */}
-              <div className="p-3.5 rounded-[16px] bg-[var(--surface-muted)] border border-black/[0.04] dark:border-white/[0.06] shadow-none flex flex-col gap-1">
+              <div className="p-3.5 rounded-[16px] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
                   <TrendingUp size={13} className="text-[var(--text-secondary)]" />
                   <span>{isEn ? 'Daily budget' : 'Budget / dag'}</span>
@@ -301,7 +301,7 @@ export function DejziSummaryModal({
 
             {/* Dejzi Proactive Tip */}
             {dejziInfo?.actionTip && (
-              <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-[14px] bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] text-xs font-medium border border-black/[0.04] dark:border-white/[0.06]">
+              <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-[14px] bg-[var(--surface-color)] text-[var(--text-primary)] text-xs font-medium border-none shadow-none">
                 <Zap size={14} className="shrink-0 text-amber-500 mt-0.5" />
                 <span>{dejziInfo.actionTip}</span>
               </div>
