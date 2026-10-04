@@ -144,9 +144,9 @@ export function SettingsView({
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between mb-4 px-1">
-          <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-            {type === 'income' ? (config.language === 'en' ? 'Income categories' : 'Inkomstkategorier') : (config.language === 'en' ? 'Categories' : 'Kategorier')}
+        <div className="flex items-center justify-between mb-3 px-1">
+          <span className="text-xs font-semibold text-[var(--text-secondary)]">
+            {list.length} {config.language === 'en' ? 'categories' : 'kategorier'}
           </span>
           <Button
             variant="secondary"
@@ -172,6 +172,20 @@ export function SettingsView({
               </span>
             </div>
           ))}
+
+          {/* Dashed Add New Category Card */}
+          <button
+            type="button"
+            onClick={() => handleAddCategory(type)}
+            className="h-32 sm:h-36 p-4 rounded-[20px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group active:scale-[0.98]"
+          >
+            <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
+              <Plus size={18} strokeWidth={2.5} />
+            </div>
+            <span className="text-xs font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+              {t('newCategory')}
+            </span>
+          </button>
         </div>
       </div>
     );
@@ -225,9 +239,9 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="flex items-center justify-between mb-4 px-1">
-          <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-            {config.language === 'en' ? 'Payment methods' : 'Betalningsmetoder'}
+        <div className="flex items-center justify-between mb-3 px-1">
+          <span className="text-xs font-semibold text-[var(--text-secondary)]">
+            {methodsList.length} {config.language === 'en' ? 'payment methods' : 'betalningsmetoder'}
           </span>
           <Button
             variant="secondary"
@@ -259,6 +273,23 @@ export function SettingsView({
               </span>
             </div>
           ))}
+
+          {/* Dashed Add New Payment Method Card */}
+          <button
+            type="button"
+            onClick={() => {
+              setPaymentMethodModalData({ name: '' });
+              setIsPaymentMethodModalOpen(true);
+            }}
+            className="h-32 sm:h-36 p-4 rounded-[20px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group active:scale-[0.98]"
+          >
+            <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
+              <Plus size={18} strokeWidth={2.5} />
+            </div>
+            <span className="text-xs font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+              {config.language === 'en' ? 'New payment method' : 'Ny betalmetod'}
+            </span>
+          </button>
         </div>
       </div>
     );
