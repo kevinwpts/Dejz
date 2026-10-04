@@ -205,11 +205,11 @@ h6 {
   /* Dejz Official Brand Logo Color */
   --logo-color: #211F1C;
 
-  /* Seamless Light Theme Background */
-  --bg-top-color: #F7F5F0;
-  --bg-color: #F7F5F0;
-  --bg-secondary: #F7F5F0;
-  --bg-gradient: #F7F5F0;
+  /* Seamless Light Theme Background - Signature Dejz Warm Beige */
+  --bg-top-color: #EFECE6;
+  --bg-color: #EFECE6;
+  --bg-secondary: #EFECE6;
+  --bg-gradient: #EFECE6;
  
   --surface-color: #FAF8F5;
   --surface-gradient: #FAF8F5;
