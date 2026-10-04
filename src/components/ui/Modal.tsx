@@ -41,10 +41,10 @@ export const Modal: React.FC<ModalProps> = ({
   }, [isOpen, onClose]);
 
   const sizeStyles = {
-    sm: 'max-w-[400px]',
-    md: 'max-w-[480px]',
-    lg: 'max-w-[560px]',
-    xl: 'max-w-[680px]',
+    sm: 'sm:max-w-[400px]',
+    md: 'sm:max-w-[480px]',
+    lg: 'sm:max-w-[560px]',
+    xl: 'sm:max-w-[680px]',
   }[size];
 
   return (

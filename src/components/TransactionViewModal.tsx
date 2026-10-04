@@ -130,7 +130,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[28px] sm:rounded-[28px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}

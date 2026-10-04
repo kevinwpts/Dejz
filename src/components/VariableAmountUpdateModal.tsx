@@ -70,7 +70,7 @@ export function VariableAmountUpdateModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 26, stiffness: 220 }}
-            className="bg-[var(--bg-color)] w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border-none relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0 font-sans text-[var(--text-primary)]"
+            className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[28px] sm:rounded-[28px] border-none relative flex flex-col overflow-hidden max-h-[90dvh] sm:max-h-[85vh] shadow-2xl pb-0 font-sans text-[var(--text-primary)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Handle on Mobile */}

@@ -275,27 +275,37 @@ export function SettingsView({
     return (
       <div className="space-y-4 w-full py-2">
         <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
-          {languages.map((l) => (
-            <div
-              key={l.code}
-              onClick={() => {
-                setConfig({ ...config, language: l.code });
-              }}
-              className="flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <LanguageFlag code={l.code} size="md" />
-                <span className="text-sm font-semibold text-[var(--text-primary)]">
-                  {l.label}
-                </span>
-              </div>
-              {config.language === l.code && (
-                <div className="w-6 h-6 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center">
-                  <Check size={14} strokeWidth={2.5} />
+          {languages.map((l) => {
+            const isSelected = config.language === l.code;
+            return (
+              <button
+                key={l.code}
+                type="button"
+                onClick={() => {
+                  setConfig({ ...config, language: l.code });
+                }}
+                className={`w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-left ${
+                  isSelected ? 'bg-[var(--accent-color)]/10' : ''
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <LanguageFlag code={l.code} size="md" />
+                  <span className={`text-sm tracking-tight ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'}`}>
+                    {l.label}
+                  </span>
                 </div>
-              )}
-            </div>
-          ))}
+                <div className="flex items-center gap-2 shrink-0 pl-2">
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
+                    isSelected
+                      ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)]'
+                      : 'border border-black/10 dark:border-white/10'
+                  }`}>
+                    {isSelected && <Check size={12} strokeWidth={3} />}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -431,7 +441,7 @@ export function SettingsView({
                 type="button"
                 onClick={() => handleSelectCurrency(c)}
                 className={`w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-left ${
-                  isSelected ? 'bg-accent/10' : ''
+                  isSelected ? 'bg-[var(--accent-color)]/10' : ''
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">

@@ -58,7 +58,7 @@ export function FilterMenuModal<T = string>({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 27, stiffness: 320 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm sm:max-w-md bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+          className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
         >
           {/* Mobile Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -104,7 +104,7 @@ export function FilterMenuModal<T = string>({
                   }}
                   className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-[14px] transition-all cursor-pointer text-left active:scale-[0.99] ${
                     isSelected
-                      ? 'bg-blue-500/10 dark:bg-blue-500/15 text-[var(--text-primary)] font-semibold'
+                      ? 'bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/15 text-[var(--text-primary)] font-semibold'
                       : 'bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] text-[var(--text-secondary)] font-medium'
                   }`}
                 >

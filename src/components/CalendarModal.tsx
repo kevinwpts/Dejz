@@ -47,7 +47,7 @@ export function CalendarModal({
             exit={{ opacity: 0, y: 40, scale: 0.98 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-[var(--bg-color)] border-none w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] font-sans"
+            className="bg-[var(--bg-color)] border-none w-full sm:max-w-md rounded-t-[28px] sm:rounded-[28px] p-5 pb-[max(1.75rem,env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl relative max-h-[85vh] flex flex-col overflow-hidden text-[var(--text-primary)] font-sans"
           >
             {/* Mobile Drag Handle */}
             <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto -mt-1 mb-3 sm:hidden shrink-0" />

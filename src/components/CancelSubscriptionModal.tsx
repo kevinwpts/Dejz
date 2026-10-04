@@ -102,7 +102,7 @@ export function CancelSubscriptionModal({
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans"
+          className="relative w-full sm:max-w-lg bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans"
         >
           {/* Drag Handle */}
           <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />

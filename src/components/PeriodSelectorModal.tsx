@@ -137,7 +137,7 @@ export function PeriodSelectorModal({
                   }}
                   className={`w-full flex items-center justify-between py-3 px-4 rounded-[16px] transition-all cursor-pointer text-left active:scale-[0.99] min-h-[52px] ${
                     !selectedPeriod && !selectedDate
-                      ? 'bg-blue-500/10 dark:bg-blue-500/15 text-[var(--text-primary)] font-semibold'
+                      ? 'bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/15 text-[var(--text-primary)] font-semibold'
                       : 'bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] text-[var(--text-secondary)] font-medium'
                   }`}
                 >
@@ -190,7 +190,7 @@ export function PeriodSelectorModal({
                       }}
                       className={`w-full flex items-center justify-between py-3 px-4 rounded-[16px] transition-all cursor-pointer text-left active:scale-[0.99] min-h-[52px] ${
                         isSelected
-                          ? 'bg-blue-500/10 dark:bg-blue-500/15 text-[var(--text-primary)] font-semibold'
+                          ? 'bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/15 text-[var(--text-primary)] font-semibold'
                           : 'bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] text-[var(--text-secondary)] font-medium'
                       }`}
                     >
