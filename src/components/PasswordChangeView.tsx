@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, Lock } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { TranslationKey } from '../i18n';
-import { Button, Input, IconButton } from './ui';
+import { Button, Input } from './ui';
 
 interface PasswordChangeViewProps {
   onBack: () => void;
@@ -63,21 +63,24 @@ export function PasswordChangeView({ onBack, t, addToast, userEmail }: PasswordC
 
   return (
     <div className="space-y-6 w-full font-sans">
-      <div className="flex items-center gap-3">
-        <IconButton
-          icon={<ChevronLeft size={18} />}
+      <div className="flex items-center gap-3.5 py-1">
+        <button
+          type="button"
           onClick={onBack}
-          variant="muted"
-          size="sm"
-          aria-label="Tillbaka"
-        />
-        <div>
-          <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)]">
+          className="w-9 h-9 rounded-full bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs shrink-0"
+          aria-label={t('back') || 'Tillbaka'}
+        >
+          <ChevronLeft size={20} strokeWidth={2.2} />
+        </button>
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)] truncate">
             {t('changePassword' as any) || 'Ändra lösenord'}
-          </h2>
-          <p className="text-xs text-[var(--text-secondary)] opacity-80">
-            {userEmail}
-          </p>
+          </h1>
+          {userEmail && (
+            <p className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 truncate">
+              {userEmail}
+            </p>
+          )}
         </div>
       </div>
 

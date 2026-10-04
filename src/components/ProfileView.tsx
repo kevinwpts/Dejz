@@ -188,18 +188,25 @@ export function ProfileView({
     onNavigate('profile', section);
   };
 
-  const SettingsMenuItem = ({ icon: Icon, label, onClick, rightNode, iconBgColor = "bg-black/[0.04] dark:bg-[#222222]", iconTextColor = "text-[#1C1917] dark:text-white" }: { icon: any, label: string, onClick?: () => void, rightNode?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) => (
+  const SettingsMenuItem = ({ icon: Icon, label, subtitle, onClick, rightNode, iconBgColor = "bg-black/5 dark:bg-[#242424]", iconTextColor = "text-[var(--text-primary)]" }: { icon: any, label: string, subtitle?: string, onClick?: () => void, rightNode?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) => (
     <button 
       onClick={onClick}
-      className={`w-full flex items-center justify-between py-3.5 px-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
+      className={`w-full flex items-center justify-between py-3.5 px-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
     >
-      <div className="flex items-center gap-3.5 min-w-0">
-        <div className={`w-9 h-9 rounded-xl ${iconBgColor} ${iconTextColor} border-none flex items-center justify-center relative shrink-0`}>
-          <Icon size={16} strokeWidth={1.8} />
+      <div className="flex items-center gap-3.5 min-w-0 pr-2">
+        <div className={`w-10 h-10 rounded-[12px] ${iconBgColor} ${iconTextColor} border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center relative shrink-0`}>
+          <Icon size={18} strokeWidth={2} />
         </div>
-        <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate tracking-tight">{label}</span>
+        <div className="min-w-0 flex flex-col justify-center text-left">
+          <span className="text-[14px] font-semibold text-[var(--text-primary)] truncate tracking-tight">{label}</span>
+          {subtitle && (
+            <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 truncate mt-0.5">
+              {subtitle}
+            </span>
+          )}
+        </div>
       </div>
-      {rightNode || (onClick && <ChevronRight size={15} strokeWidth={2} className="text-[var(--text-secondary)] group-hover:translate-x-0.5 transition-transform shrink-0 opacity-60" />)}
+      {rightNode || (onClick && <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] group-hover:translate-x-0.5 transition-transform shrink-0 opacity-50 group-hover:opacity-100" />)}
     </button>
   );
 
@@ -211,7 +218,7 @@ export function ProfileView({
       className="space-y-5 w-full pb-12 font-sans"
     >
       {/* User Header Module */}
-      <div className="bg-white dark:bg-[#1C1C1C] backdrop-blur-xl border-none rounded-[22px] p-5 shadow-none flex items-center gap-4">
+      <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-5 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs flex items-center gap-4">
         <div className="relative shrink-0">
           <label htmlFor="avatar-upload" className="cursor-pointer group block">
             <input 
@@ -274,7 +281,7 @@ export function ProfileView({
           <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
             {t('economy')}
           </h4>
-          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#1C1C1C] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem 
               icon={Calendar} 
               label={t('salary')} 
@@ -311,7 +318,7 @@ export function ProfileView({
           <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
             {t('appSettings')}
           </h4>
-          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#1C1C1C] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem 
               icon={SlidersHorizontal} 
               label={'Budget'} 
@@ -343,10 +350,10 @@ export function ProfileView({
             <div className="py-3.5 px-4 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-[#222222] text-[#1C1917] dark:text-white border-none flex items-center justify-center shrink-0">
-                    <Calendar size={16} strokeWidth={1.8} />
+                  <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#242424] text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+                    <Calendar size={18} strokeWidth={2} />
                   </div>
-                  <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInCalendar')}</span>
+                  <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInCalendar')}</span>
                 </div>
                 <ToggleSwitch 
                   isOn={config.showFixedExpensesInCalendar} 
@@ -360,17 +367,17 @@ export function ProfileView({
                   }} 
                 />
               </div>
-              <p className="text-[11px] text-[var(--text-secondary)] opacity-70 leading-relaxed pl-12">
+              <p className="text-[11.5px] text-[var(--text-secondary)] opacity-70 leading-relaxed pl-13">
                 {t('showFixedExpensesInCalendarDesc')}
               </p>
             </div>
             <div className="py-3.5 px-4 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-[#222222] text-[#1C1917] dark:text-white border-none flex items-center justify-center shrink-0">
-                    <EyeOff size={16} strokeWidth={1.8} />
+                  <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#242424] text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+                    <EyeOff size={18} strokeWidth={2} />
                   </div>
-                  <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight">
+                  <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
                     {t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
                   </span>
                 </div>
@@ -388,7 +395,7 @@ export function ProfileView({
                   }} 
                 />
               </div>
-              <p className="text-[11px] text-[var(--text-secondary)] opacity-70 leading-relaxed pl-12">
+              <p className="text-[11.5px] text-[var(--text-secondary)] opacity-70 leading-relaxed pl-13">
                 {t('hideEmptyCategoriesDesc' as any) || 'Dölj kategorier som inte har några utgifter eller aktiv budget under perioden.'}
               </p>
             </div>
@@ -400,7 +407,7 @@ export function ProfileView({
           <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
             {t('support')}
           </h4>
-          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#1C1C1C] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem icon={Mail} label={t('feedback')} onClick={onFeedbackClick} />
             <SettingsMenuItem icon={Download} label={t('exportData')} onClick={onExportData} />
             <SettingsMenuItem icon={Shield} label={t('privacyPolicy')} onClick={() => onLegalClick('privacy')} />
@@ -413,7 +420,7 @@ export function ProfileView({
           <h4 className="text-[12px] font-semibold text-rose-500 dark:text-rose-400 px-1.5">
             {t('dangerZone')}
           </h4>
-          <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#1C1C1C] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             {isDemoMode && (
               <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-2.5">
                 <div className="flex items-center justify-between">
@@ -441,19 +448,19 @@ export function ProfileView({
               onClick={onLogout}
               className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-[#222222] text-[#1C1917] dark:text-white border-none flex items-center justify-center shrink-0">
-                <LogOut size={16} strokeWidth={1.8} />
+              <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#242424] text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+                <LogOut size={18} strokeWidth={2} />
               </div>
-              <span className="text-[13.5px] font-semibold text-[var(--text-primary)]">{t('logout')}</span>
+              <span className="text-[14px] font-semibold text-[var(--text-primary)]">{t('logout')}</span>
             </button>
             <button 
               onClick={onDeleteAccount}
               className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-danger/5 transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-[#222222] text-[#1C1917] dark:text-white border-none flex items-center justify-center shrink-0">
-                <Trash2 size={16} strokeWidth={1.8} />
+              <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#242424] text-danger border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+                <Trash2 size={18} strokeWidth={2} />
               </div>
-              <span className="text-[13.5px] font-semibold text-danger">{t('deleteAccount')}</span>
+              <span className="text-[14px] font-semibold text-danger">{t('deleteAccount')}</span>
             </button>
           </div>
         </div>
