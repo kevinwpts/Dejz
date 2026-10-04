@@ -284,9 +284,7 @@ export function SettingsView({
                 onClick={() => {
                   setConfig({ ...config, language: l.code });
                 }}
-                className={`w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-left ${
-                  isSelected ? 'bg-[var(--accent-color)]/10' : ''
-                }`}
+                className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center gap-3">
                   <LanguageFlag code={l.code} size="md" />
@@ -294,15 +292,11 @@ export function SettingsView({
                     {l.label}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0 pl-2">
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-                    isSelected
-                      ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)]'
-                      : 'border border-black/10 dark:border-white/10'
-                  }`}>
-                    {isSelected && <Check size={12} strokeWidth={3} />}
+                {isSelected && (
+                  <div className="text-[var(--accent-color)] shrink-0 pl-2">
+                    <Check size={18} strokeWidth={2.5} />
                   </div>
-                </div>
+                )}
               </button>
             );
           })}
@@ -440,15 +434,13 @@ export function SettingsView({
                 key={`${c.code}-${c.symbol}`}
                 type="button"
                 onClick={() => handleSelectCurrency(c)}
-                className={`w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-left ${
-                  isSelected ? 'bg-[var(--accent-color)]/10' : ''
-                }`}
+                className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-xl shrink-0 select-none">{c.flag}</span>
                   <div className="min-w-0 flex flex-col justify-center">
                     <div className="flex items-center gap-2">
-                      <span className="text-[14px] font-medium text-[var(--text-primary)] tracking-tight">
+                      <span className={`text-[14px] tracking-tight ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
                         {c.code}
                       </span>
                       <span className="text-[12px] font-normal text-[var(--text-secondary)]">
@@ -461,15 +453,11 @@ export function SettingsView({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 pl-2">
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-                    isSelected
-                      ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)]'
-                      : 'border border-black/10 dark:border-white/10'
-                  }`}>
-                    {isSelected && <Check size={12} strokeWidth={3} />}
+                {isSelected && (
+                  <div className="text-[var(--accent-color)] shrink-0 pl-2">
+                    <Check size={18} strokeWidth={2.5} />
                   </div>
-                </div>
+                )}
               </button>
             );
           })}

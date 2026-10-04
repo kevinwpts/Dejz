@@ -703,17 +703,15 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                           setCategory(cat.name);
                           setIsCategorySelectorOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all cursor-pointer text-left ${
-                          isSelected ? 'bg-[var(--accent-color)]/15 border border-[var(--accent-color)]/25 text-[var(--accent-color)] font-semibold' : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                        }`}
+                        className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left"
                       >
                         <div className="flex items-center gap-3">
                           <CategoryIcon icon={cat.icon} color={cat.color} size="sm" />
-                          <span className="text-[15px] font-normal">{cat.name}</span>
+                          <span className={`text-[15px] tracking-tight ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-normal text-[var(--text-secondary)]'}`}>{cat.name}</span>
                         </div>
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] flex items-center justify-center shrink-0">
-                            <Check size={12} strokeWidth={2.5} />
+                          <div className="text-[var(--accent-color)] shrink-0 pl-1">
+                            <Check size={18} strokeWidth={2.5} />
                           </div>
                         )}
                       </button>
@@ -1619,17 +1617,15 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                           setCategory(cat.name);
                           setIsCategorySelectorOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all cursor-pointer text-left ${
-                          isSelected ? 'bg-[var(--accent-color)]/15 border border-[var(--accent-color)]/25 text-[var(--accent-color)] font-semibold' : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/[0.04] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                        }`}
+                        className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left"
                       >
                         <div className="flex items-center gap-3">
                           <CategoryIcon icon={cat.icon} color={cat.color} size="sm" />
-                          <span className="text-[15px] font-normal">{cat.name}</span>
+                          <span className={`text-[15px] tracking-tight ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-normal text-[var(--text-secondary)]'}`}>{cat.name}</span>
                         </div>
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--text-on-accent)] flex items-center justify-center shrink-0">
-                            <Check size={12} strokeWidth={2.5} />
+                          <div className="text-[var(--accent-color)] shrink-0 pl-1">
+                            <Check size={18} strokeWidth={2.5} />
                           </div>
                         )}
                       </button>

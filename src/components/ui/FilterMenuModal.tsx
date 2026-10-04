@@ -102,18 +102,14 @@ export function FilterMenuModal<T = string>({
                     onSelect(opt.id);
                     onClose();
                   }}
-                  className={`w-full flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-[14px] transition-all cursor-pointer text-left active:scale-[0.99] ${
-                    isSelected
-                      ? 'bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/15 text-[var(--text-primary)] font-semibold'
-                      : 'bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] text-[var(--text-secondary)] font-medium'
-                  }`}
+                  className="w-full flex items-center justify-between py-2.5 px-3 sm:py-3 sm:px-3.5 rounded-[14px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left active:scale-[0.99]"
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     {opt.icon && (
                       <div
                         className={`w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-colors ${
                           isSelected
-                            ? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
+                            ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)]'
                             : 'bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)]'
                         }`}
                       >
@@ -140,10 +136,8 @@ export function FilterMenuModal<T = string>({
                   </div>
 
                   {isSelected && (
-                    <div 
-                      className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center shrink-0 ml-2 shadow-2xs"
-                    >
-                      <Check size={12} strokeWidth={3} />
+                    <div className="text-[var(--accent-color)] shrink-0 ml-2 pl-1">
+                      <Check size={18} strokeWidth={2.5} />
                     </div>
                   )}
                 </button>
