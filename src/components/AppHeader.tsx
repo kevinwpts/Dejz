@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
 import { DejzLogo } from "./DejzLogo";
 
@@ -33,27 +33,49 @@ export function AppHeader({
   language = "sv",
   activeTab,
 }: AppHeaderProps) {
-  const [isAtTop, setIsAtTop] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
+    lastScrollYRef.current = window.scrollY;
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      setIsAtTop(currentScrollY <= 10);
+      const lastScrollY = lastScrollYRef.current;
+      const delta = currentScrollY - lastScrollY;
+
+      // Always show when near the very top of the page
+      if (currentScrollY <= 25) {
+        setIsVisible(true);
+      } else if (delta > 8) {
+        // Scrolling down -> hide header
+        setIsVisible(false);
+      } else if (delta < -8) {
+        // Scrolling up -> reveal header
+        setIsVisible(true);
+      }
+
+      lastScrollYRef.current = Math.max(0, currentScrollY);
     };
 
-    setIsAtTop(window.scrollY <= 10);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Reset visibility when changing tab or view title
+  useEffect(() => {
+    setIsVisible(true);
+    lastScrollYRef.current = window.scrollY;
+  }, [activeTab, title]);
+
   return (
     <header
-      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top,0px))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-200 ease-in-out ${
+      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top,0px))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] bg-transparent border-none ${
         isDemoMode ? '' : 'pt-[env(safe-area-inset-top,0px)]'
       } ${
-        !isAtTop
-          ? "bg-[#EFECE6]/90 dark:bg-[#141414]/94 backdrop-blur-xl border-b border-[#E2DDD4]/80 dark:border-white/[0.08]"
-          : "bg-transparent border-b border-transparent"
+        isVisible
+          ? 'translate-y-0 opacity-100 pointer-events-auto'
+          : '-translate-y-full opacity-0 pointer-events-none'
       }`}
     >
       <div className="max-w-xl mx-auto px-4 h-14 sm:h-16 flex justify-between items-center w-full gap-2 relative">
