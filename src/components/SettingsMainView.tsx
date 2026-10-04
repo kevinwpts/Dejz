@@ -149,7 +149,7 @@ export function SettingsMainView({
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('categories')}</span>
               <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
-                {`${(config.categories || []).length} ${t('expenses').toLowerCase()}, ${(config.incomeCategories || []).length} ${t('incomes').toLowerCase()}`}
+                {config.language === 'en' ? 'Expense and income categories' : 'Utgifts- och inkomstkategorier'}
               </span>
             </div>
           </div>

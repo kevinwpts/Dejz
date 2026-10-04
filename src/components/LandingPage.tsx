@@ -172,40 +172,44 @@ export function LandingPage({
 
         {/* HERO */}
         <section className="w-full pt-[calc(7.5rem+env(safe-area-inset-top))] pb-16 md:pb-24 lg:pb-32 px-6 sm:px-10 bg-[#EFECE6]">
-          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-14">
             
-            <div className="w-full lg:w-[50%] space-y-6 sm:space-y-8 text-left">
-              <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-[#211F1C] leading-[1.03]">
-                Hela din ekonomi.<br />
-                Svart på vitt.
-              </h1>
-              
-              <p className="text-lg sm:text-xl text-[#6E6961] font-normal leading-relaxed max-w-xl">
-                Samla inkomster, utgifter, sparande och budget på ett ställe. Se vart pengarna går och få koll på ekonomin mellan två löner.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
-                <button 
-                  onClick={onGetStarted} 
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
-                >
-                  <span>Kom igång gratis</span>
-                  <ChevronRight size={16} />
-                </button>
-
-                {onStartDemo && (
-                  <button
-                    onClick={onStartDemo}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-white hover:bg-[#F9F8F6] text-[#211F1C] border border-[#E2DDD4] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
-                  >
-                    <span>Testa demo</span>
-                  </button>
-                )}
+            <div className="w-full lg:w-[50%] space-y-6 text-left">
+              <div className="space-y-3 sm:space-y-3.5">
+                <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-[#211F1C] leading-[1.04]">
+                  Hela din ekonomi.<br />
+                  Svart på vitt.
+                </h1>
+                
+                <p className="text-base sm:text-lg md:text-xl text-[#6E6961] font-normal leading-snug sm:leading-normal max-w-xl">
+                  Samla inkomster, utgifter, sparande och budget på ett ställe. Se vart pengarna går och få koll på ekonomin mellan två löner.
+                </p>
               </div>
 
-              <p className="text-xs sm:text-sm font-medium text-[#6E6961] pt-1">
-                Ingen bankkoppling • Gratis att komma igång
-              </p>
+              <div className="space-y-2.5 pt-1">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <button 
+                    onClick={onGetStarted} 
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
+                  >
+                    <span>Kom igång gratis</span>
+                    <ChevronRight size={16} />
+                  </button>
+
+                  {onStartDemo && (
+                    <button
+                      onClick={onStartDemo}
+                      className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-white hover:bg-[#F9F8F6] text-[#211F1C] border border-[#E2DDD4] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
+                    >
+                      <span>Testa demo</span>
+                    </button>
+                  )}
+                </div>
+
+                <p className="text-xs sm:text-sm font-medium text-[#6E6961]">
+                  Ingen bankkoppling • Gratis att komma igång
+                </p>
+              </div>
             </div>
 
             <div className="w-full lg:w-[50%] flex items-center justify-center">
@@ -220,8 +224,8 @@ export function LandingPage({
         </section>
 
         {/* SÅ FUNGERAR DEJZ */}
-        <section id="sa-fungerar-det" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-white border-t border-b border-[#E2DDD4] scroll-mt-20">
-          <div className="max-w-6xl mx-auto space-y-12 md:space-y-16">
+        <section id="sa-fungerar-det" className="w-full py-16 md:py-24 px-6 sm:px-10 bg-white border-t border-b border-[#E2DDD4] scroll-mt-20">
+          <div className="max-w-6xl mx-auto space-y-10 md:space-y-14">
             
             <h2 className="text-3xl sm:text-5xl md:text-5xl font-extrabold tracking-tight text-[#211F1C] leading-[1.08] text-left">
               Se vad du faktiskt kan spendera.
@@ -230,7 +234,7 @@ export function LandingPage({
             <div className="w-full max-w-3xl text-left">
               <MockupPlaceholder 
                 id="CALCULATION_MOCKUP" 
-                imageSrc="/under_hero.png"
+                imageSrc="/under_hero.png" 
                 imageAlt="Dejz - Se vad du faktiskt kan spendera"
                 aspectRatio="aspect-[16/9] sm:aspect-[21/9]"
                 sublabel="Kalkyl-mockup placeras här"
@@ -266,7 +270,7 @@ export function LandingPage({
               </div>
             </div>
 
-            <p className="text-base sm:text-lg text-[#6E6961] font-medium text-left pt-2">
+            <p className="text-sm sm:text-base text-[#6E6961] font-medium text-left leading-normal">
               När du registrerar nya utgifter uppdaterar Dejz automatiskt hur mycket du har kvar.
             </p>
 
@@ -274,14 +278,14 @@ export function LandingPage({
         </section>
 
         {/* FUNKTIONER */}
-        <section id="funktioner" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-[#EFECE6] scroll-mt-20">
-          <div className="max-w-6xl mx-auto space-y-12 md:space-y-16">
+        <section id="funktioner" className="w-full py-16 md:py-24 px-6 sm:px-10 bg-[#EFECE6] scroll-mt-20">
+          <div className="max-w-6xl mx-auto space-y-10 md:space-y-14">
             
             <h2 className="text-3xl sm:text-5xl md:text-5xl font-extrabold tracking-tight text-[#211F1C] leading-[1.08] text-left">
               Allt samlat på ett ställe.
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 sm:gap-y-12 text-left">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 text-left">
               
               <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4]">
                 <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
@@ -291,7 +295,7 @@ export function LandingPage({
                   <h3 className="text-xl font-bold text-[#211F1C]">
                     Budget
                   </h3>
-                  <p className="text-base text-[#6E6961] font-normal leading-relaxed">
+                  <p className="text-sm sm:text-base text-[#6E6961] font-normal leading-snug">
                     Planera inkomster, fasta utgifter och sparande.
                   </p>
                 </div>
@@ -305,7 +309,7 @@ export function LandingPage({
                   <h3 className="text-xl font-bold text-[#211F1C]">
                     Transaktioner
                   </h3>
-                  <p className="text-base text-[#6E6961] font-normal leading-relaxed">
+                  <p className="text-sm sm:text-base text-[#6E6961] font-normal leading-snug">
                     Registrera och kategorisera dina köp.
                   </p>
                 </div>
@@ -319,7 +323,7 @@ export function LandingPage({
                   <h3 className="text-xl font-bold text-[#211F1C]">
                     Analys
                   </h3>
-                  <p className="text-base text-[#6E6961] font-normal leading-relaxed">
+                  <p className="text-sm sm:text-base text-[#6E6961] font-normal leading-snug">
                     Se vart pengarna faktiskt går.
                   </p>
                 </div>
@@ -333,7 +337,7 @@ export function LandingPage({
                   <h3 className="text-xl font-bold text-[#211F1C]">
                     Historik
                   </h3>
-                  <p className="text-base text-[#6E6961] font-normal leading-relaxed">
+                  <p className="text-sm sm:text-base text-[#6E6961] font-normal leading-snug">
                     Följ din ekonomi över tid.
                   </p>
                 </div>
@@ -350,7 +354,7 @@ export function LandingPage({
                     </h3>
                     <span className="w-2 h-2 rounded-full bg-[#1C1917]" />
                   </div>
-                  <p className="text-base text-[#6E6961] font-normal leading-relaxed max-w-xl">
+                  <p className="text-sm sm:text-base text-[#6E6961] font-normal leading-snug max-w-xl">
                     Få hjälp att förstå din ekonomi och upptäcka sådant som är värt att uppmärksamma.
                   </p>
                 </div>
@@ -362,50 +366,54 @@ export function LandingPage({
         </section>
 
         {/* INTEGRITET */}
-        <section id="integritet" className="w-full py-20 md:py-28 px-6 sm:px-10 bg-[#1C1917] text-white scroll-mt-20">
-          <div className="max-w-4xl mx-auto text-left space-y-5">
+        <section id="integritet" className="w-full py-16 md:py-24 px-6 sm:px-10 bg-[#1C1917] text-white scroll-mt-20">
+          <div className="max-w-4xl mx-auto text-left space-y-3">
             <h2 className="text-3xl sm:text-5xl md:text-5xl font-extrabold tracking-tight text-white leading-[1.08]">
               Ingen bankkoppling behövs.
             </h2>
-            <p className="text-lg sm:text-xl text-[#B8B8B8] font-normal leading-relaxed max-w-2xl">
+            <p className="text-base sm:text-lg md:text-xl text-[#B8B8B8] font-normal leading-snug sm:leading-normal max-w-2xl">
               Du bestämmer själv vad du lägger in i Dejz. Samla den ekonomi du vill hålla koll på utan att koppla ditt bankkonto.
             </p>
           </div>
         </section>
 
         {/* SLUTLIG CTA */}
-        <section className="w-full py-24 md:py-32 px-6 sm:px-10 bg-[#EFECE6] text-center border-b border-[#E2DDD4]">
-          <div className="max-w-3xl mx-auto space-y-8">
-            <h2 className="text-4xl sm:text-6xl md:text-6xl font-extrabold tracking-tight leading-[1.05] text-[#211F1C]">
-              Redo att få koll?
-            </h2>
-            
-            <p className="text-lg sm:text-xl text-[#6E6961] font-normal max-w-xl mx-auto leading-relaxed">
-              Börja med din egen ekonomi eller testa Dejz direkt med exempeldata.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
-              <button 
-                onClick={onGetStarted} 
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
-              >
-                <span>Kom igång gratis</span>
-                <ChevronRight size={16} />
-              </button>
-
-              {onStartDemo && (
-                <button
-                  onClick={onStartDemo}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-white hover:bg-[#F9F8F6] text-[#211F1C] border border-[#E2DDD4] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
-                >
-                  <span>Testa demo</span>
-                </button>
-              )}
+        <section className="w-full py-20 md:py-28 px-6 sm:px-10 bg-[#EFECE6] text-center border-b border-[#E2DDD4]">
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div className="space-y-2.5">
+              <h2 className="text-4xl sm:text-6xl md:text-6xl font-extrabold tracking-tight leading-[1.05] text-[#211F1C]">
+                Redo att få koll?
+              </h2>
+              
+              <p className="text-base sm:text-lg md:text-xl text-[#6E6961] font-normal max-w-xl mx-auto leading-snug sm:leading-normal">
+                Börja med din egen ekonomi eller testa Dejz direkt med exempeldata.
+              </p>
             </div>
+            
+            <div className="space-y-2 pt-1">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button 
+                  onClick={onGetStarted} 
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
+                >
+                  <span>Kom igång gratis</span>
+                  <ChevronRight size={16} />
+                </button>
 
-            <p className="text-xs sm:text-sm text-[#6E6961] font-medium pt-1">
-              Du kan testa demoläget utan att skapa ett konto.
-            </p>
+                {onStartDemo && (
+                  <button
+                    onClick={onStartDemo}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-white hover:bg-[#F9F8F6] text-[#211F1C] border border-[#E2DDD4] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
+                  >
+                    <span>Testa demo</span>
+                  </button>
+                )}
+              </div>
+
+              <p className="text-xs sm:text-sm text-[#6E6961] font-medium">
+                Du kan testa demoläget utan att skapa ett konto.
+              </p>
+            </div>
           </div>
         </section>
 

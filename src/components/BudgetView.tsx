@@ -516,7 +516,7 @@ export function BudgetView({
         {/* 2. Kategorilistan (Alla kategorier samlade i en ren lista) */}
         <div className="space-y-3">
           <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1 opacity-70 block">
-            {config.language === 'en' ? 'Categories' : 'Kategorier'} ({sortedCategoriesForManage.length})
+            {config.language === 'en' ? 'Categories' : 'Kategorier'}
           </span>
           
           <div className="overflow-hidden rounded-[22px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">

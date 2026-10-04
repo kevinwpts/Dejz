@@ -146,7 +146,7 @@ export function SettingsView({
       <div className="space-y-4">
         <div className="flex items-center justify-between mb-4">
           <span className="text-xs font-semibold text-[var(--text-secondary)]">
-            {list.length} {t('categories').toLowerCase()}
+            {type === 'income' ? (config.language === 'en' ? 'Income Categories' : 'Inkomstkategorier') : t('categories')}
           </span>
           <Button
             variant="secondary"

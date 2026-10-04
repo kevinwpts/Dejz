@@ -404,7 +404,7 @@ export function AnalysisView({
       <div className="space-y-3 pb-8">
         <div className="flex items-center justify-between px-1">
           <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
-            {t('categories')} ({categoryData.filter(c => c.value > 0).length})
+            {t('categories')}
           </h3>
         </div>
 
