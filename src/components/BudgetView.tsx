@@ -2,7 +2,8 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { Check, Sparkles, RotateCcw, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, MoreVertical, ChevronDown } from 'lucide-react';
-import { ICON_MAP, isEmojiString } from '../utils/icons';
+import { ICON_MAP, isEmojiString, getCategoryIconName } from '../utils/icons';
+import { CategoryIcon } from './CategoryIcon';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { BudgetItem } from './BudgetItem';
@@ -84,7 +85,6 @@ export function BudgetView({
   const [incomeSortBy, setIncomeSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [savingSortBy, setSavingSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [confirmReset, setConfirmReset] = React.useState(false);
-  const [isFixedOnlyExpanded, setIsFixedOnlyExpanded] = React.useState(false);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -279,26 +279,7 @@ export function BudgetView({
     });
 
   if (showCategoryBudgets) {
-    // Sektionering av kategorier
-    const activeCategoriesList = sortedCategoriesForManage.filter((cat) => {
-      const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
-      const hasExtraBudget = (Number(cat.budget) || 0) > fixedSpent;
-      return !fixedSpent || hasExtraBudget;
-    });
-
-    const fixedOnlyCategoriesList = sortedCategoriesForManage.filter((cat) => {
-      const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
-      const hasExtraBudget = (Number(cat.budget) || 0) > fixedSpent;
-      return fixedSpent > 0 && !hasExtraBudget;
-    });
-
-    const totalFixedOnlySum = fixedOnlyCategoriesList.reduce((sum, cat) => {
-      return sum + Math.round(getFixedSpentForCategory(cat.name));
-    }, 0);
-
     const renderCategoryRow = (cat: any) => {
-      const iconName = cat.icon;
-      const Icon = ICON_MAP[iconName];
       const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
       const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
       const isEditingThis = editingCategoryName === cat.name;
@@ -309,15 +290,22 @@ export function BudgetView({
           key={cat.name}
           className="py-3.5 px-4 sm:px-5 flex items-center justify-between gap-4 transition-colors"
         >
-          {/* Left Part: Icon, Name and helper text */}
+          {/* Left Part: Category Icon with Color, Name and helper text */}
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-9 h-9 rounded-[14px] bg-black/5 dark:bg-white/[0.04] text-[var(--text-primary)] flex items-center justify-center shrink-0">
-              {isEmojiString(iconName) ? (
-                <span className="text-base leading-none">{iconName}</span>
-              ) : Icon ? (
-                <Icon size={16} strokeWidth={2} className="text-[var(--text-primary)]" />
+            <div className="shrink-0">
+              {isEmojiString(cat.icon) ? (
+                <div 
+                  className="w-[34px] h-[34px] sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-base shrink-0"
+                  style={{ backgroundColor: cat.color ? `${cat.color}20` : 'var(--surface-muted)' }}
+                >
+                  {cat.icon}
+                </div>
               ) : (
-                <div className="w-2.5 h-2.5 rounded-full bg-[var(--text-primary)]" />
+                <CategoryIcon
+                  icon={cat.icon || getCategoryIconName(cat.name)}
+                  color={cat.color}
+                  size="md"
+                />
               )}
             </div>
 
@@ -525,64 +513,16 @@ export function BudgetView({
           )}
         </div>
 
-        {/* 2. Kategorilistan (Öppna kategorier i huvudlistan) */}
+        {/* 2. Kategorilistan (Alla kategorier samlade i en ren lista) */}
         <div className="space-y-3">
           <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1 opacity-70 block">
-            {config.language === 'en' ? 'Categories' : 'Kategorier'} ({activeCategoriesList.length})
+            {config.language === 'en' ? 'Categories' : 'Kategorier'} ({sortedCategoriesForManage.length})
           </span>
           
           <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
-            {activeCategoriesList.map((cat) => renderCategoryRow(cat))}
+            {sortedCategoriesForManage.map((cat) => renderCategoryRow(cat))}
           </div>
         </div>
-
-        {/* 3. Hopfaellbar sektion foer enbart fasta utgifter */}
-        {fixedOnlyCategoriesList.length > 0 && (
-          <div className="space-y-2">
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                setIsFixedOnlyExpanded(!isFixedOnlyExpanded);
-              }}
-              className="w-full flex items-center justify-between p-4 rounded-[18px] bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-2 h-2 rounded-full bg-[var(--text-secondary)] opacity-60" />
-                <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
-                  Enbart fasta utgifter ({fixedOnlyCategoriesList.length} st)
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[12.5px] font-bold text-[var(--text-primary)] font-amount tabular-nums">
-                  {formatAmount(totalFixedOnlySum, config.language)} {curr}
-                </span>
-                <ChevronDown 
-                  size={15} 
-                  className={`text-[var(--text-secondary)] transition-transform duration-200 ${
-                    isFixedOnlyExpanded ? 'transform rotate-180' : ''
-                  }`} 
-                />
-              </div>
-            </button>
-
-            <AnimatePresence initial={false}>
-              {isFixedOnlyExpanded && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.18 }}
-                  className="overflow-hidden space-y-2.5"
-                >
-                  <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] divide-y divide-black/[0.04] dark:divide-white/[0.04]">
-                    {fixedOnlyCategoriesList.map((cat) => renderCategoryRow(cat))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
 
         {/* Spara & Klar */}
         <div className="pt-2">

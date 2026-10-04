@@ -113,7 +113,7 @@ export function IconPickerModal({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.94, opacity: 0, y: 16 }}
           transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-          className="bg-white dark:bg-[#1C1C1C] w-full max-w-lg rounded-[28px] border border-black/[0.08] dark:border-white/[0.08] shadow-2xl overflow-hidden flex flex-col max-h-[88vh] font-sans"
+          className="bg-[var(--bg-color)] w-full max-w-lg rounded-[28px] border-none shadow-2xl overflow-hidden flex flex-col max-h-[88vh] font-sans"
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}

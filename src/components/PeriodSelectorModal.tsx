@@ -122,6 +122,52 @@ export function PeriodSelectorModal({
           <div className="overflow-y-auto space-y-2 shrink min-h-0 custom-scrollbar pt-1">
             {viewMode === 'list' ? (
               <div className="space-y-2">
+                {/* Alla perioder option */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.selection === 'function') {
+                      feedback.selection();
+                    } else if (typeof feedback?.tap === 'function') {
+                      feedback.tap();
+                    }
+                    onSelectPeriod(null);
+                    onSelectDate(null);
+                    onClose();
+                  }}
+                  className={`w-full flex items-center justify-between py-3 px-4 rounded-[16px] transition-all cursor-pointer text-left active:scale-[0.99] min-h-[52px] ${
+                    !selectedPeriod && !selectedDate
+                      ? 'bg-blue-500/10 dark:bg-blue-500/15 text-[var(--text-primary)] font-semibold'
+                      : 'bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] text-[var(--text-secondary)] font-medium'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div 
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                        !selectedPeriod && !selectedDate
+                          ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold shadow-xs' 
+                          : 'bg-black/5 dark:bg-[#1C1C1C] text-[var(--text-secondary)]'
+                      }`}
+                    >
+                      <CalendarIcon size={15} strokeWidth={1.8} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight truncate block">
+                        {currentLang === 'en' ? 'All periods' : 'Alla perioder'}
+                      </span>
+                      <span className="text-[11px] text-[var(--text-secondary)] opacity-80 block truncate mt-0.5">
+                        {currentLang === 'en' ? 'Show all transactions' : 'Visa alla transaktioner'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {!selectedPeriod && !selectedDate && (
+                    <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center shrink-0 ml-2 shadow-2xs">
+                      <Check size={12} strokeWidth={3} />
+                    </div>
+                  )}
+                </button>
+
                 {chronologicalPeriods.map((p, idx) => {
                   const [title, sub] = p.name?.includes('(')
                     ? p.name.split('(').map((s: string) => s.replace(')', '').trim())
@@ -200,7 +246,7 @@ export function PeriodSelectorModal({
                   if (typeof feedback?.light === 'function') feedback.light();
                   setViewMode('calendar');
                 }}
-                className="w-full h-12 px-4 rounded-[14px] bg-white dark:bg-[#222222] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border border-black/[0.06] dark:border-white/[0.08] active:scale-[0.98] shadow-none"
+                className="w-full h-12 px-4 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] text-[var(--text-primary)] text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border-none active:scale-[0.98] shadow-none"
               >
                 <CalendarIcon size={16} strokeWidth={2} />
                 <span>{currentLang === 'en' ? 'Select day' : 'Välj dag'}</span>

@@ -423,7 +423,7 @@ export function LogView({
         calendarContent={
           <div className="space-y-2.5">
             {/* Period Stepper (Left / Right) */}
-            <div className="flex items-center justify-between bg-black/5 dark:bg-[#222222] border-none shadow-none rounded-2xl p-1.5">
+            <div className="flex items-center justify-between bg-[var(--surface-color)] border-none shadow-none rounded-2xl p-1.5">
               <button
                 type="button"
                 onClick={handleModalPrev}
@@ -445,7 +445,7 @@ export function LogView({
                     {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                   </span>
                   {modalPeriod?.isCurrent && (
-                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] border-none">
+                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#1C1C1C] text-[var(--text-secondary)] border-none">
                       {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
                     </span>
                   )}
@@ -484,10 +484,10 @@ export function LogView({
                   setSelectedDate(null);
                   setIsPeriodPickerOpen(false);
                 }}
-                className={`inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer border active:scale-95 ${
+                className={`inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-none active:scale-95 ${
                   selectedPeriod?.name === modalPeriod?.name && !selectedDate
-                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-transparent shadow-xs'
-                    : 'bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 border-black/10 dark:border-white/10'
+                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
+                    : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10'
                 }`}
               >
                 <Layers size={13} strokeWidth={2} />

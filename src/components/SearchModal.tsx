@@ -109,11 +109,11 @@ export function SearchModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.98 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="bg-[#EFECE6] dark:bg-[#141414] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[28px] border border-black/[0.06] dark:border-white/[0.08] shadow-2xl flex flex-col overflow-hidden font-sans"
+            className="bg-[var(--bg-color)] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[28px] border-none shadow-2xl flex flex-col overflow-hidden font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Search Bar */}
-            <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-black/[0.06] dark:border-white/[0.08] bg-[#EFECE6] dark:bg-[#141414] flex items-center gap-2.5 shrink-0">
+            <div className="p-3.5 sm:p-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:pt-4 border-b border-black/[0.06] dark:border-white/[0.08] bg-[var(--bg-color)] flex items-center gap-2.5 shrink-0">
               <div className="flex-1 relative flex items-center bg-white dark:bg-[#222222] rounded-full border border-black/[0.06] dark:border-white/[0.08] px-3.5 h-[44px] transition-all shadow-none">
                 <Search size={18} className="text-[var(--text-tertiary)] shrink-0 mr-2.5" />
                 <input 

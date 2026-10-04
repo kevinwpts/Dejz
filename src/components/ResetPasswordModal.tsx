@@ -69,7 +69,7 @@ export function ResetPasswordModal({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 10 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="bg-white dark:bg-[#1C1C1C] border border-black/[0.08] dark:border-white/[0.08] rounded-[28px] p-6 sm:p-7 w-full max-w-md shadow-2xl relative font-sans"
+          className="bg-[var(--bg-color)] border-none rounded-[28px] p-6 sm:p-7 w-full max-w-md shadow-2xl relative font-sans"
         >
           <div className="absolute top-5 right-5">
             <button
