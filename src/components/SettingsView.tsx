@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Check, Sun, Moon, Monitor } from 'lucide-react';
+import { Plus, Check, Sun, Moon, Monitor, Calendar, Clock, ChevronRight } from 'lucide-react';
 import { Config } from '../types';
 import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
@@ -498,46 +498,60 @@ export function SettingsView({
        <div>
         {activeSection === 'salary' && (
           <div className="w-full py-2 space-y-4">
-            <div className="bg-[var(--surface-color)] p-5 rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-5">
+            <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-[var(--surface-color)] backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] shadow-none">
               
               {/* Payday Setting Row */}
-              <div className="space-y-1.5">
-                <button
-                  type="button"
-                  onClick={() => setIsPaydayModalOpen(true)}
-                  className="w-full flex items-center justify-between p-4 rounded-[14px] bg-[var(--surface-muted)] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-colors cursor-pointer text-left border border-black/[0.04] dark:border-white/[0.06]"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-[var(--text-secondary)]">Lönedag</span>
-                    <span className="text-sm font-bold text-[var(--text-primary)] mt-0.5">
-                      {config.language === 'en' ? `The ${config.payday}` : `Den ${config.payday}:e`}
+              <button
+                type="button"
+                onClick={() => setIsPaydayModalOpen(true)}
+                className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer text-left group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0 pr-2">
+                  <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-primary)]">
+                    <Calendar size={18} strokeWidth={2} />
+                  </div>
+                  <div className="min-w-0 flex flex-col justify-center">
+                    <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                      {config.language === 'en' ? 'Payday' : 'Lönedag'}
+                    </span>
+                    <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                      {config.language === 'en' 
+                        ? `The ${config.payday || 25}th of each month` 
+                        : `Den ${config.payday || 25}:e varje månad`}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-                    <span>Ändra</span>
-                    <span className="text-base">›</span>
-                  </div>
-                </button>
-              </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+                    {config.language === 'en' ? `The ${config.payday || 25}` : `Den ${config.payday || 25}:e`}
+                  </span>
+                  <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </button>
 
               {/* Weekend Handling Row */}
-              <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.04]">
-                <div className="flex items-center justify-between p-1">
-                  <div className="flex flex-col pr-4">
-                    <span className="text-xs font-semibold text-[var(--text-primary)]">
-                      {config.language === 'en' ? 'Pay early if payday is on a weekend' : 'Helghantering'}
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3.5 min-w-0 pr-4">
+                  <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-primary)]">
+                    <Clock size={18} strokeWidth={2} />
+                  </div>
+                  <div className="min-w-0 flex flex-col justify-center">
+                    <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                      {config.language === 'en' ? 'Pay early if weekend' : 'Helghantering'}
                     </span>
-                    <span className="text-[11px] text-[var(--text-secondary)] mt-0.5 font-medium">
-                      {config.language === 'en' ? 'Get paid the Friday before if payday is a weekend' : 'Få lön fredagen innan om lönedagen är helg'}
+                    <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                      {config.language === 'en' 
+                        ? 'Get paid Friday before if payday is on a weekend' 
+                        : 'Få lön fredagen innan om lönedagen är en helg'}
                     </span>
                   </div>
-                  <ToggleSwitch
-                    isOn={!!config.paydayBeforeWeekend}
-                    onToggle={() => {
-                      setConfig({ ...config, paydayBeforeWeekend: !config.paydayBeforeWeekend });
-                    }}
-                  />
                 </div>
+                <ToggleSwitch
+                  isOn={!!config.paydayBeforeWeekend}
+                  onToggle={() => {
+                    setConfig({ ...config, paydayBeforeWeekend: !config.paydayBeforeWeekend });
+                  }}
+                />
               </div>
             </div>
           </div>

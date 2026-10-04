@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Sparkles, RotateCcw, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, MoreVertical } from 'lucide-react';
+import { Check, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
 import { isEmojiString, getCategoryIconName } from '../utils/icons';
 import { CategoryIcon } from './CategoryIcon';
 import { Frequency, Config, Income, FixedExpense } from '../types';
@@ -83,15 +83,6 @@ export function BudgetView({
   const [fixedSortBy, setFixedSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [incomeSortBy, setIncomeSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [savingSortBy, setSavingSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
-  const [confirmReset, setConfirmReset] = React.useState(false);
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    if (confirmReset) {
-      const timer = setTimeout(() => setConfirmReset(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [confirmReset]);
 
   const sortedIncomes = React.useMemo(() => {
     const list = [...(incomes || [])];
@@ -222,41 +213,6 @@ export function BudgetView({
 
   const remainingToAllocate = totalIncomeSum - totalAllocated;
   const isOverAllocated = remainingToAllocate < 0;
-
-  // Automatic Distribution (Secondary choice requested by user)
-  const handleAutoDistribute = () => {
-    const cats = config.categories || [];
-    if (cats.length === 0 || everydayBudget <= 0) return;
-
-    // Target amount to distribute: if 0 allocated, distribute everydayBudget; else distribute remainingToAllocate across unbudgeted
-    const unbudgetedCats = cats.filter((c) => !c.budget || Number(c.budget) <= 0);
-    const targetPool = unbudgetedCats.length > 0 ? unbudgetedCats : cats;
-
-    const amountPerCat = Math.floor(everydayBudget / targetPool.length / 50) * 50; // round to nearest 50 kr
-
-    const updated = cats.map((c) => {
-      if (targetPool.some((t) => t.name === c.name)) {
-        return { ...c, budget: amountPerCat > 0 ? amountPerCat : 500 };
-      }
-      return c;
-    });
-
-    setConfig({ ...config, categories: updated });
-  };
-
-  // Auto-adapt down if over-allocated
-  const handleAutoAdaptDown = () => {
-    if (!isOverAllocated || totalAllocated <= 0 || totalIncomeSum <= 0) return;
-    const ratio = totalIncomeSum / totalAllocated;
-
-    const updated = (config.categories || []).map((c) => {
-      if (!c.budget || Number(c.budget) <= 0) return c;
-      const scaled = Math.round((Number(c.budget) * ratio) / 50) * 50;
-      return { ...c, budget: scaled > 0 ? scaled : undefined };
-    });
-
-    setConfig({ ...config, categories: updated });
-  };
 
   
 
@@ -401,70 +357,6 @@ export function BudgetView({
             <span className="text-[14px] font-semibold text-[var(--text-secondary)] tracking-tight">
               {config.language === 'en' ? 'Budget overview' : 'Budgetöversikt'}
             </span>
-            
-            {/* Tre-punkters meny */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof feedback?.light === 'function') feedback.light();
-                  setIsMenuOpen(!isMenuOpen);
-                }}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95"
-                aria-label="Fler alternativ"
-              >
-                <MoreVertical size={16} strokeWidth={2.2} />
-              </button>
-
-              <AnimatePresence>
-                {isMenuOpen && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-[100]" 
-                      onClick={() => setIsMenuOpen(false)}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -8 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -8 }}
-                      transition={{ duration: 0.12 }}
-                      className="absolute right-0 mt-1.5 w-48 bg-white dark:bg-[#222222] rounded-[16px] shadow-lg border border-black/5 dark:border-white/10 z-[110] overflow-hidden py-1"
-                    >
-                      {isOverAllocated && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleAutoAdaptDown();
-                            setIsMenuOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-2.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2 cursor-pointer transition-colors"
-                        >
-                          <Sparkles size={13} />
-                          Anpassa automatiskt
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!confirmReset) {
-                            setConfirmReset(true);
-                          } else {
-                            const updatedCategories = (config.categories || []).map((c) => ({ ...c, budget: null }));
-                            setConfig({ ...config, categories: updatedCategories });
-                            setConfirmReset(false);
-                            setIsMenuOpen(false);
-                          }
-                        }}
-                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2 cursor-pointer transition-colors"
-                      >
-                        <RotateCcw size={13} />
-                        {confirmReset ? 'Klicka igen för att nollställa' : 'Nollställ budgeten'}
-                      </button>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
           </div>
 
           {/* Beloppet som återstår med störst visuell tyngd */}
@@ -504,18 +396,6 @@ export function BudgetView({
               style={{ width: `${Math.min(100, Math.round((totalAllocated / (totalIncomeSum || 1)) * 100))}%` }}
             />
           </div>
-
-          {/* Knappen "Fördela automatiskt" under förloppsindikatorn */}
-          {!isOverAllocated && remainingToAllocate > 0 && (
-            <button
-              type="button"
-              onClick={handleAutoDistribute}
-              className="w-full mt-2 h-[40px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-primary)] hover:text-[var(--accent-color)] text-[12.5px] font-semibold tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
-            >
-              <Sparkles size={13} className="text-[var(--accent-color)] animate-pulse" />
-              Fördela automatiskt
-            </button>
-          )}
         </div>
 
         {/* 2. Kategorilistan (Alla kategorier samlade i en ren lista) */}

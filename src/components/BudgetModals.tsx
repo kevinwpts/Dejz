@@ -6,7 +6,7 @@ import { X, Check, Trash2, ChevronDown, PiggyBank, Pencil, ChevronRight, Calenda
 import { Income, FixedExpense, Frequency, Category, Config, MonthlySaving } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
-import { fetchLogoForName, getLogoUrl } from '../utils/logo';
+import { fetchLogoForName, getLogoUrl, findKnownBrandDomain } from '../utils/logo';
 import { IconSelector } from './IconSelector';
 import { IconPickerModal } from './IconPickerModal';
 import { ICON_MAP, isEmojiString, getPaymentMethodIcon, getCategoryIconName } from '../utils/icons';
@@ -325,8 +325,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
   const paymentMethod = typeof income?.paymentMethod === 'string' ? income.paymentMethod : (income?.paymentMethod as any)?.name || firstPaymentMethod;
   const [isVariable, setIsVariable] = useState(income?.isVariable || false);
   const [category, setCategory] = useState(typeof income?.category === 'object' ? (income.category as any)?.name : (income?.category || (categories && categories.length > 0 ? categories[0].name : '')));
-  const [icon, setIcon] = useState(income?.icon || '💰');
-  const originalName = useRef(income?.name || '');
+  const [icon, setIcon] = useState(income?.icon || 'none');
   const [manualSelectionThisSession, setManualSelectionThisSession] = useState(false);
   
   const [logo, setLogo] = useState<string | undefined>(income?.logo);
@@ -339,22 +338,39 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!name || name.length < 2) {
-      if (!manualSelectionThisSession) setLogo(undefined);
+    if (!name || name.trim().length < 2) {
+      if (!manualSelectionThisSession) {
+        setLogo(undefined);
+        setIcon('none');
+      }
       setAutoLogo(undefined);
       return;
     }
 
+    if (manualSelectionThisSession) return;
+
+    const trimmedName = name.trim();
+    const knownDomain = findKnownBrandDomain(trimmedName);
+    const instantLogo = knownDomain 
+      ? `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128` 
+      : getLogoUrl(trimmedName);
+
+    if (instantLogo) {
+      setLogo(instantLogo);
+      setIcon('none');
+      setAutoLogo(instantLogo);
+      return;
+    }
+
     const timer = setTimeout(async () => {
-      const url = await fetchLogoForName(name);
+      const url = await fetchLogoForName(trimmedName);
       setAutoLogo(url);
       
-      // Auto-select if the name has changed and user hasn't manually picked one this session
-      if (url && !manualSelectionThisSession && (name !== originalName.current || !logo)) {
+      if (url && !manualSelectionThisSession) {
         setLogo(url);
         setIcon('none');
       }
-    }, 800);
+    }, 200);
     return () => clearTimeout(timer);
   }, [name, manualSelectionThisSession]);
 
@@ -1181,8 +1197,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
   const [paymentMethod, setPaymentMethod] = useState(typeof expense?.paymentMethod === 'string' ? expense.paymentMethod : (expense?.paymentMethod as any)?.name || firstPaymentMethod);
   const [isVariable, setIsVariable] = useState(expense?.isVariable || false);
-  const [icon, setIcon] = useState(expense?.icon || '🏠');
-  const originalName = useRef(expense?.name || '');
+  const [icon, setIcon] = useState(expense?.icon || 'none');
   const [manualSelectionThisSession, setManualSelectionThisSession] = useState(false);
   
   const [logo, setLogo] = useState<string | undefined>(expense?.logo);
@@ -1196,22 +1211,39 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!name || name.length < 2) {
-      if (!manualSelectionThisSession) setLogo(undefined);
+    if (!name || name.trim().length < 2) {
+      if (!manualSelectionThisSession) {
+        setLogo(undefined);
+        setIcon('none');
+      }
       setAutoLogo(undefined);
       return;
     }
-    
+
+    if (manualSelectionThisSession) return;
+
+    const trimmedName = name.trim();
+    const knownDomain = findKnownBrandDomain(trimmedName);
+    const instantLogo = knownDomain 
+      ? `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128` 
+      : getLogoUrl(trimmedName);
+
+    if (instantLogo) {
+      setLogo(instantLogo);
+      setIcon('none');
+      setAutoLogo(instantLogo);
+      return;
+    }
+
     const timer = setTimeout(async () => {
-      const url = await fetchLogoForName(name);
+      const url = await fetchLogoForName(trimmedName);
       setAutoLogo(url);
       
-      // Auto-select if name changed and not manually picked this session
-      if (url && !manualSelectionThisSession && (name !== originalName.current || !logo)) {
+      if (url && !manualSelectionThisSession) {
         setLogo(url);
         setIcon('none');
       }
-    }, 800);
+    }, 200);
     return () => clearTimeout(timer);
   }, [name, manualSelectionThisSession]);
 
@@ -2039,8 +2071,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
   const [paymentMethod, setPaymentMethod] = useState(typeof saving?.paymentMethod === 'string' ? saving.paymentMethod : (saving?.paymentMethod as any)?.name || firstPaymentMethod);
   const [isVariable, setIsVariable] = useState(saving?.isVariable || false);
-  const [icon, setIcon] = useState(saving?.icon || 'piggy-bank');
-  const originalName = useRef(saving?.name || '');
+  const [icon, setIcon] = useState(saving?.icon || 'none');
   const [manualSelectionThisSession, setManualSelectionThisSession] = useState(false);
   
   const [logo, setLogo] = useState<string | undefined>(saving?.logo);
@@ -2052,22 +2083,39 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!name || name.length < 2) {
-      if (!manualSelectionThisSession) setLogo(undefined);
+    if (!name || name.trim().length < 2) {
+      if (!manualSelectionThisSession) {
+        setLogo(undefined);
+        setIcon('none');
+      }
       setAutoLogo(undefined);
       return;
     }
-    
+
+    if (manualSelectionThisSession) return;
+
+    const trimmedName = name.trim();
+    const knownDomain = findKnownBrandDomain(trimmedName);
+    const instantLogo = knownDomain 
+      ? `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128` 
+      : getLogoUrl(trimmedName);
+
+    if (instantLogo) {
+      setLogo(instantLogo);
+      setIcon('none');
+      setAutoLogo(instantLogo);
+      return;
+    }
+
     const timer = setTimeout(async () => {
-      const url = await fetchLogoForName(name);
+      const url = await fetchLogoForName(trimmedName);
       setAutoLogo(url);
       
-      // Auto-select if name changed and not manually picked this session
-      if (url && !manualSelectionThisSession && (name !== originalName.current || !logo)) {
+      if (url && !manualSelectionThisSession) {
         setLogo(url);
         setIcon('none');
       }
-    }, 800);
+    }, 200);
     return () => clearTimeout(timer);
   }, [name, manualSelectionThisSession]);
 

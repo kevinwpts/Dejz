@@ -75,6 +75,7 @@ export function TransactionLogo({
 
   if (visual.logoUrl && !imgError) {
     const bgColor = logoConfig?.backgroundColor || '#FFFFFF';
+    const isTransparent = logoConfig?.isTransparent;
 
     return (
       <div
@@ -84,7 +85,11 @@ export function TransactionLogo({
         <img
           src={visual.logoUrl}
           alt={merchantName || 'Logo'}
-          className={`${sizeConfig.innerImg} max-w-full max-h-full object-contain object-center border-none outline-none ring-0 select-none pointer-events-none block`}
+          className={
+            isTransparent
+              ? "w-[85%] h-[85%] object-contain object-center select-none pointer-events-none block"
+              : "w-full h-full object-cover object-center select-none pointer-events-none block"
+          }
           onError={() => setImgError(true)}
           referrerPolicy="no-referrer"
           loading="lazy"
