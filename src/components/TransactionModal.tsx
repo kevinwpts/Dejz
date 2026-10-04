@@ -760,16 +760,16 @@ export function TransactionModal({
               </span>
               <div className="flex items-center gap-2 min-w-0">
                 <div 
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
                   style={{ 
-                    backgroundColor: currentCatData?.color ? `${currentCatData.color}25` : 'rgba(0,0,0,0.06)',
-                    color: currentCatData?.color || 'var(--text-primary)'
+                    backgroundColor: currentCatData?.color || 'var(--accent-color)',
                   }}
                 >
                   <CategoryIcon 
                     icon={currentCatData?.icon || 'tag'} 
-                    color={currentCatData?.color} 
-                    size="2xs" 
+                    size="sm" 
+                    noBackground 
+                    whiteIcon 
                   />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
@@ -1295,7 +1295,7 @@ export function TransactionModal({
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar min-h-0">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     {categories.map(cat => {
                       const isSelected = (category || '').toLowerCase() === cat.name.toLowerCase();
                       return (
@@ -1314,28 +1314,20 @@ export function TransactionModal({
                             }
                             setIsCategoryPickerOpen(false);
                           }}
-                          className={`flex items-center gap-2.5 p-3 rounded-[14px] text-left transition-all cursor-pointer ${
-                            isSelected
-                              ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs font-semibold'
-                              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.08]'
+                          style={{ backgroundColor: cat.color || '#6366f1' }}
+                          className={`h-28 sm:h-32 p-3.5 rounded-[20px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                            isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
-                          <div 
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                              isSelected ? 'bg-white/20 text-white' : ''
-                            }`}
-                            style={isSelected ? {} : { backgroundColor: cat.color ? `${cat.color}20` : 'rgba(0,0,0,0.05)', color: cat.color || 'var(--text-primary)' }}
-                          >
-                            <CategoryIcon 
-                              icon={cat.icon} 
-                              color={isSelected ? '#ffffff' : cat.color} 
-                              size="xs" 
-                            />
-                          </div>
-                          <span className="text-[13px] truncate font-medium flex-1">
+                          <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />
+                          <span className="text-[14px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
                             {cat.name}
                           </span>
-                          {isSelected && <Check size={16} strokeWidth={2.5} className="shrink-0" />}
+                          {isSelected && (
+                            <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
+                              <Check size={14} strokeWidth={3} />
+                            </div>
+                          )}
                         </button>
                       );
                     })}

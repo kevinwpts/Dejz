@@ -510,16 +510,16 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               </span>
               <div className="flex items-center gap-2 min-w-0">
                 <div 
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
                   style={{ 
-                    backgroundColor: (categories || []).find(c => c.name === category)?.color ? `${(categories || []).find(c => c.name === category)?.color}25` : 'rgba(0,0,0,0.06)',
-                    color: (categories || []).find(c => c.name === category)?.color || 'var(--text-primary)'
+                    backgroundColor: (categories || []).find(c => c.name === category)?.color || 'var(--accent-color)'
                   }}
                 >
                   <CategoryIcon 
                     icon={(categories || []).find(c => c.name === category)?.icon || 'tag'} 
-                    color={(categories || []).find(c => c.name === category)?.color} 
-                    size="2xs" 
+                    size="sm" 
+                    noBackground 
+                    whiteIcon 
                   />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
@@ -692,31 +692,36 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     <X size={16} strokeWidth={2.2} />
                   </button>
                 </div>
-                <div className="p-3 overflow-y-auto space-y-1 shrink min-h-0 custom-scrollbar">
-                  {(categories || []).map(cat => {
-                    const isSelected = category === cat.name;
-                    return (
-                      <button
-                        key={cat.name}
-                        type="button"
-                        onClick={() => {
-                          setCategory(cat.name);
-                          setIsCategorySelectorOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left"
-                      >
-                        <div className="flex items-center gap-3">
-                          <CategoryIcon icon={cat.icon} color={cat.color} size="sm" />
-                          <span className={`text-[15px] tracking-tight ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-normal text-[var(--text-secondary)]'}`}>{cat.name}</span>
-                        </div>
-                        {isSelected && (
-                          <div className="text-[var(--accent-color)] shrink-0 pl-1">
-                            <Check size={18} strokeWidth={2.5} />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
+                <div className="p-3 overflow-y-auto shrink min-h-0 custom-scrollbar max-h-[340px]">
+                  <div className="grid grid-cols-2 gap-3">
+                    {(categories || []).map(cat => {
+                      const isSelected = category === cat.name;
+                      return (
+                        <button
+                          key={cat.name}
+                          type="button"
+                          onClick={() => {
+                            setCategory(cat.name);
+                            setIsCategorySelectorOpen(false);
+                          }}
+                          style={{ backgroundColor: cat.color || '#6366f1' }}
+                          className={`h-24 sm:h-28 p-3 rounded-[18px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                            isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
+                          }`}
+                        >
+                          <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />
+                          <span className="text-[13.5px] sm:text-[14px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
+                            {cat.name}
+                          </span>
+                          {isSelected && (
+                            <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
+                              <Check size={14} strokeWidth={3} />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </motion.div>
             </div>,
@@ -1361,16 +1366,16 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               </span>
               <div className="flex items-center gap-2 min-w-0">
                 <div 
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
                   style={{ 
-                    backgroundColor: categories.find(c => c.name === category)?.color ? `${categories.find(c => c.name === category)?.color}25` : 'rgba(0,0,0,0.06)',
-                    color: categories.find(c => c.name === category)?.color || 'var(--text-primary)'
+                    backgroundColor: categories.find(c => c.name === category)?.color || 'var(--accent-color)'
                   }}
                 >
                   <CategoryIcon 
                     icon={categories.find(c => c.name === category)?.icon || 'receipt'} 
-                    color={categories.find(c => c.name === category)?.color} 
-                    size="2xs" 
+                    size="sm" 
+                    noBackground 
+                    whiteIcon 
                   />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
@@ -1606,31 +1611,36 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     <X size={16} strokeWidth={2.2} />
                   </button>
                 </div>
-                <div className="p-3 overflow-y-auto space-y-1 shrink min-h-0 custom-scrollbar">
-                  {(categories || []).map(cat => {
-                    const isSelected = category === cat.name;
-                    return (
-                      <button
-                        key={cat.name}
-                        type="button"
-                        onClick={() => {
-                          setCategory(cat.name);
-                          setIsCategorySelectorOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left"
-                      >
-                        <div className="flex items-center gap-3">
-                          <CategoryIcon icon={cat.icon} color={cat.color} size="sm" />
-                          <span className={`text-[15px] tracking-tight ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-normal text-[var(--text-secondary)]'}`}>{cat.name}</span>
-                        </div>
-                        {isSelected && (
-                          <div className="text-[var(--accent-color)] shrink-0 pl-1">
-                            <Check size={18} strokeWidth={2.5} />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
+                <div className="p-3 overflow-y-auto shrink min-h-0 custom-scrollbar max-h-[340px]">
+                  <div className="grid grid-cols-2 gap-3">
+                    {(categories || []).map(cat => {
+                      const isSelected = category === cat.name;
+                      return (
+                        <button
+                          key={cat.name}
+                          type="button"
+                          onClick={() => {
+                            setCategory(cat.name);
+                            setIsCategorySelectorOpen(false);
+                          }}
+                          style={{ backgroundColor: cat.color || '#6366f1' }}
+                          className={`h-24 sm:h-28 p-3 rounded-[18px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                            isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
+                          }`}
+                        >
+                          <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />
+                          <span className="text-[13.5px] sm:text-[14px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
+                            {cat.name}
+                          </span>
+                          {isSelected && (
+                            <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
+                              <Check size={14} strokeWidth={3} />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </motion.div>
             </div>,

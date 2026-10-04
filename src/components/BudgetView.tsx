@@ -301,11 +301,17 @@ export function BudgetView({
                   {cat.icon}
                 </div>
               ) : (
-                <CategoryIcon
-                  icon={cat.icon || getCategoryIconName(cat.name)}
-                  color={cat.color}
-                  size="md"
-                />
+                <div 
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-2xs"
+                  style={{ backgroundColor: cat.color || '#6366f1' }}
+                >
+                  <CategoryIcon
+                    icon={cat.icon || getCategoryIconName(cat.name)}
+                    size="sm"
+                    noBackground
+                    whiteIcon
+                  />
+                </div>
               )}
             </div>
 
