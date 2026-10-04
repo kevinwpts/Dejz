@@ -393,8 +393,8 @@ export function BudgetView({
         {/* 1. Tydlig budgetöversikt i en toppmodul */}
         <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] opacity-80">
-              Budgetöversikt
+            <span className="text-[14px] font-semibold text-[var(--text-secondary)] tracking-tight">
+              {config.language === 'en' ? 'Budget overview' : 'Budgetöversikt'}
             </span>
             
             {/* Tre-punkters meny */}
@@ -515,7 +515,7 @@ export function BudgetView({
 
         {/* 2. Kategorilistan (Alla kategorier samlade i en ren lista) */}
         <div className="space-y-3">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1 opacity-70 block">
+          <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1 block">
             {config.language === 'en' ? 'Categories' : 'Kategorier'}
           </span>
           

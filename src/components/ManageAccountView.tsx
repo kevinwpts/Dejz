@@ -209,7 +209,7 @@ export function ManageAccountView({
             {/* Connected Accounts */}
             {identities.length > 0 && (
               <div className="space-y-2">
-                <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-widest px-1.5 opacity-60 block">
+                <span className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5 block">
                   {t('connectedAccounts' as any) || 'Kopplade konton'}
                 </span>
                 <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-[var(--surface-color)] backdrop-blur-xl border-none shadow-none">

@@ -28,7 +28,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
       {/* Budget Status */}
       <div className="p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] shadow-none">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)]">
+          <h3 className="text-xs font-semibold text-[var(--text-secondary)]">
             {t('budgetUsage')}
           </h3>
           <span className="text-xs font-bold text-[#05B862] bg-[#05B862]/10 px-2.5 py-0.5 rounded-full">
@@ -53,7 +53,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
 
       {/* Category Totals */}
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)] ml-1">
+        <h3 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight ml-1">
           {t('categories')}
         </h3>
         <div className="grid grid-cols-1 gap-2">

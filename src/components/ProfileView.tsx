@@ -272,7 +272,7 @@ export function ProfileView({
       <div className="space-y-4">
         {/* Ekonomi & Budget */}
         <div className="space-y-2">
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] px-1.5">
+          <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
             {t('economy')}
           </h4>
           <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#1C1C1C] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
@@ -309,7 +309,7 @@ export function ProfileView({
 
         {/* App Settings */}
         <div className="space-y-2">
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] px-1.5">
+          <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
             {t('appSettings')}
           </h4>
           <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#1C1C1C] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
@@ -370,7 +370,7 @@ export function ProfileView({
 
         {/* Support & Legal */}
         <div className="space-y-2">
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] px-1.5">
+          <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
             {t('support')}
           </h4>
           <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#1C1C1C] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
@@ -383,7 +383,7 @@ export function ProfileView({
 
         {/* Account Actions */}
         <div className="space-y-2">
-          <h4 className="text-[11px] font-bold uppercase tracking-widest text-danger px-1.5 opacity-70">
+          <h4 className="text-[12px] font-semibold text-rose-500 dark:text-rose-400 px-1.5">
             {t('dangerZone')}
           </h4>
           <div className="overflow-hidden border-none rounded-[22px] bg-white dark:bg-[#1C1C1C] backdrop-blur-xl shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">

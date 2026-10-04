@@ -180,7 +180,7 @@ export function ManageAccountModal({
 
           {identities.length > 0 && (
             <div className="space-y-2 pt-1">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-1 block">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] px-1 block">
                 {t('connectedAccounts' as any) || 'Kopplade konton'}
               </span>
               <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/50">

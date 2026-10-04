@@ -144,9 +144,9 @@ export function SettingsView({
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-semibold text-[var(--text-secondary)]">
-            {type === 'income' ? (config.language === 'en' ? 'Income Categories' : 'Inkomstkategorier') : t('categories')}
+        <div className="flex items-center justify-between mb-4 px-1">
+          <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+            {type === 'income' ? (config.language === 'en' ? 'Income categories' : 'Inkomstkategorier') : (config.language === 'en' ? 'Categories' : 'Kategorier')}
           </span>
           <Button
             variant="secondary"
@@ -225,9 +225,9 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-semibold text-[var(--text-secondary)]">
-            {methodsList.length} betalmetodsval
+        <div className="flex items-center justify-between mb-4 px-1">
+          <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+            {config.language === 'en' ? 'Payment methods' : 'Betalningsmetoder'}
           </span>
           <Button
             variant="secondary"
@@ -238,7 +238,7 @@ export function SettingsView({
               setIsPaymentMethodModalOpen(true);
             }}
           >
-            Ny betalmetod
+            {config.language === 'en' ? 'New payment method' : 'Ny betalmetod'}
           </Button>
         </div>
 
@@ -273,7 +273,10 @@ export function SettingsView({
     ];
 
     return (
-      <div className="space-y-4 w-full py-2">
+      <div className="space-y-3 w-full py-2">
+        <h3 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1">
+          {config.language === 'en' ? 'Select language' : 'Välj språk'}
+        </h3>
         <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {languages.map((l) => {
             const isSelected = config.language === l.code;
@@ -320,8 +323,8 @@ export function SettingsView({
     return (
       <div className="space-y-6 w-full py-2">
         <div className="space-y-3">
-          <label className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)] ml-1">
-            Utseendeläge
+          <label className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1 block">
+            {isEn ? 'Appearance mode' : 'Utseendeläge'}
           </label>
           <div className="grid grid-cols-3 gap-2.5">
             {[
@@ -353,8 +356,8 @@ export function SettingsView({
 
         {/* Temafärg */}
         <div className="space-y-3 pt-2">
-          <label className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)] ml-1">
-            Temafärg
+          <label className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1 block">
+            {isEn ? 'Theme color' : 'Temafärg'}
           </label>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
             {THEME_COLOR_OPTIONS.map((theme) => {
@@ -420,8 +423,8 @@ export function SettingsView({
 
     return (
       <div className="space-y-3 w-full py-2">
-        <h3 className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)] px-1">
-          {isEn ? 'Select Currency' : 'Välj valuta'}
+        <h3 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1">
+          {isEn ? 'Select currency' : 'Välj valuta'}
         </h3>
 
         <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
@@ -472,7 +475,9 @@ export function SettingsView({
         {activeSection === 'salary' && (
           <div className="space-y-6">
             <div className="bg-[var(--surface-color)] p-5 rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-5">
-              <h2 className="text-xs sm:text-sm font-bold font-display uppercase tracking-wider text-[var(--text-secondary)]">Lönedag & Period</h2>
+              <h2 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                {config.language === 'en' ? 'Payday & period' : 'Lönedag & period'}
+              </h2>
               
               {/* Payday Setting Row */}
               <div className="space-y-1.5">
