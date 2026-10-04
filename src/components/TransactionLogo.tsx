@@ -39,41 +39,36 @@ export function TransactionLogo({
 
   const sizeConfig = {
     xl: {
-      container: 'w-16 h-16',
+      container: 'w-16 h-16 rounded-[18px]',
       icon: 30,
-      padding: 'p-3',
     },
     lg: {
-      container: 'w-14 h-14',
+      container: 'w-14 h-14 rounded-[16px]',
       icon: 26,
-      padding: 'p-2.5',
     },
     md: {
-      container: 'w-[42px] h-[42px]',
+      container: 'w-[42px] h-[42px] rounded-[12px]',
       icon: 20,
-      padding: 'p-2',
     },
     sm: {
-      container: 'w-8 h-8',
+      container: 'w-8 h-8 rounded-[9px]',
       icon: 15,
-      padding: 'p-1.5',
     },
   }[size] || {
-    container: 'w-[42px] h-[42px]',
+    container: 'w-[42px] h-[42px] rounded-[12px]',
     icon: 20,
-    padding: 'p-2',
   };
 
-  // If there's an official logo and no load error (standard Revolut / Apple Pay / Monzo style)
+  // If there's an official logo and no load error (Klarna / Apple Pay squircle app icon style)
   if (visual.logoUrl && !imgError) {
     return (
       <div
-        className={`${sizeConfig.container} rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-[#242424] border border-black/[0.08] dark:border-white/[0.1] shadow-2xs select-none`}
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-[#222222] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs select-none`}
       >
         <img
           src={visual.logoUrl}
           alt={merchantName || 'Logo'}
-          className={`w-full h-full object-contain ${sizeConfig.padding} object-center select-none pointer-events-none block`}
+          className="w-full h-full object-cover object-center select-none pointer-events-none block"
           onError={() => setImgError(true)}
           referrerPolicy="no-referrer"
           loading="lazy"
@@ -82,14 +77,14 @@ export function TransactionLogo({
     );
   }
 
-  // Fallback Category / Default Icon
+  // Fallback Category / Default Icon (same uniform squircle shape)
   const IconComponent = visual.iconComponent || Receipt;
   const bgColor = visual.backgroundColor || '#6E6961';
   const textColor = visual.textColor || '#ffffff';
 
   return (
     <div
-      className={`${sizeConfig.container} rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs select-none`}
+      className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs select-none`}
       style={{ backgroundColor: bgColor, color: textColor }}
     >
       <IconComponent size={sizeConfig.icon} strokeWidth={1.8} />

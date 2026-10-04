@@ -462,7 +462,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-[16px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
@@ -1334,7 +1334,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-[16px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
