@@ -46,30 +46,45 @@ export function TransactionLogo({
     merchantName,
   ]);
 
-  const containerSize =
-    size === 'xl'
-      ? 'w-16 h-16'
-      : size === 'lg'
-      ? 'w-14 h-14'
-      : size === 'sm'
-      ? 'w-8 h-8'
-      : 'w-[42px] h-[42px]';
-
-  const iconSize = size === 'xl' ? 32 : size === 'lg' ? 24 : size === 'sm' ? 16 : 21;
+  const sizeConfig = {
+    xl: {
+      container: 'w-16 h-16 rounded-[20px]',
+      icon: 32,
+      innerImg: 'w-[75%] h-[75%] rounded-[10px]',
+    },
+    lg: {
+      container: 'w-14 h-14 rounded-[16px]',
+      icon: 26,
+      innerImg: 'w-[75%] h-[75%] rounded-[8px]',
+    },
+    md: {
+      container: 'w-[42px] h-[42px] rounded-[13px]',
+      icon: 21,
+      innerImg: 'w-[76%] h-[76%] rounded-[6px]',
+    },
+    sm: {
+      container: 'w-8 h-8 rounded-[9px]',
+      icon: 16,
+      innerImg: 'w-[76%] h-[76%] rounded-[4px]',
+    },
+  }[size] || {
+    container: 'w-[42px] h-[42px] rounded-[13px]',
+    icon: 21,
+    innerImg: 'w-[76%] h-[76%] rounded-[6px]',
+  };
 
   if (visual.logoUrl && !imgError) {
     const bgColor = logoConfig?.backgroundColor || '#FFFFFF';
 
     return (
       <div
-        className={`${containerSize} rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 border-none outline-none ring-0 shadow-none transition-colors duration-200 select-none`}
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs transition-colors duration-200 select-none`}
         style={{ backgroundColor: bgColor }}
       >
-        {/* Maximum 70% width and height, object-fit contain, strictly centered without cropping or stretching */}
         <img
           src={visual.logoUrl}
           alt={merchantName || 'Logo'}
-          className="w-[70%] h-[70%] max-w-[70%] max-h-[70%] object-contain object-center border-none outline-none ring-0 select-none pointer-events-none block"
+          className={`${sizeConfig.innerImg} max-w-full max-h-full object-contain object-center border-none outline-none ring-0 select-none pointer-events-none block`}
           onError={() => setImgError(true)}
           referrerPolicy="no-referrer"
           loading="lazy"
@@ -84,10 +99,10 @@ export function TransactionLogo({
 
   return (
     <div
-      className={`${containerSize} rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 border-none outline-none ring-0 shadow-none select-none`}
+      className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs select-none`}
       style={{ backgroundColor: bgColor, color: textColor }}
     >
-      <IconComponent size={iconSize} strokeWidth={1.75} />
+      <IconComponent size={sizeConfig.icon} strokeWidth={1.8} />
     </div>
   );
 }

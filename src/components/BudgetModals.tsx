@@ -446,7 +446,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-[16px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
@@ -672,13 +672,13 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
           {/* Category Selector Bottom Sheet Modal */}
           {isCategorySelectorOpen && createPortal(
-            <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategorySelectorOpen(false)} />
               <motion.div
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[80dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[32px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -692,7 +692,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     <X size={16} strokeWidth={2.2} />
                   </button>
                 </div>
-                <div className="p-3 overflow-y-auto shrink min-h-0 custom-scrollbar max-h-[340px]">
+                <div className="p-4 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
                   <div className="grid grid-cols-2 gap-3">
                     {(categories || []).map(cat => {
                       const isSelected = category === cat.name;
@@ -705,7 +705,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                             setIsCategorySelectorOpen(false);
                           }}
                           style={{ backgroundColor: cat.color || '#6366f1' }}
-                          className={`h-24 sm:h-28 p-3 rounded-[18px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                          className={`h-28 sm:h-32 p-3.5 rounded-[20px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
@@ -1302,7 +1302,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-[16px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
@@ -1591,13 +1591,13 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
           {/* Category Selector Bottom Sheet Modal */}
           {isCategorySelectorOpen && createPortal(
-            <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategorySelectorOpen(false)} />
               <motion.div
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[80dvh] h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[32px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -1611,7 +1611,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     <X size={16} strokeWidth={2.2} />
                   </button>
                 </div>
-                <div className="p-3 overflow-y-auto shrink min-h-0 custom-scrollbar max-h-[340px]">
+                <div className="p-4 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
                   <div className="grid grid-cols-2 gap-3">
                     {(categories || []).map(cat => {
                       const isSelected = category === cat.name;
@@ -1624,7 +1624,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                             setIsCategorySelectorOpen(false);
                           }}
                           style={{ backgroundColor: cat.color || '#6366f1' }}
-                          className={`h-24 sm:h-28 p-3 rounded-[18px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                          className={`h-28 sm:h-32 p-3.5 rounded-[20px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
