@@ -598,7 +598,7 @@ export function SettingsView({
       {deleteMigrationData && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[var(--bg-color)] w-full max-w-sm rounded-[28px] p-6 relative border-none shadow-2xl font-sans">
-            <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] mb-2">
+            <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)] mb-2">
               Ta bort {deleteMigrationData.category.name}?
             </h3>
             <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed font-medium">

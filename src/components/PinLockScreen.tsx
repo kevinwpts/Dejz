@@ -111,7 +111,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
         <div className="w-14 h-14 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border border-black/5 dark:border-white/10 rounded-[16px] flex items-center justify-center mb-5 shadow-xs">
           <Lock size={26} />
         </div>
-        <h2 className="text-lg sm:text-xl font-bold font-display uppercase tracking-wider text-[var(--text-primary)] mb-1 text-center">
+        <h2 className="text-lg sm:text-xl font-bold font-display tracking-tight text-[var(--text-primary)] mb-1 text-center">
           {getTitle()}
         </h2>
         <p className="text-[var(--text-secondary)] h-5 text-xs font-medium">

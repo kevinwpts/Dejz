@@ -70,7 +70,7 @@ export function CategoryModal({
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 px-5 border-b border-black/[0.06] dark:border-white/[0.08]">
-            <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+            <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
               {isEdit ? t('edit') : t('newCategory')}
             </h2>
             <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export function CategoryModal({
               <button 
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer border-none shadow-none"
                 aria-label={t('close')}
               >
                 <X size={17} strokeWidth={2.2} />

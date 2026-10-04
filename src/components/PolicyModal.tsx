@@ -29,7 +29,7 @@ export const PolicyModal = ({ isOpen, onClose, title, content }: PolicyModalProp
           >
             <div className="bg-[var(--bg-color)] border-none rounded-[28px] shadow-2xl p-6 sm:p-7 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-5 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-                <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">{title}</h2>
+                <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">{title}</h2>
                 <button
                   type="button"
                   onClick={onClose}

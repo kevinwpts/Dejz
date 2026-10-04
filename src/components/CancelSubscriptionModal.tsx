@@ -110,7 +110,7 @@ export function CancelSubscriptionModal({
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div>
-              <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+              <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
                 {isEn ? 'Show how to cancel' : 'Visa hur du säger upp'}
               </h3>
               <p className="text-xs font-medium text-[var(--text-tertiary)] mt-0.5">

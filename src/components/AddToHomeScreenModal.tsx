@@ -223,7 +223,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
 
             {/* Header: Title & Description */}
             <div className="flex flex-col items-center text-center mb-5 pt-1">
-              <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+              <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
                 {localized.title}
               </h3>
               <p className="text-xs font-medium text-[var(--text-tertiary)] mt-1 max-w-[280px] mx-auto leading-relaxed">

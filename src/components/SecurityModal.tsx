@@ -98,7 +98,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast, _userEmail }: Secu
             <Lock size={24} />
           </div>
 
-          <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] mb-5">
+          <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)] mb-5">
             {t('security')}
           </h2>
 

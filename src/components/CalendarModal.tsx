@@ -55,11 +55,11 @@ export function CalendarModal({
             {/* Header */}
             <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] flex items-center justify-center text-[var(--text-primary)]">
+                <div className="w-8 h-8 rounded-full bg-[var(--surface-color)] flex items-center justify-center text-[var(--text-primary)] border-none shadow-none">
                   <CalendarIcon size={16} strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold font-display uppercase tracking-wider text-[var(--text-primary)] leading-tight">
+                  <h3 className="text-base font-bold font-display tracking-tight text-[var(--text-primary)] leading-tight">
                     {language === 'en' ? 'Select period' : 'Välj period'}
                   </h3>
                   <p className="text-xs font-semibold text-[var(--text-secondary)] mt-0.5">
@@ -77,7 +77,7 @@ export function CalendarModal({
                       onSelectDate(today);
                       if (onPeriodChange) onPeriodChange(today);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-[var(--surface-muted)] text-xs font-semibold text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/[0.1] border border-black/[0.06] dark:border-white/[0.08] transition-all active:scale-95 cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-[var(--surface-color)] text-xs font-semibold text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.05] border-none shadow-none transition-all active:scale-95 cursor-pointer"
                   >
                     <RotateCcw size={12} strokeWidth={2} />
                     <span>{language === 'en' ? 'Current' : 'Nuvarande'}</span>
@@ -86,7 +86,7 @@ export function CalendarModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] transition-colors cursor-pointer border-none shadow-none"
                   aria-label="Stäng"
                 >
                   <X size={16} strokeWidth={2} />

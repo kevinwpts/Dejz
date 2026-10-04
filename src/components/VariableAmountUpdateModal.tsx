@@ -82,7 +82,7 @@ export function VariableAmountUpdateModal({
                  <BudgetItemLogo item={item} type={item.budgetType === 'income' ? 'income' : 'expense'} config={config} />
                </div>
                <div className="flex flex-col items-center overflow-hidden px-2 text-center">
-                 <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] truncate">
+                 <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)] truncate">
                    {item.name}
                  </h2>
                  <span className="text-xs font-semibold text-[#05B862]">

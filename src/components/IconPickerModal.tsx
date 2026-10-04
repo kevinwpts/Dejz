@@ -123,14 +123,14 @@ export function IconPickerModal({
                 <Sparkles size={18} />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+                <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
                   Välj ikon
                 </h3>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 rounded-full transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-full transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer border-none shadow-none"
               aria-label="Stäng"
             >
               <X size={16} strokeWidth={2} />

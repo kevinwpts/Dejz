@@ -92,7 +92,7 @@ export function PeriodSelectorModal({
                 </div>
               )}
               <div className="min-w-0">
-                <h3 className="text-base font-bold font-display uppercase tracking-wider text-[var(--text-primary)] leading-tight truncate">
+                <h3 className="text-base font-bold font-display tracking-tight text-[var(--text-primary)] leading-tight truncate">
                   {viewMode === 'calendar' 
                     ? (currentLang === 'en' ? 'Select date' : 'Välj datum')
                     : (currentLang === 'en' ? 'Select period' : 'Välj period')}

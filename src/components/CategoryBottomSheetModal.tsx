@@ -172,7 +172,7 @@ export function CategoryBottomSheetModal({
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] truncate">
+                  <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)] truncate">
                     {targetCategoryName}
                   </h2>
                 </div>

@@ -50,7 +50,7 @@ export function FeedbackModal({ onClose, onSubmit, t }: FeedbackModalProps) {
         <div className="p-6 sm:p-7">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+              <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
                 {t('sendFeedback')}
               </h2>
               <p className="text-xs font-medium text-[var(--text-tertiary)] mt-0.5 flex items-center gap-1.5">
@@ -61,7 +61,7 @@ export function FeedbackModal({ onClose, onSubmit, t }: FeedbackModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer border-none shadow-none"
               aria-label="Stäng"
             >
               <X size={17} strokeWidth={2.2} />

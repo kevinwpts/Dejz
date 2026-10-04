@@ -58,7 +58,7 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
                 <Cookie size={20} />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+                <h3 className="text-base font-bold font-display tracking-tight text-[var(--text-primary)]">
                   {t('cookieConsentTitle')}
                 </h3>
                 <p className="text-xs text-[var(--text-secondary)] leading-relaxed">

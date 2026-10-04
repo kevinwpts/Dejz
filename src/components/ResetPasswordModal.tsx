@@ -88,7 +88,7 @@ export function ResetPasswordModal({
                 <CheckCircle2 size={30} strokeWidth={2} />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+                <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
                   Lösenord uppdaterat!
                 </h3>
                 <p className="text-xs font-medium text-[var(--text-secondary)]">
@@ -99,10 +99,10 @@ export function ResetPasswordModal({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1 text-left pr-8">
-                <div className="w-10 h-10 rounded-[14px] bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] flex items-center justify-center mb-3 border border-black/[0.06] dark:border-white/[0.08]">
+                <div className="w-10 h-10 rounded-[14px] bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center mb-3 border-none">
                   <Lock size={18} strokeWidth={2} />
                 </div>
-                <h3 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+                <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
                   Välj ett nytt lösenord
                 </h3>
                 <p className="text-xs text-[var(--text-secondary)]">

@@ -105,7 +105,7 @@ export function CalculatorModal({ _isOpen, onClose, _t }: CalculatorModalProps) 
           >
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+                <h3 className="text-base font-bold font-display tracking-tight text-[var(--text-primary)]">
                   Kalkylator
                 </h3>
                 <button 

@@ -219,7 +219,7 @@ export function DejziSummaryModal({
               <div className="flex items-center gap-3">
                 <DejziAvatar size="lg" />
                 <div>
-                  <h3 className="text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+                  <h3 className="text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
                     {userName ? `${isEn ? 'Hi' : 'Hej'} ${userName}!` : 'Dejzi'}
                   </h3>
                   <p className="text-xs font-semibold text-amber-500 dark:text-amber-400 mt-0.5">

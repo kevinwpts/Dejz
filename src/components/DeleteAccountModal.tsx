@@ -69,7 +69,7 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm, t, isSocialUser
             <AlertCircle size={24} />
           </div>
 
-          <h2 className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] mb-2">
+          <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)] mb-2">
             {t('deleteAccount')}
           </h2>
           <p className="text-xs font-medium text-[var(--text-secondary)] mb-5 leading-relaxed">

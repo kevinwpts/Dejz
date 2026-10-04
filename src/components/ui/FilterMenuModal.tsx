@@ -66,7 +66,7 @@ export function FilterMenuModal<T = string>({
           {/* Header */}
           <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div className="min-w-0 pr-2">
-              <h3 className="text-base font-bold font-display uppercase tracking-wider text-[var(--text-primary)] truncate">
+              <h3 className="text-base font-bold font-display tracking-tight text-[var(--text-primary)] truncate">
                 {title}
               </h3>
               {subtitle && (
@@ -81,7 +81,7 @@ export function FilterMenuModal<T = string>({
                 if (typeof feedback?.light === 'function') feedback.light();
                 onClose();
               }}
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95"
+              className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95 border-none shadow-none"
               aria-label="Stäng"
             >
               <X size={16} strokeWidth={2.2} />
