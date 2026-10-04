@@ -26,19 +26,19 @@ export function normalizeMerchant(name?: string): string {
     .replace(/\s+/g, ' ');
 }
 
-// User saved merchant preferences (e.g. "lasses bilservice" -> { icon: 'Car' })
-export function getMerchantPreference(merchant?: string): { icon?: string; logo?: string } | null {
-  if (!merchant) return null;
-  const key = normalizeMerchant(merchant);
-  if (!key) return null;
+// Clear legacy custom preferences & caches as requested
+if (typeof window !== 'undefined') {
   try {
-    const stored = localStorage.getItem('dejz_merchant_preferences');
-    if (!stored) return null;
-    const prefs = JSON.parse(stored);
-    return prefs[key] || null;
+    localStorage.removeItem('dejz_merchant_preferences');
+    localStorage.removeItem('dejz_logo_visual_cache_v2');
   } catch {
-    return null;
+    // Ignore storage errors
   }
+}
+
+// User saved merchant preferences (cleaned up for standard fintech behavior)
+export function getMerchantPreference(_merchant?: string): { icon?: string; logo?: string } | null {
+  return null;
 }
 
 export function saveMerchantPreference(merchant: string, preference: { icon?: string; logo?: string }) {

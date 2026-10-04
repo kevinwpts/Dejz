@@ -695,7 +695,7 @@ export function TransactionModal({
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-[16px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-full overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
