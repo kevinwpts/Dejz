@@ -473,11 +473,11 @@ export function SettingsView({
     <div className="space-y-6 font-sans pb-12">
        <div>
         {activeSection === 'salary' && (
-          <div className="space-y-6">
+          <div className="space-y-3 w-full py-2">
+            <h3 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1">
+              {config.language === 'en' ? 'Payday & period' : 'Lönedag & period'}
+            </h3>
             <div className="bg-[var(--surface-color)] p-5 rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-5">
-              <h2 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-                {config.language === 'en' ? 'Payday & period' : 'Lönedag & period'}
-              </h2>
               
               {/* Payday Setting Row */}
               <div className="space-y-1.5">
