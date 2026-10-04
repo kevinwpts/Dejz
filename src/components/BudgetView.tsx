@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { Check, Sparkles, RotateCcw, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
+import { Check, Sparkles, RotateCcw, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, MoreVertical, ChevronDown } from 'lucide-react';
 import { ICON_MAP, isEmojiString } from '../utils/icons';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey, Language } from '../i18n';
@@ -84,6 +84,8 @@ export function BudgetView({
   const [incomeSortBy, setIncomeSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [savingSortBy, setSavingSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [confirmReset, setConfirmReset] = React.useState(false);
+  const [isFixedOnlyExpanded, setIsFixedOnlyExpanded] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (confirmReset) {
@@ -277,6 +279,122 @@ export function BudgetView({
     });
 
   if (showCategoryBudgets) {
+    // Sektionering av kategorier
+    const activeCategoriesList = sortedCategoriesForManage.filter((cat) => {
+      const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
+      const hasExtraBudget = (Number(cat.budget) || 0) > fixedSpent;
+      return !fixedSpent || hasExtraBudget;
+    });
+
+    const fixedOnlyCategoriesList = sortedCategoriesForManage.filter((cat) => {
+      const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
+      const hasExtraBudget = (Number(cat.budget) || 0) > fixedSpent;
+      return fixedSpent > 0 && !hasExtraBudget;
+    });
+
+    const totalFixedOnlySum = fixedOnlyCategoriesList.reduce((sum, cat) => {
+      return sum + Math.round(getFixedSpentForCategory(cat.name));
+    }, 0);
+
+    const renderCategoryRow = (cat: any) => {
+      const iconName = cat.icon;
+      const Icon = ICON_MAP[iconName];
+      const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
+      const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
+      const isEditingThis = editingCategoryName === cat.name;
+      const extraBudget = catBudget - fixedSpent;
+
+      return (
+        <div 
+          key={cat.name}
+          className="py-3.5 px-4 sm:px-5 flex items-center justify-between gap-4 transition-colors"
+        >
+          {/* Left Part: Icon, Name and helper text */}
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            <div className="w-9 h-9 rounded-[14px] bg-black/5 dark:bg-white/[0.04] text-[var(--text-primary)] flex items-center justify-center shrink-0">
+              {isEmojiString(iconName) ? (
+                <span className="text-base leading-none">{iconName}</span>
+              ) : Icon ? (
+                <Icon size={16} strokeWidth={2} className="text-[var(--text-primary)]" />
+              ) : (
+                <div className="w-2.5 h-2.5 rounded-full bg-[var(--text-primary)]" />
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <span className="text-[13.5px] font-bold text-[var(--text-primary)] truncate block tracking-tight">
+                {cat.name}
+              </span>
+              {fixedSpent > 0 ? (
+                <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-85 block truncate mt-0.5 font-sans">
+                  {formatAmount(fixedSpent, config.language)} {curr} fast ingår
+                  {extraBudget > 0 && ` (+${formatAmount(extraBudget, config.language)} ${curr} extra)`}
+                </span>
+              ) : (
+                <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-40 block truncate mt-0.5">
+                  Endast rörliga utgifter
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Right Part: Direct input of amount without +/- buttons */}
+          <div className="shrink-0">
+            {isEditingThis ? (
+              <div className="flex items-center gap-1 bg-black/[0.04] dark:bg-[#222222] rounded-[12px] px-2.5 py-1.5 border border-[var(--accent-color)]">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  autoFocus
+                  value={inlineInputValue}
+                  onBlur={() => {
+                    const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
+                    const updatedCategories = (config.categories || []).map((c) => {
+                      if (c.name === cat.name) {
+                        return { ...c, budget: finalVal > 0 ? finalVal : null };
+                      }
+                      return c;
+                    });
+                    setConfig({ ...config, categories: updatedCategories });
+                    setEditingCategoryName(null);
+                  }}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    setInlineInputValue(val);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.currentTarget.blur();
+                    }
+                  }}
+                  className="w-16 sm:w-20 bg-transparent border-none text-right text-sm font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none"
+                />
+                <span className="text-xs font-bold text-[var(--text-secondary)] select-none">
+                  {curr}
+                </span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingCategoryName(cat.name);
+                  setInlineInputValue(catBudget > 0 ? String(catBudget) : "");
+                }}
+                className="min-w-[80px] text-right py-2 px-3.5 rounded-[12px] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-all cursor-pointer active:scale-[0.98]"
+              >
+                <span className={`text-[14px] font-bold font-amount tabular-nums ${
+                  catBudget > 0 ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] opacity-60'
+                }`}>
+                  {catBudget > 0 ? `${formatAmount(catBudget, config.language)} ${curr}` : `0 ${curr}`}
+                </span>
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    };
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 14 }}
@@ -284,40 +402,108 @@ export function BudgetView({
         transition={{ duration: 0.35 }}
         className="space-y-6 font-sans"
       >
-        {/* Open Top Header - No card slop, directly on background */}
-        <div className="px-1 py-3 space-y-5">
+        {/* 1. Tydlig budgetöversikt i en toppmodul */}
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] opacity-80">
+              Budgetöversikt
+            </span>
+            
+            {/* Tre-punkters meny */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  setIsMenuOpen(!isMenuOpen);
+                }}
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                aria-label="Fler alternativ"
+              >
+                <MoreVertical size={16} strokeWidth={2.2} />
+              </button>
 
+              <AnimatePresence>
+                {isMenuOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-[100]" 
+                      onClick={() => setIsMenuOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -8 }}
+                      transition={{ duration: 0.12 }}
+                      className="absolute right-0 mt-1.5 w-48 bg-white dark:bg-[#222222] rounded-[16px] shadow-lg border border-black/5 dark:border-white/10 z-[110] overflow-hidden py-1"
+                    >
+                      {isOverAllocated && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleAutoAdaptDown();
+                            setIsMenuOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2 cursor-pointer transition-colors"
+                        >
+                          <Sparkles size={13} />
+                          Anpassa automatiskt
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!confirmReset) {
+                            setConfirmReset(true);
+                          } else {
+                            const updatedCategories = (config.categories || []).map((c) => ({ ...c, budget: null }));
+                            setConfig({ ...config, categories: updatedCategories });
+                            setConfirmReset(false);
+                            setIsMenuOpen(false);
+                          }
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2 cursor-pointer transition-colors"
+                      >
+                        <RotateCcw size={13} />
+                        {confirmReset ? 'Klicka igen för att nollställa' : 'Nollställ budgeten'}
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
 
-          {/* Large dynamic status amount focused on "[spent] av [income] fördelat" */}
+          {/* Beloppet som återstår med störst visuell tyngd */}
           <div className="space-y-1">
-            <div className="text-[26px] sm:text-[32px] leading-tight font-bold tracking-tight text-[var(--text-primary)] font-amount tabular-nums">
-              {isOverAllocated ? (
+            <div className={`text-[26px] sm:text-[32px] leading-tight font-extrabold tracking-tight font-amount tabular-nums ${
+              isOverAllocated ? "text-rose-600 dark:text-rose-400" : "text-[var(--text-primary)]"
+            }`}>
+              {remainingToAllocate > 0 ? (
                 <>
-                  <span className="text-rose-600 dark:text-rose-400">{formatAmount(totalAllocated, config.language)} {curr}</span>
-                  <span className="text-[var(--text-secondary)] text-lg sm:text-xl font-medium"> fördelat av </span>
-                  <span>{formatAmount(totalIncomeSum, config.language)} {curr}</span>
+                  <span>{formatAmount(remainingToAllocate, config.language)} {curr}</span>
+                  <span className="text-base sm:text-lg font-medium text-[var(--text-secondary)] font-sans ml-1.5">kvar att fördela</span>
                 </>
+              ) : remainingToAllocate === 0 ? (
+                <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 text-xl sm:text-2xl py-1 font-sans font-bold">
+                  ✓ Allt är fördelat! 🎉
+                </span>
               ) : (
                 <>
-                  <span className="text-[var(--text-primary)]">{formatAmount(totalAllocated, config.language)} {curr}</span>
-                  <span className="text-[var(--text-secondary)] text-lg sm:text-xl font-medium"> fördelat av </span>
-                  <span>{formatAmount(totalIncomeSum, config.language)} {curr}</span>
+                  <span>{formatAmount(Math.abs(remainingToAllocate), config.language)} {curr}</span>
+                  <span className="text-base sm:text-lg font-medium text-rose-500/80 font-sans ml-1.5">överfördelat</span>
                 </>
               )}
             </div>
-            {isOverAllocated ? (
-              <span className="text-xs font-semibold tracking-wide text-rose-600 dark:text-rose-400 block mt-1">
-                ⚠️ Du har fördelat {formatAmount(Math.abs(remainingToAllocate), config.language)} {curr} mer än din inkomst ({formatAmount(totalIncomeSum, config.language)} {curr})
-              </span>
-            ) : (
-              <span className="text-xs font-semibold tracking-wide text-[var(--text-secondary)] block mt-1">
-                ✓ {formatAmount(remainingToAllocate, config.language)} {curr} kvar att fördela av din inkomst ({formatAmount(totalIncomeSum, config.language)} {curr})
-              </span>
-            )}
+
+            {/* Kompletterande mindre information */}
+            <div className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)]">
+              {formatAmount(totalAllocated, config.language)} av {formatAmount(totalIncomeSum, config.language)} {curr} fördelat
+            </div>
           </div>
 
-          {/* Simple progress bar */}
-          <div className="w-full h-1.5 bg-black/5 dark:bg-[#222222] rounded-full overflow-hidden">
+          {/* Diskret förloppsindikator */}
+          <div className="w-full h-1.5 bg-black/[0.04] dark:bg-white/[0.06] rounded-full overflow-hidden">
             <div 
               className={`h-full rounded-full transition-all duration-300 ${
                 isOverAllocated ? "bg-rose-500" : "bg-[var(--accent-color)]"
@@ -326,238 +512,79 @@ export function BudgetView({
             />
           </div>
 
-          {/* Secondary Quick Actions - Discreetly placed */}
-          <div className="flex items-center gap-3 pt-1">
-            {isOverAllocated ? (
-              <button
-                type="button"
-                onClick={handleAutoAdaptDown}
-                className="text-[11px] font-bold text-rose-600 dark:text-rose-300 hover:text-rose-700 dark:hover:text-white flex items-center gap-1.5 py-1 px-3 rounded-full bg-rose-50 dark:bg-rose-500/[0.08] border-none shadow-none transition-all cursor-pointer active:scale-95"
-              >
-                <Sparkles size={11} />
-                {config.language === 'en' ? 'Auto-adapt' : 'Anpassa automatiskt'}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleAutoDistribute}
-                className="text-[11px] font-bold text-[var(--text-primary)] flex items-center gap-1.5 py-1 px-3 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/20 border-none shadow-none transition-all cursor-pointer active:scale-95"
-              >
-                <Sparkles size={11} />
-                {config.language === 'en' ? 'Auto-distribute' : 'Fördela automatiskt'}
-              </button>
-            )}
-
+          {/* Knappen "Fördela automatiskt" under förloppsindikatorn */}
+          {!isOverAllocated && remainingToAllocate > 0 && (
             <button
               type="button"
-              onClick={() => {
-                if (!confirmReset) {
-                  setConfirmReset(true);
-                } else {
-                  const updatedCategories = (config.categories || []).map((c) => ({ ...c, budget: null }));
-                  setConfig({ ...config, categories: updatedCategories });
-                  setConfirmReset(false);
-                }
-              }}
-              className={`text-[11px] font-bold flex items-center gap-1.5 py-1 px-3 rounded-full border-none shadow-none transition-all cursor-pointer active:scale-95 ${
-                confirmReset 
-                  ? "bg-rose-500/20 text-rose-600 dark:text-rose-400 animate-pulse" 
-                  : "bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400"
-              }`}
+              onClick={handleAutoDistribute}
+              className="w-full mt-2 h-[40px] rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-primary)] hover:text-[var(--accent-color)] text-[12.5px] font-semibold tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
             >
-              <RotateCcw size={11} />
-              {confirmReset 
-                ? (config.language === 'en' ? 'Click again to reset' : 'Klicka igen för att nollställa') 
-                : (config.language === 'en' ? 'Reset' : 'Nollställ')}
+              <Sparkles size={13} className="text-[var(--accent-color)] animate-pulse" />
+              Fördela automatiskt
             </button>
-          </div>
+          )}
         </div>
 
-        {/* Continuous Category List */}
+        {/* 2. Kategorilistan (Öppna kategorier i huvudlistan) */}
         <div className="space-y-3">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1 opacity-60 block">
-            {config.language === 'en' ? 'Categories' : 'Kategorier'} ({config.categories?.length || 0})
+          <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)] px-1 opacity-70 block">
+            {config.language === 'en' ? 'Categories' : 'Kategorier'} ({activeCategoriesList.length})
           </span>
           
           <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
-            {sortedCategoriesForManage.map((cat) => {
-              const iconName = cat.icon;
-              const Icon = ICON_MAP[iconName];
-              const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
-              const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
-              const isEditingThis = editingCategoryName === cat.name;
-
-              return (
-                <div 
-                  key={cat.name}
-                  className={`py-3 px-3.5 sm:px-4 transition-all flex items-center justify-between gap-3 ${
-                    catBudget === 0 ? "opacity-75 hover:opacity-100" : "opacity-100"
-                  }`}
-                >
-                  {/* Left: Icon, Name, Fixed text */}
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-8 h-8 rounded-[12px] bg-black/5 dark:bg-white/[0.04] border-none shadow-none text-[var(--text-primary)] flex items-center justify-center shrink-0">
-                      {isEmojiString(iconName) ? (
-                        <span className="text-sm leading-none">{iconName}</span>
-                      ) : Icon ? (
-                        <Icon size={15} strokeWidth={1.8} className="text-[var(--text-primary)]" />
-                      ) : (
-                        <div className="w-2 h-2 rounded-full bg-[var(--text-primary)]" />
-                      )}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <span className="text-[13px] sm:text-[13.5px] font-semibold text-[var(--text-primary)] truncate block tracking-tight">
-                        {cat.name}
-                      </span>
-                      {fixedSpent > 0 && (
-                        <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-80 block truncate mt-0.5 font-amount tabular-nums">
-                          {formatAmount(fixedSpent, config.language)} {curr} fast
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Right: Amount + Minus/Plus OR "Ange budget" */}
-                  <div className="flex items-center gap-2 shrink-0 select-none">
-                    {catBudget > 0 ? (
-                      <div className="flex items-center gap-1.5">
-                        {/* Minus button */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const currentAmount = Math.max(Number(cat.budget) || 0, fixedSpent);
-                            const newAmount = Math.max(fixedSpent, currentAmount - 100);
-                            const updatedCategories = (config.categories || []).map((c) => {
-                              if (c.name === cat.name) {
-                                return { ...c, budget: newAmount > 0 ? newAmount : undefined };
-                              }
-                              return c;
-                            });
-                            setConfig({ ...config, categories: updatedCategories });
-                          }}
-                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border-none hover:bg-black/10 dark:hover:bg-white/[0.07] text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
-                        >
-                          −
-                        </button>
-
-                        {/* Direct editable amount or button */}
-                        {isEditingThis ? (
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            autoFocus
-                            value={inlineInputValue}
-                            onBlur={() => {
-                              const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
-                              const updatedCategories = (config.categories || []).map((c) => {
-                                if (c.name === cat.name) {
-                                  return { ...c, budget: finalVal > 0 ? finalVal : null };
-                                }
-                                return c;
-                              });
-                              setConfig({ ...config, categories: updatedCategories });
-                              setEditingCategoryName(null);
-                            }}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, "");
-                              setInlineInputValue(val);
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.currentTarget.blur();
-                              }
-                            }}
-                            className="w-20 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border-none text-center text-xs font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none"
-                          />
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditingCategoryName(cat.name);
-                              setInlineInputValue(catBudget > 0 ? String(catBudget) : "");
-                            }}
-                            className="px-2 py-1 rounded-lg transition-all text-xs font-bold font-amount tabular-nums text-center text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.06] cursor-pointer"
-                          >
-                            {formatAmount(catBudget, config.language)} {curr}
-                          </button>
-                        )}
-
-                        {/* Plus button */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const currentAmount = Math.max(Number(cat.budget) || 0, fixedSpent);
-                            const newAmount = currentAmount + 100;
-                            const updatedCategories = (config.categories || []).map((c) => {
-                              if (c.name === cat.name) {
-                                return { ...c, budget: newAmount };
-                              }
-                              return c;
-                            });
-                            setConfig({ ...config, categories: updatedCategories });
-                          }}
-                          className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/[0.03] border-none hover:bg-black/10 dark:hover:bg-white/[0.07] text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90 text-xs font-bold"
-                        >
-                          +
-                        </button>
-                      </div>
-                    ) : (
-                      isEditingThis ? (
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          autoFocus
-                          value={inlineInputValue}
-                          onBlur={() => {
-                            const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
-                            const updatedCategories = (config.categories || []).map((c) => {
-                              if (c.name === cat.name) {
-                                return { ...c, budget: finalVal > 0 ? finalVal : null };
-                              }
-                              return c;
-                            });
-                            setConfig({ ...config, categories: updatedCategories });
-                            setEditingCategoryName(null);
-                          }}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, "");
-                            setInlineInputValue(val);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.currentTarget.blur();
-                            }
-                          }}
-                          className="w-24 h-7 px-1.5 rounded-lg bg-black/5 dark:bg-[#222222] border-none text-center text-xs font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none"
-                        />
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingCategoryName(cat.name);
-                            setInlineInputValue("");
-                          }}
-                          className="px-3 py-1.5 rounded-lg bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[var(--text-primary)] text-xs font-semibold border-none transition-all cursor-pointer active:scale-95"
-                        >
-                          Ange budget
-                        </button>
-                      )
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {activeCategoriesList.map((cat) => renderCategoryRow(cat))}
           </div>
         </div>
 
-        {/* Save & Exit */}
+        {/* 3. Hopfaellbar sektion foer enbart fasta utgifter */}
+        {fixedOnlyCategoriesList.length > 0 && (
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
+                setIsFixedOnlyExpanded(!isFixedOnlyExpanded);
+              }}
+              className="w-full flex items-center justify-between p-4 rounded-[18px] bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-left"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-2 h-2 rounded-full bg-[var(--text-secondary)] opacity-60" />
+                <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                  Enbart fasta utgifter ({fixedOnlyCategoriesList.length} st)
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[12.5px] font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                  {formatAmount(totalFixedOnlySum, config.language)} {curr}
+                </span>
+                <ChevronDown 
+                  size={15} 
+                  className={`text-[var(--text-secondary)] transition-transform duration-200 ${
+                    isFixedOnlyExpanded ? 'transform rotate-180' : ''
+                  }`} 
+                />
+              </div>
+            </button>
+
+            <AnimatePresence initial={false}>
+              {isFixedOnlyExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="overflow-hidden space-y-2.5"
+                >
+                  <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+                    {fixedOnlyCategoriesList.map((cat) => renderCategoryRow(cat))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {/* Spara & Klar */}
         <div className="pt-2">
           <button
             type="button"
