@@ -1447,125 +1447,132 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 3. Grid for Frequency & Payment Method */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Frequency Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
-                {t('frequency')}
-              </span>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                  <Repeat size={14} strokeWidth={2} />
-                </div>
-                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
-                  {getFrequencyLabel(frequency, t)}
-                </span>
-                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
-              </div>
-              <select
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value as Frequency)}
-                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                title={t('frequency')}
-              >
-                {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
-                    {t(`freq_${key.toLowerCase()}` as TranslationKey)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Payment Method Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
-                {t('paymentMethod')}
-              </span>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                  <CreditCard size={14} strokeWidth={2} />
-                </div>
-                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
-                  {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
-                </span>
-                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
-              </div>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                title={t('paymentMethod')}
-              >
-                {(paymentMethods || []).map((method, idx) => {
-                  const methodName = typeof method === 'string' ? method : method?.name || '';
-                  return (
-                    <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
-                      {methodName}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-          </div>
-
-          {/* 4. Grid for Type & (Start Month if non-monthly OR Note if monthly) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Type: Fixed / Variable Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
-                {t('type')}
-              </span>
-              <div className="flex items-center gap-2.5">
-                <span className="text-[14px] font-bold text-[var(--text-primary)]">
-                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsVariable(!isVariable)}
-                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-                >
-                  <div
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
-                  />
-                </button>
-              </div>
-            </div>
-
-            {frequency !== Frequency.MONTHLY ? (
-              /* Start Month Card */
-              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
-                  {t('startMonthLabel')}
-                </span>
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                    <Calendar size={14} strokeWidth={2} />
+          {/* Cards for Frequency, Payment Method, Type, Start Month, Note */}
+          {frequency !== Frequency.MONTHLY ? (
+            <>
+              {/* 2-Column layout: Left has Frequency + Start Month, Right has Payment Method + Type */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Left Column: Frequency & Start Month directly under it */}
+                <div className="flex flex-col gap-3">
+                  {/* Frequency Card */}
+                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                      {t('frequency')}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                        <Repeat size={14} strokeWidth={2} />
+                      </div>
+                      <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                        {getFrequencyLabel(frequency, t)}
+                      </span>
+                      <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                    </div>
+                    <select
+                      value={frequency}
+                      onChange={(e) => setFrequency(e.target.value as Frequency)}
+                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                      title={t('frequency')}
+                    >
+                      {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
+                        <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                          {t(`freq_${key.toLowerCase()}` as TranslationKey)}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
-                    {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
-                  </span>
-                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+
+                  {/* Start Month Card (placed directly under Frequency) */}
+                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                      {t('startMonthLabel')}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                        <Calendar size={14} strokeWidth={2} />
+                      </div>
+                      <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                        {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
+                      </span>
+                      <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                    </div>
+                    <select
+                      value={startMonth}
+                      onChange={(e) => setStartMonth(parseInt(e.target.value))}
+                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                      title={t('startMonthLabel')}
+                    >
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const date = new Date(2024, i, 1);
+                        const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
+                        const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                        return (
+                          <option key={i} value={i} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                            {capitalizedMonth}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
                 </div>
-                <select
-                  value={startMonth}
-                  onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                  title={t('startMonthLabel')}
-                >
-                  {Array.from({ length: 12 }, (_, i) => {
-                    const date = new Date(2024, i, 1);
-                    const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
-                    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-                    return (
-                      <option key={i} value={i} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
-                        {capitalizedMonth}
-                      </option>
-                    );
-                  })}
-                </select>
+
+                {/* Right Column: Payment Method & Type */}
+                <div className="flex flex-col gap-3">
+                  {/* Payment Method Card */}
+                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                      {t('paymentMethod')}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                        <CreditCard size={14} strokeWidth={2} />
+                      </div>
+                      <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                        {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
+                      </span>
+                      <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                    </div>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                      title={t('paymentMethod')}
+                    >
+                      {(paymentMethods || []).map((method, idx) => {
+                        const methodName = typeof method === 'string' ? method : method?.name || '';
+                        return (
+                          <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                            {methodName}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
+                  {/* Type: Fixed / Variable Card */}
+                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
+                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                      {t('type')}
+                    </span>
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-[14px] font-bold text-[var(--text-primary)]">
+                        {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsVariable(!isVariable)}
+                        className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
+                      >
+                        <div
+                          className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ) : (
-              /* Note Card when monthly: sits alongside Type in a balanced 2-column row! */
+
+              {/* Note Card (full width) */}
               <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px]">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                   {t('ownNote')}
@@ -1589,36 +1596,120 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   )}
                 </div>
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <>
+              {/* Grid for Frequency & Payment Method */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Frequency Card */}
+                <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                    {t('frequency')}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                      <Repeat size={14} strokeWidth={2} />
+                    </div>
+                    <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                      {getFrequencyLabel(frequency, t)}
+                    </span>
+                    <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  </div>
+                  <select
+                    value={frequency}
+                    onChange={(e) => setFrequency(e.target.value as Frequency)}
+                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                    title={t('frequency')}
+                  >
+                    {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
+                      <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                        {t(`freq_${key.toLowerCase()}` as TranslationKey)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          {/* 5. Grid for Note Card when non-monthly (full-width) */}
-          {frequency !== Frequency.MONTHLY && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px] sm:col-span-2">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
-                  {t('ownNote')}
-                </span>
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="text" 
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
-                    className="text-[13.5px] font-medium text-[var(--text-primary)] bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
-                  />
-                  {note && (
-                    <button 
-                      type="button"
-                      onClick={() => setNote('')}
-                      className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
-                    >
-                      <X size={13} strokeWidth={2.5} />
-                    </button>
-                  )}
+                {/* Payment Method Card */}
+                <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                    {t('paymentMethod')}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                      <CreditCard size={14} strokeWidth={2} />
+                    </div>
+                    <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                      {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
+                    </span>
+                    <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  </div>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                    title={t('paymentMethod')}
+                  >
+                    {(paymentMethods || []).map((method, idx) => {
+                      const methodName = typeof method === 'string' ? method : method?.name || '';
+                      return (
+                        <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                          {methodName}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
               </div>
-            </div>
+
+              {/* Grid for Type & Note */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Type: Fixed / Variable Card */}
+                <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                    {t('type')}
+                  </span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-[14px] font-bold text-[var(--text-primary)]">
+                      {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsVariable(!isVariable)}
+                      className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
+                    >
+                      <div
+                        className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Note Card */}
+                <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px]">
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+                    {t('ownNote')}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
+                      className="text-[13.5px] font-medium text-[var(--text-primary)] bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                    />
+                    {note && (
+                      <button 
+                        type="button"
+                        onClick={() => setNote('')}
+                        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
+                      >
+                        <X size={13} strokeWidth={2.5} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
           )}
 
           {/* Category Selector Bottom Sheet Modal */}
