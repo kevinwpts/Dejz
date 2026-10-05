@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, Config } from '../types';
 import { resolveEntityVisual } from '../utils/resolver';
-import { fetchLogoForName } from '../utils/logo';
 import { Receipt } from 'lucide-react';
 
 export function TransactionLogo({
@@ -14,7 +13,6 @@ export function TransactionLogo({
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }) {
   const [imgError, setImgError] = useState(false);
-  const [fetchedLogo, setFetchedLogo] = useState<string | null>(transaction.logo || null);
 
   const merchantName =
     typeof transaction.merchant === 'object'
@@ -25,23 +23,20 @@ export function TransactionLogo({
           ? (transaction.category as any)?.name
           : transaction.category);
 
+  const visual = resolveEntityVisual(transaction, config);
+  const activeLogoUrl = (transaction.logo && transaction.logo !== 'none') ? transaction.logo : visual.logoUrl;
+
   useEffect(() => {
     setImgError(false);
-    let active = true;
-    if (!transaction.logo && merchantName) {
-      fetchLogoForName(merchantName).then(url => {
-        if (active && url) {
-          setFetchedLogo(url);
-        }
-      });
-    } else {
-      setFetchedLogo(transaction.logo || null);
-    }
-    return () => { active = false; };
-  }, [transaction.logo, merchantName]);
-
-  const visual = resolveEntityVisual(transaction, config);
-  const activeLogoUrl = fetchedLogo || visual.logoUrl;
+  }, [
+    activeLogoUrl,
+    transaction.logo,
+    transaction.icon,
+    transaction.merchant,
+    transaction.note,
+    transaction.category,
+    merchantName,
+  ]);
 
   const sizeConfig = {
     xl: {
