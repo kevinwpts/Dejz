@@ -1270,8 +1270,9 @@ export default function App() {
   // Dynamically update CSS variables and background tint when theme color or dark mode changes
   useEffect(() => {
     if (!config) return;
-    applyThemeColor(config.themeColor || '#3B82F6', !!config.darkMode);
-  }, [config?.themeColor, config?.darkMode]);
+    const isDark = session ? !!config.darkMode : false;
+    applyThemeColor(config.themeColor || '#3B82F6', isDark);
+  }, [config?.themeColor, config?.darkMode, session]);
 
   const handleFeedbackSubmit = async (message: string) => {
     const activeUserId = session?.user?.id || 'demo-user';
@@ -1498,17 +1499,23 @@ export default function App() {
   useEffect(() => {
     const applyTheme = () => {
       let isDark = false;
-      const themeMode = config?.themeMode || 'system';
+      
+      // Pre-login screens (LandingPage, Auth, Welcome) are ALWAYS locked to light mode
+      if (session) {
+        const themeMode = config?.themeMode || 'system';
 
-      if (themeMode === 'dark') {
-        isDark = true;
-      } else if (themeMode === 'light') {
-        isDark = false;
-      } else {
-        // System preference
-        if (typeof window !== 'undefined' && window.matchMedia) {
-          isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (themeMode === 'dark') {
+          isDark = true;
+        } else if (themeMode === 'light') {
+          isDark = false;
+        } else {
+          // System preference
+          if (typeof window !== 'undefined' && window.matchMedia) {
+            isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
         }
+      } else {
+        isDark = false;
       }
 
       document.documentElement.classList.remove("dark", "light");
@@ -1558,7 +1565,7 @@ export default function App() {
         return () => mediaQuery.removeListener(handleSystemThemeChange);
       }
     }
-  }, [config?.themeMode, config?.darkMode, config?.themeColor]);
+  }, [config?.themeMode, config?.darkMode, config?.themeColor, session]);
 
   // --- URL Routing & Language Subpath Sync ---
   useEffect(() => {
@@ -1730,6 +1737,14 @@ export default function App() {
     setSession(null);
     setShowLanding(true);
     setShowWelcome(false);
+    
+    // Immediately enforce light mode for landing & auth
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
+    document.body.classList.remove("dark");
+    document.body.classList.add("light");
+    applyThemeColor(config?.themeColor || '#3B82F6', false);
+    
     window.scrollTo({ top: 0, behavior: 'instant' });
     if (isSupabaseConfigured) {
       await supabase.auth.signOut().catch(() => {});
@@ -4142,7 +4157,7 @@ export default function App() {
 
   if (publicLegalDoc) {
     return (
-      <div className={config?.darkMode ?? true ? 'dark' : ''}>
+      <div className="light">
         <PublicLegalPage
           initialDoc={publicLegalDoc}
           onNavigateHome={() => {
@@ -4160,7 +4175,7 @@ export default function App() {
 
   if (isAuthLoading) {
     return (
-      <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative pt-[env(safe-area-inset-top)] bg-[var(--bg-color)] ${config?.darkMode ?? true ? 'dark' : ''}`}>
+      <div className="min-h-dvh font-sans text-[var(--text-primary)] relative pt-[env(safe-area-inset-top)] bg-[var(--bg-color)] light">
         <div className="min-h-dvh flex items-center justify-center relative z-10">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="w-8 h-8 text-[var(--text-secondary)] animate-spin" />
@@ -4174,9 +4189,8 @@ export default function App() {
   }
 
   if (!session) {
-    const isDark = !showLanding && (config?.darkMode ?? false);
     return (
-      <div className={`min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-clip ${isDark ? 'dark' : ''}`}>
+      <div className="min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)] overflow-x-clip light">
         {showLanding ? (
           <>
             <LandingPage
