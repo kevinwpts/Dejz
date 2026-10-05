@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { User, Mail, LogOut, Camera, Unlink, MailCheck, Globe, Lock, ChevronRight, ChevronLeft } from 'lucide-react';
+import { User, Mail, LogOut, Camera, Unlink, MailCheck, Globe, Lock, ChevronRight } from 'lucide-react';
 
 import { ConfirmModal } from './ConfirmModal';
 import { PasswordChangeView } from './PasswordChangeView';
@@ -132,26 +132,6 @@ export function ManageAccountView({
         />
       ) : (
         <>
-          {/* Sub-Navigation Header */}
-          <div className="flex items-center gap-3.5 py-1">
-            <button
-              type="button"
-              onClick={onBack}
-              className="w-9 h-9 rounded-full bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs shrink-0"
-              aria-label={t('back') || 'Tillbaka'}
-            >
-              <ChevronLeft size={20} strokeWidth={2.2} />
-            </button>
-            <div className="min-w-0">
-              <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)] truncate">
-                {t('manageAccount')}
-              </h1>
-              <p className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 truncate">
-                {user.email}
-              </p>
-            </div>
-          </div>
-
           {/* Profile Avatar Upload */}
           <div className="text-center py-2 flex flex-col items-center justify-center">
             <label htmlFor="avatar-manage" className="relative w-20 h-20 mb-2 block cursor-pointer group">

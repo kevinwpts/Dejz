@@ -4070,6 +4070,7 @@ export default function App() {
         case "salary": return t("salary");
         case "categories": return t("categories");
         case "paymentMethods": return t("paymentMethods");
+        case "currency": return config?.language === 'en' ? 'Currency' : 'Valuta';
         case "language": return t("language");
         case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';
         default: return config?.language === 'en' ? 'Settings' : 'Inställningar';
@@ -4081,6 +4082,7 @@ export default function App() {
         case "salary": return t("salary");
         case "categories": return t("categories");
         case "paymentMethods": return t("paymentMethods");
+        case "currency": return config?.language === 'en' ? 'Currency' : 'Valuta';
         case "manageAccount": return t("manageAccount");
         case "language": return t("language");
         case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Check, Sun, Moon, Monitor, Calendar, Clock, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Plus, Check, Sun, Moon, Monitor, Calendar, Clock, ChevronRight } from 'lucide-react';
 import { Config } from '../types';
 import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
@@ -39,7 +39,7 @@ interface SettingsViewProps {
 
 export function SettingsView({ 
   activeSection,
-  onBack,
+  onBack: _onBack,
   config, 
   setConfig, 
   t, 
@@ -493,60 +493,9 @@ export function SettingsView({
     );
   };
 
-  const sectionTitles: Record<string, { title: string; subtitle?: string }> = {
-    salary: {
-      title: config.language === 'en' ? 'Payday' : 'Lönedag',
-      subtitle: config.language === 'en' ? 'Configure when your financial month starts' : 'Ställ in när din budgetmånad startar',
-    },
-    categories: {
-      title: config.language === 'en' ? 'Categories' : 'Kategorier',
-      subtitle: config.language === 'en' ? 'Manage expense and income categories' : 'Hantera utgifts- och inkomstkategorier',
-    },
-    paymentMethods: {
-      title: config.language === 'en' ? 'Payment Methods' : 'Betalmetoder',
-      subtitle: config.language === 'en' ? 'Your cards, accounts and payment options' : 'Dina kort, konton och betalsätt',
-    },
-    language: {
-      title: config.language === 'en' ? 'Language' : 'Språk',
-      subtitle: config.language === 'en' ? 'Choose app language' : 'Välj språk i appen',
-    },
-    appearance: {
-      title: config.language === 'en' ? 'Appearance' : 'Utseende',
-      subtitle: config.language === 'en' ? 'Dark mode and theme colors' : 'Mörkt läge och temafärger',
-    },
-    currency: {
-      title: config.language === 'en' ? 'Currency' : 'Valuta',
-      subtitle: config.language === 'en' ? 'Select display currency' : 'Välj valuta för dina belopp',
-    },
-  };
-
-  const currentInfo = sectionTitles[activeSection] || { title: '' };
-
   return (
-    <div className="space-y-5 font-sans pb-12 max-w-md mx-auto">
-      {/* Sub-Navigation Header */}
-      <div className="flex items-center gap-3.5 py-1">
-        <button
-          type="button"
-          onClick={onBack}
-          className="w-9 h-9 rounded-full bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs shrink-0"
-          aria-label={t('back') || 'Tillbaka'}
-        >
-          <ChevronLeft size={20} strokeWidth={2.2} />
-        </button>
-        <div className="min-w-0">
-          <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)] truncate">
-            {currentInfo.title}
-          </h1>
-          {currentInfo.subtitle && (
-            <p className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 truncate">
-              {currentInfo.subtitle}
-            </p>
-          )}
-        </div>
-      </div>
-
-       <div>
+    <div className="space-y-6 font-sans pb-12 max-w-md mx-auto">
+      <div>
         {activeSection === 'salary' && (
           <div className="w-full py-2 space-y-4">
             <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-[var(--surface-color)] backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] shadow-none">

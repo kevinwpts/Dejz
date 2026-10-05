@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Receipt, Calendar, Eye, ArrowUpRight, ArrowDownRight, Tag, FileText, ChevronLeft } from 'lucide-react';
+import { Search, Receipt, Calendar, Eye, ArrowUpRight, ArrowDownRight, Tag, FileText } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { EmptyState } from './EmptyState';
 import { formatAmount } from '../utils/format';
@@ -13,7 +13,7 @@ interface ReceiptsViewProps {
 }
 
 export function ReceiptsView({
-  onBack,
+  onBack: _onBack,
   transactions,
   config,
   onViewTransaction
@@ -50,28 +50,8 @@ export function ReceiptsView({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 pb-24 max-w-md mx-auto"
+      className="space-y-6 pb-24 max-w-md mx-auto"
     >
-      {/* Sub-Navigation Header */}
-      <div className="flex items-center gap-3.5 py-1">
-        <button
-          type="button"
-          onClick={onBack}
-          className="w-9 h-9 rounded-full bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs shrink-0"
-          aria-label="Tillbaka"
-        >
-          <ChevronLeft size={20} strokeWidth={2.2} />
-        </button>
-        <div className="min-w-0">
-          <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)] truncate">
-            {config.language === 'sv' ? 'Kvitton' : 'Receipts'}
-          </h1>
-          <p className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 truncate">
-            {config.language === 'sv' ? `${receiptTransactions.length} sparade kvitton` : `${receiptTransactions.length} saved receipts`}
-          </p>
-        </div>
-      </div>
-
       {/* Stats Summary Panel */}
       {receiptTransactions.length > 0 && (
         <div className="overflow-hidden rounded-[22px] bg-[var(--surface-color)] p-5 border border-black/[0.06] dark:border-white/[0.08] shadow-none space-y-2">
