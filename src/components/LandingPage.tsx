@@ -104,20 +104,16 @@ export function LandingPage({
         onClose={() => setActivePolicy(null)}
       />
 
-      {/* HERO SECTION WITH INTEGRATED HEADER & HERO_BACKGROUND_IMAGE */}
-      <section className="relative w-full overflow-hidden bg-slate-900 text-white">
-        {/* HERO_BACKGROUND_IMAGE placeholder covering the entire hero background */}
+      {/* HERO SECTION WITH HERO.PNG BACKGROUND */}
+      <section className="relative w-full overflow-hidden bg-slate-950 text-white">
+        {/* HERO background image */}
         <div 
-          data-mockup-id="HERO_BACKGROUND_IMAGE"
-          className="absolute inset-0 w-full h-full bg-slate-950/90 border border-dashed border-slate-700/50 flex flex-col items-center justify-center pointer-events-none select-none z-0"
-        >
-          <div className="absolute top-8 right-8 px-4 py-2 rounded-lg bg-slate-900/80 border border-slate-700 text-slate-400 font-mono text-xs uppercase tracking-widest">
-            [ HERO_BACKGROUND_IMAGE ]
-          </div>
-        </div>
+          className="absolute inset-0 w-full h-full bg-cover bg-center z-0"
+          style={{ backgroundImage: "url('/hero.png')" }}
+        />
 
-        {/* Subtle gradient overlay for left side readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/80 to-transparent z-0 pointer-events-none lg:w-3/5" />
+        {/* Subtle gradient overlay on left side for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-slate-950/25 z-0 pointer-events-none" />
 
         {/* Header integrated inside hero composition */}
         <header className="relative z-20 w-full border-b border-white/10 backdrop-blur-md bg-slate-950/40">
@@ -240,7 +236,7 @@ export function LandingPage({
               </div>
             </div>
 
-            {/* Right Column (empty on top of background image for future mockups) */}
+            {/* Right Column (empty over hero.png background) */}
             <div className="lg:col-span-6 hidden lg:block" />
           </div>
         </div>
