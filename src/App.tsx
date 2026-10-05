@@ -725,15 +725,22 @@ export default function App() {
       }
 
       if (dbSettings) {
-        // Migrate category emojis back to Lucide icon names
+        const VIBRANT_FALLBACK_COLORS = ['#ef4444', '#f97316', '#d97706', '#ec4899', '#6366f1', '#0ea5e9', '#3b82f6', '#8b5cf6', '#a855f7', '#10b981', '#06b6d4', '#0d9488'];
         const migrateCategories = (categories: any[]) => {
           let hasChanged = false;
-          const migrated = categories.map((cat) => {
-            if (cat.icon && isEmojiString(cat.icon)) {
+          const migrated = categories.map((cat, idx) => {
+            const updated = { ...cat };
+            if (updated.icon && isEmojiString(updated.icon)) {
               hasChanged = true;
-              return { ...cat, icon: resolveLucideIcon(cat.icon) };
+              updated.icon = resolveLucideIcon(updated.icon);
             }
-            return cat;
+            if (!updated.color || updated.color === '#64748b' || updated.color === '#94a3b8' || updated.color === '#71717a' || updated.color === '#a1a1aa') {
+              hasChanged = true;
+              const defaultMatch = DEFAULT_EXPENSE_CATEGORIES.find(d => d.name.toLowerCase() === (updated.name || '').trim().toLowerCase()) 
+                || DEFAULT_INCOME_CATEGORIES.find(d => d.name.toLowerCase() === (updated.name || '').trim().toLowerCase());
+              updated.color = defaultMatch ? defaultMatch.color : VIBRANT_FALLBACK_COLORS[idx % VIBRANT_FALLBACK_COLORS.length];
+            }
+            return updated;
           });
           return { migrated, hasChanged };
         };

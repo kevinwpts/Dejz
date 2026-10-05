@@ -177,6 +177,32 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
 
   return (
     <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(2.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+      {/* Top Left Back Button */}
+      {onBack && (
+        <div className="absolute top-6 left-6 sm:top-8 sm:left-8 z-30">
+          <IconButton 
+            icon={<ChevronLeft size={18} />}
+            onClick={() => {
+              if (isForgotPassword) {
+                setIsForgotPassword(false);
+                setError(null);
+              } else if (isEmailSent) {
+                setIsEmailSent(false);
+                setIsRegistering(false);
+              } else if (isResetSent) {
+                setIsResetSent(false);
+                setIsForgotPassword(false);
+              } else {
+                onBack();
+              }
+            }}
+            variant="muted"
+            size="sm"
+            aria-label="Tillbaka"
+          />
+        </div>
+      )}
+
       <div className="w-full max-w-[400px] mx-auto my-auto relative z-10 space-y-6">
         {isEmailSent ? (
           <div className="text-center py-6 space-y-6">
@@ -238,21 +264,8 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
           </div>
         ) : isForgotPassword ? (
           <div className="space-y-6">
-            {/* Header with Back Button and Logo */}
+            {/* Header with Logo */}
             <div className="relative flex flex-col items-center mb-2">
-              <div className="absolute top-0 left-0">
-                <IconButton 
-                  icon={<ChevronLeft size={18} />}
-                  onClick={() => {
-                    setIsForgotPassword(false);
-                    setError(null);
-                  }}
-                  variant="muted"
-                  size="sm"
-                  aria-label={t('backToLogin' as any)}
-                />
-              </div>
-              
               <div className="flex flex-col items-center pt-1 mb-4 select-none">
                 <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
               </div>
@@ -291,20 +304,8 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Header with Back Button and Logo */}
+            {/* Header with Logo */}
             <div className="relative flex flex-col items-center mb-2">
-              {onBack && (
-                <div className="absolute top-0 left-0">
-                  <IconButton 
-                    icon={<ChevronLeft size={18} />}
-                    onClick={onBack}
-                    variant="muted"
-                    size="sm"
-                    aria-label="Tillbaka"
-                  />
-                </div>
-              )}
-              
               <div className="flex flex-col items-center pt-1 mb-4 select-none">
                 <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
               </div>
