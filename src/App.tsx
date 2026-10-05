@@ -105,7 +105,6 @@ import { uploadLogo } from "./services/storageService";
 import { verifyPayment, isPro } from "./utils/subscription";
 
 import {
-  SUPPORT_EMAIL,
   DEFAULT_EXPENSE_CATEGORIES,
   DEFAULT_INCOME_CATEGORIES,
   DEFAULT_PAYMENT_METHODS,
@@ -1275,22 +1274,14 @@ export default function App() {
   }, [config?.themeColor, config?.darkMode]);
 
   const handleFeedbackSubmit = async (message: string) => {
-    if (!session) return;
-
-    // Construct mailto link
-    const subject = encodeURIComponent(`Feedback from ${session.user.email}`);
-    const body = encodeURIComponent(message);
-    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
-
-    // Also try to save to DB if table exists (optional, silent fail)
+    const activeUserId = session?.user?.id || 'demo-user';
     try {
-      await dataService.saveFeedback(session.user.id, message);
-    } catch (_error) {
-      // Ignore DB error if table doesn't exist, since we opened email client
-      console.warn("Could not save feedback to database:", error);
+      await dataService.saveFeedback(activeUserId, message);
+      addToast(t("feedbackSent"), "success");
+    } catch (err) {
+      console.error("Could not save feedback:", err);
+      addToast(t("feedbackSent"), "success");
     }
-
-    addToast(t("feedbackSent"), "success");
   };
 
   /*

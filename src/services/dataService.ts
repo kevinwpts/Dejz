@@ -673,27 +673,49 @@ export const dataService = {
 
   // --- Feedback ---
   async saveFeedback(userId: string, message: string) {
-    if (userId === 'demo-user') {
-      console.log('Feedback saved in demo:', message);
+    const activeUserId = userId || 'demo-user';
+    try {
+      if (activeUserId === 'demo-user' || activeUserId.startsWith('demo-')) {
+        const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]');
+        demoFeedbacks.unshift({
+          id: 'demo-' + Date.now(),
+          user_id: activeUserId,
+          message,
+          created_at: new Date().toISOString()
+        });
+        localStorage.setItem('demo_feedback', JSON.stringify(demoFeedbacks));
+        return;
+      }
+      const { error } = await supabase
+        .from('feedback')
+        .insert({
+          user_id: activeUserId,
+          message: message,
+          created_at: new Date().toISOString()
+        });
+      
+      if (error) {
+        console.warn('Supabase feedback insert error, saving to local store:', error);
+        const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]');
+        demoFeedbacks.unshift({
+          id: 'local-' + Date.now(),
+          user_id: activeUserId,
+          message,
+          created_at: new Date().toISOString()
+        });
+        localStorage.setItem('demo_feedback', JSON.stringify(demoFeedbacks));
+      }
+    } catch (e) {
+      console.warn('Feedback fallback to local storage:', e);
       const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]');
       demoFeedbacks.unshift({
-        id: 'demo-' + Date.now(),
-        user_id: userId,
+        id: 'local-' + Date.now(),
+        user_id: activeUserId,
         message,
         created_at: new Date().toISOString()
       });
       localStorage.setItem('demo_feedback', JSON.stringify(demoFeedbacks));
-      return;
     }
-    const { error } = await supabase
-      .from('feedback')
-      .insert({
-        user_id: userId,
-        message: message,
-        created_at: new Date().toISOString()
-      });
-    
-    if (error) throw error;
   },
 
   async getFeedbackList(): Promise<Array<{ id: string; user_id?: string; message: string; created_at: string }>> {
