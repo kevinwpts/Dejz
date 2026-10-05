@@ -43,7 +43,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       accent:
         'bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] shadow-none border-none',
       danger:
-        'bg-rose-500/10 dark:bg-[#381F26] text-rose-600 dark:text-[#FF808B] hover:bg-rose-500/20 dark:hover:bg-[#4A2631] border-none',
+        'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 border-none shadow-none',
     }[variant];
 
     return (

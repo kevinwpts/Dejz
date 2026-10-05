@@ -23,15 +23,14 @@ export function ConfirmModal({
   cancelText, 
   onConfirm, 
   onCancel, 
-  variant = 'danger',
+  variant: _variant = 'danger',
   t
 }: ConfirmModalProps) {
   const displayConfirmText = confirmText || (t ? t('confirm') : 'Bekräfta');
   const displayCancelText = cancelText || (t ? t('cancel') : 'Avbryt');
 
-  const isDanger = variant === 'danger';
-  const iconColor = isDanger ? 'text-danger' : 'text-[var(--accent-color)]';
-  const iconBg = isDanger ? 'bg-danger/10 border-danger/20' : 'bg-[var(--accent-color)]/10 border-[var(--accent-color)]/20';
+  const iconColor = 'text-[var(--accent-color)]';
+  const iconBg = 'bg-[var(--accent-color)]/10 border-[var(--accent-color)]/20';
 
   return (
     <Modal
@@ -58,14 +57,14 @@ export function ConfirmModal({
         <div className="flex flex-col gap-2.5">
           <Button 
             onClick={onConfirm} 
-            variant={isDanger ? 'danger' : 'primary'}
+            variant="primary"
             fullWidth
           >
             {displayConfirmText}
           </Button>
           <Button 
             onClick={onCancel}
-            variant="ghost"
+            variant="secondary"
             fullWidth
           >
             {displayCancelText}

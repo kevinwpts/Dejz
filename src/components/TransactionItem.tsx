@@ -146,7 +146,7 @@ export function TransactionItem({
         {canSwipe && (
           <motion.div 
             style={{ opacity: actionOpacity, display: actionDisplay }}
-            className="absolute inset-y-0 right-0 w-[84px] bg-rose-500 text-white flex items-center justify-center z-0 cursor-pointer"
+            className="absolute inset-y-0 right-0 w-[84px] bg-[#6E6961] dark:bg-[#4A453F] text-white flex items-center justify-center z-0 cursor-pointer"
           >
             <button
               type="button"
@@ -156,7 +156,7 @@ export function TransactionItem({
                 feedback.tap();
                 setShowConfirmModal(true);
               }}
-              className="w-full h-full flex flex-col items-center justify-center gap-1 text-white hover:bg-rose-600 active:scale-95 transition-all cursor-pointer select-none"
+              className="w-full h-full flex flex-col items-center justify-center gap-1 text-white hover:bg-[#5C574F] active:scale-95 transition-all cursor-pointer select-none"
               aria-label={getL10n('Ta bort', 'Delete')}
             >
               <Trash2 size={19} strokeWidth={2} />
