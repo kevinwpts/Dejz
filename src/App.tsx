@@ -2405,7 +2405,15 @@ export default function App() {
       if (!isNaN(d.getTime())) registrationDate = d;
     }
 
-    const earliest = registrationDate || now;
+    let earliest = registrationDate || now;
+    if (transactions && transactions.length > 0) {
+      transactions.forEach((tx) => {
+        const txDate = new Date(tx.timestamp || tx.date);
+        if (!isNaN(txDate.getTime()) && txDate < earliest) {
+          earliest = txDate;
+        }
+      });
+    }
 
     const nowYear = now.getFullYear();
     const nowMonth = now.getMonth();
@@ -2413,8 +2421,8 @@ export default function App() {
     const earliestMonth = earliest.getMonth();
 
     const monthDiff = (nowYear - earliestYear) * 12 + (nowMonth - earliestMonth);
-    const startOffset = -Math.max(0, monthDiff);
-    const endOffset = 24;
+    const startOffset = -Math.max(12, monthDiff);
+    const endOffset = 12;
 
     const newLockedPeriods = { ...(config?.lockedPeriods || {}) };
     let hasNewLocks = false;
@@ -2432,9 +2440,6 @@ export default function App() {
       let start = tempBounds.start;
       let end = tempBounds.end;
 
-      if (registrationDate && end < registrationDate) {
-        continue;
-      }
       let name = getPeriodName(
         start,
         end,
@@ -4748,6 +4753,7 @@ export default function App() {
                 }}
                 onShowToast={addToast}
                 onSecurityClick={() => setIsSecurityModalOpen(true)}
+                onSetSubscriptionStatus={setSubscriptionStatus}
                 profile={profile}
                 userId={session?.user.id || ""}
                 session={session}

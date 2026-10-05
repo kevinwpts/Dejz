@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff } from 'lucide-react';
+import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
 import { ManageAccountView } from './ManageAccountView';
 import { ReceiptsView } from './ReceiptsView';
+import { AdminDashboardView } from './AdminDashboardView';
 import { DejzLogo } from './DejzLogo';
 
 interface ProfileViewProps {
@@ -29,6 +30,7 @@ interface ProfileViewProps {
   onPaymentSuccess: () => void;
   onShowToast: (message: string, type: 'success' | 'error') => void;
   onSecurityClick: () => void;
+  onSetSubscriptionStatus?: (status: string | null) => void;
   profile: any;
   userId: string;
   session: any;
@@ -73,6 +75,7 @@ export function ProfileView({
   onPaymentSuccess,
   onShowToast: _onShowToast,
   onSecurityClick,
+  onSetSubscriptionStatus,
   profile,
   userId,
   session,
@@ -97,12 +100,35 @@ export function ProfileView({
   onRenameCategory,
   onMigrateAndDeleteCategory,
 }: ProfileViewProps) {
-  const [activePage, setActivePage] = useState<'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'pro' | 'receipts'>(initialSection as any);
+  const [activePage, setActivePage] = useState<'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'pro' | 'receipts' | 'admin'>(initialSection as any);
+
+  const isAdmin = user?.email?.toLowerCase() === 'kevinwpts@gmail.com' || profile?.role === 'admin' || user?.user_metadata?.role === 'admin';
 
   useEffect(() => {
-    setActivePage(initialSection);
+    setActivePage(initialSection as any);
   }, [initialSection]);
   const [isUploading, setIsUploading] = useState(false);
+
+  if (activePage === 'admin') {
+    return (
+      <AdminDashboardView
+        onBack={() => {
+          setActivePage('main');
+          onNavigate('profile', 'main');
+        }}
+        user={user}
+        config={config}
+        setConfig={setConfig}
+        subscriptionStatus={subscriptionStatus}
+        onSetSubscriptionStatus={onSetSubscriptionStatus}
+        transactions={_transactions}
+        incomes={_incomes}
+        fixedExpenses={_fixedExpenses}
+        onRefresh={onRefresh}
+        addToast={addToast}
+      />
+    );
+  }
 
   if (activePage === 'receipts') {
     return (
@@ -261,6 +287,12 @@ export function ProfileView({
             <h3 className="font-bold text-base sm:text-lg text-[var(--text-primary)] truncate tracking-tight">
               {user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('user')}
             </h3>
+            {isAdmin && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold border border-amber-500/20 shrink-0">
+                <Crown size={11} strokeWidth={2} />
+                Admin
+              </span>
+            )}
           </div>
           <p className="text-xs font-medium text-[var(--text-secondary)] truncate opacity-60 mb-2.5 tracking-tight">
             {user?.email}
@@ -276,6 +308,26 @@ export function ProfileView({
       </div>
 
       <div className="space-y-4">
+        {/* Admin Tools for App Owner */}
+        {isAdmin && (
+          <div className="space-y-2">
+            <h4 className="text-[12px] font-semibold text-amber-600 dark:text-amber-400 px-1.5 flex items-center gap-1.5">
+              <Crown size={13} strokeWidth={2} />
+              <span>{config.language === 'en' ? 'Administration' : 'Administration'}</span>
+            </h4>
+            <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-amber-500/25 shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+              <SettingsMenuItem 
+                icon={ShieldCheck} 
+                label={config.language === 'en' ? 'Admin Dashboard' : 'Adminpanel'} 
+                subtitle={config.language === 'en' ? 'Owner tools, subscription simulator & feedback' : 'Ägarverktyg, prenumerationssimulator & feedback'}
+                onClick={() => handleSectionClick('admin')}
+                iconBgColor="bg-amber-500/10"
+                iconTextColor="text-amber-600 dark:text-amber-400"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Ekonomi & Budget */}
         <div className="space-y-2">
           <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">

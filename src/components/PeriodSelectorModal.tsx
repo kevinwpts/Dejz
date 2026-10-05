@@ -37,7 +37,7 @@ export function PeriodSelectorModal({
   }, [isOpen]);
 
   const chronologicalPeriods = periods 
-    ? periods.filter(p => !p.isFuture || p.isCurrent).slice().reverse() 
+    ? periods.slice().reverse() 
     : [];
 
   return (

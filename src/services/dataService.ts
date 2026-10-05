@@ -672,8 +672,17 @@ export const dataService = {
   },
 
   // --- Feedback ---
-  async saveFeedback(userId: string, message: string) {    if (userId === 'demo-user') {
+  async saveFeedback(userId: string, message: string) {
+    if (userId === 'demo-user') {
       console.log('Feedback saved in demo:', message);
+      const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]');
+      demoFeedbacks.unshift({
+        id: 'demo-' + Date.now(),
+        user_id: userId,
+        message,
+        created_at: new Date().toISOString()
+      });
+      localStorage.setItem('demo_feedback', JSON.stringify(demoFeedbacks));
       return;
     }
     const { error } = await supabase
@@ -685,6 +694,54 @@ export const dataService = {
       });
     
     if (error) throw error;
+  },
+
+  async getFeedbackList(): Promise<Array<{ id: string; user_id?: string; message: string; created_at: string }>> {
+    try {
+      const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]');
+      const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (error) {
+        console.warn('Could not fetch remote feedback:', error);
+        return demoFeedbacks;
+      }
+      return [...(data || []), ...demoFeedbacks];
+    } catch {
+      return JSON.parse(localStorage.getItem('demo_feedback') || '[]');
+    }
+  },
+
+  async deleteFeedback(id: string) {
+    if (id.startsWith('demo-')) {
+      const demoFeedbacks = JSON.parse(localStorage.getItem('demo_feedback') || '[]').filter((f: any) => f.id !== id);
+      localStorage.setItem('demo_feedback', JSON.stringify(demoFeedbacks));
+      return;
+    }
+    await supabase.from('feedback').delete().eq('id', id);
+  },
+
+  async getAdminStats(): Promise<{ totalUsers: number; dbHealthy: boolean; timestamp: string }> {
+    try {
+      const { count, error } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+      
+      return {
+        totalUsers: error ? 1 : (count || 1),
+        dbHealthy: !error,
+        timestamp: new Date().toISOString()
+      };
+    } catch {
+      return {
+        totalUsers: 1,
+        dbHealthy: false,
+        timestamp: new Date().toISOString()
+      };
+    }
   },
 
   async resetSavingsPot(userId: string) {    if (userId === 'demo-user') {

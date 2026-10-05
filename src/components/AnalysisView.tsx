@@ -55,14 +55,13 @@ export function AnalysisView({
     }) || periods.find(p => p.isCurrent) || null;
   }, [periods, currentPeriodDate]);
 
+  const [isAllPeriodsSelected, setIsAllPeriodsSelected] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('all');
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const isEn = config.language === 'en';
-
-
 
   const filterOptions = useMemo(() => [
     {
@@ -82,15 +81,35 @@ export function AnalysisView({
     },
   ], [isEn, t]);
 
+  const effectiveStats = useMemo(() => {
+    if (!isAllPeriodsSelected) return stats;
+    let totalIncome = 0;
+    (transactions || []).forEach(t => {
+      if (t.type === 'income') totalIncome += t.amount;
+    });
+
+    return {
+      ...stats,
+      periodName: isEn ? 'All periods' : 'Alla perioder',
+      totalIncome: totalIncome > 0 ? totalIncome : (stats?.totalIncome || 0),
+      periodTransactions: transactions || [],
+      isPastPeriod: false,
+    };
+  }, [isAllPeriodsSelected, stats, transactions, isEn]);
+
   const filteredExpenses = useMemo(() => {
-    if (!stats || !transactions) return [];
+    if (!transactions) return [];
+    if (isAllPeriodsSelected) {
+      return transactions.filter(e => e.type === 'expense' || e.type === 'savings');
+    }
+    if (!stats) return [];
     return transactions
       .filter(e => {
         const inPeriod = e.timestamp >= stats.periodStart.getTime() && e.timestamp <= stats.periodEnd.getTime() + 86399999;
         if (!inPeriod) return false;
         return e.type === 'expense' || e.type === 'savings';
       });
-  }, [transactions, stats?.periodStart, stats?.periodEnd]);
+  }, [transactions, isAllPeriodsSelected, stats?.periodStart, stats?.periodEnd]);
 
   const { categoryData, totalFixed, totalSpentInPeriod } = useMemo(() => {
     const breakdown: Record<string, number> = {};
@@ -266,7 +285,11 @@ export function AnalysisView({
         {/* Left: Period Button */}
         <FilterSelectButton
           icon={<Calendar size={15} strokeWidth={2} />}
-          value={stats.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}
+          value={
+            isAllPeriodsSelected 
+              ? (isEn ? 'All periods' : 'Alla perioder') 
+              : (effectiveStats?.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period'))
+          }
           onClick={() => setIsPeriodModalOpen(true)}
           className="flex-[1.25] min-w-0"
         />
@@ -293,11 +316,17 @@ export function AnalysisView({
         isOpen={isPeriodModalOpen}
         onClose={() => setIsPeriodModalOpen(false)}
         periods={periods || []}
-        selectedPeriod={currentPeriod}
+        selectedPeriod={isAllPeriodsSelected ? null : currentPeriod}
         selectedDate={null}
         onSelectPeriod={(p) => {
-          if (p.date && onPeriodChange) {
-            onPeriodChange(new Date(p.date));
+          if (!p) {
+            setIsAllPeriodsSelected(true);
+          } else {
+            setIsAllPeriodsSelected(false);
+            const targetDate = p.date ? new Date(p.date) : (p.start ? new Date(p.start) : null);
+            if (targetDate && onPeriodChange) {
+              onPeriodChange(targetDate);
+            }
           }
         }}
         onSelectDate={() => {}}
@@ -320,7 +349,7 @@ export function AnalysisView({
 
       {/* Unified Budget Summary Card */}
       <BudgetSummaryModule
-        stats={stats}
+        stats={effectiveStats}
         config={config}
         transactions={transactions}
         fixedExpenses={fixedExpenses}
