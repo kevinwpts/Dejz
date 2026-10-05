@@ -49,7 +49,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
       </div>
       <ChevronDown
         size={14}
-        strokeWidth={2.2}
+        strokeWidth={2.5}
         className="text-[var(--text-secondary)] shrink-0 ml-1"
       />
     </button>

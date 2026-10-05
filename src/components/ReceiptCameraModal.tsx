@@ -247,7 +247,7 @@ export function ReceiptCameraModal({
           className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 border border-white/20 text-white flex items-center justify-center backdrop-blur-xl transition-all cursor-pointer shadow-md"
           aria-label={isEn ? 'Close' : 'Stäng'}
         >
-          <X size={20} strokeWidth={2.2} />
+          <X size={20} strokeWidth={2} />
         </button>
 
         {/* Status / Title Pill */}
@@ -393,7 +393,7 @@ export function ReceiptCameraModal({
               disabled={isProcessing}
               className="flex-1 py-3.5 px-4 rounded-[14px] bg-white/10 hover:bg-white/20 active:scale-98 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 backdrop-blur-md transition-all cursor-pointer"
             >
-              <RotateCcw size={17} strokeWidth={2.2} />
+              <RotateCcw size={17} strokeWidth={2} />
               <span>{isEn ? 'Retake' : 'Ta om'}</span>
             </button>
 
@@ -404,7 +404,7 @@ export function ReceiptCameraModal({
               disabled={isProcessing}
               className="flex-1 py-3.5 px-4 rounded-[14px] bg-white hover:bg-white/90 active:scale-98 text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
-              <Check size={18} strokeWidth={2.6} />
+              <Check size={18} strokeWidth={2} />
               <span>{isEn ? 'Use receipt' : 'Använd kvitto'}</span>
             </button>
           </div>
@@ -418,7 +418,7 @@ export function ReceiptCameraModal({
               className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white/90 hover:text-white flex flex-col items-center justify-center gap-1 backdrop-blur-md transition-all cursor-pointer"
               title={isEn ? 'Choose photo' : 'Välj bild'}
             >
-              <ImageIcon size={20} strokeWidth={1.8} />
+              <ImageIcon size={20} strokeWidth={2} />
             </button>
 
             {/* Native-feeling Shutter Button */}
@@ -439,7 +439,7 @@ export function ReceiptCameraModal({
               className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white/90 hover:text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
               title={isEn ? 'Flip camera' : 'Vänd kamera'}
             >
-              <SwitchCamera size={20} strokeWidth={1.8} />
+              <SwitchCamera size={20} strokeWidth={2} />
             </button>
           </div>
         )}

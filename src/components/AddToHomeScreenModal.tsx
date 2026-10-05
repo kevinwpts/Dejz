@@ -218,7 +218,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
               aria-label="Stäng"
               className="absolute top-5 right-5 w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors z-20 cursor-pointer border-none shadow-none"
             >
-              <X size={17} strokeWidth={2.2} />
+              <X size={17} strokeWidth={2} />
             </button>
 
             {/* Header: Title & Description */}
@@ -270,7 +270,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                   onClick={handleInstallClick}
                   className="w-full h-12 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[14px] font-semibold text-sm shadow-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Download size={18} strokeWidth={2.5} />
+                  <Download size={18} strokeWidth={2} />
                   <span>{localized.installBtn}</span>
                 </button>
                 <button

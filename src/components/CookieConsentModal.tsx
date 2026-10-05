@@ -51,7 +51,7 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center justify-center shrink-0 cursor-pointer border-none shadow-none"
               title={t('close') || 'Stäng'}
             >
-              <X size={17} strokeWidth={2.2} />
+              <X size={17} strokeWidth={2} />
             </button>
             <div className="flex items-start gap-3.5 pr-6">
               <div className="w-10 h-10 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center shrink-0 text-[var(--text-primary)] border border-black/5 dark:border-white/10">

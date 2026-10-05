@@ -92,7 +92,7 @@ export function BudgetGauge({
                 aria-label="Period- och löneinformation"
                 title="Period- och löneinformation"
               >
-                <Info size={11} strokeWidth={2.2} />
+                <Info size={11} strokeWidth={2} />
               </button>
             )}
           </div>

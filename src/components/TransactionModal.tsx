@@ -651,7 +651,7 @@ export function TransactionModal({
               className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               aria-label={t('close')}
             >
-              <X size={15} strokeWidth={2.2} />
+              <X size={15} strokeWidth={2.5} />
             </button>
           </div>
 
@@ -775,7 +775,7 @@ export function TransactionModal({
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
                   {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
             </div>
 
@@ -881,7 +881,7 @@ export function TransactionModal({
                     onClick={() => setNote('')}
                     className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
                   >
-                    <X size={13} strokeWidth={2} />
+                    <X size={13} strokeWidth={2.5} />
                   </button>
                 )}
               </div>
@@ -1165,7 +1165,7 @@ export function TransactionModal({
               }}
               className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-none"
             >
-              <Check size={15} strokeWidth={2} />
+              <Check size={15} strokeWidth={2.5} />
               <span>
                 {transaction 
                   ? (currentLang === 'en' ? 'Save changes' : 'Spara ändringar')
@@ -1184,7 +1184,7 @@ export function TransactionModal({
                 title={currentLang === 'en' ? 'Delete' : 'Ta bort'}
                 aria-label={currentLang === 'en' ? 'Delete' : 'Ta bort'}
               >
-                <Trash2 size={16} strokeWidth={1.9} />
+                <Trash2 size={16} strokeWidth={2} />
               </button>
             )}
           </div>
@@ -1219,7 +1219,7 @@ export function TransactionModal({
                     className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-colors cursor-pointer"
                     aria-label={t('close')}
                   >
-                    <X size={16} strokeWidth={2} />
+                    <X size={16} strokeWidth={2.5} />
                   </button>
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 min-h-0">
@@ -1290,7 +1290,7 @@ export function TransactionModal({
                     className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                     aria-label={t('close')}
                   >
-                    <X size={15} strokeWidth={2.2} />
+                    <X size={15} strokeWidth={2.5} />
                   </button>
                 </div>
 
@@ -1325,7 +1325,7 @@ export function TransactionModal({
                           </span>
                           {isSelected && (
                             <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
-                              <Check size={14} strokeWidth={3} />
+                              <Check size={14} strokeWidth={2.5} />
                             </div>
                           )}
                         </button>
@@ -1342,7 +1342,7 @@ export function TransactionModal({
                       }}
                       className="w-full py-2.5 rounded-[14px] border border-dashed border-black/15 dark:border-white/15 text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] hover:border-black/30 dark:hover:border-white/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <Plus size={15} strokeWidth={2} />
+                      <Plus size={15} strokeWidth={2.5} />
                       <span>{t('newCategory')}</span>
                     </button>
                   </div>

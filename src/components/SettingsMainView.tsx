@@ -4,6 +4,7 @@ import { Calendar, Tag, CreditCard, Globe, Palette, Coins, ChevronRight } from '
 import { Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
+import { formatPaydaySummary } from '../utils/format';
 
 interface SettingsMainViewProps {
   onBack: () => void;
@@ -130,7 +131,9 @@ export function SettingsMainView({
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('salary')}</span>
               <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 mt-0.5">
-                {config.payday ? `${config.payday}:e i varje månad` : 'Ej angivet'}
+                {config.payday 
+                  ? formatPaydaySummary(config.payday, config.language)
+                  : (config.language === 'en' ? 'Not specified' : 'Ej angivet')}
               </span>
             </div>
           </div>

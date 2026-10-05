@@ -103,7 +103,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
           className="absolute top-6 right-6 w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
           aria-label="Stäng"
         >
-          <X size={17} strokeWidth={2.2} />
+          <X size={17} strokeWidth={2} />
         </button>
       )}
 

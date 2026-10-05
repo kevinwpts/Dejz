@@ -124,7 +124,7 @@ export function CancelSubscriptionModal({
               className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer border-none shadow-none"
               aria-label="Stäng"
             >
-              <X size={17} strokeWidth={2.2} />
+              <X size={17} strokeWidth={2} />
             </button>
           </div>
 
@@ -175,7 +175,7 @@ export function CancelSubscriptionModal({
                     onClick={() => feedback.tap()}
                     className="w-full h-12 px-4 rounded-[14px] bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-none flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
-                    <Phone size={17} strokeWidth={2.4} />
+                    <Phone size={17} strokeWidth={2} />
                     <span>{isEn ? `Call Kundservice: ${details.phoneNumber}` : `Ring kundservice: ${details.phoneNumber}`}</span>
                   </a>
                 ) : details.directActionType === 'email' && details.supportEmail ? (
@@ -184,7 +184,7 @@ export function CancelSubscriptionModal({
                     onClick={() => feedback.tap()}
                     className="w-full h-12 px-4 rounded-[14px] bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-none flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
-                    <Mail size={17} strokeWidth={2.4} />
+                    <Mail size={17} strokeWidth={2} />
                     <span>{isEn ? `Email Cancellation: ${details.supportEmail}` : `Skicka uppsägning: ${details.supportEmail}`}</span>
                   </a>
                 ) : (
@@ -193,7 +193,7 @@ export function CancelSubscriptionModal({
                     onClick={handleOpenLink}
                     className="w-full h-12 px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-sm hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
-                    <ExternalLink size={17} strokeWidth={2.4} />
+                    <ExternalLink size={17} strokeWidth={2} />
                     <span>{isEn ? 'Open cancellation portal' : 'Öppna uppsägningssidan'}</span>
                   </button>
                 )}

@@ -472,7 +472,7 @@ export function AnalysisView({
                           </p>
                         </div>
                         <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
-                          <ChevronDown size={18} strokeWidth={1.8} />
+                          <ChevronDown size={18} strokeWidth={2} />
                         </div>
                       </div>
                     </div>

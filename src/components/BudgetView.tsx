@@ -366,24 +366,28 @@ export function BudgetView({
             }`}>
               {remainingToAllocate > 0 ? (
                 <>
-                  <span>{formatAmount(remainingToAllocate, config.language)} {curr}</span>
-                  <span className="text-base sm:text-lg font-medium text-[var(--text-secondary)] font-sans ml-1.5">kvar att fördela</span>
+                  <span className="font-amount tabular-nums">{formatAmount(remainingToAllocate, config.language)} {curr}</span>
+                  <span className="text-base sm:text-lg font-medium text-[var(--text-secondary)] font-sans ml-1.5">
+                    {config.language === 'en' ? 'left to allocate' : 'kvar att fördela'}
+                  </span>
                 </>
               ) : remainingToAllocate === 0 ? (
                 <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 text-xl sm:text-2xl py-1 font-sans font-bold">
-                  ✓ Allt är fördelat! 🎉
+                  ✓ {config.language === 'en' ? 'All allocated! 🎉' : 'Allt är fördelat! 🎉'}
                 </span>
               ) : (
                 <>
-                  <span>{formatAmount(Math.abs(remainingToAllocate), config.language)} {curr}</span>
-                  <span className="text-base sm:text-lg font-medium text-rose-500/80 font-sans ml-1.5">överfördelat</span>
+                  <span className="font-amount tabular-nums">{formatAmount(Math.abs(remainingToAllocate), config.language)} {curr}</span>
+                  <span className="text-base sm:text-lg font-medium text-rose-500/80 font-sans ml-1.5">
+                    {config.language === 'en' ? 'overallocated' : 'överfördelat'}
+                  </span>
                 </>
               )}
             </div>
 
             {/* Kompletterande mindre information */}
             <div className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)]">
-              {formatAmount(totalAllocated, config.language)} av {formatAmount(totalIncomeSum, config.language)} {curr} fördelat
+              <span className="font-amount tabular-nums">{formatAmount(totalAllocated, config.language)}</span> {config.language === 'en' ? 'of' : 'av'} <span className="font-amount tabular-nums">{formatAmount(totalIncomeSum, config.language)}</span> {curr} {config.language === 'en' ? 'allocated' : 'fördelat'}
             </div>
           </div>
 
@@ -436,7 +440,7 @@ export function BudgetView({
         <FilterSelectButton
           icon={
             budgetFilter === 'fixed' ? <Calendar size={15} strokeWidth={2} /> :
-            budgetFilter === 'income' ? <ArrowDownLeft size={15} strokeWidth={2} /> :
+            budgetFilter === 'income' ? <ArrowDownLeft size={15} strokeWidth={2.5} /> :
             <PiggyBank size={15} strokeWidth={2} />
           }
           value={
@@ -463,7 +467,7 @@ export function BudgetView({
             {
               id: 'income',
               label: config?.language === 'en' ? 'Income' : 'Inkomster',
-              icon: <ArrowDownLeft size={16} strokeWidth={2} />,
+              icon: <ArrowDownLeft size={16} strokeWidth={2.5} />,
             },
             {
               id: 'savings',
@@ -525,7 +529,7 @@ export function BudgetView({
                   className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
-                  <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
+                  <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
                   <span className="text-[var(--text-secondary)] font-normal">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
@@ -591,7 +595,7 @@ export function BudgetView({
                   className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
-                  <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
+                  <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
                   <span className="text-[var(--text-secondary)] font-normal">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
@@ -607,7 +611,7 @@ export function BudgetView({
                 <Button
                   variant="secondary"
                   size="sm"
-                  icon={<Plus size={14} strokeWidth={2.5} />}
+                  icon={<Plus size={14} strokeWidth={2} />}
                   onClick={onAddFixedExpense}
                 >
                   {t('newFixedExpense')}
@@ -675,7 +679,7 @@ export function BudgetView({
                   className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
-                  <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
+                  <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
                   <span className="text-[var(--text-secondary)] font-normal">
                     {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                   </span>
@@ -691,7 +695,7 @@ export function BudgetView({
                 <Button
                   variant="secondary"
                   size="sm"
-                  icon={<Plus size={14} strokeWidth={2.5} />}
+                  icon={<Plus size={14} strokeWidth={2} />}
                   onClick={onAddMonthlySaving}
                 >
                   {t('newMonthlySaving')}

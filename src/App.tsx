@@ -4371,7 +4371,7 @@ export default function App() {
               className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-sm"
             >
               <span>{t('exitDemo')}</span>
-              <LogOut size={12} strokeWidth={2.5} />
+              <LogOut size={12} strokeWidth={2} />
             </button>
           </div>
         </div>
@@ -5578,7 +5578,7 @@ export default function App() {
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
                   <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
-                    <ArrowDownLeft size={24} strokeWidth={1.8} className="text-[var(--text-primary)]" />
+                    <ArrowDownLeft size={24} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
                     {config?.language === "en" ? "Expense" : "Utgift"}
@@ -5598,7 +5598,7 @@ export default function App() {
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
                   <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
-                    <ArrowUpRight size={24} strokeWidth={1.8} className="text-[var(--text-primary)]" />
+                    <ArrowUpRight size={24} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
                     {config?.language === "en" ? "Income" : "Inkomst"}
@@ -5616,7 +5616,7 @@ export default function App() {
                     {isScanningReceipt ? (
                       <Loader2 size={24} className="animate-spin text-[var(--text-primary)]" />
                     ) : (
-                      <Camera size={24} strokeWidth={1.8} className="text-[var(--text-primary)]" />
+                      <Camera size={24} strokeWidth={2} className="text-[var(--text-primary)]" />
                     )}
                   </div>
                   <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
@@ -5674,7 +5674,7 @@ export default function App() {
                     </button>
                   }
                   submitVariant="inside"
-                  submitIcon={<Plus size={18} strokeWidth={2.4} />}
+                  submitIcon={<Plus size={18} strokeWidth={2} />}
                   feedback={
                     plusSuccessMsg
                       ? { type: 'success', message: plusSuccessMsg.text }

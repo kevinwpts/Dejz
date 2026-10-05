@@ -259,8 +259,8 @@ export function LogView({
         <FilterSelectButton
           icon={
             typeFilter === 'all' ? <LayoutGrid size={15} strokeWidth={2} /> :
-            typeFilter === 'expense' ? <ArrowDownLeft size={15} strokeWidth={2} /> :
-            typeFilter === 'income' ? <ArrowUpRight size={15} strokeWidth={2} /> :
+            typeFilter === 'expense' ? <ArrowDownLeft size={15} strokeWidth={2.5} /> :
+            typeFilter === 'income' ? <ArrowUpRight size={15} strokeWidth={2.5} /> :
             <FileText size={15} strokeWidth={2} />
           }
           value={
@@ -290,12 +290,12 @@ export function LogView({
             {
               id: 'expense',
               label: t('expense' as TranslationKey) || (config.language === 'en' ? 'Expenses' : 'Utgifter'),
-              icon: <ArrowDownLeft size={16} strokeWidth={2} />,
+              icon: <ArrowDownLeft size={16} strokeWidth={2.5} />,
             },
             {
               id: 'income',
               label: t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster'),
-              icon: <ArrowUpRight size={16} strokeWidth={2} />,
+              icon: <ArrowUpRight size={16} strokeWidth={2.5} />,
             },
             {
               id: 'receipt',
@@ -436,7 +436,7 @@ export function LogView({
                 aria-label="Föregående period"
                 title="Föregående period"
               >
-                <ChevronLeft size={17} strokeWidth={2.2} />
+                <ChevronLeft size={17} strokeWidth={2} />
               </button>
 
               <div className="flex flex-col items-center text-center px-2 min-w-0">
@@ -469,7 +469,7 @@ export function LogView({
                 aria-label="Nästa period"
                 title="Nästa period"
               >
-                <ChevronRight size={17} strokeWidth={2.2} />
+                <ChevronRight size={17} strokeWidth={2} />
               </button>
             </div>
 

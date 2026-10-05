@@ -129,7 +129,7 @@ export function GreetingModule({
             {/* Header */}
             <div className="flex items-center justify-between pb-1">
               <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold font-display uppercase tracking-wider text-sm">
-                <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2.2} />
+                <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2} />
                 <span>{isEn ? 'Period & Payday' : 'Period & Nästa Lön'}</span>
               </div>
               <button
@@ -138,7 +138,7 @@ export function GreetingModule({
                 className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                 aria-label="Stäng"
               >
-                <X size={17} strokeWidth={2.2} />
+                <X size={17} strokeWidth={2} />
               </button>
             </div>
 

@@ -169,7 +169,7 @@ export function NotificationsView({
                 }}
                 className="w-full py-3 px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-2 hover:opacity-95 active:scale-[0.98] transition-all shadow-xs cursor-pointer"
               >
-                <Edit3 size={15} strokeWidth={2.2} />
+                <Edit3 size={15} strokeWidth={2} />
                 <span>{config.language === 'en' ? 'Set amount' : 'Ange belopp'}</span>
                 <ArrowRight size={14} className="opacity-70" />
               </button>

@@ -51,7 +51,7 @@ export function CategoryIcon({
     xl: 24,
   };
 
-  const strokeWidth = 1.8;
+  const strokeWidth = 2;
 
   const getMatureStyles = () => {
     if (noBackground) {

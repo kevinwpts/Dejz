@@ -10,6 +10,7 @@ import { ConfirmModal } from './ConfirmModal';
 import { CategoryIcon } from './CategoryIcon';
 import { Button, Modal } from './ui';
 import { ToggleSwitch } from './ToggleSwitch';
+import { formatPaydaySummary, formatOrdinalDay } from '../utils/format';
 
 interface SettingsViewProps {
   activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency';
@@ -151,7 +152,7 @@ export function SettingsView({
           <Button
             variant="secondary"
             size="sm"
-            icon={<Plus size={14} strokeWidth={2.5} />}
+            icon={<Plus size={14} strokeWidth={2} />}
             onClick={() => handleAddCategory(type)}
           >
             {t('newCategory')}
@@ -180,7 +181,7 @@ export function SettingsView({
             className="h-32 sm:h-36 p-4 rounded-[22px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group active:scale-[0.98]"
           >
             <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
-              <Plus size={18} strokeWidth={2.5} />
+              <Plus size={18} strokeWidth={2} />
             </div>
             <span className="text-xs font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
               {t('newCategory')}
@@ -246,7 +247,7 @@ export function SettingsView({
           <Button
             variant="secondary"
             size="sm"
-            icon={<Plus size={14} strokeWidth={2.5} />}
+            icon={<Plus size={14} strokeWidth={2} />}
             onClick={() => {
               setPaymentMethodModalData({ name: '' });
               setIsPaymentMethodModalOpen(true);
@@ -284,7 +285,7 @@ export function SettingsView({
             className="h-32 sm:h-36 p-4 rounded-[22px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group active:scale-[0.98]"
           >
             <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
-              <Plus size={18} strokeWidth={2.5} />
+              <Plus size={18} strokeWidth={2} />
             </div>
             <span className="text-xs font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
               {config.language === 'en' ? 'New payment method' : 'Ny betalmetod'}
@@ -325,7 +326,7 @@ export function SettingsView({
                 </div>
                 {isSelected && (
                   <div className="text-[var(--accent-color)] shrink-0 pl-2">
-                    <Check size={18} strokeWidth={2.5} />
+                    <Check size={18} strokeWidth={2} />
                   </div>
                 )}
               </button>
@@ -482,7 +483,7 @@ export function SettingsView({
 
                 {isSelected && (
                   <div className="text-[var(--accent-color)] shrink-0 pl-2">
-                    <Check size={18} strokeWidth={2.5} />
+                    <Check size={18} strokeWidth={2} />
                   </div>
                 )}
               </button>
@@ -515,15 +516,15 @@ export function SettingsView({
                       {config.language === 'en' ? 'Payday' : 'Lönedag'}
                     </span>
                     <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
-                      {config.language === 'en' 
-                        ? `The ${config.payday || 25}th of each month` 
-                        : `Den ${config.payday || 25}:e varje månad`}
+                      {formatPaydaySummary(config.payday || 25, config.language)}
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
-                    {config.language === 'en' ? `The ${config.payday || 25}` : `Den ${config.payday || 25}:e`}
+                    {config.language === 'en' 
+                      ? `The ${formatOrdinalDay(config.payday || 25, 'en')}` 
+                      : `Den ${formatOrdinalDay(config.payday || 25, 'sv')}`}
                   </span>
                   <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform" />
                 </div>
@@ -609,59 +610,69 @@ export function SettingsView({
 
       {/* Category Deletion Migration Modal */}
       {deleteMigrationData && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[var(--bg-color)] w-full max-w-sm rounded-[28px] p-6 relative border-none shadow-2xl font-sans">
-            <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)] mb-2">
-              Ta bort {deleteMigrationData.category.name}?
-            </h3>
-            <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed font-medium">
-              Kategorin används av {deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till innan den tas bort.
-            </p>
-            <div className="space-y-4 mb-6">
-              <label className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)]">Flytta transaktioner till:</label>
-              <select
-                value={targetMigrationId}
-                onChange={(e) => setTargetMigrationId(e.target.value)}
-                className="w-full h-[48px] bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] px-3 text-[14px] font-normal text-[var(--text-primary)] outline-none"
-              >
-                {(deleteMigrationData.type === 'income' ? (config.incomeCategories || []) : (config.categories || []))
-                  .filter(c => c.id !== deleteMigrationData.category.id)
-                  .map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-2.5">
-              <Button
-                onClick={() => {
-                  onMigrateAndDeleteCategory?.(deleteMigrationData.type, deleteMigrationData.category.id, targetMigrationId);
-                  setDeleteMigrationData(null);
-                }}
-                variant="danger"
-                fullWidth
-              >
-                Flytta & ta bort
-              </Button>
-              <Button
-                onClick={() => setDeleteMigrationData(null)}
-                variant="ghost"
-                fullWidth
-              >
-                Avbryt
-              </Button>
-            </div>
+        <Modal
+          isOpen={!!deleteMigrationData}
+          onClose={() => setDeleteMigrationData(null)}
+          center
+          size="sm"
+          title={config.language === 'en' ? `Delete ${deleteMigrationData.category.name}?` : `Ta bort ${deleteMigrationData.category.name}?`}
+          showCloseButton={true}
+          bodyClassName="p-6 space-y-4"
+        >
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
+            {config.language === 'en'
+              ? `This category is used by ${deleteMigrationData.count} transactions. Choose which category to move them to before deleting.`
+              : `Kategorin används av ${deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till innan den tas bort.`}
+          </p>
+          <div className="space-y-2 mb-2">
+            <label className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)]">
+              {config.language === 'en' ? 'Move transactions to:' : 'Flytta transaktioner till:'}
+            </label>
+            <select
+              value={targetMigrationId}
+              onChange={(e) => setTargetMigrationId(e.target.value)}
+              className="w-full h-[48px] bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] px-3 text-[14px] font-normal text-[var(--text-primary)] outline-none"
+            >
+              {(deleteMigrationData.type === 'income' ? (config.incomeCategories || []) : (config.categories || []))
+                .filter(c => c.id !== deleteMigrationData.category.id)
+                .map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+            </select>
           </div>
-        </div>
+          <div className="flex flex-col gap-2.5 pt-2">
+            <Button
+              onClick={() => {
+                onMigrateAndDeleteCategory?.(deleteMigrationData.type, deleteMigrationData.category.id, targetMigrationId);
+                setDeleteMigrationData(null);
+              }}
+              variant="danger"
+              fullWidth
+            >
+              {config.language === 'en' ? 'Move & Delete' : 'Flytta & ta bort'}
+            </Button>
+            <Button
+              onClick={() => setDeleteMigrationData(null)}
+              variant="ghost"
+              fullWidth
+            >
+              {config.language === 'en' ? 'Cancel' : 'Avbryt'}
+            </Button>
+          </div>
+        </Modal>
       )}
 
       {deleteConfirmIndex && (
         <ConfirmModal
           isOpen={!!deleteConfirmIndex}
-          title={`Ta bort ${deleteConfirmIndex.category.name}?`}
-          message="Är du säker på att du vill ta bort denna kategori? Den används inte av några transaktioner."
-          confirmText="Ta bort"
+          title={config.language === 'en' ? `Delete ${deleteConfirmIndex.category.name}?` : `Ta bort ${deleteConfirmIndex.category.name}?`}
+          message={config.language === 'en' 
+            ? 'Are you sure you want to delete this category? It is not used by any transactions.' 
+            : 'Är du säker på att du vill ta bort denna kategori? Den används inte av några transaktioner.'}
+          confirmText={config.language === 'en' ? 'Delete' : 'Ta bort'}
+          cancelText={config.language === 'en' ? 'Cancel' : 'Avbryt'}
           onConfirm={() => {
             const field = deleteConfirmIndex.type === 'income' ? 'incomeCategories' : 'categories';
             const currentCategories = config[field] || [];
@@ -678,10 +689,14 @@ export function SettingsView({
       {pendingPayday !== null && (
         <ConfirmModal
           isOpen={pendingPayday !== null}
-          title={`Ändra lönedag till den ${pendingPayday}:e?`}
-          message="Din aktuella period anpassas efter din nästa lön. Tidigare perioder och din historik påverkas inte."
-          confirmText="Ändra lönedag"
-          cancelText="Avbryt"
+          title={config.language === 'en' 
+            ? `Change payday to the ${formatOrdinalDay(pendingPayday, 'en')}?` 
+            : `Ändra lönedag till den ${formatOrdinalDay(pendingPayday, 'sv')}?`}
+          message={config.language === 'en'
+            ? 'Your current period will adjust to your next salary. Previous periods and history will not be affected.'
+            : 'Din aktuella period anpassas efter din nästa lön. Tidigare perioder och din historik påverkas inte.'}
+          confirmText={config.language === 'en' ? 'Change payday' : 'Ändra lönedag'}
+          cancelText={config.language === 'en' ? 'Cancel' : 'Avbryt'}
           variant="info"
           onConfirm={() => {
             if (pendingPayday !== null) {

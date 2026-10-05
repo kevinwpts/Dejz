@@ -990,7 +990,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                                   <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
                                     isAdded ? 'bg-white text-[#05B862] border border-[#05B862]/30 shadow-2xs' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
                                   }`}>
-                                    {isAdded ? <Check size={11} strokeWidth={3} className="text-[#05B862]" /> : <Plus size={11} />}
+                                    {isAdded ? <Check size={11} strokeWidth={2.5} className="text-[#05B862]" /> : <Plus size={11} />}
                                   </div>
                                 </button>
                               );

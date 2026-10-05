@@ -78,7 +78,7 @@ export function ReceiptsView({
       {receiptTransactions.length > 0 && (
         <div className="relative">
           <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[var(--text-tertiary)]">
-            <Search size={18} strokeWidth={1.5} />
+            <Search size={18} strokeWidth={2} />
           </div>
           <input
             type="text"
@@ -123,7 +123,7 @@ export function ReceiptsView({
                           </div>
                         </>
                       ) : (
-                        <Receipt size={20} className="text-[var(--text-secondary)]" strokeWidth={1.5} />
+                        <Receipt size={20} className="text-[var(--text-secondary)]" strokeWidth={2} />
                       )}
                     </div>
 
@@ -144,12 +144,12 @@ export function ReceiptsView({
                       </div>
                       <div className="flex items-center gap-2 text-[10px] font-semibold text-[var(--text-secondary)] opacity-60">
                         <span className="flex items-center gap-1">
-                          <Calendar size={11} strokeWidth={1.5} />
+                          <Calendar size={11} strokeWidth={2} />
                           {formatDate(item.timestamp)}
                         </span>
                         <span>•</span>
                         <span className="flex items-center gap-1 text-[10px]">
-                          <Tag size={10} strokeWidth={1.5} />
+                          <Tag size={10} strokeWidth={2} />
                           {item.category}
                         </span>
                       </div>

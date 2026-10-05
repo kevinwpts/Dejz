@@ -88,7 +88,7 @@ export function AppHeader({
                 className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/15 text-[#211F1C] dark:text-white flex items-center justify-center active:scale-90 transition-all cursor-pointer shrink-0"
                 aria-label="Tillbaka"
               >
-                <ChevronLeft size={18} strokeWidth={2.2} />
+                <ChevronLeft size={18} strokeWidth={2} />
               </button>
               {title && (
                 <h1 className="text-[16px] sm:text-[17px] font-semibold tracking-tight truncate select-none leading-tight text-[#211F1C] dark:text-white">
@@ -119,7 +119,7 @@ export function AppHeader({
               aria-label="Notiser"
               title="Notiser"
             >
-              <Bell size={20} strokeWidth={1.8} />
+              <Bell size={20} strokeWidth={2} />
               {notificationCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 min-w-[15px] h-[15px] px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-semibold flex items-center justify-center leading-none">
                   {notificationCount}
@@ -142,7 +142,7 @@ export function AppHeader({
             aria-label={language === 'en' ? 'Search' : 'Sök'}
             title={language === 'en' ? 'Search' : 'Sök'}
           >
-            <Search size={20} strokeWidth={1.8} />
+            <Search size={20} strokeWidth={2} />
           </button>
 
           {/* 3. Profile Avatar completely to the far right */}

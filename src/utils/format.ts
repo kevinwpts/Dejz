@@ -64,10 +64,37 @@ export const formatAmount = (val: string | number, language: string = 'sv-SE'): 
 };
 
 /**
- * Parses a formatted string back to a number.
- * Example: "20 000,50" -> 20000.5
- * Example: "2 000 / 2" -> 1000
+ * Formats day of month into ordinal representation (e.g. 1st, 2nd, 25th in EN or 1:a, 2:a, 25:e in SV/others)
  */
+export const formatOrdinalDay = (day: number, lang: string = 'sv'): string => {
+  const isEn = lang === 'en' || lang === 'en-US';
+  if (isEn) {
+    if (day >= 11 && day <= 13) return `${day}th`;
+    const lastDigit = day % 10;
+    if (lastDigit === 1) return `${day}st`;
+    if (lastDigit === 2) return `${day}nd`;
+    if (lastDigit === 3) return `${day}rd`;
+    return `${day}th`;
+  }
+  // Swedish / Nordic: 1:a, 2:a, 21:a, 22:a, 31:a, others :e
+  if (day === 1 || day === 2 || day === 21 || day === 22 || day === 31) {
+    return `${day}:a`;
+  }
+  return `${day}:e`;
+};
+
+/**
+ * Formats payday summary sentence for settings and onboarding
+ */
+export const formatPaydaySummary = (day: number, lang: string = 'sv'): string => {
+  const isEn = lang === 'en' || lang === 'en-US';
+  const ordinal = formatOrdinalDay(day, lang);
+  if (isEn) {
+    return `The ${ordinal} of each month`;
+  }
+  return `Den ${ordinal} varje månad`;
+};
+
 export const parseAmount = (val: string): number => {
   if (!val) return 0;
   

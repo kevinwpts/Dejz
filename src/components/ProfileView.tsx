@@ -206,7 +206,7 @@ export function ProfileView({
           )}
         </div>
       </div>
-      {rightNode || (onClick && <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] group-hover:translate-x-0.5 transition-transform shrink-0 opacity-50 group-hover:opacity-100" />)}
+      {rightNode || (onClick && <ChevronRight size={16} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:translate-x-0.5 transition-transform shrink-0 opacity-50 group-hover:opacity-100" />)}
     </button>
   );
 
@@ -306,7 +306,7 @@ export function ProfileView({
                   <span className="text-xs font-semibold">
                     {config.currency || 'kr'}
                   </span>
-                  <ChevronRight size={14} strokeWidth={2} className="opacity-60 group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight size={14} strokeWidth={2.5} className="opacity-60 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               )}
             />
@@ -333,7 +333,7 @@ export function ProfileView({
                   <span className="text-xs font-semibold">
                     {config.themeMode === 'light' ? 'Ljust' : config.themeMode === 'dark' ? 'Mörkt' : 'System'}
                   </span>
-                  <ChevronRight size={14} strokeWidth={2} className="opacity-60 group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight size={14} strokeWidth={2.5} className="opacity-60 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               )}
             />

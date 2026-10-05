@@ -158,7 +158,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 title={t('close')}
                 aria-label={t('close')}
               >
-                <X size={15} strokeWidth={2.2} />
+                <X size={15} strokeWidth={2.5} />
               </button>
             </div>
 
@@ -264,7 +264,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             {transaction.tags && transaction.tags.length > 0 && (
               <div className="py-3 flex items-start justify-between gap-4">
                 <div className="flex items-center gap-1.5 text-[var(--text-secondary)] shrink-0 pt-0.5">
-                  <Tag size={13} strokeWidth={1.75} />
+                  <Tag size={13} strokeWidth={2} />
                   <span className="text-[13px] font-normal">{t('tags')}</span>
                 </div>
                 <div className="flex flex-wrap justify-end gap-1.5">
@@ -283,7 +283,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 <div className="py-3.5 space-y-2">
                   <div className="flex items-center justify-between text-[var(--text-secondary)]">
                     <div className="flex items-center gap-1.5">
-                      <Paperclip size={13} strokeWidth={1.75} />
+                      <Paperclip size={13} strokeWidth={2} />
                       <span className="text-[13px] font-normal">
                         {config.language === 'en' ? 'Attached file / Receipt' : 'Bifogad fil / Kvitto'}
                       </span>
@@ -400,7 +400,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             }} 
             className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
           >
-            <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
+            <Pencil size={14.5} strokeWidth={2} className="dark:text-white" />
             <span>{t('edit')}</span>
           </button>
 
@@ -414,7 +414,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
             title={t('duplicate')}
             aria-label={t('duplicate')}
           >
-            <Repeat size={16} strokeWidth={1.9} className="dark:text-white" />
+            <Repeat size={16} strokeWidth={2} className="dark:text-white" />
           </button>
 
           {onDelete && (
@@ -428,7 +428,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
               title={config.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
             >
-              <Trash2 size={16} strokeWidth={1.9} className="dark:text-white" />
+              <Trash2 size={16} strokeWidth={2} className="dark:text-white" />
             </button>
           )}
         </div>

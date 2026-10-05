@@ -139,7 +139,7 @@ export function IconSelector({
               onClick={onRestoreAuto}
               className="text-xs font-medium text-accent flex items-center gap-1 hover:opacity-70 transition-opacity cursor-pointer"
             >
-              <Sparkles size={12} strokeWidth={1.5} />
+              <Sparkles size={12} strokeWidth={2} />
               {t('restoreToAuto')}
             </button>
           )}
@@ -194,7 +194,7 @@ export function IconSelector({
               {(() => {
                 const key = resolveLucideIcon(suggestedEmoji);
                 const Icon = ICON_MAP[key] || Sparkles;
-                return <Icon size={26} strokeWidth={1.75} />;
+                return <Icon size={26} strokeWidth={2} />;
               })()}
               {isIconSelected(suggestedEmoji) && (
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110 shadow-xs">
@@ -237,7 +237,7 @@ export function IconSelector({
               </div>
             ) : (
               <>
-                <Upload size={18} strokeWidth={1.5} className="opacity-60" />
+                <Upload size={18} strokeWidth={2} className="opacity-60" />
                 <span className="text-xs font-semibold">{t('uploadLogo')}</span>
               </>
             )}
@@ -269,7 +269,7 @@ export function IconSelector({
                     : 'bg-[var(--surface-muted)] border-[var(--border-color)] hover:border-[var(--accent-color)]/30'
                 }`}
               >
-                <Icon size={22} strokeWidth={1.75} />
+                <Icon size={22} strokeWidth={2} />
                 {selected && (
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110 shadow-xs">
                     <Check size={10} strokeWidth={2.5} />
@@ -292,10 +292,10 @@ export function IconSelector({
               (() => {
                 const key = resolveLucideIcon(currentIcon);
                 const Icon = ICON_MAP[key] || Sparkles;
-                return <Icon size={22} strokeWidth={1.75} />;
+                return <Icon size={22} strokeWidth={2} />;
               })()
             ) : (
-              <Plus size={20} strokeWidth={1.5} />
+              <Plus size={20} strokeWidth={2} />
             )}
           </button>
         </div>

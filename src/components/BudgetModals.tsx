@@ -15,7 +15,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
-import { Button, IconButton } from './ui';
+import { Button, IconButton, Modal } from './ui';
 import { CancelSubscriptionModal } from './CancelSubscriptionModal';
 import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
 import { resolveEntityVisual } from '../utils/resolver';
@@ -159,7 +159,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                 title={t('close')}
                 aria-label={t('close')}
               >
-                <X size={15} strokeWidth={2.2} />
+                <X size={15} strokeWidth={2.5} />
               </button>
             </div>
 
@@ -255,7 +255,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             }} 
             className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
           >
-            <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
+            <Pencil size={14.5} strokeWidth={2} className="dark:text-white" />
             <span>{t('edit')}</span>
           </button>
 
@@ -269,7 +269,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             title={config.language === 'en' ? 'Delete' : 'Ta bort'}
             aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
           >
-            <Trash2 size={16} strokeWidth={1.9} />
+            <Trash2 size={16} strokeWidth={2} />
           </button>
         </div>
 
@@ -452,7 +452,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               aria-label={t('close')}
             >
-              <X size={15} strokeWidth={2.2} />
+              <X size={15} strokeWidth={2.5} />
             </button>
           </div>
 
@@ -541,7 +541,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
                   {category || t('income')}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
             </div>
 
@@ -552,12 +552,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                  <Calendar size={14} strokeWidth={2.2} />
+                  <Calendar size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {deductionDay}:e
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={deductionDay}
@@ -581,12 +581,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                  <Repeat size={14} strokeWidth={2.2} />
+                  <Repeat size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={frequency}
@@ -633,12 +633,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                    <Calendar size={14} strokeWidth={2.2} />
+                    <Calendar size={14} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
-                  <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
                 </div>
                 <select
                   value={startMonth}
@@ -679,7 +679,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     onClick={() => setNote('')}
                     className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
                   >
-                    <X size={13} strokeWidth={2} />
+                    <X size={13} strokeWidth={2.5} />
                   </button>
                 )}
               </div>
@@ -705,7 +705,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     onClick={() => setIsCategorySelectorOpen(false)}
                     className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                   >
-                    <X size={16} strokeWidth={2.2} />
+                    <X size={16} strokeWidth={2.5} />
                   </button>
                 </div>
                 <div className="p-4 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
@@ -731,7 +731,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                           </span>
                           {isSelected && (
                             <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
-                              <Check size={14} strokeWidth={3} />
+                              <Check size={14} strokeWidth={2.5} />
                             </div>
                           )}
                         </button>
@@ -752,7 +752,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             onClick={handleSave} 
             className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
           >
-            <Check size={15} strokeWidth={2} />
+            <Check size={15} strokeWidth={2.5} />
             <span>{income ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add income' : 'Lägg till inkomst')}</span>
           </button>
 
@@ -767,7 +767,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             >
-              <Trash2 size={16} strokeWidth={1.9} />
+              <Trash2 size={16} strokeWidth={2} />
             </button>
           )}
         </div>
@@ -796,7 +796,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
                   <IconButton 
-                    icon={<X size={16} strokeWidth={1.5} />}
+                    icon={<X size={16} strokeWidth={2} />}
                     onClick={() => setShowIconSelector(false)}
                     variant="muted"
                     size="sm"
@@ -968,7 +968,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                 title={t('close')}
                 aria-label={t('close')}
               >
-                <X size={15} strokeWidth={2.2} />
+                <X size={15} strokeWidth={2.5} />
               </button>
             </div>
 
@@ -1111,7 +1111,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             }} 
             className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
           >
-            <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
+            <Pencil size={14.5} strokeWidth={2} className="dark:text-white" />
             <span>{t('edit')}</span>
           </button>
 
@@ -1125,7 +1125,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             title={config.language === 'en' ? 'Delete' : 'Ta bort'}
             aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
           >
-            <Trash2 size={16} strokeWidth={1.9} />
+            <Trash2 size={16} strokeWidth={2} />
           </button>
         </div>
 
@@ -1324,7 +1324,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               aria-label={t('close')}
             >
-              <X size={15} strokeWidth={2.2} />
+              <X size={15} strokeWidth={2.5} />
             </button>
           </div>
 
@@ -1413,7 +1413,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
                   {category || (config?.language === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
             </div>
 
@@ -1426,12 +1426,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                  <Calendar size={14} strokeWidth={2.2} />
+                  <Calendar size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {deductionDay}:e
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={deductionDay}
@@ -1455,12 +1455,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                  <Repeat size={14} strokeWidth={2.2} />
+                  <Repeat size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={frequency}
@@ -1483,12 +1483,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                  <CreditCard size={14} strokeWidth={2.2} />
+                  <CreditCard size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
                   {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={paymentMethod}
@@ -1539,12 +1539,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                    <Calendar size={14} strokeWidth={2.2} />
+                    <Calendar size={14} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
-                  <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
                 </div>
                 <select
                   value={startMonth}
@@ -1584,7 +1584,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                       onClick={() => setNote('')}
                       className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
                     >
-                      <X size={13} strokeWidth={2} />
+                      <X size={13} strokeWidth={2.5} />
                     </button>
                   )}
                 </div>
@@ -1613,7 +1613,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                       onClick={() => setNote('')}
                       className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
                     >
-                      <X size={13} strokeWidth={2} />
+                      <X size={13} strokeWidth={2.5} />
                     </button>
                   )}
                 </div>
@@ -1640,7 +1640,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     onClick={() => setIsCategorySelectorOpen(false)}
                     className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                   >
-                    <X size={16} strokeWidth={2.2} />
+                    <X size={16} strokeWidth={2.5} />
                   </button>
                 </div>
                 <div className="p-4 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
@@ -1666,7 +1666,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                           </span>
                           {isSelected && (
                             <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
-                              <Check size={14} strokeWidth={3} />
+                              <Check size={14} strokeWidth={2.5} />
                             </div>
                           )}
                         </button>
@@ -1707,7 +1707,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             onClick={handleSave} 
             className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
           >
-            <Check size={15} strokeWidth={2} />
+            <Check size={15} strokeWidth={2.5} />
             <span>{expense ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add fixed expense' : 'Lägg till fast kostnad')}</span>
           </button>
 
@@ -1722,7 +1722,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             >
-              <Trash2 size={16} strokeWidth={1.9} />
+              <Trash2 size={16} strokeWidth={2} />
             </button>
           )}
         </div>
@@ -1756,7 +1756,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                     aria-label={t('close')}
                   >
-                    <X size={16} strokeWidth={2} />
+                    <X size={16} strokeWidth={2.5} />
                   </button>
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-6 min-h-0">
@@ -1928,7 +1928,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
                 title={t('close')}
                 aria-label={t('close')}
               >
-                <X size={15} strokeWidth={2.2} />
+                <X size={15} strokeWidth={2.5} />
               </button>
             </div>
 
@@ -2012,7 +2012,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             }} 
             className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
           >
-            <Pencil size={14.5} strokeWidth={1.9} className="dark:text-white" />
+            <Pencil size={14.5} strokeWidth={2} className="dark:text-white" />
             <span>{t('edit')}</span>
           </button>
           <button 
@@ -2025,7 +2025,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             title={t('delete')}
             aria-label={t('delete')}
           >
-            <Trash2 size={16} strokeWidth={1.9} />
+            <Trash2 size={16} strokeWidth={2} />
           </button>
         </div>
       </motion.div>
@@ -2183,7 +2183,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
               aria-label={t('close')}
             >
-              <X size={15} strokeWidth={2.2} />
+              <X size={15} strokeWidth={2.5} />
             </button>
           </div>
 
@@ -2258,12 +2258,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                  <Calendar size={14} strokeWidth={2.2} />
+                  <Calendar size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {deductionDay}:e
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={deductionDay}
@@ -2284,12 +2284,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                  <Repeat size={14} strokeWidth={2.2} />
+                  <Repeat size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={frequency}
@@ -2337,12 +2337,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                    <Calendar size={14} strokeWidth={2.2} />
+                    <Calendar size={14} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
-                  <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
                 </div>
                 <select
                   value={startMonth}
@@ -2372,12 +2372,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                    <CreditCard size={14} strokeWidth={2.2} />
+                    <CreditCard size={14} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
                     {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
                   </span>
-                  <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
                 </div>
                 <select
                   value={paymentMethod}
@@ -2403,12 +2403,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                    <CreditCard size={14} strokeWidth={2.2} />
+                    <CreditCard size={14} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
                     {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
                   </span>
-                  <ChevronDown size={14} strokeWidth={2.2} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
                 </div>
                 <select
                   value={paymentMethod}
@@ -2433,7 +2433,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             onClick={handleSave} 
             className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
           >
-            <Check size={15} strokeWidth={2} />
+            <Check size={15} strokeWidth={2.5} />
             <span>{saving ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add saving' : 'Lägg till månadssparande')}</span>
           </button>
 
@@ -2448,7 +2448,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             >
-              <Trash2 size={16} strokeWidth={1.9} />
+              <Trash2 size={16} strokeWidth={2} />
             </button>
           )}
         </div>
@@ -2477,7 +2477,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                     <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
                   </div>
                   <IconButton 
-                    icon={<X size={16} strokeWidth={1.5} />}
+                    icon={<X size={16} strokeWidth={2} />}
                     onClick={() => setShowIconSelector(false)}
                     variant="muted"
                     size="sm"
@@ -2558,100 +2558,78 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
     setColor(initialColor || '#6366f1');
   }, [isOpen, initialName, initialIcon, initialColor]);
 
-  if (!isOpen) return null;
-
   return (
-    <AnimatePresence>
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4"
-        onClick={onClose}
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        center
+        size="xs"
+        title={initialName ? t('edit') : 'Ny betalningsmetod'}
+        showCloseButton={true}
+        headerRight={
+          initialName && onDelete ? (
+            <IconButton 
+              icon={<Trash2 size={16} strokeWidth={2} />}
+              onClick={() => { onDelete(); onClose(); }}
+              variant="danger"
+              size="sm"
+              aria-label={t('delete')}
+            />
+          ) : undefined
+        }
+        bodyClassName="p-6 space-y-6"
       >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-[var(--bg-color)] w-full max-w-sm rounded-[28px] overflow-hidden flex flex-col relative border-none shadow-2xl font-sans"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10">
-            <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
-              {initialName ? t('edit') : 'Ny betalningsmetod'}
-            </h2>
-            <div className="flex items-center gap-2">
-              {initialName && onDelete && (
-                <IconButton 
-                  icon={<Trash2 size={16} />}
-                  onClick={() => { onDelete(); onClose(); }}
-                  variant="danger"
-                  size="sm"
-                  aria-label={t('delete')}
-                />
-              )}
-              <IconButton 
-                icon={<X size={18} strokeWidth={2} />}
-                onClick={onClose}
-                variant="muted"
-                size="sm"
-                aria-label={t('close')}
+        <div className="flex flex-col items-center">
+          <button 
+            onClick={() => setShowIconPicker(true)}
+            className="w-20 h-20 rounded-[22px] flex items-center justify-center mb-2 cursor-pointer"
+            style={{ backgroundColor: `${color}20`, color: color }}
+          >
+            <CategoryIcon icon={icon} color={color} size="xl" />
+          </button>
+          <span className="text-xs text-[var(--text-secondary)]">Klicka för att ändra</span>
+        </div>
+
+        <div className="space-y-4">
+          <input 
+            type="text" 
+            placeholder="Namn på betalningsmetod"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[14px] px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs transition-all outline-none"
+          />
+
+          <div className="flex flex-wrap gap-2">
+            {['#6366f1', '#ef4444', '#10b981', '#f59e0b', '#ec4899', '#a855f7'].map(c => (
+              <button
+                key={c}
+                className="w-8 h-8 rounded-full border-2 border-transparent transition-all cursor-pointer"
+                style={{ backgroundColor: c, borderColor: color === c ? 'var(--text-primary)' : 'transparent' }}
+                onClick={() => setColor(c)}
               />
-            </div>
+            ))}
           </div>
 
-          <div className="p-6 space-y-6">
-            <div className="flex flex-col items-center">
-              <button 
-                onClick={() => setShowIconPicker(true)}
-                className="w-20 h-20 rounded-[22px] flex items-center justify-center mb-2"
-                style={{ backgroundColor: `${color}20`, color: color }}
-              >
-                <CategoryIcon icon={icon} color={color} size="xl" />
-              </button>
-              <span className="text-xs text-[var(--text-secondary)]">Klicka för att ändra</span>
-            </div>
+          <Button
+            onClick={() => { if (name.trim()) { onSave(name.trim(), icon, color); onClose(); } }}
+            disabled={!name.trim()}
+            variant="primary"
+            fullWidth
+            size="lg"
+          >
+            {t('save')}
+          </Button>
+        </div>
+      </Modal>
 
-            <div className="space-y-4">
-              <input 
-                type="text" 
-                placeholder="Namn på betalningsmetod"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[14px] px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs transition-all outline-none"
-              />
-
-              <div className="flex flex-wrap gap-2">
-                {['#6366f1', '#ef4444', '#10b981', '#f59e0b', '#ec4899', '#a855f7'].map(c => (
-                  <button
-                    key={c}
-                    className="w-8 h-8 rounded-full border-2 border-transparent transition-all"
-                    style={{ backgroundColor: c, borderColor: color === c ? 'var(--text-primary)' : 'transparent' }}
-                    onClick={() => setColor(c)}
-                  />
-                ))}
-              </div>
-
-              <Button
-                onClick={() => { if (name.trim()) { onSave(name.trim(), icon, color); onClose(); } }}
-                disabled={!name.trim()}
-                variant="primary"
-                fullWidth
-                size="lg"
-              >
-                {t('save')}
-              </Button>
-            </div>
-          </div>
-        </motion.div>
-        <IconPickerModal
-          isOpen={showIconPicker}
-          onClose={() => setShowIconPicker(false)}
-          selectedIcon={icon}
-          onSelectIcon={setIcon}
-          t={t}
-        />
-      </motion.div>
-    </AnimatePresence>
+      <IconPickerModal
+        isOpen={showIconPicker}
+        onClose={() => setShowIconPicker(false)}
+        selectedIcon={icon}
+        onSelectIcon={setIcon}
+        t={t}
+      />
+    </>
   );
 }

@@ -69,7 +69,7 @@ export function SelectionRow<T = string>({
 
       {isSelected && (
         <div className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] flex items-center justify-center shrink-0 ml-2 shadow-2xs">
-          <Check size={12} strokeWidth={3} />
+          <Check size={12} strokeWidth={2.5} />
         </div>
       )}
     </button>

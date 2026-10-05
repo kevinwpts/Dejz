@@ -70,7 +70,7 @@ export function PasswordChangeView({ onBack, t, addToast, userEmail }: PasswordC
           className="w-9 h-9 rounded-full bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs shrink-0"
           aria-label={t('back') || 'Tillbaka'}
         >
-          <ChevronLeft size={20} strokeWidth={2.2} />
+          <ChevronLeft size={20} strokeWidth={2} />
         </button>
         <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)] truncate">

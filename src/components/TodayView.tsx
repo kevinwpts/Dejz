@@ -336,7 +336,7 @@ export function TodayView({
                         {isEmojiString(cat.iconName) ? (
                           <span className="text-[20px] leading-none">{cat.iconName}</span>
                         ) : Icon ? (
-                          <Icon size={22} strokeWidth={1.8} />
+                          <Icon size={22} strokeWidth={2} />
                         ) : (
                           <div className="w-2 h-2 rounded-full bg-white" />
                         )}
@@ -361,7 +361,7 @@ export function TodayView({
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-[14px] bg-black/[0.04] dark:bg-white/5 border-none flex items-center justify-center text-[var(--text-secondary)] transition-colors">
-                    <SlidersHorizontal size={15} strokeWidth={1.75} />
+                    <SlidersHorizontal size={15} strokeWidth={2} />
                   </div>
                   <div>
                     <p className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
@@ -412,7 +412,7 @@ export function TodayView({
               onClick={handleGoToToday}
               className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white dark:bg-white/[0.04] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.07] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-[18px] text-xs font-medium text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
             >
-              <RotateCcw size={11} strokeWidth={1.75} />
+              <RotateCcw size={11} strokeWidth={2.5} />
               <span>{lang === "en" ? "Today" : "Idag"}</span>
             </button>
           )}

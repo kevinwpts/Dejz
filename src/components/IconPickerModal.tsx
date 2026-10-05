@@ -133,7 +133,7 @@ export function IconPickerModal({
               className="w-8 h-8 flex items-center justify-center bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-full transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer border-none shadow-none"
               aria-label="Stäng"
             >
-              <X size={16} strokeWidth={2} />
+              <X size={16} strokeWidth={2.5} />
             </button>
           </div>
 
@@ -158,7 +158,7 @@ export function IconPickerModal({
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/10 dark:bg-white/15 hover:bg-black/15 dark:hover:bg-white/20 flex items-center justify-center text-xs text-[var(--text-secondary)] transition-colors cursor-pointer"
                   aria-label="Rensa sökning"
                 >
-                  <X size={12} strokeWidth={2} />
+                  <X size={12} strokeWidth={2.5} />
                 </button>
               )}
             </div>
@@ -225,7 +225,7 @@ export function IconPickerModal({
                             : 'bg-accent/5 text-[var(--text-primary)] hover:bg-accent/10 border border-accent/20'
                         }`}
                       >
-                        <IconComponent size={22} strokeWidth={1.75} className="transition-transform group-hover:scale-110" />
+                        <IconComponent size={22} strokeWidth={2} className="transition-transform group-hover:scale-110" />
                         <span className="text-[10px] text-center truncate w-full px-0.5 font-medium leading-tight">
                           {item.name.split('/')[0].trim()}
                         </span>
@@ -259,7 +259,7 @@ export function IconPickerModal({
                             : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
                         }`}
                       >
-                        <IconComponent size={22} strokeWidth={1.75} className="transition-transform group-hover:scale-110" />
+                        <IconComponent size={22} strokeWidth={2} className="transition-transform group-hover:scale-110" />
                         <span className="text-[10px] text-center truncate w-full px-0.5 opacity-80 group-hover:opacity-100 font-medium leading-tight">
                           {item.name.split('/')[0].trim()}
                         </span>
@@ -303,7 +303,7 @@ export function IconPickerModal({
                       >
                         <IconComponent 
                           size={22} 
-                          strokeWidth={1.75} 
+                          strokeWidth={2} 
                           className="transition-transform group-hover:scale-110"
                         />
                         <span className="text-[10px] text-center truncate w-full px-0.5 opacity-80 group-hover:opacity-100 font-medium leading-tight">

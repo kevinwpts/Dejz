@@ -39,7 +39,7 @@ export function BottomSheetHeader({
         </div>
         <div className="flex justify-end">
           <IconButton
-            icon={<X size={16} strokeWidth={2.2} />}
+            icon={<X size={16} strokeWidth={2} />}
             onClick={onClose}
             variant="muted"
             size="sm"
@@ -58,7 +58,7 @@ export function BottomSheetHeader({
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <IconButton
-            icon={<X size={16} strokeWidth={2.2} />}
+            icon={<X size={16} strokeWidth={2} />}
             onClick={onClose}
             variant="muted"
             size="sm"
@@ -89,7 +89,7 @@ export function BottomSheetHeader({
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
         <IconButton
-          icon={<X size={16} strokeWidth={2.2} />}
+          icon={<X size={16} strokeWidth={2} />}
           onClick={onClose}
           variant="muted"
           size="sm"

@@ -171,7 +171,7 @@ export function BudgetSummaryModule({
           {/* Label under progressbar */}
           <div className="flex items-center justify-between text-[13px] font-medium text-[var(--text-secondary)]">
             <span>
-              {budgetUsedPct} {isEn ? '% of budget used' : '% av budgeten använd'}
+              <span className="font-amount tabular-nums font-semibold text-[var(--text-primary)]">{budgetUsedPct}%</span> {isEn ? 'of budget used' : 'av budgeten använd'}
             </span>
             <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[11px] text-[var(--accent-color)]">
               {isEn ? 'View details' : 'Visa detaljer'}

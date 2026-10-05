@@ -87,7 +87,7 @@ export function TransactionLogo({
       className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs select-none`}
       style={{ backgroundColor: bgColor, color: textColor }}
     >
-      <IconComponent size={sizeConfig.icon} strokeWidth={1.8} />
+      <IconComponent size={sizeConfig.icon} strokeWidth={2} />
     </div>
   );
 }

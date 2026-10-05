@@ -183,7 +183,7 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
                 className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer border-none shadow-none"
                 aria-label="Stäng"
               >
-                <X size={16} strokeWidth={2} />
+                <X size={16} strokeWidth={2.5} />
               </button>
             </div>
 

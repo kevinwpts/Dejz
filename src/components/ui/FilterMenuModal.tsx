@@ -84,7 +84,7 @@ export function FilterMenuModal<T = string>({
               className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95 border-none shadow-none"
               aria-label="Stäng"
             >
-              <X size={16} strokeWidth={2.2} />
+              <X size={16} strokeWidth={2.5} />
             </button>
           </div>
 
@@ -137,7 +137,7 @@ export function FilterMenuModal<T = string>({
 
                   {isSelected && (
                     <div className="text-[var(--accent-color)] shrink-0 ml-2 pl-1">
-                      <Check size={18} strokeWidth={2.5} />
+                      <Check size={18} strokeWidth={2} />
                     </div>
                   )}
                 </button>

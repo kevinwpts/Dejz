@@ -187,7 +187,7 @@ export function CategoryBottomSheetModal({
                 className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer border-none shadow-none"
                 aria-label="Stäng"
               >
-                <X size={17} strokeWidth={2.2} />
+                <X size={17} strokeWidth={2} />
               </button>
             </div>
 

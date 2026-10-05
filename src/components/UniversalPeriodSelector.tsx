@@ -93,7 +93,7 @@ export function UniversalPeriodSelector({
           aria-label="Föregående period"
           title="Föregående period"
         >
-          <ChevronLeft size={15} strokeWidth={2} />
+          <ChevronLeft size={15} strokeWidth={2.5} />
         </button>
             
         <div 
@@ -102,7 +102,7 @@ export function UniversalPeriodSelector({
         >
           <CalendarIcon 
             size={13} 
-            strokeWidth={1.8} 
+            strokeWidth={2} 
             className="text-[var(--text-primary)] shrink-0" 
           />
           <span className="text-xs sm:text-[13px] font-bold tracking-tight truncate text-[var(--text-primary)]">
@@ -137,7 +137,7 @@ export function UniversalPeriodSelector({
           aria-label="Nästa period"
           title="Nästa period"
         >
-          <ChevronRight size={15} strokeWidth={2} />
+          <ChevronRight size={15} strokeWidth={2.5} />
         </button>
       </div>
     );

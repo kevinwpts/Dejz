@@ -58,7 +58,7 @@ export function CustomBottomNavigation({
           aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
           title={isEn ? "Add transaction" : "Lägg till transaktion"}
         >
-          <Plus size={28} strokeWidth={3.3} className="text-[var(--on-accent)]" />
+          <Plus size={28} strokeWidth={2} className="text-[var(--on-accent)]" />
         </button>
       </div>
 
