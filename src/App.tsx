@@ -1747,6 +1747,7 @@ export default function App() {
     document.documentElement.classList.add("light");
     document.body.classList.remove("dark");
     document.body.classList.add("light");
+    localStorage.removeItem('dejz_theme_color');
     applyThemeColor('#3B82F6', false);
     
     window.scrollTo({ top: 0, behavior: 'instant' });
