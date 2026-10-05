@@ -757,13 +757,7 @@ export const getLogoUrl = (title: string, category?: string): string | undefined
     // If it's already a full URL or data URI, return it directly
     if (title.startsWith('http') || title.startsWith('data:image')) return title;
 
-    // Check instant vector badges first
-    const instantSvg = getInstantBrandLogo(title, category);
-    if (instantSvg) {
-        return instantSvg;
-    }
-
-    // Check known brands (Tinder, Max, Spotify, SATS, SkyShowtime, etc.)
+    // Check known brands first (Tinder, Max, Spotify, SATS, SkyShowtime, etc.)
     const knownDomain = findKnownBrandDomain(title, category);
     if (knownDomain) {
         const apiKey = import.meta.env.VITE_LOGODEV_API_KEY;
@@ -771,6 +765,12 @@ export const getLogoUrl = (title: string, category?: string): string | undefined
             return `https://img.logo.dev/${knownDomain}?token=${apiKey}`;
         }
         return `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128`;
+    }
+
+    // Check instant vector badges fallback
+    const instantSvg = getInstantBrandLogo(title, category);
+    if (instantSvg) {
+        return instantSvg;
     }
 
     let normalized = title.toLowerCase().trim();

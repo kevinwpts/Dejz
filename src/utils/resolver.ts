@@ -148,22 +148,22 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
   }
 
   // 3. Secure automated company logo (High-confidence brand lookup)
-  const instantSvg = getInstantBrandLogo(merchantText, categoryText) || getInstantBrandLogo(transaction.merchant || '', categoryText);
-  if (instantSvg) {
-    return {
-      type: 'merchant',
-      logoUrl: instantSvg,
-      source: 'brand_auto',
-      merchantNormalized: normalizeMerchant(merchantText)
-    };
-  }
-
   const brandDomain = findKnownBrandDomain(merchantText, categoryText) || findKnownBrandDomain(transaction.merchant || '', categoryText);
   if (brandDomain) {
     const brandLogoUrl = `https://www.google.com/s2/favicons?domain=${brandDomain}&sz=128`;
     return {
       type: 'merchant',
       logoUrl: brandLogoUrl,
+      source: 'brand_auto',
+      merchantNormalized: normalizeMerchant(merchantText)
+    };
+  }
+
+  const instantSvg = getInstantBrandLogo(merchantText, categoryText) || getInstantBrandLogo(transaction.merchant || '', categoryText);
+  if (instantSvg) {
+    return {
+      type: 'merchant',
+      logoUrl: instantSvg,
       source: 'brand_auto',
       merchantNormalized: normalizeMerchant(merchantText)
     };
