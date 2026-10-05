@@ -511,17 +511,17 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             </div>
           </div>
 
-          {/* 2. Grid for Category & Arrival Day */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Category Card */}
+          {/* 2. Grouped Details Module with Dividers */}
+          <div className="rounded-[22px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+            {/* Row 1: Category */}
             <div 
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setIsCategorySelectorOpen(true);
               }}
-              className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+              className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer group min-h-[58px]"
             >
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
@@ -538,16 +538,16 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     whiteIcon 
                   />
                 </div>
-                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || t('income')}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
               </div>
             </div>
 
-            {/* Arrival Day Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+            {/* Row 2: Arrival / Payout Day */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {t('arrivalDay')}
               </span>
               <div className="flex items-center gap-2">
@@ -557,7 +557,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {deductionDay}:e
                 </span>
-                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={deductionDay}
@@ -570,23 +570,20 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 ))}
               </select>
             </div>
-          </div>
 
-          {/* 3. Grid for Frequency & Type */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Frequency Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+            {/* Row 3: Frequency */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2} />
                 </div>
-                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={frequency}
@@ -602,33 +599,10 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               </select>
             </div>
 
-            {/* Type: Fixed / Variable Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
-                {t('type')}
-              </span>
-              <div className="flex items-center gap-2.5">
-                <span className="text-[14px] font-bold text-[var(--text-primary)]">
-                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsVariable(!isVariable)}
-                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-                >
-                  <div
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 4. Grid for Start Month (if applicable) & Note */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Row 4 (if non-monthly): Start Month (directly below frequency) */}
             {frequency !== Frequency.MONTHLY && (
-              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+              <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+                <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
@@ -638,7 +612,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
-                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
                 </div>
                 <select
                   value={startMonth}
@@ -660,18 +634,39 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               </div>
             )}
 
-            {/* Note Card */}
-            <div className={`p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px] ${frequency === Frequency.MONTHLY ? 'sm:col-span-2' : ''}`}>
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider block mb-2">
+            {/* Row 5: Type (Fixed / Variable) */}
+            <div className="p-4 flex items-center justify-between min-h-[58px]">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+                {t('type')}
+              </span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[14px] font-bold text-[var(--text-primary)]">
+                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsVariable(!isVariable)}
+                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
+                >
+                  <div
+                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Row 6: Own Note */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-3">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {t('ownNote')}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
                 <input 
                   type="text" 
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
-                  className="text-[13.5px] font-medium text-[var(--text-primary)] bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                  className="text-[13.5px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
                 />
                 {note && (
                   <button 
@@ -1383,17 +1378,17 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             </div>
           </div>
 
-          {/* 2. Grid for Category & Deduction Day */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Category Card */}
+          {/* 2. Grouped Details Module with Dividers */}
+          <div className="rounded-[22px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+            {/* Row 1: Category */}
             <div 
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setIsCategorySelectorOpen(true);
               }}
-              className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+              className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer group min-h-[58px]"
             >
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
@@ -1410,16 +1405,16 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     whiteIcon 
                   />
                 </div>
-                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || (config?.language === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
               </div>
             </div>
 
-            {/* Deduction Day Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+            {/* Row 2: Deduction / Payment Day */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {paymentMethod === 'autogiro' || (typeof paymentMethod === 'string' && (paymentMethod.toLowerCase().includes('autogiro') || paymentMethod.toLowerCase().includes('kort')))
                   ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag')
                   : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
@@ -1431,7 +1426,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {deductionDay}:e
                 </span>
-                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={deductionDay}
@@ -1444,273 +1439,147 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 ))}
               </select>
             </div>
-          </div>
 
-          {/* 3. Grid for Frequency & Payment Method */}
-          {/* Cards for Frequency, Payment Method, Type, Start Month, Note */}
-          {frequency !== Frequency.MONTHLY ? (
-            <>
-              {/* 2-Column layout: Left has Frequency + Start Month, Right has Payment Method + Type */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Left Column: Frequency & Start Month directly under it */}
-                <div className="flex flex-col gap-3">
-                  {/* Frequency Card */}
-                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
-                      {t('frequency')}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                        <Repeat size={14} strokeWidth={2} />
-                      </div>
-                      <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
-                        {getFrequencyLabel(frequency, t)}
-                      </span>
-                      <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
-                    </div>
-                    <select
-                      value={frequency}
-                      onChange={(e) => setFrequency(e.target.value as Frequency)}
-                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                      title={t('frequency')}
-                    >
-                      {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                        <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
-                          {t(`freq_${key.toLowerCase()}` as TranslationKey)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Start Month Card (placed directly under Frequency) */}
-                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
-                      {t('startMonthLabel')}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                        <Calendar size={14} strokeWidth={2} />
-                      </div>
-                      <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
-                        {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
-                      </span>
-                      <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
-                    </div>
-                    <select
-                      value={startMonth}
-                      onChange={(e) => setStartMonth(parseInt(e.target.value))}
-                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                      title={t('startMonthLabel')}
-                    >
-                      {Array.from({ length: 12 }, (_, i) => {
-                        const date = new Date(2024, i, 1);
-                        const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
-                        const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-                        return (
-                          <option key={i} value={i} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
-                            {capitalizedMonth}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
+            {/* Row 3: Frequency */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+                {t('frequency')}
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <Repeat size={14} strokeWidth={2} />
                 </div>
-
-                {/* Right Column: Payment Method & Type */}
-                <div className="flex flex-col gap-3">
-                  {/* Payment Method Card */}
-                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
-                      {t('paymentMethod')}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                        <CreditCard size={14} strokeWidth={2} />
-                      </div>
-                      <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
-                        {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
-                      </span>
-                      <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
-                    </div>
-                    <select
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                      title={t('paymentMethod')}
-                    >
-                      {(paymentMethods || []).map((method, idx) => {
-                        const methodName = typeof method === 'string' ? method : method?.name || '';
-                        return (
-                          <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
-                            {methodName}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-
-                  {/* Type: Fixed / Variable Card */}
-                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
-                      {t('type')}
-                    </span>
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-[14px] font-bold text-[var(--text-primary)]">
-                        {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setIsVariable(!isVariable)}
-                        className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-                      >
-                        <div
-                          className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                  {getFrequencyLabel(frequency, t)}
+                </span>
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
               </div>
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value as Frequency)}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                title={t('frequency')}
+              >
+                {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
+                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                    {t(`freq_${key.toLowerCase()}` as TranslationKey)}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              {/* Note Card (full width) */}
-              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px]">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider block mb-2">
-                  {t('ownNote')}
+            {/* Row 4 (if non-monthly): Start Month (directly below Frequency) */}
+            {frequency !== Frequency.MONTHLY && (
+              <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+                <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+                  {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
-                  <input 
-                    type="text" 
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
-                    className="text-[13.5px] font-medium text-[var(--text-primary)] bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
-                  />
-                  {note && (
-                    <button 
-                      type="button"
-                      onClick={() => setNote('')}
-                      className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
-                    >
-                      <X size={13} strokeWidth={2.5} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Grid for Frequency & Payment Method */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Frequency Card */}
-                <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
-                    {t('frequency')}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                      <Repeat size={14} strokeWidth={2} />
-                    </div>
-                    <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
-                      {getFrequencyLabel(frequency, t)}
-                    </span>
-                    <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    <Calendar size={14} strokeWidth={2} />
                   </div>
-                  <select
-                    value={frequency}
-                    onChange={(e) => setFrequency(e.target.value as Frequency)}
-                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                    title={t('frequency')}
-                  >
-                    {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                      <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
-                        {t(`freq_${key.toLowerCase()}` as TranslationKey)}
+                  <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
+                    {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
+                  </span>
+                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
+                </div>
+                <select
+                  value={startMonth}
+                  onChange={(e) => setStartMonth(parseInt(e.target.value))}
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                  title={t('startMonthLabel')}
+                >
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const date = new Date(2024, i, 1);
+                    const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
+                    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                    return (
+                      <option key={i} value={i} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                        {capitalizedMonth}
                       </option>
-                    ))}
-                  </select>
-                </div>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
 
-                {/* Payment Method Card */}
-                <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
-                    {t('paymentMethod')}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                      <CreditCard size={14} strokeWidth={2} />
-                    </div>
-                    <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
-                      {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
-                    </span>
-                    <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
-                  </div>
-                  <select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                    title={t('paymentMethod')}
+            {/* Row 5: Payment Method */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+                {t('paymentMethod')}
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <CreditCard size={14} strokeWidth={2} />
+                </div>
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
+                  {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
+                </span>
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
+              </div>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                title={t('paymentMethod')}
+              >
+                {(paymentMethods || []).map((method, idx) => {
+                  const methodName = typeof method === 'string' ? method : method?.name || '';
+                  return (
+                    <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                      {methodName}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            {/* Row 6: Type (Fixed / Variable) */}
+            <div className="p-4 flex items-center justify-between min-h-[58px]">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+                {t('type')}
+              </span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[14px] font-bold text-[var(--text-primary)]">
+                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsVariable(!isVariable)}
+                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
+                >
+                  <div
+                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Row 7: Own Note */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] gap-3">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+                {t('ownNote')}
+              </span>
+              <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
+                <input 
+                  type="text" 
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
+                  className="text-[13.5px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
+                />
+                {note && (
+                  <button 
+                    type="button"
+                    onClick={() => setNote('')}
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
                   >
-                    {(paymentMethods || []).map((method, idx) => {
-                      const methodName = typeof method === 'string' ? method : method?.name || '';
-                      return (
-                        <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
-                          {methodName}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
+                    <X size={13} strokeWidth={2.5} />
+                  </button>
+                )}
               </div>
-
-              {/* Grid for Type & Note */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Type: Fixed / Variable Card */}
-                <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
-                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
-                    {t('type')}
-                  </span>
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-[14px] font-bold text-[var(--text-primary)]">
-                      {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setIsVariable(!isVariable)}
-                      className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-                    >
-                      <div
-                        className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
-                      />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Note Card */}
-                <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px]">
-                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider block mb-2">
-                    {t('ownNote')}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="text" 
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      placeholder={config?.language === 'en' ? 'Add note...' : 'Skriv notering...'}
-                      className="text-[13.5px] font-medium text-[var(--text-primary)] bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal"
-                    />
-                    {note && (
-                      <button 
-                        type="button"
-                        onClick={() => setNote('')}
-                        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
-                      >
-                        <X size={13} strokeWidth={2.5} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
+            </div>
+          </div>
 
           {/* Category Selector Bottom Sheet Modal */}
           {isCategorySelectorOpen && createPortal(
@@ -2340,11 +2209,11 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             </div>
           </div>
 
-          {/* 2. Grid for Deduction Day & Frequency */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Deduction Day Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+          {/* 2. Grouped Details Module with Dividers */}
+          <div className="rounded-[22px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+            {/* Row 1: Deduction Day */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {t('deductionDay') || 'Dragningsdag'}
               </span>
               <div className="flex items-center gap-2">
@@ -2354,7 +2223,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
                   {deductionDay}:e
                 </span>
-                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={deductionDay}
@@ -2368,19 +2237,19 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               </select>
             </div>
 
-            {/* Frequency Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+            {/* Row 2: Frequency */}
+            <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2} />
                 </div>
-                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {getFrequencyLabel(frequency, t)}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
               </div>
               <select
                 value={frequency}
@@ -2395,35 +2264,11 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 ))}
               </select>
             </div>
-          </div>
 
-          {/* 3. Grid for Type & (Start Month or Payment Method) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Type: Fixed / Variable Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
-                {t('type')}
-              </span>
-              <div className="flex items-center gap-2.5">
-                <span className="text-[14px] font-bold text-[var(--text-primary)]">
-                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsVariable(!isVariable)}
-                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-                >
-                  <div
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
-                  />
-                </button>
-              </div>
-            </div>
-
-            {/* Start Month if not monthly */}
+            {/* Row 3 (if non-monthly): Start Month (directly below frequency) */}
             {frequency !== Frequency.MONTHLY && (
-              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+              <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+                <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
@@ -2433,7 +2278,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {new Date(2024, startMonth, 1).toLocaleString(config?.language || 'sv-SE', { month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
                   </span>
-                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
                 </div>
                 <select
                   value={startMonth}
@@ -2455,20 +2300,20 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               </div>
             )}
 
-            {/* Payment Method Card */}
-            {paymentMethods && paymentMethods.length > 0 && frequency === Frequency.MONTHLY && (
-              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+            {/* Row 4: Payment Method (if available) */}
+            {paymentMethods && paymentMethods.length > 0 && (
+              <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
+                <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                   {t('paymentMethod') || 'Betalmetod'}
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <CreditCard size={14} strokeWidth={2} />
                   </div>
-                  <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
+                  <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                     {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
                   </span>
-                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
                 </div>
                 <select
                   value={paymentMethod}
@@ -2483,38 +2328,28 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 </select>
               </div>
             )}
-          </div>
 
-          {/* 4. Grid for Payment Method if non-monthly (full-width) */}
-          {paymentMethods && paymentMethods.length > 0 && frequency !== Frequency.MONTHLY && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer sm:col-span-2">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
-                  {t('paymentMethod') || 'Betalmetod'}
+            {/* Row 5: Type (Fixed / Variable) */}
+            <div className="p-4 flex items-center justify-between min-h-[58px]">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+                {t('type')}
+              </span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[14px] font-bold text-[var(--text-primary)]">
+                  {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                    <CreditCard size={14} strokeWidth={2} />
-                  </div>
-                  <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
-                    {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
-                  </span>
-                  <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
-                </div>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                  title={t('paymentMethod')}
+                <button
+                  type="button"
+                  onClick={() => setIsVariable(!isVariable)}
+                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
                 >
-                  {paymentMethods.map((pm: any) => {
-                    const pmName = typeof pm === 'string' ? pm : pm.name;
-                    return <option key={pmName} value={pmName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">{pmName}</option>;
-                  })}
-                </select>
+                  <div
+                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
+                  />
+                </button>
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}

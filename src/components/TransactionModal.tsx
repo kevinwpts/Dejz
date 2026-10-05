@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { X, ChevronDown, Calendar, Plus, Camera, Trash2, Check, Loader2, Paperclip, FileText } from 'lucide-react';
+import { X, ChevronRight, Calendar, Plus, Camera, Trash2, Check, Loader2, Paperclip, FileText } from 'lucide-react';
 import { Transaction, Category, TransactionSplit } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
@@ -744,23 +744,43 @@ export function TransactionModal({
             </div>
           </div>
 
-          {/* 2. Grid for Category & Date Selection */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Category Grid Card: Icon and text aligned to the right */}
+          {/* Calendar Widget if open */}
+          <AnimatePresence>
+            {showFullCalendar && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden p-3 bg-[var(--surface-color)] rounded-[22px]"
+              >
+                <CalendarWidget 
+                  calendarDays={calendarDays}
+                  normalizedSelectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  t={t}
+                  currentLang={currentLang}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* 2. Grouped Details Module with Dividers */}
+          <div className="rounded-[22px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+            {/* Row 1: Category */}
             <div 
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setActiveSplitIndex(null);
                 setIsCategoryPickerOpen(true);
               }}
-              className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+              className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer group min-h-[60px]"
             >
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
                 <div 
-                  className="w-7 h-7 rounded-[12px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
+                  className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
                   style={{ 
                     backgroundColor: currentCatData?.color || 'var(--accent-color)',
                   }}
@@ -772,18 +792,16 @@ export function TransactionModal({
                     whiteIcon 
                   />
                 </div>
-                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[170px]">
+                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
-                <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0 ml-0.5" />
+                <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
               </div>
             </div>
 
-            {/* Date Grid Card: Simplified, no redundant left text */}
-            <div 
-              className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]"
-            >
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
+            {/* Row 2: Date */}
+            <div className="p-4 flex items-center justify-between min-h-[60px]">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {t('date')}
               </span>
               <div className="flex items-center gap-1.5 shrink-0">
@@ -836,48 +854,26 @@ export function TransactionModal({
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* Calendar Widget if open */}
-          <AnimatePresence>
-            {showFullCalendar && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden p-3 bg-[var(--surface-color)] rounded-[22px]"
-              >
-                <CalendarWidget 
-                  calendarDays={calendarDays}
-                  normalizedSelectedDate={selectedDate}
-                  setSelectedDate={setSelectedDate}
-                  t={t}
-                  currentLang={currentLang}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* 3. Grid for Note and Attachments */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Note Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider block mb-2">
+            {/* Row 3: Note */}
+            <div className="p-4 flex items-center justify-between min-h-[60px] gap-3">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
                 {t('ownNote')}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
                 <input 
                   ref={noteInputRef}
                   type="text" 
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder={type === 'income' ? t('incomeNotePlaceholder') : (currentLang === 'en' ? 'Add note...' : 'Skriv notering...')}
-                  className={`text-[13.5px] font-medium text-[var(--text-primary)] bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
+                  className={`text-[13.5px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
                     validationError === 'note' ? 'text-rose-500' : ''
                   }`}
                 />
                 {note && (
                   <button 
+                    type="button"
                     onClick={() => setNote('')}
                     className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-0.5 cursor-pointer shrink-0 transition-colors"
                   >
@@ -887,10 +883,10 @@ export function TransactionModal({
               </div>
             </div>
 
-            {/* Receipt Card */}
-            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider block mb-2">
-                {currentLang === 'en' ? 'Receipt / Document' : 'Bifogat kvitto'}
+            {/* Row 4: Receipt / Attachment */}
+            <div className="p-4 flex items-center justify-between min-h-[60px]">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+                {currentLang === 'en' ? 'Receipt / Document' : 'Kvitto / Bilaga'}
               </span>
 
               {isScanningReceipt ? (
@@ -901,24 +897,22 @@ export function TransactionModal({
                   </span>
                 </div>
               ) : receiptUrl ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-6 h-6 rounded-[14px] overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0">
-                      {receiptUrl.includes('.pdf') ? (
-                        <FileText size={13} className="text-[var(--text-secondary)]" />
-                      ) : (
-                        <img src={receiptUrl} alt="Attached" className="w-full h-full object-cover" />
-                      )}
-                    </div>
-                    <a
-                      href={receiptUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11.5px] font-semibold text-[var(--text-primary)] hover:underline truncate"
-                    >
-                      {currentLang === 'en' ? 'View file' : 'Visa kvitto'}
-                    </a>
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-6 h-6 rounded-[8px] overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0">
+                    {receiptUrl.includes('.pdf') ? (
+                      <FileText size={13} className="text-[var(--text-secondary)]" />
+                    ) : (
+                      <img src={receiptUrl} alt="Attached" className="w-full h-full object-cover" />
+                    )}
                   </div>
+                  <a
+                    href={receiptUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11.5px] font-semibold text-[var(--text-primary)] hover:underline truncate max-w-[120px]"
+                  >
+                    {currentLang === 'en' ? 'View file' : 'Visa fil'}
+                  </a>
                   <button
                     type="button"
                     onClick={() => {
@@ -938,7 +932,7 @@ export function TransactionModal({
                     type="button"
                     onClick={() => receiptInputRef.current?.click()}
                     disabled={isUploadingReceipt}
-                    className="flex-1 h-[28px] px-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-semibold rounded-[12px] transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1"
+                    className="h-[28px] px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-semibold rounded-[12px] transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1"
                   >
                     <Paperclip size={11} strokeWidth={2} />
                     <span>{currentLang === 'en' ? 'File' : 'Fil'}</span>
@@ -947,7 +941,7 @@ export function TransactionModal({
                     type="button"
                     onClick={() => setIsCameraModalOpen(true)}
                     disabled={isUploadingReceipt}
-                    className="flex-1 h-[28px] px-2 bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-90 text-[11px] font-semibold rounded-[12px] shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1"
+                    className="h-[28px] px-2.5 bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-90 text-[11px] font-semibold rounded-[12px] shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1"
                   >
                     <Camera size={11} strokeWidth={2} />
                     <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
@@ -955,31 +949,31 @@ export function TransactionModal({
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Category Split toggle if expense */}
-          {type === 'expense' && splits.length === 0 && (
-            <div className="p-3.5 bg-[var(--surface-color)] rounded-[22px] flex items-center justify-between">
-              <span className="text-[12px] font-medium text-[var(--text-secondary)]">
-                {currentLang === 'en' ? 'Split across multiple categories' : 'Dela upp i fler kategorier'}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof feedback?.light === 'function') feedback.light();
-                  const total = parseAmount(amount);
-                  setSplits([
-                    { id: Math.random().toString(), amount: total, category: category || categories[0]?.name || '', tags: [] },
-                    { id: Math.random().toString(), amount: 0, category: '', tags: [] }
-                  ]);
-                }}
-                className="px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 hover:bg-[var(--accent-color)] hover:text-[var(--text-on-accent)] text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
-              >
-                <Plus size={12} strokeWidth={2.5} />
-                <span>{currentLang === 'en' ? 'Add' : 'Dela upp'}</span>
-              </button>
-            </div>
-          )}
+            {/* Row 5: Split categories toggle if expense */}
+            {type === 'expense' && splits.length === 0 && (
+              <div className="p-4 flex items-center justify-between min-h-[60px]">
+                <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight">
+                  {currentLang === 'en' ? 'Split across categories' : 'Dela upp i fler kategorier'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    const total = parseAmount(amount);
+                    setSplits([
+                      { id: Math.random().toString(), amount: total, category: category || categories[0]?.name || '', tags: [] },
+                      { id: Math.random().toString(), amount: 0, category: '', tags: [] }
+                    ]);
+                  }}
+                  className="px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 hover:bg-[var(--accent-color)] hover:text-[var(--text-on-accent)] text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
+                >
+                  <Plus size={12} strokeWidth={2.5} />
+                  <span>{currentLang === 'en' ? 'Add' : 'Dela upp'}</span>
+                </button>
+              </div>
+            )}
+          </div>
 
               {/* Split Transaction Details if Active */}
               {type === 'expense' && splits.length > 0 && (
