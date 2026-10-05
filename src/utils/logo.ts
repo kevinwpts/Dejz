@@ -558,16 +558,12 @@ export function findKnownBrandDomain(name: string, category?: string): string | 
     if (!name) return undefined;
     const lower = name.toLowerCase().trim();
 
-    // 0. Smart Context Disambiguation for "Max"
-    if (lower.includes('max') && (isStreamingMaxContext(lower, category) || lower.includes('hbo'))) {
+    if (lower.includes('hbo') || (lower.includes('max') && ((category || '').toLowerCase().includes('stream') || lower.includes('hbo')))) {
         return 'max.com';
     }
 
     // 1. Direct match
     if (KNOWN_BRANDS[lower]) {
-        if (lower === 'max' && isStreamingMaxContext(lower, category)) {
-            return 'max.com';
-        }
         return KNOWN_BRANDS[lower];
     }
 
@@ -595,9 +591,6 @@ export function findKnownBrandDomain(name: string, category?: string): string | 
             // Short keys (e.g. "sl", "ica", "sj", "if", "tre", "stc", "3") require word-boundary check
             const regex = new RegExp(`(?:^|[^a-z0-9])${key}(?:$|[^a-z0-9])`, 'i');
             if (regex.test(lower) || regex.test(normalized)) {
-                if (key === 'max' && isStreamingMaxContext(lower, category)) {
-                    return 'max.com';
-                }
                 return KNOWN_BRANDS[key];
             }
         }
