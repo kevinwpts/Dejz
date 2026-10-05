@@ -487,7 +487,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
-                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-emerald-600 dark:text-emerald-400"
+                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
               >
                 <input
                   ref={amountInputRef}
@@ -502,7 +502,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     }
                   }}
                   placeholder="0"
-                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400 placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none"
+                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none"
                 />
                 <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] select-none ml-2 mb-1.5 font-sans shrink-0">
                   {currency}
