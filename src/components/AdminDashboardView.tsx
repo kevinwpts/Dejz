@@ -14,10 +14,12 @@ import {
   Check, 
   ChevronLeft, 
   FileCode,
-  Users
+  Users,
+  Play
 } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { dataService } from '../services/dataService';
+import { createFreshTestAccount, seedDemoData } from '../utils/demoData';
 import { feedback } from '../utils/feedback';
 import { Modal } from './ui';
 
@@ -301,6 +303,84 @@ export function AdminDashboardView({
           >
             <Users size={16} strokeWidth={2} />
             <span>{isEn ? 'Free user' : 'Gratiskonto'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Quick Test Account Tools (Admin Only) */}
+      <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-4">
+        <div className="flex items-center gap-2">
+          <Sparkles size={18} strokeWidth={2} className="text-amber-500" />
+          <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
+            {isEn ? 'Quick Test Account (Admin Only)' : 'Snabbtest & Testkonto (Endast Admin)'}
+          </h3>
+        </div>
+        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+          {isEn
+            ? 'Launch a clean test account to test onboarding from scratch, or load complete demo data. This tool is now exclusively accessible from your admin dashboard.'
+            : 'Starta ett helt rent testkonto för att testa onboardingflödet från början, eller ladda in fullständig exempeldata. Denna snabbknapp är nu flyttad hit och endast tillgänglig för dig som admin.'}
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <button
+            type="button"
+            onClick={() => {
+              feedback.tap();
+              createFreshTestAccount(config.language);
+              addToast(isEn ? 'Fresh test account initialized! Starting onboarding...' : 'Nytt testkonto initierat! Startar onboarding...', 'success');
+              setTimeout(() => {
+                window.location.reload();
+              }, 400);
+            }}
+            className="p-4 rounded-[16px] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] border border-black/[0.05] dark:border-white/[0.06] text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
+                {isEn ? 'Start Fresh Onboarding Test' : 'Testa Onboarding (Rent testkonto)'}
+              </span>
+              <Play size={14} strokeWidth={2.5} className="text-amber-500 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+            <p className="text-[11px] text-[var(--text-secondary)] opacity-75">
+              {isEn ? 'Clears test data and opens initial setup wizard' : 'Nollställer testdata och öppnar introduktionsguiden'}
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              feedback.tap();
+              seedDemoData();
+              const mockSession = {
+                access_token: 'demo-token',
+                refresh_token: 'demo-refresh',
+                expires_in: 3600,
+                token_type: 'bearer',
+                user: {
+                  id: 'demo-user',
+                  email: 'demo@dejz.se',
+                  user_metadata: {},
+                  app_metadata: {},
+                  aud: 'authenticated',
+                  created_at: new Date().toISOString()
+                }
+              };
+              localStorage.setItem('dejz_demo_session', JSON.stringify(mockSession));
+              addToast(isEn ? 'Demo data loaded successfully!' : 'Exempeldata inläst i demoläge!', 'success');
+              setTimeout(() => {
+                window.location.reload();
+              }, 400);
+            }}
+            className="p-4 rounded-[16px] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] border border-black/[0.05] dark:border-white/[0.06] text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
+                {isEn ? 'Load Full Demo Data' : 'Ladda in fullständig exempeldata'}
+              </span>
+              <Play size={14} strokeWidth={2.5} className="text-emerald-500 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+            <p className="text-[11px] text-[var(--text-secondary)] opacity-75">
+              {isEn ? 'Pre-populates realistic incomes, expenses & goals' : 'Laddar färdiga inkomster, utgifter och sparmål'}
+            </p>
           </button>
         </div>
       </div>

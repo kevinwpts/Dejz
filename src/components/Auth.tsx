@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { createFreshTestAccount } from '../utils/demoData';
-import { Mail, Lock, ChevronLeft, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, ChevronLeft, CheckCircle2 } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { DejzLogo } from './DejzLogo';
 import { Button, Input, IconButton, SegmentedControl, Divider } from './ui';
@@ -23,17 +23,6 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-
-  const handleQuickTestLogin = () => {
-    setEmail('test@example.com');
-    setPassword('123456');
-    setLoading(true);
-    setTimeout(() => {
-      createFreshTestAccount();
-      onShowToast("Nytt testkonto initierat! Startar onboarding...", "success");
-      window.location.reload();
-    }, 400);
-  };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -390,17 +379,6 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                   fullWidth
                 >
                   {isRegistering ? t('createAccount') : t('login')}
-                </Button>
-
-                <Button
-                  type="button"
-                  onClick={handleQuickTestLogin}
-                  disabled={loading}
-                  variant="subtle"
-                  fullWidth
-                  icon={<Sparkles size={13} />}
-                >
-                  {t('quickTestBtn' as any)}
                 </Button>
               </div>
             </form>
