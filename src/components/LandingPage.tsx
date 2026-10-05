@@ -147,7 +147,7 @@ export function LandingPage({
       <section className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 px-4 sm:px-6 max-w-4xl mx-auto">
         <div className="text-center relative z-10 space-y-6">
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] max-w-3xl mx-auto">
-            Få full koll på din ekonomi – utan krångel.
+            Få full kontroll på din ekonomi – utan krångel.
           </h1>
 
           <p className="text-base sm:text-lg text-[var(--text-secondary)] font-normal max-w-xl mx-auto leading-relaxed">
@@ -172,18 +172,19 @@ export function LandingPage({
             )}
           </div>
 
-          <div className="pt-2 flex items-center justify-center gap-5 text-xs font-medium text-[var(--text-secondary)]">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 size={14} className="text-emerald-500" />
-              <span>Inga bindningstider</span>
+          {/* Clean Unboxed Trust Badges with Perfect Mobile Row/Column Alignment */}
+          <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8 text-xs font-medium text-[var(--text-secondary)]">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+              <span className="text-[var(--text-primary)]">Inga bindningstider</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 size={14} className="text-emerald-500" />
-              <span>100% säker & privat</span>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+              <span className="text-[var(--text-primary)]">100% säker & privat</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 size={14} className="text-emerald-500" />
-              <span>Kom igång på 1 minut</span>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+              <span className="text-[var(--text-primary)]">Kom igång på 1 minut</span>
             </div>
           </div>
 
@@ -444,7 +445,7 @@ export function LandingPage({
         <div className="relative rounded-[28px] bg-[var(--accent-color)] text-[var(--text-on-accent)] p-8 sm:p-12 overflow-hidden text-center space-y-6 shadow-xl">
           <div className="relative z-10 max-w-xl mx-auto space-y-3">
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
-              Redo att få full koll på ekonomin?
+              Redo a få full koll på ekonomin?
             </h2>
             <p className="text-sm sm:text-base opacity-90">
               Skapa ett gratis konto på under en minut och upplev skillnaden redan idag.
