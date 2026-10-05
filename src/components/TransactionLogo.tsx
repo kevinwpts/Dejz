@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, Config } from '../types';
 import { resolveEntityVisual } from '../utils/resolver';
+import { fetchLogoForName } from '../utils/logo';
 import { Receipt } from 'lucide-react';
 
 export function TransactionLogo({
@@ -13,6 +14,7 @@ export function TransactionLogo({
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }) {
   const [imgError, setImgError] = useState(false);
+  const [fetchedLogo, setFetchedLogo] = useState<string | null>(transaction.logo || null);
 
   const merchantName =
     typeof transaction.merchant === 'object'
@@ -23,19 +25,23 @@ export function TransactionLogo({
           ? (transaction.category as any)?.name
           : transaction.category);
 
-  const visual = resolveEntityVisual(transaction, config);
-
   useEffect(() => {
     setImgError(false);
-  }, [
-    visual.logoUrl,
-    transaction.logo,
-    transaction.icon,
-    transaction.merchant,
-    transaction.note,
-    transaction.category,
-    merchantName,
-  ]);
+    let active = true;
+    if (!transaction.logo && merchantName) {
+      fetchLogoForName(merchantName).then(url => {
+        if (active && url) {
+          setFetchedLogo(url);
+        }
+      });
+    } else {
+      setFetchedLogo(transaction.logo || null);
+    }
+    return () => { active = false; };
+  }, [transaction.logo, merchantName]);
+
+  const visual = resolveEntityVisual(transaction, config);
+  const activeLogoUrl = fetchedLogo || visual.logoUrl;
 
   const sizeConfig = {
     xl: {
@@ -60,13 +66,13 @@ export function TransactionLogo({
   };
 
   // If there's an official logo and no load error (Klarna / Apple Pay squircle app icon style)
-  if (visual.logoUrl && !imgError) {
+  if (activeLogoUrl && !imgError) {
     return (
       <div
         className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] shadow-2xs select-none`}
       >
         <img
-          src={visual.logoUrl}
+          src={activeLogoUrl}
           alt={merchantName || 'Logo'}
           className="w-full h-full object-cover object-center select-none pointer-events-none block"
           onError={() => setImgError(true)}
