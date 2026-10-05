@@ -1271,11 +1271,11 @@ export default function App() {
     }
   }, [config?.appIconTheme]);
 
-  // Dynamically update CSS variables and background tint when theme color or dark mode changes
   useEffect(() => {
     if (!config) return;
     const isDark = session ? !!config.darkMode : false;
-    applyThemeColor(config.themeColor || '#3B82F6', isDark);
+    const themeHex = session ? (config.themeColor || '#3B82F6') : '#3B82F6';
+    applyThemeColor(themeHex, isDark);
   }, [config?.themeColor, config?.darkMode, session]);
 
   const handleFeedbackSubmit = async (message: string) => {
@@ -1747,7 +1747,7 @@ export default function App() {
     document.documentElement.classList.add("light");
     document.body.classList.remove("dark");
     document.body.classList.add("light");
-    applyThemeColor(config?.themeColor || '#3B82F6', false);
+    applyThemeColor('#3B82F6', false);
     
     window.scrollTo({ top: 0, behavior: 'instant' });
     if (isSupabaseConfigured) {
