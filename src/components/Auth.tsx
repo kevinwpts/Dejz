@@ -176,10 +176,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
   };
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(2.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+    <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(3.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
       {/* Top Left Back Button */}
       {onBack && (
-        <div className="absolute top-6 left-6 sm:top-8 sm:left-8 z-30">
+        <div className="absolute top-[calc(1rem+env(safe-area-inset-top))] left-6 sm:left-8 z-30">
           <IconButton 
             icon={<ChevronLeft size={18} />}
             onClick={() => {

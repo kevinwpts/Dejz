@@ -22,6 +22,7 @@ import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
 import { feedback } from "../utils/feedback";
 import { designSystem } from "../constants/designSystem";
+import { getCategoryColor } from "../utils/categoryColors";
 
 interface TodayViewProps {
   stats: any;
@@ -251,7 +252,7 @@ export function TodayView({
           percentage,
           isOverBudget,
           iconName: cat.icon || getCategoryIconName(cat.name),
-          color: cat.color || '#6E6961',
+          color: cat.color || getCategoryColor(cat.name, config?.categories),
         };
       })
       .filter((cat: any) => {
@@ -329,7 +330,7 @@ export function TodayView({
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                       onClick={() => handleCategoryClick(cat.name)}
-                      style={{ backgroundColor: cat.color || '#6E6961' }}
+                      style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.categories) }}
                       className="flex-shrink-0 w-[100px] sm:w-[110px] h-[100px] sm:h-[110px] p-3 rounded-[22px] flex flex-col items-center justify-between text-center group cursor-pointer border-none shadow-sm transition-transform active:scale-95"
                     >
                       <div className="flex items-center justify-center pt-1 text-white">

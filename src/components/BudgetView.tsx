@@ -10,6 +10,7 @@ import { EmptyState } from './EmptyState';
 import { FilterSelectButton, FilterMenuModal, Button } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
+import { getCategoryColor } from '../utils/categoryColors';
 
 interface BudgetViewProps {
   allTransactions?: any[];
@@ -247,18 +248,18 @@ export function BudgetView({
         >
           {/* Left Part: Category Icon with Color, Name and helper text */}
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="shrink-0">
+             <div className="shrink-0">
               {isEmojiString(cat.icon) ? (
                 <div 
                   className="w-[34px] h-[34px] sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-base shrink-0"
-                  style={{ backgroundColor: cat.color ? `${cat.color}20` : 'var(--surface-muted)' }}
+                  style={{ backgroundColor: `${cat.color || getCategoryColor(cat.name, config?.categories)}20` }}
                 >
                   {cat.icon}
                 </div>
               ) : (
                 <div 
                   className="w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] flex items-center justify-center text-white shrink-0 shadow-2xs"
-                  style={{ backgroundColor: cat.color || '#6366f1' }}
+                  style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.categories) }}
                 >
                   <CategoryIcon
                     icon={cat.icon || getCategoryIconName(cat.name)}

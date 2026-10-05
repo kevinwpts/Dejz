@@ -11,6 +11,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { Button, Modal } from './ui';
 import { ToggleSwitch } from './ToggleSwitch';
 import { formatPaydaySummary, formatOrdinalDay } from '../utils/format';
+import { getCategoryColor } from '../utils/categoryColors';
 
 interface SettingsViewProps {
   activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency';
@@ -164,7 +165,7 @@ export function SettingsView({
             <div
               key={cat.id || index}
               onClick={() => handleEditCategory(type, index, cat.name, cat.icon, cat.color)}
-              style={{ backgroundColor: cat.color || '#6E6961' }}
+              style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.categories) }}
               className="h-32 sm:h-36 p-4 rounded-[22px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
             >
               <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />

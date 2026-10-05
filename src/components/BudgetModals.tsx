@@ -20,6 +20,7 @@ import { CancelSubscriptionModal } from './CancelSubscriptionModal';
 import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
 import { resolveEntityVisual } from '../utils/resolver';
 import { feedback } from '../utils/feedback';
+import { getCategoryColor } from '../utils/categoryColors';
 
 function _hexToRgba(hex: string, alpha: number): string {
   if (!hex) return `rgba(124, 58, 237, ${alpha})`;
@@ -715,7 +716,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                             setCategory(cat.name);
                             setIsCategorySelectorOpen(false);
                           }}
-                          style={{ backgroundColor: cat.color || '#6366f1' }}
+                          style={{ backgroundColor: cat.color || getCategoryColor(cat.name, categories) }}
                           className={`h-28 sm:h-32 p-3.5 rounded-[22px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
@@ -1615,7 +1616,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                             setCategory(cat.name);
                             setIsCategorySelectorOpen(false);
                           }}
-                          style={{ backgroundColor: cat.color || '#6366f1' }}
+                          style={{ backgroundColor: cat.color || getCategoryColor(cat.name, categories) }}
                           className={`h-28 sm:h-32 p-3.5 rounded-[22px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}

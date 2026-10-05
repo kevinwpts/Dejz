@@ -21,6 +21,7 @@ import { formatFullDate, parseReceiptDate } from '../utils/date';
 import { ReceiptCameraModal } from './ReceiptCameraModal';
 import { ConfirmModal } from './ConfirmModal';
 import { feedback } from '../utils/feedback';
+import { getCategoryColor } from '../utils/categoryColors';
 
 interface TransactionModalProps {
   transaction: Transaction | null;
@@ -995,7 +996,7 @@ export function TransactionModal({
                               <div className="flex items-center gap-2">
                                 <div 
                                   className="w-10 h-10 rounded-[12px] flex items-center justify-center text-white shadow-xs transition-all"
-                                  style={{ backgroundColor: split.category ? (catData?.color || COLORS[index % COLORS.length]) : 'var(--surface-muted)' }}
+                                  style={{ backgroundColor: split.category ? (catData?.color || getCategoryColor(split.category, categories)) : 'var(--surface-muted)' }}
                                 >
                                   <CategoryIcon icon={catData?.icon || 'tag'} size="sm" color={split.category ? "#fff" : "var(--text-tertiary)"} />
                                 </div>
