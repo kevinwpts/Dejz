@@ -104,88 +104,80 @@ export function LandingPage({
         onClose={() => setActivePolicy(null)}
       />
 
-      {/* UNIFIED HERO SECTION WITH HERO.PNG BACKGROUND & NEUTRAL LEFT GRADIENT */}
-      <section className="relative w-full overflow-hidden bg-slate-950 text-white">
-        {/* HERO background image (natural colors, unfiltered right side) */}
-        <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-center z-0"
-          style={{ backgroundImage: "url('/hero.png')" }}
-        />
-
-        {/* Neutral black gradient overlay on left side only for text contrast, fading out to right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent z-0 pointer-events-none lg:w-3/5" />
-
-        {/* Header integrated inside hero composition (using dark class so DejzLogo renders light/white variant) */}
-        <header className="relative z-20 w-full border-b border-white/10 backdrop-blur-md bg-black/30 dark">
-          <div className="max-w-[1200px] mx-auto px-6 sm:px-8 h-20 flex items-center justify-between">
-            <div className="flex items-center gap-10">
-              <div className="flex items-center select-none cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                <DejzLogo className="text-2xl font-black tracking-tight text-white" />
-              </div>
-
-              <nav className="hidden md:flex items-center gap-6">
-                <a 
-                  href="#how-it-works" 
-                  className="text-sm font-semibold text-slate-200 hover:text-white transition-colors"
-                >
-                  Så fungerar det
-                </a>
-                <a 
-                  href="#features" 
-                  className="text-sm font-semibold text-slate-200 hover:text-white transition-colors"
-                >
-                  Funktioner
-                </a>
-              </nav>
+      {/* HEADER (Clean background, no phone image behind header) */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/95 border-b border-slate-200/80 transition-all">
+        <div className="max-w-[1240px] mx-auto px-6 sm:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-10">
+            <div className="flex items-center select-none cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <DejzLogo className="text-2xl font-black tracking-tight text-slate-900" />
             </div>
 
-            <div className="flex items-center gap-3">
-              {onLogin && (
-                <button
-                  onClick={onLogin}
-                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-[12px] text-sm font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition-all cursor-pointer active:scale-95"
-                >
-                  Logga in
-                </button>
-              )}
-              <button
-                onClick={onGetStarted}
-                className="inline-flex items-center justify-center px-5 py-2.5 rounded-[12px] text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 transition-all cursor-pointer shadow-sm active:scale-95"
+            <nav className="hidden md:flex items-center gap-6">
+              <a 
+                href="#how-it-works" 
+                className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
               >
-                Kom igång gratis
-              </button>
-            </div>
+                Så fungerar det
+              </a>
+              <a 
+                href="#features" 
+                className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Funktioner
+              </a>
+            </nav>
           </div>
-        </header>
 
-        {/* Hero Content Area */}
-        <div className="relative z-10 max-w-[1200px] mx-auto px-6 sm:px-8 pt-16 pb-24 sm:pt-24 sm:pb-32">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Column (~40-45% width for copy with neutral contrast) */}
-            <div className="lg:col-span-6 space-y-8">
+          <div className="flex items-center gap-3">
+            {onLogin && (
+              <button
+                onClick={onLogin}
+                className="inline-flex items-center justify-center px-4 py-2 rounded-[12px] text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer active:scale-95"
+              >
+                Logga in
+              </button>
+            )}
+            <button
+              onClick={onGetStarted}
+              className="inline-flex items-center justify-center px-4.5 py-2 rounded-[12px] text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-all cursor-pointer shadow-sm active:scale-95"
+            >
+              Kom igång gratis
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* HERO SECTION (Structured container, side-by-side on desktop, stacked on mobile) */}
+      <section className="relative w-full bg-white pt-8 pb-16 sm:py-20">
+        <div className="max-w-[1240px] mx-auto px-6 sm:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+            
+            {/* LEFT COLUMN: Text, CTAs, Google, Trust */}
+            <div className="lg:col-span-6 space-y-6 sm:space-y-8 order-1 lg:order-1">
               <div className="space-y-4">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
                   Hela din ekonomi.<br />
                   Svart på vitt.
                 </h1>
 
-                <p className="text-base sm:text-lg text-slate-200 font-normal leading-relaxed max-w-lg drop-shadow-sm">
+                <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-xl">
                   Samla inkomster, utgifter, sparande och budget på ett ställe. Se vart pengarna går och få koll på ekonomin mellan två löner.
                 </p>
               </div>
 
+              {/* CTA buttons */}
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row items-stretch gap-3">
                   <button
                     onClick={onGetStarted}
-                    className="flex-1 inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-500 transition-all cursor-pointer shadow-md shadow-emerald-600/30 active:scale-95"
+                    className="flex-1 inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-all cursor-pointer shadow-md shadow-emerald-600/20 active:scale-95"
                   >
                     Kom igång gratis
                   </button>
                   {onStartDemo && (
                     <button
                       onClick={onStartDemo}
-                      className="inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-base font-semibold text-white bg-white/15 hover:bg-white/25 backdrop-blur-md transition-all cursor-pointer active:scale-95 border border-white/20"
+                      className="inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-base font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer active:scale-95"
                     >
                       Testa demo direkt
                     </button>
@@ -195,7 +187,7 @@ export function LandingPage({
                 {onGoogleLogin && (
                   <button
                     onClick={onGoogleLogin}
-                    className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-[14px] text-sm font-semibold text-slate-800 bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-xs active:scale-95"
+                    className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-[14px] text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-all cursor-pointer shadow-xs active:scale-95"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -208,43 +200,52 @@ export function LandingPage({
                 )}
               </div>
 
-              {/* Trust points horizontally under CTA */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-white/20">
+              {/* Trust points (compact 3 columns) */}
+              <div className="grid grid-cols-3 gap-3 pt-6 border-t border-slate-200">
                 <div className="space-y-1">
-                  <div className="w-8 h-8 rounded-[10px] bg-white/15 flex items-center justify-center text-emerald-400 mb-2">
-                    <Shield size={18} strokeWidth={2} />
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
+                    <Shield size={14} strokeWidth={2} />
                   </div>
-                  <h4 className="text-sm font-bold text-white">Ingen bankkoppling</h4>
-                  <p className="text-xs text-slate-200 leading-relaxed">Du har full kontroll över din data.</p>
+                  <h4 className="text-xs font-bold text-slate-900 leading-tight">Ingen bankkoppling</h4>
+                  <p className="text-[11px] text-slate-500 leading-snug hidden sm:block">Full kontroll över din data.</p>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="w-8 h-8 rounded-[10px] bg-white/15 flex items-center justify-center text-emerald-400 mb-2">
-                    <Lock size={18} strokeWidth={2} />
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
+                    <Lock size={14} strokeWidth={2} />
                   </div>
-                  <h4 className="text-sm font-bold text-white">Säker och privat</h4>
-                  <p className="text-xs text-slate-200 leading-relaxed">Din ekonomiska information är din.</p>
+                  <h4 className="text-xs font-bold text-slate-900 leading-tight">Säker och privat</h4>
+                  <p className="text-[11px] text-slate-500 leading-snug hidden sm:block">Din information är din.</p>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="w-8 h-8 rounded-[10px] bg-white/15 flex items-center justify-center text-emerald-400 mb-2">
-                    <Sparkles size={18} strokeWidth={2} />
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
+                    <Sparkles size={14} strokeWidth={2} />
                   </div>
-                  <h4 className="text-sm font-bold text-white">Byggd för enkelhet</h4>
-                  <p className="text-xs text-slate-200 leading-relaxed">Fokus på det som faktiskt hjälper.</p>
+                  <h4 className="text-xs font-bold text-slate-900 leading-tight">Byggd för enkelhet</h4>
+                  <p className="text-[11px] text-slate-500 leading-snug hidden sm:block">Fokus på det som hjälper.</p>
                 </div>
               </div>
             </div>
 
-            {/* Right Column (showing natural unfiltered phones on hero.png) */}
-            <div className="lg:col-span-6 hidden lg:block" />
+            {/* RIGHT COLUMN: Real image element (hero.png) */}
+            <div className="lg:col-span-6 order-2 lg:order-2 flex justify-center">
+              <div className="w-full relative rounded-[24px] overflow-hidden shadow-xl border border-slate-200/80 bg-slate-900">
+                <img 
+                  src="/hero.png" 
+                  alt="Dejz App" 
+                  className="w-full h-auto object-cover object-center block"
+                />
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
       {/* 3. SÅ FUNGERAR DEJZ */}
       <section id="how-it-works" className="py-24 bg-slate-50 border-y border-slate-200/80">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-8 space-y-14">
+        <div className="max-w-[1240px] mx-auto px-6 sm:px-8 space-y-14">
           <div className="max-w-2xl space-y-3">
             <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
               Så fungerar Dejz
@@ -337,7 +338,7 @@ export function LandingPage({
 
       {/* 4. STOR PRODUKTSEKTION ("Din ekonomi, på dina villkor") ~45% bild, 55% text */}
       <section id="features" className="py-24 bg-white">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
+        <div className="max-w-[1240px] mx-auto px-6 sm:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
             {/* Left Image (~45% / col-span-5) */}
             <div className="lg:col-span-5">
@@ -405,7 +406,7 @@ export function LandingPage({
 
       {/* 5. ALLT DU BEHÖVER – SAMLAT PÅ ETT STÄLLE */}
       <section className="py-24 bg-slate-50 border-y border-slate-200/80">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
+        <div className="max-w-[1240px] mx-auto px-6 sm:px-8">
           <div className="bg-white rounded-[28px] p-8 sm:p-12 border border-slate-200/80 shadow-xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
               {/* Left Content (wider left column) */}
@@ -498,7 +499,7 @@ export function LandingPage({
       </section>
 
       {/* 10. SLUTLIG CTA (Mörk avslutande CTA) */}
-      <section className="py-12 px-6 sm:px-8 max-w-[1200px] mx-auto">
+      <section className="py-12 px-6 sm:px-8 max-w-[1240px] mx-auto">
         <div className="bg-slate-900 text-white rounded-[24px] p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-lg">
           <div className="space-y-2 text-center lg:text-left">
             <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
@@ -536,7 +537,7 @@ export function LandingPage({
 
       {/* 11. FOOTER */}
       <footer className="py-12 border-t border-slate-200 mt-12 bg-white">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-slate-600">
+        <div className="max-w-[1240px] mx-auto px-6 sm:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-slate-600">
           <div className="flex items-center gap-2 select-none">
             <DejzLogo className="text-xl font-bold tracking-tight text-slate-900" />
           </div>
