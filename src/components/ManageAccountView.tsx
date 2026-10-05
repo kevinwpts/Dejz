@@ -144,7 +144,7 @@ export function ManageAccountView({
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-2xl font-bold uppercase">
+                  <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-2xl font-bold">
                     {fullName ? fullName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
                   </div>
                 )}

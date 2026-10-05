@@ -629,7 +629,7 @@ export function BudgetView({
                 ).map(([freq, items]) => (
                   <div key={freq} className="space-y-2">
                     <div className="flex items-center gap-3 px-1 pt-1">
-                      <span className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)]">
+                      <span className="text-xs font-semibold font-display tracking-wider text-[var(--text-secondary)]">
                         {Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq) 
                           ? t(`freq_${Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq)!.toLowerCase()}` as TranslationKey)
                           : freq}

@@ -185,7 +185,7 @@ export function SearchModal({
               ) : (
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between px-1">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-secondary)] opacity-70">
+                    <span className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] opacity-70">
                       {getL10n("Transaktioner", "Transactions", "Transaksjoner", "Transaktioner", "Tapahtumat")} ({matchingTransactions.length})
                     </span>
                   </div>

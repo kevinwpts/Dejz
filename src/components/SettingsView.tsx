@@ -625,7 +625,7 @@ export function SettingsView({
               : `Kategorin används av ${deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till innan den tas bort.`}
           </p>
           <div className="space-y-2 mb-2">
-            <label className="text-xs font-semibold font-display uppercase tracking-wider text-[var(--text-secondary)]">
+            <label className="text-xs font-semibold font-display tracking-wider text-[var(--text-secondary)]">
               {config.language === 'en' ? 'Move transactions to:' : 'Flytta transaktioner till:'}
             </label>
             <select

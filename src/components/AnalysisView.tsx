@@ -412,7 +412,7 @@ export function AnalysisView({
 
               {/* Airy Center */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4">
-                <span className="text-[11px] font-medium text-[var(--text-secondary)] uppercase tracking-wider">
+                <span className="text-[11px] font-medium text-[var(--text-secondary)] tracking-wider">
                   {isEn ? 'Total' : 'Totalt'}
                 </span>
                 <span className="text-[16px] sm:text-[19px] font-bold text-[var(--text-primary)] tabular-nums tracking-tight">

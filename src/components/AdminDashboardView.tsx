@@ -226,7 +226,7 @@ export function AdminDashboardView({
             <span className="text-[11px] font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Subscription' : 'Status'}
             </span>
-            <span className="text-xs font-bold text-[var(--text-primary)] block mt-1 uppercase tracking-tight">
+            <span className="text-xs font-bold text-[var(--text-primary)] block mt-1 tracking-tight">
               {subscriptionStatus || 'Free'}
             </span>
           </div>

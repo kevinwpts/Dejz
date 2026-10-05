@@ -521,7 +521,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               }}
               className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
@@ -547,7 +547,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
             {/* Arrival Day Card */}
             <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {t('arrivalDay')}
               </span>
               <div className="flex items-center gap-2">
@@ -576,7 +576,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Frequency Card */}
             <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
@@ -604,7 +604,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
             {/* Type: Fixed / Variable Card */}
             <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {t('type')}
               </span>
               <div className="flex items-center gap-2.5">
@@ -628,7 +628,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {frequency !== Frequency.MONTHLY && (
               <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
@@ -662,7 +662,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
             {/* Note Card */}
             <div className={`p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px] ${frequency === Frequency.MONTHLY ? 'sm:col-span-2' : ''}`}>
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider block mb-2">
                 {t('ownNote')}
               </span>
               <div className="flex items-center gap-2">
@@ -1393,7 +1393,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               }}
               className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
@@ -1419,7 +1419,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
             {/* Deduction Day Card */}
             <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {paymentMethod === 'autogiro' || (typeof paymentMethod === 'string' && (paymentMethod.toLowerCase().includes('autogiro') || paymentMethod.toLowerCase().includes('kort')))
                   ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag')
                   : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
@@ -1456,7 +1456,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <div className="flex flex-col gap-3">
                   {/* Frequency Card */}
                   <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                       {t('frequency')}
                     </span>
                     <div className="flex items-center gap-2">
@@ -1484,7 +1484,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
                   {/* Start Month Card (placed directly under Frequency) */}
                   <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                       {t('startMonthLabel')}
                     </span>
                     <div className="flex items-center gap-2">
@@ -1520,7 +1520,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <div className="flex flex-col gap-3">
                   {/* Payment Method Card */}
                   <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                       {t('paymentMethod')}
                     </span>
                     <div className="flex items-center gap-2">
@@ -1551,7 +1551,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
                   {/* Type: Fixed / Variable Card */}
                   <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                       {t('type')}
                     </span>
                     <div className="flex items-center gap-2.5">
@@ -1574,7 +1574,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
               {/* Note Card (full width) */}
               <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px]">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider block mb-2">
                   {t('ownNote')}
                 </span>
                 <div className="flex items-center gap-2">
@@ -1603,7 +1603,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Frequency Card */}
                 <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                     {t('frequency')}
                   </span>
                   <div className="flex items-center gap-2">
@@ -1631,7 +1631,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
                 {/* Payment Method Card */}
                 <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                     {t('paymentMethod')}
                   </span>
                   <div className="flex items-center gap-2">
@@ -1665,7 +1665,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Type: Fixed / Variable Card */}
                 <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
-                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                     {t('type')}
                   </span>
                   <div className="flex items-center gap-2.5">
@@ -1686,7 +1686,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
                 {/* Note Card */}
                 <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px]">
-                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider block mb-2">
                     {t('ownNote')}
                   </span>
                   <div className="flex items-center gap-2">
@@ -2344,7 +2344,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Deduction Day Card */}
             <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {t('deductionDay') || 'Dragningsdag'}
               </span>
               <div className="flex items-center gap-2">
@@ -2370,7 +2370,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
 
             {/* Frequency Card */}
             <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
@@ -2401,7 +2401,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Type: Fixed / Variable Card */}
             <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {t('type')}
               </span>
               <div className="flex items-center gap-2.5">
@@ -2423,7 +2423,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             {/* Start Month if not monthly */}
             {frequency !== Frequency.MONTHLY && (
               <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
@@ -2458,7 +2458,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
             {/* Payment Method Card */}
             {paymentMethods && paymentMethods.length > 0 && frequency === Frequency.MONTHLY && (
               <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                   {t('paymentMethod') || 'Betalmetod'}
                 </span>
                 <div className="flex items-center gap-2">
@@ -2489,7 +2489,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           {paymentMethods && paymentMethods.length > 0 && frequency !== Frequency.MONTHLY && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer sm:col-span-2">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                   {t('paymentMethod') || 'Betalmetod'}
                 </span>
                 <div className="flex items-center gap-2">

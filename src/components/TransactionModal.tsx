@@ -755,7 +755,7 @@ export function TransactionModal({
               }}
               className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
@@ -783,7 +783,7 @@ export function TransactionModal({
             <div 
               className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]"
             >
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider shrink-0">
                 {t('date')}
               </span>
               <div className="flex items-center gap-1.5 shrink-0">
@@ -862,7 +862,7 @@ export function TransactionModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Note Card */}
             <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider block mb-2">
                 {t('ownNote')}
               </span>
               <div className="flex items-center gap-2">
@@ -889,7 +889,7 @@ export function TransactionModal({
 
             {/* Receipt Card */}
             <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider block mb-2">
                 {currentLang === 'en' ? 'Receipt / Document' : 'Bifogat kvitto'}
               </span>
 

@@ -648,7 +648,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                     </button>
                   )}
                   <div className="flex flex-col">
-                    <span className="text-[10.5px] font-bold text-[var(--accent-color)] tracking-wide uppercase">
+                    <span className="text-[10.5px] font-bold text-[var(--accent-color)] tracking-wide">
                       {s.stepOf(stepNumber, totalSteps)}
                     </span>
                     <h2 className="text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)]">
@@ -1288,7 +1288,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       </div>
 
                       {error && (
-                        <div className="p-2.5 bg-red-500/10 border border-red-500/20 rounded-[14px] text-red-500 text-xs text-center font-bold">
+                        <div className="p-2.5 bg-[var(--surface-color)] border border-black/10 dark:border-white/10 rounded-[14px] text-[var(--text-secondary)] text-xs text-center font-medium">
                           {error}
                         </div>
                       )}

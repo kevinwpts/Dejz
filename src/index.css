@@ -555,7 +555,7 @@ h6 {
   }
 
   .input-label,
-  .uppercase-label {
+  .section-label {
     letter-spacing: 0.06em;
     @apply font-semibold text-xs text-[var(--text-secondary)];
   }

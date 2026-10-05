@@ -70,7 +70,7 @@ const MockupPlaceholder = ({
       <div className="absolute bottom-4 right-4 w-3 h-3 border-b-2 border-r-2 border-[#211F1C]/20 rounded-br-xs" />
 
       <div className="relative z-10 flex flex-col items-center gap-1.5 text-center">
-        <span className="text-xs font-mono font-bold tracking-[0.2em] text-[#211F1C]/75 uppercase">
+        <span className="text-xs font-mono font-bold tracking-[0.2em] text-[#211F1C]/75">
           [ {id} ]
         </span>
         <span className="text-xs text-[#6E6961]">

@@ -151,7 +151,7 @@ export function UniversalPeriodSelector({
         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer group select-none active:scale-95 shadow-none"
       >
         <CalendarIcon size={13} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
-        <span className="text-xs sm:text-[13px] font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+        <span className="text-xs sm:text-[13px] font-bold font-display tracking-wider text-[var(--text-primary)]">
           {month}
         </span>
         <ChevronDown size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0" />
@@ -187,7 +187,7 @@ export function UniversalPeriodSelector({
             className="flex flex-col items-center group/label px-4 py-1.5 rounded-[14px] hover:bg-[var(--surface-muted)] transition-all cursor-pointer active:scale-95"
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)] group-hover/label:text-[var(--text-primary)] transition-colors">
+              <span className="text-base sm:text-lg font-bold font-display tracking-wider text-[var(--text-primary)] group-hover/label:text-[var(--text-primary)] transition-colors">
                 {month}
               </span>
               <CalendarIcon size={14} className="text-[var(--text-secondary)] group-hover/label:text-[var(--text-primary)] transition-colors" />
@@ -201,7 +201,7 @@ export function UniversalPeriodSelector({
           </button>
         ) : (
           <div className="flex flex-col items-center px-4 py-1 select-none">
-            <span className="text-base sm:text-lg font-bold font-display uppercase tracking-wider text-[var(--text-primary)]">
+            <span className="text-base sm:text-lg font-bold font-display tracking-wider text-[var(--text-primary)]">
               {month}
             </span>
             {dates && (

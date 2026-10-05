@@ -147,7 +147,7 @@ export function CancelSubscriptionModal({
               </div>
 
               <div className="text-right shrink-0">
-                <span className="text-sm font-bold font-amount tabular-nums text-rose-500">
+                <span className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)]">
                   -{expense.amount} {config.currency || 'kr'}
                 </span>
                 <span className="block text-[10.5px] text-[var(--text-secondary)] font-medium">
@@ -173,7 +173,7 @@ export function CancelSubscriptionModal({
                   <a
                     href={`tel:${details.phoneNumber.replace(/\s+/g, '')}`}
                     onClick={() => feedback.tap()}
-                    className="w-full h-12 px-4 rounded-[14px] bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-none flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full h-12 px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-sm hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Phone size={17} strokeWidth={2} />
                     <span>{isEn ? `Call Kundservice: ${details.phoneNumber}` : `Ring kundservice: ${details.phoneNumber}`}</span>
@@ -182,7 +182,7 @@ export function CancelSubscriptionModal({
                   <a
                     href={`mailto:${details.supportEmail}?subject=${encodeURIComponent(`Uppsägning av abonnemang - ${expense.name}`)}`}
                     onClick={() => feedback.tap()}
-                    className="w-full h-12 px-4 rounded-[14px] bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-none flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full h-12 px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-sm hover:opacity-90 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Mail size={17} strokeWidth={2} />
                     <span>{isEn ? `Email Cancellation: ${details.supportEmail}` : `Skicka uppsägning: ${details.supportEmail}`}</span>
@@ -200,9 +200,9 @@ export function CancelSubscriptionModal({
 
                 {/* Step-by-Step Instructions */}
                 {details.steps && details.steps.length > 0 && (
-                  <div className="p-4 rounded-[22px] bg-black/5 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] space-y-3">
+                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] space-y-3">
                     <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)] tracking-tight">
-                      <HelpCircle size={14} className="text-[var(--text-primary)]" />
+                      <HelpCircle size={14} className="text-[var(--text-secondary)]" />
                       <span>{isEn ? 'How to cancel step-by-step' : 'Så här säger du upp avtalet'}</span>
                     </div>
 
@@ -219,23 +219,23 @@ export function CancelSubscriptionModal({
                   </div>
                 )}
 
-                {/* Notice Period & Tips Box */}
+                {/* Notice Period & Tips Box (clean neutral surface) */}
                 {(details.noticePeriod || details.tips) && (
-                  <div className="p-3.5 rounded-[14px] bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+                  <div className="p-3.5 rounded-[16px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] text-xs text-[var(--text-secondary)] space-y-2">
                     {details.noticePeriod && (
                       <div className="flex items-start gap-2">
-                        <Clock size={14} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                        <Clock size={14} className="text-[var(--text-secondary)] shrink-0 mt-0.5" />
                         <div>
-                          <span className="font-bold">{isEn ? 'Notice period: ' : 'Uppsägningstid: '}</span>
+                          <span className="font-bold text-[var(--text-primary)]">{isEn ? 'Notice period: ' : 'Uppsägningstid: '}</span>
                           <span>{details.noticePeriod}</span>
                         </div>
                       </div>
                     )}
                     {details.tips && (
                       <div className="flex items-start gap-2">
-                        <Info size={14} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                        <Info size={14} className="text-[var(--text-secondary)] shrink-0 mt-0.5" />
                         <div>
-                          <span className="font-bold">{isEn ? 'Tip: ' : 'Bra att veta: '}</span>
+                          <span className="font-bold text-[var(--text-primary)]">{isEn ? 'Tip: ' : 'Bra att veta: '}</span>
                           <span>{details.tips}</span>
                         </div>
                       </div>
@@ -267,28 +267,28 @@ export function CancelSubscriptionModal({
                   <button
                     type="button"
                     onClick={() => setShowConfirmDelete(true)}
-                    className="w-full py-3 px-4 rounded-[14px] bg-rose-500/10 hover:bg-rose-500/15 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
+                    className="w-full py-3 px-4 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
                   >
                     <Trash2 size={14} />
                     <span>{isEn ? 'Already cancelled? Remove from budget' : 'Redan uppsagt? Ta bort från budgeten'}</span>
                   </button>
                 ) : (
-                  <div className="p-4 rounded-[22px] bg-rose-500/10 border border-rose-500/20 space-y-3">
-                    <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 text-center">
+                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] space-y-3">
+                    <p className="text-xs font-medium text-[var(--text-primary)] text-center">
                       {isEn ? 'Are you sure you want to remove this expense from your budget?' : 'Vill du ta bort denna fasta utgift från din framtida budget?'}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => setShowConfirmDelete(false)}
-                        className="py-2.5 px-3 rounded-[14px] bg-white dark:bg-white/10 text-[var(--text-primary)] text-xs font-semibold border border-black/5 dark:border-white/5 cursor-pointer active:scale-[0.98]"
+                        className="py-2.5 px-3 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-primary)] text-xs font-semibold border border-black/5 dark:border-white/5 cursor-pointer active:scale-[0.98]"
                       >
                         {isEn ? 'Keep in budget' : 'Behåll'}
                       </button>
                       <button
                         type="button"
                         onClick={handleConfirmCancelAndDelete}
-                        className="py-2.5 px-3 rounded-[14px] bg-rose-600 text-white text-xs font-semibold shadow-none hover:bg-rose-500 cursor-pointer active:scale-[0.98]"
+                        className="py-2.5 px-3 rounded-[14px] bg-black dark:bg-white text-white dark:text-black hover:opacity-90 text-xs font-semibold cursor-pointer active:scale-[0.98]"
                       >
                         {isEn ? 'Yes, remove' : 'Ja, ta bort'}
                       </button>

@@ -92,7 +92,7 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
       {/* Weekday Headers */}
       <div className="grid grid-cols-7 gap-1">
         {[t('monInitial'), t('tueInitial'), t('wedInitial'), t('thuInitial'), t('friInitial'), t('satInitial'), t('sunInitial')].map((d, i) => (
-          <div key={i} className="text-center text-[11px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider py-0.5">
+          <div key={i} className="text-center text-[11px] font-medium text-[var(--text-tertiary)] tracking-wider py-0.5">
             {d}
           </div>
         ))}

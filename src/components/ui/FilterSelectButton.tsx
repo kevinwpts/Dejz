@@ -38,7 +38,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
         {icon && <span className="text-[var(--text-secondary)] shrink-0">{icon}</span>}
         <div className="min-w-0 flex-1">
           {label && (
-            <span className="block text-[10px] uppercase font-semibold font-display tracking-wider text-[var(--text-secondary)] leading-tight truncate">
+            <span className="block text-[10px] font-semibold font-display tracking-wider text-[var(--text-secondary)] leading-tight truncate">
               {label}
             </span>
           )}

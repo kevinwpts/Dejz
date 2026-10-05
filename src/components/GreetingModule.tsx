@@ -128,7 +128,7 @@ export function GreetingModule({
           <div className="relative w-full max-w-[320px] bg-white dark:bg-[#1C1C1C] rounded-[28px] p-5 border border-black/[0.08] dark:border-white/[0.08] shadow-2xl space-y-4 z-10 text-left font-sans">
             {/* Header */}
             <div className="flex items-center justify-between pb-1">
-              <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold font-display uppercase tracking-wider text-sm">
+              <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold font-display tracking-wider text-sm">
                 <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2} />
                 <span>{isEn ? 'Period & Payday' : 'Period & Nästa Lön'}</span>
               </div>
@@ -150,7 +150,7 @@ export function GreetingModule({
                   <Calendar size={16} strokeWidth={2} />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-[var(--text-tertiary)] tracking-wider">
                     {isEn ? 'CURRENT PERIOD' : 'AKTUELL PERIOD'}
                   </span>
                   <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate">
@@ -165,7 +165,7 @@ export function GreetingModule({
                   <Clock size={16} strokeWidth={2} />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-[var(--text-tertiary)] tracking-wider">
                     {isEn ? 'NEXT PAYDAY' : 'NÄSTA LÖN'}
                   </span>
                   <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate">

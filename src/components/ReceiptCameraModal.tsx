@@ -289,8 +289,8 @@ export function ReceiptCameraModal({
         {/* Error Fallback */}
         {cameraError ? (
           <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-[28px] bg-[#1C1C1C] border border-white/[0.08] space-y-4">
-            <div className="w-14 h-14 mx-auto rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
-              <AlertCircle size={28} />
+            <div className="w-14 h-14 mx-auto rounded-full bg-white/10 border border-white/10 text-white flex items-center justify-center">
+              <AlertCircle size={26} strokeWidth={2} />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-base font-bold text-white">
@@ -391,7 +391,7 @@ export function ReceiptCameraModal({
               type="button"
               onClick={handleRetake}
               disabled={isProcessing}
-              className="flex-1 py-3.5 px-4 rounded-[14px] bg-white/10 hover:bg-white/20 active:scale-98 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 backdrop-blur-md transition-all cursor-pointer"
+              className="flex-1 py-3.5 px-4 rounded-[14px] bg-white/10 hover:bg-white/20 active:scale-98 text-white font-bold text-xs tracking-wider flex items-center justify-center gap-2 backdrop-blur-md transition-all cursor-pointer"
             >
               <RotateCcw size={17} strokeWidth={2} />
               <span>{isEn ? 'Retake' : 'Ta om'}</span>
@@ -402,7 +402,7 @@ export function ReceiptCameraModal({
               type="button"
               onClick={handleConfirmPhoto}
               disabled={isProcessing}
-              className="flex-1 py-3.5 px-4 rounded-[14px] bg-white hover:bg-white/90 active:scale-98 text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="flex-1 py-3.5 px-4 rounded-[14px] bg-white hover:bg-white/90 active:scale-98 text-black font-bold text-xs tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <Check size={18} strokeWidth={2} />
               <span>{isEn ? 'Use receipt' : 'Använd kvitto'}</span>

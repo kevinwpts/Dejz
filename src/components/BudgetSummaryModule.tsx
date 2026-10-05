@@ -109,7 +109,7 @@ export function BudgetSummaryModule({
         <div className="grid grid-cols-2 gap-4 items-start">
           {/* Spenderat */}
           <div className="space-y-1">
-            <span className="text-[11.5px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block">
+            <span className="text-[11.5px] font-semibold text-[var(--text-secondary)] tracking-wider block">
               {isPastPeriod ? (isEn ? 'Total spent' : 'Spenderat') : (isEn ? 'Spent so far' : 'Spenderat')}
             </span>
             <div className="flex items-baseline gap-1.5">
@@ -125,7 +125,7 @@ export function BudgetSummaryModule({
           {/* Kvar att spendera */}
           <div className="space-y-1 text-right">
             <div className="flex items-center justify-end gap-1">
-              <span className="text-[11.5px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+              <span className="text-[11.5px] font-semibold text-[var(--text-secondary)] tracking-wider">
                 {isPastPeriod ? (isOverBudget ? (isEn ? 'Over budget' : 'Över budget') : (isEn ? 'Left' : 'Kvar')) : (isEn ? 'Remaining' : 'Kvar')}
               </span>
               <button
