@@ -15,7 +15,7 @@ import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 import { parseIncomePrompt } from '../utils/incomeAiParser';
 import { SmartInput, Modal, Button } from './ui';
 import { ToggleSwitch } from './ToggleSwitch';
-import { getInstantBrandLogo, findKnownBrandDomain, fetchLogoForName } from '../utils/logo';
+import { getInstantBrandLogo, getLogoUrl, fetchLogoForName } from '../utils/logo';
 
 export type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
 
@@ -246,10 +246,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
     if (existingIndex >= 0) {
       setFixedExpenses(fixedExpenses.filter((_, i) => i !== existingIndex));
     } else {
-      const knownDomain = findKnownBrandDomain(preset.name, preset.category);
-      const instantLogo = getInstantBrandLogo(preset.name, preset.category) || (
-        knownDomain ? `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128` : undefined
-      );
+      const instantLogo = getInstantBrandLogo(preset.name, preset.category) || getLogoUrl(preset.name, preset.category);
 
       const newExpense: Omit<FixedExpense, 'id'> = {
         name: preset.name,
@@ -262,7 +259,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
       };
       setFixedExpenses(prev => [...prev, newExpense]);
 
-      if (!instantLogo) {
+      if (!instantLogo || instantLogo.includes('google.com/s2/favicons')) {
         fetchLogoForName(preset.name, preset.category).then(url => {
           if (url) {
             setFixedExpenses(prev => prev.map(item => 

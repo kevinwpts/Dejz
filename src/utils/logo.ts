@@ -571,11 +571,32 @@ export const INSTANT_BRAND_LOGOS: Record<string, string> = {
     // Snabbmat & Streaming
     'max': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23e30613"/><text x="50" y="64" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" letter-spacing="1" text-anchor="middle">MAX</text></svg>',
     'mcdonalds': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23bf0c0c"/><text x="50" y="70" fill="%23ffc72c" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="52" text-anchor="middle">M</text></svg>',
+    'netflix': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23141414"/><g transform="translate(26, 18)"><path fill="%23E50914" d="M0 0h15v64H0z"/><path fill="%23B81D24" d="M33 0h15v64H33z"/><path fill="%23E50914" d="M0 0l33 64h15L15 0z"/></g></svg>',
     'spotify': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23121212"/><circle cx="50" cy="50" r="32" fill="%231db954"/><path d="M36 44c10-3 20-2 29 2M38 52c8-2 16-1 23 2M41 59c6-2 13-1 18 2" fill="none" stroke="%23121212" stroke-width="4" stroke-linecap="round"/></svg>',
+    'disney+': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23113CCF"/><text x="50" y="58" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="26" letter-spacing="-1" text-anchor="middle">Disney+</text></svg>',
+    'disney plus': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23113CCF"/><text x="50" y="58" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="26" letter-spacing="-1" text-anchor="middle">Disney+</text></svg>',
+    'disney': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23113CCF"/><text x="50" y="58" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="26" letter-spacing="-1" text-anchor="middle">Disney+</text></svg>',
+    'youtube': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FF0000"/><path d="M42 34l24 16-24 16V34z" fill="%23ffffff"/></svg>',
+    'youtube premium': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FF0000"/><path d="M42 34l24 16-24 16V34z" fill="%23ffffff"/></svg>',
     'tinder': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><defs><linearGradient id="tinderGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23fd297b"/><stop offset="50%" stop-color="%23ff5864"/><stop offset="100%" stop-color="%23ff655b"/></linearGradient></defs><rect width="100" height="100" fill="url(%23tinderGrad)"/><path d="M49.2 24c.7 2.4 1 5 .8 7.6-.4 3.7-2.2 7-5 9.4-2.5 2.2-4.1 5.3-4.4 8.7-.6 7.4 5 13.9 12.4 14.5 7.4.6 13.9-5 14.5-12.4.2-2.9-.6-5.8-2.3-8.1-1.3 4.1-4.7 7.2-9 8.1 3.5-6.2 3.1-13.8-.9-19.6-1.5-2.2-3.6-4-6.1-5.2v-3z" fill="%23ffffff"/></svg>',
     'skyshowtime': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23000000"/><text x="50" y="44" fill="%2300d2ff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="17" letter-spacing="1" text-anchor="middle">SKY</text><text x="50" y="68" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="13" letter-spacing="0.5" text-anchor="middle">SHOWTIME</text></svg>',
     'max (hbo)': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23002be7"/><text x="50" y="65" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="30" letter-spacing="2" text-anchor="middle">MAX</text></svg>',
-    'hbo max': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23002be7"/><text x="50" y="65" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="30" letter-spacing="2" text-anchor="middle">MAX</text></svg>'
+    'hbo max': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23002be7"/><text x="50" y="65" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="30" letter-spacing="2" text-anchor="middle">MAX</text></svg>',
+    'storytel': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FF5A00"/><path d="M50 22c-15 0-26 12-26 27s11 27 26 27 26-12 26-27-11-27-26-27zm0 38c-6 0-11-5-11-11s5-11 11-11 11 5 11 11-5 11-11 11z" fill="%23ffffff"/></svg>',
+    'bookbeat': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23111111"/><text x="50" y="62" fill="%23FFDD00" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="19" letter-spacing="0.5" text-anchor="middle">BookBeat</text></svg>',
+    'viaplay': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23220033"/><text x="50" y="62" fill="%23FF2255" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="18" letter-spacing="0.5" text-anchor="middle">viaplay</text></svg>',
+    'tv4 play': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23E30613"/><text x="50" y="64" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" letter-spacing="1" text-anchor="middle">TV4</text></svg>',
+    'tv4': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23E30613"/><text x="50" y="64" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" letter-spacing="1" text-anchor="middle">TV4</text></svg>',
+    'apple tv': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23000000"/><path d="M50 25c2-3 5-4 8-4 0 3-1 6-3 8-2 2-5 3-7 3 0-3 1-6 2-7zm9 10c-3 0-6 2-8 2s-5-2-8-2c-4 0-8 3-10 8-4 9 0 22 5 28 3 4 6 8 10 8s5-2 8-2 5 2 8 2 7-4 10-8c2-3 3-6 3-6s-6-3-6-9c0-6 5-8 5-8s-3-5-7-5z" fill="%23ffffff"/></svg>',
+    'apple music': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FA233B"/><path d="M50 25c2-3 5-4 8-4 0 3-1 6-3 8-2 2-5 3-7 3 0-3 1-6 2-7zm9 10c-3 0-6 2-8 2s-5-2-8-2c-4 0-8 3-10 8-4 9 0 22 5 28 3 4 6 8 10 8s5-2 8-2 5 2 8 2 7-4 10-8c2-3 3-6 3-6s-6-3-6-9c0-6 5-8 5-8s-3-5-7-5z" fill="%23ffffff"/></svg>',
+    'apple': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23000000"/><path d="M50 25c2-3 5-4 8-4 0 3-1 6-3 8-2 2-5 3-7 3 0-3 1-6 2-7zm9 10c-3 0-6 2-8 2s-5-2-8-2c-4 0-8 3-10 8-4 9 0 22 5 28 3 4 6 8 10 8s5-2 8-2 5 2 8 2 7-4 10-8c2-3 3-6 3-6s-6-3-6-9c0-6 5-8 5-8s-3-5-7-5z" fill="%23ffffff"/></svg>',
+    'hedvig': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%231E1E24"/><text x="50" y="62" fill="%23FF5E7E" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="1" text-anchor="middle">hedvig</text></svg>',
+    'csn': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23003A70"/><text x="50" y="64" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" letter-spacing="2" text-anchor="middle">CSN</text></svg>',
+    'klarna': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FFB3C7"/><text x="50" y="62" fill="%230A0A0A" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="-0.5" text-anchor="middle">Klarna.</text></svg>',
+    'telia': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23990099"/><text x="50" y="62" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="1" text-anchor="middle">Telia</text></svg>',
+    'tele2': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23000f2e"/><text x="50" y="62" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="1" text-anchor="middle">Tele2</text></svg>',
+    'telenor': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%2300A0EB"/><text x="50" y="62" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="1" text-anchor="middle">telenor</text></svg>',
+    'tre': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FF6600"/><text x="50" y="66" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="44" text-anchor="middle">3</text></svg>',
 };
 
 /**
@@ -740,9 +761,9 @@ export function buildDomainLogoUrls(domain: string): string[] {
         urls.push(`https://img.logo.dev/${domain}?token=${apiKey}`);
     }
 
-    // Google 128px high-res favicon service returns authentic brand icons reliably
-    urls.push(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`);
+    // High-resolution Clearbit corporate logo service
     urls.push(`https://logo.clearbit.com/${domain}`);
+    urls.push(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`);
     urls.push(`https://unavatar.io/${domain}`);
 
     return urls;
@@ -757,20 +778,20 @@ export const getLogoUrl = (title: string, category?: string): string | undefined
     // If it's already a full URL or data URI, return it directly
     if (title.startsWith('http') || title.startsWith('data:image')) return title;
 
-    // Check known brands first (Tinder, Max, Spotify, SATS, SkyShowtime, etc.)
+    // 1. Check instant vector SVG badges first (100% crisp vector graphics, instant load)
+    const instantSvg = getInstantBrandLogo(title, category);
+    if (instantSvg) {
+        return instantSvg;
+    }
+
+    // 2. Check known brand domains (Netflix, Spotify, Tinder, SATS, SkyShowtime, etc.)
     const knownDomain = findKnownBrandDomain(title, category);
     if (knownDomain) {
         const apiKey = import.meta.env.VITE_LOGODEV_API_KEY;
         if (apiKey) {
             return `https://img.logo.dev/${knownDomain}?token=${apiKey}`;
         }
-        return `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128`;
-    }
-
-    // Check instant vector badges fallback
-    const instantSvg = getInstantBrandLogo(title, category);
-    if (instantSvg) {
-        return instantSvg;
+        return `https://logo.clearbit.com/${knownDomain}`;
     }
 
     let normalized = title.toLowerCase().trim();
@@ -781,7 +802,7 @@ export const getLogoUrl = (title: string, category?: string): string | undefined
         if (apiKey) {
             return `https://img.logo.dev/${normalized}?token=${apiKey}`;
         }
-        return `https://www.google.com/s2/favicons?domain=${normalized}&sz=128`;
+        return `https://logo.clearbit.com/${normalized}`;
     }
 
     // Clean common suffixes and map Swedish characters to ASCII

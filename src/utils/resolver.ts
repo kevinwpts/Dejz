@@ -91,6 +91,18 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
 
   if (explicitLogo) {
     if (explicitLogo.startsWith('http') || explicitLogo.startsWith('data:image') || explicitLogo.startsWith('/')) {
+      // If explicit logo is a legacy low-res google favicon, upgrade to crisp instant SVG or Clearbit if available
+      if (explicitLogo.includes('google.com/s2/favicons')) {
+        const upgraded = getInstantBrandLogo(merchantText, categoryText) || getLogoUrl(merchantText, categoryText);
+        if (upgraded && !upgraded.includes('google.com/s2/favicons')) {
+          return {
+            type: 'merchant',
+            logoUrl: upgraded,
+            source: 'brand_auto',
+            merchantNormalized: normalizeMerchant(merchantText)
+          };
+        }
+      }
       return {
         type: 'custom',
         logoUrl: explicitLogo,
@@ -122,48 +134,24 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     };
   }
 
-  // 2. Saved user preference for the normalized merchant/company
-  const userPref = getMerchantPreference(merchantText);
-  if (userPref) {
-    if (userPref.logo) {
-      return {
-        type: 'merchant',
-        logoUrl: userPref.logo,
-        source: 'user_preference',
-        merchantNormalized: normalizeMerchant(merchantText)
-      };
-    }
-    if (userPref.icon) {
-      const resolvedKey = resolveLucideIcon(userPref.icon);
-      return {
-        type: 'merchant',
-        iconKey: resolvedKey,
-        iconComponent: ICON_MAP[resolvedKey] || Receipt,
-        backgroundColor: category?.color || getEmojiSolidColor(userPref.icon),
-        textColor: '#ffffff',
-        source: 'user_preference',
-        merchantNormalized: normalizeMerchant(merchantText)
-      };
-    }
-  }
-
-  // 3. Secure automated company logo (High-confidence brand lookup)
-  const brandDomain = findKnownBrandDomain(merchantText, categoryText) || findKnownBrandDomain(transaction.merchant || '', categoryText);
-  if (brandDomain) {
-    const brandLogoUrl = `https://www.google.com/s2/favicons?domain=${brandDomain}&sz=128`;
-    return {
-      type: 'merchant',
-      logoUrl: brandLogoUrl,
-      source: 'brand_auto',
-      merchantNormalized: normalizeMerchant(merchantText)
-    };
-  }
-
+  // 2. Instant vector SVG logo (100% crisp vector graphics, instant load)
   const instantSvg = getInstantBrandLogo(merchantText, categoryText) || getInstantBrandLogo(transaction.merchant || '', categoryText);
   if (instantSvg) {
     return {
       type: 'merchant',
       logoUrl: instantSvg,
+      source: 'brand_auto',
+      merchantNormalized: normalizeMerchant(merchantText)
+    };
+  }
+
+  // 3. Secure automated company logo (High-confidence brand lookup via Clearbit/Logo.dev)
+  const brandDomain = findKnownBrandDomain(merchantText, categoryText) || findKnownBrandDomain(transaction.merchant || '', categoryText);
+  if (brandDomain) {
+    const brandLogoUrl = getLogoUrl(merchantText, categoryText) || `https://logo.clearbit.com/${brandDomain}`;
+    return {
+      type: 'merchant',
+      logoUrl: brandLogoUrl,
       source: 'brand_auto',
       merchantNormalized: normalizeMerchant(merchantText)
     };

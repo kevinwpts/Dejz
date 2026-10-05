@@ -26,7 +26,10 @@ export function TransactionLogo({
           : transaction.category);
 
   const visual = resolveEntityVisual(transaction, config);
-  const directLogoUrl = (transaction.logo && transaction.logo !== 'none') ? transaction.logo : visual.logoUrl;
+  const rawExplicitLogo = (transaction.logo && transaction.logo !== 'none') ? transaction.logo : undefined;
+  const directLogoUrl = (rawExplicitLogo && !rawExplicitLogo.includes('google.com/s2/favicons')) 
+    ? rawExplicitLogo 
+    : (visual.logoUrl || rawExplicitLogo);
 
   useEffect(() => {
     setImgError(false);
@@ -46,6 +49,20 @@ export function TransactionLogo({
   }, [directLogoUrl, merchantName]);
 
   const activeLogoUrl = directLogoUrl || asyncLogoUrl;
+
+  const handleImageError = () => {
+    if (activeLogoUrl && !activeLogoUrl.includes('google.com/s2/favicons')) {
+      const knownDomain = merchantName ? findKnownBrandDomain(merchantName) : undefined;
+      if (knownDomain) {
+        const fallbackFavicon = `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128`;
+        if (activeLogoUrl !== fallbackFavicon) {
+          setAsyncLogoUrl(fallbackFavicon);
+          return;
+        }
+      }
+    }
+    setImgError(true);
+  };
 
   const sizeConfig = {
     xl: {
@@ -79,7 +96,7 @@ export function TransactionLogo({
           src={activeLogoUrl}
           alt={merchantName || 'Logo'}
           className="w-full h-full object-cover object-center select-none pointer-events-none block"
-          onError={() => setImgError(true)}
+          onError={handleImageError}
           referrerPolicy="no-referrer"
           loading="lazy"
         />

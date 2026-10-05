@@ -58,6 +58,7 @@ import { ProfileView } from "./components/ProfileView";
 import { SettingsMainView } from "./components/SettingsMainView";
 import { AddToHomeScreenModal } from "./components/AddToHomeScreenModal";
 import { CookieConsentModal } from "./components/CookieConsentModal";
+import { getInstantBrandLogo, getLogoUrl } from "./utils/logo";
 import { FeedbackModal } from "./components/FeedbackModal";
 import { DeleteAccountModal } from "./components/DeleteAccountModal";
 import { SecurityModal } from "./components/SecurityModal";
@@ -960,7 +961,16 @@ export default function App() {
 
       setTransactions(dbTransactions || []);
       setIncomes(dbIncomes || []);
-      setFixedExpenses(dbFixed || []);
+      const upgradedFixedRefresh = (dbFixed || []).map((fe) => {
+        if (!fe.logo || fe.logo.includes("google.com/s2/favicons")) {
+          const autoLogo = getInstantBrandLogo(fe.name, fe.category) || getLogoUrl(fe.name, fe.category);
+          if (autoLogo && !autoLogo.includes("google.com/s2/favicons")) {
+            return { ...fe, logo: autoLogo };
+          }
+        }
+        return fe;
+      });
+      setFixedExpenses(upgradedFixedRefresh);
 
       // Small delay to make the refresh feel "real"
       await new Promise((resolve) => setTimeout(resolve, 800));
@@ -2353,7 +2363,16 @@ export default function App() {
 
       setTransactions(dbTransactions || []);
       setIncomes(dbIncomes || []);
-      setFixedExpenses(dbFixed || []);
+      const upgradedFixed = (dbFixed || []).map((fe) => {
+        if (!fe.logo || fe.logo.includes("google.com/s2/favicons")) {
+          const autoLogo = getInstantBrandLogo(fe.name, fe.category) || getLogoUrl(fe.name, fe.category);
+          if (autoLogo && !autoLogo.includes("google.com/s2/favicons")) {
+            return { ...fe, logo: autoLogo };
+          }
+        }
+        return fe;
+      });
+      setFixedExpenses(upgradedFixed);
     } catch (_error) {
       console.error("Failed to fetch initial data:", _error);
       setConfig((prev) => prev || defaultConfig);
@@ -5038,6 +5057,8 @@ export default function App() {
               const newFixedExpenses: FixedExpense[] = [];
               for (const exp of data.fixedExpenses || []) {
                 if (exp.name && exp.amount > 0) {
+                  const autoLogo = getInstantBrandLogo(exp.name, exp.category) || getLogoUrl(exp.name, exp.category);
+                  const fixedLogo = (exp.logo && !exp.logo.includes("google.com/s2/favicons")) ? exp.logo : (autoLogo || exp.logo);
                   const fixed: FixedExpense = {
                     id: crypto.randomUUID(),
                     name: exp.name,
@@ -5046,7 +5067,7 @@ export default function App() {
                     frequency: exp.frequency || Frequency.MONTHLY,
                     icon: exp.icon || "CreditCard",
                     category: exp.category,
-                    logo: exp.logo,
+                    logo: fixedLogo,
                   };
                   await dataService.saveFixedExpense(activeUserId, fixed);
                   newFixedExpenses.push(fixed);

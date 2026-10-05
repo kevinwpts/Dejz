@@ -1219,16 +1219,15 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
     if (manualSelectionThisSession) return;
 
     const trimmedName = name.trim();
-    const knownDomain = findKnownBrandDomain(trimmedName);
-    const instantLogo = knownDomain 
-      ? `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128` 
-      : getLogoUrl(trimmedName);
+    const instantLogo = getInstantBrandLogo(trimmedName, category) || getLogoUrl(trimmedName, category);
 
     if (instantLogo) {
       setLogo(instantLogo);
       setIcon('none');
       setAutoLogo(instantLogo);
-      return;
+      if (!instantLogo.includes('google.com/s2/favicons')) {
+        return;
+      }
     }
 
     const timer = setTimeout(async () => {
