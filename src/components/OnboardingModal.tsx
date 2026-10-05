@@ -992,12 +992,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                               const isAdded = fixedExpenses.some(
                                 e => e.name.trim().toLowerCase() === preset.name.trim().toLowerCase()
                               );
+                              const presetLogo = getInstantBrandLogo(preset.name, preset.category) || getLogoUrl(preset.name, preset.category);
                               const mockTx = {
                                 id: preset.id,
                                 amount: preset.defaultAmount,
                                 merchant: preset.name,
                                 category: preset.category,
                                 type: 'expense' as const,
+                                logo: presetLogo,
                                 timestamp: Date.now(),
                               };
                               return (
