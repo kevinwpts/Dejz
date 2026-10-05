@@ -176,16 +176,12 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
   };
 
   return (
-    <div className="min-h-dvh flex items-center justify-center p-4 sm:p-6 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(2rem+env(safe-area-inset-top))] pb-[calc(2rem+env(safe-area-inset-bottom))]">
-      <div
-        className="w-full max-w-[420px] bg-[var(--surface-color)] p-6 sm:p-8 rounded-[28px] border border-[var(--border-color)] shadow-xs relative z-10"
-      >
+    <div className="min-h-dvh flex flex-col items-center justify-between p-6 sm:p-10 bg-[var(--bg-color)] selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] relative overflow-hidden pt-[calc(2.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+      <div className="w-full max-w-[400px] mx-auto my-auto relative z-10 space-y-6">
         {isEmailSent ? (
-          <div
-            className="text-center py-4 space-y-6"
-          >
-            <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[14px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
-              <Mail size={28} />
+          <div className="text-center py-6 space-y-6">
+            <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[20px] flex items-center justify-center mx-auto shadow-xs">
+              <Mail size={28} strokeWidth={2} />
             </div>
 
             <div className="space-y-2">
@@ -197,23 +193,24 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               </p>
             </div>
 
-            <Button
-              onClick={() => {
-                setIsEmailSent(false);
-                setIsRegistering(false);
-              }}
-              variant="primary"
-              fullWidth
-            >
-              {t('backToLogin' as any)}
-            </Button>
+            <div className="pt-2">
+              <Button
+                onClick={() => {
+                  setIsEmailSent(false);
+                  setIsRegistering(false);
+                }}
+                variant="primary"
+                fullWidth
+                size="lg"
+              >
+                {t('backToLogin' as any)}
+              </Button>
+            </div>
           </div>
         ) : isResetSent ? (
-          <div
-            className="text-center py-4 space-y-6"
-          >
-            <div className="w-16 h-16 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] rounded-[14px] flex items-center justify-center mx-auto border border-black/10 dark:border-white/10 shadow-xs">
-              <CheckCircle2 size={30} />
+          <div className="text-center py-6 space-y-6">
+            <div className="w-16 h-16 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] rounded-[20px] flex items-center justify-center mx-auto shadow-xs">
+              <CheckCircle2 size={30} strokeWidth={2} />
             </div>
 
             <div className="space-y-2">
@@ -225,21 +222,24 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               </p>
             </div>
 
-            <Button
-              onClick={() => {
-                setIsResetSent(false);
-                setIsForgotPassword(false);
-              }}
-              variant="primary"
-              fullWidth
-            >
-              {t('backToLogin' as any)}
-            </Button>
+            <div className="pt-2">
+              <Button
+                onClick={() => {
+                  setIsResetSent(false);
+                  setIsForgotPassword(false);
+                }}
+                variant="primary"
+                fullWidth
+                size="lg"
+              >
+                {t('backToLogin' as any)}
+              </Button>
+            </div>
           </div>
         ) : isForgotPassword ? (
-          <div>
+          <div className="space-y-6">
             {/* Header with Back Button and Logo */}
-            <div className="relative flex flex-col items-center mb-6">
+            <div className="relative flex flex-col items-center mb-2">
               <div className="absolute top-0 left-0">
                 <IconButton 
                   icon={<ChevronLeft size={18} />}
@@ -253,14 +253,14 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 />
               </div>
               
-              <div className="flex flex-col items-center pt-1 mb-3 select-none">
+              <div className="flex flex-col items-center pt-1 mb-4 select-none">
                 <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
               </div>
 
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1 text-center">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1.5 text-center">
                 {t('forgotPasswordTitle' as any)}
               </h1>
-              <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] text-center max-w-[300px]">
+              <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] text-center max-w-[320px] leading-relaxed">
                 {t('forgotPasswordDesc' as any)}
               </p>
             </div>
@@ -276,7 +276,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 error={error}
               />
 
-              <div className="pt-1">
+              <div className="pt-2">
                 <Button
                   type="submit"
                   loading={loading}
@@ -290,9 +290,9 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
             </form>
           </div>
         ) : (
-          <div>
+          <div className="space-y-6">
             {/* Header with Back Button and Logo */}
-            <div className="relative flex flex-col items-center mb-6">
+            <div className="relative flex flex-col items-center mb-2">
               {onBack && (
                 <div className="absolute top-0 left-0">
                   <IconButton 
@@ -305,7 +305,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 </div>
               )}
               
-              <div className="flex flex-col items-center pt-1 mb-3 select-none">
+              <div className="flex flex-col items-center pt-1 mb-4 select-none">
                 <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
               </div>
 
@@ -318,7 +318,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
             </div>
 
             {/* Segmented Pill Switcher */}
-            <div className="mb-5">
+            <div>
               <SegmentedControl
                 value={isRegistering ? 'register' : 'login'}
                 onChange={(val) => {
@@ -332,8 +332,8 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
               />
             </div>
 
-            <form onSubmit={handleAuth} className="space-y-3.5">
-              <div className="space-y-2.5">
+            <form onSubmit={handleAuth} className="space-y-4">
+              <div className="space-y-3">
                 <Input 
                   type="email"
                   required
@@ -371,12 +371,13 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 </div>
               </div>
 
-              <div className="pt-1.5 space-y-2.5">
+              <div className="pt-1">
                 <Button 
                   type="submit"
                   loading={loading}
                   variant="primary"
                   fullWidth
+                  size="lg"
                 >
                   {isRegistering ? t('createAccount') : t('login')}
                 </Button>
@@ -385,12 +386,13 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
 
             <Divider label={t('orContinueWith')} />
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               <Button 
                 type="button"
                 onClick={() => handleSocialLogin('google')}
                 variant="secondary"
                 fullWidth
+                size="lg"
                 icon={
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                     <path
@@ -415,24 +417,25 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 {t('continueWithGoogle' as any)}
               </Button>
             </div>
-
-            <div className="mt-5 pt-3 border-t border-[var(--border-color)] flex items-center justify-center gap-4 text-[11px] font-semibold text-[var(--text-secondary)]">
-              <button 
-                onClick={() => onLegalClick('privacy')}
-                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-              >
-                {t('privacyPolicy' as any)}
-              </button>
-              <span>•</span>
-              <button 
-                onClick={() => onLegalClick('terms')}
-                className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-              >
-                {t('termsOfService' as any)}
-              </button>
-            </div>
           </div>
         )}
+      </div>
+
+      {/* Footer Legal Links */}
+      <div className="relative z-10 pt-4 flex items-center justify-center gap-4 text-xs font-semibold text-[var(--text-secondary)]">
+        <button 
+          onClick={() => onLegalClick('privacy')}
+          className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+        >
+          {t('privacyPolicy' as any)}
+        </button>
+        <span>•</span>
+        <button 
+          onClick={() => onLegalClick('terms')}
+          className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+        >
+          {t('termsOfService' as any)}
+        </button>
       </div>
     </div>
   );

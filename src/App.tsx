@@ -1533,7 +1533,7 @@ export default function App() {
         document.body.classList.add("light");
       }
 
-      const userThemeHex = config?.themeColor || '#3B82F6';
+      const userThemeHex = session ? (config?.themeColor || '#3B82F6') : '#3B82F6';
       applyThemeColor(userThemeHex, isDark);
 
       const themeColor = isDark ? "#191919" : "#FFFFFF";
