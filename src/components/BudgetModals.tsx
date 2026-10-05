@@ -429,7 +429,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[28px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -462,7 +462,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-[16px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-[14px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
@@ -519,14 +519,14 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 if (typeof feedback?.light === 'function') feedback.light();
                 setIsCategorySelectorOpen(true);
               }}
-              className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+              className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
                 <div 
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
+                  className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
                   style={{ 
                     backgroundColor: (categories || []).find(c => c.name === category)?.color || 'var(--accent-color)'
                   }}
@@ -546,12 +546,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             </div>
 
             {/* Arrival Day Card */}
-            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('arrivalDay')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Calendar size={14} strokeWidth={2.2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
@@ -566,7 +566,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 title={t('arrivalDay')}
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <option key={day} value={day} className="bg-white dark:bg-[#222222] text-[var(--text-primary)] font-bold">{day}:e</option>
+                  <option key={day} value={day} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-bold">{day}:e</option>
                 ))}
               </select>
             </div>
@@ -575,12 +575,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           {/* 3. Grid for Frequency & Type */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Frequency Card */}
-            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2.2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
@@ -595,7 +595,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 title={t('frequency')}
               >
                 {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
                     {t(`freq_${key.toLowerCase()}` as TranslationKey)}
                   </option>
                 ))}
@@ -603,7 +603,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             </div>
 
             {/* Type: Fixed / Variable Card */}
-            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
+            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('type')}
               </span>
@@ -627,12 +627,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           {/* 4. Grid for Start Month (if applicable) & Note */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {frequency !== Frequency.MONTHLY && (
-              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <Calendar size={14} strokeWidth={2.2} />
                   </div>
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
@@ -651,7 +651,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                     return (
-                      <option key={i} value={i} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                      <option key={i} value={i} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
                         {capitalizedMonth}
                       </option>
                     );
@@ -661,7 +661,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
             )}
 
             {/* Note Card */}
-            <div className={`p-4 rounded-[20px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px] ${frequency === Frequency.MONTHLY ? 'sm:col-span-2' : ''}`}>
+            <div className={`p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px] ${frequency === Frequency.MONTHLY ? 'sm:col-span-2' : ''}`}>
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                 {t('ownNote')}
               </span>
@@ -694,7 +694,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[32px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -703,7 +703,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   <button
                     type="button"
                     onClick={() => setIsCategorySelectorOpen(false)}
-                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                   >
                     <X size={16} strokeWidth={2.2} />
                   </button>
@@ -721,7 +721,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                             setIsCategorySelectorOpen(false);
                           }}
                           style={{ backgroundColor: cat.color || '#6366f1' }}
-                          className={`h-28 sm:h-32 p-3.5 rounded-[20px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                          className={`h-28 sm:h-32 p-3.5 rounded-[22px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
@@ -1087,7 +1087,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           <button
             type="button"
             onClick={() => setIsCancelModalOpen(true)}
-            className="w-full mt-2 p-3.5 bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-xl flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left border-none shadow-none"
+            className="w-full mt-2 p-3.5 bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-[14px] flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left border-none shadow-none"
           >
             <div>
               <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -1301,7 +1301,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[28px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -1334,7 +1334,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-[16px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-[14px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
@@ -1391,14 +1391,14 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 if (typeof feedback?.light === 'function') feedback.light();
                 setIsCategorySelectorOpen(true);
               }}
-              className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
+              className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer flex items-center justify-between group min-h-[76px]"
             >
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
                 <div 
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
+                  className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
                   style={{ 
                     backgroundColor: categories.find(c => c.name === category)?.color || 'var(--accent-color)'
                   }}
@@ -1418,14 +1418,14 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             </div>
 
             {/* Deduction Day Card */}
-            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {paymentMethod === 'autogiro' || (typeof paymentMethod === 'string' && (paymentMethod.toLowerCase().includes('autogiro') || paymentMethod.toLowerCase().includes('kort')))
                   ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag')
                   : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Calendar size={14} strokeWidth={2.2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
@@ -1440,7 +1440,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 title={paymentMethod === 'autogiro' ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag') : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <option key={day} value={day} className="bg-white dark:bg-[#222222] text-[var(--text-primary)] font-bold">{day}:e</option>
+                  <option key={day} value={day} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-bold">{day}:e</option>
                 ))}
               </select>
             </div>
@@ -1449,12 +1449,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           {/* 3. Grid for Frequency & Payment Method */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Frequency Card */}
-            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2.2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
@@ -1469,7 +1469,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 title={t('frequency')}
               >
                 {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
                     {t(`freq_${key.toLowerCase()}` as TranslationKey)}
                   </option>
                 ))}
@@ -1477,12 +1477,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
             </div>
 
             {/* Payment Method Card */}
-            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('paymentMethod')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <CreditCard size={14} strokeWidth={2.2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
@@ -1499,7 +1499,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 {(paymentMethods || []).map((method, idx) => {
                   const methodName = typeof method === 'string' ? method : method?.name || '';
                   return (
-                    <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                    <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
                       {methodName}
                     </option>
                   );
@@ -1511,7 +1511,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           {/* 4. Grid for Type & (Start Month if non-monthly OR Note if monthly) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Type: Fixed / Variable Card */}
-            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
+            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('type')}
               </span>
@@ -1533,12 +1533,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
             {frequency !== Frequency.MONTHLY ? (
               /* Start Month Card */
-              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <Calendar size={14} strokeWidth={2.2} />
                   </div>
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
@@ -1557,7 +1557,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                     return (
-                      <option key={i} value={i} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                      <option key={i} value={i} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
                         {capitalizedMonth}
                       </option>
                     );
@@ -1566,7 +1566,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               </div>
             ) : (
               /* Note Card when monthly: sits alongside Type in a balanced 2-column row! */
-              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px]">
+              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px]">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                   {t('ownNote')}
                 </span>
@@ -1595,7 +1595,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           {/* 5. Grid for Note Card when non-monthly (full-width) */}
           {frequency !== Frequency.MONTHLY && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px] sm:col-span-2">
+              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] flex flex-col justify-between min-h-[76px] sm:col-span-2">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
                   {t('ownNote')}
                 </span>
@@ -1629,7 +1629,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[32px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -1638,7 +1638,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   <button
                     type="button"
                     onClick={() => setIsCategorySelectorOpen(false)}
-                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                   >
                     <X size={16} strokeWidth={2.2} />
                   </button>
@@ -1656,7 +1656,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                             setIsCategorySelectorOpen(false);
                           }}
                           style={{ backgroundColor: cat.color || '#6366f1' }}
-                          className={`h-28 sm:h-32 p-3.5 rounded-[20px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                          className={`h-28 sm:h-32 p-3.5 rounded-[22px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
@@ -1684,7 +1684,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setIsCancelModalOpen(true)}
-                className="w-full p-3.5 rounded-[16px] bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
+                className="w-full p-3.5 rounded-[14px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
               >
                 <div>
                   <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -1753,7 +1753,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   <button 
                     type="button"
                     onClick={() => setShowIconSelector(false)}
-                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                     aria-label={t('close')}
                   >
                     <X size={16} strokeWidth={2} />
@@ -2164,7 +2164,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[32px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[28px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -2197,7 +2197,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl overflow-hidden bg-black/5 dark:bg-[#222222]">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl overflow-hidden bg-black/5 dark:bg-white/5">
                   {logo ? (
                     <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                   ) : isEmojiString(icon) ? (
@@ -2252,12 +2252,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           {/* 2. Grid for Deduction Day & Frequency */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Deduction Day Card */}
-            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('deductionDay') || 'Dragningsdag'}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Calendar size={14} strokeWidth={2.2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
@@ -2272,18 +2272,18 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 title={t('deductionDay') || 'Dragningsdag'}
               >
                 {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <option key={day} value={day} className="bg-white dark:bg-[#222222] text-[var(--text-primary)] font-bold">{day}:e</option>
+                  <option key={day} value={day} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-bold">{day}:e</option>
                 ))}
               </select>
             </div>
 
             {/* Frequency Card */}
-            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2.2} />
                 </div>
                 <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
@@ -2298,7 +2298,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 title={t('frequency')}
               >
                 {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
                     {t(`freq_${key.toLowerCase()}` as TranslationKey)}
                   </option>
                 ))}
@@ -2309,7 +2309,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           {/* 3. Grid for Type & (Start Month or Payment Method) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Type: Fixed / Variable Card */}
-            <div className="p-4 rounded-[20px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
+            <div className="p-4 rounded-[22px] bg-[var(--surface-color)] transition-all flex items-center justify-between min-h-[76px]">
               <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                 {t('type')}
               </span>
@@ -2331,12 +2331,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
 
             {/* Start Month if not monthly */}
             {frequency !== Frequency.MONTHLY && (
-              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <Calendar size={14} strokeWidth={2.2} />
                   </div>
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
@@ -2355,7 +2355,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                     const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                     return (
-                      <option key={i} value={i} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">
+                      <option key={i} value={i} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
                         {capitalizedMonth}
                       </option>
                     );
@@ -2366,12 +2366,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
 
             {/* Payment Method Card */}
             {paymentMethods && paymentMethods.length > 0 && frequency === Frequency.MONTHLY && (
-              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
+              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('paymentMethod') || 'Betalmetod'}
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <CreditCard size={14} strokeWidth={2.2} />
                   </div>
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
@@ -2387,7 +2387,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 >
                   {paymentMethods.map((pm: any) => {
                     const pmName = typeof pm === 'string' ? pm : pm.name;
-                    return <option key={pmName} value={pmName} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">{pmName}</option>;
+                    return <option key={pmName} value={pmName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">{pmName}</option>;
                   })}
                 </select>
               </div>
@@ -2397,12 +2397,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           {/* 4. Grid for Payment Method if non-monthly (full-width) */}
           {paymentMethods && paymentMethods.length > 0 && frequency !== Frequency.MONTHLY && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer sm:col-span-2">
+              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all flex items-center justify-between group min-h-[76px] relative cursor-pointer sm:col-span-2">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider shrink-0">
                   {t('paymentMethod') || 'Betalmetod'}
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <CreditCard size={14} strokeWidth={2.2} />
                   </div>
                   <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[160px]">
@@ -2418,7 +2418,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 >
                   {paymentMethods.map((pm: any) => {
                     const pmName = typeof pm === 'string' ? pm : pm.name;
-                    return <option key={pmName} value={pmName} className="bg-white dark:bg-[#222222] text-[var(--text-primary)]">{pmName}</option>;
+                    return <option key={pmName} value={pmName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">{pmName}</option>;
                   })}
                 </select>
               </div>
@@ -2604,7 +2604,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
             <div className="flex flex-col items-center">
               <button 
                 onClick={() => setShowIconPicker(true)}
-                className="w-20 h-20 rounded-2xl flex items-center justify-center mb-2"
+                className="w-20 h-20 rounded-[22px] flex items-center justify-center mb-2"
                 style={{ backgroundColor: `${color}20`, color: color }}
               >
                 <CategoryIcon icon={icon} color={color} size="xl" />
@@ -2618,7 +2618,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
                 placeholder="Namn på betalningsmetod"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[12px] px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs transition-all outline-none"
+                className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[14px] px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs transition-all outline-none"
               />
 
               <div className="flex flex-wrap gap-2">

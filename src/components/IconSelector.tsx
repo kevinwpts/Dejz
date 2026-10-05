@@ -271,7 +271,7 @@ export function IconSelector({
               >
                 <Icon size={22} strokeWidth={1.75} />
                 {selected && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[4px] flex items-center justify-center scale-110 shadow-xs">
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center scale-110 shadow-xs">
                     <Check size={10} strokeWidth={2.5} />
                   </div>
                 )}

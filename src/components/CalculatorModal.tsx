@@ -117,7 +117,7 @@ export function CalculatorModal({ _isOpen, onClose, _t }: CalculatorModalProps) 
                 </button>
               </div>
 
-              <div className="bg-black/[0.04] dark:bg-white/[0.06] p-4 rounded-[16px] border border-black/5 dark:border-white/10 text-right space-y-1">
+              <div className="bg-black/[0.04] dark:bg-white/[0.06] p-4 rounded-[14px] border border-black/5 dark:border-white/10 text-right space-y-1">
                 <div className="text-xs font-medium text-[var(--text-tertiary)] h-4 overflow-hidden tabular-nums">
                   {equation}
                 </div>
@@ -135,7 +135,7 @@ export function CalculatorModal({ _isOpen, onClose, _t }: CalculatorModalProps) 
                     className={`
                       h-12 flex items-center justify-center rounded-[14px] font-semibold text-base transition-all active:scale-[0.95] cursor-pointer
                       ${btn.wide ? 'col-span-2' : ''}
-                      ${btn.type === 'number' ? 'bg-white dark:bg-[#222222] text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 border border-black/5 dark:border-white/5 shadow-xs' : ''}
+                      ${btn.type === 'number' ? 'bg-white dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 border border-black/5 dark:border-white/5 shadow-xs' : ''}
                       ${btn.type === 'operator' ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)] hover:bg-[var(--accent-color)]/20 border border-[var(--accent-color)]/20' : ''}
                       ${btn.type === 'special' ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-black/5 dark:border-white/5' : ''}
                       ${btn.type === 'equal' ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-xs' : ''}

@@ -131,7 +131,7 @@ export function CancelSubscriptionModal({
           {/* Body */}
           <div className="p-5 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
             {/* Target Item Card */}
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--surface-color)] border-none shadow-none">
+            <div className="flex items-center justify-between p-3.5 rounded-[22px] bg-[var(--surface-color)] border-none shadow-none">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-[var(--bg-color)] flex items-center justify-center shrink-0 border-none overflow-hidden [&_div]:w-8 [&_div]:h-8 [&_div]:rounded-full [&_img]:rounded-full">
                   <BudgetItemLogo item={expense} type="expense" config={config} />
@@ -200,7 +200,7 @@ export function CancelSubscriptionModal({
 
                 {/* Step-by-Step Instructions */}
                 {details.steps && details.steps.length > 0 && (
-                  <div className="p-4 rounded-[16px] bg-black/5 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] space-y-3">
+                  <div className="p-4 rounded-[22px] bg-black/5 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] space-y-3">
                     <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)] tracking-tight">
                       <HelpCircle size={14} className="text-[var(--text-primary)]" />
                       <span>{isEn ? 'How to cancel step-by-step' : 'Så här säger du upp avtalet'}</span>
@@ -209,7 +209,7 @@ export function CancelSubscriptionModal({
                     <ol className="space-y-2.5">
                       {details.steps.map((step, idx) => (
                         <li key={idx} className="flex items-start gap-2.5 text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
-                          <span className="w-5 h-5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] font-bold text-[10.5px] flex items-center justify-center shrink-0 mt-0.5 border border-black/10 dark:border-white/10">
+                          <span className="w-5 h-5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] font-bold text-[10.5px] flex items-center justify-center shrink-0 mt-0.5 border border-black/10 dark:border-white/10">
                             {idx + 1}
                           </span>
                           <span className="text-[var(--text-primary)]">{step}</span>
@@ -221,7 +221,7 @@ export function CancelSubscriptionModal({
 
                 {/* Notice Period & Tips Box */}
                 {(details.noticePeriod || details.tips) && (
-                  <div className="p-3.5 rounded-[16px] bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+                  <div className="p-3.5 rounded-[14px] bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 space-y-2">
                     {details.noticePeriod && (
                       <div className="flex items-start gap-2">
                         <Clock size={14} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
@@ -273,7 +273,7 @@ export function CancelSubscriptionModal({
                     <span>{isEn ? 'Already cancelled? Remove from budget' : 'Redan uppsagt? Ta bort från budgeten'}</span>
                   </button>
                 ) : (
-                  <div className="p-4 rounded-[16px] bg-rose-500/10 border border-rose-500/20 space-y-3">
+                  <div className="p-4 rounded-[22px] bg-rose-500/10 border border-rose-500/20 space-y-3">
                     <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 text-center">
                       {isEn ? 'Are you sure you want to remove this expense from your budget?' : 'Vill du ta bort denna fasta utgift från din framtida budget?'}
                     </p>
@@ -281,14 +281,14 @@ export function CancelSubscriptionModal({
                       <button
                         type="button"
                         onClick={() => setShowConfirmDelete(false)}
-                        className="py-2.5 px-3 rounded-[12px] bg-white dark:bg-[#222222] text-[var(--text-primary)] text-xs font-semibold border border-black/5 dark:border-white/5 cursor-pointer active:scale-[0.98]"
+                        className="py-2.5 px-3 rounded-[14px] bg-white dark:bg-white/10 text-[var(--text-primary)] text-xs font-semibold border border-black/5 dark:border-white/5 cursor-pointer active:scale-[0.98]"
                       >
                         {isEn ? 'Keep in budget' : 'Behåll'}
                       </button>
                       <button
                         type="button"
                         onClick={handleConfirmCancelAndDelete}
-                        className="py-2.5 px-3 rounded-[12px] bg-rose-600 text-white text-xs font-semibold shadow-none hover:bg-rose-500 cursor-pointer active:scale-[0.98]"
+                        className="py-2.5 px-3 rounded-[14px] bg-rose-600 text-white text-xs font-semibold shadow-none hover:bg-rose-500 cursor-pointer active:scale-[0.98]"
                       >
                         {isEn ? 'Yes, remove' : 'Ja, ta bort'}
                       </button>

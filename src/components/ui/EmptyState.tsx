@@ -20,10 +20,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      className={`bg-[var(--surface-color)] rounded-[16px] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-none border-none ${className}`}
+      className={`bg-[var(--surface-color)] rounded-[22px] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-none border-none ${className}`}
     >
       {Icon && (
-        <div className="w-12 h-12 rounded-2xl bg-black/[0.04] dark:bg-white/[0.06] border-none flex items-center justify-center text-[var(--text-secondary)] mb-3 shrink-0">
+        <div className="w-12 h-12 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border-none flex items-center justify-center text-[var(--text-secondary)] mb-3 shrink-0">
           <Icon size={20} strokeWidth={2} />
         </div>
       )}

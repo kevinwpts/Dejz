@@ -188,7 +188,7 @@ export function ProfileView({
     onNavigate('profile', section);
   };
 
-  const SettingsMenuItem = ({ icon: Icon, label, subtitle, onClick, rightNode, iconBgColor = "bg-black/5 dark:bg-[#242424]", iconTextColor = "text-[var(--text-primary)]" }: { icon: any, label: string, subtitle?: string, onClick?: () => void, rightNode?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) => (
+  const SettingsMenuItem = ({ icon: Icon, label, subtitle, onClick, rightNode, iconBgColor = "bg-black/5 dark:bg-white/5", iconTextColor = "text-[var(--text-primary)]" }: { icon: any, label: string, subtitle?: string, onClick?: () => void, rightNode?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) => (
     <button 
       onClick={onClick}
       className={`w-full flex items-center justify-between py-3.5 px-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
@@ -237,7 +237,7 @@ export function ProfileView({
                 }
               }}
             />
-            <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[22px] sm:rounded-[24px] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-[#222222] border-none group-hover:scale-[1.02] transition-all duration-300 shadow-none">
+            <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[22px] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] transition-all duration-300 shadow-none">
               {avatarUrl ? (
                 <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
               ) : (
@@ -267,7 +267,7 @@ export function ProfileView({
           </p>
           <button 
             onClick={() => handleSectionClick('manageAccount')}
-            className="px-3 py-1.5 bg-black/[0.04] dark:bg-[#222222] text-[11px] font-semibold text-[var(--text-primary)] rounded-[12px] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
+            className="px-3 py-1.5 bg-black/[0.04] dark:bg-white/5 text-[11px] font-semibold text-[var(--text-primary)] rounded-[12px] border-none hover:bg-black/[0.07] dark:hover:bg-white/[0.1] transition-all flex items-center gap-1.5 w-fit active:scale-95 cursor-pointer shadow-none"
           >
             {t('manageAccount')}
             <ChevronRight size={11} strokeWidth={2.5} />
@@ -350,7 +350,7 @@ export function ProfileView({
             <div className="py-3.5 px-4 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#242424] text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
                     <Calendar size={18} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInCalendar')}</span>
@@ -374,7 +374,7 @@ export function ProfileView({
             <div className="py-3.5 px-4 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#242424] text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
                     <EyeOff size={18} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
@@ -437,7 +437,7 @@ export function ProfileView({
                 </p>
                 <button 
                   onClick={onExitDemo}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-none hover:opacity-90 active:scale-[0.98]"
+                  className="w-full py-2.5 px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-none hover:opacity-90 active:scale-[0.98]"
                 >
                   <LogOut size={13} strokeWidth={2} />
                   <span>{t('exitDemo')}</span>
@@ -448,7 +448,7 @@ export function ProfileView({
               onClick={onLogout}
               className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#242424] text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
                 <LogOut size={18} strokeWidth={2} />
               </div>
               <span className="text-[14px] font-semibold text-[var(--text-primary)]">{t('logout')}</span>
@@ -457,7 +457,7 @@ export function ProfileView({
               onClick={onDeleteAccount}
               className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-danger/5 transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-[#242424] text-danger border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-white/5 text-danger border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
                 <Trash2 size={18} strokeWidth={2} />
               </div>
               <span className="text-[14px] font-semibold text-danger">{t('deleteAccount')}</span>

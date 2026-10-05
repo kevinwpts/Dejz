@@ -110,7 +110,7 @@ export function FilterMenuModal<T = string>({
                         className={`w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-colors ${
                           isSelected
                             ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)]'
-                            : 'bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)]'
+                            : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
                         }`}
                       >
                         {opt.icon}
@@ -122,7 +122,7 @@ export function FilterMenuModal<T = string>({
                           {opt.label}
                         </span>
                         {opt.badge && (
-                          <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] shrink-0">
+                          <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] shrink-0">
                             {opt.badge}
                           </span>
                         )}

@@ -257,7 +257,7 @@ export function BudgetView({
                 </div>
               ) : (
                 <div 
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-2xs"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] flex items-center justify-center text-white shrink-0 shadow-2xs"
                   style={{ backgroundColor: cat.color || '#6366f1' }}
                 >
                   <CategoryIcon
@@ -290,7 +290,7 @@ export function BudgetView({
           {/* Right Part: Direct input of amount without +/- buttons */}
           <div className="shrink-0">
             {isEditingThis ? (
-              <div className="flex items-center gap-1 bg-black/[0.04] dark:bg-[#222222] rounded-[12px] px-2.5 py-1.5 border border-[var(--accent-color)]">
+              <div className="flex items-center gap-1 bg-black/[0.04] dark:bg-white/5 rounded-[12px] px-2.5 py-1.5 border border-[var(--accent-color)]">
                 <input
                   type="text"
                   inputMode="numeric"
@@ -522,7 +522,7 @@ export function BudgetView({
                     else if (incomeSortBy === 'name') setIncomeSortBy('amount');
                     else setIncomeSortBy('day');
                   }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                  className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
@@ -541,7 +541,7 @@ export function BudgetView({
                 <button 
                   type="button"
                   onClick={onAddIncome} 
-                  className="h-9 px-4 rounded-xl bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
+                  className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
                 >
                   <Plus size={14} strokeWidth={2.5} />
                   <span>{t('newIncome')}</span>
@@ -588,7 +588,7 @@ export function BudgetView({
                     else if (fixedSortBy === 'name') setFixedSortBy('amount');
                     else setFixedSortBy('day');
                   }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                  className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />
@@ -672,7 +672,7 @@ export function BudgetView({
                     else if (savingSortBy === 'name') setSavingSortBy('amount');
                     else setSavingSortBy('day');
                   }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                  className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                   title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                 >
                   <ArrowUpDown size={13} strokeWidth={2.2} className="text-[var(--text-secondary)] shrink-0" />

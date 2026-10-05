@@ -269,7 +269,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                 </div>
                 <div className="flex flex-wrap justify-end gap-1.5">
                   {(transaction.tags || []).map((tag, index) => (
-                    <span key={index} className="bg-[var(--surface-color)] text-[var(--text-primary)] px-2.5 py-1 rounded-[8px] text-[11px] font-medium border-none shadow-none">
+                    <span key={index} className="bg-[var(--surface-color)] text-[var(--text-primary)] px-2.5 py-1 rounded-full text-[11px] font-medium border-none shadow-none">
                       {tag}
                     </span>
                   ))}
@@ -298,7 +298,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                   </div>
                   <div 
                     onClick={() => setShowReceiptLightbox(true)}
-                    className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-[16px] overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 flex items-center justify-center cursor-pointer group shadow-sm hover:shadow-md transition-all"
+                    className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-[22px] overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 flex items-center justify-center cursor-pointer group shadow-sm hover:shadow-md transition-all"
                   >
                     {transaction.receiptUrl.includes('.pdf') ? (
                       <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
@@ -314,7 +314,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       />
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all">
-                      <span className="bg-white/95 dark:bg-zinc-900/95 text-black dark:text-white px-4 py-2.5 rounded-xl text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-xl">
+                      <span className="bg-white/95 dark:bg-zinc-900/95 text-black dark:text-white px-4 py-2.5 rounded-[14px] text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-xl">
                         {config.language === 'en' ? 'Click to zoom' : 'Klicka för att förstora'}
                       </span>
                     </div>
@@ -342,7 +342,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                           href={transaction.receiptUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-xl text-xs font-medium transition-colors"
+                          className="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-[14px] text-xs font-medium transition-colors"
                         >
                           {config.language === 'en' ? 'Open original' : 'Öppna original'}
                         </a>
@@ -361,14 +361,14 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                       onClick={(e) => e.stopPropagation()}
                     >
                       {transaction.receiptUrl.includes('.pdf') ? (
-                        <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl text-center space-y-4 shadow-2xl">
+                        <div className="bg-white dark:bg-zinc-900 p-8 rounded-[22px] text-center space-y-4 shadow-2xl">
                           <FileText size={64} className="mx-auto text-violet-500" />
                           <p className="text-sm font-medium text-zinc-900 dark:text-white">PDF-dokument</p>
                           <a 
                             href={transaction.receiptUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-block bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg"
+                            className="inline-block bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-[14px] text-sm font-semibold transition-colors shadow-lg"
                           >
                             {config.language === 'en' ? 'Open PDF in new tab' : 'Öppna PDF i ny flik'}
                           </a>
@@ -377,7 +377,7 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                         <img 
                           src={transaction.receiptUrl} 
                           alt="Receipt Fullscreen" 
-                          className="max-h-[80vh] max-w-full object-contain rounded-xl shadow-2xl"
+                          className="max-h-[80vh] max-w-full object-contain rounded-[14px] shadow-2xl"
                           referrerPolicy="no-referrer"
                         />
                       )}

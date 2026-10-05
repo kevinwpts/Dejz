@@ -75,7 +75,7 @@ export function ResetPasswordModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
               aria-label="Stäng"
             >
               <X size={16} strokeWidth={2} />
@@ -84,7 +84,7 @@ export function ResetPasswordModal({
 
           {success ? (
             <div className="text-center py-6 space-y-4">
-              <div className="w-14 h-14 bg-emerald-500/10 text-emerald-500 rounded-[16px] flex items-center justify-center mx-auto border border-emerald-500/20 shadow-xs">
+              <div className="w-14 h-14 bg-emerald-500/10 text-emerald-500 rounded-[14px] flex items-center justify-center mx-auto border border-emerald-500/20 shadow-xs">
                 <CheckCircle2 size={30} strokeWidth={2} />
               </div>
               <div className="space-y-1">

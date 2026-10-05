@@ -100,7 +100,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
         <button 
           type="button"
           onClick={onCancel}
-          className="absolute top-6 right-6 w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+          className="absolute top-6 right-6 w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
           aria-label="Stäng"
         >
           <X size={17} strokeWidth={2.2} />
@@ -108,7 +108,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
       )}
 
       <div className="mb-8 flex flex-col items-center">
-        <div className="w-14 h-14 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border border-black/5 dark:border-white/10 rounded-[16px] flex items-center justify-center mb-5 shadow-xs">
+        <div className="w-14 h-14 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border border-black/5 dark:border-white/10 rounded-[14px] flex items-center justify-center mb-5 shadow-xs">
           <Lock size={26} />
         </div>
         <h2 className="text-lg sm:text-xl font-bold font-display tracking-tight text-[var(--text-primary)] mb-1 text-center">
@@ -138,7 +138,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
             key={num}
             type="button"
             onClick={() => handleNumberClick(num)}
-            className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-[#222222] active:scale-[0.92] transition-all flex items-center justify-center border border-black/5 dark:border-white/10 shadow-xs cursor-pointer"
+            className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.92] transition-all flex items-center justify-center border border-black/5 dark:border-white/10 shadow-xs cursor-pointer"
           >
             {num}
           </button>
@@ -156,7 +156,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
         <button
           type="button"
           onClick={() => handleNumberClick(0)}
-          className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-[#222222] active:scale-[0.92] transition-all flex items-center justify-center border border-black/5 dark:border-white/10 shadow-xs cursor-pointer"
+          className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.92] transition-all flex items-center justify-center border border-black/5 dark:border-white/10 shadow-xs cursor-pointer"
         >
           0
         </button>

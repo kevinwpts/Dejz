@@ -75,14 +75,14 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-[14px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <ChevronLeft size={15} strokeWidth={2.2} />
           </button>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="w-7 h-7 rounded-lg bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-[14px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <ChevronRight size={15} strokeWidth={2.2} />
           </button>

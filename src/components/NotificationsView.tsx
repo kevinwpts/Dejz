@@ -69,7 +69,7 @@ export function NotificationsView({
         if (isIncome) {
           if (isToday) {
             statusBadgeText = config.language === 'en' ? 'Arrives today' : 'Kommer idag';
-            statusBadgeStyle = 'bg-black/5 dark:bg-[#222222] text-[var(--text-primary)]';
+            statusBadgeStyle = 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)]';
           } else if (isPast) {
             statusBadgeText = config.language === 'en' ? `Arrived on the ${n.deductionDay}th` : `Kom den ${n.deductionDay}:e`;
             statusBadgeStyle = 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
@@ -97,7 +97,7 @@ export function NotificationsView({
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="p-5 sm:p-6 rounded-[18px] bg-[var(--surface-color)] transition-all flex flex-col gap-4 relative shadow-xs"
+            className="p-5 sm:p-6 rounded-[22px] bg-[var(--surface-color)] transition-all flex flex-col gap-4 relative shadow-xs"
           >
             {/* Top status bar */}
             <div className="flex items-center justify-between gap-3">
@@ -141,7 +141,7 @@ export function NotificationsView({
             </div>
 
             {/* Subtitle / Question or Standard Amount */}
-            <div className="flex items-center justify-between bg-[var(--surface-muted)]/60 px-4 py-2.5 rounded-[16px] text-xs">
+            <div className="flex items-center justify-between bg-[var(--surface-muted)]/60 px-4 py-2.5 rounded-[14px] text-xs">
               {isIncome ? (
                 <span className="text-[var(--text-secondary)] font-medium">
                   {config.language === 'en'

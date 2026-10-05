@@ -57,7 +57,7 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm, t, isSocialUser
           <button 
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
             aria-label={t('close')}
           >
             <X size={17} strokeWidth={2.2} />

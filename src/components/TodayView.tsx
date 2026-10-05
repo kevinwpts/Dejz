@@ -357,10 +357,10 @@ export function TodayView({
               <button
                 type="button"
                 onClick={() => onNavigate("budget", "category-budgets")}
-                className="w-full p-4 rounded-[20px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-[#222222] border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
+                className="w-full p-4 rounded-[22px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-black/[0.04] dark:bg-[#222222] border-none flex items-center justify-center text-[var(--text-secondary)] transition-colors">
+                  <div className="w-9 h-9 rounded-[14px] bg-black/[0.04] dark:bg-white/5 border-none flex items-center justify-center text-[var(--text-secondary)] transition-colors">
                     <SlidersHorizontal size={15} strokeWidth={1.75} />
                   </div>
                   <div>

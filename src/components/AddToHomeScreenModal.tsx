@@ -237,9 +237,9 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                 <button
                   type="button"
                   onClick={() => setActivePlatform('ios')}
-                  className={`py-1.5 px-4 rounded-[10px] transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer ${
+                  className={`py-1.5 px-4 rounded-[12px] transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer ${
                     activePlatform === 'ios'
-                      ? 'bg-white dark:bg-[#222222] text-[var(--text-primary)] shadow-xs border border-black/5 dark:border-white/5'
+                      ? 'bg-white dark:bg-white/10 text-[var(--text-primary)] shadow-xs border border-black/5 dark:border-white/5'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -251,9 +251,9 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                 <button
                   type="button"
                   onClick={() => setActivePlatform('android')}
-                  className={`py-1.5 px-4 rounded-[10px] transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer ${
+                  className={`py-1.5 px-4 rounded-[12px] transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer ${
                     activePlatform === 'android'
-                      ? 'bg-white dark:bg-[#222222] text-[var(--text-primary)] shadow-xs border border-black/5 dark:border-white/5'
+                      ? 'bg-white dark:bg-white/10 text-[var(--text-primary)] shadow-xs border border-black/5 dark:border-white/5'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -286,7 +286,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                 <div className="space-y-2.5">
                   {/* Step 1 */}
                   <div className="flex items-center gap-3 group p-2.5 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-                    <div className="w-8 h-8 rounded-[10px] bg-white dark:bg-[#222222] border border-black/5 dark:border-white/10 flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
+                    <div className="w-8 h-8 rounded-[12px] bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
                       1
                     </div>
                     <div className="flex-1 min-w-0">
@@ -302,7 +302,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
 
                   {/* Step 2 */}
                   <div className="flex items-center gap-3 group p-2.5 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-                    <div className="w-8 h-8 rounded-[10px] bg-white dark:bg-[#222222] border border-black/5 dark:border-white/10 flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
+                    <div className="w-8 h-8 rounded-[12px] bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
                       2
                     </div>
                     <div className="flex-1 min-w-0">

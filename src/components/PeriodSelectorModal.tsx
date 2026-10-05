@@ -135,14 +135,14 @@ export function PeriodSelectorModal({
                     onSelectDate(null);
                     onClose();
                   }}
-                  className="w-full flex items-center justify-between py-3 px-4 rounded-[16px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[52px]"
+                  className="w-full flex items-center justify-between py-3 px-4 rounded-[14px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[52px]"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div 
-                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                      className={`w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-colors ${
                         !selectedPeriod && !selectedDate
                           ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)] font-semibold' 
-                          : 'bg-black/5 dark:bg-[#1C1C1C] text-[var(--text-secondary)]'
+                          : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
                       }`}
                     >
                       <CalendarIcon size={15} strokeWidth={1.8} />
@@ -184,12 +184,12 @@ export function PeriodSelectorModal({
                         onSelectDate(null);
                         onClose();
                       }}
-                      className="w-full flex items-center justify-between py-3 px-4 rounded-[16px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[52px]"
+                      className="w-full flex items-center justify-between py-3 px-4 rounded-[14px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[52px]"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div 
-                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                            isSelected ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)] font-semibold' : 'bg-black/5 dark:bg-[#1C1C1C] text-[var(--text-secondary)]'
+                          className={`w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)] font-semibold' : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
                           }`}
                         >
                           <CalendarIcon size={15} strokeWidth={1.8} />
@@ -200,7 +200,7 @@ export function PeriodSelectorModal({
                               {title}
                             </span>
                             {p.isCurrent && (
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] tracking-tight shrink-0">
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] tracking-tight shrink-0">
                                 {currentLang === 'en' ? 'Current' : 'Nu'}
                               </span>
                             )}

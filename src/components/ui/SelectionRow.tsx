@@ -42,7 +42,7 @@ export function SelectionRow<T = string>({
             className={`w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-colors ${
               isSelected
                 ? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
-                : 'bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)]'
+                : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
             }`}
           >
             {icon}
@@ -54,7 +54,7 @@ export function SelectionRow<T = string>({
               {label}
             </span>
             {badge && (
-              <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] shrink-0">
+              <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] shrink-0">
                 {badge}
               </span>
             )}

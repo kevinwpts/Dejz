@@ -4098,8 +4098,8 @@ export default function App() {
     return (
       <div className="min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)]">
         <div className="min-h-dvh flex items-center justify-center p-6 relative z-10">
-          <div className="max-w-md w-full bg-[var(--surface-color)] p-10 rounded-[20px] text-center space-y-6">
-            <div className="w-16 h-16 bg-danger/10 text-danger rounded-2xl flex items-center justify-center mx-auto">
+          <div className="max-w-md w-full bg-[var(--surface-color)] p-10 rounded-[28px] text-center space-y-6">
+            <div className="w-16 h-16 bg-danger/10 text-danger rounded-[22px] flex items-center justify-center mx-auto">
               <AlertCircle size={32} />
             </div>
             <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
@@ -4107,7 +4107,7 @@ export default function App() {
             </h1>
 
             {!isSupabaseUrlValid && (
-              <div className="bg-danger/10 p-4 rounded-2xl text-left">
+              <div className="bg-danger/10 p-4 rounded-[14px] text-left">
                 <p className="text-xs font-semibold text-danger mb-1">
                   Felaktig URL
                 </p>
@@ -5556,7 +5556,7 @@ export default function App() {
                     feedback.tap();
                     setIsPlusMenuOpen(false);
                   }}
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors"
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors"
                   aria-label={config?.language === "en" ? "Close" : "Stäng"}
                 >
                   <X size={16} />
@@ -5577,7 +5577,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     <ArrowDownLeft size={24} strokeWidth={1.8} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
@@ -5597,7 +5597,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     <ArrowUpRight size={24} strokeWidth={1.8} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
@@ -5612,7 +5612,7 @@ export default function App() {
                   disabled={isScanningReceipt}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222222] border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     {isScanningReceipt ? (
                       <Loader2 size={24} className="animate-spin text-[var(--text-primary)]" />
                     ) : (
@@ -5661,7 +5661,7 @@ export default function App() {
                           ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
                             ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/30"
-                            : "bg-white dark:bg-[#222222] hover:bg-black/[0.03] dark:hover:bg-white/15 text-[var(--text-secondary)] border-black/[0.06] dark:border-white/10 active:scale-95 shadow-xs"
+                            : "bg-white dark:bg-white/5 hover:bg-black/[0.03] dark:hover:bg-white/15 text-[var(--text-secondary)] border-black/[0.06] dark:border-white/10 active:scale-95 shadow-xs"
                       }`}
                     >
                       {isAudioTranscribing ? (
@@ -5682,7 +5682,7 @@ export default function App() {
                         ? { type: 'error', message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-[22px] bg-white dark:bg-[#222222] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
+                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-[22px] bg-white dark:bg-white/5 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
                     isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-black/[0.06] dark:border-white/10"
                   }`}
                 />

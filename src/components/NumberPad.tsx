@@ -114,7 +114,7 @@ export function NumberPad({
           <span className="opacity-90">Beräknat belopp:</span>
           <span className="text-sm font-extrabold flex items-center gap-1">
             = {livePreview} {currency}
-            <span className="text-[10px] font-normal bg-white/20 px-1.5 py-0.5 rounded-md ml-1.5">Verkställ</span>
+            <span className="text-[10px] font-normal bg-white/20 px-1.5 py-0.5 rounded-full ml-1.5">Verkställ</span>
           </span>
         </button>
       )}

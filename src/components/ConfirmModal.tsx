@@ -56,7 +56,7 @@ export function ConfirmModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative z-10 text-center">
-          <div className={`w-14 h-14 ${iconBg} ${iconColor} rounded-[16px] flex items-center justify-center mx-auto mb-4 border shadow-xs`}>
+          <div className={`w-14 h-14 ${iconBg} ${iconColor} rounded-[14px] flex items-center justify-center mx-auto mb-4 border shadow-xs`}>
             <AlertCircle size={28} strokeWidth={1.75} />
           </div>
 

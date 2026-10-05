@@ -110,7 +110,7 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
         return (
           <div className="space-y-6 text-sm text-[var(--text-secondary)] leading-relaxed">
             <div className="surface-card p-6 flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-accent/10 text-accent flex items-center justify-center">
+              <div className="w-16 h-16 rounded-[22px] bg-accent/10 text-accent flex items-center justify-center">
                 <Mail size={32} />
               </div>
               <div>

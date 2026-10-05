@@ -164,7 +164,7 @@ export function SettingsView({
               key={cat.id || index}
               onClick={() => handleEditCategory(type, index, cat.name, cat.icon, cat.color)}
               style={{ backgroundColor: cat.color || '#6E6961' }}
-              className="h-32 sm:h-36 p-4 rounded-[20px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
+              className="h-32 sm:h-36 p-4 rounded-[22px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
             >
               <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />
               <span className="text-[14px] sm:text-[15px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
@@ -177,7 +177,7 @@ export function SettingsView({
           <button
             type="button"
             onClick={() => handleAddCategory(type)}
-            className="h-32 sm:h-36 p-4 rounded-[20px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group active:scale-[0.98]"
+            className="h-32 sm:h-36 p-4 rounded-[22px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group active:scale-[0.98]"
           >
             <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
               <Plus size={18} strokeWidth={2.5} />
@@ -194,7 +194,7 @@ export function SettingsView({
   const renderCategoriesSettings = () => {
     return (
       <div className="space-y-6 w-full py-2">
-        <div className="flex p-1 bg-black/[0.04] dark:bg-[#1C1C1C] rounded-[16px]">
+        <div className="flex p-1 bg-black/[0.04] dark:bg-[#1C1C1C] rounded-[14px]">
           <button
             onClick={() => setCategoryTab('expense')}
             className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer ${
@@ -265,7 +265,7 @@ export function SettingsView({
                 setIsPaymentMethodModalOpen(true);
               }}
               style={{ backgroundColor: method.color || '#6366f1' }}
-              className="h-32 sm:h-36 p-4 rounded-[20px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
+              className="h-32 sm:h-36 p-4 rounded-[22px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
             >
               <CategoryIcon icon={method.icon} size="lg" noBackground whiteIcon />
               <span className="text-[14px] sm:text-[15px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
@@ -281,7 +281,7 @@ export function SettingsView({
               setPaymentMethodModalData({ name: '' });
               setIsPaymentMethodModalOpen(true);
             }}
-            className="h-32 sm:h-36 p-4 rounded-[20px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group active:scale-[0.98]"
+            className="h-32 sm:h-36 p-4 rounded-[22px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group active:scale-[0.98]"
           >
             <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
               <Plus size={18} strokeWidth={2.5} />
@@ -507,7 +507,7 @@ export function SettingsView({
                 className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer text-left group"
               >
                 <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                  <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-primary)]">
+                  <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
                     <Calendar size={18} strokeWidth={2} />
                   </div>
                   <div className="min-w-0 flex flex-col justify-center">
@@ -532,7 +532,7 @@ export function SettingsView({
               {/* Weekend Handling Row */}
               <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3.5 min-w-0 pr-4">
-                  <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-[#222222] text-[var(--text-primary)]">
+                  <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
                     <Clock size={18} strokeWidth={2} />
                   </div>
                   <div className="min-w-0 flex flex-col justify-center">
@@ -715,7 +715,7 @@ export function SettingsView({
                 className={`py-3 rounded-[14px] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
                   isSelected
                     ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-md scale-105'
-                    : 'bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/15'
+                    : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/15'
                 }`}
               >
                 {day}

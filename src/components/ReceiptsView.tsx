@@ -85,7 +85,7 @@ export function ReceiptsView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={config.language === 'sv' ? 'Sök köpställe, kategori eller belopp...' : 'Search merchant, category, or amount...'}
-            className="w-full h-[46px] pl-11 pr-4 bg-white dark:bg-[#222222] border border-black/[0.06] dark:border-white/[0.08] rounded-full text-xs font-semibold placeholder-[var(--text-tertiary)] focus:outline-none shadow-none transition-all text-[var(--text-primary)]"
+            className="w-full h-[46px] pl-11 pr-4 bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] rounded-full text-xs font-semibold placeholder-[var(--text-tertiary)] focus:outline-none shadow-none transition-all text-[var(--text-primary)]"
             id="receipts_search_input"
           />
         </div>
@@ -104,12 +104,12 @@ export function ReceiptsView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={() => onViewTransaction(item)}
-                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-[var(--surface-color)] rounded-[14px] shadow-none border border-black/[0.06] dark:border-white/[0.08] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.98] transition-all cursor-pointer"
+                  className="group flex items-center justify-between p-3.5 sm:p-4 bg-[var(--surface-color)] rounded-[22px] shadow-none border border-black/[0.06] dark:border-white/[0.08] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.98] transition-all cursor-pointer"
                   id={`receipt_item_${item.id}`}
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     {/* Receipt thumbnail / Icon wrapper */}
-                    <div className="w-12 h-12 rounded-xl border-none overflow-hidden relative shrink-0 bg-black/[0.04] dark:bg-[#222222] flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-[14px] border-none overflow-hidden relative shrink-0 bg-black/[0.04] dark:bg-white/5 flex items-center justify-center">
                       {item.receiptUrl ? (
                         <>
                           <img

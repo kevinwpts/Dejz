@@ -32,11 +32,11 @@ class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="flex items-center justify-center h-screen bg-[var(--bg-color)] text-[var(--text-primary)]">
-          <div className="text-center p-8 border border-danger/30 rounded-lg surface-card max-w-2xl w-full mx-4">
+          <div className="text-center p-8 border border-danger/30 rounded-[28px] surface-card max-w-2xl w-full mx-4">
             <h1 className="text-2xl font-semibold mb-2">{this.getTranslation('errorTitle')}</h1>
             <p className="mb-4 text-sm opacity-80">{this.getTranslation('errorMessage')}</p>
             {this.state.error && (
-              <pre className="text-left text-[10px] bg-danger/10 p-3 rounded-lg overflow-auto max-h-48 font-mono border border-danger/20">
+              <pre className="text-left text-[10px] bg-danger/10 p-3 rounded-[14px] overflow-auto max-h-48 font-mono border border-danger/20">
                 {this.state.error.toString()}
               </pre>
             )}

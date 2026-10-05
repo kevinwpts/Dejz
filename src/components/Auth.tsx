@@ -195,7 +195,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
           <div
             className="text-center py-4 space-y-6"
           >
-            <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[20px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
+            <div className="w-16 h-16 bg-[var(--accent-color)]/10 text-[var(--accent-color)] rounded-[14px] flex items-center justify-center mx-auto border border-[var(--accent-color)]/20 shadow-xs">
               <Mail size={28} />
             </div>
 
@@ -223,7 +223,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
           <div
             className="text-center py-4 space-y-6"
           >
-            <div className="w-16 h-16 bg-black/5 dark:bg-[#1C1C1C] text-[var(--text-primary)] rounded-[20px] flex items-center justify-center mx-auto border border-black/10 dark:border-white/10 shadow-xs">
+            <div className="w-16 h-16 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] rounded-[14px] flex items-center justify-center mx-auto border border-black/10 dark:border-white/10 shadow-xs">
               <CheckCircle2 size={30} />
             </div>
 

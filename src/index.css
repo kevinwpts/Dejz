@@ -64,13 +64,13 @@
   --color-info-container: var(--info-container);
   --color-scrim: var(--scrim-color);
 
-  --radius-4xl: 24px;
+  --radius-4xl: 28px;
   --radius-3xl: 22px;
-  --radius-2xl: 20px;
-  --radius-xl: 16px;
+  --radius-2xl: 22px;
+  --radius-xl: 14px;
   --radius-lg: 14px;
-  --radius-md: 12px;
-  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-sm: 12px;
 
   --shadow-2xs: none;
   --shadow-xs: none;
@@ -352,9 +352,9 @@ h6 {
   --modal-bg: #1C1C1C;
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
-  --surface-high: #222222;
-  --surface-muted: #222222;
-  --bg-hover: #282828;
+  --surface-high: rgba(255, 255, 255, 0.06);
+  --surface-muted: rgba(255, 255, 255, 0.05);
+  --bg-hover: rgba(255, 255, 255, 0.08);
   --surface-tint: transparent;
 
   /* Typography */
@@ -366,19 +366,19 @@ h6 {
   --text-inactive: #707070;
 
   /* Borders */
-  --border-subtle: #2A2A2A;
-  --border-color: #2A2A2A;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-color: rgba(255, 255, 255, 0.08);
   --border-control: #858585;
   --border-strong: #858585;
   --inner-highlight: transparent;
 
-  --chip-bg: #222222;
+  --chip-bg: rgba(255, 255, 255, 0.05);
   --chip-text: #B8B8B8;
-  --chip-active-bg: #2A2A2A;
+  --chip-active-bg: rgba(255, 255, 255, 0.1);
   --chip-active-text: #FFFFFF;
 
   --transaction-bg: #1C1C1C;
-  --card-nested-bg: #222222;
+  --card-nested-bg: rgba(255, 255, 255, 0.05);
   --remaining-today-gradient: #1C1C1C;
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
@@ -612,8 +612,8 @@ h6 {
   .dark textarea:-webkit-autofill,
   .dark select:-webkit-autofill {
     -webkit-text-fill-color: #FFFFFF !important;
-    -webkit-box-shadow: 0 0 0px 1000px #222222 inset !important;
-    box-shadow: 0 0 0px 1000px #222222 inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px #1C1C1C inset !important;
+    box-shadow: 0 0 0px 1000px #1C1C1C inset !important;
     caret-color: #FFFFFF !important;
   }
 }
@@ -628,7 +628,7 @@ h6 {
 
 @layer components {
   .module-surface {
-    @apply rounded-[18px];
+    @apply rounded-[22px];
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
@@ -636,7 +636,7 @@ h6 {
 
   .surface-card,
   .glass-card {
-    border-radius: 18px;
+    border-radius: 22px;
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
@@ -645,7 +645,7 @@ h6 {
   }
 
   .profile-card {
-    border-radius: 18px;
+    border-radius: 22px;
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
@@ -655,21 +655,21 @@ h6 {
   }
 
   .flat-card {
-    border-radius: 18px;
+    border-radius: 22px;
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
   }
 
   .surface-elevated {
-    border-radius: 18px;
+    border-radius: 22px;
     background: var(--surface-elevated-gradient);
     border: none;
     box-shadow: none;
   }
 
   .surface-solid {
-    border-radius: 18px;
+    border-radius: 22px;
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
@@ -683,7 +683,7 @@ h6 {
   }
 
   .accent-button {
-    @apply inline-flex items-center justify-center font-semibold px-5 py-2.5 rounded-[12px] transition-all;
+    @apply inline-flex items-center justify-center font-semibold px-5 py-2.5 rounded-[14px] transition-all;
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
     border: none;
@@ -692,7 +692,7 @@ h6 {
   }
 
   .accent-button-full {
-    @apply inline-flex items-center justify-center font-semibold px-5 py-3.5 rounded-[12px] transition-all w-full;
+    @apply inline-flex items-center justify-center font-semibold px-5 py-3.5 rounded-[14px] transition-all w-full;
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
     border: none;
@@ -778,7 +778,7 @@ h6 {
   }
 
   .modal-surface {
-    border-radius: var(--radius-2xl);
+    border-radius: var(--radius-4xl);
     background: var(--bg-color);
     box-shadow: none;
   }

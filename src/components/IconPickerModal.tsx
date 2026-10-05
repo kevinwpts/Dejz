@@ -119,7 +119,7 @@ export function IconPickerModal({
           {/* Header */}
           <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-2xl bg-[#05B862]/15 text-[#05B862] flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-[12px] bg-[#05B862]/15 text-[#05B862] flex items-center justify-center shrink-0">
                 <Sparkles size={18} />
               </div>
               <div>
@@ -174,7 +174,7 @@ export function IconPickerModal({
                     key={cat.id}
                     type="button"
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`whitespace-nowrap px-3 py-1.5 rounded-[10px] text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+                    className={`whitespace-nowrap px-3 py-1.5 rounded-[12px] text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
                       isActive
                         ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold shadow-xs scale-[1.02]'
                         : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
@@ -219,7 +219,7 @@ export function IconPickerModal({
                       <button
                         key={`sugg-${item.key}`}
                         onClick={() => handleSelect(item.key)}
-                        className={`relative aspect-square rounded-[16px] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
+                        className={`relative aspect-square rounded-[14px] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
                           isSelected
                             ? 'bg-accent/15 text-accent border border-accent ring-2 ring-accent/30 shadow-xs scale-[1.02]'
                             : 'bg-accent/5 text-[var(--text-primary)] hover:bg-accent/10 border border-accent/20'
@@ -253,7 +253,7 @@ export function IconPickerModal({
                       <button
                         key={`recent-${item.key}`}
                         onClick={() => handleSelect(item.key)}
-                        className={`relative aspect-square rounded-[16px] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
+                        className={`relative aspect-square rounded-[14px] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
                           isSelected
                             ? 'bg-accent/15 text-accent border border-accent ring-2 ring-accent/30 shadow-xs scale-[1.02]'
                             : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
@@ -295,7 +295,7 @@ export function IconPickerModal({
                       <button
                         key={item.key}
                         onClick={() => handleSelect(item.key)}
-                        className={`relative aspect-square rounded-[16px] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
+                        className={`relative aspect-square rounded-[14px] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
                           isSelected
                             ? 'bg-accent/15 text-accent border border-accent ring-2 ring-accent/30 shadow-xs scale-[1.02]'
                             : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] hover:border-accent/40'

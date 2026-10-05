@@ -39,11 +39,11 @@ export function TransactionLogo({
 
   const sizeConfig = {
     xl: {
-      container: 'w-16 h-16 rounded-[18px]',
+      container: 'w-16 h-16 rounded-[14px]',
       icon: 30,
     },
     lg: {
-      container: 'w-14 h-14 rounded-[16px]',
+      container: 'w-14 h-14 rounded-[14px]',
       icon: 26,
     },
     md: {
@@ -51,7 +51,7 @@ export function TransactionLogo({
       icon: 20,
     },
     sm: {
-      container: 'w-8 h-8 rounded-[9px]',
+      container: 'w-8 h-8 rounded-[12px]',
       icon: 15,
     },
   }[size] || {
@@ -63,7 +63,7 @@ export function TransactionLogo({
   if (visual.logoUrl && !imgError) {
     return (
       <div
-        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-[#222222] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs select-none`}
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] shadow-2xs select-none`}
       >
         <img
           src={visual.logoUrl}

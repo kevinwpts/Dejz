@@ -135,7 +135,7 @@ export function GreetingModule({
               <button
                 type="button"
                 onClick={() => setIsPeriodInfoOpen(false)}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                 aria-label="Stäng"
               >
                 <X size={17} strokeWidth={2.2} />
@@ -146,7 +146,7 @@ export function GreetingModule({
             <div className="space-y-2.5 pt-1">
               {/* Period */}
               <div className="flex items-center gap-3 p-3 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-                <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#222222] flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
+                <div className="w-8 h-8 rounded-[14px] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
                   <Calendar size={16} strokeWidth={2} />
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -161,7 +161,7 @@ export function GreetingModule({
 
               {/* Payday / Next Salary */}
               <div className="flex items-center gap-3 p-3 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-                <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#222222] flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
+                <div className="w-8 h-8 rounded-[14px] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
                   <Clock size={16} strokeWidth={2} />
                 </div>
                 <div className="flex flex-col min-w-0">

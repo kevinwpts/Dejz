@@ -46,9 +46,9 @@ const ToastItem: React.FC<ToastProps> = ({ toast, onDismiss }) => {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 12, scale: 0.95 }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className="flex items-center gap-3.5 py-3.5 px-4 rounded-2xl bg-[var(--surface-color)]/95 backdrop-blur-xl border border-[var(--border-color)] shadow-[0_12px_40px_rgba(0,0,0,0.12)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.4)] text-[var(--text-primary)] max-w-sm w-full pointer-events-auto relative overflow-hidden group"
+      className="flex items-center gap-3.5 py-3.5 px-4 rounded-[22px] bg-[var(--surface-color)]/95 backdrop-blur-xl border border-[var(--border-color)] shadow-[0_12px_40px_rgba(0,0,0,0.12)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.4)] text-[var(--text-primary)] max-w-sm w-full pointer-events-auto relative overflow-hidden group"
     >
-      <div className={`w-8 h-8 rounded-xl ${current.bgIcon} flex items-center justify-center shrink-0`}>
+      <div className={`w-8 h-8 rounded-[14px] ${current.bgIcon} flex items-center justify-center shrink-0`}>
         {current.icon}
       </div>
       <p className="text-xs font-semibold tracking-tight flex-1 leading-snug">
@@ -56,7 +56,7 @@ const ToastItem: React.FC<ToastProps> = ({ toast, onDismiss }) => {
       </p>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="w-6 h-6 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all shrink-0 opacity-70 group-hover:opacity-100"
+        className="w-6 h-6 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all shrink-0 opacity-70 group-hover:opacity-100"
         aria-label="Stäng"
       >
         <X size={14} />

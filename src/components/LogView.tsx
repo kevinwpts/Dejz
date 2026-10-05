@@ -423,12 +423,12 @@ export function LogView({
         calendarContent={
           <div className="space-y-2.5">
             {/* Period Stepper (Left / Right) */}
-            <div className="flex items-center justify-between bg-[var(--surface-color)] border-none shadow-none rounded-2xl p-1.5">
+            <div className="flex items-center justify-between bg-[var(--surface-color)] border-none shadow-none rounded-[22px] p-1.5">
               <button
                 type="button"
                 onClick={handleModalPrev}
                 disabled={!canModalGoPrev}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-8 h-8 rounded-[14px] flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoPrev
                     ? 'text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
                     : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
@@ -461,7 +461,7 @@ export function LogView({
                 type="button"
                 onClick={handleModalNext}
                 disabled={!canModalGoNext}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-8 h-8 rounded-[14px] flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoNext
                     ? 'text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
                     : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
@@ -530,11 +530,11 @@ export function LogView({
                         setSelectedPeriod(modalPeriod);
                         setIsPeriodPickerOpen(false);
                       }}
-                      className={`aspect-square w-full rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
+                      className={`aspect-square w-full rounded-[14px] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
                         isSelected 
                           ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-bold shadow-xs z-10' 
                           : isToday
-                          ? 'bg-black/5 dark:bg-[#222222] text-[#1C1917] dark:text-white border-none font-bold'
+                          ? 'bg-black/5 dark:bg-white/5 text-[#1C1917] dark:text-white border-none font-bold'
                           : 'bg-transparent text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.06] hover:text-[#1C1917] dark:hover:text-white font-medium'
                       }`}
                     >

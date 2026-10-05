@@ -288,7 +288,7 @@ export function ReceiptCameraModal({
       <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-black">
         {/* Error Fallback */}
         {cameraError ? (
-          <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-3xl bg-[#242424] border border-[#383838] space-y-4">
+          <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-[28px] bg-[#1C1C1C] border border-white/[0.08] space-y-4">
             <div className="w-14 h-14 mx-auto rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
               <AlertCircle size={28} />
             </div>
@@ -303,7 +303,7 @@ export function ReceiptCameraModal({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full py-3 px-4 rounded-xl bg-white text-black font-bold text-xs hover:bg-neutral-200 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 rounded-[14px] bg-white text-black font-bold text-xs hover:bg-neutral-200 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <ImageIcon size={16} />
               <span>{isEn ? 'Choose photo from library' : 'Välj bild från galleri'}</span>
@@ -332,12 +332,12 @@ export function ReceiptCameraModal({
             {/* Viewfinder Frame overlay */}
             <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-6">
               {/* Receipt Target Box */}
-              <div className="relative w-full max-w-[320px] aspect-[3/4.6] max-h-[65vh] rounded-2xl border-2 border-white/30 shadow-[0_0_0_9999px_rgba(0,0,0,0.48)] overflow-hidden">
+              <div className="relative w-full max-w-[320px] aspect-[3/4.6] max-h-[65vh] rounded-[22px] border-2 border-white/30 shadow-[0_0_0_9999px_rgba(0,0,0,0.48)] overflow-hidden">
                 {/* 4 Corner Markers */}
-                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-xl" />
-                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr-xl" />
-                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl-xl" />
-                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-xl" />
+                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-[14px]" />
+                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr-[14px]" />
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl-[14px]" />
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-[14px]" />
 
                 {/* Subtle animated scan sweep line */}
                 <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/60 to-transparent animate-[bounce_2.5s_infinite]" />
@@ -391,7 +391,7 @@ export function ReceiptCameraModal({
               type="button"
               onClick={handleRetake}
               disabled={isProcessing}
-              className="flex-1 py-3.5 px-4 rounded-2xl bg-white/10 hover:bg-white/20 active:scale-98 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 backdrop-blur-md transition-all cursor-pointer"
+              className="flex-1 py-3.5 px-4 rounded-[14px] bg-white/10 hover:bg-white/20 active:scale-98 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 backdrop-blur-md transition-all cursor-pointer"
             >
               <RotateCcw size={17} strokeWidth={2.2} />
               <span>{isEn ? 'Retake' : 'Ta om'}</span>
@@ -402,7 +402,7 @@ export function ReceiptCameraModal({
               type="button"
               onClick={handleConfirmPhoto}
               disabled={isProcessing}
-              className="flex-1 py-3.5 px-4 rounded-2xl bg-white hover:bg-white/90 active:scale-98 text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="flex-1 py-3.5 px-4 rounded-[14px] bg-white hover:bg-white/90 active:scale-98 text-black font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <Check size={18} strokeWidth={2.6} />
               <span>{isEn ? 'Use receipt' : 'Använd kvitto'}</span>

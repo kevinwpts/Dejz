@@ -134,7 +134,7 @@ export function SavingsGoalModal({
                     e.stopPropagation();
                     setShowIconSelector(true);
                   }}
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-2xl transition-all active:scale-95 overflow-hidden bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 shrink-0 text-[var(--accent-color)]"
+                  className="w-10 h-10 rounded-[14px] flex items-center justify-center text-2xl transition-all active:scale-95 overflow-hidden bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 shrink-0 text-[var(--accent-color)]"
                 >
                   {logo ? (
                     <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -263,7 +263,7 @@ export function SavingsGoalModal({
                       <button 
                         type="button"
                         onClick={() => setShowIconSelector(false)}
-                        className="w-8 h-8 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                        className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                         aria-label={t('close')}
                       >
                         <X size={17} strokeWidth={2.2} />

@@ -24,7 +24,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     const baseStyles =
       'inline-flex items-center justify-center transition-all duration-150 active:scale-90 select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none shrink-0';
 
-    const shapeStyles = shape === 'circle' ? 'rounded-full' : 'rounded-xl';
+    const shapeStyles = shape === 'circle' ? 'rounded-full' : 'rounded-[14px]';
 
     const sizeStyles = {
       xs: 'w-6 h-6 text-xs',
@@ -35,11 +35,11 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 
     const variantStyles = {
       muted:
-        'bg-black/5 dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-[#222222] border-none shadow-none',
+        'bg-black/5 dark:bg-white/5 text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/10 border-none shadow-none',
       default:
-        'bg-black/5 dark:bg-[#1C1C1C] text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-[#222222] border-none shadow-none',
+        'bg-black/5 dark:bg-white/5 text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/10 border-none shadow-none',
       ghost:
-        'bg-transparent text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-[#1C1C1C]',
+        'bg-transparent text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5',
       accent:
         'bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] shadow-none border-none',
       danger:

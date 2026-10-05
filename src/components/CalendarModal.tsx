@@ -134,14 +134,14 @@ export function CalendarModal({
                           onSelectDate(p.date);
                           onClose();
                         }}
-                        className={`w-full flex items-center justify-between p-3 rounded-[16px] transition-all cursor-pointer text-left ${
+                        className={`w-full flex items-center justify-between p-3 rounded-[14px] transition-all cursor-pointer text-left ${
                           isSelected
                             ? 'bg-blue-500/10 dark:bg-blue-500/15 text-[var(--text-primary)] font-semibold'
                             : 'bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] text-[var(--text-secondary)]'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                          <div className={`w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 ${
                             isSelected 
                               ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold shadow-xs' 
                               : 'bg-black/5 dark:bg-white/[0.04] text-[var(--text-secondary)]'
@@ -154,7 +154,7 @@ export function CalendarModal({
                                 {mPart}
                               </span>
                               {p.isCurrent && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#222222] text-[var(--text-primary)] tracking-tight">
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] tracking-tight">
                                   {language === 'en' ? 'Current' : 'Nuvarande'}
                                 </span>
                               )}

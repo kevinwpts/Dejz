@@ -46,12 +46,12 @@ const MockupPlaceholder = ({
     return (
       <div 
         data-mockup-id={id}
-        className={`relative w-full rounded-[24px] sm:rounded-[32px] overflow-hidden flex items-center justify-center bg-white border border-[#E2DDD4] shadow-sm ${className}`}
+        className={`relative w-full rounded-[28px] overflow-hidden flex items-center justify-center bg-white border border-[#E2DDD4] shadow-sm ${className}`}
       >
         <img 
           src={imageSrc} 
           alt={imageAlt} 
-          className="w-full h-auto max-h-[540px] object-contain rounded-[24px] sm:rounded-[32px]" 
+          className="w-full h-auto max-h-[540px] object-contain rounded-[28px]" 
         />
       </div>
     );
@@ -60,7 +60,7 @@ const MockupPlaceholder = ({
   return (
     <div 
       data-mockup-id={id}
-      className={`relative w-full ${aspectRatio} rounded-[28px] sm:rounded-[36px] bg-white border border-[#E2DDD4] overflow-hidden flex flex-col items-center justify-center p-8 select-none shadow-sm ${className}`}
+      className={`relative w-full ${aspectRatio} rounded-[28px] bg-white border border-[#E2DDD4] overflow-hidden flex flex-col items-center justify-center p-8 select-none shadow-sm ${className}`}
     >
       <div className="absolute inset-0 opacity-[0.2] bg-[radial-gradient(#211F1C_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
       
@@ -187,7 +187,7 @@ export function LandingPage({
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
                 <button 
                   onClick={onGetStarted} 
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[14px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
                 >
                   <span>Kom igång gratis</span>
                   <ChevronRight size={16} />
@@ -196,7 +196,7 @@ export function LandingPage({
                 {onStartDemo && (
                   <button
                     onClick={onStartDemo}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-white hover:bg-[#F9F8F6] text-[#211F1C] border border-[#E2DDD4] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[14px] bg-white hover:bg-[#F9F8F6] text-[#211F1C] border border-[#E2DDD4] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
                   >
                     <span>Testa demo</span>
                   </button>
@@ -284,7 +284,7 @@ export function LandingPage({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 sm:gap-y-12 text-left">
               
               <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4]">
-                <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
+                <div className="w-10 h-10 rounded-[14px] bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
                   <Wallet size={20} />
                 </div>
                 <div className="space-y-1">
@@ -298,7 +298,7 @@ export function LandingPage({
               </div>
 
               <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4]">
-                <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
+                <div className="w-10 h-10 rounded-[14px] bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
                   <CreditCard size={20} />
                 </div>
                 <div className="space-y-1">
@@ -312,7 +312,7 @@ export function LandingPage({
               </div>
 
               <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4]">
-                <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
+                <div className="w-10 h-10 rounded-[14px] bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
                   <PieChart size={20} />
                 </div>
                 <div className="space-y-1">
@@ -326,7 +326,7 @@ export function LandingPage({
               </div>
 
               <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4]">
-                <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
+                <div className="w-10 h-10 rounded-[14px] bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
                   <Calendar size={20} />
                 </div>
                 <div className="space-y-1">
@@ -340,7 +340,7 @@ export function LandingPage({
               </div>
 
               <div className="space-y-3 bg-white p-6 rounded-[22px] border border-[#E2DDD4] md:col-span-2 lg:col-span-2">
-                <div className="w-10 h-10 rounded-xl bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
+                <div className="w-10 h-10 rounded-[14px] bg-black/[0.04] flex items-center justify-center text-[#211F1C]">
                   <Sparkles size={20} />
                 </div>
                 <div className="space-y-1">
@@ -387,7 +387,7 @@ export function LandingPage({
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
               <button 
                 onClick={onGetStarted} 
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[14px] bg-[#1C1917] text-[#FFFFFF] hover:bg-[#2E2A27] active:bg-[#3D3834] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
               >
                 <span>Kom igång gratis</span>
                 <ChevronRight size={16} />
@@ -396,7 +396,7 @@ export function LandingPage({
               {onStartDemo && (
                 <button
                   onClick={onStartDemo}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[16px] bg-white hover:bg-[#F9F8F6] text-[#211F1C] border border-[#E2DDD4] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[14px] bg-white hover:bg-[#F9F8F6] text-[#211F1C] border border-[#E2DDD4] transition-all font-semibold text-base cursor-pointer text-center shadow-xs active:scale-[0.98]"
                 >
                   <span>Testa demo</span>
                 </button>
