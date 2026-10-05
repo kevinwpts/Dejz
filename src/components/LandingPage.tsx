@@ -104,19 +104,19 @@ export function LandingPage({
         onClose={() => setActivePolicy(null)}
       />
 
-      {/* HERO SECTION WITH HERO.PNG BACKGROUND */}
+      {/* UNIFIED HERO SECTION WITH HERO.PNG BACKGROUND & NEUTRAL LEFT GRADIENT */}
       <section className="relative w-full overflow-hidden bg-slate-950 text-white">
-        {/* HERO background image */}
+        {/* HERO background image (natural colors, unfiltered right side) */}
         <div 
           className="absolute inset-0 w-full h-full bg-cover bg-center z-0"
           style={{ backgroundImage: "url('/hero.png')" }}
         />
 
-        {/* Subtle gradient overlay on left side for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-slate-950/25 z-0 pointer-events-none" />
+        {/* Neutral black gradient overlay on left side only for text contrast, fading out to right */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent z-0 pointer-events-none lg:w-3/5" />
 
-        {/* Header integrated inside hero composition */}
-        <header className="relative z-20 w-full border-b border-white/10 backdrop-blur-md bg-slate-950/40">
+        {/* Header integrated inside hero composition (using dark class so DejzLogo renders light/white variant) */}
+        <header className="relative z-20 w-full border-b border-white/10 backdrop-blur-md bg-black/30 dark">
           <div className="max-w-[1200px] mx-auto px-6 sm:px-8 h-20 flex items-center justify-between">
             <div className="flex items-center gap-10">
               <div className="flex items-center select-none cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -126,13 +126,13 @@ export function LandingPage({
               <nav className="hidden md:flex items-center gap-6">
                 <a 
                   href="#how-it-works" 
-                  className="text-sm font-semibold text-slate-300 hover:text-white transition-colors"
+                  className="text-sm font-semibold text-slate-200 hover:text-white transition-colors"
                 >
                   Så fungerar det
                 </a>
                 <a 
                   href="#features" 
-                  className="text-sm font-semibold text-slate-300 hover:text-white transition-colors"
+                  className="text-sm font-semibold text-slate-200 hover:text-white transition-colors"
                 >
                   Funktioner
                 </a>
@@ -159,9 +159,9 @@ export function LandingPage({
         </header>
 
         {/* Hero Content Area */}
-        <div className="relative z-10 max-w-[1200px] mx-auto px-6 sm:px-8 pt-20 pb-28 sm:pt-28 sm:pb-36">
+        <div className="relative z-10 max-w-[1200px] mx-auto px-6 sm:px-8 pt-16 pb-24 sm:pt-24 sm:pb-32">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Column (~40% width for copy) */}
+            {/* Left Column (~40-45% width for copy with neutral contrast) */}
             <div className="lg:col-span-6 space-y-8">
               <div className="space-y-4">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
@@ -169,7 +169,7 @@ export function LandingPage({
                   Svart på vitt.
                 </h1>
 
-                <p className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-lg">
+                <p className="text-base sm:text-lg text-slate-200 font-normal leading-relaxed max-w-lg drop-shadow-sm">
                   Samla inkomster, utgifter, sparande och budget på ett ställe. Se vart pengarna går och få koll på ekonomin mellan två löner.
                 </p>
               </div>
@@ -185,7 +185,7 @@ export function LandingPage({
                   {onStartDemo && (
                     <button
                       onClick={onStartDemo}
-                      className="inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-base font-semibold text-white bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all cursor-pointer active:scale-95 border border-white/10"
+                      className="inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-base font-semibold text-white bg-white/15 hover:bg-white/25 backdrop-blur-md transition-all cursor-pointer active:scale-95 border border-white/20"
                     >
                       Testa demo direkt
                     </button>
@@ -195,7 +195,7 @@ export function LandingPage({
                 {onGoogleLogin && (
                   <button
                     onClick={onGoogleLogin}
-                    className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-[14px] text-sm font-semibold text-slate-800 bg-white hover:bg-slate-100 transition-all cursor-pointer shadow-xs active:scale-95"
+                    className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-[14px] text-sm font-semibold text-slate-800 bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-xs active:scale-95"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -209,34 +209,34 @@ export function LandingPage({
               </div>
 
               {/* Trust points horizontally under CTA */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-white/15">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-white/20">
                 <div className="space-y-1">
-                  <div className="w-8 h-8 rounded-[10px] bg-white/10 flex items-center justify-center text-emerald-400 mb-2">
+                  <div className="w-8 h-8 rounded-[10px] bg-white/15 flex items-center justify-center text-emerald-400 mb-2">
                     <Shield size={18} strokeWidth={2} />
                   </div>
                   <h4 className="text-sm font-bold text-white">Ingen bankkoppling</h4>
-                  <p className="text-xs text-slate-300 leading-relaxed">Du har full kontroll över din data.</p>
+                  <p className="text-xs text-slate-200 leading-relaxed">Du har full kontroll över din data.</p>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="w-8 h-8 rounded-[10px] bg-white/10 flex items-center justify-center text-emerald-400 mb-2">
+                  <div className="w-8 h-8 rounded-[10px] bg-white/15 flex items-center justify-center text-emerald-400 mb-2">
                     <Lock size={18} strokeWidth={2} />
                   </div>
                   <h4 className="text-sm font-bold text-white">Säker och privat</h4>
-                  <p className="text-xs text-slate-300 leading-relaxed">Din ekonomiska information är din.</p>
+                  <p className="text-xs text-slate-200 leading-relaxed">Din ekonomiska information är din.</p>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="w-8 h-8 rounded-[10px] bg-white/10 flex items-center justify-center text-emerald-400 mb-2">
+                  <div className="w-8 h-8 rounded-[10px] bg-white/15 flex items-center justify-center text-emerald-400 mb-2">
                     <Sparkles size={18} strokeWidth={2} />
                   </div>
                   <h4 className="text-sm font-bold text-white">Byggd för enkelhet</h4>
-                  <p className="text-xs text-slate-300 leading-relaxed">Fokus på det som faktiskt hjälper.</p>
+                  <p className="text-xs text-slate-200 leading-relaxed">Fokus på det som faktiskt hjälper.</p>
                 </div>
               </div>
             </div>
 
-            {/* Right Column (empty over hero.png background) */}
+            {/* Right Column (showing natural unfiltered phones on hero.png) */}
             <div className="lg:col-span-6 hidden lg:block" />
           </div>
         </div>
