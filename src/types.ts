@@ -114,6 +114,7 @@ export interface Config {
   includeFixedExpensesInAnalysis: boolean;
   showFixedExpensesInTodayView: boolean;
   showFixedExpensesInCalendar: boolean;
+  showFixedExpensesInHistory?: boolean;
   hideEmptyCategories?: boolean;
   heroBackgroundImage?: string;
   userAgeGroup?: string;

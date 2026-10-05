@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck } from 'lucide-react';
+import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -421,6 +421,35 @@ export function ProfileView({
               </div>
               <p className="text-[11.5px] text-[var(--text-secondary)] opacity-70 leading-relaxed pl-13">
                 {t('showFixedExpensesInCalendarDesc')}
+              </p>
+            </div>
+            <div className="py-3.5 px-4 space-y-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-[12px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+                    <History size={18} strokeWidth={2} />
+                  </div>
+                  <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInHistory')}</span>
+                </div>
+                <ToggleSwitch 
+                  isOn={Boolean(config.showFixedExpensesInHistory ?? (localStorage.getItem('dejz_show_fixed_in_history') === 'true'))} 
+                  onToggle={() => {
+                    const currentVal = Boolean(config.showFixedExpensesInHistory ?? (localStorage.getItem('dejz_show_fixed_in_history') === 'true'));
+                    const next = !currentVal;
+                    try {
+                      localStorage.setItem('dejz_show_fixed_in_history', next ? 'true' : 'false');
+                    } catch (err) {
+                      void err;
+                    }
+                    setConfig({
+                      ...config,
+                      showFixedExpensesInHistory: next,
+                    });
+                  }} 
+                />
+              </div>
+              <p className="text-[11.5px] text-[var(--text-secondary)] opacity-70 leading-relaxed pl-13">
+                {t('showFixedExpensesInHistoryDesc')}
               </p>
             </div>
             <div className="py-3.5 px-4 space-y-1">

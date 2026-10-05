@@ -11,7 +11,7 @@ import {
   ChevronRight,
   Layers
 } from 'lucide-react';
-import { Transaction, Config } from '../types';
+import { Transaction, Config, FixedExpense, Income, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
@@ -19,25 +19,38 @@ import { FilterSelectButton, FilterMenuModal } from './ui';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { formatFullDate } from '../utils/date';
+import { feedback } from '../utils/feedback';
 
 interface LogViewProps {
   transactions: Transaction[];
+  fixedExpenses?: FixedExpense[];
+  incomes?: Income[];
+  stats?: any;
   config: Config;
+  periods?: any[];
   onAddTransaction: () => void;
   onAddIncome: () => void;
   onViewTransaction: (t: Transaction) => void;
+  onViewFixedExpense?: (expense: FixedExpense) => void;
+  onViewIncome?: (income: Income) => void;
+  onViewMonthlySaving?: (saving: any) => void;
   onDeleteTransaction: (id: string) => void;
   t: (key: TranslationKey) => string;
   currentLang: Language;
-  periods?: any[];
 }
 
 export function LogView({ 
   transactions, 
+  fixedExpenses = [],
+  incomes = [],
+  stats,
   config, 
   onAddTransaction, 
   _onAddIncome, 
   onViewTransaction, 
+  onViewFixedExpense,
+  onViewIncome,
+  onViewMonthlySaving,
   onDeleteTransaction, 
   t, 
   currentLang,
@@ -79,6 +92,154 @@ export function LogView({
     return periods.filter(p => !p.isFuture || p.isCurrent);
   }, [periods]);
 
+  // Generate virtual transactions for fixed expenses, incomes, and savings goals if option enabled
+  const fixedItemsAsTransactions = useMemo(() => {
+    if (!config?.showFixedExpensesInHistory) return [];
+    const items: (Transaction & { isFixed: boolean; originalItem: any })[] = [];
+    const isEn = currentLang === 'en';
+
+    // Helper to check if a recurring item is active in a given month (0-11)
+    const isItemActiveInMonth = (item: { frequency?: Frequency; startMonth?: number }, monthIndex: number) => {
+      if (!item.frequency || item.frequency === Frequency.MONTHLY) return true;
+      if (item.startMonth === undefined) return true;
+      const startM = item.startMonth;
+      if (item.frequency === Frequency.QUARTERLY) return (monthIndex - startM + 12) % 3 === 0;
+      if (item.frequency === Frequency.SEMI_ANNUALLY) return (monthIndex - startM + 12) % 6 === 0;
+      if (item.frequency === Frequency.ANNUALLY) return monthIndex === startM;
+      return true;
+    };
+
+    // Determine the month range to generate for
+    const targetMonths: { year: number; month: number; periodId?: string }[] = [];
+    const seenYearMonths = new Set<string>();
+
+    if (chronologicalPeriods.length > 0) {
+      chronologicalPeriods.forEach(p => {
+        const pStart = new Date(p.start);
+        const pEnd = new Date(p.end);
+        
+        let curr = new Date(pStart.getFullYear(), pStart.getMonth(), 1);
+        const endMonthDate = new Date(pEnd.getFullYear(), pEnd.getMonth(), 1);
+        
+        while (curr <= endMonthDate) {
+          const ymKey = `${curr.getFullYear()}-${curr.getMonth()}`;
+          if (!seenYearMonths.has(ymKey)) {
+            seenYearMonths.add(ymKey);
+            targetMonths.push({ year: curr.getFullYear(), month: curr.getMonth(), periodId: p.id });
+          }
+          curr = new Date(curr.getFullYear(), curr.getMonth() + 1, 1);
+        }
+      });
+    } else {
+      // Fallback: past 12 months up to current month
+      const now = new Date();
+      for (let i = -12; i <= 1; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        const ymKey = `${d.getFullYear()}-${d.getMonth()}`;
+        if (!seenYearMonths.has(ymKey)) {
+          seenYearMonths.add(ymKey);
+          targetMonths.push({ year: d.getFullYear(), month: d.getMonth() });
+        }
+      }
+    }
+
+    // Generate entries for each target month
+    targetMonths.forEach(({ year, month, periodId }) => {
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // 1. Incomes
+      (incomes || []).forEach(inc => {
+        if (!isItemActiveInMonth(inc, month)) return;
+        const rawDay = inc.deductionDay || config?.payday || 25;
+        const day = Math.min(rawDay, daysInMonth);
+        const itemDate = new Date(year, month, day, 12, 0, 0);
+
+        const amount = inc.isVariable && periodId && inc.periodOverrides && inc.periodOverrides[periodId] !== undefined
+          ? inc.periodOverrides[periodId]
+          : inc.amount;
+
+        items.push({
+          id: `fixed-income-${inc.id}-${year}-${month}-${day}`,
+          merchant: inc.name,
+          category: inc.category || (isEn ? 'Income' : 'Inkomst'),
+          amount: amount || 0,
+          type: 'income',
+          timestamp: itemDate.getTime(),
+          date: itemDate.toISOString(),
+          isFixed: true,
+          originalItem: inc,
+          icon: inc.icon,
+          logo: inc.logo,
+        } as any);
+      });
+
+      // 2. Fixed Expenses
+      (fixedExpenses || []).forEach(fe => {
+        if (!isItemActiveInMonth(fe, month)) return;
+        const rawDay = fe.deductionDay || config?.payday || 25;
+        const day = Math.min(rawDay, daysInMonth);
+        const itemDate = new Date(year, month, day, 12, 0, 0);
+
+        const amount = fe.isVariable && periodId && fe.periodOverrides && fe.periodOverrides[periodId] !== undefined
+          ? fe.periodOverrides[periodId]
+          : fe.amount;
+
+        items.push({
+          id: `fixed-expense-${fe.id}-${year}-${month}-${day}`,
+          merchant: fe.name,
+          category: fe.category || (isEn ? 'Fixed Expense' : 'Fast utgift'),
+          amount: amount || 0,
+          type: 'expense',
+          timestamp: itemDate.getTime(),
+          date: itemDate.toISOString(),
+          isFixed: true,
+          originalItem: fe,
+          icon: fe.icon,
+          logo: fe.logo,
+        } as any);
+      });
+
+      // 3. Monthly Savings
+      const savingsList = config?.monthlySavingsItems && config.monthlySavingsItems.length > 0
+        ? config.monthlySavingsItems
+        : (stats?.savingsGoals || []).filter((g: any) => Number(g.targetAmount) > 0);
+
+      savingsList.forEach((ms: any) => {
+        if (!isItemActiveInMonth(ms, month)) return;
+        const rawDay = ms.deductionDay || config?.payday || 25;
+        const day = Math.min(rawDay, daysInMonth);
+        const itemDate = new Date(year, month, day, 12, 0, 0);
+
+        const amount = ms.isVariable && periodId && ms.periodOverrides && ms.periodOverrides[periodId] !== undefined
+          ? ms.periodOverrides[periodId]
+          : (ms.amount !== undefined ? ms.amount : (ms.targetAmount || 0));
+
+        items.push({
+          id: `fixed-saving-${ms.id}-${year}-${month}-${day}`,
+          merchant: ms.name || (isEn ? 'Monthly Saving' : 'Månadssparande'),
+          category: isEn ? 'Monthly Saving' : 'Månadssparande',
+          amount: Number(amount) || 0,
+          type: 'expense',
+          timestamp: itemDate.getTime(),
+          date: itemDate.toISOString(),
+          isFixed: true,
+          originalItem: ms,
+          icon: ms.icon || 'PiggyBank',
+          logo: ms.logo,
+        } as any);
+      });
+    });
+
+    return items;
+  }, [config?.showFixedExpensesInHistory, config?.monthlySavingsItems, config?.payday, chronologicalPeriods, incomes, fixedExpenses, stats?.savingsGoals, currentLang]);
+
+  // Combined transactions list (regular + fixed if option enabled)
+  const allCombinedTransactions = useMemo(() => {
+    if (!transactions) return fixedItemsAsTransactions;
+    if (fixedItemsAsTransactions.length === 0) return transactions;
+    return [...transactions, ...fixedItemsAsTransactions];
+  }, [transactions, fixedItemsAsTransactions]);
+
   const selectedMonthName = useMemo(() => {
     if (!selectedPeriod?.name) return '';
     return selectedPeriod.name.includes('(')
@@ -115,9 +276,9 @@ export function LogView({
 
   // Filter transactions by date / period / type
   const filteredExpenses = useMemo(() => {
-    if (!transactions) return [];
-    return transactions
-      .filter(e => {
+    if (!allCombinedTransactions) return [];
+    return allCombinedTransactions
+      .filter((e: any) => {
         // 1. Day filter has top priority if user chose a specific day
         if (selectedDate) {
           const startOfDay = new Date(selectedDate);
@@ -146,11 +307,11 @@ export function LogView({
         return matchesType;
       })
       .sort((a, b) => b.timestamp - a.timestamp);
-  }, [transactions, typeFilter, selectedPeriod, selectedDate]);
+  }, [allCombinedTransactions, typeFilter, selectedPeriod, selectedDate]);
 
   const groupedExpenses = useMemo(() => {
-    const groups: Record<string, Transaction[]> = {};
-    filteredExpenses.forEach(e => {
+    const groups: Record<string, (Transaction & { isFixed?: boolean; originalItem?: any })[]> = {};
+    filteredExpenses.forEach((e: any) => {
       const dateKey = new Date(e.timestamp).toDateString();
       if (!groups[dateKey]) groups[dateKey] = [];
       groups[dateKey].push(e);
@@ -203,8 +364,8 @@ export function LogView({
 
     // Pre-calculate transactions per day in this month
     const txByDay: Record<number, { hasIncome: boolean; hasExpense: boolean; count: number }> = {};
-    if (transactions) {
-      transactions.forEach(tx => {
+    if (allCombinedTransactions) {
+      allCombinedTransactions.forEach((tx: any) => {
         const d = new Date(tx.timestamp);
         if (d.getFullYear() === year && d.getMonth() === month) {
           const dayNum = d.getDate();
@@ -225,7 +386,7 @@ export function LogView({
       firstDayWeekday,
       txByDay
     };
-  }, [modalPeriodDate, transactions]);
+  }, [modalPeriodDate, allCombinedTransactions]);
 
   const weekdayNames = useMemo(() => {
     if (currentLang === 'en') return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -236,7 +397,7 @@ export function LogView({
 
   const today = useMemo(() => new Date(), []);
 
-  if (!transactions) return null;
+  if (!transactions && (!fixedExpenses || fixedExpenses.length === 0)) return null;
 
   return (
     <div className="space-y-6 font-sans">
@@ -332,13 +493,27 @@ export function LogView({
                 </span>
               </div>
               <div className="space-y-2.5">
-                {dayTransactions.map((transaction: Transaction) => (
+                {dayTransactions.map((transaction: any) => (
                   <TransactionItem 
                     key={transaction.id}
                     transaction={transaction}
+                    isFixed={Boolean(transaction.isFixed)}
                     config={config}
-                    onView={onViewTransaction}
-                    onDelete={onDeleteTransaction}
+                    onView={transaction.isFixed ? undefined : onViewTransaction}
+                    onDelete={transaction.isFixed ? undefined : onDeleteTransaction}
+                    onClick={() => {
+                      if (transaction.isFixed) {
+                        if (transaction.type === 'income' && onViewIncome) {
+                          onViewIncome(transaction.originalItem);
+                        } else if (transaction.originalItem?.targetAmount && onViewMonthlySaving) {
+                          onViewMonthlySaving(transaction.originalItem);
+                        } else if (onViewFixedExpense) {
+                          onViewFixedExpense(transaction.originalItem);
+                        }
+                      } else if (onViewTransaction) {
+                        onViewTransaction(transaction);
+                      }
+                    }}
                   />
                 ))}
               </div>

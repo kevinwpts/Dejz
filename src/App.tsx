@@ -940,6 +940,10 @@ export default function App() {
             dbSettings.showFixedExpensesInCalendar !== undefined
               ? dbSettings.showFixedExpensesInCalendar
               : true,
+          showFixedExpensesInHistory:
+            dbSettings.showFixedExpensesInHistory !== undefined
+              ? dbSettings.showFixedExpensesInHistory
+              : (localStorage.getItem('dejz_show_fixed_in_history') === 'true'),
           hideEmptyCategories:
             dbSettings.hideEmptyCategories !== undefined && dbSettings.hideEmptyCategories !== null
               ? Boolean(dbSettings.hideEmptyCategories)
@@ -1910,6 +1914,7 @@ export default function App() {
       includeFixedExpensesInAnalysis: true,
       showFixedExpensesInTodayView: true,
       showFixedExpensesInCalendar: true,
+      showFixedExpensesInHistory: localStorage.getItem('dejz_show_fixed_in_history') === 'true',
       hideEmptyCategories: localStorage.getItem('dejz_hide_empty_categories') === 'true',
     };
 
@@ -2297,6 +2302,10 @@ export default function App() {
             dbProfile.show_fixed_expenses_in_calendar !== undefined
               ? dbProfile.show_fixed_expenses_in_calendar
               : true,
+          showFixedExpensesInHistory:
+            dbProfile.show_fixed_expenses_in_history !== undefined
+              ? dbProfile.show_fixed_expenses_in_history
+              : (localStorage.getItem('dejz_show_fixed_in_history') === 'true' || localSavedConfig?.showFixedExpensesInHistory === true),
           hideEmptyCategories:
             dbProfile.hide_empty_categories !== undefined && dbProfile.hide_empty_categories !== null
               ? Boolean(dbProfile.hide_empty_categories)
@@ -3874,6 +3883,7 @@ export default function App() {
           includeFixedExpensesInAnalysis: true,
           showFixedExpensesInTodayView: true,
           showFixedExpensesInCalendar: true,
+          showFixedExpensesInHistory: false,
           hideEmptyCategories: false,
           paymentMethods: DEFAULT_PAYMENT_METHODS,
         };
@@ -4542,6 +4552,9 @@ export default function App() {
             <div style={{ display: activeTab === "transactions" ? "block" : "none" }}>
               <LogView
                 transactions={transactions}
+                fixedExpenses={fixedExpenses}
+                incomes={incomes}
+                stats={stats}
                 config={config}
                 periods={periods}
                 onAddTransaction={() => {
@@ -4556,6 +4569,15 @@ export default function App() {
                 }}
                 onViewTransaction={(t) => {
                   setViewingTransaction(t);
+                }}
+                onViewFixedExpense={(expense) => {
+                  setViewingFixedExpense(expense);
+                }}
+                onViewIncome={(income) => {
+                  setViewingIncome(income);
+                }}
+                onViewMonthlySaving={(saving) => {
+                  setViewingMonthlySaving(saving);
                 }}
                 onDeleteTransaction={deleteTransaction}
                 t={t}

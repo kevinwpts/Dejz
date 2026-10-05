@@ -86,6 +86,9 @@ export const dataService = {
         : (localSavedConfig?.showFixedExpensesInCalendar !== undefined 
             ? localSavedConfig.showFixedExpensesInCalendar 
             : (profileData.show_fixed_expenses_in_today_view !== undefined ? profileData.show_fixed_expenses_in_today_view : false)),
+      showFixedExpensesInHistory: profileData.show_fixed_expenses_in_history !== undefined
+        ? profileData.show_fixed_expenses_in_history
+        : (localSavedConfig?.showFixedExpensesInHistory !== undefined ? localSavedConfig.showFixedExpensesInHistory : false),
       homeWidgets: profileData.home_widgets || localSavedConfig?.homeWidgets || undefined,
       hideEmptyCategories: profileData.hide_empty_categories !== undefined
         ? profileData.hide_empty_categories
@@ -198,6 +201,7 @@ export const dataService = {
       include_fixed_expenses_in_analysis: config.includeFixedExpensesInAnalysis,
       show_fixed_expenses_in_today_view: config.showFixedExpensesInTodayView,
       show_fixed_expenses_in_calendar: config.showFixedExpensesInCalendar,
+      show_fixed_expenses_in_history: config.showFixedExpensesInHistory,
       home_widgets: config.homeWidgets,
       hide_empty_categories: config.hideEmptyCategories,
       updated_at: new Date().toISOString()
