@@ -13,7 +13,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
 import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 import { parseIncomePrompt } from '../utils/incomeAiParser';
-import { SmartInput } from './ui';
+import { SmartInput, Modal, Button } from './ui';
 import { ToggleSwitch } from './ToggleSwitch';
 
 export type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
@@ -80,6 +80,11 @@ const texts = {
     
     next: 'Nästa',
     back: 'Tillbaka',
+    exitOnboarding: 'Avsluta onboarding',
+    skipOnboardingTitle: 'Hoppa över introduktionen?',
+    skipOnboardingDesc: 'Du kan alltid ställa in lönedag, inkomster och fasta utgifter senare under Inställningar.',
+    skipAndEnter: 'Hoppa över & öppna Dejz',
+    continueOnboarding: 'Fortsätt introduktionen',
   },
   en: {
     stepOf: (step: number, total: number) => `Step ${step} of ${total}`,
@@ -134,6 +139,11 @@ const texts = {
     
     next: 'Next',
     back: 'Back',
+    exitOnboarding: 'Exit onboarding',
+    skipOnboardingTitle: 'Skip onboarding?',
+    skipOnboardingDesc: 'You can always configure your payday, incomes, and fixed expenses later in Settings.',
+    skipAndEnter: 'Skip & Open Dejz',
+    continueOnboarding: 'Continue onboarding',
   }
 };
 
@@ -183,15 +193,17 @@ interface OnboardingModalProps {
   }) => Promise<void> | void;
   t: (key: TranslationKey) => string;
   currentPeriodId: string;
+  onClose?: () => void;
 }
 
-export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, currentPeriodId }: OnboardingModalProps) {
+export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onClose, t, currentPeriodId }: OnboardingModalProps) {
   useScrollLock(isOpen);
   const isEn = config.language === 'en' || t('today') === 'Today';
   const lang = isEn ? 'en' : 'sv';
   const s = texts[lang];
 
   const [step, setStep] = useState<Step>('name');
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [fullName, setFullName] = useState('');
   const [payday, setPayday] = useState(25);
   const [isCustomDayActive, setIsCustomDayActive] = useState(false);
@@ -632,7 +644,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                       className="w-8 h-8 flex items-center justify-center bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] rounded-[12px] transition-all text-[var(--text-secondary)] border border-[var(--border-color)] shadow-2xs cursor-pointer active:scale-95"
                       aria-label={s.back}
                     >
-                      <ChevronLeft size={16} />
+                      <ChevronLeft size={16} strokeWidth={2} />
                     </button>
                   )}
                   <div className="flex flex-col">
@@ -650,6 +662,17 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
                     </h2>
                   </div>
                 </div>
+
+                {/* Exit Onboarding Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowExitConfirm(true)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer border border-[var(--border-color)] shadow-2xs active:scale-95 shrink-0"
+                  title={s.exitOnboarding}
+                  aria-label={s.exitOnboarding}
+                >
+                  <X size={16} strokeWidth={2} />
+                </button>
               </div>
 
               {/* Content Body: Question / Action */}
@@ -1334,6 +1357,54 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, t, 
               />
             )}
           </AnimatePresence>
+
+          {/* Exit / Skip Confirmation Modal */}
+          {showExitConfirm && (
+            <Modal
+              isOpen={showExitConfirm}
+              onClose={() => setShowExitConfirm(false)}
+              center
+              size="sm"
+              title={s.skipOnboardingTitle}
+              showCloseButton={true}
+              bodyClassName="p-6 space-y-4"
+            >
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
+                {s.skipOnboardingDesc}
+              </p>
+              <div className="flex flex-col gap-2.5 pt-2">
+                <Button
+                  variant="primary"
+                  fullWidth
+                  onClick={() => {
+                    setShowExitConfirm(false);
+                    if (onClose) {
+                      onClose();
+                    } else {
+                      onComplete({
+                        fullName: fullName.trim() || 'Användare',
+                        incomes: [],
+                        fixedExpenses: [],
+                        savingsGoals: [],
+                        initialSpent: 0,
+                        payday: payday || 25,
+                        paydayBeforeWeekend,
+                      });
+                    }
+                  }}
+                >
+                  {s.skipAndEnter}
+                </Button>
+                <Button
+                  variant="ghost"
+                  fullWidth
+                  onClick={() => setShowExitConfirm(false)}
+                >
+                  {s.continueOnboarding}
+                </Button>
+              </div>
+            </Modal>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

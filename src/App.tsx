@@ -4882,6 +4882,15 @@ export default function App() {
           userId={session?.user.id}
           currentPeriodId={currentPeriodId}
           isPro={isPro(subscriptionStatus)}
+          onClose={() => {
+            setIsOnboarding(false);
+            const activeUserId = session?.user?.id || "demo-user";
+            try {
+              dataService.updateProfile(activeUserId, { onboarding_completed: true });
+            } catch (err) {
+              console.warn("Could not mark onboarding completed on exit:", err);
+            }
+          }}
           onComplete={async (data) => {
             setIsOnboarding(false);
             tabScrollPositions.current['today'] = 0;
