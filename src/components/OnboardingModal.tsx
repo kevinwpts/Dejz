@@ -15,7 +15,7 @@ import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 import { parseIncomePrompt } from '../utils/incomeAiParser';
 import { SmartInput, Modal, Button } from './ui';
 import { ToggleSwitch } from './ToggleSwitch';
-import { getInstantBrandLogo, getLogoUrl, fetchLogoForName } from '../utils/logo';
+import { getLogoUrl, fetchLogoForName } from '../utils/logo';
 
 export type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
 
@@ -246,7 +246,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
     if (existingIndex >= 0) {
       setFixedExpenses(fixedExpenses.filter((_, i) => i !== existingIndex));
     } else {
-      const instantLogo = getInstantBrandLogo(preset.name, preset.category) || getLogoUrl(preset.name, preset.category);
+      const instantLogo = getLogoUrl(preset.name, preset.category);
 
       const newExpense: Omit<FixedExpense, 'id'> = {
         name: preset.name,
@@ -992,7 +992,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                               const isAdded = fixedExpenses.some(
                                 e => e.name.trim().toLowerCase() === preset.name.trim().toLowerCase()
                               );
-                              const presetLogo = getInstantBrandLogo(preset.name, preset.category) || getLogoUrl(preset.name, preset.category);
+                              const presetLogo = getLogoUrl(preset.name, preset.category);
                               const mockTx = {
                                 id: preset.id,
                                 amount: preset.defaultAmount,

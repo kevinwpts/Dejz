@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Sparkles, Upload, Check, Plus } from 'lucide-react';
-import { fetchLogoForName, getInstantBrandLogo } from '../utils/logo';
+import { fetchLogoForName, getLogoUrl } from '../utils/logo';
 import { getAutomaticMerchantLogo, isAutomaticMerchantLogo } from '../utils/resolver';
 import { uploadLogo } from '../services/storageService';
 import { TranslationKey } from '../i18n';
@@ -39,9 +39,9 @@ export function IconSelector({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 1. Resolve automatic merchant logo from our central resolver or instant brand database
+  // 1. Resolve automatic merchant logo from our central resolver or logo database
   const instantAuto = useMemo(() => {
-    return getAutomaticMerchantLogo(name) || (name ? getInstantBrandLogo(name) : undefined);
+    return getAutomaticMerchantLogo(name) || (name ? getLogoUrl(name) : undefined);
   }, [name]);
 
   useEffect(() => {

@@ -546,151 +546,7 @@ export const KNOWN_BRANDS: Record<string, string> = {
     'mindler': 'mindler.se'
 };
 
-// Instant vector SVG logos for iconic brands
-export const INSTANT_BRAND_LOGOS: Record<string, string> = {
-    // Fitness 24/7 & Gym
-    'fitness 24/7': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%2304234c"/><text x="50" y="38" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="14" letter-spacing="1.5" text-anchor="middle">FITNESS</text><rect x="14" y="46" width="72" height="30" rx="15" fill="%23ff5500"/><text x="50" y="67" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="16" letter-spacing="0.5" text-anchor="middle">24Seven</text></svg>',
-    'fitness24seven': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%2304234c"/><text x="50" y="38" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="14" letter-spacing="1.5" text-anchor="middle">FITNESS</text><rect x="14" y="46" width="72" height="30" rx="15" fill="%23ff5500"/><text x="50" y="67" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="16" letter-spacing="0.5" text-anchor="middle">24Seven</text></svg>',
-    'sats': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%230e1b2f"/><text x="50" y="62" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="24" letter-spacing="2" text-anchor="middle">SATS</text></svg>',
-    'nordic wellness': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23111111"/><circle cx="50" cy="50" r="38" fill="none" stroke="%2395c11f" stroke-width="4"/><text x="50" y="48" fill="%2395c11f" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="18" text-anchor="middle">NW</text><text x="50" y="68" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="8" letter-spacing="1" text-anchor="middle">WELLNESS</text></svg>',
-    'nordicwellness': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23111111"/><circle cx="50" cy="50" r="38" fill="none" stroke="%2395c11f" stroke-width="4"/><text x="50" y="48" fill="%2395c11f" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="18" text-anchor="middle">NW</text><text x="50" y="68" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="8" letter-spacing="1" text-anchor="middle">WELLNESS</text></svg>',
-    'friskis': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23e30613"/><text x="50" y="58" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="1" text-anchor="middle">F%26S</text><text x="50" y="74" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="8" letter-spacing="1" text-anchor="middle">FRISKIS</text></svg>',
-    'friskissvettis': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23e30613"/><text x="50" y="58" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="1" text-anchor="middle">F%26S</text><text x="50" y="74" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="8" letter-spacing="1" text-anchor="middle">FRISKIS</text></svg>',
 
-    // Mat & Livsmedel
-    'coop': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%2300843D"/><g fill="%23ffffff" transform="translate(8, 36) scale(0.84)"><path d="M18.8 21.8c-2.3 2.2-5.4 3.4-9 3.4C3.8 25.2 0 20.8 0 14.4 0 7.9 4.1 3.5 10 3.5c3.6 0 6.6 1.2 8.8 3.4l-2.8 3.4c-1.6-1.5-3.6-2.3-6-2.3-3.6 0-6.1 2.7-6.1 6.4 0 3.7 2.4 6.4 6.1 6.4 2.3 0 4.4-.9 6-2.4l2.8 3.4zm14.5-18.3c6 0 10.1 4.4 10.1 10.9s-4.1 10.8-10.1 10.8c-6 0-10.1-4.3-10.1-10.8s4.1-10.9 10.1-10.9zm0 4.5c-3.6 0-6.1 2.7-6.1 6.4 0 3.7 2.5 6.4 6.1 6.4 3.6 0 6.1-2.7 6.1-6.4 0-3.7-2.5-6.4-6.1-6.4zm22.8-4.5c6 0 10.1 4.4 10.1 10.9s-4.1 10.8-10.1 10.8c-6 0-10.1-4.3-10.1-10.8s4.1-10.9 10.1-10.9zm0 4.5c-3.6 0-6.1 2.7-6.1 6.4 0 3.7 2.5 6.4 6.1 6.4 3.6 0 6.1-2.7 6.1-6.4 0-3.7-2.5-6.4-6.1-6.4zm22.8-4.5c6 0 10.1 4.4 10.1 10.9 0 6.5-4.1 10.8-10.1 10.8-2.9 0-5.4-1.1-7.1-3v10.4h-4V4.1h3.8v2.7c1.7-2 4.4-3.3 7.3-3.3zm-.4 4.5c-3.6 0-6.1 2.7-6.1 6.4 0 3.7 2.5 6.4 6.1 6.4 3.6 0 6.1-2.7 6.1-6.4 0-3.7-2.5-6.4-6.1-6.4z"/></g></svg>',
-    'ica': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23e0001a"/><text x="50" y="64" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="30" letter-spacing="1" text-anchor="middle">ICA</text></svg>',
-    'willys': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23d81b27"/><text x="50" y="62" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="0.5" text-anchor="middle">WILLYS:</text></svg>',
-    'lidl': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%230050aa"/><circle cx="50" cy="50" r="38" fill="%23fff000" stroke="%23e60000" stroke-width="4"/><text x="50" y="60" fill="%230050aa" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="0.5" text-anchor="middle">LIDL</text></svg>',
-    'hemköp': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23d8232a"/><text x="50" y="62" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="18" letter-spacing="0.5" text-anchor="middle">HEMKÖP</text></svg>',
-    
-    // Kollektivtrafik
-    'sl': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23007ac3"/><circle cx="50" cy="50" r="34" fill="none" stroke="%23ffffff" stroke-width="5"/><text x="50" y="62" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="26" letter-spacing="1" text-anchor="middle">SL</text></svg>',
-    'sj': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%231b6c39"/><text x="50" y="64" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="34" letter-spacing="2" text-anchor="middle">SJ</text></svg>',
-    
-    // Snabbmat & Streaming
-    'max': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23e30613"/><text x="50" y="64" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" letter-spacing="1" text-anchor="middle">MAX</text></svg>',
-    'mcdonalds': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23bf0c0c"/><text x="50" y="70" fill="%23ffc72c" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="52" text-anchor="middle">M</text></svg>',
-    'netflix': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23141414"/><g transform="translate(26, 18)"><path fill="%23E50914" d="M0 0h15v64H0z"/><path fill="%23B81D24" d="M33 0h15v64H33z"/><path fill="%23E50914" d="M0 0l33 64h15L15 0z"/></g></svg>',
-    'spotify': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23121212"/><circle cx="50" cy="50" r="32" fill="%231db954"/><path d="M36 44c10-3 20-2 29 2M38 52c8-2 16-1 23 2M41 59c6-2 13-1 18 2" fill="none" stroke="%23121212" stroke-width="4" stroke-linecap="round"/></svg>',
-    'disney+': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23113CCF"/><text x="50" y="58" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="26" letter-spacing="-1" text-anchor="middle">Disney+</text></svg>',
-    'disney plus': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23113CCF"/><text x="50" y="58" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="26" letter-spacing="-1" text-anchor="middle">Disney+</text></svg>',
-    'disney': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23113CCF"/><text x="50" y="58" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="26" letter-spacing="-1" text-anchor="middle">Disney+</text></svg>',
-    'youtube': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FF0000"/><path d="M42 34l24 16-24 16V34z" fill="%23ffffff"/></svg>',
-    'youtube premium': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FF0000"/><path d="M42 34l24 16-24 16V34z" fill="%23ffffff"/></svg>',
-    'tinder': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><defs><linearGradient id="tinderGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23fd297b"/><stop offset="50%" stop-color="%23ff5864"/><stop offset="100%" stop-color="%23ff655b"/></linearGradient></defs><rect width="100" height="100" fill="url(%23tinderGrad)"/><path d="M49.2 24c.7 2.4 1 5 .8 7.6-.4 3.7-2.2 7-5 9.4-2.5 2.2-4.1 5.3-4.4 8.7-.6 7.4 5 13.9 12.4 14.5 7.4.6 13.9-5 14.5-12.4.2-2.9-.6-5.8-2.3-8.1-1.3 4.1-4.7 7.2-9 8.1 3.5-6.2 3.1-13.8-.9-19.6-1.5-2.2-3.6-4-6.1-5.2v-3z" fill="%23ffffff"/></svg>',
-    'skyshowtime': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23000000"/><text x="50" y="44" fill="%2300d2ff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="17" letter-spacing="1" text-anchor="middle">SKY</text><text x="50" y="68" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="13" letter-spacing="0.5" text-anchor="middle">SHOWTIME</text></svg>',
-    'max (hbo)': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23002be7"/><text x="50" y="65" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="30" letter-spacing="2" text-anchor="middle">MAX</text></svg>',
-    'hbo max': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23002be7"/><text x="50" y="65" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="30" letter-spacing="2" text-anchor="middle">MAX</text></svg>',
-    'storytel': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FF5A00"/><path d="M50 22c-15 0-26 12-26 27s11 27 26 27 26-12 26-27-11-27-26-27zm0 38c-6 0-11-5-11-11s5-11 11-11 11 5 11 11-5 11-11 11z" fill="%23ffffff"/></svg>',
-    'bookbeat': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23111111"/><text x="50" y="62" fill="%23FFDD00" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="19" letter-spacing="0.5" text-anchor="middle">BookBeat</text></svg>',
-    'viaplay': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23220033"/><text x="50" y="62" fill="%23FF2255" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="18" letter-spacing="0.5" text-anchor="middle">viaplay</text></svg>',
-    'tv4 play': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23E30613"/><text x="50" y="64" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" letter-spacing="1" text-anchor="middle">TV4</text></svg>',
-    'tv4': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23E30613"/><text x="50" y="64" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" letter-spacing="1" text-anchor="middle">TV4</text></svg>',
-    'apple tv': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23000000"/><path d="M50 25c2-3 5-4 8-4 0 3-1 6-3 8-2 2-5 3-7 3 0-3 1-6 2-7zm9 10c-3 0-6 2-8 2s-5-2-8-2c-4 0-8 3-10 8-4 9 0 22 5 28 3 4 6 8 10 8s5-2 8-2 5 2 8 2 7-4 10-8c2-3 3-6 3-6s-6-3-6-9c0-6 5-8 5-8s-3-5-7-5z" fill="%23ffffff"/></svg>',
-    'apple music': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FA233B"/><path d="M50 25c2-3 5-4 8-4 0 3-1 6-3 8-2 2-5 3-7 3 0-3 1-6 2-7zm9 10c-3 0-6 2-8 2s-5-2-8-2c-4 0-8 3-10 8-4 9 0 22 5 28 3 4 6 8 10 8s5-2 8-2 5 2 8 2 7-4 10-8c2-3 3-6 3-6s-6-3-6-9c0-6 5-8 5-8s-3-5-7-5z" fill="%23ffffff"/></svg>',
-    'apple': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23000000"/><path d="M50 25c2-3 5-4 8-4 0 3-1 6-3 8-2 2-5 3-7 3 0-3 1-6 2-7zm9 10c-3 0-6 2-8 2s-5-2-8-2c-4 0-8 3-10 8-4 9 0 22 5 28 3 4 6 8 10 8s5-2 8-2 5 2 8 2 7-4 10-8c2-3 3-6 3-6s-6-3-6-9c0-6 5-8 5-8s-3-5-7-5z" fill="%23ffffff"/></svg>',
-    'hedvig': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%231E1E24"/><text x="50" y="62" fill="%23FF5E7E" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="1" text-anchor="middle">hedvig</text></svg>',
-    'csn': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23003A70"/><text x="50" y="64" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="28" letter-spacing="2" text-anchor="middle">CSN</text></svg>',
-    'klarna': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FFB3C7"/><text x="50" y="62" fill="%230A0A0A" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="-0.5" text-anchor="middle">Klarna.</text></svg>',
-    'telia': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23990099"/><text x="50" y="62" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="1" text-anchor="middle">Telia</text></svg>',
-    'tele2': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23000f2e"/><text x="50" y="62" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="1" text-anchor="middle">Tele2</text></svg>',
-    'telenor': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%2300A0EB"/><text x="50" y="62" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="1" text-anchor="middle">telenor</text></svg>',
-    'tre': 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="%23FF6600"/><text x="50" y="66" fill="%23ffffff" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="44" text-anchor="middle">3</text></svg>',
-};
-
-/**
- * Disambiguation helper for context-dependent names like "Max (HBO)" vs "Max Hamburgare"
- */
-export function isStreamingMaxContext(name: string, category?: string): boolean {
-    const lowerName = (name || '').toLowerCase();
-    const lowerCat = (category || '').toLowerCase();
-
-    // Explicit mentions of HBO or streaming
-    if (
-        lowerName.includes('hbo') ||
-        lowerName.includes('stream') ||
-        lowerName.includes('tv') ||
-        lowerName.includes('film') ||
-        lowerName.includes('serie') ||
-        lowerName.includes('abonnemang') ||
-        lowerName.includes('play')
-    ) {
-        return true;
-    }
-
-    // Category indicates entertainment/streaming
-    if (
-        lowerCat.includes('stream') ||
-        lowerCat.includes('abonnemang') ||
-        lowerCat.includes('nöje') ||
-        lowerCat.includes('noje') ||
-        lowerCat.includes('media') ||
-        lowerCat.includes('tv')
-    ) {
-        return true;
-    }
-
-    return false;
-}
-
-/**
- * Returns an instant vector SVG logo data URI for known major brands.
- */
-export function getInstantBrandLogo(name: string, category?: string): string | undefined {
-    if (!name) return undefined;
-    const lower = name.toLowerCase().trim();
-
-    // Check specific streaming context for Max
-    if (lower.includes('max') && (isStreamingMaxContext(lower, category) || lower.includes('hbo'))) {
-        return INSTANT_BRAND_LOGOS['max (hbo)'];
-    }
-
-    // Direct match
-    if (INSTANT_BRAND_LOGOS[lower]) {
-        // If it matched fastfood 'max' but context is streaming, return HBO max logo
-        if (lower === 'max' && isStreamingMaxContext(lower, category)) {
-            return INSTANT_BRAND_LOGOS['max (hbo)'];
-        }
-        return INSTANT_BRAND_LOGOS[lower];
-    }
-
-    // Normalized match
-    const normalized = lower
-        .replace(/[åä]/g, 'a')
-        .replace(/[ö]/g, 'o')
-        .replace(/24\/7/g, '24seven')
-        .replace(/24 7/g, '24seven')
-        .replace(/&/g, '')
-        .trim();
-
-    if (INSTANT_BRAND_LOGOS[normalized]) {
-        return INSTANT_BRAND_LOGOS[normalized];
-    }
-
-    // Search keys sorted by length descending so multi-word keys match first
-    const sortedKeys = Object.keys(INSTANT_BRAND_LOGOS).sort((a, b) => b.length - a.length);
-
-    for (const key of sortedKeys) {
-        // Skip hamburger 'max' if context is streaming
-        if (key === 'max' && isStreamingMaxContext(lower, category)) {
-            continue;
-        }
-
-        if (key.includes(' ') || key.includes('/') || key.length > 3) {
-            if (lower.includes(key) || normalized.includes(key)) {
-                return INSTANT_BRAND_LOGOS[key];
-            }
-        } else {
-            const regex = new RegExp(`(?:^|[^a-z0-9])${key}(?:$|[^a-z0-9])`, 'i');
-            if (regex.test(lower) || regex.test(normalized)) {
-                return INSTANT_BRAND_LOGOS[key];
-            }
-        }
-    }
-
-    return undefined;
-}
 
 // Pre-sorted known brand keys by length descending for optimal multi-word matching
 const SORTED_BRAND_KEYS = Object.keys(KNOWN_BRANDS).sort((a, b) => b.length - a.length);
@@ -778,13 +634,7 @@ export const getLogoUrl = (title: string, category?: string): string | undefined
     // If it's already a full URL or data URI, return it directly
     if (title.startsWith('http') || title.startsWith('data:image')) return title;
 
-    // 1. Check instant vector SVG badges first (100% crisp vector graphics, instant load)
-    const instantSvg = getInstantBrandLogo(title, category);
-    if (instantSvg) {
-        return instantSvg;
-    }
-
-    // 2. Check known brand domains (Netflix, Spotify, Tinder, SATS, SkyShowtime, etc.)
+    // Check known brand domains (Netflix, Spotify, Tinder, SATS, SkyShowtime, etc.)
     const knownDomain = findKnownBrandDomain(title, category);
     if (knownDomain) {
         const apiKey = import.meta.env.VITE_LOGODEV_API_KEY;
@@ -849,11 +699,7 @@ export const fetchLogoForName = async (name: string, category?: string): Promise
         return ok ? name : undefined;
     }
 
-    // 0. Check instant vector logo
-    const instant = getInstantBrandLogo(name, category);
-    if (instant) {
-        return instant;
-    }
+
 
     // 1. Check known brands first (Tinder, SkyShowtime, Max, Spotify, SATS, Coop, etc.)
     const knownDomain = findKnownBrandDomain(name, category);

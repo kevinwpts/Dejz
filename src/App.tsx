@@ -58,7 +58,7 @@ import { ProfileView } from "./components/ProfileView";
 import { SettingsMainView } from "./components/SettingsMainView";
 import { AddToHomeScreenModal } from "./components/AddToHomeScreenModal";
 import { CookieConsentModal } from "./components/CookieConsentModal";
-import { getInstantBrandLogo, getLogoUrl } from "./utils/logo";
+import { getLogoUrl } from "./utils/logo";
 import { FeedbackModal } from "./components/FeedbackModal";
 import { DeleteAccountModal } from "./components/DeleteAccountModal";
 import { SecurityModal } from "./components/SecurityModal";
@@ -963,7 +963,7 @@ export default function App() {
       setIncomes(dbIncomes || []);
       const upgradedFixedRefresh = (dbFixed || []).map((fe) => {
         if (!fe.logo || fe.logo.includes("google.com/s2/favicons")) {
-          const autoLogo = getInstantBrandLogo(fe.name, fe.category) || getLogoUrl(fe.name, fe.category);
+          const autoLogo = getLogoUrl(fe.name, fe.category);
           if (autoLogo && !autoLogo.includes("google.com/s2/favicons")) {
             return { ...fe, logo: autoLogo };
           }
@@ -2365,7 +2365,7 @@ export default function App() {
       setIncomes(dbIncomes || []);
       const upgradedFixed = (dbFixed || []).map((fe) => {
         if (!fe.logo || fe.logo.includes("google.com/s2/favicons")) {
-          const autoLogo = getInstantBrandLogo(fe.name, fe.category) || getLogoUrl(fe.name, fe.category);
+          const autoLogo = getLogoUrl(fe.name, fe.category);
           if (autoLogo && !autoLogo.includes("google.com/s2/favicons")) {
             return { ...fe, logo: autoLogo };
           }
@@ -5057,7 +5057,7 @@ export default function App() {
               const newFixedExpenses: FixedExpense[] = [];
               for (const exp of data.fixedExpenses || []) {
                 if (exp.name && exp.amount > 0) {
-                  const autoLogo = getInstantBrandLogo(exp.name, exp.category) || getLogoUrl(exp.name, exp.category);
+                  const autoLogo = getLogoUrl(exp.name, exp.category);
                   const fixedLogo = (exp.logo && !exp.logo.includes("google.com/s2/favicons")) ? exp.logo : (autoLogo || exp.logo);
                   const fixed: FixedExpense = {
                     id: crypto.randomUUID(),

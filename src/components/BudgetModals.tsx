@@ -6,7 +6,7 @@ import { X, Check, Trash2, ChevronDown, PiggyBank, Pencil, ChevronRight, Calenda
 import { Income, FixedExpense, Frequency, Category, Config, MonthlySaving } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
-import { fetchLogoForName, getLogoUrl, findKnownBrandDomain, getInstantBrandLogo } from '../utils/logo';
+import { fetchLogoForName, getLogoUrl, findKnownBrandDomain } from '../utils/logo';
 import { IconSelector } from './IconSelector';
 import { IconPickerModal } from './IconPickerModal';
 import { ICON_MAP, isEmojiString, getPaymentMethodIcon, getCategoryIconName } from '../utils/icons';
@@ -1219,7 +1219,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
     if (manualSelectionThisSession) return;
 
     const trimmedName = name.trim();
-    const instantLogo = getInstantBrandLogo(trimmedName, category) || getLogoUrl(trimmedName, category);
+    const instantLogo = getLogoUrl(trimmedName, category);
 
     if (instantLogo) {
       setLogo(instantLogo);

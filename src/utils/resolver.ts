@@ -1,5 +1,5 @@
 import { Transaction, Config } from '../types';
-import { getInstantBrandLogo, findKnownBrandDomain, getLogoUrl } from './logo';
+import { findKnownBrandDomain, getLogoUrl } from './logo';
 import { resolveLucideIcon, ICON_MAP, getCategoryIconName, suggestIcon, isEmojiString } from './icons';
 import { getEmojiSolidColor } from './ui';
 import { ArrowUp, Receipt, PiggyBank } from 'lucide-react';
@@ -93,7 +93,7 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     if (explicitLogo.startsWith('http') || explicitLogo.startsWith('data:image') || explicitLogo.startsWith('/')) {
       // If explicit logo is a legacy low-res google favicon, upgrade to crisp instant SVG or Clearbit if available
       if (explicitLogo.includes('google.com/s2/favicons')) {
-        const upgraded = getInstantBrandLogo(merchantText, categoryText) || getLogoUrl(merchantText, categoryText);
+        const upgraded = getLogoUrl(merchantText, categoryText);
         if (upgraded && !upgraded.includes('google.com/s2/favicons')) {
           return {
             type: 'merchant',
@@ -134,18 +134,7 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     };
   }
 
-  // 2. Instant vector SVG logo (100% crisp vector graphics, instant load)
-  const instantSvg = getInstantBrandLogo(merchantText, categoryText) || getInstantBrandLogo(transaction.merchant || '', categoryText);
-  if (instantSvg) {
-    return {
-      type: 'merchant',
-      logoUrl: instantSvg,
-      source: 'brand_auto',
-      merchantNormalized: normalizeMerchant(merchantText)
-    };
-  }
-
-  // 3. Secure automated company logo (High-confidence brand lookup via Clearbit/Logo.dev)
+  // 2. Secure automated company logo (High-confidence brand lookup via Clearbit/Logo.dev/Google)
   const brandDomain = findKnownBrandDomain(merchantText, categoryText) || findKnownBrandDomain(transaction.merchant || '', categoryText);
   if (brandDomain) {
     const brandLogoUrl = getLogoUrl(merchantText, categoryText) || `https://logo.clearbit.com/${brandDomain}`;
@@ -263,8 +252,7 @@ export function isAutomaticMerchantLogo(url?: string, merchantName?: string): bo
     if (autoLogo && (url === autoLogo || url.includes(autoLogo) || autoLogo.includes(url))) {
       return true;
     }
-    const instant = getInstantBrandLogo(merchantName);
-    if (instant && url === instant) return true;
+
     const knownDomain = findKnownBrandDomain(merchantName);
     if (knownDomain && url.includes(knownDomain)) return true;
     const autoUrl = getLogoUrl(merchantName);
