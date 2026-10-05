@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, Config } from '../types';
 import { resolveEntityVisual } from '../utils/resolver';
+import { fetchLogoForName } from '../utils/logo';
 import { Receipt } from 'lucide-react';
 
 export function TransactionLogo({
@@ -13,6 +14,7 @@ export function TransactionLogo({
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }) {
   const [imgError, setImgError] = useState(false);
+  const [asyncLogoUrl, setAsyncLogoUrl] = useState<string | null>(null);
 
   const merchantName =
     typeof transaction.merchant === 'object'
@@ -24,19 +26,26 @@ export function TransactionLogo({
           : transaction.category);
 
   const visual = resolveEntityVisual(transaction, config);
-  const activeLogoUrl = (transaction.logo && transaction.logo !== 'none') ? transaction.logo : visual.logoUrl;
+  const directLogoUrl = (transaction.logo && transaction.logo !== 'none') ? transaction.logo : visual.logoUrl;
 
   useEffect(() => {
     setImgError(false);
-  }, [
-    activeLogoUrl,
-    transaction.logo,
-    transaction.icon,
-    transaction.merchant,
-    transaction.note,
-    transaction.category,
-    merchantName,
-  ]);
+    let active = true;
+
+    if (!directLogoUrl && merchantName && merchantName.length >= 2) {
+      fetchLogoForName(merchantName).then(url => {
+        if (active && url) {
+          setAsyncLogoUrl(url);
+        }
+      });
+    } else {
+      setAsyncLogoUrl(null);
+    }
+
+    return () => { active = false; };
+  }, [directLogoUrl, merchantName]);
+
+  const activeLogoUrl = directLogoUrl || asyncLogoUrl;
 
   const sizeConfig = {
     xl: {
