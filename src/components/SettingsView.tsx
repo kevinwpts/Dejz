@@ -12,6 +12,7 @@ import { Button, Modal } from './ui';
 import { ToggleSwitch } from './ToggleSwitch';
 import { formatPaydaySummary, formatOrdinalDay } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
+import { getPaymentMethodIcon } from '../utils/icons';
 
 interface SettingsViewProps {
   activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency';
@@ -253,7 +254,7 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="flex items-center justify-between mb-3 px-1 gap-2 flex-wrap">
+        <div className="flex items-center justify-between mb-2 px-1 gap-2 flex-wrap">
           <span className="text-xs font-semibold text-[var(--text-secondary)]">
             {methodsList.length} {config.language === 'en' ? 'payment methods' : 'betalningsmetoder'}
           </span>
@@ -280,41 +281,54 @@ export function SettingsView({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3.5">
-          {methodsList.map((method: any, index: number) => (
-            <div
-              key={method.name || index}
-              onClick={() => {
-                setPaymentMethodModalData({ index, name: method.name });
-                setIsPaymentMethodModalOpen(true);
-              }}
-              style={{ backgroundColor: method.color || '#6366f1' }}
-              className="h-32 sm:h-36 p-4 rounded-[22px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
-            >
-              <CategoryIcon icon={method.icon} size="lg" noBackground whiteIcon />
-              <span className="text-[14px] sm:text-[15px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
-                {method.name}
-              </span>
-            </div>
-          ))}
-
-          {/* Dashed Add New Payment Method Card */}
-          <button
-            type="button"
-            onClick={() => {
-              setPaymentMethodModalData({ name: '' });
-              setIsPaymentMethodModalOpen(true);
-            }}
-            className="h-32 sm:h-36 p-4 rounded-[22px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group active:scale-[0.98]"
-          >
-            <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
-              <Plus size={18} strokeWidth={2} />
-            </div>
-            <span className="text-xs font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-              {config.language === 'en' ? 'New payment method' : 'Ny betalmetod'}
-            </span>
-          </button>
+        {/* Clean grouped list */}
+        <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          {methodsList.map((method: any, index: number) => {
+            const IconComp = getPaymentMethodIcon(method.name);
+            return (
+              <button
+                key={method.name || index}
+                type="button"
+                onClick={() => {
+                  setPaymentMethodModalData({ index, name: method.name });
+                  setIsPaymentMethodModalOpen(true);
+                }}
+                className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center text-[var(--text-secondary)] shrink-0 group-hover:text-[var(--text-primary)] group-hover:bg-black/[0.07] dark:group-hover:bg-white/[0.1] transition-all">
+                    {IconComp ? (
+                      <IconComp size={18} strokeWidth={2} />
+                    ) : (
+                      <CategoryIcon icon={method.icon || 'credit-card'} size="sm" noBackground />
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold text-[var(--text-primary)] tracking-tight truncate">
+                    {method.name}
+                  </span>
+                </div>
+                <div className="text-[var(--text-tertiary)] shrink-0 pl-2 group-hover:text-[var(--text-secondary)] transition-colors">
+                  <ChevronRight size={16} strokeWidth={2} />
+                </div>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Dashed Add New Button at bottom */}
+        <button
+          type="button"
+          onClick={() => {
+            setPaymentMethodModalData({ name: '' });
+            setIsPaymentMethodModalOpen(true);
+          }}
+          className="w-full py-3.5 px-4 rounded-[18px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex items-center justify-center gap-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer group active:scale-[0.99]"
+        >
+          <div className="w-5 h-5 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
+            <Plus size={13} strokeWidth={2.5} />
+          </div>
+          <span>{config.language === 'en' ? 'Add new payment method' : 'Lägg till betalningsmetod'}</span>
+        </button>
       </div>
     );
   };

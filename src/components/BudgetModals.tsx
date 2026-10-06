@@ -19,8 +19,7 @@ import { Button, IconButton, Modal } from './ui';
 import { CancelSubscriptionModal } from './CancelSubscriptionModal';
 import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
 import { resolveEntityVisual } from '../utils/resolver';
-import { feedback } from '../utils/feedback';
-import { getCategoryColor, DEFAULT_CATEGORY_PALETTE } from '../utils/categoryColors';
+import { getCategoryColor } from '../utils/categoryColors';
 
 function _hexToRgba(hex: string, alpha: number): string {
   if (!hex) return `rgba(124, 58, 237, ${alpha})`;
@@ -2511,74 +2510,29 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
           <button 
             type="button"
             onClick={() => setShowIconPicker(true)}
-            className="w-20 h-20 rounded-[22px] flex items-center justify-center transition-all active:scale-95 group cursor-pointer shadow-sm relative overflow-hidden"
-            style={{ backgroundColor: color }}
+            className="w-16 h-16 rounded-2xl bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center transition-all active:scale-95 group cursor-pointer border border-black/[0.06] dark:border-white/[0.08] relative overflow-hidden text-[var(--text-primary)]"
             title="Välj ikon"
           >
             <CategoryIcon 
               icon={icon} 
-              size="xl" 
+              size="lg" 
               noBackground 
-              whiteIcon 
             />
           </button>
+          <span className="text-[11px] font-medium text-[var(--text-tertiary)] mt-2">
+            Tryck för att byta ikon (valfritt)
+          </span>
         </div>
 
         <div className="space-y-4">
           <input 
             type="text" 
+            autoFocus
             placeholder="Namn på betalningsmetod"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[14px] px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs transition-all outline-none"
           />
-
-          {/* Color palette */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between ml-0.5 mr-1">
-              <label className="text-xs font-semibold text-[var(--text-secondary)]">
-                {t('color')}
-              </label>
-              {/* Custom hex color input picker */}
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono text-[var(--text-tertiary)]">{color}</span>
-                <div className="relative w-6 h-6 rounded-full overflow-hidden border border-[var(--border-color)] cursor-pointer shadow-xs">
-                  <input
-                    type="color"
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    className="absolute inset-0 -translate-x-2 -translate-y-2 w-12 h-12 cursor-pointer opacity-0"
-                    title="Välj anpassad färg"
-                  />
-                  <div className="w-full h-full" style={{ backgroundColor: color }} />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-8 gap-2 bg-[var(--surface-muted)] p-2.5 rounded-[16px] border border-[var(--border-color)]">
-              {DEFAULT_CATEGORY_PALETTE.map((c) => {
-                const isSelected = color.toLowerCase() === c.toLowerCase();
-                return (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
-                    className={`w-full aspect-square rounded-full transition-transform active:scale-90 relative cursor-pointer ${
-                      isSelected ? 'scale-110 shadow-sm ring-2 ring-white dark:ring-[#1C1C1C]' : 'hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: c }}
-                    aria-label={`Välj färg ${c}`}
-                  >
-                    {isSelected && (
-                      <span className="absolute inset-0 flex items-center justify-center text-white">
-                        <Check size={12} strokeWidth={3} />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
           <Button
             onClick={() => { if (name.trim()) { onSave(name.trim(), icon, color); onClose(); } }}
