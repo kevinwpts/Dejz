@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
+import { Check, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, RotateCcw } from 'lucide-react';
 import { isEmojiString, getCategoryIconName } from '../utils/icons';
 import { CategoryIcon } from './CategoryIcon';
 import { Frequency, Config, Income, FixedExpense } from '../types';
@@ -11,6 +11,7 @@ import { FilterSelectButton, FilterMenuModal, Button } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { getCategoryColor } from '../utils/categoryColors';
+import { ConfirmModal } from './ConfirmModal';
 
 interface BudgetViewProps {
   allTransactions?: any[];
@@ -64,6 +65,16 @@ export function BudgetView({
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
   });
+  const [showResetBudgetConfirm, setShowResetBudgetConfirm] = React.useState(false);
+
+  const handleResetCategoryBudgets = () => {
+    const resetCategories = (config.categories || []).map((c) => ({
+      ...c,
+      budget: null,
+    }));
+    setConfig({ ...config, categories: resetCategories });
+    setShowResetBudgetConfirm(false);
+  };
   const handleOpenCategoryBudgets = () => {
     setShowCategoryBudgets(true);
   };
@@ -417,8 +428,8 @@ export function BudgetView({
           </div>
         </div>
 
-        {/* Spara & Klar */}
-        <div className="pt-2">
+        {/* Spara & Nollställ */}
+        <div className="pt-2 space-y-2.5">
           <button
             type="button"
             onClick={handleCloseCategoryBudgets}
@@ -427,7 +438,34 @@ export function BudgetView({
             <Check size={16} strokeWidth={2.5} />
             {config.language === 'en' ? 'Done, save budget' : 'Klar, spara budgeten'}
           </button>
+
+          <button
+            type="button"
+            onClick={() => setShowResetBudgetConfirm(true)}
+            className="w-full py-2.5 text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <RotateCcw size={13} strokeWidth={2} />
+            <span>{config.language === 'en' ? 'Reset budget' : 'Nollställ budgeten'}</span>
+          </button>
         </div>
+
+        {showResetBudgetConfirm && (
+          <ConfirmModal
+            isOpen={showResetBudgetConfirm}
+            title={config.language === 'en' ? "Reset budget?" : "Nollställ budgeten?"}
+            message={
+              config.language === 'en'
+                ? "Do you want to reset all category budgets to 0? Your income, fixed expenses, and savings will remain unchanged."
+                : "Vill du nollställa alla kategoribudgetar till 0 kr? Dina inkomster, fasta utgifter och sparande påverkas inte."
+            }
+            confirmText={config.language === 'en' ? "Reset budget" : "Nollställ budget"}
+            cancelText={config.language === 'en' ? "Cancel" : "Avbryt"}
+            variant="danger"
+            onConfirm={handleResetCategoryBudgets}
+            onCancel={() => setShowResetBudgetConfirm(false)}
+            t={t}
+          />
+        )}
       </motion.div>
     );
   }
