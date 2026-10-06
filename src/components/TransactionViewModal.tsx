@@ -168,7 +168,7 @@ export function TransactionViewModal({
 
   const merchantName = typeof transaction.merchant === 'object' ? (transaction.merchant as any)?.name : (transaction.merchant || (typeof transaction.category === 'object' ? (transaction.category as any)?.name : transaction.category));
 
-  if (typeof document === 'undefined') return null;
+  if (typeof document === 'undefined' || !document.body) return null;
 
   return createPortal(
     <motion.div 

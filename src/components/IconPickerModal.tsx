@@ -329,5 +329,6 @@ export function IconPickerModal({
     </AnimatePresence>
   );
 
+  if (typeof document === 'undefined' || !document.body) return null;
   return createPortal(modalNode, document.body);
 }

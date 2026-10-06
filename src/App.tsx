@@ -3534,18 +3534,19 @@ export default function App() {
   const handleSaveMonthlySaving = async (saving: any) => {
     if (!session || !config) return;
     try {
+      const targetId = editingMonthlySaving?.id || crypto.randomUUID();
       const newSaving = {
         ...saving,
         isVariable: Boolean(saving.isVariable),
         periodOverrides: saving.isVariable ? (saving.periodOverrides || {}) : {},
-        id: editingMonthlySaving?.id || crypto.randomUUID(),
+        id: targetId,
       };
 
-      const newItems = editingMonthlySaving
-        ? config.monthlySavingsItems?.map((s: any) =>
-            s.id === editingMonthlySaving.id ? newSaving : s,
-          ) || [newSaving]
-        : [...(config.monthlySavingsItems || []), newSaving];
+      const existingItems = config.monthlySavingsItems || [];
+      const itemExists = editingMonthlySaving && existingItems.some((s: any) => s.id === editingMonthlySaving.id);
+      const newItems = itemExists
+        ? existingItems.map((s: any) => (s.id === editingMonthlySaving.id ? newSaving : s))
+        : [...existingItems, newSaving];
 
       const itemsSum = newItems.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0);
       const newConfig = { ...config, monthlySavingsItems: newItems, monthlySavings: itemsSum };
@@ -5433,6 +5434,7 @@ export default function App() {
         )}
         {isMonthlySavingModalOpen && (
           <MonthlySavingModal
+            key={editingMonthlySaving?.id || "new-monthly-saving"}
             saving={editingMonthlySaving}
             currentPeriodId={currentPeriodId}
             onClose={() => {

@@ -314,5 +314,6 @@ export function CancelSubscriptionModal({
     </AnimatePresence>
   );
 
+  if (typeof document === 'undefined' || !document.body) return null;
   return createPortal(modalContent, document.body);
 }

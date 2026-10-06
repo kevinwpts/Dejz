@@ -36,7 +36,7 @@ export function FilterMenuModal<T = string>({
 }: FilterMenuModalProps<T>) {
   useScrollLock(isOpen);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined' || !document.body) return null;
 
   return createPortal(
     <AnimatePresence>

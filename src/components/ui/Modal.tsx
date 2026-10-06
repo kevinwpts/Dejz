@@ -146,6 +146,6 @@ export const Modal: React.FC<ModalProps> = ({
     </AnimatePresence>
   );
 
-  if (!mounted || typeof document === 'undefined') return null;
+  if (!mounted || typeof document === 'undefined' || !document.body) return null;
   return createPortal(modalNode, document.body);
 };

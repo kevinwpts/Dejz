@@ -134,24 +134,34 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     };
   }
 
-  // 2. Secure automated company logo (High-confidence brand lookup via Clearbit/Logo.dev/Google)
-  const brandDomain = findKnownBrandDomain(merchantText, categoryText) || findKnownBrandDomain(transaction.merchant || '', categoryText);
-  if (brandDomain) {
-    const brandLogoUrl = getLogoUrl(merchantText, categoryText) || `https://logo.clearbit.com/${brandDomain}`;
+  // If this is a new transaction preview inside TransactionModal, visual resolution is handled onBlur/Enter
+  if (transaction.id === 'preview' && !explicitLogo && (!explicitIcon || explicitIcon === 'receipt' || explicitIcon === 'none')) {
     return {
-      type: 'merchant',
-      logoUrl: brandLogoUrl,
-      source: 'brand_auto',
-      merchantNormalized: normalizeMerchant(merchantText)
+      type: 'fallback',
+      iconKey: 'receipt',
+      iconComponent: Receipt,
+      backgroundColor: 'var(--surface-muted)',
+      textColor: 'var(--text-secondary)',
+      source: 'neutral_placeholder'
     };
   }
 
-  // Also try fuzzy fallback brand lookup if merchant text is clean
+  // 2. Secure automated company logo (High-confidence brand lookup via Clearbit/Logo.dev/Google)
   if (merchantText && merchantText.length >= 2) {
-    const fuzzyLogo = getLogoUrl(merchantText, categoryText);
+    const brandDomain = findKnownBrandDomain(merchantText) || findKnownBrandDomain(transaction.merchant || '');
+    if (brandDomain) {
+      const brandLogoUrl = getLogoUrl(merchantText) || `https://logo.clearbit.com/${brandDomain}`;
+      return {
+        type: 'merchant',
+        logoUrl: brandLogoUrl,
+        source: 'brand_auto',
+        merchantNormalized: normalizeMerchant(merchantText)
+      };
+    }
+
+    const fuzzyLogo = getLogoUrl(merchantText);
     // Only use fuzzy auto logo if it's high confidence (e.g. recognized domain)
     if (fuzzyLogo && !fuzzyLogo.includes('default')) {
-      // Check if we have a known instant domain match
       const norm = normalizeMerchant(merchantText);
       if (norm.length > 2) {
         return {

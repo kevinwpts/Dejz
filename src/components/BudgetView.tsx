@@ -206,13 +206,16 @@ export function BudgetView({
     }
   }, [showCategoryBudgets, everydayBudget]);
 
-  const totalAllocated = (config.categories || []).reduce((sum, c) => {
+  // The available pool to distribute across categories is Total Income minus Monthly Savings
+  const totalPoolToAllocate = Math.max(0, totalIncomeSum - totalSavingsSum);
+
+  const totalCategoryAllocated = (config.categories || []).reduce((sum, c) => {
     const fixedSpent = Math.round(getFixedSpentForCategory(c.name));
     const val = Math.max(Number(c.budget) || 0, fixedSpent);
     return sum + (val > 0 ? val : 0);
   }, 0);
 
-  const remainingToAllocate = totalIncomeSum - totalAllocated;
+  const remainingToAllocate = totalPoolToAllocate - totalCategoryAllocated;
   const isOverAllocated = remainingToAllocate < 0;
 
   
@@ -388,7 +391,7 @@ export function BudgetView({
 
             {/* Kompletterande mindre information */}
             <div className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)]">
-              <span className="font-amount tabular-nums">{formatAmount(totalAllocated, config.language)}</span> {config.language === 'en' ? 'of' : 'av'} <span className="font-amount tabular-nums">{formatAmount(totalIncomeSum, config.language)}</span> {curr} {config.language === 'en' ? 'allocated' : 'fördelat'}
+              <span className="font-amount tabular-nums">{formatAmount(totalCategoryAllocated, config.language)}</span> {config.language === 'en' ? 'of' : 'av'} <span className="font-amount tabular-nums">{formatAmount(totalPoolToAllocate, config.language)}</span> {curr} {config.language === 'en' ? 'allocated' : 'fördelat'}
             </div>
           </div>
 
@@ -398,7 +401,7 @@ export function BudgetView({
               className={`h-full rounded-full transition-all duration-300 ${
                 isOverAllocated ? "bg-rose-500" : "bg-[var(--accent-color)]"
               }`}
-              style={{ width: `${Math.min(100, Math.round((totalAllocated / (totalIncomeSum || 1)) * 100))}%` }}
+              style={{ width: `${Math.min(100, Math.round((totalCategoryAllocated / (totalPoolToAllocate || 1)) * 100))}%` }}
             />
           </div>
         </div>

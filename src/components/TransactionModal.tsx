@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -333,8 +333,6 @@ export function TransactionModal({
       e.target.value = '';
     }
   };
-  const originalMerchant = useRef(transaction?.merchant || '');
-  const originalNote = useRef(transaction?.note || '');
   const [manualSelectionThisSession, setManualSelectionThisSession] = useState(false);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [_showAdvanced, _setShowAdvanced] = useState(true);
@@ -522,59 +520,48 @@ export function TransactionModal({
     }
   }, [categories, category]);
 
-  useEffect(() => {
-    const brandQuery = merchant.trim() || note.trim();
+  const resolveBrandVisuals = useCallback(async (customMerchant?: string, customNote?: string) => {
+    if (manualSelectionThisSession) return;
+    const query = (customMerchant !== undefined ? customMerchant : merchant).trim() || (customNote !== undefined ? customNote : note).trim();
     
-    if (!brandQuery) {
-      if (!manualSelectionThisSession) {
-        setLogo(undefined);
-        setIcon('receipt');
-      }
+    if (!query) {
+      setLogo(undefined);
+      setIcon('receipt');
       setLogoError(false);
       return;
     }
 
-    const searchName = brandQuery;
-    // 1. Instant check for known brand domains (e.g. Coop -> coop.se, ICA -> ica.se, Willys, SATS, etc.)
-    const knownDomain = findKnownBrandDomain(merchant) || findKnownBrandDomain(note) || findKnownBrandDomain(brandQuery);
-    const instantLogo = knownDomain ? `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128` : getLogoUrl(brandQuery);
-    const suggestedIcon = suggestIcon(searchName);
+    const knownDomain = findKnownBrandDomain(query);
+    const instantLogo = knownDomain ? `https://www.google.com/s2/favicons?domain=${knownDomain}&sz=128` : getLogoUrl(query);
+    const suggestedIcon = suggestIcon(query);
 
-    if (!manualSelectionThisSession) {
-      if (instantLogo) {
-        setLogo(instantLogo);
-        setIcon('receipt');
-        setLogoError(false);
-        return;
-      } else if (suggestedIcon && suggestedIcon !== '🧾') {
-        const hasChanged = merchant !== originalMerchant.current || note !== originalNote.current;
-        if (hasChanged || !logo) {
-          setIcon(suggestedIcon);
-        }
-      }
+    if (instantLogo) {
+      setLogo(instantLogo);
+      setIcon('receipt');
+      setLogoError(false);
+      return;
     }
 
-    const timer = setTimeout(async () => {
-      if (manualSelectionThisSession) return;
+    const url = await fetchLogoForName(query);
+    setLogoError(false);
+    if (url) {
+      setLogo(url);
+      setIcon('receipt');
+    } else if (suggestedIcon && suggestedIcon !== '🧾') {
+      setLogo(undefined);
+      setIcon(suggestedIcon);
+    } else {
+      setLogo(undefined);
+      setIcon('receipt');
+    }
+  }, [merchant, note, manualSelectionThisSession]);
 
-      const url = await fetchLogoForName(brandQuery || searchName);
-      setLogoError(false);
-      
-      const hasChanged = merchant !== originalMerchant.current || note !== originalNote.current;
-
-      if (url && (hasChanged || !logo)) {
-        setLogo(url);
-        setIcon('receipt');
-      } else if (!url && hasChanged) {
-        // If no logo found, suggest an icon based on the name
-        setLogo(undefined);
-        if (suggestedIcon && suggestedIcon !== '🧾') {
-          setIcon(suggestedIcon);
-        }
-      }
-    }, 200);
-    return () => clearTimeout(timer);
-  }, [merchant, note, category, manualSelectionThisSession]);
+  // Only resolve initial prefill brand visual on mount if not editing existing transaction
+  useEffect(() => {
+    if (prefill?.name && !transaction && !logo) {
+      resolveBrandVisuals(prefill.name);
+    }
+  }, []);
 
 
 
@@ -596,7 +583,7 @@ export function TransactionModal({
 
   const backdropMouseDownTarget = useRef<EventTarget | null>(null);
 
-  if (typeof document === 'undefined') return null;
+  if (typeof document === 'undefined' || !document.body) return null;
 
   return createPortal(
     <motion.div 
@@ -712,6 +699,13 @@ export function TransactionModal({
                   type="text" 
                   value={merchant}
                   onChange={(e) => setMerchant(e.target.value)}
+                  onBlur={(e) => resolveBrandVisuals(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      resolveBrandVisuals(e.currentTarget.value);
+                      amountInputRef.current?.focus();
+                    }
+                  }}
                   placeholder={currentLang === 'en' ? 'Name' : 'Namn'}
                   className="text-[19px] sm:text-[21px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
@@ -867,6 +861,12 @@ export function TransactionModal({
                   type="text" 
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
+                  onBlur={(e) => resolveBrandVisuals(undefined, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      resolveBrandVisuals(undefined, e.currentTarget.value);
+                    }
+                  }}
                   placeholder={type === 'income' ? t('incomeNotePlaceholder') : (currentLang === 'en' ? 'Add note...' : 'Skriv notering...')}
                   className={`text-[13.5px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
                     validationError === 'note' ? 'text-rose-500' : ''

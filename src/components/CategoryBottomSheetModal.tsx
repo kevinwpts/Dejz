@@ -126,7 +126,7 @@ export function CategoryBottomSheetModal({
     return Math.min(100, Math.round((categoryData.spent / categoryData.budget) * 100));
   }, [categoryData]);
 
-  if (!targetCategoryName || typeof document === 'undefined') return null;
+  if (!targetCategoryName || typeof document === 'undefined' || !document.body) return null;
 
   return createPortal(
     <AnimatePresence>

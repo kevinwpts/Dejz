@@ -149,28 +149,18 @@ export function SettingsView({
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between mb-3 px-1 gap-2 flex-wrap">
+        <div className="flex items-center justify-between mb-3 px-1">
           <span className="text-xs font-semibold text-[var(--text-secondary)]">
             {list.length} {config.language === 'en' ? 'categories' : 'kategorier'}
           </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<RotateCcw size={13} strokeWidth={2} />}
-              onClick={() => setIsResetCategoriesModalOpen(true)}
-            >
-              {config.language === 'en' ? 'Reset to default' : 'Återställ standard'}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<Plus size={14} strokeWidth={2} />}
-              onClick={() => handleAddCategory(type)}
-            >
-              {t('newCategory')}
-            </Button>
-          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Plus size={14} strokeWidth={2} />}
+            onClick={() => handleAddCategory(type)}
+          >
+            {t('newCategory')}
+          </Button>
         </div>
 
         <div className="grid grid-cols-2 gap-3.5">
@@ -233,7 +223,19 @@ export function SettingsView({
         </div>
 
         <div key={categoryTab}>
-            {categoryTab === 'expense' ? renderCategoryList('expense') : renderCategoryList('income')}
+          {categoryTab === 'expense' ? renderCategoryList('expense') : renderCategoryList('income')}
+        </div>
+
+        {/* Reset button placed under everything */}
+        <div className="pt-2 pb-1 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setIsResetCategoriesModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
+          >
+            <RotateCcw size={13} strokeWidth={2} />
+            <span>{config.language === 'en' ? 'Reset categories to default' : 'Återställ kategorier till standard'}</span>
+          </button>
         </div>
       </div>
     );
@@ -254,31 +256,21 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="flex items-center justify-between mb-2 px-1 gap-2 flex-wrap">
+        <div className="flex items-center justify-between mb-2 px-1">
           <span className="text-xs font-semibold text-[var(--text-secondary)]">
             {methodsList.length} {config.language === 'en' ? 'payment methods' : 'betalningsmetoder'}
           </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<RotateCcw size={13} strokeWidth={2} />}
-              onClick={() => setIsResetPaymentMethodsModalOpen(true)}
-            >
-              {config.language === 'en' ? 'Reset to default' : 'Återställ standard'}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<Plus size={14} strokeWidth={2} />}
-              onClick={() => {
-                setPaymentMethodModalData({ name: '' });
-                setIsPaymentMethodModalOpen(true);
-              }}
-            >
-              {config.language === 'en' ? 'New payment method' : 'Ny betalmetod'}
-            </Button>
-          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Plus size={14} strokeWidth={2} />}
+            onClick={() => {
+              setPaymentMethodModalData({ name: '' });
+              setIsPaymentMethodModalOpen(true);
+            }}
+          >
+            {config.language === 'en' ? 'New payment method' : 'Ny betalmetod'}
+          </Button>
         </div>
 
         {/* Clean grouped list */}
@@ -329,6 +321,18 @@ export function SettingsView({
           </div>
           <span>{config.language === 'en' ? 'Add new payment method' : 'Lägg till betalningsmetod'}</span>
         </button>
+
+        {/* Reset button placed under everything */}
+        <div className="pt-2 pb-1 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setIsResetPaymentMethodsModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
+          >
+            <RotateCcw size={13} strokeWidth={2} />
+            <span>{config.language === 'en' ? 'Reset payment methods to default' : 'Återställ betalningsmetoder till standard'}</span>
+          </button>
+        </div>
       </div>
     );
   };

@@ -19,11 +19,7 @@ export function TransactionLogo({
   const merchantName =
     typeof transaction.merchant === 'object'
       ? (transaction.merchant as any)?.name
-      : transaction.merchant ||
-        transaction.note ||
-        (typeof transaction.category === 'object'
-          ? (transaction.category as any)?.name
-          : transaction.category);
+      : (transaction.merchant || transaction.note || '');
 
   const visual = resolveEntityVisual(transaction, config);
   const rawExplicitLogo = (transaction.logo && transaction.logo !== 'none') ? transaction.logo : undefined;
@@ -35,7 +31,12 @@ export function TransactionLogo({
     setImgError(false);
     let active = true;
 
-    if (!directLogoUrl && merchantName && merchantName.length >= 2) {
+    if (transaction.id === 'preview') {
+      setAsyncLogoUrl(null);
+      return;
+    }
+
+    if (!directLogoUrl && merchantName && merchantName.trim().length >= 2) {
       fetchLogoForName(merchantName).then(url => {
         if (active && url) {
           setAsyncLogoUrl(url);
@@ -46,7 +47,7 @@ export function TransactionLogo({
     }
 
     return () => { active = false; };
-  }, [directLogoUrl, merchantName]);
+  }, [directLogoUrl, merchantName, transaction.id]);
 
   const activeLogoUrl = directLogoUrl || asyncLogoUrl;
 
@@ -85,6 +86,18 @@ export function TransactionLogo({
     container: 'w-[42px] h-[42px] rounded-[12px]',
     icon: 20,
   };
+
+  // If this is an empty new transaction waiting for input, render a clean neutral placeholder
+  if (visual.source === 'neutral_placeholder') {
+    const IconComponent = visual.iconComponent || Receipt;
+    return (
+      <div
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs select-none`}
+      >
+        <IconComponent size={sizeConfig.icon} strokeWidth={2} />
+      </div>
+    );
+  }
 
   // If there's an official logo and no load error (Klarna / Apple Pay squircle app icon style)
   if (activeLogoUrl && !imgError) {

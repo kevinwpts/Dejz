@@ -211,23 +211,29 @@ export function TodayView({
       }
     });
 
-    if (stats?.savingsGoals) {
-      stats.savingsGoals.forEach((goal: any) => {
-        if (goal.deductionDay === day) {
-          transactions.push({
-            id: `saving-${goal.id}`,
-            merchant: goal.name,
-            category: lang === "en" ? "Monthly Saving" : "Månadssparande",
-            amount: goal.targetAmount,
-            type: "expense",
-            originalItem: goal,
-          });
-        }
-      });
-    }
+    const savingsList = config?.monthlySavingsItems && config.monthlySavingsItems.length > 0 
+      ? config.monthlySavingsItems 
+      : (stats?.savingsGoals || []);
+
+    savingsList.forEach((goal: any) => {
+      if (goal.deductionDay === day) {
+        const itemAmount = goal.amount !== undefined && goal.amount !== null ? goal.amount : goal.targetAmount;
+        transactions.push({
+          id: goal.id ? (goal.id.startsWith('saving-') ? goal.id : `saving-${goal.id}`) : `saving-${Math.random()}`,
+          merchant: goal.name,
+          category: lang === "en" ? "Monthly Saving" : "Månadssparande",
+          amount: itemAmount,
+          type: "expense",
+          originalItem: {
+            ...goal,
+            amount: itemAmount,
+          },
+        });
+      }
+    });
 
     return transactions;
-  }, [normalizedSelectedDate, incomes, fixedExpenses, stats?.savingsGoals, stats?.periodId, lang]);
+  }, [normalizedSelectedDate, incomes, fixedExpenses, config?.monthlySavingsItems, stats?.savingsGoals, stats?.periodId, lang]);
 
   const categoryBudgetData = useMemo(() => {
     if (!stats?.categories) return [];
@@ -478,7 +484,7 @@ export function TodayView({
                       onClick={() => {
                         if (item.type === "income" && onViewIncome) {
                           onViewIncome(item.originalItem);
-                        } else if (item.originalItem?.targetAmount && onViewMonthlySaving) {
+                        } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
                           onViewMonthlySaving(item.originalItem);
                         } else if (onViewFixedExpense) {
                           onViewFixedExpense(item.originalItem);

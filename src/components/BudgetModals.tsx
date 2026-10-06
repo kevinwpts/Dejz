@@ -99,7 +99,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
 
   const hasAdjustment = income.isVariable && income.periodOverrides && currentPeriodId && income.periodOverrides[currentPeriodId] !== undefined;
 
-  if (typeof document === 'undefined') return null;
+  if (typeof document === 'undefined' || !document.body) return null;
 
   return createPortal(
     <motion.div 
@@ -682,7 +682,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           </div>
 
           {/* Category Selector Bottom Sheet Modal */}
-          {isCategorySelectorOpen && createPortal(
+          {isCategorySelectorOpen && typeof document !== 'undefined' && document.body && createPortal(
             <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategorySelectorOpen(false)} />
               <motion.div
@@ -903,7 +903,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
   const PaymentIcon = getPaymentMethodIcon(methodStr);
   const freqText = getFrequencyLabel(expense.frequency, t);
 
-  if (typeof document === 'undefined') return null;
+  if (typeof document === 'undefined' || !document.body) return null;
 
   return createPortal(
     <motion.div 
@@ -1581,7 +1581,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* Category Selector Bottom Sheet Modal */}
-          {isCategorySelectorOpen && createPortal(
+          {isCategorySelectorOpen && typeof document !== 'undefined' && document.body && createPortal(
             <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategorySelectorOpen(false)} />
               <motion.div
@@ -1827,7 +1827,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
   const PaymentIcon = getPaymentMethodIcon(methodStr);
   const freqText = getFrequencyLabel(saving.frequency, t);
 
-  if (typeof document === 'undefined') return null;
+  if (typeof document === 'undefined' || !document.body) return null;
 
   return createPortal(
     <motion.div 
@@ -2002,7 +2002,8 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
           t={t}
         />
       )}
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }
 
@@ -2022,7 +2023,8 @@ interface MonthlySavingModalProps {
 export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, currency, userId, isPro, paymentMethods, _currentPeriodId, config }: MonthlySavingModalProps & { paymentMethods: any[], _currentPeriodId?: string, currentPeriodId?: string, config: Config }) {
   useScrollLock(true);
   const [name, setName] = useState(saving?.name || '');
-  const [amount, setAmount] = useState(formatAmount(saving?.amount || ''));
+  const rawAmount = saving?.amount !== undefined && saving?.amount !== null ? saving.amount : (saving as any)?.targetAmount;
+  const [amount, setAmount] = useState(formatAmount(rawAmount !== undefined && rawAmount !== null ? String(rawAmount) : ''));
   
   const [deductionDay, setDeductionDay] = useState(saving?.deductionDay || 25);
   const [startMonth, setStartMonth] = useState(saving?.startMonth ?? new Date().getMonth());

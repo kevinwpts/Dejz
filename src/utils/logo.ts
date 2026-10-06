@@ -555,7 +555,7 @@ const SORTED_BRAND_KEYS = Object.keys(KNOWN_BRANDS).sort((a, b) => b.length - a.
  * Finds a matching domain from the known brands dictionary.
  */
 export function findKnownBrandDomain(name: string, category?: string): string | undefined {
-    if (!name) return undefined;
+    if (!name || name.trim().length < 2) return undefined;
     const lower = name.toLowerCase().trim();
 
     if (lower.includes('hbo') || (lower.includes('max') && ((category || '').toLowerCase().includes('stream') || lower.includes('hbo')))) {
@@ -622,7 +622,7 @@ export function buildDomainLogoUrls(domain: string): string[] {
  * Synchronous resolver for a logo URL given a name, merchant or category.
  */
 export const getLogoUrl = (title: string, category?: string): string | undefined => {
-    if (!title) return undefined;
+    if (!title || title.trim().length < 2) return undefined;
     
     // If it's already a full URL or data URI, return it directly
     if (title.startsWith('http') || title.startsWith('data:image')) return title;
