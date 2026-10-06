@@ -408,14 +408,14 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
 
 
-  const backdropMouseDownTarget = useRef<EventTarget | null>(null);
+  if (typeof document === 'undefined' || !document.body) return null;
 
-  return (
+  return createPortal(
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
+      className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -845,7 +845,8 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           t={t}
         />
       )}
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }
 
@@ -1274,14 +1275,14 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
 
 
-  const backdropMouseDownTarget = useRef<EventTarget | null>(null);
+  if (typeof document === 'undefined' || !document.body) return null;
 
-  return (
+  return createPortal(
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
+      className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -1778,7 +1779,8 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           }}
         />
       )}
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }
 
@@ -2112,14 +2114,14 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
     });
   };
 
-  const backdropMouseDownTarget = useRef<EventTarget | null>(null);
+  if (typeof document === 'undefined' || !document.body) return null;
 
-  return (
+  return createPortal(
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
+      className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -2466,7 +2468,8 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           t={t}
         />
       )}
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }
 // --- Payment Method Modal ---
