@@ -1231,6 +1231,9 @@ export const ICON_MAP: Record<string, any> = {
   settings: Settings,
   more: MoreHorizontal,
   rotateccw: RotateCcw,
+  refresh: RotateCcw,
+  'credit-card': CreditCard,
+  'shopping-bag': ShoppingBag,
   frown: Frown,
   meh: Meh,
   check: Check,
@@ -1807,11 +1810,14 @@ export const suggestCategory = (
 
 export const getPaymentMethodIcon = (method: string): any => {
   const m = method.toLowerCase();
+  if (m.includes('apple')) return Apple;
   if (m.includes('kort')) return CreditCard;
   if (m.includes('swish')) return Smartphone;
+  if (m.includes('klarna')) return ShoppingBag;
+  if (m.includes('paypal')) return Wallet;
   if (m.includes('faktura')) return Receipt;
   if (m.includes('autogiro')) return RotateCcw;
   if (m.includes('kontant')) return Banknote;
-  if (m.includes('överföring')) return ArrowUpDown;
+  if (m.includes('överföring') || m.includes('bank')) return Landmark;
   return Wallet;
 };

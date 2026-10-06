@@ -128,11 +128,33 @@ const normalizePaymentMethods = (methods: any[] | null | undefined): any[] => {
     if (typeof m === 'string') {
       const found = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === m.toLowerCase());
       if (found) return found;
-      if (m.toLowerCase() === 'e-faktura' || m.toLowerCase() === 'faktura') {
-        return { name: "Faktura", icon: "receipt", color: "#f59e0b" };
+      const lower = m.toLowerCase();
+      if (lower.includes('apple')) {
+        return { name: m, icon: "apple", color: "#374151" };
       }
-      if (m.toLowerCase() === 'kort') {
-        return { name: "Kortbetalning", icon: "credit-card", color: "#ec4899" };
+      if (lower.includes('klarna')) {
+        return { name: m, icon: "shopping-bag", color: "#f472b6" };
+      }
+      if (lower.includes('paypal')) {
+        return { name: m, icon: "wallet", color: "#0284c7" };
+      }
+      if (lower.includes('faktura')) {
+        return { name: m, icon: "receipt", color: "#f59e0b" };
+      }
+      if (lower.includes('kort')) {
+        return { name: m, icon: "credit-card", color: "#ec4899" };
+      }
+      if (lower.includes('swish')) {
+        return { name: m, icon: "smartphone", color: "#10b981" };
+      }
+      if (lower.includes('autogiro')) {
+        return { name: m, icon: "refresh", color: "#6366f1" };
+      }
+      if (lower.includes('kontant')) {
+        return { name: m, icon: "banknote", color: "#059669" };
+      }
+      if (lower.includes('överföring') || lower.includes('bank')) {
+        return { name: m, icon: "landmark", color: "#8b5cf6" };
       }
       return { name: m, icon: 'credit-card', color: '#6366f1' };
     }

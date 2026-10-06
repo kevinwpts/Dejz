@@ -57,7 +57,7 @@ export const dataService = {
       paydayBeforeWeekend: profileData.payday_before_weekend,
       categories: profileData.categories,
       incomeCategories: profileData.income_categories,
-      paymentMethods: profileData.payment_methods || ['Autogiro', 'Faktura', 'Kortbetalning', 'Swish', 'Övrigt'],
+      paymentMethods: profileData.payment_methods || ['Kortbetalning', 'Swish', 'Autogiro', 'Apple', 'Klarna', 'PayPal', 'Faktura', 'Banköverföring', 'Kontanter', 'Övrigt'],
       initialSpent: profileData.initial_spent,
       notifications: profileData.notifications,
       securityLock: profileData.security_lock,

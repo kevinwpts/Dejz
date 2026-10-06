@@ -35,7 +35,7 @@ export function seedDemoData() {
       { name: 'Bidrag', icon: 'Gift', color: '#f59e0b' },
       { name: 'Övrigt', icon: 'MoreHorizontal', color: '#94a3b8' },
     ],
-    paymentMethods: ['Kortbetalning', 'Swish', 'Autogiro', 'Faktura', 'Kontanter', 'Övrigt'],
+    paymentMethods: ['Kortbetalning', 'Swish', 'Autogiro', 'Apple', 'Klarna', 'PayPal', 'Faktura', 'Banköverföring', 'Kontanter', 'Övrigt'],
     initialSpent: 0,
     notifications: {
       salaryDayReminder: true,
@@ -891,7 +891,7 @@ export function createFreshTestAccount() {
       { name: 'Bidrag', icon: 'Gift', color: '#f59e0b' },
       { name: 'Övrigt', icon: 'MoreHorizontal', color: '#94a3b8' },
     ],
-    paymentMethods: ['Kortbetalning', 'Swish', 'Autogiro', 'Faktura', 'Kontanter', 'Övrigt'],
+    paymentMethods: ['Kortbetalning', 'Swish', 'Autogiro', 'Apple', 'Klarna', 'PayPal', 'Faktura', 'Banköverföring', 'Kontanter', 'Övrigt'],
     initialSpent: 0,
     notifications: {
       salaryDayReminder: true,

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Check, Sun, Moon, Monitor, Calendar, Clock, ChevronRight } from 'lucide-react';
+import { Plus, Check, Sun, Moon, Monitor, Calendar, Clock, ChevronRight, RotateCcw } from 'lucide-react';
 import { Config } from '../types';
 import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
-import { DEFAULT_PAYMENT_METHODS } from '../constants';
+import { DEFAULT_PAYMENT_METHODS, DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 import { CategoryModal } from './CategoryModal';
 import { PaymentMethodModal } from './BudgetModals';
 import { ConfirmModal } from './ConfirmModal';
@@ -83,6 +83,8 @@ export function SettingsView({
 
   const [pendingPayday, setPendingPayday] = useState<number | null>(null);
   const [isPaydayModalOpen, setIsPaydayModalOpen] = useState(false);
+  const [isResetCategoriesModalOpen, setIsResetCategoriesModalOpen] = useState(false);
+  const [isResetPaymentMethodsModalOpen, setIsResetPaymentMethodsModalOpen] = useState(false);
 
   const handleUpdatePayday = (day: number) => {
     if (day === config.payday) return;
@@ -146,18 +148,28 @@ export function SettingsView({
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between mb-3 px-1">
+        <div className="flex items-center justify-between mb-3 px-1 gap-2 flex-wrap">
           <span className="text-xs font-semibold text-[var(--text-secondary)]">
             {list.length} {config.language === 'en' ? 'categories' : 'kategorier'}
           </span>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Plus size={14} strokeWidth={2} />}
-            onClick={() => handleAddCategory(type)}
-          >
-            {t('newCategory')}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<RotateCcw size={13} strokeWidth={2} />}
+              onClick={() => setIsResetCategoriesModalOpen(true)}
+            >
+              {config.language === 'en' ? 'Reset to default' : 'Återställ standard'}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Plus size={14} strokeWidth={2} />}
+              onClick={() => handleAddCategory(type)}
+            >
+              {t('newCategory')}
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3.5">
@@ -241,21 +253,31 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="flex items-center justify-between mb-3 px-1">
+        <div className="flex items-center justify-between mb-3 px-1 gap-2 flex-wrap">
           <span className="text-xs font-semibold text-[var(--text-secondary)]">
             {methodsList.length} {config.language === 'en' ? 'payment methods' : 'betalningsmetoder'}
           </span>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Plus size={14} strokeWidth={2} />}
-            onClick={() => {
-              setPaymentMethodModalData({ name: '' });
-              setIsPaymentMethodModalOpen(true);
-            }}
-          >
-            {config.language === 'en' ? 'New payment method' : 'Ny betalmetod'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<RotateCcw size={13} strokeWidth={2} />}
+              onClick={() => setIsResetPaymentMethodsModalOpen(true)}
+            >
+              {config.language === 'en' ? 'Reset to default' : 'Återställ standard'}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Plus size={14} strokeWidth={2} />}
+              onClick={() => {
+                setPaymentMethodModalData({ name: '' });
+                setIsPaymentMethodModalOpen(true);
+              }}
+            >
+              {config.language === 'en' ? 'New payment method' : 'Ny betalmetod'}
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3.5">
@@ -706,6 +728,51 @@ export function SettingsView({
             setPendingPayday(null);
           }}
           onCancel={() => setPendingPayday(null)}
+          t={t}
+        />
+      )}
+
+      {isResetCategoriesModalOpen && (
+        <ConfirmModal
+          isOpen={isResetCategoriesModalOpen}
+          title={config.language === 'en' ? 'Reset categories to default?' : 'Återställ kategorier till standard?'}
+          message={config.language === 'en'
+            ? 'This will restore all standard expense and income categories with their original colors and icons.'
+            : 'Detta återställer alla utgifts- och inkomstkategorier till standardlistan med ursprungliga ikoner och färger.'}
+          confirmText={config.language === 'en' ? 'Reset' : 'Återställ'}
+          cancelText={config.language === 'en' ? 'Cancel' : 'Avbryt'}
+          variant="danger"
+          onConfirm={() => {
+            setConfig({
+              ...config,
+              categories: DEFAULT_EXPENSE_CATEGORIES,
+              incomeCategories: DEFAULT_INCOME_CATEGORIES
+            });
+            setIsResetCategoriesModalOpen(false);
+          }}
+          onCancel={() => setIsResetCategoriesModalOpen(false)}
+          t={t}
+        />
+      )}
+
+      {isResetPaymentMethodsModalOpen && (
+        <ConfirmModal
+          isOpen={isResetPaymentMethodsModalOpen}
+          title={config.language === 'en' ? 'Reset payment methods to default?' : 'Återställ betalningsmetoder?'}
+          message={config.language === 'en'
+            ? 'This will restore all standard payment methods including Apple, Klarna, PayPal, Swish, Kortbetalning, Autogiro etc.'
+            : 'Detta återställer alla betalningsmetoder till standardlistan inklusive Apple, Klarna, PayPal, Swish, Kortbetalning, Autogiro m.fl.'}
+          confirmText={config.language === 'en' ? 'Reset' : 'Återställ'}
+          cancelText={config.language === 'en' ? 'Cancel' : 'Avbryt'}
+          variant="danger"
+          onConfirm={() => {
+            setConfig({
+              ...config,
+              paymentMethods: DEFAULT_PAYMENT_METHODS
+            });
+            setIsResetPaymentMethodsModalOpen(false);
+          }}
+          onCancel={() => setIsResetPaymentMethodsModalOpen(false)}
           t={t}
         />
       )}

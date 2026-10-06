@@ -28,9 +28,14 @@ export const DEFAULT_INCOME_CATEGORIES = [
 ];
 
 export const DEFAULT_PAYMENT_METHODS = [
-  { name: "Autogiro", icon: "refresh", color: "#6366f1" },
-  { name: "Faktura", icon: "receipt", color: "#f59e0b" },
   { name: "Kortbetalning", icon: "credit-card", color: "#ec4899" },
   { name: "Swish", icon: "smartphone", color: "#10b981" },
+  { name: "Autogiro", icon: "refresh", color: "#6366f1" },
+  { name: "Apple", icon: "apple", color: "#374151" },
+  { name: "Klarna", icon: "shopping-bag", color: "#f472b6" },
+  { name: "PayPal", icon: "wallet", color: "#0284c7" },
+  { name: "Faktura", icon: "receipt", color: "#f59e0b" },
+  { name: "Banköverföring", icon: "landmark", color: "#8b5cf6" },
+  { name: "Kontanter", icon: "banknote", color: "#059669" },
   { name: "Övrigt", icon: "package", color: "#0d9488" }
 ];
