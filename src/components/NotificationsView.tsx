@@ -1,16 +1,17 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { Check, Edit3, ArrowRight, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Check, Edit3, X } from 'lucide-react';
 import { AppNotification, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItemLogo } from './BudgetItem';
-import { formatAmount } from '../utils/format';
+import { formatAmount, parseAmount } from '../utils/format';
 import { EmptyState } from './EmptyState';
+import { feedback } from '../utils/feedback';
 
 interface NotificationsViewProps {
   notifications: AppNotification[];
-  onOpenItem: (item: any) => void;
-  onConfirmStandard: (item: any) => void;
+  onOpenItem?: (item: any) => void;
+  onConfirmStandard: (item: any, customAmount?: number) => void;
   onDismiss: (notificationId: string) => void;
   onBack?: () => void;
   currency: string;
@@ -20,13 +21,30 @@ interface NotificationsViewProps {
 
 export function NotificationsView({
   notifications,
-  onOpenItem,
+  onOpenItem: _onOpenItem,
   onConfirmStandard,
   onDismiss,
   currency,
   config,
   t,
 }: NotificationsViewProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [customAmount, setCustomAmount] = useState<string>('');
+
+  const handleStartEdit = (n: AppNotification) => {
+    if (typeof feedback?.light === 'function') feedback.light();
+    setEditingId(n.id);
+    setCustomAmount(n.expectedAmount ? String(n.expectedAmount) : '');
+  };
+
+  const handleSaveCustom = (n: AppNotification) => {
+    const parsed = parseAmount(customAmount);
+    const finalAmount = !isNaN(parsed) && parsed > 0 ? parsed : Number(n.expectedAmount || 0);
+    if (typeof feedback?.success === 'function') feedback.success();
+    onConfirmStandard(n.item, finalAmount);
+    setEditingId(null);
+  };
+
   if (notifications.length === 0) {
     return (
       <motion.div
@@ -62,6 +80,7 @@ export function NotificationsView({
         const isToday = n.deductionDay === todayDate;
         const isPast = n.deductionDay < todayDate;
         const isIncome = n.type === 'variable_income' || n.item?.budgetType === 'income';
+        const isEditing = editingId === n.id;
 
         let statusBadgeText = '';
         let statusBadgeStyle = '';
@@ -101,7 +120,7 @@ export function NotificationsView({
           >
             {/* Top status bar */}
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="w-11 h-11 rounded-full bg-[var(--surface-muted)] flex items-center justify-center flex-shrink-0 shadow-xs [&_div]:w-9 [&_div]:h-9 [&_div]:rounded-full [&_img]:rounded-full [&_span]:text-xl">
                   <BudgetItemLogo
                     item={n.item}
@@ -109,19 +128,19 @@ export function NotificationsView({
                     config={config}
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   {n.item.budgetType === 'income' && (
                     <span className="text-xs font-semibold text-success block">
                       {config.language === 'en' ? 'Income' : 'Inkomst'}
                     </span>
                   )}
-                  <span className="text-base font-bold text-[var(--text-primary)] leading-tight block">
+                  <span className="text-base font-bold text-[var(--text-primary)] leading-tight block truncate">
                     {n.item.name}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <span
                   className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide ${statusBadgeStyle}`}
                 >
@@ -140,53 +159,96 @@ export function NotificationsView({
               </div>
             </div>
 
-            {/* Subtitle / Question or Standard Amount */}
-            <div className="flex items-center justify-between bg-[var(--surface-muted)]/60 px-4 py-2.5 rounded-[14px] text-xs">
-              {isIncome ? (
-                <span className="text-[var(--text-secondary)] font-medium">
-                  {config.language === 'en'
-                    ? (isToday ? 'How much money actually arrived today?' : 'How much money was actually received?')
-                    : (isToday ? 'Hur mycket pengar kom faktiskt idag?' : 'Hur mycket pengar kom faktiskt in?')}
-                </span>
+            {/* Inline edit mode vs Action buttons */}
+            <AnimatePresence mode="wait">
+              {isEditing ? (
+                <motion.div
+                  key="editing"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-3 pt-1"
+                >
+                  <div className="relative flex items-center">
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      autoFocus
+                      value={customAmount}
+                      onChange={(e) => setCustomAmount(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveCustom(n);
+                        if (e.key === 'Escape') setEditingId(null);
+                      }}
+                      placeholder={String(n.expectedAmount || 0)}
+                      className="w-full h-12 bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[14px] px-4 pr-14 text-lg font-bold font-amount text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)] transition-all"
+                    />
+                    <span className="absolute right-4 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
+                      {currency}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSaveCustom(n)}
+                      className="h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-1.5 hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+                    >
+                      <Check size={16} strokeWidth={2.5} />
+                      <span>{t('save')}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="h-11 rounded-[14px] bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold text-xs flex items-center justify-center transition-all cursor-pointer active:scale-[0.98]"
+                    >
+                      <span>{t('cancel')}</span>
+                    </button>
+                  </div>
+                </motion.div>
               ) : (
-                <>
-                  <span className="text-[var(--text-secondary)] font-medium">
-                    {config.language === 'en' ? 'Expected amount:' : 'Förväntat standardbelopp:'}
-                  </span>
-                  <span className="font-bold font-amount text-[var(--text-primary)]">
-                    {formatAmount(n.expectedAmount)} {currency}
-                  </span>
-                </>
+                <motion.div
+                  key="buttons"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      if (onOpenItem) {
+                        onOpenItem(n.item);
+                      } else {
+                        handleStartEdit(n);
+                      }
+                    }}
+                    className="w-full py-3 px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-2 hover:opacity-95 active:scale-[0.98] transition-all shadow-xs cursor-pointer"
+                  >
+                    <Edit3 size={15} strokeWidth={2} />
+                    <span>{config.language === 'en' ? 'Set amount' : 'Ange belopp'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.success === 'function') feedback.success();
+                      onConfirmStandard(n.item);
+                    }}
+                    className="w-full py-3 px-4 rounded-[14px] bg-[var(--surface-muted)] text-[var(--text-primary)] font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-[var(--surface-color)] active:scale-[0.98] transition-all cursor-pointer"
+                  >
+                    <Check size={15} className="text-neutral-800 dark:text-white" strokeWidth={2.5} />
+                    <span>
+                      {config.language === 'en'
+                        ? `Keep (${formatAmount(n.expectedAmount)} ${currency})`
+                        : `Behåll (${formatAmount(n.expectedAmount)} ${currency})`}
+                    </span>
+                  </button>
+                </motion.div>
               )}
-            </div>
-
-            {/* Action buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-0.5">
-              <button
-                type="button"
-                onClick={() => {
-                  onOpenItem(n.item);
-                }}
-                className="w-full py-3 px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-2 hover:opacity-95 active:scale-[0.98] transition-all shadow-xs cursor-pointer"
-              >
-                <Edit3 size={15} strokeWidth={2} />
-                <span>{config.language === 'en' ? 'Set amount' : 'Ange belopp'}</span>
-                <ArrowRight size={14} className="opacity-70" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onConfirmStandard(n.item)}
-                className="w-full py-3 px-4 rounded-[14px] bg-[var(--surface-muted)] text-[var(--text-primary)] font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-[var(--surface-color)] active:scale-[0.98] transition-all cursor-pointer"
-              >
-                <Check size={15} className="text-neutral-800 dark:text-white" strokeWidth={2.5} />
-                <span>
-                  {config.language === 'en'
-                    ? `Keep standard (${formatAmount(n.expectedAmount)} ${currency})`
-                    : `Behåll (${formatAmount(n.expectedAmount)} ${currency})`}
-                </span>
-              </button>
-            </div>
+            </AnimatePresence>
           </motion.div>
         );
       })}
