@@ -73,26 +73,48 @@ export function CategoryModal({
         }
         bodyClassName="p-5 sm:p-6 space-y-5"
       >
-        {/* Preview */}
-        <div className="flex flex-col items-center justify-center">
-          <button 
-            type="button"
-            onClick={() => setShowIconPicker(true)}
-            className="flex flex-col items-center justify-center gap-2 transition-transform active:scale-95 group cursor-pointer"
-          >
-            <div className="relative group-hover:ring-4 group-hover:ring-[var(--accent-color)]/20 transition-all rounded-[14px]">
-              <CategoryIcon 
-                icon={icon} 
-                size="xl" 
-                customBgColor={color} 
-                whiteIcon 
-                shape="squircle"
-              />
+        {/* Live Preview Card */}
+        <div className="space-y-2">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] ml-0.5">
+            Förhandsvisning
+          </label>
+          <div className="p-3.5 bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[18px] flex items-center justify-between shadow-xs">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowIconPicker(true)}
+                className="relative group cursor-pointer"
+                title="Byt ikon"
+              >
+                <CategoryIcon 
+                  icon={icon} 
+                  size="lg" 
+                  customBgColor={color} 
+                  whiteIcon 
+                  shape="squircle"
+                />
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center text-[10px] shadow-xs group-hover:scale-110 transition-transform">
+                  ✎
+                </div>
+              </button>
+              <div>
+                <h4 className="text-sm font-bold text-[var(--text-primary)]">
+                  {name.trim() || 'Kategorinamn'}
+                </h4>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${color}18`, color: color }}>
+                    {type === 'expense' ? 'Utgift' : 'Inkomst'}
+                  </span>
+                  <span className="text-[10px] text-[var(--text-secondary)]">Exempelpost</span>
+                </div>
+              </div>
             </div>
-            <span className="text-xs font-semibold text-[var(--accent-color)] group-hover:underline">
-              {t('changeIcon')}
-            </span>
-          </button>
+            <div className="text-right">
+              <span className="text-sm font-bold font-mono text-[var(--text-primary)]">
+                {type === 'expense' ? '-249 kr' : '+15 000 kr'}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Form */}
@@ -120,10 +142,27 @@ export function CategoryModal({
 
           {/* Color palette */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
-              {t('color')}
-            </label>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center justify-between ml-0.5 mr-1">
+              <label className="text-xs font-semibold text-[var(--text-secondary)]">
+                {t('color')}
+              </label>
+              {/* Custom hex color input picker */}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono text-[var(--text-tertiary)]">{color}</span>
+                <div className="relative w-6 h-6 rounded-full overflow-hidden border border-[var(--border-color)] cursor-pointer shadow-xs">
+                  <input
+                    type="color"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    className="absolute inset-0 -translate-x-2 -translate-y-2 w-12 h-12 cursor-pointer opacity-0"
+                    title="Välj anpassad färg"
+                  />
+                  <div className="w-full h-full" style={{ backgroundColor: color }} />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-8 gap-2 bg-[var(--surface-muted)] p-2.5 rounded-[16px] border border-[var(--border-color)]">
               {PRESET_COLORS.map((c) => {
                 const isSelected = color.toLowerCase() === c.toLowerCase();
                 return (
@@ -131,37 +170,20 @@ export function CategoryModal({
                     key={c}
                     type="button"
                     onClick={() => setColor(c)}
-                    className={`w-7 h-7 rounded-full transition-transform active:scale-90 relative cursor-pointer ${
-                      isSelected ? 'scale-110 shadow-xs ring-2 ring-white dark:ring-[#1C1C1C]' : 'hover:scale-105'
+                    className={`w-full aspect-square rounded-full transition-transform active:scale-90 relative cursor-pointer ${
+                      isSelected ? 'scale-110 shadow-sm ring-2 ring-white dark:ring-[#1C1C1C]' : 'hover:scale-105'
                     }`}
                     style={{ backgroundColor: c }}
                     aria-label={`Välj färg ${c}`}
                   >
                     {isSelected && (
                       <span className="absolute inset-0 flex items-center justify-center text-white">
-                        <Check size={14} strokeWidth={2.5} />
+                        <Check size={12} strokeWidth={3} />
                       </span>
                     )}
                   </button>
                 );
               })}
-
-              {/* Custom color picker button */}
-              <label 
-                className="w-7 h-7 rounded-full border border-dashed border-black/20 dark:border-white/20 flex items-center justify-center cursor-pointer hover:border-[var(--accent-color)] transition-colors relative overflow-hidden bg-black/[0.04] dark:bg-white/[0.06] group" 
-                title="Anpassad färg"
-              >
-                <input
-                  type="color"
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                />
-                <div
-                  className="w-4 h-4 rounded-full border border-white/30 group-hover:scale-110 transition-transform"
-                  style={{ backgroundColor: color }}
-                />
-              </label>
             </div>
           </div>
 
