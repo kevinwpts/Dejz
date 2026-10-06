@@ -102,15 +102,47 @@ export function GreetingModule({
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className="w-full -mt-2 sm:-mt-3 pt-0 mb-4 sm:mb-5 select-none px-1"
       >
-        {/* Budget Gauge with info button */}
+        {/* Budget Gauge */}
         <BudgetGauge
           remainingCents={stats?.remainingPeriodCents || 0}
           disposablePotCents={stats?.disposablePot || 0}
           currency={currency}
           language={language}
           label={t('totalRemaining')}
-          onOpenInfo={() => setIsPeriodInfoOpen(true)}
         />
+
+        {/* Integrated Period & Payday Micro-Cards (Proposal 2) */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 mt-2 sm:mt-3 max-w-[380px] mx-auto px-2">
+          {/* Card 1: Period */}
+          <div className="bg-[var(--surface-color)] rounded-[18px] p-2.5 sm:p-3 flex items-center gap-2.5 border border-black/[0.04] dark:border-white/[0.06]">
+            <div className="w-8 h-8 rounded-[12px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
+              <Calendar size={15} strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex flex-col text-left">
+              <span className="text-[10px] font-semibold text-[var(--text-secondary)] tracking-tight">
+                {isEn ? 'Period' : 'Period'}
+              </span>
+              <span className="text-[12px] sm:text-[13px] font-bold text-[var(--text-primary)] truncate font-sans">
+                {periodIntervalText}
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2: Next Payday */}
+          <div className="bg-[var(--surface-color)] rounded-[18px] p-2.5 sm:p-3 flex items-center gap-2.5 border border-black/[0.04] dark:border-white/[0.06]">
+            <div className="w-8 h-8 rounded-[12px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
+              <Clock size={15} strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex flex-col text-left">
+              <span className="text-[10px] font-semibold text-[var(--text-secondary)] tracking-tight">
+                {isEn ? 'Next payday' : 'Nästa lön'}
+              </span>
+              <span className="text-[12px] sm:text-[13px] font-bold text-[var(--text-primary)] truncate font-sans">
+                {stats?.isPastPeriod ? (isEn ? 'Ended' : 'Avslutad') : `${daysValueText} ${isEn ? '' : 'kvar'}`}
+              </span>
+            </div>
+          </div>
+        </div>
       </motion.div>
 
       {/* 2. DINA BUDGETAR CAROUSEL */}
