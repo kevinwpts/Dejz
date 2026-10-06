@@ -12,6 +12,7 @@ interface PeriodSelectorModalProps {
   onSelectPeriod: (period: any) => void;
   onSelectDate: (date: Date | null) => void;
   showCalendarOption?: boolean;
+  showAllPeriodsOption?: boolean;
   currentLang: string;
   calendarContent?: React.ReactNode;
 }
@@ -25,6 +26,7 @@ export function PeriodSelectorModal({
   onSelectPeriod,
   onSelectDate,
   showCalendarOption = false,
+  showAllPeriodsOption = true,
   currentLang,
   calendarContent,
 }: PeriodSelectorModalProps) {
@@ -98,46 +100,48 @@ export function PeriodSelectorModal({
       {viewMode === 'list' ? (
         <div className="space-y-2">
           {/* Alla perioder option */}
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof feedback?.selection === 'function') {
-                feedback.selection();
-              } else if (typeof feedback?.tap === 'function') {
-                feedback.tap();
-              }
-              onSelectPeriod(null);
-              onSelectDate(null);
-              onClose();
-            }}
-            className="w-full flex items-center justify-between py-3 px-4 rounded-[14px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[52px]"
-          >
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div 
-                className={`w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-colors ${
-                  !selectedPeriod && !selectedDate
-                    ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)] font-semibold' 
-                    : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
-                }`}
-              >
-                <CalendarIcon size={15} strokeWidth={2} />
+          {showAllPeriodsOption && (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.selection === 'function') {
+                  feedback.selection();
+                } else if (typeof feedback?.tap === 'function') {
+                  feedback.tap();
+                }
+                onSelectPeriod(null);
+                onSelectDate(null);
+                onClose();
+              }}
+              className="w-full flex items-center justify-between py-3 px-4 rounded-[14px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[52px]"
+            >
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div 
+                  className={`w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-colors ${
+                    !selectedPeriod && !selectedDate
+                      ? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)] font-semibold' 
+                      : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
+                  }`}
+                >
+                  <CalendarIcon size={15} strokeWidth={2} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className={`text-[13.5px] tracking-tight truncate block ${!selectedPeriod && !selectedDate ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'}`}>
+                    {currentLang === 'en' ? 'All periods' : 'Alla perioder'}
+                  </span>
+                  <span className="text-[11px] text-[var(--text-secondary)] opacity-80 block truncate mt-0.5">
+                    {currentLang === 'en' ? 'Show all transactions' : 'Visa alla transaktioner'}
+                  </span>
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <span className={`text-[13.5px] tracking-tight truncate block ${!selectedPeriod && !selectedDate ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'}`}>
-                  {currentLang === 'en' ? 'All periods' : 'Alla perioder'}
-                </span>
-                <span className="text-[11px] text-[var(--text-secondary)] opacity-80 block truncate mt-0.5">
-                  {currentLang === 'en' ? 'Show all transactions' : 'Visa alla transaktioner'}
-                </span>
-              </div>
-            </div>
 
-            {!selectedPeriod && !selectedDate && (
-              <div className="text-[var(--accent-color)] shrink-0 ml-2 pl-1">
-                <Check size={18} strokeWidth={2} />
-              </div>
-            )}
-          </button>
+              {!selectedPeriod && !selectedDate && (
+                <div className="text-[var(--accent-color)] shrink-0 ml-2 pl-1">
+                  <Check size={18} strokeWidth={2} />
+                </div>
+              )}
+            </button>
+          )}
 
           {chronologicalPeriods.map((p, idx) => {
             const [title, sub] = p.name?.includes('(')

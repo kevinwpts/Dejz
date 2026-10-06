@@ -770,7 +770,7 @@ export function TransactionModal({
               }}
               className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer group min-h-[60px]"
             >
-              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
@@ -787,7 +787,7 @@ export function TransactionModal({
                     whiteIcon 
                   />
                 </div>
-                <span className="text-[14px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
+                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
                 <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
@@ -796,7 +796,7 @@ export function TransactionModal({
 
             {/* Row 2: Date */}
             <div className="p-4 flex items-center justify-between min-h-[60px]">
-              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('date')}
               </span>
               <div className="flex items-center gap-1.5 shrink-0">
@@ -852,7 +852,7 @@ export function TransactionModal({
 
             {/* Row 3: Note */}
             <div className="p-4 flex items-center justify-between min-h-[60px] gap-3">
-              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {t('ownNote')}
               </span>
               <div className="flex items-center gap-2 flex-1 justify-end min-w-0">
@@ -868,7 +868,7 @@ export function TransactionModal({
                     }
                   }}
                   placeholder={type === 'income' ? t('incomeNotePlaceholder') : (currentLang === 'en' ? 'Add note...' : 'Skriv notering...')}
-                  className={`text-[13.5px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
+                  className={`text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
                     validationError === 'note' ? 'text-rose-500' : ''
                   }`}
                 />
@@ -886,7 +886,7 @@ export function TransactionModal({
 
             {/* Row 4: Receipt / Attachment */}
             <div className="p-4 flex items-center justify-between min-h-[60px]">
-              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight shrink-0">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
                 {currentLang === 'en' ? 'Receipt / Document' : 'Kvitto / Bilaga'}
               </span>
 

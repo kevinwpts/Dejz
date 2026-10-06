@@ -2468,17 +2468,24 @@ export default function App() {
       const d = new Date(profile.created_at);
       if (!isNaN(d.getTime())) registrationDate = d;
     }
-
-    let earliest = registrationDate || now;
-    if (transactions && transactions.length > 0) {
-      transactions.forEach((tx) => {
-        const txDate = new Date(tx.timestamp || tx.date);
-        if (!isNaN(txDate.getTime()) && txDate < earliest) {
-          earliest = txDate;
-        }
-      });
+    if (!registrationDate && config?.createdAt) {
+      const d = new Date(config.createdAt);
+      if (!isNaN(d.getTime())) registrationDate = d;
+    }
+    if (!registrationDate) {
+      const stored = localStorage.getItem('dejz_account_created_at');
+      if (stored) {
+        const d = new Date(stored);
+        if (!isNaN(d.getTime())) registrationDate = d;
+      }
+    }
+    if (!registrationDate) {
+      registrationDate = new Date();
+      localStorage.setItem('dejz_account_created_at', registrationDate.toISOString());
     }
 
+    // Earliest boundary is strictly the registration date's period
+    const earliest = registrationDate;
     const earliestBounds = getPeriodBoundaries(
       earliest,
       paydayType,
@@ -2511,7 +2518,7 @@ export default function App() {
       let start = tempBounds.start;
       let end = tempBounds.end;
 
-      // Do not include periods from before account registration or earliest activity
+      // Do not include periods from before account registration
       if (end < earliestBounds.start) {
         continue;
       }

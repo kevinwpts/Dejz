@@ -182,14 +182,16 @@ export function BudgetView({
     }
   }, 0);
 
-  const totalSavingsSum = config.monthlySavingsItems && config.monthlySavingsItems.length > 0
-    ? (config.monthlySavingsItems.reduce((sum, item) => {
-        const amount = (item.isVariable && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined)
-          ? item.periodOverrides[currentPeriodId]
-          : (Number(item.amount) || 0);
-        return sum + amount;
-      }, 0) || 0)
-    : (Number(config.monthlySavings) || 0);
+  const totalSavingsSum = stats?.totalSavings !== undefined
+    ? stats.totalSavings
+    : (config.monthlySavingsItems && config.monthlySavingsItems.length > 0
+        ? (config.monthlySavingsItems.reduce((sum, item) => {
+            const amount = (item.isVariable && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined)
+              ? item.periodOverrides[currentPeriodId]
+              : (Number(item.amount) || Number((item as any).targetAmount) || 0);
+            return sum + amount;
+          }, 0) || 0)
+        : (Number(config.monthlySavings) || 0));
 
   const calculatedEverydayBudget = Math.max(0, Math.round(totalIncomeSum - totalFixedSum - totalSavingsSum));
   const everydayBudget = stats?.disposablePot !== undefined ? Math.round(stats.disposablePot) : calculatedEverydayBudget;
@@ -397,6 +399,13 @@ export function BudgetView({
             {/* Kompletterande mindre information */}
             <div className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)]">
               <span className="font-amount tabular-nums">{formatAmount(totalCategoryAllocated, config.language)}</span> {config.language === 'en' ? 'of' : 'av'} <span className="font-amount tabular-nums">{formatAmount(totalPoolToAllocate, config.language)}</span> {curr} {config.language === 'en' ? 'allocated' : 'fördelat'}
+              {totalSavingsSum > 0 && (
+                <span className="block text-[11px] font-normal opacity-75 mt-0.5">
+                  {config.language === 'en'
+                    ? `(Income ${formatAmount(totalIncomeSum, config.language)} − Savings ${formatAmount(totalSavingsSum, config.language)} ${curr})`
+                    : `(Inkomst ${formatAmount(totalIncomeSum, config.language)} − Sparande ${formatAmount(totalSavingsSum, config.language)} ${curr})`}
+                </span>
+              )}
             </div>
           </div>
 

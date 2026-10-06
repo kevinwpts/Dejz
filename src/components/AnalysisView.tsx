@@ -60,7 +60,6 @@ export function AnalysisView({
     return periods.filter(p => !p.isFuture || p.isCurrent);
   }, [periods]);
 
-  const [isAllPeriodsSelected, setIsAllPeriodsSelected] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('all');
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
@@ -86,35 +85,16 @@ export function AnalysisView({
     },
   ], [isEn, t]);
 
-  const effectiveStats = useMemo(() => {
-    if (!isAllPeriodsSelected) return stats;
-    let totalIncome = 0;
-    (transactions || []).forEach(t => {
-      if (t.type === 'income') totalIncome += t.amount;
-    });
-
-    return {
-      ...stats,
-      periodName: isEn ? 'All periods' : 'Alla perioder',
-      totalIncome: totalIncome > 0 ? totalIncome : (stats?.totalIncome || 0),
-      periodTransactions: transactions || [],
-      isPastPeriod: false,
-    };
-  }, [isAllPeriodsSelected, stats, transactions, isEn]);
+  const effectiveStats = stats;
 
   const filteredExpenses = useMemo(() => {
-    if (!transactions) return [];
-    if (isAllPeriodsSelected) {
-      return transactions.filter(e => e.type === 'expense' || e.type === 'savings');
-    }
-    if (!stats) return [];
-    return transactions
-      .filter(e => {
-        const inPeriod = e.timestamp >= stats.periodStart.getTime() && e.timestamp <= stats.periodEnd.getTime() + 86399999;
-        if (!inPeriod) return false;
-        return e.type === 'expense' || e.type === 'savings';
-      });
-  }, [transactions, isAllPeriodsSelected, stats?.periodStart, stats?.periodEnd]);
+    if (!transactions || !stats) return [];
+    return transactions.filter(e => {
+      const inPeriod = e.timestamp >= stats.periodStart.getTime() && e.timestamp <= stats.periodEnd.getTime() + 86399999;
+      if (!inPeriod) return false;
+      return e.type === 'expense' || e.type === 'savings';
+    });
+  }, [transactions, stats?.periodStart, stats?.periodEnd]);
 
   const { categoryData, totalFixed, totalSpentInPeriod } = useMemo(() => {
     const breakdown: Record<string, number> = {};
@@ -290,11 +270,7 @@ export function AnalysisView({
         {/* Left: Period Button */}
         <FilterSelectButton
           icon={<Calendar size={15} strokeWidth={2} />}
-          value={
-            isAllPeriodsSelected 
-              ? (isEn ? 'All periods' : 'Alla perioder') 
-              : (effectiveStats?.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period'))
-          }
+          value={effectiveStats?.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}
           onClick={() => setIsPeriodModalOpen(true)}
           className="flex-[1.25] min-w-0"
         />
@@ -321,13 +297,10 @@ export function AnalysisView({
         isOpen={isPeriodModalOpen}
         onClose={() => setIsPeriodModalOpen(false)}
         periods={availablePeriods}
-        selectedPeriod={isAllPeriodsSelected ? null : currentPeriod}
+        selectedPeriod={currentPeriod}
         selectedDate={null}
         onSelectPeriod={(p) => {
-          if (!p) {
-            setIsAllPeriodsSelected(true);
-          } else {
-            setIsAllPeriodsSelected(false);
+          if (p) {
             const targetDate = p.date ? new Date(p.date) : (p.start ? new Date(p.start) : null);
             if (targetDate && onPeriodChange) {
               onPeriodChange(targetDate);
@@ -336,6 +309,7 @@ export function AnalysisView({
         }}
         onSelectDate={() => {}}
         showCalendarOption={false}
+        showAllPeriodsOption={false}
         currentLang={config.language}
       />
 
