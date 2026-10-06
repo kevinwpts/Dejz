@@ -69,9 +69,9 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
   const categoryText = typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '');
   
   // Find category in config for color/icon source of truth
-  const searchCategory = categoryText.trim().toLowerCase();
+  const searchCategory = (categoryText || '').trim().toLowerCase();
   const category = config ? [...(config.categories || []), ...(config.incomeCategories || [])].find(
-    c => c.name.trim().toLowerCase() === searchCategory
+    c => (c?.name || '').trim().toLowerCase() === searchCategory
   ) : null;
 
   // Special savings pot case

@@ -1,3 +1,5 @@
+import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
+
 /**
  * Unified Category Colors for Dejz
  * Single source of truth for category color palette, fallback assignments, and consistency.
@@ -37,17 +39,24 @@ export function getCategoryColor(
     return DEFAULT_CATEGORY_PALETTE[0];
   }
 
-  const normalized = categoryName.trim().toLowerCase();
+  const normalized = (categoryName || '').trim().toLowerCase();
 
   // 1. Check if user configured an explicit color for this category
   if (customCategories && Array.isArray(customCategories)) {
-    const matched = customCategories.find(c => c.name.trim().toLowerCase() === normalized);
-    if (matched?.color && matched.color.trim() !== '') {
+    const matched = customCategories.find(c => (c?.name || '').trim().toLowerCase() === normalized);
+    if (matched?.color && (matched.color || '').trim() !== '') {
       return matched.color;
     }
   }
 
-  // 2. Deterministic hash of category name into DEFAULT_CATEGORY_PALETTE
+  // 2. Check standard categories
+  const defaultMatch = DEFAULT_EXPENSE_CATEGORIES.find(d => d.name.toLowerCase() === normalized)
+    || DEFAULT_INCOME_CATEGORIES.find(d => d.name.toLowerCase() === normalized);
+  if (defaultMatch?.color) {
+    return defaultMatch.color;
+  }
+
+  // 3. Deterministic hash of category name into DEFAULT_CATEGORY_PALETTE
   let hash = 0;
   for (let i = 0; i < normalized.length; i++) {
     hash = (hash << 5) - hash + normalized.charCodeAt(i);

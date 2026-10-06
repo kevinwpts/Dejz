@@ -86,7 +86,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                 {(() => {
                   const searchCategory = (item.category || '').trim().toLowerCase();
                   const category = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
-                    c => c.name.trim().toLowerCase() === searchCategory
+                    c => (c?.name || '').trim().toLowerCase() === searchCategory
                   );
                   const iconKey = category?.icon || getCategoryIconName(item.category);
                   if (iconKey) {

@@ -377,7 +377,7 @@ export function getTransactionDominantColor(transaction: Transaction, config?: C
   // 3. Category color in config
   const categoryText = typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '');
   const cat = [...(config?.categories || []), ...(config?.incomeCategories || [])].find(
-    c => c.name.trim().toLowerCase() === categoryText.trim().toLowerCase()
+    c => (c?.name || '').trim().toLowerCase() === (categoryText || '').trim().toLowerCase()
   );
   if (cat?.color) {
     return cat.color;

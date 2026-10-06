@@ -249,7 +249,7 @@ export function PeriodTimeline({
 
           // Check if day has transactions matching category filter
           const hasCategoryMatch = categoryFilter && Array.isArray(day.transactions)
-            ? day.transactions.some((t: any) => t.category?.trim().toLowerCase() === categoryFilter.trim().toLowerCase())
+            ? day.transactions.some((t: any) => (t.category || '').trim().toLowerCase() === (categoryFilter || '').trim().toLowerCase())
             : false;
 
           return (

@@ -148,8 +148,8 @@ export function AnalysisView({
 
     if (includeVariable) {
       (config.categories || []).forEach(c => {
-        const nameTrimmed = c.name.trim();
-        if (!(nameTrimmed in breakdown)) {
+        const nameTrimmed = (c?.name || '').trim();
+        if (nameTrimmed && !(nameTrimmed in breakdown)) {
           breakdown[nameTrimmed] = 0;
         }
       });
@@ -159,9 +159,9 @@ export function AnalysisView({
 
     const data = Object.entries(breakdown)
       .map(([name, value], index) => {
-        const searchName = name.trim().toLowerCase();
+        const searchName = (name || '').trim().toLowerCase();
         const cat = allCats.find(
-          c => c.name.trim().toLowerCase() === searchName
+          c => (c?.name || '').trim().toLowerCase() === searchName
         );
         
         const icon = cat?.icon || getCategoryIconName(name);
@@ -428,12 +428,13 @@ export function AnalysisView({
                     return false;
                   }
                   
+                  const catNameTrimmed = (catName || '').trim();
                   const transactionSplits = (t as any).splits;
                   if (transactionSplits && transactionSplits.length > 0) {
-                    return transactionSplits.some((s: any) => (s.category || '').trim() === catName.trim());
+                    return transactionSplits.some((s: any) => (s.category || '').trim() === catNameTrimmed);
                   }
                   
-                  return (t.category || '').trim() === catName.trim();
+                  return (t.category || '').trim() === catNameTrimmed;
                 })
                 .sort((a, b) => b.timestamp - a.timestamp);
                 

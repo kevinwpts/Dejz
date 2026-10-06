@@ -197,9 +197,9 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
               <div className="flex items-center justify-end gap-2">
                 {(() => {
                   const catName = typeof income.category === 'object' ? (income.category as any)?.name : (income.category || t('income'));
-                  const searchCat = catName.trim().toLowerCase();
+                  const searchCat = (catName || '').trim().toLowerCase();
                   const cat = [...(config.incomeCategories || []), ...(config.categories || [])].find(
-                    c => c.name.trim().toLowerCase() === searchCat
+                    c => (c?.name || '').trim().toLowerCase() === searchCat
                   );
                   const iconKey = income.icon || cat?.icon || getCategoryIconName(catName);
                   return (
@@ -1002,9 +1002,9 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               <div className="flex items-center justify-end gap-2">
                 {(() => {
                   const catName = typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || '');
-                  const searchCat = catName.trim().toLowerCase();
+                  const searchCat = (catName || '').trim().toLowerCase();
                   const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
-                    c => c.name.trim().toLowerCase() === searchCat
+                    c => (c?.name || '').trim().toLowerCase() === searchCat
                   );
                   const iconKey = expense.icon || cat?.icon || getCategoryIconName(catName);
                   return (

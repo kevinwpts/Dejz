@@ -751,18 +751,45 @@ export default function App() {
         const VIBRANT_FALLBACK_COLORS = ['#ef4444', '#f97316', '#d97706', '#ec4899', '#6366f1', '#0ea5e9', '#3b82f6', '#8b5cf6', '#a855f7', '#10b981', '#06b6d4', '#0d9488'];
         const migrateCategories = (categories: any[]) => {
           let hasChanged = false;
+          if (!Array.isArray(categories)) return { migrated: [], hasChanged: false };
+
+          const colorCounts: Record<string, number> = {};
+          categories.forEach((c) => {
+            if (c.color) {
+              const lowerColor = String(c.color).toLowerCase();
+              colorCounts[lowerColor] = (colorCounts[lowerColor] || 0) + 1;
+            }
+          });
+          const hasUniformColorBug = Object.values(colorCounts).some((count) => count >= 3 && count >= categories.length * 0.3);
+
           const migrated = categories.map((cat, idx) => {
             const updated = { ...cat };
             if (updated.icon && isEmojiString(updated.icon)) {
               hasChanged = true;
               updated.icon = resolveLucideIcon(updated.icon);
             }
-            if (!updated.color || updated.color === '#64748b' || updated.color === '#94a3b8' || updated.color === '#71717a' || updated.color === '#a1a1aa') {
+
+            const catNameLower = (updated.name || '').trim().toLowerCase();
+            const defaultMatch = DEFAULT_EXPENSE_CATEGORIES.find(d => d.name.toLowerCase() === catNameLower) 
+              || DEFAULT_INCOME_CATEGORIES.find(d => d.name.toLowerCase() === catNameLower);
+
+            const isGenericColor = !updated.color 
+              || updated.color === '#64748b' 
+              || updated.color === '#94a3b8' 
+              || updated.color === '#71717a' 
+              || updated.color === '#a1a1aa'
+              || hasUniformColorBug;
+
+            if (defaultMatch) {
+              if (updated.color !== defaultMatch.color && (isGenericColor || !updated.color)) {
+                updated.color = defaultMatch.color;
+                hasChanged = true;
+              }
+            } else if (isGenericColor) {
+              updated.color = VIBRANT_FALLBACK_COLORS[idx % VIBRANT_FALLBACK_COLORS.length];
               hasChanged = true;
-              const defaultMatch = DEFAULT_EXPENSE_CATEGORIES.find(d => d.name.toLowerCase() === (updated.name || '').trim().toLowerCase()) 
-                || DEFAULT_INCOME_CATEGORIES.find(d => d.name.toLowerCase() === (updated.name || '').trim().toLowerCase());
-              updated.color = defaultMatch ? defaultMatch.color : VIBRANT_FALLBACK_COLORS[idx % VIBRANT_FALLBACK_COLORS.length];
             }
+
             return updated;
           });
           return { migrated, hasChanged };
@@ -2095,15 +2122,49 @@ export default function App() {
 
       // Parse/map settings locally from dbProfile to prevent redundant DB query level
       if (dbProfile && Object.keys(dbProfile).length > 0) {
-        // Migrate category emojis back to Lucide icon names
+        const VIBRANT_FALLBACK_COLORS = ['#ef4444', '#f97316', '#d97706', '#ec4899', '#6366f1', '#0ea5e9', '#3b82f6', '#8b5cf6', '#a855f7', '#10b981', '#06b6d4', '#0d9488'];
         const migrateCategories = (cats: any[]) => {
           let hasChanged = false;
-          const migrated = cats.map((cat) => {
-            if (cat.icon && isEmojiString(cat.icon)) {
-              hasChanged = true;
-              return { ...cat, icon: resolveLucideIcon(cat.icon) };
+          if (!Array.isArray(cats)) return { migrated: [], hasChanged: false };
+
+          const colorCounts: Record<string, number> = {};
+          cats.forEach((c) => {
+            if (c.color) {
+              const lowerColor = String(c.color).toLowerCase();
+              colorCounts[lowerColor] = (colorCounts[lowerColor] || 0) + 1;
             }
-            return cat;
+          });
+          const hasUniformColorBug = Object.values(colorCounts).some((count) => count >= 3 && count >= cats.length * 0.3);
+
+          const migrated = cats.map((cat, idx) => {
+            const updated = { ...cat };
+            if (updated.icon && isEmojiString(updated.icon)) {
+              hasChanged = true;
+              updated.icon = resolveLucideIcon(updated.icon);
+            }
+
+            const catNameLower = (updated.name || '').trim().toLowerCase();
+            const defaultMatch = DEFAULT_EXPENSE_CATEGORIES.find(d => d.name.toLowerCase() === catNameLower) 
+              || DEFAULT_INCOME_CATEGORIES.find(d => d.name.toLowerCase() === catNameLower);
+
+            const isGenericColor = !updated.color 
+              || updated.color === '#64748b' 
+              || updated.color === '#94a3b8' 
+              || updated.color === '#71717a' 
+              || updated.color === '#a1a1aa'
+              || hasUniformColorBug;
+
+            if (defaultMatch) {
+              if (updated.color !== defaultMatch.color && (isGenericColor || !updated.color)) {
+                updated.color = defaultMatch.color;
+                hasChanged = true;
+              }
+            } else if (isGenericColor) {
+              updated.color = VIBRANT_FALLBACK_COLORS[idx % VIBRANT_FALLBACK_COLORS.length];
+              hasChanged = true;
+            }
+
+            return updated;
           });
           return { migrated, hasChanged };
         };
@@ -4111,8 +4172,8 @@ export default function App() {
         const isMatch =
           t.categoryId === deleteCatId ||
           (t.category &&
-            deleteCat.name &&
-            t.category.trim().toLowerCase() === deleteCat.name.trim().toLowerCase());
+            deleteCat?.name &&
+            (t.category || '').trim().toLowerCase() === (deleteCat.name || '').trim().toLowerCase());
         if (isMatch && targetCat) {
           return {
             ...t,

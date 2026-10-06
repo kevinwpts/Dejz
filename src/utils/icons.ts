@@ -1534,8 +1534,8 @@ export const POPULAR_EMOJIS = [
   '🐶', '🐱', '🐾', '🌴', '🏖️', '🏕️', '🏔️', '👶', '🎓', '💼'
 ];
 
-export const suggestIcon = (name: string): string => {
-  const n = name.toLowerCase().trim();
+export const suggestIcon = (name?: string | null): string => {
+  const n = (name || '').toLowerCase().trim();
   
   if (n.includes('lön') || n.includes('salary') || n.includes('inkomst')) return 'banknote';
   if (n.includes('hyra') || n.includes('hem') || n.includes('home') || n.includes('lägenhet') || n.includes('bostad')) return 'home';
@@ -1655,15 +1655,15 @@ export const getSuggestedIconsForQuery = (query: string, limit = 6): IconItem[] 
 };
 
 export const suggestCategory = (
-  name: string,
+  name?: string | null,
   availableCategories?: { name: string }[]
 ): string | undefined => {
   if (!name || !availableCategories || availableCategories.length === 0) return undefined;
-  const n = name.toLowerCase().trim();
+  const n = (name || '').toLowerCase().trim();
 
   const match = (keywords: string[]) => {
     return availableCategories.find(c => {
-      const catLower = c.name.toLowerCase();
+      const catLower = (c?.name || '').toLowerCase();
       return keywords.some(k => catLower.includes(k) || k.includes(catLower));
     })?.name;
   };

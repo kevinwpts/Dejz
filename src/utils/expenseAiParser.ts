@@ -201,8 +201,8 @@ const SWEDISH_BRAND_CATEGORIES: Record<string, { categoryKeyword: string; defaul
  * Extracts amount and text from free-form string like:
  * "300kr coop", "coop 300 kr", "45 kaffe", "lunch på max 125", "149 spotify"
  */
-export function extractAmountAndQuery(input: string): { amount: number | null; query: string } {
-  const cleanInput = input.trim();
+export function extractAmountAndQuery(input?: string | null): { amount: number | null; query: string } {
+  const cleanInput = (input || '').trim();
   if (!cleanInput) return { amount: null, query: '' };
 
   // Match numbers (e.g. 300, 300kr, 300.50, 45,50 kr, 25k)
@@ -242,11 +242,11 @@ export function extractAmountAndQuery(input: string): { amount: number | null; q
 function findBestUserCategory(keyword: string, categories: Category[], defaultCategory: string): string {
   if (!categories || categories.length === 0) return defaultCategory;
 
-  const normalize = (s: string) => s.toLowerCase().trim();
+  const normalize = (s?: string | null) => (s || '').toLowerCase().trim();
   const normKey = normalize(keyword);
 
   // Exact match
-  const exact = categories.find(c => normalize(c.name) === normKey);
+  const exact = categories.find(c => normalize(c?.name) === normKey);
   if (exact) return exact.name;
 
   // Keyword contains

@@ -152,7 +152,7 @@ export function BudgetView({
 
   const getFixedSpentForCategory = (catName: string) => {
     return (fixedExpenses || [])
-      .filter((e) => e.category?.trim().toLowerCase() === catName.trim().toLowerCase())
+      .filter((e) => (e.category || '').trim().toLowerCase() === (catName || '').trim().toLowerCase())
       .reduce((sum, e) => {
         const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
           ? e.periodOverrides[currentPeriodId]
