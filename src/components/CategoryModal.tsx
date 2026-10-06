@@ -79,20 +79,16 @@ export function CategoryModal({
           <button 
             type="button"
             onClick={() => setShowIconPicker(true)}
-            className="flex flex-col items-center justify-center gap-2 transition-transform active:scale-95 group cursor-pointer"
+            className="w-20 h-20 rounded-[22px] flex items-center justify-center transition-all active:scale-95 group cursor-pointer shadow-sm relative overflow-hidden"
+            style={{ backgroundColor: color }}
+            title="Välj ikon"
           >
-            <div className="relative group-hover:ring-4 group-hover:ring-[var(--accent-color)]/20 transition-all rounded-[18px]">
-              <CategoryIcon 
-                icon={icon} 
-                size="xl" 
-                customBgColor={color} 
-                whiteIcon 
-                shape="squircle"
-              />
-            </div>
-            <span className="text-xs font-semibold text-[var(--accent-color)] group-hover:underline">
-              {t('changeIcon')}
-            </span>
+            <CategoryIcon 
+              icon={icon} 
+              size="xl" 
+              noBackground 
+              whiteIcon 
+            />
           </button>
         </div>
 
