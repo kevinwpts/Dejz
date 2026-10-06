@@ -88,12 +88,16 @@ export function BudgetView({
   }, [initialSection]);
 
   const handleCloseCategoryBudgets = () => {
-    if (!config?.hasSavedInitialBudget) {
-      setConfig({
-        ...config,
-        hasSavedInitialBudget: true,
-      });
+    try {
+      localStorage.setItem('dejz_has_saved_initial_budget', 'true');
+    } catch (_e) {
+      // ignore
     }
+    const updatedConfig = {
+      ...config,
+      hasSavedInitialBudget: true,
+    };
+    setConfig(updatedConfig);
     setShowCategoryBudgets(false);
     onClearSection?.();
   };

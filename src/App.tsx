@@ -60,6 +60,7 @@ import { AddToHomeScreenModal } from "./components/AddToHomeScreenModal";
 import { CookieConsentModal } from "./components/CookieConsentModal";
 import { getLogoUrl } from "./utils/logo";
 import { FeedbackModal } from "./components/FeedbackModal";
+import { FloatingFeedbackWidget } from "./components/FloatingFeedbackWidget";
 import { DeleteAccountModal } from "./components/DeleteAccountModal";
 import { SecurityModal } from "./components/SecurityModal";
 import { ManageAccountModal } from "./components/ManageAccountModal";
@@ -2402,11 +2403,11 @@ export default function App() {
               ? Boolean(dbProfile.hide_empty_categories)
               : (localStorage.getItem('dejz_hide_empty_categories') === 'true' || localSavedConfig?.hideEmptyCategories === true),
           hasSavedInitialBudget:
-            dbProfile.has_saved_initial_budget !== undefined && dbProfile.has_saved_initial_budget !== null
-              ? Boolean(dbProfile.has_saved_initial_budget)
-              : (dbProfile.hasSavedInitialBudget !== undefined && dbProfile.hasSavedInitialBudget !== null
-                  ? Boolean(dbProfile.hasSavedInitialBudget)
-                  : localSavedConfig?.hasSavedInitialBudget),
+            dbProfile.has_saved_initial_budget === true ||
+            dbProfile.hasSavedInitialBudget === true ||
+            localSavedConfig?.hasSavedInitialBudget === true ||
+            localStorage.getItem('dejz_has_saved_initial_budget') === 'true' ||
+            (session?.user?.id ? localStorage.getItem(`dejz_has_saved_initial_budget_${session.user.id}`) === 'true' : false),
         };
 
         // Ensure monthlySavings is consistent with monthlySavingsItems
@@ -4951,6 +4952,14 @@ export default function App() {
           )}
         </main>
       </PullToRefresh>
+
+      {/* Floating Feedback Widget */}
+      {!isAddTransactionOpen && !isFeedbackModalOpen && (
+        <FloatingFeedbackWidget 
+          onOpenFeedback={() => setIsFeedbackModalOpen(true)}
+          language={config?.language || 'sv'}
+        />
+      )}
 
       {/* Bottom Navigation */}
       {!isAddTransactionOpen && (

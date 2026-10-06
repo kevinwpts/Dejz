@@ -5,7 +5,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { formatAmount, capitalize } from '../utils/format';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
-import { Paperclip, Trash2 } from 'lucide-react';
+import { Paperclip, Trash2, RotateCw } from 'lucide-react';
 import { feedback } from '../utils/feedback';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { ConfirmModal } from './ConfirmModal';
@@ -42,9 +42,17 @@ export function TransactionItem({
   showDate
 }: TransactionItemProps) {
   const transaction = originalTransaction as any;
-  const canEdit = onView && !isFixed;
+  const isFixedItem = Boolean(
+    isFixed || 
+    transaction?.isFixed || 
+    transaction?.is_fixed || 
+    transaction?.isFixedExpense || 
+    transaction?.fixed_expense_id || 
+    (typeof transaction?.id === 'string' && transaction.id.startsWith('fixed-'))
+  );
+  const canEdit = onView && !isFixedItem;
   const isClickable = Boolean(onClick || (canEdit && onView));
-  const canSwipe = Boolean(onDelete && !isFixed);
+  const canSwipe = Boolean(onDelete && !isFixedItem);
 
   const [isOpen, setIsOpen] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -202,21 +210,39 @@ export function TransactionItem({
             </div>
             
             <div className="min-w-0 flex-1 flex flex-col justify-center">
-              {/* Primary Merchant Name: 14px, weight 500 */}
-              <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
-                {merchantName}
-              </p>
+              {/* Primary Merchant Name + Fixed Icon Badge */}
+              <div className="flex items-center gap-1.5 min-w-0">
+                <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight">
+                  {merchantName}
+                </p>
+                {isFixedItem && (
+                  <span 
+                    title={getL10n(
+                      transaction.type === 'income' ? 'Fast inkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast sparande' : 'Fast utgift',
+                      transaction.type === 'income' ? 'Fixed income' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fixed savings' : 'Fixed expense',
+                      transaction.type === 'income' ? 'Fast inntekt' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast sparing' : 'Fast utgift',
+                      transaction.type === 'income' ? 'Fast indkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast opsparing' : 'Fast udgift',
+                      transaction.type === 'income' ? 'Kiinteä tulo' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Kiinteä säästö' : 'Kiinteä kulu'
+                    )}
+                    className={`inline-flex items-center justify-center p-0.5 rounded-full border shrink-0 select-none ${
+                      transaction.type === 'income' 
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' 
+                        : (transaction.type === 'saving' || transaction.type === 'savings')
+                        ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
+                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                    }`}
+                  >
+                    <RotateCw size={9.5} strokeWidth={2.4} className="shrink-0" />
+                  </span>
+                )}
+              </div>
               
               {/* Secondary Details: smaller category icon & text */}
-              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)]">
+              <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)] flex-wrap">
                 {hideCategoryBadge ? (
                   (transaction.timestamp || transaction.date) ? (
                     <span className="text-[11px] font-normal text-[var(--text-tertiary)] tabular-nums">
                       {new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
-                    </span>
-                  ) : isFixed ? (
-                    <span className="text-[11px] font-normal text-[var(--text-tertiary)]">
-                      {getL10n('Fast utgift', 'Fixed expense', 'Fast utgift', 'Fast udgift', 'Kiinteä kulu')}
                     </span>
                   ) : null
                 ) : showAllCategories && isSplit ? (
@@ -229,7 +255,7 @@ export function TransactionItem({
                   renderCategoryBadge(transaction.category)
                 )}
 
-                {transaction.note && !isFixed && (
+                {transaction.note && !isFixedItem && (
                   <span className="text-[11px] font-normal text-[var(--text-tertiary)] truncate min-w-0 flex-1">
                     • {transaction.note}
                   </span>
@@ -248,21 +274,19 @@ export function TransactionItem({
               <span className="font-amount tabular-nums font-normal tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
               <span className="text-[11px] font-normal opacity-75 ml-[2px]">{config?.currency || 'kr'}</span>
             </p>
-            {(transaction.timestamp || transaction.date) && !isFixed ? (
+            {(transaction.timestamp || transaction.date) && !isFixedItem ? (
               <p className="text-[9.5px] font-normal text-[var(--text-tertiary)] mt-0.5 tabular-nums">
                 {showDate 
                   ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
                   : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}
               </p>
-            ) : isFixed && (
-              <span className="text-[9.5px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap">
-                {getL10n(
-                  transaction.type === 'income' ? 'Fast inkomst' : transaction.type === 'saving' ? 'Fast sparande' : 'Fast utgift',
-                  transaction.type === 'income' ? 'Fixed income' : transaction.type === 'saving' ? 'Fixed savings' : 'Fixed expense',
-                  transaction.type === 'income' ? 'Fast inntekt' : transaction.type === 'saving' ? 'Fast sparing' : 'Fast utgift',
-                  transaction.type === 'income' ? 'Fast indkomst' : transaction.type === 'saving' ? 'Fast opsparing' : 'Fast udgift',
-                  transaction.type === 'income' ? 'Kiinteä tulo' : transaction.type === 'saving' ? 'Kiinteä säästö' : 'Kiinteä kulu'
-                )}
+            ) : isFixedItem && (
+              <span className="text-[9.5px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap tabular-nums">
+                {transaction.deductionDay 
+                  ? `${transaction.deductionDay}${config?.language === 'en' ? 'th' : ':e'}`
+                  : (transaction.timestamp || transaction.date) 
+                    ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
+                    : ''}
               </span>
             )}
           </div>
