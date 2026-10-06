@@ -21,7 +21,7 @@ interface NotificationsViewProps {
 
 export function NotificationsView({
   notifications,
-  onOpenItem: _onOpenItem,
+  onOpenItem,
   onConfirmStandard,
   onDismiss,
   currency,
