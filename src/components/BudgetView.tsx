@@ -233,12 +233,6 @@ export function BudgetView({
 
 
   const sortedCategoriesForManage = [...(config.categories || [])]
-    .filter((cat) => {
-      if (!config?.hideEmptyCategories) return true;
-      const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
-      const budgetVal = cat.budget !== undefined && cat.budget !== null ? Number(cat.budget) || 0 : 0;
-      return budgetVal > 0 || fixedSpent > 0;
-    })
     .sort((a, b) => {
       const aFixed = Math.round(getFixedSpentForCategory(a.name));
       const bFixed = Math.round(getFixedSpentForCategory(b.name));
