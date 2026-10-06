@@ -28,7 +28,6 @@ import {
   Mic,
   Square,
   Plus,
-  X,
 } from "lucide-react";
 import { useVoiceExpense } from "./hooks/useVoiceExpense";
 import { parseQuickExpense } from "./utils/expenseAiParser";
@@ -5656,30 +5655,24 @@ export default function App() {
             }}
           >
             <motion.div
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.6 }}
+              onDragEnd={(_e, info) => {
+                if (info.offset.y > 60 || info.velocity.y > 200) {
+                  feedback.tap();
+                  setIsPlusMenuOpen(false);
+                }
+              }}
               initial={{ y: "100%", opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-[#EFECE6] dark:bg-[#1C1C1C] w-full rounded-t-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-5"
+              className="bg-[#EFECE6] dark:bg-[#1C1C1C] w-full rounded-t-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Drawer Handle */}
-              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mb-1 shrink-0" />
-
-              {/* Header with X Close Button */}
-              <div className="flex items-center justify-end -mt-1 -mb-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    feedback.tap();
-                    setIsPlusMenuOpen(false);
-                  }}
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center cursor-pointer transition-colors"
-                  aria-label={config?.language === "en" ? "Close" : "Stäng"}
-                >
-                  <X size={16} />
-                </button>
-              </div>
+              {/* Drawer Handle / Drag Pill */}
+              <div className="w-12 h-1.5 bg-black/20 dark:bg-white/20 rounded-full mx-auto my-1 shrink-0 cursor-grab active:cursor-grabbing" />
 
               {/* The 3 Action Buttons */}
               <div className="grid grid-cols-3 gap-3 justify-items-center py-2">

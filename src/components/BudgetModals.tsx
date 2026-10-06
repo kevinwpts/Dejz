@@ -1088,10 +1088,10 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           >
             <div>
               <p className="text-[13px] font-medium text-[var(--text-primary)]">
-                {config.language === 'en' ? 'Show how to cancel' : 'Visa hur du säger upp'}
+                {config.language === 'en' ? 'Cancel subscription' : 'Säg upp abonnemang'}
               </p>
               <p className="text-[11.5px] font-normal text-[var(--text-secondary)] mt-0.5">
-                {config.language === 'en' ? 'Instructions and link to provider' : 'Instruktioner och länk till leverantören'}
+                {config.language === 'en' ? 'Instructions and direct link' : 'Instruktioner och direktlänk'}
               </p>
             </div>
             <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-70 group-hover:opacity-100 transition-opacity shrink-0" />
@@ -1649,10 +1649,10 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               >
                 <div>
                   <p className="text-[13px] font-medium text-[var(--text-primary)]">
-                    {config?.language === 'en' ? 'Show how to cancel' : 'Visa hur du säger upp'}
+                    {config?.language === 'en' ? 'Cancel subscription' : 'Säg upp abonnemang'}
                   </p>
                   <p className="text-[11.5px] font-normal text-[var(--text-secondary)] mt-0.5">
-                    {config?.language === 'en' ? 'Instructions and link to provider' : 'Instruktioner och länk till leverantören'}
+                    {config?.language === 'en' ? 'Instructions and direct link' : 'Instruktioner och direktlänk'}
                   </p>
                 </div>
                 <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-70 group-hover:opacity-100 transition-opacity shrink-0" />

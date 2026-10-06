@@ -5,6 +5,8 @@ import { formatAmount, capitalize } from '../utils/format';
 import { Config, Frequency } from '../types';
 import { TransactionLogo } from './TransactionLogo';
 import { getCategoryIconName } from '../utils/icons';
+import { Calendar } from 'lucide-react';
+import { DEFAULT_PAYMENT_METHODS } from '../constants';
 
 interface BudgetItemProps {
   item: any;
@@ -50,6 +52,26 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
     : ':e';
   const dayString = item.deductionDay ? `${item.deductionDay}${daySuffix}` : '';
   const paymentString = item.paymentMethod ? (typeof item.paymentMethod === 'string' ? item.paymentMethod : item.paymentMethod?.name) : '';
+  
+  const matchedPaymentMethod = React.useMemo(() => {
+    if (!paymentString) return null;
+    const pMethods = config?.paymentMethods && config.paymentMethods.length > 0 ? config.paymentMethods : DEFAULT_PAYMENT_METHODS;
+    const found = pMethods.find((pm: any) => {
+      const pmName = typeof pm === 'string' ? pm : pm?.name;
+      return (pmName || '').trim().toLowerCase() === paymentString.trim().toLowerCase();
+    });
+    if (found) {
+      if (typeof found === 'string') {
+        const defaultFound = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === (found as string).toLowerCase());
+        return defaultFound || { name: found, icon: 'credit-card' };
+      }
+      return found;
+    }
+    const defaultFound = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === paymentString.toLowerCase());
+    return defaultFound || { name: paymentString, icon: 'credit-card' };
+  }, [paymentString, config?.paymentMethods]);
+
+  const pmIconKey = matchedPaymentMethod?.icon || 'credit-card';
 
   const amountColor = type === 'income' 
     ? 'text-emerald-600 dark:text-emerald-400' 
@@ -123,14 +145,21 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
           <span className="text-[10px] font-normal text-[#777168] dark:text-[#A8A8A8] ml-[2px]">{currency}</span>
         </p>
 
-        {/* Right-aligned deduction metadata under amount */}
+        {/* Right-aligned deduction metadata micro-badges */}
         {(dayString || paymentString) && (
-          <div className="flex items-center gap-0.5 mt-0.5 justify-end max-w-full overflow-hidden text-[#777168] dark:text-[#A8A8A8]">
-            <span className="text-[11px] font-normal tracking-tight truncate tabular-nums">
-              {dayString && <span>{dayString}</span>}
-              {dayString && paymentString && <span className="mx-1 opacity-50">·</span>}
-              {paymentString && <span className="truncate max-w-[70px] sm:max-w-[100px]">{paymentString}</span>}
-            </span>
+          <div className="flex items-center gap-1 mt-1 justify-end max-w-full overflow-hidden">
+            {dayString && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none tabular-nums">
+                <Calendar size={10} strokeWidth={2} className="opacity-70 shrink-0" />
+                <span>{dayString}</span>
+              </span>
+            )}
+            {paymentString && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none truncate max-w-[90px] sm:max-w-[120px]">
+                <CategoryIcon icon={pmIconKey} size="2xs" className="shrink-0" />
+                <span className="truncate">{paymentString}</span>
+              </span>
+            )}
           </div>
         )}
       </div>

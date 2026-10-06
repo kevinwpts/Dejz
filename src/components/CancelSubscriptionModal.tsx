@@ -111,10 +111,10 @@ export function CancelSubscriptionModal({
           <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div>
               <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
-                {isEn ? 'Show how to cancel' : 'Visa hur du säger upp'}
+                {isEn ? 'Cancel subscription' : 'Säg upp abonnemang'}
               </h3>
               <p className="text-xs font-medium text-[var(--text-tertiary)] mt-0.5">
-                {isEn ? 'Instructions and link to provider' : 'Instruktioner och länk till leverantören'}
+                {isEn ? 'Instructions and direct link' : 'Instruktioner och direktlänk'}
               </p>
             </div>
 
