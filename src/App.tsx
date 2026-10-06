@@ -1371,21 +1371,10 @@ export default function App() {
   };
   */
 
-  const handleConfirmDeleteAccount = async (password?: string) => {
+  const handleConfirmDeleteAccount = async () => {
     if (!session) return;
 
     try {
-      // Verify password by signing in (only for email users)
-      if (password) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: session.user.email!,
-          password: password,
-        });
-
-        if (signInError) {
-          throw new Error(t("wrongPassword"));
-        }
-      }
 
       // Try to revoke Google OAuth token if available
       if (providerToken && session.user.app_metadata.provider === "google") {
