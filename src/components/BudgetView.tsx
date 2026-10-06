@@ -326,7 +326,12 @@ export function BudgetView({
                       }
                       return c;
                     });
-                    setConfig({ ...config, categories: updatedCategories });
+                    try {
+                      localStorage.setItem('dejz_has_saved_initial_budget', 'true');
+                    } catch (_e) {
+                      // ignore localStorage write errors
+                    }
+                    setConfig({ ...config, categories: updatedCategories, hasSavedInitialBudget: true });
                     setEditingCategoryName(null);
                   }}
                   onChange={(e) => {

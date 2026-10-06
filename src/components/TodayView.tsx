@@ -235,6 +235,18 @@ export function TodayView({
     return transactions;
   }, [normalizedSelectedDate, incomes, fixedExpenses, config?.monthlySavingsItems, stats?.savingsGoals, stats?.periodId, lang]);
 
+  const hasSavedBudget = useMemo(() => {
+    return Boolean(
+      config?.hasSavedInitialBudget ||
+      (config?.categories && config.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0)) ||
+      (stats?.categories && Object.values(stats.categories).some((c: any) => typeof c.userBudget === 'number' && c.userBudget > 0)) ||
+      (typeof window !== 'undefined' && (
+        localStorage.getItem('dejz_has_saved_initial_budget') === 'true' ||
+        localStorage.getItem('dejz_has_saved_budget') === 'true'
+      ))
+    );
+  }, [config?.hasSavedInitialBudget, config?.categories, stats?.categories]);
+
   const categoryBudgetData = useMemo(() => {
     if (!stats?.categories) return [];
     return Object.values(stats.categories)
@@ -324,7 +336,7 @@ export function TodayView({
         allTransactions={allTransactions}
         categoryBudgets={
           <div className="mt-1 sm:mt-2 pb-1">
-            {!config?.hasSavedInitialBudget ? (
+            {!hasSavedBudget ? (
               <button
                 type="button"
                 onClick={() => onNavigate("budget", "category-budgets")}

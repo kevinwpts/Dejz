@@ -94,8 +94,12 @@ export const dataService = {
         ? profileData.hide_empty_categories
         : (localSavedConfig?.hideEmptyCategories !== undefined ? localSavedConfig.hideEmptyCategories : false),
       hasSavedInitialBudget: profileData.has_saved_initial_budget !== undefined && profileData.has_saved_initial_budget !== null
-        ? profileData.has_saved_initial_budget
-        : (localSavedConfig?.hasSavedInitialBudget !== undefined ? localSavedConfig.hasSavedInitialBudget : undefined),
+        ? Boolean(profileData.has_saved_initial_budget)
+        : (localSavedConfig?.hasSavedInitialBudget !== undefined 
+            ? Boolean(localSavedConfig.hasSavedInitialBudget) 
+            : (Array.isArray(profileData.categories) && profileData.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0)
+                ? true
+                : (typeof window !== 'undefined' && localStorage.getItem('dejz_has_saved_initial_budget') === 'true'))),
     };
   },
 

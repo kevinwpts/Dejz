@@ -2406,8 +2406,21 @@ export default function App() {
             dbProfile.hasSavedInitialBudget === true ||
             localSavedConfig?.hasSavedInitialBudget === true ||
             localStorage.getItem('dejz_has_saved_initial_budget') === 'true' ||
-            (session?.user?.id ? localStorage.getItem(`dejz_has_saved_initial_budget_${session.user.id}`) === 'true' : false),
+            (session?.user?.id ? localStorage.getItem(`dejz_has_saved_initial_budget_${session.user.id}`) === 'true' : false) ||
+            (Array.isArray(dbProfile.categories) && dbProfile.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0)) ||
+            (Array.isArray(localSavedConfig?.categories) && localSavedConfig.categories.some((c: any) => typeof c.budget === 'number' && c.budget > 0)),
         };
+
+        if (mappedConfig.hasSavedInitialBudget) {
+          try {
+            localStorage.setItem('dejz_has_saved_initial_budget', 'true');
+            if (session?.user?.id) {
+              localStorage.setItem(`dejz_has_saved_initial_budget_${session.user.id}`, 'true');
+            }
+          } catch (_e) {
+            // ignore localStorage write errors
+          }
+        }
 
         // Ensure monthlySavings is consistent with monthlySavingsItems
         if (mappedConfig.monthlySavingsItems && mappedConfig.monthlySavingsItems.length > 0) {
