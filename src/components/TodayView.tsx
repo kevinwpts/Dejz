@@ -324,7 +324,28 @@ export function TodayView({
         allTransactions={allTransactions}
         categoryBudgets={
           <div className="mt-1 sm:mt-2 pb-1">
-            {categoryBudgetData.length > 0 ? (
+            {config?.hasSavedInitialBudget === false ? (
+              <button
+                type="button"
+                onClick={() => onNavigate("budget", "category-budgets")}
+                className="w-full p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-[14px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
+                    <SlidersHorizontal size={18} strokeWidth={2} />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] leading-snug">
+                      {lang === "en" ? "Set up your budget" : "Sätt upp din budget"}
+                    </p>
+                    <p className="text-[11px] font-medium text-[var(--text-secondary)] mt-0.5">
+                      {lang === "en" ? "Set limits per category to track spending" : "Fördela din budget på dina kategorier"}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+              </button>
+            ) : categoryBudgetData.length > 0 ? (
               <div className="flex items-center gap-3.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
                 {categoryBudgetData.map((cat, index) => {
                   const Icon = ICON_MAP[cat.iconName];

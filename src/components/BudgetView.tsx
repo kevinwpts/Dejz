@@ -88,6 +88,12 @@ export function BudgetView({
   }, [initialSection]);
 
   const handleCloseCategoryBudgets = () => {
+    if (config?.hasSavedInitialBudget === false) {
+      setConfig({
+        ...config,
+        hasSavedInitialBudget: true,
+      });
+    }
     setShowCategoryBudgets(false);
     onClearSection?.();
   };

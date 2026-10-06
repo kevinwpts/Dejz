@@ -93,6 +93,9 @@ export const dataService = {
       hideEmptyCategories: profileData.hide_empty_categories !== undefined
         ? profileData.hide_empty_categories
         : (localSavedConfig?.hideEmptyCategories !== undefined ? localSavedConfig.hideEmptyCategories : false),
+      hasSavedInitialBudget: profileData.has_saved_initial_budget !== undefined && profileData.has_saved_initial_budget !== null
+        ? profileData.has_saved_initial_budget
+        : (localSavedConfig?.hasSavedInitialBudget !== undefined ? localSavedConfig.hasSavedInitialBudget : undefined),
     };
   },
 
@@ -204,6 +207,7 @@ export const dataService = {
       show_fixed_expenses_in_history: config.showFixedExpensesInHistory,
       home_widgets: config.homeWidgets,
       hide_empty_categories: config.hideEmptyCategories,
+      has_saved_initial_budget: config.hasSavedInitialBudget,
       updated_at: new Date().toISOString()
     };
 

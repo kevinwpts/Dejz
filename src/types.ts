@@ -121,6 +121,7 @@ export interface Config {
   userGender?: string;
   homeWidgets?: HomeWidgetConfig[];
   lockedPeriods?: Record<string, { start: string; end: string; name: string }>;
+  hasSavedInitialBudget?: boolean;
 }
 
 export type HomeWidgetId =

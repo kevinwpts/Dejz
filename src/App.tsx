@@ -1956,6 +1956,7 @@ export default function App() {
       showFixedExpensesInCalendar: true,
       showFixedExpensesInHistory: localStorage.getItem('dejz_show_fixed_in_history') === 'true',
       hideEmptyCategories: localStorage.getItem('dejz_hide_empty_categories') === 'true',
+      hasSavedInitialBudget: false,
     };
 
     try {
@@ -2350,6 +2351,12 @@ export default function App() {
             dbProfile.hide_empty_categories !== undefined && dbProfile.hide_empty_categories !== null
               ? Boolean(dbProfile.hide_empty_categories)
               : (localStorage.getItem('dejz_hide_empty_categories') === 'true' || localSavedConfig?.hideEmptyCategories === true),
+          hasSavedInitialBudget:
+            dbProfile.has_saved_initial_budget !== undefined && dbProfile.has_saved_initial_budget !== null
+              ? Boolean(dbProfile.has_saved_initial_budget)
+              : (dbProfile.hasSavedInitialBudget !== undefined && dbProfile.hasSavedInitialBudget !== null
+                  ? Boolean(dbProfile.hasSavedInitialBudget)
+                  : localSavedConfig?.hasSavedInitialBudget),
         };
 
         // Ensure monthlySavings is consistent with monthlySavingsItems
@@ -3957,6 +3964,7 @@ export default function App() {
           showFixedExpensesInHistory: false,
           hideEmptyCategories: false,
           paymentMethods: DEFAULT_PAYMENT_METHODS,
+          hasSavedInitialBudget: false,
         };
 
         await dataService.saveSettings(session.user.id, defaultConfig);
@@ -5062,6 +5070,7 @@ export default function App() {
               // 3. Update config with income, initialSpent, payday, savings goals, monthlySavings, monthlySavingsItems, age, gender, and categories
               const newConfig: Config = {
                 ...config,
+                hasSavedInitialBudget: false,
                 darkMode: (config?.darkMode !== undefined && config?.darkMode !== null) ? config.darkMode : true,
                 payday: data.payday || 25,
                 paydayBeforeWeekend: data.paydayBeforeWeekend !== undefined ? data.paydayBeforeWeekend : (config?.paydayBeforeWeekend !== undefined ? config.paydayBeforeWeekend : true),
