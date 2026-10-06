@@ -10,7 +10,7 @@ import { Modal, IconButton } from './ui';
 interface CategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  type: 'expense' | 'income';
+  type?: 'expense' | 'income';
   initialData: { name: string; icon: string; color?: string; index?: number } | null;
   onSave: (data: { name: string; icon: string; color?: string; index?: number }) => void;
   onDelete?: (index: number) => void;
@@ -22,6 +22,7 @@ const PRESET_COLORS = [...DEFAULT_CATEGORY_PALETTE];
 export function CategoryModal({ 
   isOpen, 
   onClose, 
+  type: _type = 'expense',
   initialData, 
   onSave, 
   onDelete, 
@@ -73,48 +74,26 @@ export function CategoryModal({
         }
         bodyClassName="p-5 sm:p-6 space-y-5"
       >
-        {/* Live Preview Card */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] ml-0.5">
-            Förhandsvisning
-          </label>
-          <div className="p-3.5 bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[18px] flex items-center justify-between shadow-xs">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setShowIconPicker(true)}
-                className="relative group cursor-pointer"
-                title="Byt ikon"
-              >
-                <CategoryIcon 
-                  icon={icon} 
-                  size="lg" 
-                  customBgColor={color} 
-                  whiteIcon 
-                  shape="squircle"
-                />
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center text-[10px] shadow-xs group-hover:scale-110 transition-transform">
-                  ✎
-                </div>
-              </button>
-              <div>
-                <h4 className="text-sm font-bold text-[var(--text-primary)]">
-                  {name.trim() || 'Kategorinamn'}
-                </h4>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${color}18`, color: color }}>
-                    {type === 'expense' ? 'Utgift' : 'Inkomst'}
-                  </span>
-                  <span className="text-[10px] text-[var(--text-secondary)]">Exempelpost</span>
-                </div>
-              </div>
+        {/* Preview / Icon selector */}
+        <div className="flex flex-col items-center justify-center pt-1">
+          <button 
+            type="button"
+            onClick={() => setShowIconPicker(true)}
+            className="flex flex-col items-center justify-center gap-2 transition-transform active:scale-95 group cursor-pointer"
+          >
+            <div className="relative group-hover:ring-4 group-hover:ring-[var(--accent-color)]/20 transition-all rounded-[18px]">
+              <CategoryIcon 
+                icon={icon} 
+                size="xl" 
+                customBgColor={color} 
+                whiteIcon 
+                shape="squircle"
+              />
             </div>
-            <div className="text-right">
-              <span className="text-sm font-bold font-mono text-[var(--text-primary)]">
-                {type === 'expense' ? '-249 kr' : '+15 000 kr'}
-              </span>
-            </div>
-          </div>
+            <span className="text-xs font-semibold text-[var(--accent-color)] group-hover:underline">
+              {t('changeIcon')}
+            </span>
+          </button>
         </div>
 
         {/* Form */}
