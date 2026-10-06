@@ -20,6 +20,7 @@ import { CancelSubscriptionModal } from './CancelSubscriptionModal';
 import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
 import { resolveEntityVisual } from '../utils/resolver';
 import { getCategoryColor } from '../utils/categoryColors';
+import { feedback } from '../utils/feedback';
 
 function _hexToRgba(hex: string, alpha: number): string {
   if (!hex) return `rgba(124, 58, 237, ${alpha})`;
@@ -1992,10 +1993,18 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
       {showDeleteConfirm && (
         <ConfirmModal
           isOpen={showDeleteConfirm}
-          title={t('delete')}
-          message={t('deleteConfirm')}
+          title={config.language === 'en' ? "Delete monthly saving?" : "Radera månadssparande?"}
+          message={
+            config.language === 'en'
+              ? `Do you want to delete ${saving.name} (${formatAmount(saving.amount, config.language)} ${currency})?`
+              : `Vill du radera ${saving.name} (${formatAmount(saving.amount, config.language)} ${currency})?`
+          }
+          confirmText={config.language === 'en' ? "Delete" : "Radera"}
+          cancelText={config.language === 'en' ? "Cancel" : "Avbryt"}
+          variant="danger"
           onConfirm={() => {
             onDelete(saving.id);
+            setShowDeleteConfirm(false);
             onClose();
           }}
           onCancel={() => setShowDeleteConfirm(false)}

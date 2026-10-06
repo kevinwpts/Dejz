@@ -3534,7 +3534,8 @@ export default function App() {
   const handleSaveMonthlySaving = async (saving: any) => {
     if (!session || !config) return;
     try {
-      const targetId = editingMonthlySaving?.id || crypto.randomUUID();
+      const rawId = editingMonthlySaving?.id || crypto.randomUUID();
+      const targetId = rawId.startsWith('saving-') ? rawId.replace('saving-', '') : rawId;
       const newSaving = {
         ...saving,
         isVariable: Boolean(saving.isVariable),
@@ -3543,9 +3544,9 @@ export default function App() {
       };
 
       const existingItems = config.monthlySavingsItems || [];
-      const itemExists = editingMonthlySaving && existingItems.some((s: any) => s.id === editingMonthlySaving.id);
+      const itemExists = existingItems.some((s: any) => s.id === targetId || s.id === rawId);
       const newItems = itemExists
-        ? existingItems.map((s: any) => (s.id === editingMonthlySaving.id ? newSaving : s))
+        ? existingItems.map((s: any) => (s.id === targetId || s.id === rawId ? newSaving : s))
         : [...existingItems, newSaving];
 
       const itemsSum = newItems.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0);
@@ -3563,8 +3564,9 @@ export default function App() {
   const handleDeleteMonthlySaving = async (id: string) => {
     if (!session || !config) return;
     try {
+      const cleanId = id.startsWith('saving-') ? id.replace('saving-', '') : id;
       const newItems =
-        config.monthlySavingsItems?.filter((s: any) => s.id !== id) || [];
+        config.monthlySavingsItems?.filter((s: any) => s.id !== id && s.id !== cleanId) || [];
       const itemsSum = newItems.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0);
       const newConfig = { ...config, monthlySavingsItems: newItems, monthlySavings: itemsSum };
       setConfig(newConfig);
@@ -5419,12 +5421,15 @@ export default function App() {
             saving={viewingMonthlySaving}
             onClose={() => setViewingMonthlySaving(null)}
             onEdit={(saving) => {
+              const cleanId = saving.id?.startsWith('saving-') ? saving.id.replace('saving-', '') : saving.id;
+              const cleanSaving = { ...saving, id: cleanId };
               setViewingMonthlySaving(null);
-              setEditingMonthlySaving(saving);
+              setEditingMonthlySaving(cleanSaving);
               setIsMonthlySavingModalOpen(true);
             }}
-            onDelete={() => {
-              handleDeleteMonthlySaving(viewingMonthlySaving.id);
+            onDelete={(id) => {
+              const targetId = id || viewingMonthlySaving?.id;
+              if (targetId) handleDeleteMonthlySaving(targetId);
               setViewingMonthlySaving(null);
             }}
             t={t}
