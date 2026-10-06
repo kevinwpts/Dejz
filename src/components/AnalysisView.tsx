@@ -55,6 +55,11 @@ export function AnalysisView({
     }) || periods.find(p => p.isCurrent) || null;
   }, [periods, currentPeriodDate]);
 
+  const availablePeriods = useMemo(() => {
+    if (!periods || periods.length === 0) return [];
+    return periods.filter(p => !p.isFuture || p.isCurrent);
+  }, [periods]);
+
   const [isAllPeriodsSelected, setIsAllPeriodsSelected] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('all');
@@ -315,7 +320,7 @@ export function AnalysisView({
       <PeriodSelectorModal
         isOpen={isPeriodModalOpen}
         onClose={() => setIsPeriodModalOpen(false)}
-        periods={periods || []}
+        periods={availablePeriods}
         selectedPeriod={isAllPeriodsSelected ? null : currentPeriod}
         selectedDate={null}
         onSelectPeriod={(p) => {

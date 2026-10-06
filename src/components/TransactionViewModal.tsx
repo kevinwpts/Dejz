@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
-import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2 } from 'lucide-react';
+import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2, ChevronDown } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
@@ -14,9 +14,13 @@ import { feedback } from '../utils/feedback';
 import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
 import { resolveEntityVisual } from '../utils/resolver';
 import { ConfirmModal } from './ConfirmModal';
+import { findKnownBrandDomain } from '../utils/logo';
+import { TransactionItem } from './TransactionItem';
 
 interface TransactionViewModalProps {
   transaction: Transaction;
+  transactions?: Transaction[];
+  onSelectTransaction?: (transaction: Transaction) => void;
   onClose: () => void;
   onEdit: (transaction: Transaction) => void;
   onDelete?: (id: string) => void;
@@ -41,7 +45,17 @@ function _hexToRgba(hex: string, alpha: number): string {
   return `rgba(124, 58, 237, ${alpha})`;
 }
 
-export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, onDuplicate, t, config }: TransactionViewModalProps) {
+export function TransactionViewModal({ 
+  transaction, 
+  transactions = [],
+  onSelectTransaction,
+  onClose, 
+  onEdit, 
+  onDelete, 
+  onDuplicate, 
+  t, 
+  config 
+}: TransactionViewModalProps) {
   useScrollLock(true);
   const dragControls = useDragControls();
   const isIncome = transaction.type === 'income';
@@ -49,7 +63,63 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReceiptLightbox, setShowReceiptLightbox] = useState(false);
+  const [showSimilar, setShowSimilar] = useState(false);
   const [_brandColor, setBrandColor] = useState(() => getTransactionDominantColor(transaction, config));
+
+  // Compute similar transactions (fuzzy merchant name match, brand domain match, etc.)
+  const similarTransactions = useMemo(() => {
+    if (!transactions || transactions.length === 0) return [];
+
+    const getRawMerchant = (tx: Transaction) => {
+      const m = typeof tx.merchant === 'object' ? (tx.merchant as any)?.name : (tx.merchant || (typeof tx.category === 'object' ? (tx.category as any)?.name : tx.category));
+      return String(m || '').trim();
+    };
+
+    const cleanMerchant = (name: string) => {
+      return name
+        .toLowerCase()
+        .replace(/\b(ab|aktiebolag|as|oy|aps|ltd|gmbh|inc|llc|sverige|sweden|butik|butiken|online|ecom|store)\b/gi, '')
+        .replace(/[^a-z0-9åäö]/gi, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+
+    const currentRawName = getRawMerchant(transaction);
+    const currentCleanName = cleanMerchant(currentRawName);
+    const currentDomain = findKnownBrandDomain(currentRawName);
+    const currentFirstWord = currentCleanName.split(' ')[0] || '';
+
+    return transactions.filter(t => {
+      if (t.id === transaction.id) return false;
+      const otherRaw = getRawMerchant(t);
+      if (!otherRaw) return false;
+
+      // 1. Exact raw match (case insensitive)
+      if (currentRawName.toLowerCase() === otherRaw.toLowerCase()) return true;
+
+      // 2. Domain match (e.g. Stadium vs Stadium Barkarby both match stadium.se)
+      if (currentDomain) {
+        const otherDomain = findKnownBrandDomain(otherRaw);
+        if (otherDomain && otherDomain === currentDomain) return true;
+      }
+
+      // 3. Cleaned name substring match (e.g. "stadium" in "stadium ab")
+      const otherClean = cleanMerchant(otherRaw);
+      if (currentCleanName && otherClean) {
+        if (currentCleanName === otherClean) return true;
+        if (currentCleanName.length >= 3 && otherClean.includes(currentCleanName)) return true;
+        if (otherClean.length >= 3 && currentCleanName.includes(otherClean)) return true;
+      }
+
+      // 4. First significant word match (e.g. "stadium" in "stadium kungsgatan")
+      if (currentFirstWord && currentFirstWord.length >= 3) {
+        const otherFirstWord = otherClean.split(' ')[0] || '';
+        if (currentFirstWord === otherFirstWord) return true;
+      }
+
+      return false;
+    }).sort((a, b) => b.timestamp - a.timestamp);
+  }, [transaction, transactions]);
 
   useEffect(() => {
     const initial = getTransactionDominantColor(transaction, config);
@@ -386,6 +456,60 @@ export function TransactionViewModal({ transaction, onClose, onEdit, onDelete, o
                   document.body
                 )}
               </>
+            )}
+
+            {/* Similar Transactions Section */}
+            {similarTransactions.length > 0 && (
+              <div className="pt-3 pb-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.light === 'function') feedback.light();
+                    setShowSimilar(prev => !prev);
+                  }}
+                  className="w-full py-3 px-4 rounded-[18px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all flex items-center justify-between cursor-pointer border border-black/[0.04] dark:border-white/[0.06] shadow-2xs text-left active:scale-[0.99]"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13.5px] font-semibold text-[var(--text-primary)] tracking-tight">
+                        {config.language === 'en' ? 'Similar transactions' : 'Liknande transaktioner'}
+                      </span>
+                      <span className="text-[10.5px] font-bold px-1.5 py-0.2 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+                        {similarTransactions.length}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-[var(--text-secondary)] opacity-75 block truncate mt-0.5">
+                      {config.language === 'en' 
+                        ? `${similarTransactions.length} other ${similarTransactions.length === 1 ? 'transaction' : 'transactions'} with similar name`
+                        : `${similarTransactions.length} ${similarTransactions.length === 1 ? 'annan transaktion' : 'andra transaktioner'} med liknande namn`}
+                    </span>
+                  </div>
+                  <ChevronDown 
+                    size={16} 
+                    className={`text-[var(--text-secondary)] transition-transform duration-200 shrink-0 ml-2 ${showSimilar ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+
+                {showSimilar && (
+                  <div className="mt-2 space-y-1 bg-[var(--surface-muted)]/50 p-2 rounded-[20px] border border-black/[0.04] dark:border-white/[0.06]">
+                    {similarTransactions.map((similarTx) => (
+                      <TransactionItem
+                        key={similarTx.id}
+                        transaction={similarTx}
+                        config={config}
+                        variant="transparent"
+                        showDate={true}
+                        onClick={() => {
+                          if (typeof feedback?.selection === 'function') feedback.selection();
+                          if (onSelectTransaction) {
+                            onSelectTransaction(similarTx);
+                          }
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>

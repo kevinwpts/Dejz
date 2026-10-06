@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, Camera, Loader2, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History } from 'lucide-react';
+import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -107,7 +107,6 @@ export function ProfileView({
   useEffect(() => {
     setActivePage(initialSection as any);
   }, [initialSection]);
-  const [isUploading, setIsUploading] = useState(false);
 
   if (activePage === 'admin') {
     return (
@@ -245,42 +244,20 @@ export function ProfileView({
     >
       {/* User Header Module */}
       <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-5 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs flex items-center gap-4">
-        <div className="relative shrink-0">
-          <label htmlFor="avatar-upload" className="cursor-pointer group block">
-            <input 
-              type="file" 
-              className="hidden" 
-              accept="image/*"
-              id="avatar-upload"
-              onChange={async (e) => {
-                if (e.target.files && e.target.files[0]) {
-                  setIsUploading(true);
-                  try {
-                    await onUploadAvatar(e.target.files[0]);
-                  } finally {
-                    setIsUploading(false);
-                  }
-                }
-              }}
-            />
-            <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[22px] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] transition-all duration-300 shadow-none">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-2xl font-bold">
-                  {(user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
-                </div>
-              )}
-              {isUploading && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
-                  <Loader2 className="animate-spin text-white" size={18} />
-                </div>
-              )}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <Camera size={18} strokeWidth={2} className="text-white" />
+        <div 
+          onClick={() => handleSectionClick('manageAccount')}
+          className="relative shrink-0 cursor-pointer group"
+          title={t('manageAccount')}
+        >
+          <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[22px] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-none">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-2xl font-bold">
+                {(user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
               </div>
-            </div>
-          </label>
+            )}
+          </div>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">

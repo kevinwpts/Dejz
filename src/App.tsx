@@ -2457,13 +2457,20 @@ export default function App() {
       });
     }
 
+    const earliestBounds = getPeriodBoundaries(
+      earliest,
+      paydayType,
+      paydaySetting,
+      adjustment,
+    );
+
     const nowYear = now.getFullYear();
     const nowMonth = now.getMonth();
     const earliestYear = earliest.getFullYear();
     const earliestMonth = earliest.getMonth();
 
-    const monthDiff = (nowYear - earliestYear) * 12 + (nowMonth - earliestMonth);
-    const startOffset = -Math.max(12, monthDiff);
+    const monthDiff = Math.max(0, (nowYear - earliestYear) * 12 + (nowMonth - earliestMonth));
+    const startOffset = -monthDiff - 1;
     const endOffset = 12;
 
     const newLockedPeriods = { ...(config?.lockedPeriods || {}) };
@@ -2481,6 +2488,11 @@ export default function App() {
 
       let start = tempBounds.start;
       let end = tempBounds.end;
+
+      // Do not include periods from before account registration or earliest activity
+      if (end < earliestBounds.start) {
+        continue;
+      }
 
       let name = getPeriodName(
         start,
@@ -5276,6 +5288,8 @@ export default function App() {
             }}
             t={t}
             config={config}
+            transactions={transactions}
+            onSelectTransaction={(t) => setViewingTransaction(t)}
           />
         )}
 

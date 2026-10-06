@@ -582,7 +582,7 @@ export function LogView({
       <PeriodSelectorModal
         isOpen={isPeriodPickerOpen}
         onClose={() => setIsPeriodPickerOpen(false)}
-        periods={periods || []}
+        periods={chronologicalPeriods}
         selectedPeriod={selectedPeriod}
         selectedDate={selectedDate}
         onSelectPeriod={(p) => {
