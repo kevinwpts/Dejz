@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Search, Sparkles, Check, Clock } from 'lucide-react';
 import { 
@@ -99,23 +100,24 @@ export function IconPickerModal({
     onClose();
   };
 
-  return (
+  const modalNode = (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[130] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md"
-        onClick={onClose}
-      >
+      {isOpen && (
         <motion.div
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-          className="bg-[var(--bg-color)] w-full max-w-2xl rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl overflow-hidden flex flex-col h-[92vh] sm:h-[90vh] font-sans"
-          onClick={e => e.stopPropagation()}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md"
+          onClick={onClose}
         >
+          <motion.div
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            className="bg-[var(--bg-color)] w-full max-w-2xl rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl overflow-hidden flex flex-col h-[92vh] sm:h-[90vh] font-sans"
+            onClick={e => e.stopPropagation()}
+          >
           {/* Header */}
           <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div className="flex items-center gap-3">
@@ -323,6 +325,9 @@ export function IconPickerModal({
           </div>
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>
   );
+
+  return createPortal(modalNode, document.body);
 }
