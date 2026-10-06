@@ -375,7 +375,17 @@ export function TodayView({
                       </span>
 
                       <span className="text-[10px] font-medium text-white/95 tabular-nums tracking-tight whitespace-nowrap bg-black/15 px-2 py-0.5 rounded-full">
-                        {cat.hasBudget ? `${formatAmount(Math.round(cat.remaining), lang)} ${config?.currency || 'kr'} ${lang === 'en' ? 'left' : 'kvar'}` : `${formatAmount(Math.round(cat.spent), lang)} ${config?.currency || 'kr'}`}
+                        {(() => {
+                          const currency = config?.currency || 'kr';
+                          if (!cat.hasBudget) {
+                            return `${formatAmount(Math.round(cat.spent), lang)} ${currency}`;
+                          }
+                          const rem = Math.round(cat.remaining);
+                          if (rem < 0) {
+                            return `${formatAmount(rem, lang)} ${currency}`;
+                          }
+                          return `${formatAmount(rem, lang)} ${currency} ${lang === 'en' ? 'left' : 'kvar'}`;
+                        })()}
                       </span>
                     </motion.button>
                   );
