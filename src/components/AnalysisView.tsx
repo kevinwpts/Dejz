@@ -532,6 +532,7 @@ export function AnalysisView({
                                       config={config}
                                       language={config.language}
                                       currency={config.currency || 'kr'}
+                                      onClick={() => onViewFixedExpense?.(fe)}
                                       onView={() => onViewFixedExpense?.(fe)}
                                     />
                                   </div>

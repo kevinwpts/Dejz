@@ -50,8 +50,8 @@ export function TransactionItem({
     transaction?.fixed_expense_id || 
     (typeof transaction?.id === 'string' && transaction.id.startsWith('fixed-'))
   );
-  const canEdit = onView && !isFixedItem;
-  const isClickable = Boolean(onClick || (canEdit && onView));
+  const canEdit = Boolean(onView);
+  const isClickable = Boolean(onClick || onView);
   const canSwipe = Boolean(onDelete && !isFixedItem);
 
   const [isOpen, setIsOpen] = useState(false);
