@@ -324,7 +324,7 @@ export function TodayView({
         allTransactions={allTransactions}
         categoryBudgets={
           <div className="mt-1 sm:mt-2 pb-1">
-            {config?.hasSavedInitialBudget === false ? (
+            {!config?.hasSavedInitialBudget ? (
               <button
                 type="button"
                 onClick={() => onNavigate("budget", "category-budgets")}
