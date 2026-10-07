@@ -10,7 +10,6 @@ import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
 import { getActiveFixedExpenses, getCancelledFixedExpenses } from '../utils/cancellation';
-import { CancelledSubscriptionsModal } from './CancelledSubscriptionsModal';
 
 interface BudgetViewProps {
   allTransactions?: any[];
@@ -58,7 +57,6 @@ export function BudgetView({
 }: BudgetViewProps) {
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
   const [isBudgetFilterModalOpen, setIsBudgetFilterModalOpen] = React.useState(false);
-  const [isCancelledModalOpen, setIsCancelledModalOpen] = React.useState(false);
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
   });
@@ -441,15 +439,6 @@ export function BudgetView({
                     }
                   </span>
                 </button>
-                {cancelledFixedExpenses.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setIsCancelledModalOpen(true)}
-                    className="h-8 px-3 rounded-[12px] bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 border border-amber-500/20 shadow-none shrink-0"
-                  >
-                    <span>{config.language === 'en' ? `Cancelled (${cancelledFixedExpenses.length})` : `Uppsagda (${cancelledFixedExpenses.length})`}</span>
-                  </button>
-                )}
                 <Button
                   variant="secondary"
                   size="sm"
@@ -475,11 +464,11 @@ export function BudgetView({
 
                     return (
                       <div key={freq} className="space-y-3">
-                        <div className="flex items-center justify-between px-1.5 select-none">
+                        <div className="flex items-baseline justify-between px-1.5 select-none">
                           <h3 className="text-xs font-semibold text-[var(--text-secondary)] tracking-wider uppercase">
                             {label}
                           </h3>
-                          <span className="text-xs font-semibold text-[var(--text-primary)] font-amount tabular-nums">
+                          <span className="text-base font-bold text-[var(--text-primary)] font-amount tabular-nums">
                             {formatAmount(Math.round(sum), config.language)} {config.currency || 'kr'}{suffix}
                           </span>
                         </div>
@@ -510,6 +499,37 @@ export function BudgetView({
                   actionLabel={`+ ${t('newFixedExpense')}`}
                   onAction={onAddFixedExpense}
                 />
+              )}
+
+              {/* Cancelled Subscriptions Native Section */}
+              {cancelledFixedExpenses.length > 0 && (
+                <div className="space-y-3 pt-5 mt-5 border-t border-dashed border-black/[0.08] dark:border-white/10">
+                  <div className="flex items-center justify-between px-1.5 select-none">
+                    <h3 className="text-xs font-semibold text-amber-600 dark:text-amber-500 tracking-wider uppercase flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                      {config.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
+                    </h3>
+                    <span className="text-xs font-medium text-[var(--text-secondary)]">
+                      {cancelledFixedExpenses.length}
+                    </span>
+                  </div>
+                  <div className="space-y-2.5 opacity-60 hover:opacity-100 transition-opacity duration-200">
+                    {cancelledFixedExpenses.map((expense) => (
+                      <BudgetItem 
+                        key={expense.id}
+                        item={expense} 
+                        onClick={() => onViewFixedExpense(expense)} 
+                        currency={config.currency} 
+                        type="expense"
+                        language={config.language as Language}
+                        t={t}
+                        config={config}
+                        currentPeriodId={currentPeriodId}
+                        isGrouped={true}
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           )}
@@ -582,22 +602,7 @@ export function BudgetView({
         </motion.div>
       </AnimatePresence>
 
-      {/* Cancelled Subscriptions Modal */}
-      {isCancelledModalOpen && (
-        <CancelledSubscriptionsModal
-          isOpen={isCancelledModalOpen}
-          onClose={() => setIsCancelledModalOpen(false)}
-          fixedExpenses={fixedExpenses}
-          onUpdateExpense={(updated) => {
-            onEditFixedExpense(updated);
-          }}
-          onDeleteExpense={(id) => {
-            const newList = fixedExpenses.filter(e => e.id !== id);
-            setFixedExpenses(newList);
-          }}
-          config={config}
-        />
-      )}
+
     </motion.div>
   );
 }
