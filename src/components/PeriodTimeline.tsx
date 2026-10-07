@@ -7,7 +7,7 @@ interface PeriodTimelineProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
   language?: string;
-  stats?: any;
+  _stats?: any;
   isCurrentPeriod?: boolean;
   categoryFilter?: string | null;
   showFixedInCalendar?: boolean;
@@ -18,7 +18,7 @@ export function PeriodTimeline({
   selectedDate,
   onSelectDate,
   language = 'sv',
-  stats,
+  _stats,
   categoryFilter = null,
   showFixedInCalendar = true,
 }: PeriodTimelineProps) {
@@ -204,24 +204,7 @@ export function PeriodTimeline({
     scrollToElement(targetEl, 'smooth');
   };
 
-  const nextPaydayDate = useMemo(() => {
-    if (stats?.periodEnd) {
-      const d = new Date(stats.periodEnd);
-      d.setDate(d.getDate() + 1);
-      return d;
-    }
-    if (calendarDays && calendarDays.length > 0) {
-      const lastDay = calendarDays[calendarDays.length - 1];
-      if (lastDay?.date) {
-        const d = new Date(lastDay.date);
-        d.setDate(d.getDate() + 1);
-        return d;
-      }
-    }
-    return null;
-  }, [stats?.periodEnd, calendarDays]);
 
-  const nextPaydayDayNumber = nextPaydayDate ? nextPaydayDate.getDate() : null;
 
   return (
     <div className="relative group/timeline w-full my-1 sm:my-1.5 font-sans overflow-visible" id="period_timeline_wrapper">
@@ -314,7 +297,7 @@ export function PeriodTimeline({
                     : 'text-[#716E68] dark:text-[#9CA6BC]/70'
                 }`}
               >
-                {isFirstDay ? (isEn ? 'Payday' : 'Lön') : (isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort)}
+                {isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}
               </span>
 
               {/* Day Number */}
@@ -333,18 +316,6 @@ export function PeriodTimeline({
             </button>
           );
         })}
-
-        {/* Lön / Payday Box at the end of the timeline */}
-        <div
-          className="flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[54px] h-[50px] sm:h-[56px] p-1.5 rounded-[14px] bg-black/5 dark:bg-white/[0.04] text-[#242321] dark:text-white border-none select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5 shadow-none"
-        >
-          <span className="text-[8px] sm:text-[8.5px] tracking-wider leading-none font-medium text-[#716E68] dark:text-[#9CA6BC]/70">
-            {isEn ? 'Payday' : 'Lön'}
-          </span>
-          <span className="text-[15px] sm:text-[16px] leading-none font-medium tabular-nums font-amount text-[#242321] dark:text-[#C7CDDC]">
-            {nextPaydayDayNumber ?? '💰'}
-          </span>
-        </div>
       </div>
 
       {/* Right Scroll Arrow Button */}

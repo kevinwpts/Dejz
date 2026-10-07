@@ -48,6 +48,7 @@ export function GreetingModule({
 }: GreetingModuleProps) {
   const isEn = language === 'en';
   const [isPeriodInfoOpen, setIsPeriodInfoOpen] = useState(false);
+  const [isCalculationInfoOpen, setIsCalculationInfoOpen] = useState(false);
 
   const effectiveRemainingDays = useMemo(() => {
     if (!stats) return 1;
@@ -109,6 +110,7 @@ export function GreetingModule({
           currency={currency}
           language={language}
           label={t('totalRemaining')}
+          onOpenInfo={() => setIsCalculationInfoOpen(true)}
         />
 
         {/* Proposal 1: Subtle horizontal status pill directly below gauge */}
@@ -204,6 +206,110 @@ export function GreetingModule({
               className="w-full h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-xs flex items-center justify-center"
             >
               {isEn ? 'Close' : 'Stäng'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Detailed Calculation Info Modal */}
+      {isCalculationInfoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
+          <div 
+            className="fixed inset-0" 
+            onClick={() => setIsCalculationInfoOpen(false)} 
+          />
+          <div className="relative w-full max-w-[340px] bg-white dark:bg-[#1C1C1C] rounded-[28px] p-5 border border-black/[0.08] dark:border-white/[0.08] shadow-2xl space-y-4 z-10 text-left font-sans">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-1">
+              <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold font-display tracking-wider text-xs uppercase">
+                <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2.4} />
+                <span>{isEn ? 'Calculation Details' : 'Hur räknas det ut?'}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCalculationInfoOpen(false)}
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer border-none"
+                aria-label="Stäng"
+              >
+                <X size={17} strokeWidth={2} />
+              </button>
+            </div>
+
+            {/* Explanatory introduction */}
+            <p className="text-xs text-[var(--text-secondary)] leading-normal">
+              {isEn 
+                ? 'Your remaining budget is what is left for variable spending after deducting bills and savings from your income.' 
+                : 'Kvar att spendera är vad som återstår för rörliga köp under perioden efter att fasta utgifter och sparande räknats bort.'}
+            </p>
+
+            {/* Real-time Math Breakdown */}
+            <div className="space-y-2 pt-1">
+              {/* 1. Incomes */}
+              <div className="flex justify-between items-center text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Total Income' : 'Totala inkomster'}</span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-amount tabular-nums">
+                  +{formatAmount(stats?.totalIncome || 0, language)} {currency}
+                </span>
+              </div>
+
+              {/* 2. Fixed Expenses */}
+              <div className="flex justify-between items-center text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Fixed Expenses' : 'Fasta utgifter (verkliga)'}</span>
+                <span className="font-semibold text-rose-500 dark:text-rose-400 font-amount tabular-nums">
+                  -{formatAmount(stats?.totalFixed || 0, language)} {currency}
+                </span>
+              </div>
+
+              {/* 3. Monthly Savings */}
+              <div className="flex justify-between items-center text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Monthly Savings' : 'Månadssparande'}</span>
+                <span className="font-semibold text-amber-500 font-amount tabular-nums">
+                  -{formatAmount(stats?.totalSavings || 0, language)} {currency}
+                </span>
+              </div>
+
+              {/* 4. Disposable Pot = Income - Fixed - Savings */}
+              <div className="flex justify-between items-center text-xs py-1.5 px-2 bg-black/[0.03] dark:bg-white/[0.04] rounded-lg">
+                <span className="font-medium text-[var(--text-primary)]">{isEn ? 'Disposable Pot' : 'Rörlig pott för perioden'}</span>
+                <span className="font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                  ={formatAmount(stats?.disposablePot || 0, language)} {currency}
+                </span>
+              </div>
+
+              {/* 5. Total Spent in Period */}
+              <div className="flex justify-between items-center text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Variable Spent' : 'Spenderat hittills'}</span>
+                <span className="font-semibold text-rose-500 dark:text-rose-400 font-amount tabular-nums">
+                  -{formatAmount(stats?.totalSpentInPeriod || 0, language)} {currency}
+                </span>
+              </div>
+
+              {/* 6. Extra Income / Swish */}
+              {stats?.totalExtraIncomeInPeriod > 0 && (
+                <div className="flex justify-between items-center text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+                  <span className="text-[var(--text-secondary)]">{isEn ? 'Extra Income' : 'Extra inkomster'}</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-amount tabular-nums">
+                    +{formatAmount(stats?.totalExtraIncomeInPeriod || 0, language)} {currency}
+                  </span>
+                </div>
+              )}
+
+              {/* 7. Remaining to Spend */}
+              <div className="flex justify-between items-center text-xs py-2 px-2 bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/20 rounded-lg border border-[var(--accent-color)]/15">
+                <span className="font-bold text-[var(--text-primary)]">{isEn ? 'Remaining to Spend' : 'Kvar att spendera'}</span>
+                <span className="font-extrabold text-[var(--text-primary)] font-amount tabular-nums">
+                  {formatAmount(stats?.remainingPeriodCents || 0, language)} {currency}
+                </span>
+              </div>
+            </div>
+
+            {/* Close action */}
+            <button
+              type="button"
+              onClick={() => setIsCalculationInfoOpen(false)}
+              className="w-full h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-xs flex items-center justify-center border-none mt-2"
+            >
+              {isEn ? 'Got it' : 'Jag förstår'}
             </button>
           </div>
         </div>

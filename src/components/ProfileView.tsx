@@ -399,25 +399,21 @@ export function ProfileView({
             <SettingsMenuItem 
               icon={HandCoins} 
               label={config.language === 'en' ? 'Debts & IOUs' : 'Skyldig (Skulder & utlägg)'} 
-              subtitle={config.language === 'en' ? 'Track who owes who' : 'Håll koll på vem som är skyldig vem'}
               onClick={() => handleSectionClick('debts')} 
             />
             <SettingsMenuItem 
               icon={Receipt} 
               label={config.language === 'en' ? 'Receipts' : 'Kvitton'} 
-              subtitle={config.language === 'en' ? 'All saved receipts' : 'Alla sparade kvitton'}
               onClick={() => handleSectionClick('receipts')} 
             />
             <SettingsMenuItem 
               icon={Users2} 
               label={config.language === 'en' ? 'Shared budget' : 'Delad budget (Par-läge)'} 
-              subtitle={config.language === 'en' ? 'Budget together with partner' : 'Budgetera ihop med din partner'}
               onClick={() => handleSectionClick('sharedBudget')} 
             />
             <SettingsMenuItem 
               icon={BookOpen} 
               label={config.language === 'en' ? 'Guides & instructions' : 'Guider & Instruktioner'} 
-              subtitle={config.language === 'en' ? 'Learn how features work' : 'Så fungerar funktionerna i appen'}
               onClick={() => handleSectionClick('guides')} 
             />
           </div>
@@ -432,13 +428,11 @@ export function ProfileView({
             <SettingsMenuItem 
               icon={Bell} 
               label={config.language === 'en' ? 'Notifications' : 'Notiser'} 
-              subtitle={config.language === 'en' ? 'Manage notification preferences' : 'Anpassa vilka notiser du vill få'}
               onClick={() => handleSectionClick('notifications')} 
             />
             <SettingsMenuItem 
               icon={Ban} 
               label={config.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'} 
-              subtitle={config.language === 'en' ? 'History and reactivate subscriptions' : 'Visa historik och återaktivera tjänster'}
               onClick={onCancelledSubscriptionsClick} 
               iconTextColor="text-rose-500"
             />

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
+import { Info } from 'lucide-react';
 
 interface BudgetGaugeProps {
   remainingCents: number;
@@ -17,6 +18,7 @@ export function BudgetGauge({
   currency,
   language,
   label = 'Kvar att spendera',
+  onOpenInfo,
 }: BudgetGaugeProps) {
   // Respect prefers-reduced-motion
   const prefersReducedMotion = useMemo(() => {
@@ -82,6 +84,17 @@ export function BudgetGauge({
             <span className="text-[13px] sm:text-[14px] font-medium text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
               {label}
             </span>
+            {onOpenInfo && (
+              <button
+                type="button"
+                onClick={onOpenInfo}
+                className="p-1 -m-1 rounded-full text-[#6D6962]/75 hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
+                aria-label="Info"
+                title={language === 'en' ? 'How is this calculated?' : 'Hur beräknas detta?'}
+              >
+                <Info size={12.5} strokeWidth={2.4} />
+              </button>
+            )}
           </div>
 
           {/* Remaining amount: Swedish number format */}

@@ -2716,22 +2716,68 @@ export default function App() {
           },
           0,
         );
+        const isFixedItemDueInPeriod = (
+          fe: { frequency?: Frequency; startMonth?: number; deductionDay?: number }
+        ): boolean => {
+          const freq = fe.frequency || Frequency.MONTHLY;
+          if (freq === Frequency.MONTHLY) {
+            return true;
+          }
+
+          const startM = fe.startMonth;
+          if (startM === undefined) return true;
+
+          const day = fe.deductionDay || 1;
+          const startYear = periodStart.getFullYear();
+          const endYear = periodEnd.getFullYear();
+
+          if (freq === Frequency.ANNUALLY) {
+            const dates = [
+              new Date(startYear, startM, day),
+              new Date(endYear, startM, day)
+            ];
+            return dates.some(d => d >= periodStart && d <= periodEnd);
+          }
+
+          if (freq === Frequency.SEMI_ANNUALLY) {
+            const months = [startM, (startM + 6) % 12];
+            const dates: Date[] = [];
+            months.forEach(m => {
+              dates.push(new Date(startYear, m, day));
+              if (endYear !== startYear) {
+                dates.push(new Date(endYear, m, day));
+              }
+            });
+            return dates.some(d => d >= periodStart && d <= periodEnd);
+          }
+
+          if (freq === Frequency.QUARTERLY) {
+            const months = [startM, (startM + 3) % 12, (startM + 6) % 12, (startM + 9) % 12];
+            const dates: Date[] = [];
+            months.forEach(m => {
+              dates.push(new Date(startYear, m, day));
+              if (endYear !== startYear) {
+                dates.push(new Date(endYear, m, day));
+              }
+            });
+            return dates.some(d => d >= periodStart && d <= periodEnd);
+          }
+
+          return true;
+        };
+
         const activeFixed = getActiveFixedExpenses(fixedExpenses);
         const totalFixed = activeFixed.reduce((sum, e) => {
           const amount = getAmountForPeriod(e);
-          switch (e.frequency) {
-            case Frequency.QUARTERLY:
-              return sum + amount / 3;
-            case Frequency.SEMI_ANNUALLY:
-              return sum + amount / 6;
-            case Frequency.ANNUALLY:
-              return sum + amount / 12;
-            default:
-              return sum + amount;
-          }
+          const isDue = isFixedItemDueInPeriod(e);
+          return isDue ? sum + amount : sum;
         }, 0);
         const savingsFromItems = config.monthlySavingsItems?.reduce(
-          (sum, item) => sum + getAmountForPeriod(item),
+          (sum, item) => {
+            const amount = getAmountForPeriod(item);
+            const isDue = isFixedItemDueInPeriod(item);
+            return isDue ? sum + amount : sum;
+          },
           0,
         ) || 0;
 
@@ -3102,13 +3148,8 @@ export default function App() {
         if (fixedExpenses) {
           fixedExpenses.forEach((fe) => {
             const amount = getAmountForPeriod(fe);
-            let periodAmount = amount;
-            switch (fe.frequency) {
-              case Frequency.QUARTERLY: periodAmount = amount / 3; break;
-              case Frequency.SEMI_ANNUALLY: periodAmount = amount / 6; break;
-              case Frequency.ANNUALLY: periodAmount = amount / 12; break;
-              default: periodAmount = amount; break;
-            }
+            const isDue = isFixedItemDueInPeriod(fe);
+            const periodAmount = isDue ? amount : 0;
             const catName = fe.category ? fe.category.trim() : "Fasta utgifter";
             fixedExpenseCategoryMap[catName] = (fixedExpenseCategoryMap[catName] || 0) + periodAmount;
           });
