@@ -24,6 +24,7 @@ export interface BudgetCategoriesViewProps {
   onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
   onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
   initialTab?: 'budget' | 'categories';
+  mode?: 'all' | 'budget' | 'categories';
   onDone?: () => void;
 }
 
@@ -38,12 +39,17 @@ export function BudgetCategoriesView({
   t,
   onRenameCategory,
   onMigrateAndDeleteCategory,
+  initialTab,
+  mode,
   onDone,
 }: BudgetCategoriesViewProps) {
   const curr = config?.currency || 'kr';
   const isEn = config.language === 'en';
+  const effectiveMode: 'all' | 'budget' | 'categories' = mode || (initialTab === 'budget' ? 'budget' : initialTab === 'categories' ? 'categories' : 'all');
 
-  const [activeCategoryType, setActiveCategoryType] = useState<'expense' | 'income'>('expense');
+  const [activeCategoryType, setActiveCategoryType] = useState<'expense' | 'income'>(
+    effectiveMode === 'budget' ? 'expense' : 'expense'
+  );
 
   // --- Inline Budget Editing State ---
   const [editingCategoryName, setEditingCategoryName] = useState<string | null>(null);
@@ -295,84 +301,90 @@ export function BudgetCategoriesView({
 
   return (
     <div className="space-y-5 font-sans pb-10 max-w-2xl mx-auto w-full">
-      {/* 0. Flikväljare: Utgifter / Inkomster */}
-      <div className="flex bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[16px] gap-1">
-        <button
-          type="button"
-          onClick={() => setActiveCategoryType('expense')}
-          className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer border-none ${
-            activeCategoryType === 'expense'
-              ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-          }`}
-        >
-          {isEn ? 'Expenses' : 'Utgifter'}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveCategoryType('income')}
-          className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer border-none ${
-            activeCategoryType === 'income'
-              ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-          }`}
-        >
-          {isEn ? 'Income' : 'Inkomster'}
-        </button>
-      </div>
+      {/* 0. Flikväljare: Utgifter / Inkomster (döljs i rent budgetläge) */}
+      {effectiveMode !== 'budget' && (
+        <div className="flex bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[16px] gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveCategoryType('expense')}
+            className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer border-none ${
+              activeCategoryType === 'expense'
+                ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            {isEn ? 'Expenses' : 'Utgifter'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategoryType('income')}
+            className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer border-none ${
+              activeCategoryType === 'income'
+                ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            {isEn ? 'Income' : 'Inkomster'}
+          </button>
+        </div>
+      )}
 
       {activeCategoryType === 'expense' ? (
         <>
-          {/* 1. Toppmodul */}
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="bg-[var(--surface-color)] rounded-[20px] p-4 space-y-2.5"
-          >
-            <div className="flex items-baseline justify-between">
-              <div className="space-y-0.5">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
-                  {isEn ? 'Left to allocate' : 'Kvar att fördela'}
-                </span>
-                <div
-                  className={`text-2xl font-extrabold tracking-tight font-amount tabular-nums ${
-                    isOverAllocated
-                      ? 'text-rose-600 dark:text-rose-400'
-                      : remainingToAllocate === 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-[var(--text-primary)]'
-                  }`}
-                >
-                  {remainingToAllocate === 0
-                    ? '0 kr'
-                    : `${formatAmount(remainingToAllocate, config.language)} ${curr}`}
+          {/* 1. Toppmodul (visas endast vid budgetfördelning) */}
+          {effectiveMode !== 'categories' && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-[var(--surface-color)] rounded-[20px] p-4 space-y-2.5"
+            >
+              <div className="flex items-baseline justify-between">
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
+                    {isEn ? 'Left to allocate' : 'Kvar att fördela'}
+                  </span>
+                  <div
+                    className={`text-2xl font-extrabold tracking-tight font-amount tabular-nums ${
+                      isOverAllocated
+                        ? 'text-rose-600 dark:text-rose-400'
+                        : remainingToAllocate === 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-[var(--text-primary)]'
+                    }`}
+                  >
+                    {remainingToAllocate === 0
+                      ? '0 kr'
+                      : `${formatAmount(remainingToAllocate, config.language)} ${curr}`}
+                  </div>
+                </div>
+
+                <div className="text-right text-xs font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                  {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
                 </div>
               </div>
 
-              <div className="text-right text-xs font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
-                {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
+              {/* Diskret förloppslinje */}
+              <div className="w-full h-1.5 bg-black/[0.04] dark:bg-white/[0.06] rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    isOverAllocated ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
+                  }`}
+                  style={{
+                    width: `${Math.min(100, Math.round((totalCategoryAllocated / (totalPoolToAllocate || 1)) * 100))}%`,
+                  }}
+                />
               </div>
-            </div>
+            </motion.div>
+          )}
 
-            {/* Diskret förloppslinje */}
-            <div className="w-full h-1.5 bg-black/[0.04] dark:bg-white/[0.06] rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-300 ${
-                  isOverAllocated ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
-                }`}
-                style={{
-                  width: `${Math.min(100, Math.round((totalCategoryAllocated / (totalPoolToAllocate || 1)) * 100))}%`,
-                }}
-              />
-            </div>
-          </motion.div>
-
-          {/* 2. Utgiftskategorier – Färgglada kort */}
+          {/* 2. Utgiftskategorier */}
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <span className="text-xs font-semibold text-[var(--text-secondary)]">
-                {isEn ? 'Expense Categories' : 'Utgiftskategorier'}
+                {effectiveMode === 'budget' 
+                  ? (isEn ? 'Category Budgets' : 'Kategoribudgetar')
+                  : (isEn ? 'Expense Categories' : 'Utgiftskategorier')}
               </span>
               <Button
                 variant="ghost"
@@ -384,7 +396,35 @@ export function BudgetCategoriesView({
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            {effectiveMode === 'categories' ? (
+              /* Rent kategoriläge: enhetliga kort för namn, ikon och färg */
+              <div className="grid grid-cols-2 gap-3">
+                {categoriesList.map((cat, index) => {
+                  const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
+                  return (
+                    <div
+                      key={cat.id || index}
+                      onClick={() => handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget)}
+                      style={{
+                        backgroundColor: `${catColor}18`,
+                        borderColor: `${catColor}35`,
+                      }}
+                      className="relative p-3.5 rounded-[18px] border flex flex-col justify-between h-[105px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden group hover:border-black/20 dark:hover:border-white/30"
+                    >
+                      <div className="flex items-center justify-between">
+                        <CategoryIcon icon={cat.icon} color={catColor} solidBackground whiteIcon size="md" />
+                      </div>
+
+                      <span className="text-xs font-bold text-[var(--text-primary)] block truncate leading-tight">
+                        {cat.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Budgetläge: kort med inline budgetfördelning */
+              <div className="grid grid-cols-2 gap-3">
               {categoriesList.map((cat, index) => {
                 const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
                 const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
@@ -477,7 +517,8 @@ export function BudgetCategoriesView({
                   </div>
                 );
               })}
-            </div>
+              </div>
+            )}
           </div>
         </>
       ) : (
@@ -536,21 +577,27 @@ export function BudgetCategoriesView({
         </button>
 
         <div className="flex items-center justify-center gap-3 pt-1">
-          <button
-            type="button"
-            onClick={() => setShowResetBudgetConfirm(true)}
-            className="py-1 px-2 text-xs font-medium text-[var(--text-tertiary)] hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
-          >
-            {isEn ? 'Reset budget' : 'Nollställ budget'}
-          </button>
-          <span className="text-[var(--text-tertiary)] opacity-30">•</span>
-          <button
-            type="button"
-            onClick={() => setIsResetCategoriesModalOpen(true)}
-            className="py-1 px-2 text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-          >
-            {isEn ? 'Reset categories' : 'Återställ kategorier'}
-          </button>
+          {effectiveMode !== 'categories' && (
+            <button
+              type="button"
+              onClick={() => setShowResetBudgetConfirm(true)}
+              className="py-1 px-2 text-xs font-medium text-[var(--text-tertiary)] hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
+            >
+              {isEn ? 'Reset budget' : 'Nollställ budget'}
+            </button>
+          )}
+          {effectiveMode === 'all' && (
+            <span className="text-[var(--text-tertiary)] opacity-30">•</span>
+          )}
+          {effectiveMode !== 'budget' && (
+            <button
+              type="button"
+              onClick={() => setIsResetCategoriesModalOpen(true)}
+              className="py-1 px-2 text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+            >
+              {isEn ? 'Reset categories' : 'Återställ kategorier'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -567,6 +614,7 @@ export function BudgetCategoriesView({
           setIsCategoryModalOpen(false);
         }}
         t={t}
+        hideBudget={effectiveMode === 'categories'}
       />
 
       {showResetBudgetConfirm && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, Ban } from 'lucide-react';
+import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, Ban, PieChart, Tag } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -365,8 +365,13 @@ export function ProfileView({
               onClick={() => handleSectionClick('salary')} 
             />
             <SettingsMenuItem 
-              icon={SlidersHorizontal} 
-              label={config.language === 'en' ? 'Budget & categories' : 'Budget & kategorier'} 
+              icon={PieChart} 
+              label={config.language === 'en' ? 'Budget' : 'Budget'} 
+              onClick={() => handleSectionClick('budget')} 
+            />
+            <SettingsMenuItem 
+              icon={Tag} 
+              label={config.language === 'en' ? 'Categories' : 'Kategorier'} 
               onClick={() => handleSectionClick('categories')} 
             />
             <SettingsMenuItem 

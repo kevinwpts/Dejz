@@ -16,6 +16,7 @@ interface CategoryModalProps {
   onSave: (data: { name: string; icon: string; color?: string; budget?: number | null; index?: number }) => void;
   onDelete?: (index: number) => void;
   t: (key: TranslationKey) => string;
+  hideBudget?: boolean;
 }
 
 const PRESET_COLORS = [...DEFAULT_CATEGORY_PALETTE];
@@ -28,7 +29,8 @@ export function CategoryModal({
   initialData, 
   onSave, 
   onDelete, 
-  t 
+  t,
+  hideBudget = false
 }: CategoryModalProps) {
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('receipt');
@@ -54,7 +56,9 @@ export function CategoryModal({
       name: name.trim(), 
       icon, 
       color, 
-      budget: type === 'expense' ? (budget ? Number(budget) : null) : undefined,
+      budget: type === 'expense' 
+        ? (hideBudget ? (initialData?.budget ?? null) : (budget ? Number(budget) : null))
+        : undefined,
       index: initialData?.index 
     });
   };
@@ -124,8 +128,8 @@ export function CategoryModal({
             />
           </div>
 
-          {/* Budget Field (Only for expense categories) */}
-          {type !== 'income' && (
+          {/* Budget Field (Only for expense categories when not hidden) */}
+          {type !== 'income' && !hideBudget && (
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
                 {t('budget')}

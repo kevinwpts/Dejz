@@ -15,7 +15,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
 
 interface SettingsViewProps {
-  activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications';
+  activeSection: 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications';
   onBack: () => void;
   config: Config;
   setConfig: (config: Config) => void;
@@ -47,7 +47,7 @@ interface SettingsViewProps {
 
 export function SettingsView({ 
   activeSection,
-  onBack: _onBack,
+  onBack,
   config, 
   setConfig, 
   t, 
@@ -550,8 +550,9 @@ export function SettingsView({
           </div>
         )}
 
-        {activeSection === 'categories' && (
+        {activeSection === 'budget' && (
           <BudgetCategoriesView
+            mode="budget"
             config={config}
             setConfig={setConfig}
             incomes={incomes}
@@ -562,7 +563,26 @@ export function SettingsView({
             t={t}
             onRenameCategory={onRenameCategory}
             onMigrateAndDeleteCategory={onMigrateAndDeleteCategory}
-            initialTab={initialCategorySubTab}
+            initialTab="budget"
+            onDone={onBack}
+          />
+        )}
+
+        {activeSection === 'categories' && (
+          <BudgetCategoriesView
+            mode="categories"
+            config={config}
+            setConfig={setConfig}
+            incomes={incomes}
+            fixedExpenses={fixedExpenses}
+            stats={stats}
+            currentPeriodId={currentPeriodId}
+            transactions={transactions}
+            t={t}
+            onRenameCategory={onRenameCategory}
+            onMigrateAndDeleteCategory={onMigrateAndDeleteCategory}
+            initialTab="categories"
+            onDone={onBack}
           />
         )}
         {activeSection === 'paymentMethods' && renderPaymentMethodsSettings()}

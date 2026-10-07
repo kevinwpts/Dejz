@@ -263,6 +263,7 @@ export default function App() {
   const [settingsSection, setSettingsSection] = useState<
     | "main"
     | "salary"
+    | "budget"
     | "categories"
     | "paymentMethods"
     | "language"
@@ -4295,7 +4296,8 @@ export default function App() {
       if (settingsSection === "main") return config?.language === 'en' ? 'Settings' : 'Inställningar';
       switch (settingsSection) {
         case "salary": return t("salary");
-        case "categories": return config?.language === 'en' ? 'Budget & categories' : 'Budget & kategorier';
+        case "budget": return config?.language === 'en' ? 'Budget' : 'Budget';
+        case "categories": return config?.language === 'en' ? 'Categories' : 'Kategorier';
         case "paymentMethods": return t("paymentMethods");
         case "currency": return config?.language === 'en' ? 'Currency' : 'Valuta';
         case "language": return t("language");
@@ -4307,7 +4309,8 @@ export default function App() {
       if (profileSection === "main") return t("profile");
       switch (profileSection) {
         case "salary": return t("salary");
-        case "categories": return config?.language === 'en' ? 'Budget & categories' : 'Budget & kategorier';
+        case "budget": return config?.language === 'en' ? 'Budget' : 'Budget';
+        case "categories": return config?.language === 'en' ? 'Categories' : 'Kategorier';
         case "paymentMethods": return t("paymentMethods");
         case "currency": return config?.language === 'en' ? 'Currency' : 'Valuta';
         case "manageAccount": return t("manageAccount");
@@ -4898,6 +4901,10 @@ export default function App() {
                 transactions={transactions}
                 onMigrateAndDeleteCategory={handleMigrateAndDeleteCategory}
                 onCancelledSubscriptionsClick={() => setIsCancelledSubscriptionsOpen(true)}
+                incomes={incomes}
+                fixedExpenses={fixedExpenses}
+                stats={stats}
+                currentPeriodId={currentPeriodId}
               />
             </div>
           )}

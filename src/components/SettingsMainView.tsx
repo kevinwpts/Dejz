@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, CreditCard, Globe, Palette, Coins, ChevronRight, SlidersHorizontal, Bell, Ban } from 'lucide-react';
-import { Config } from '../types';
+import { Calendar, CreditCard, Globe, Palette, Coins, ChevronRight, SlidersHorizontal, Bell, Ban, PieChart, Tag } from 'lucide-react';
+import { Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
 import { formatPaydaySummary } from '../utils/format';
@@ -29,8 +29,12 @@ interface SettingsMainViewProps {
   transactions?: any[];
   onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
   onNavigate: (tab: string, section?: string) => void;
-  initialSection?: 'main' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications';
+  initialSection?: 'main' | 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications';
   onCancelledSubscriptionsClick?: () => void;
+  incomes?: Income[];
+  fixedExpenses?: FixedExpense[];
+  stats?: any;
+  currentPeriodId?: string;
 }
 
 export function SettingsMainView({
@@ -57,9 +61,13 @@ export function SettingsMainView({
   onMigrateAndDeleteCategory,
   onNavigate,
   initialSection = 'main',
-  onCancelledSubscriptionsClick
+  onCancelledSubscriptionsClick,
+  incomes = [],
+  fixedExpenses = [],
+  stats,
+  currentPeriodId,
 }: SettingsMainViewProps) {
-  const [activeSection, setActiveSection] = useState<'main' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications'>(initialSection);
+  const [activeSection, setActiveSection] = useState<'main' | 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications'>(initialSection);
 
   useEffect(() => {
     setActiveSection(initialSection);
@@ -108,6 +116,10 @@ export function SettingsMainView({
           onRenameCategory={onRenameCategory}
           transactions={transactions}
           onMigrateAndDeleteCategory={onMigrateAndDeleteCategory}
+          incomes={incomes}
+          fixedExpenses={fixedExpenses}
+          stats={stats}
+          currentPeriodId={currentPeriodId}
         />
       </motion.div>
     );
@@ -144,19 +156,40 @@ export function SettingsMainView({
 
         <button
           type="button"
+          onClick={() => handleSectionClick('budget')}
+          className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3.5 min-w-0 pr-2">
+            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+              <PieChart size={18} strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                {config.language === 'en' ? 'Budget' : 'Budget'}
+              </span>
+              <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 mt-0.5">
+                {config.language === 'en' ? 'Allocate monthly budget per category' : 'Fördela budget per kategori'}
+              </span>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleSectionClick('categories')}
           className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <SlidersHorizontal size={18} strokeWidth={2} />
+              <Tag size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-                {config.language === 'en' ? 'Budget & categories' : 'Budget & kategorier'}
+                {config.language === 'en' ? 'Categories' : 'Kategorier'}
               </span>
               <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 mt-0.5">
-                {config.language === 'en' ? 'Allocate budget and manage categories' : 'Fördela budget och hantera kategorier'}
+                {config.language === 'en' ? 'Manage expense and income categories' : 'Hantera utgifts- och inkomstkategorier'}
               </span>
             </div>
           </div>
