@@ -176,7 +176,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                 )}
                 <span className="truncate">
                   {dayString && paymentString 
-                    ? `${dayString}, ${matchedPaymentMethod?.name || paymentString}` 
+                    ? `${dayString} · ${matchedPaymentMethod?.name || paymentString}` 
                     : (dayString || matchedPaymentMethod?.name || paymentString)}
                 </span>
               </span>
