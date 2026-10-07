@@ -118,10 +118,24 @@ export interface Config {
   hideEmptyCategories?: boolean;
   heroBackgroundImage?: string;
   userAgeGroup?: string;
-  userGender?: string;
   homeWidgets?: HomeWidgetConfig[];
   lockedPeriods?: Record<string, { start: string; end: string; name: string }>;
   hasSavedInitialBudget?: boolean;
+  debts?: Debt[];
+  partnerConnected?: boolean;
+  partnerName?: string;
+  partnerInviteCode?: string;
+}
+
+export interface Debt {
+  id: string;
+  type: 'owe_me' | 'i_owe'; // owe_me = de är skyldiga mig, i_owe = jag är skyldig
+  personName: string;
+  amount: number;
+  description?: string;
+  date: string;
+  isSettled?: boolean;
+  settledAt?: number;
 }
 
 export type HomeWidgetId =

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History } from 'lucide-react';
+import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
 import { ManageAccountView } from './ManageAccountView';
 import { ReceiptsView } from './ReceiptsView';
+import { DebtsView } from './DebtsView';
+import { SharedBudgetView } from './SharedBudgetView';
+import { GuidesView } from './GuidesView';
 import { AdminDashboardView } from './AdminDashboardView';
 import { DejzLogo } from './DejzLogo';
 
@@ -139,6 +142,44 @@ export function ProfileView({
         transactions={_transactions}
         config={config}
         onViewTransaction={onViewTransaction}
+      />
+    );
+  }
+
+  if (activePage === 'debts') {
+    return (
+      <DebtsView
+        onBack={() => {
+          setActivePage('main');
+          onNavigate('profile', 'main');
+        }}
+        config={config}
+        setConfig={setConfig}
+      />
+    );
+  }
+
+  if (activePage === 'sharedBudget') {
+    return (
+      <SharedBudgetView
+        onBack={() => {
+          setActivePage('main');
+          onNavigate('profile', 'main');
+        }}
+        config={config}
+        setConfig={setConfig}
+      />
+    );
+  }
+
+  if (activePage === 'guides') {
+    return (
+      <GuidesView
+        onBack={() => {
+          setActivePage('main');
+          onNavigate('profile', 'main');
+        }}
+        config={config}
       />
     );
   }
@@ -343,6 +384,47 @@ export function ProfileView({
                   <ChevronRight size={14} strokeWidth={2.5} className="opacity-60 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               )}
+            />
+          </div>
+        </div>
+
+        {/* Verktyg & Delning */}
+        <div className="space-y-2">
+          <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
+            {config.language === 'en' ? 'Tools & Sharing' : 'Verktyg & Funktioner'}
+          </h4>
+          <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+            <SettingsMenuItem 
+              icon={HandCoins} 
+              label={config.language === 'en' ? 'Debts & IOUs' : 'Skyldig (Skulder & utlägg)'} 
+              subtitle={config.language === 'en' ? 'Track who owes who' : 'Håll koll på vem som är skyldig vem'}
+              onClick={() => handleSectionClick('debts')} 
+              iconBgColor="bg-amber-500/10"
+              iconTextColor="text-amber-600 dark:text-amber-400"
+            />
+            <SettingsMenuItem 
+              icon={Receipt} 
+              label={config.language === 'en' ? 'Receipts' : 'Kvitton'} 
+              subtitle={config.language === 'en' ? 'All saved receipts' : 'Alla sparade kvitton'}
+              onClick={() => handleSectionClick('receipts')} 
+              iconBgColor="bg-sky-500/10"
+              iconTextColor="text-sky-600 dark:text-sky-400"
+            />
+            <SettingsMenuItem 
+              icon={Users2} 
+              label={config.language === 'en' ? 'Shared budget' : 'Delad budget (Par-läge)'} 
+              subtitle={config.language === 'en' ? 'Budget together with partner' : 'Budgetera ihop med din partner'}
+              onClick={() => handleSectionClick('sharedBudget')} 
+              iconBgColor="bg-rose-500/10"
+              iconTextColor="text-rose-500 dark:text-rose-400"
+            />
+            <SettingsMenuItem 
+              icon={BookOpen} 
+              label={config.language === 'en' ? 'Guides & instructions' : 'Guider & Instruktioner'} 
+              subtitle={config.language === 'en' ? 'Learn how features work' : 'Så fungerar funktionerna i appen'}
+              onClick={() => handleSectionClick('guides')} 
+              iconBgColor="bg-indigo-500/10"
+              iconTextColor="text-indigo-600 dark:text-indigo-400"
             />
           </div>
         </div>

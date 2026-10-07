@@ -252,6 +252,10 @@ export default function App() {
     | "paymentMethods"
     | "language"
     | "manageAccount"
+    | "receipts"
+    | "debts"
+    | "sharedBudget"
+    | "guides"
   >("main");
   const [settingsSection, setSettingsSection] = useState<
     | "main"
@@ -4255,7 +4259,10 @@ export default function App() {
         case "manageAccount": return t("manageAccount");
         case "language": return t("language");
         case "appearance": return config?.language === 'en' ? 'Appearance' : 'Utseende';
-        case "receipts": return config?.language === 'en' ? 'Receipts' : 'Mina kvitton';
+        case "receipts": return config?.language === 'en' ? 'Receipts' : 'Kvitton';
+        case "debts": return config?.language === 'en' ? 'Debts & IOUs' : 'Skyldig';
+        case "sharedBudget": return config?.language === 'en' ? 'Shared budget' : 'Delad budget';
+        case "guides": return config?.language === 'en' ? 'Guides & Instructions' : 'Guider & Instruktioner';
         case "notifications": return t("notifications");
         default: return t("profile");
       }
