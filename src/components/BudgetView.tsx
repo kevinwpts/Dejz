@@ -1,17 +1,14 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, RotateCcw } from 'lucide-react';
-import { isEmojiString, getCategoryIconName } from '../utils/icons';
-import { CategoryIcon } from './CategoryIcon';
+import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
 import { Frequency, Config, Income, FixedExpense } from '../types';
-import { TranslationKey, Language } from '../i18n';
+import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
 import { FilterSelectButton, FilterMenuModal, Button } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
-import { getCategoryColor } from '../utils/categoryColors';
-import { ConfirmModal } from './ConfirmModal';
+import { BudgetCategoriesView } from './BudgetCategoriesView';
 
 interface BudgetViewProps {
   allTransactions?: any[];
@@ -57,27 +54,11 @@ export function BudgetView({
   initialSection,
   onClearSection
 }: BudgetViewProps) {
-  const curr = config?.currency || 'kr';
-  const [editingCategoryName, setEditingCategoryName] = React.useState<string | null>(null);
-  const [inlineInputValue, setInlineInputValue] = React.useState<string>("");
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
   const [isBudgetFilterModalOpen, setIsBudgetFilterModalOpen] = React.useState(false);
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
   });
-  const [showResetBudgetConfirm, setShowResetBudgetConfirm] = React.useState(false);
-
-  const handleResetCategoryBudgets = () => {
-    const resetCategories = (config.categories || []).map((c) => ({
-      ...c,
-      budget: null,
-    }));
-    setConfig({ ...config, categories: resetCategories });
-    setShowResetBudgetConfirm(false);
-  };
-  const handleOpenCategoryBudgets = () => {
-    setShowCategoryBudgets(true);
-  };
 
   React.useEffect(() => {
     if (initialSection === 'category-budgets' || initialSection === 'allocate') {
@@ -154,21 +135,6 @@ export function BudgetView({
     }
   }, [config?.monthlySavingsItems, config?.savingsGoals, config?.payday, savingSortBy]);
 
-  const getFixedSpentForCategory = (catName: string) => {
-    return (fixedExpenses || [])
-      .filter((e) => (e.category || '').trim().toLowerCase() === (catName || '').trim().toLowerCase())
-      .reduce((sum, e) => {
-        const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
-          ? e.periodOverrides[currentPeriodId]
-          : (Number(e.amount) || 0);
-        switch (e.frequency) {
-          case Frequency.QUARTERLY: return sum + amount / 3;
-          case Frequency.SEMI_ANNUALLY: return sum + amount / 6;
-          case Frequency.ANNUALLY: return sum + amount / 12;
-          default: return sum + amount;
-        }
-      }, 0);
-  };
 
 
 
@@ -203,290 +169,24 @@ export function BudgetView({
           }, 0) || 0)
         : (Number(config.monthlySavings) || 0));
 
-  const calculatedEverydayBudget = Math.max(0, Math.round(totalIncomeSum - totalFixedSum - totalSavingsSum));
-  const everydayBudget = stats?.disposablePot !== undefined ? Math.round(stats.disposablePot) : calculatedEverydayBudget;
-
-  // Category Budget Editing Modal State
-  
-  
-
-  // Legacy Percentage Normalization on Open
-  React.useEffect(() => {
-    if (showCategoryBudgets && config.categories && config.categories.length > 0) {
-      const budgetValues = config.categories.map((c) => Number(c.budget) || 0);
-      const totalSum = budgetValues.reduce((a, b) => a + b, 0);
-      const maxVal = Math.max(...budgetValues, 0);
-
-      // If budgets look like legacy percentages (max <= 100 and sum <= 100) and everydayBudget > 500, convert to SEK
-      if (maxVal <= 100 && totalSum <= 100 && totalSum > 0 && everydayBudget > 500) {
-        const normalized = config.categories.map((c) => {
-          if (!c.budget || Number(c.budget) <= 0) return { ...c, budget: null };
-          const converted = Math.round((everydayBudget * Number(c.budget)) / 100);
-          return { ...c, budget: converted > 0 ? converted : undefined };
-        });
-        setConfig({ ...config, categories: normalized });
-      }
-    }
-  }, [showCategoryBudgets, everydayBudget]);
-
-  // The available pool to distribute across categories is Total Income minus Monthly Savings
-  const totalPoolToAllocate = Math.max(0, totalIncomeSum - totalSavingsSum);
-
-  const totalCategoryAllocated = (config.categories || []).reduce((sum, c) => {
-    const fixedSpent = Math.round(getFixedSpentForCategory(c.name));
-    const val = Math.max(Number(c.budget) || 0, fixedSpent);
-    return sum + (val > 0 ? val : 0);
-  }, 0);
-
-  const remainingToAllocate = totalPoolToAllocate - totalCategoryAllocated;
-  const isOverAllocated = remainingToAllocate < 0;
-
-  
-
-
-  const sortedCategoriesForManage = [...(config.categories || [])]
-    .sort((a, b) => {
-      const aFixed = Math.round(getFixedSpentForCategory(a.name));
-      const bFixed = Math.round(getFixedSpentForCategory(b.name));
-      if (bFixed !== aFixed) {
-        return bFixed - aFixed;
-      }
-      return (a.name || "").localeCompare(b.name || "");
-    });
 
   if (showCategoryBudgets) {
-    const renderCategoryRow = (cat: any) => {
-      const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
-      const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
-      const isEditingThis = editingCategoryName === cat.name;
-      const extraBudget = catBudget - fixedSpent;
-
-      return (
-        <div 
-          key={cat.name}
-          className="py-3.5 px-4 sm:px-5 flex items-center justify-between gap-4 transition-colors"
-        >
-          {/* Left Part: Category Icon with Color, Name and helper text */}
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
-             <div className="shrink-0">
-              {isEmojiString(cat.icon) ? (
-                <div 
-                  className="w-[34px] h-[34px] sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-base shrink-0"
-                  style={{ backgroundColor: `${cat.color || getCategoryColor(cat.name, config?.categories)}20` }}
-                >
-                  {cat.icon}
-                </div>
-              ) : (
-                <div 
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] flex items-center justify-center text-white shrink-0 shadow-2xs"
-                  style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.categories) }}
-                >
-                  <CategoryIcon
-                    icon={cat.icon || getCategoryIconName(cat.name)}
-                    size="sm"
-                    noBackground
-                    whiteIcon
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <span className="text-[13.5px] font-bold text-[var(--text-primary)] truncate block tracking-tight">
-                {cat.name}
-              </span>
-              {fixedSpent > 0 ? (
-                <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-85 block truncate mt-0.5 font-sans">
-                  {formatAmount(fixedSpent, config.language)} {curr} fast ingår
-                  {extraBudget > 0 && ` (+${formatAmount(extraBudget, config.language)} ${curr} extra)`}
-                </span>
-              ) : (
-                <span className="text-[11px] font-medium text-[var(--text-secondary)] opacity-40 block truncate mt-0.5">
-                  Endast rörliga utgifter
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Right Part: Direct input of amount without +/- buttons */}
-          <div className="shrink-0">
-            {isEditingThis ? (
-              <div className="flex items-center gap-1 bg-black/[0.04] dark:bg-white/5 rounded-[12px] px-2.5 py-1.5 border border-[var(--accent-color)]">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  autoFocus
-                  value={inlineInputValue}
-                  onBlur={() => {
-                    const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
-                    const updatedCategories = (config.categories || []).map((c) => {
-                      if (c.name === cat.name) {
-                        return { ...c, budget: finalVal > 0 ? finalVal : null };
-                      }
-                      return c;
-                    });
-                    try {
-                      localStorage.setItem('dejz_has_saved_initial_budget', 'true');
-                    } catch (_e) {
-                      // ignore localStorage write errors
-                    }
-                    setConfig({ ...config, categories: updatedCategories, hasSavedInitialBudget: true });
-                    setEditingCategoryName(null);
-                  }}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, "");
-                    setInlineInputValue(val);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.currentTarget.blur();
-                    }
-                  }}
-                  className="w-16 sm:w-20 bg-transparent border-none text-right text-sm font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none"
-                />
-                <span className="text-xs font-bold text-[var(--text-secondary)] select-none">
-                  {curr}
-                </span>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingCategoryName(cat.name);
-                  setInlineInputValue(catBudget > 0 ? String(catBudget) : "");
-                }}
-                className="min-w-[80px] text-right py-2 px-3.5 rounded-[12px] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-all cursor-pointer active:scale-[0.98]"
-              >
-                <span className={`text-[14px] font-bold font-amount tabular-nums ${
-                  catBudget > 0 ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] opacity-60'
-                }`}>
-                  {catBudget > 0 ? `${formatAmount(catBudget, config.language)} ${curr}` : `0 ${curr}`}
-                </span>
-              </button>
-            )}
-          </div>
-        </div>
-      );
-    };
-
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="space-y-6 font-sans"
-      >
-        {/* 1. Tydlig budgetöversikt i en toppmodul */}
-        <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-[14px] font-semibold text-[var(--text-secondary)] tracking-tight">
-              {config.language === 'en' ? 'Budget overview' : 'Budgetöversikt'}
-            </span>
-          </div>
-
-          {/* Beloppet som återstår med störst visuell tyngd */}
-          <div className="space-y-1">
-            <div className={`text-[26px] sm:text-[32px] leading-tight font-extrabold tracking-tight font-amount tabular-nums ${
-              isOverAllocated ? "text-rose-600 dark:text-rose-400" : "text-[var(--text-primary)]"
-            }`}>
-              {remainingToAllocate > 0 ? (
-                <>
-                  <span className="font-amount tabular-nums">{formatAmount(remainingToAllocate, config.language)} {curr}</span>
-                  <span className="text-base sm:text-lg font-medium text-[var(--text-secondary)] font-sans ml-1.5">
-                    {config.language === 'en' ? 'left to allocate' : 'kvar att fördela'}
-                  </span>
-                </>
-              ) : remainingToAllocate === 0 ? (
-                <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 text-xl sm:text-2xl py-1 font-sans font-bold">
-                  ✓ {config.language === 'en' ? 'All allocated! 🎉' : 'Allt är fördelat! 🎉'}
-                </span>
-              ) : (
-                <>
-                  <span className="font-amount tabular-nums">{formatAmount(Math.abs(remainingToAllocate), config.language)} {curr}</span>
-                  <span className="text-base sm:text-lg font-medium text-rose-500/80 font-sans ml-1.5">
-                    {config.language === 'en' ? 'overallocated' : 'överfördelat'}
-                  </span>
-                </>
-              )}
-            </div>
-
-            {/* Kompletterande mindre information */}
-            <div className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)]">
-              <span className="font-amount tabular-nums">{formatAmount(totalCategoryAllocated, config.language)}</span> {config.language === 'en' ? 'of' : 'av'} <span className="font-amount tabular-nums">{formatAmount(totalPoolToAllocate, config.language)}</span> {curr} {config.language === 'en' ? 'allocated' : 'fördelat'}
-              {totalSavingsSum > 0 && (
-                <span className="block text-[11px] font-normal opacity-75 mt-0.5">
-                  {config.language === 'en'
-                    ? `(Income ${formatAmount(totalIncomeSum, config.language)} − Savings ${formatAmount(totalSavingsSum, config.language)} ${curr})`
-                    : `(Inkomst ${formatAmount(totalIncomeSum, config.language)} − Sparande ${formatAmount(totalSavingsSum, config.language)} ${curr})`}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Diskret förloppsindikator */}
-          <div className="w-full h-1.5 bg-black/[0.04] dark:bg-white/[0.06] rounded-full overflow-hidden">
-            <div 
-              className={`h-full rounded-full transition-all duration-300 ${
-                isOverAllocated ? "bg-rose-500" : "bg-[var(--accent-color)]"
-              }`}
-              style={{ width: `${Math.min(100, Math.round((totalCategoryAllocated / (totalPoolToAllocate || 1)) * 100))}%` }}
-            />
-          </div>
-        </div>
-
-        {/* 2. Kategorilistan (Alla kategorier samlade i en ren lista) */}
-        <div className="space-y-3">
-          <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight px-1 block">
-            {config.language === 'en' ? 'Categories' : 'Kategorier'}
-          </span>
-          
-          <div className="overflow-hidden rounded-[22px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04]">
-            {sortedCategoriesForManage.map((cat) => renderCategoryRow(cat))}
-          </div>
-        </div>
-
-        {/* Spara & Nollställ */}
-        <div className="pt-2 space-y-2.5">
-          <button
-            type="button"
-            onClick={handleCloseCategoryBudgets}
-            className="w-full h-12 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-none"
-          >
-            <Check size={16} strokeWidth={2.5} />
-            {config.language === 'en' ? 'Done, save budget' : 'Klar, spara budgeten'}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowResetBudgetConfirm(true)}
-            className="w-full py-2.5 text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-          >
-            <RotateCcw size={13} strokeWidth={2} />
-            <span>{config.language === 'en' ? 'Reset budget' : 'Nollställ budgeten'}</span>
-          </button>
-        </div>
-
-        {showResetBudgetConfirm && (
-          <ConfirmModal
-            isOpen={showResetBudgetConfirm}
-            title={config.language === 'en' ? "Reset budget?" : "Nollställ budgeten?"}
-            message={
-              config.language === 'en'
-                ? "Do you want to reset all category budgets to 0? Your income, fixed expenses, and savings will remain unchanged."
-                : "Vill du nollställa alla kategoribudgetar till 0 kr? Dina inkomster, fasta utgifter och sparande påverkas inte."
-            }
-            confirmText={config.language === 'en' ? "Reset budget" : "Nollställ budget"}
-            cancelText={config.language === 'en' ? "Cancel" : "Avbryt"}
-            variant="danger"
-            onConfirm={handleResetCategoryBudgets}
-            onCancel={() => setShowResetBudgetConfirm(false)}
-            t={t}
-          />
-        )}
-      </motion.div>
+      <BudgetCategoriesView
+        config={config}
+        setConfig={setConfig}
+        incomes={incomes}
+        fixedExpenses={fixedExpenses}
+        stats={stats}
+        currentPeriodId={currentPeriodId}
+        transactions={_allTransactions}
+        t={t}
+        initialTab="budget"
+        onDone={handleCloseCategoryBudgets}
+      />
     );
   }
+
 
   return (
     <motion.div

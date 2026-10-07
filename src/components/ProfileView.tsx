@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, Tag, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History } from 'lucide-react';
+import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -157,6 +157,11 @@ export function ProfileView({
           config={config}
           setConfig={setConfig}
           t={t}
+          incomes={_incomes}
+          fixedExpenses={_fixedExpenses}
+          stats={_stats}
+          currentPeriodId={_stats?.periodId || _periods[0]?.id || 'current'}
+          transactions={_transactions}
           onSecurityClick={onSecurityClick}
           subscriptionStatus={subscriptionStatus}
           onFeedbackClick={onFeedbackClick}
@@ -317,8 +322,8 @@ export function ProfileView({
               onClick={() => handleSectionClick('salary')} 
             />
             <SettingsMenuItem 
-              icon={Tag} 
-              label={t('categories')} 
+              icon={SlidersHorizontal} 
+              label={config.language === 'en' ? 'Budget & categories' : 'Budget & kategorier'} 
               onClick={() => handleSectionClick('categories')} 
             />
             <SettingsMenuItem 
@@ -348,11 +353,6 @@ export function ProfileView({
             {t('appSettings')}
           </h4>
           <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
-            <SettingsMenuItem 
-              icon={SlidersHorizontal} 
-              label={'Budget'} 
-              onClick={() => onNavigate('budget', 'allocate')} 
-            />
             <SettingsMenuItem 
               icon={Palette} 
               label={t('appearance' as any) || 'Utseende'} 

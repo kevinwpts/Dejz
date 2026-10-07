@@ -3,16 +3,16 @@ import { Plus, Check, Sun, Moon, Monitor, Calendar, Clock, ChevronRight, RotateC
 import { Config } from '../types';
 import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
-import { DEFAULT_PAYMENT_METHODS, DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
-import { CategoryModal } from './CategoryModal';
+import { DEFAULT_PAYMENT_METHODS } from '../constants';
 import { PaymentMethodModal } from './BudgetModals';
 import { ConfirmModal } from './ConfirmModal';
-import { CategoryIcon } from './CategoryIcon';
 import { Button, Modal } from './ui';
 import { ToggleSwitch } from './ToggleSwitch';
 import { formatPaydaySummary, formatOrdinalDay } from '../utils/format';
-import { getCategoryColor } from '../utils/categoryColors';
 import { getPaymentMethodIcon } from '../utils/icons';
+import { CategoryIcon } from './CategoryIcon';
+
+import { BudgetCategoriesView } from './BudgetCategoriesView';
 
 interface SettingsViewProps {
   activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency';
@@ -38,6 +38,11 @@ interface SettingsViewProps {
   onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
   transactions?: any[];
   onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
+  incomes?: any[];
+  fixedExpenses?: any[];
+  stats?: any;
+  currentPeriodId?: string;
+  initialCategorySubTab?: 'budget' | 'categories';
 }
 
 export function SettingsView({ 
@@ -64,27 +69,22 @@ export function SettingsView({
   onRenameCategory,
   transactions = [],
   onMigrateAndDeleteCategory,
+  incomes = [],
+  fixedExpenses = [],
+  stats,
+  currentPeriodId,
+  initialCategorySubTab = 'budget',
 }: SettingsViewProps) {
-  const [categoryTab, setCategoryTab] = useState<'expense' | 'income'>('expense');
-
   // Reset scroll position when switching sections
   React.useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeSection]);
 
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
   const [paymentMethodModalData, setPaymentMethodModalData] = useState<{ index?: number, name: string } | null>(null);
-  const [categoryModalData, setCategoryModalData] = useState<{ type: 'income' | 'expense', index?: number, name: string, icon: string, color?: string } | null>(null);
-
-  // Deletion migration modal state
-  const [deleteMigrationData, setDeleteMigrationData] = useState<{ type: 'income' | 'expense', category: any, count: number } | null>(null);
-  const [targetMigrationId, setTargetMigrationId] = useState<string>('');
-  const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<{ type: 'income' | 'expense', index: number, category: any } | null>(null);
 
   const [pendingPayday, setPendingPayday] = useState<number | null>(null);
   const [isPaydayModalOpen, setIsPaydayModalOpen] = useState(false);
-  const [isResetCategoriesModalOpen, setIsResetCategoriesModalOpen] = useState(false);
   const [isResetPaymentMethodsModalOpen, setIsResetPaymentMethodsModalOpen] = useState(false);
 
   const handleUpdatePayday = (day: number) => {
@@ -92,154 +92,6 @@ export function SettingsView({
     setPendingPayday(day);
   };
 
-  const handleEditCategory = (type: 'income' | 'expense', index: number, name: string, icon: string, color?: string) => {
-    setCategoryModalData({ type, index, name, icon, color });
-    setIsCategoryModalOpen(true);
-  };
-
-  const handleAddCategory = (type: 'income' | 'expense') => {
-    setCategoryModalData({ type, name: '', icon: 'tag' });
-    setIsCategoryModalOpen(true);
-  };
-
-  const handleSaveCategoryModal = (data: { name: string; icon: string; color?: string; index?: number }) => {
-    if (!categoryModalData) return;
-    const { type } = categoryModalData;
-    const field = type === 'income' ? 'incomeCategories' : 'categories';
-    const currentCategories = [...(config[field] || [])];
-    
-    const oldName = categoryModalData.index !== undefined ? categoryModalData.name : null;
-    const newName = (data.name || '').trim();
-
-    if (data.index !== undefined) {
-      currentCategories[data.index] = { ...currentCategories[data.index], name: data.name, icon: data.icon, color: data.color };
-    } else {
-      const newId = 'cat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-      currentCategories.push({ id: newId, name: data.name, icon: data.icon, color: data.color });
-    }
-    
-    setConfig({ ...config, [field]: currentCategories });
-    setIsCategoryModalOpen(false);
-
-    if (oldName && newName && oldName.trim().toLowerCase() !== newName.toLowerCase()) {
-      onRenameCategory?.(type, oldName.trim(), newName);
-    }
-  };
-
-  const handleDeleteCategory = (type: 'income' | 'expense', index: number) => {
-    const field = type === 'income' ? 'incomeCategories' : 'categories';
-    const currentCategories = config[field] || [];
-    const cat = currentCategories[index];
-    if (!cat) return;
-
-    const affected = transactions.filter(t => t.categoryId === cat.id || (t.category && cat.name && t.category.trim().toLowerCase() === cat.name.trim().toLowerCase()));
-    if (affected.length > 0) {
-      const otherCats = currentCategories.filter(c => c.id !== cat.id);
-      const ovrigt = otherCats.find(c => c.id === 'ovrigt' || c.name.toLowerCase() === 'övrigt') || otherCats[0];
-      setTargetMigrationId(ovrigt?.id || otherCats[0]?.id || '');
-      setDeleteMigrationData({ type, category: cat, count: affected.length });
-    } else {
-      setDeleteConfirmIndex({ type, index, category: cat });
-    }
-  };
-
-  const renderCategoryList = (type: 'expense' | 'income') => {
-    const field = type === 'income' ? 'incomeCategories' : 'categories';
-    const list = config[field] || [];
-
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between mb-3 px-1">
-          <span className="text-xs font-semibold text-[var(--text-secondary)]">
-            {list.length} {config.language === 'en' ? 'categories' : 'kategorier'}
-          </span>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Plus size={14} strokeWidth={2} />}
-            onClick={() => handleAddCategory(type)}
-          >
-            {t('newCategory')}
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3.5">
-          {list.map((cat: any, index: number) => (
-            <div
-              key={cat.id || index}
-              onClick={() => handleEditCategory(type, index, cat.name, cat.icon, cat.color)}
-              style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.categories) }}
-              className="h-32 sm:h-36 p-4 rounded-[22px] flex flex-col items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden"
-            >
-              <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />
-              <span className="text-[14px] sm:text-[15px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
-                {cat.name}
-              </span>
-            </div>
-          ))}
-
-          {/* Dashed Add New Category Card */}
-          <button
-            type="button"
-            onClick={() => handleAddCategory(type)}
-            className="h-32 sm:h-36 p-4 rounded-[22px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2 transition-all cursor-pointer group active:scale-[0.98]"
-          >
-            <div className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
-              <Plus size={18} strokeWidth={2} />
-            </div>
-            <span className="text-xs font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-              {t('newCategory')}
-            </span>
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderCategoriesSettings = () => {
-    return (
-      <div className="space-y-6 w-full py-2">
-        <div className="flex p-1 bg-black/[0.04] dark:bg-[#1C1C1C] rounded-[14px]">
-          <button
-            onClick={() => setCategoryTab('expense')}
-            className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer ${
-              categoryTab === 'expense'
-                ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            {t('expenses')}
-          </button>
-          <button
-            onClick={() => setCategoryTab('income')}
-            className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer ${
-              categoryTab === 'income'
-                ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            {t('incomes')}
-          </button>
-        </div>
-
-        <div key={categoryTab}>
-          {categoryTab === 'expense' ? renderCategoryList('expense') : renderCategoryList('income')}
-        </div>
-
-        {/* Reset button placed under everything */}
-        <div className="pt-2 pb-1 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setIsResetCategoriesModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
-          >
-            <RotateCcw size={13} strokeWidth={2} />
-            <span>{config.language === 'en' ? 'Reset categories to default' : 'Återställ kategorier till standard'}</span>
-          </button>
-        </div>
-      </div>
-    );
-  };
 
   const renderPaymentMethodsSettings = () => {
     const methodsList = (config.paymentMethods || []).map((method, index) => {
@@ -599,25 +451,26 @@ export function SettingsView({
           </div>
         )}
 
-        {activeSection === 'categories' && renderCategoriesSettings()}
+        {activeSection === 'categories' && (
+          <BudgetCategoriesView
+            config={config}
+            setConfig={setConfig}
+            incomes={incomes}
+            fixedExpenses={fixedExpenses}
+            stats={stats}
+            currentPeriodId={currentPeriodId}
+            transactions={transactions}
+            t={t}
+            onRenameCategory={onRenameCategory}
+            onMigrateAndDeleteCategory={onMigrateAndDeleteCategory}
+            initialTab={initialCategorySubTab}
+          />
+        )}
         {activeSection === 'paymentMethods' && renderPaymentMethodsSettings()}
         {activeSection === 'language' && renderLanguageSettings()}
         {activeSection === 'appearance' && renderAppearanceSettings()}
         {activeSection === 'currency' && renderCurrencySettings()}
       </div>
-
-      <CategoryModal
-        isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
-        type={categoryModalData?.type || 'expense'}
-        initialData={categoryModalData}
-        onSave={handleSaveCategoryModal}
-        onDelete={(index) => {
-          handleDeleteCategory(categoryModalData!.type, index);
-          setIsCategoryModalOpen(false);
-        }}
-        t={t}
-      />
 
       <PaymentMethodModal
         isOpen={isPaymentMethodModalOpen}
@@ -649,84 +502,6 @@ export function SettingsView({
         t={t}
       />
 
-      {/* Category Deletion Migration Modal */}
-      {deleteMigrationData && (
-        <Modal
-          isOpen={!!deleteMigrationData}
-          onClose={() => setDeleteMigrationData(null)}
-          center
-          size="sm"
-          title={config.language === 'en' ? `Delete ${deleteMigrationData.category.name}?` : `Ta bort ${deleteMigrationData.category.name}?`}
-          showCloseButton={true}
-          bodyClassName="p-6 space-y-4"
-        >
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
-            {config.language === 'en'
-              ? `This category is used by ${deleteMigrationData.count} transactions. Choose which category to move them to before deleting.`
-              : `Kategorin används av ${deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till innan den tas bort.`}
-          </p>
-          <div className="space-y-2 mb-2">
-            <label className="text-xs font-semibold font-display tracking-wider text-[var(--text-secondary)]">
-              {config.language === 'en' ? 'Move transactions to:' : 'Flytta transaktioner till:'}
-            </label>
-            <select
-              value={targetMigrationId}
-              onChange={(e) => setTargetMigrationId(e.target.value)}
-              className="w-full h-[48px] bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] px-3 text-[14px] font-normal text-[var(--text-primary)] outline-none"
-            >
-              {(deleteMigrationData.type === 'income' ? (config.incomeCategories || []) : (config.categories || []))
-                .filter(c => c.id !== deleteMigrationData.category.id)
-                .map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-2.5 pt-2">
-            <Button
-              onClick={() => {
-                onMigrateAndDeleteCategory?.(deleteMigrationData.type, deleteMigrationData.category.id, targetMigrationId);
-                setDeleteMigrationData(null);
-              }}
-              variant="danger"
-              fullWidth
-            >
-              {config.language === 'en' ? 'Move & Delete' : 'Flytta & ta bort'}
-            </Button>
-            <Button
-              onClick={() => setDeleteMigrationData(null)}
-              variant="ghost"
-              fullWidth
-            >
-              {config.language === 'en' ? 'Cancel' : 'Avbryt'}
-            </Button>
-          </div>
-        </Modal>
-      )}
-
-      {deleteConfirmIndex && (
-        <ConfirmModal
-          isOpen={!!deleteConfirmIndex}
-          title={config.language === 'en' ? `Delete ${deleteConfirmIndex.category.name}?` : `Ta bort ${deleteConfirmIndex.category.name}?`}
-          message={config.language === 'en' 
-            ? 'Are you sure you want to delete this category? It is not used by any transactions.' 
-            : 'Är du säker på att du vill ta bort denna kategori? Den används inte av några transaktioner.'}
-          confirmText={config.language === 'en' ? 'Delete' : 'Ta bort'}
-          cancelText={config.language === 'en' ? 'Cancel' : 'Avbryt'}
-          onConfirm={() => {
-            const field = deleteConfirmIndex.type === 'income' ? 'incomeCategories' : 'categories';
-            const currentCategories = config[field] || [];
-            const newCategories = currentCategories.filter((_, i) => i !== deleteConfirmIndex.index);
-            setConfig({ ...config, [field]: newCategories });
-            setDeleteConfirmIndex(null);
-          }}
-          onCancel={() => setDeleteConfirmIndex(null)}
-          variant="danger"
-          t={t}
-        />
-      )}
-
       {pendingPayday !== null && (
         <ConfirmModal
           isOpen={pendingPayday !== null}
@@ -746,29 +521,6 @@ export function SettingsView({
             setPendingPayday(null);
           }}
           onCancel={() => setPendingPayday(null)}
-          t={t}
-        />
-      )}
-
-      {isResetCategoriesModalOpen && (
-        <ConfirmModal
-          isOpen={isResetCategoriesModalOpen}
-          title={config.language === 'en' ? 'Reset categories to default?' : 'Återställ kategorier till standard?'}
-          message={config.language === 'en'
-            ? 'This will restore all standard expense and income categories with their original colors and icons.'
-            : 'Detta återställer alla utgifts- och inkomstkategorier till standardlistan med ursprungliga ikoner och färger.'}
-          confirmText={config.language === 'en' ? 'Reset' : 'Återställ'}
-          cancelText={config.language === 'en' ? 'Cancel' : 'Avbryt'}
-          variant="danger"
-          onConfirm={() => {
-            setConfig({
-              ...config,
-              categories: DEFAULT_EXPENSE_CATEGORIES,
-              incomeCategories: DEFAULT_INCOME_CATEGORIES
-            });
-            setIsResetCategoriesModalOpen(false);
-          }}
-          onCancel={() => setIsResetCategoriesModalOpen(false)}
           t={t}
         />
       )}

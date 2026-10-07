@@ -339,7 +339,7 @@ export function TodayView({
             {!hasSavedBudget ? (
               <button
                 type="button"
-                onClick={() => onNavigate("budget", "category-budgets")}
+                onClick={() => onNavigate("profile", "categories")}
                 className="w-full p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
               >
                 <div className="flex items-center gap-3.5">
@@ -411,10 +411,10 @@ export function TodayView({
                   transition={{ delay: 0.04 + categoryBudgetData.length * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                   onClick={() => {
                     if (typeof feedback.light === 'function') feedback.light();
-                    onNavigate("budget", "category-budgets");
+                    onNavigate("profile", "categories");
                   }}
                   className="flex-shrink-0 w-[100px] sm:w-[110px] h-[100px] sm:h-[110px] p-3 rounded-[22px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/15 dark:border-white/15 flex flex-col items-center justify-between text-center group cursor-pointer transition-all active:scale-95 shadow-none"
-                  aria-label={lang === 'en' ? 'Manage budget' : 'Hantera budget'}
+                  aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
                 >
                   <div className="w-8 h-8 rounded-[12px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
                     <SlidersHorizontal size={16} strokeWidth={2} />
@@ -432,7 +432,7 @@ export function TodayView({
             ) : (
               <button
                 type="button"
-                onClick={() => onNavigate("budget", "category-budgets")}
+                onClick={() => onNavigate("profile", "categories")}
                 className="w-full p-4 rounded-[22px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
               >
                 <div className="flex items-center gap-3">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Tag, CreditCard, Globe, Palette, Coins, ChevronRight } from 'lucide-react';
+import { Calendar, CreditCard, Globe, Palette, Coins, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -147,12 +147,14 @@ export function SettingsMainView({
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <Tag size={18} strokeWidth={2} />
+              <SlidersHorizontal size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
-              <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('categories')}</span>
+              <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                {config.language === 'en' ? 'Budget & categories' : 'Budget & kategorier'}
+              </span>
               <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 mt-0.5">
-                {config.language === 'en' ? 'Expense and income categories' : 'Utgifts- och inkomstkategorier'}
+                {config.language === 'en' ? 'Allocate budget and manage categories' : 'Fördela budget och hantera kategorier'}
               </span>
             </div>
           </div>

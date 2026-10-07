@@ -3680,6 +3680,12 @@ export default function App() {
       targetTab = section === "log" || section === "transactions" ? "transactions" : "analysis";
     }
 
+    // Map budget allocate and category-budgets to unified profile categories
+    if (targetTab === "budget" && (targetSection === "allocate" || targetSection === "category-budgets")) {
+      targetTab = "profile";
+      targetSection = "categories";
+    }
+
     const isDifferent =
       targetTab !== activeTab ||
       (targetTab === "profile" && targetSection !== profileSection) ||
@@ -4223,7 +4229,7 @@ export default function App() {
     if (activeTab === "analysis") return t("analysis");
     if (activeTab === "budget") {
       if (budgetSection === "allocate" || budgetSection === "category-budgets") {
-        return 'Budget';
+        return config?.language === 'en' ? 'Budget & categories' : 'Budget & kategorier';
       }
       return budgetSection ? (config?.language === 'en' ? 'Budget' : 'Budget') : (config?.language === 'en' ? 'Finances' : 'Ekonomi');
     }
@@ -4231,7 +4237,7 @@ export default function App() {
       if (settingsSection === "main") return config?.language === 'en' ? 'Settings' : 'Inställningar';
       switch (settingsSection) {
         case "salary": return t("salary");
-        case "categories": return t("categories");
+        case "categories": return config?.language === 'en' ? 'Budget & categories' : 'Budget & kategorier';
         case "paymentMethods": return t("paymentMethods");
         case "currency": return config?.language === 'en' ? 'Currency' : 'Valuta';
         case "language": return t("language");
@@ -4243,7 +4249,7 @@ export default function App() {
       if (profileSection === "main") return t("profile");
       switch (profileSection) {
         case "salary": return t("salary");
-        case "categories": return t("categories");
+        case "categories": return config?.language === 'en' ? 'Budget & categories' : 'Budget & kategorier';
         case "paymentMethods": return t("paymentMethods");
         case "currency": return config?.language === 'en' ? 'Currency' : 'Valuta';
         case "manageAccount": return t("manageAccount");
