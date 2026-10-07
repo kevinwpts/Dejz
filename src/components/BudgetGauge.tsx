@@ -36,14 +36,14 @@ export function BudgetGauge({
   // Dash offset calculated with normalized pathLength = 100
   const dashOffset = 100 * (1 - fillRatio);
 
-  // Exact shared path geometry: M 30 180 A 150 150 0 0 1 330 180
-  const gaugePath = "M 30 180 A 150 150 0 0 1 330 180";
+  // Exact shared path geometry: M 22 180 A 158 158 0 0 1 338 180 (Outer radius 175px in 360px viewBox)
+  const gaugePath = "M 22 180 A 158 158 0 0 1 338 180";
 
   return (
-    <div className="w-full max-w-[380px] mx-auto px-6 pt-1 pb-1 relative select-none">
-      <div className="relative w-full aspect-[360/200]">
+    <div className="w-full max-w-[440px] mx-auto px-0.5 sm:px-1 pt-1 pb-1 relative select-none">
+      <div className="relative w-full aspect-[360/198]">
         <svg
-          viewBox="0 0 360 200"
+          viewBox="0 0 360 198"
           preserveAspectRatio="xMidYMid meet"
           className="w-full h-auto block overflow-visible"
         >
@@ -51,7 +51,7 @@ export function BudgetGauge({
           <path
             d={gaugePath}
             fill="none"
-            strokeWidth="36"
+            strokeWidth="34"
             strokeLinecap="butt"
             pathLength={100}
             className="stroke-[#E2DDD4] dark:stroke-white/10 transition-colors duration-300"
@@ -62,7 +62,7 @@ export function BudgetGauge({
             d={gaugePath}
             fill="none"
             stroke="var(--accent-color)"
-            strokeWidth="36"
+            strokeWidth="34"
             strokeLinecap="butt"
             pathLength={100}
             strokeDasharray="100 100"
@@ -76,7 +76,7 @@ export function BudgetGauge({
         </svg>
 
         {/* Text centered inside the semi-circle arc */}
-        <div className="absolute inset-x-0 bottom-6 sm:bottom-8 flex flex-col items-center justify-center text-center pointer-events-none">
+        <div className="absolute inset-x-0 bottom-5 sm:bottom-7 flex flex-col items-center justify-center text-center pointer-events-none">
           {/* Heading */}
           <div className="flex items-center justify-center gap-1.5 pointer-events-auto">
             <span className="text-[13px] sm:text-[14px] font-medium text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
@@ -88,7 +88,7 @@ export function BudgetGauge({
           <div className="flex items-baseline justify-center gap-1.5 mt-0.5 sm:mt-1">
             <AnimatedNumber
               value={remainingCents}
-              className={`text-[34px] sm:text-[38px] font-semibold leading-none font-amount tabular-nums tracking-tight ${
+              className={`text-[36px] sm:text-[40px] font-semibold leading-none font-amount tabular-nums tracking-tight ${
                 isNegative
                   ? 'text-rose-500 dark:text-rose-400'
                   : 'text-[var(--text-primary)]'
@@ -96,7 +96,7 @@ export function BudgetGauge({
               formatter={(val) => formatAmount(val, language)}
             />
             <span
-              className={`text-[18px] sm:text-[20px] font-normal leading-none ${
+              className={`text-[19px] sm:text-[21px] font-normal leading-none ${
                 isNegative
                   ? 'text-rose-500/80 dark:text-rose-400/80'
                   : 'text-[var(--text-secondary)]'
