@@ -173,7 +173,6 @@ export function NotificationsView({
                     <input
                       type="text"
                       inputMode="decimal"
-                      autoFocus
                       value={customAmount}
                       onChange={(e) => setCustomAmount(e.target.value)}
                       onKeyDown={(e) => {

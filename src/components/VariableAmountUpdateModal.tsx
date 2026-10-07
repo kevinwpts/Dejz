@@ -35,9 +35,6 @@ export function VariableAmountUpdateModal({
   useEffect(() => {
     if (isOpen && item) {
       setAmount('');
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
     }
   }, [isOpen, item]);
 

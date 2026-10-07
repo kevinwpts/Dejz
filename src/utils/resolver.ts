@@ -1,3 +1,4 @@
+import React from 'react';
 import { Transaction, Config } from '../types';
 import { findKnownBrandDomain, getLogoUrl } from './logo';
 import { resolveLucideIcon, ICON_MAP, getCategoryIconName, suggestIcon, isEmojiString } from './icons';

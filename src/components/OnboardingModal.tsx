@@ -723,7 +723,6 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                           placeholder={s.firstNamePlaceholder}
                           autoComplete="given-name"
                           autoCorrect="off"
-                          autoFocus
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' && fullName.trim()) handleNext();
                           }}

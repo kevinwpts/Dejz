@@ -108,3 +108,44 @@ export const parseAmount = (val: string): number => {
   const normalized = val.replace(/\s/g, '').replace(/,/g, '.');
   return parseFloat(normalized) || 0;
 };
+
+/**
+ * Formats a deduction day (1-31 or 99/32) into user-friendly text.
+ */
+export const formatDeductionDayDisplay = (day?: number | null, language: string = 'sv', short: boolean = false): string => {
+  if (!day) return '-';
+  const isEn = language === 'en' || language === 'en-US';
+
+  if (day === 1) {
+    if (short) return isEn ? '1st (First day)' : '1:a (Första dagen)';
+    return isEn ? '1st (First day of month)' : 'Första dagen i månaden (1:a)';
+  }
+
+  if (day === 31 || day === 99 || day === 32) {
+    if (short) return isEn ? 'Last day' : 'Sista dagen';
+    return isEn ? 'Sista dagen i månaden' : 'Sista dagen i månaden';
+  }
+
+  return formatOrdinalDay(day, language);
+};
+
+/**
+ * Returns options list for deduction day selects.
+ */
+export const getDeductionDayOptions = (language: string = 'sv') => {
+  const isEn = language === 'en' || language === 'en-US';
+  const options = [
+    { value: 1, label: isEn ? '1st - First day of month' : 'Första dagen i månaden (1:a)' },
+  ];
+
+  for (let d = 2; d <= 30; d++) {
+    options.push({ value: d, label: formatOrdinalDay(d, language) });
+  }
+
+  options.push({
+    value: 31,
+    label: isEn ? 'Last day of month' : 'Sista dagen i månaden',
+  });
+
+  return options;
+};

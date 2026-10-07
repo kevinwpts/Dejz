@@ -121,7 +121,6 @@ export function CategoryModal({
               }}
               className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-3.5 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
               placeholder={t('name')}
-              autoFocus
             />
           </div>
 

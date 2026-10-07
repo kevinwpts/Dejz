@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 
-import { X, Check, Trash2, ChevronDown, PiggyBank, Pencil, ChevronRight, Calendar, Repeat, CreditCard } from 'lucide-react';
+import { X, Check, Trash2, ChevronDown, PiggyBank, Pencil, ChevronRight, Calendar, Repeat, CreditCard, Clock } from 'lucide-react';
 import { Income, FixedExpense, Frequency, Category, Config, MonthlySaving } from '../types';
 import { TranslationKey } from '../i18n';
-import { formatAmount, parseAmount } from '../utils/format';
+import { formatAmount, parseAmount, formatDeductionDayDisplay, getDeductionDayOptions } from '../utils/format';
 import { fetchLogoForName, getLogoUrl, findKnownBrandDomain } from '../utils/logo';
 import { IconSelector } from './IconSelector';
 import { IconPickerModal } from './IconPickerModal';
@@ -21,6 +21,7 @@ import { getTransactionDominantColor, extractDominantColorFromImage } from '../u
 import { resolveEntityVisual } from '../utils/resolver';
 import { getCategoryColor } from '../utils/categoryColors';
 import { feedback } from '../utils/feedback';
+import { isExpenseCancelledAndExpired } from '../utils/cancellation';
 
 function _hexToRgba(hex: string, alpha: number): string {
   if (!hex) return `rgba(124, 58, 237, ${alpha})`;
@@ -229,7 +230,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                 {t('arrivalDay')}
               </span>
               <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
-                {income.deductionDay ? `${income.deductionDay}e` : '-'}
+                {formatDeductionDayDisplay(income.deductionDay, config.language, true)}
               </span>
             </div>
 
@@ -557,7 +558,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   <Calendar size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
-                  {deductionDay}:e
+                  {formatDeductionDayDisplay(deductionDay, config?.language, true)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
               </div>
@@ -567,8 +568,10 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                 title={t('arrivalDay')}
               >
-                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <option key={day} value={day} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-medium">{day}:e</option>
+                {getDeductionDayOptions(config?.language).map(opt => (
+                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-medium">
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -991,6 +994,18 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                 {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
               </p>
             )}
+            {expense.isCancelled && (
+              <div className="mt-2.5">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold text-xs border border-amber-500/20">
+                  <Clock size={13} />
+                  <span>
+                    {isExpenseCancelledAndExpired(expense)
+                      ? (config.language === 'en' ? 'Cancelled & Expired (not in budget)' : 'Uppsagt & Avslutat (räknas ej mer)')
+                      : (config.language === 'en' ? `Cancelled (ends ${expense.cancellationDate || 'date'})` : `Uppsagt (slutar ${expense.cancellationDate || 'valt datum'})`)}
+                  </span>
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Details Section: Clean list with discrete subtle divider lines */}
@@ -1047,7 +1062,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                   : (config.language === 'en' ? 'Payment day' : 'Betaldag')}
               </span>
               <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
-                {expense.deductionDay ? `${expense.deductionDay}e` : '-'}
+                {formatDeductionDayDisplay(expense.deductionDay, config.language, true)}
                 {expense.frequency !== Frequency.MONTHLY && expense.startMonth !== undefined && (
                   <span className="text-[13px] font-normal text-[var(--text-secondary)] ml-1">
                     ({new Date(2024, expense.startMonth, 1).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE', { month: 'short' })})
@@ -1161,6 +1176,10 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               onDelete(id);
               onClose();
             }}
+            onUpdateExpense={(updated) => {
+              onEdit(updated);
+              onClose();
+            }}
           />
         )}
       </motion.div>
@@ -1196,6 +1215,13 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
   const firstPaymentMethod = paymentMethods && paymentMethods.length > 0 ? (typeof paymentMethods[0] === 'string' ? paymentMethods[0] : paymentMethods[0]?.name) : 'Autogiro';
   const [paymentMethod, setPaymentMethod] = useState(typeof expense?.paymentMethod === 'string' ? expense.paymentMethod : (expense?.paymentMethod as any)?.name || firstPaymentMethod);
   const [isVariable, setIsVariable] = useState(expense?.isVariable || false);
+  const [isCancelled, setIsCancelled] = useState(expense?.isCancelled || false);
+  const [cancellationDate, setCancellationDate] = useState<string>(() => {
+    if (expense?.cancellationDate) return expense.cancellationDate;
+    const now = new Date();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return lastDay.toISOString().split('T')[0];
+  });
   const [icon, setIcon] = useState(expense?.icon || 'none');
   const [manualSelectionThisSession, setManualSelectionThisSession] = useState(false);
   
@@ -1260,7 +1286,10 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
       deductionDay, 
       startMonth: frequency === Frequency.MONTHLY ? undefined : startMonth,
       isVariable, 
-      periodOverrides: isVariable ? (expense?.periodOverrides || {}) : {} 
+      periodOverrides: isVariable ? (expense?.periodOverrides || {}) : {},
+      isCancelled,
+      cancellationDate: isCancelled ? cancellationDate : undefined,
+      cancelledAt: isCancelled ? (expense?.cancelledAt || Date.now()) : undefined,
     });
   };
 
@@ -1427,7 +1456,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   <Calendar size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
-                  {deductionDay}:e
+                  {formatDeductionDayDisplay(deductionDay, config?.language, true)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
               </div>
@@ -1437,8 +1466,10 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                 title={paymentMethod === 'autogiro' ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag') : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
               >
-                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <option key={day} value={day} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-medium">{day}:e</option>
+                {getDeductionDayOptions(config?.language).map(opt => (
+                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-medium">
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -1557,6 +1588,42 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 </button>
               </div>
             </div>
+
+            {/* Row 7: Cancellation Status */}
+            <div className="p-4 flex items-center justify-between min-h-[58px]">
+              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                {config?.language === 'en' ? 'Sagt upp abonnemang' : 'Sagt upp abonnemang'}
+              </span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                  {isCancelled ? (config?.language === 'en' ? 'Yes, cancelled' : 'Ja, sagt upp') : (config?.language === 'en' ? 'No, active' : 'Nej, aktivt')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsCancelled(!isCancelled)}
+                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isCancelled ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
+                >
+                  <div
+                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isCancelled ? 'left-[18px]' : 'left-0.5'}`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Row 8 (if cancelled): Cancellation Date */}
+            {isCancelled && (
+              <div className="p-4 flex items-center justify-between min-h-[58px] gap-3 bg-black/[0.02] dark:bg-white/[0.03]">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                  {config?.language === 'en' ? 'Expiration date' : 'Sista dag (uppsägningsdatum)'}
+                </span>
+                <input
+                  type="date"
+                  value={cancellationDate}
+                  onChange={(e) => setCancellationDate(e.target.value)}
+                  className="text-[13px] font-semibold text-[var(--text-primary)] bg-transparent outline-none border border-black/10 dark:border-white/10 rounded-[10px] px-2 py-1"
+                />
+              </div>
+            )}
 
             {/* Row 7: Own Note */}
             <div className="p-4 flex items-center justify-between min-h-[58px] gap-3">
@@ -1945,7 +2012,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
                 {config.language === 'en' ? 'Deduction day' : 'Dragningsdag'}
               </span>
               <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
-                {saving.deductionDay ? `${saving.deductionDay}e` : '-'}
+                {formatDeductionDayDisplay(saving.deductionDay, config.language, true)}
               </span>
             </div>
 
@@ -2235,7 +2302,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   <Calendar size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
-                  {deductionDay}:e
+                  {formatDeductionDayDisplay(deductionDay, config?.language, true)}
                 </span>
                 <ChevronDown size={14} strokeWidth={2.5} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 transition-colors shrink-0 ml-0.5" />
               </div>
@@ -2245,8 +2312,10 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                 title={t('deductionDay') || 'Dragningsdag'}
               >
-                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <option key={day} value={day} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-medium">{day}:e</option>
+                {getDeductionDayOptions(config?.language).map(opt => (
+                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-medium">
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -2543,7 +2612,6 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
         <div className="space-y-4">
           <input 
             type="text" 
-            autoFocus
             placeholder="Namn på betalningsmetod"
             value={name}
             onChange={(e) => setName(e.target.value)}

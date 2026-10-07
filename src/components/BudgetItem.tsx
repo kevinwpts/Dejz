@@ -1,7 +1,7 @@
 import React from 'react';
 import { CategoryIcon } from './CategoryIcon';
 import { Language, TranslationKey } from '../i18n';
-import { formatAmount, capitalize } from '../utils/format';
+import { formatAmount, capitalize, formatDeductionDayDisplay } from '../utils/format';
 import { Config, Frequency } from '../types';
 import { TransactionLogo } from './TransactionLogo';
 import { getCategoryIconName } from '../utils/icons';
@@ -46,11 +46,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   }
 
   // Format deduction info for right side under amount
-  const isEn = language === 'en';
-  const daySuffix = isEn 
-    ? (item.deductionDay === 1 ? 'st' : item.deductionDay === 2 ? 'nd' : item.deductionDay === 3 ? 'rd' : 'th')
-    : ':e';
-  const dayString = item.deductionDay ? `${item.deductionDay}${daySuffix}` : '';
+  const dayString = item.deductionDay ? formatDeductionDayDisplay(item.deductionDay, language, true) : '';
   const paymentString = item.paymentMethod ? (typeof item.paymentMethod === 'string' ? item.paymentMethod : item.paymentMethod?.name) : '';
   
   const matchedPaymentMethod = React.useMemo(() => {
@@ -126,6 +122,12 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                   {capitalize(item.category || '')}
                 </span>
               </div>
+            )}
+
+            {item.isCancelled && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
+                {language === 'en' ? 'Cancelled' : 'Uppsagd'}
+              </span>
             )}
 
             {item.note && (

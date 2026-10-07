@@ -198,6 +198,9 @@ export interface FixedExpense {
   isVariable?: boolean;
   periodOverrides?: Record<string, number>;
   note?: string;
+  isCancelled?: boolean;
+  cancellationDate?: string;
+  cancelledAt?: number;
 }
 
 export interface SavingsPotTransaction {

@@ -29,6 +29,7 @@ import {
   Square,
   Plus,
 } from "lucide-react";
+import { getActiveFixedExpenses } from './utils/cancellation';
 import { useVoiceExpense } from "./hooks/useVoiceExpense";
 import { parseQuickExpense } from "./utils/expenseAiParser";
 import { SmartInput } from "./components/ui";
@@ -2709,7 +2710,8 @@ export default function App() {
           },
           0,
         );
-        const totalFixed = fixedExpenses.reduce((sum, e) => {
+        const activeFixed = getActiveFixedExpenses(fixedExpenses);
+        const totalFixed = activeFixed.reduce((sum, e) => {
           const amount = getAmountForPeriod(e);
           switch (e.frequency) {
             case Frequency.QUARTERLY:

@@ -9,6 +9,8 @@ import { FilterSelectButton, FilterMenuModal, Button } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
+import { getActiveFixedExpenses, getCancelledFixedExpenses } from '../utils/cancellation';
+import { CancelledSubscriptionsModal } from './CancelledSubscriptionsModal';
 
 interface BudgetViewProps {
   allTransactions?: any[];
@@ -56,6 +58,7 @@ export function BudgetView({
 }: BudgetViewProps) {
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
   const [isBudgetFilterModalOpen, setIsBudgetFilterModalOpen] = React.useState(false);
+  const [isCancelledModalOpen, setIsCancelledModalOpen] = React.useState(false);
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
   });
@@ -87,6 +90,44 @@ export function BudgetView({
   const [incomeSortBy, setIncomeSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
   const [savingSortBy, setSavingSortBy] = React.useState<'day' | 'name' | 'amount'>('day');
 
+  const [_selectedFreqFilter, _setSelectedFreqFilter] = React.useState<string>('all');
+  const [_collapsedFreqs, _setCollapsedFreqs] = React.useState<Record<string, boolean>>({});
+
+  const _toggleFreqCollapse = (freq: string) => {
+    _setCollapsedFreqs(prev => ({ ...prev, [freq]: !prev[freq] }));
+  };
+
+  const _freqStats = React.useMemo(() => {
+    const stats: Record<string, { count: number; totalMonthly: number; totalRaw: number }> = {
+      [Frequency.MONTHLY]: { count: 0, totalMonthly: 0, totalRaw: 0 },
+      [Frequency.QUARTERLY]: { count: 0, totalMonthly: 0, totalRaw: 0 },
+      [Frequency.SEMI_ANNUALLY]: { count: 0, totalMonthly: 0, totalRaw: 0 },
+      [Frequency.ANNUALLY]: { count: 0, totalMonthly: 0, totalRaw: 0 },
+    };
+
+    (fixedExpenses || []).forEach((e) => {
+      const freq = e.frequency || Frequency.MONTHLY;
+      const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
+        ? e.periodOverrides[currentPeriodId]
+        : (Number(e.amount) || 0);
+
+      if (!stats[freq]) {
+        stats[freq] = { count: 0, totalMonthly: 0, totalRaw: 0 };
+      }
+      stats[freq].count += 1;
+      stats[freq].totalRaw += amount;
+
+      let monthlyAmount = amount;
+      if (freq === Frequency.QUARTERLY) monthlyAmount = amount / 3;
+      else if (freq === Frequency.SEMI_ANNUALLY) monthlyAmount = amount / 6;
+      else if (freq === Frequency.ANNUALLY) monthlyAmount = amount / 12;
+
+      stats[freq].totalMonthly += monthlyAmount;
+    });
+
+    return stats;
+  }, [fixedExpenses, currentPeriodId]);
+
   const sortedIncomes = React.useMemo(() => {
     const list = [...(incomes || [])];
     if (incomeSortBy === 'day') {
@@ -103,8 +144,11 @@ export function BudgetView({
     }
   }, [incomes, incomeSortBy]);
 
+  const activeFixedExpenses = React.useMemo(() => getActiveFixedExpenses(fixedExpenses), [fixedExpenses]);
+  const cancelledFixedExpenses = React.useMemo(() => getCancelledFixedExpenses(fixedExpenses), [fixedExpenses]);
+
   const sortedFixedExpenses = React.useMemo(() => {
-    const list = [...(fixedExpenses || [])];
+    const list = [...(activeFixedExpenses || [])];
     if (fixedSortBy === 'day') {
       return list.sort((a, b) => {
         const dayA = typeof a.deductionDay === 'number' && a.deductionDay > 0 ? a.deductionDay : 999;
@@ -117,7 +161,12 @@ export function BudgetView({
     } else {
       return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
-  }, [fixedExpenses, fixedSortBy]);
+  }, [activeFixedExpenses, fixedSortBy]);
+
+  const filteredFixedExpenses = React.useMemo(() => {
+    if (_selectedFreqFilter === 'all') return sortedFixedExpenses;
+    return sortedFixedExpenses.filter(e => (e.frequency || Frequency.MONTHLY) === _selectedFreqFilter);
+  }, [sortedFixedExpenses, _selectedFreqFilter]);
 
   const sortedSavings = React.useMemo(() => {
     const list = config?.monthlySavingsItems ? [...config.monthlySavingsItems] : [];
@@ -146,7 +195,7 @@ export function BudgetView({
     return sum + amount;
   }, 0);
 
-  const totalFixedSum = (fixedExpenses || []).reduce((sum, e) => {
+  const totalFixedSum = (activeFixedExpenses || []).reduce((sum, e) => {
     const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
       ? e.periodOverrides[currentPeriodId]
       : (Number(e.amount) || 0);
@@ -368,6 +417,15 @@ export function BudgetView({
                     }
                   </span>
                 </button>
+                {cancelledFixedExpenses.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsCancelledModalOpen(true)}
+                    className="h-8 px-3 rounded-[12px] bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 border border-amber-500/20 shadow-none shrink-0"
+                  >
+                    <span>{config.language === 'en' ? `Cancelled (${cancelledFixedExpenses.length})` : `Uppsagda (${cancelledFixedExpenses.length})`}</span>
+                  </button>
+                )}
                 <Button
                   variant="secondary"
                   size="sm"
@@ -378,9 +436,9 @@ export function BudgetView({
                 </Button>
               </div>
 
-              {sortedFixedExpenses.length > 0 ? (
+              {filteredFixedExpenses.length > 0 ? (
                 Object.entries(
-                  sortedFixedExpenses.reduce((acc, exp) => {
+                  filteredFixedExpenses.reduce((acc, exp) => {
                     const freq = exp.frequency || Frequency.MONTHLY;
                     if (!acc[freq]) acc[freq] = [];
                     acc[freq].push(exp);
@@ -491,6 +549,23 @@ export function BudgetView({
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Cancelled Subscriptions Modal */}
+      {isCancelledModalOpen && (
+        <CancelledSubscriptionsModal
+          isOpen={isCancelledModalOpen}
+          onClose={() => setIsCancelledModalOpen(false)}
+          fixedExpenses={fixedExpenses}
+          onUpdateExpense={(updated) => {
+            onEditFixedExpense(updated);
+          }}
+          onDeleteExpense={(id) => {
+            const newList = fixedExpenses.filter(e => e.id !== id);
+            setFixedExpenses(newList);
+          }}
+          config={config}
+        />
+      )}
     </motion.div>
   );
 }

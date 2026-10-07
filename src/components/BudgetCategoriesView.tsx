@@ -10,6 +10,7 @@ import { Button, Modal } from './ui';
 import { formatAmount } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
+import { getActiveFixedExpenses } from '../utils/cancellation';
 
 export interface BudgetCategoriesViewProps {
   config: Config;
@@ -75,8 +76,10 @@ export function BudgetCategoriesView({
   const [isResetCategoriesModalOpen, setIsResetCategoriesModalOpen] = useState(false);
 
   // --- Calculations ---
+  const activeExpenses = getActiveFixedExpenses(fixedExpenses);
+
   const getFixedSpentForCategory = (catName: string) => {
-    return (fixedExpenses || [])
+    return (activeExpenses || [])
       .filter((e) => (e.category || '').trim().toLowerCase() === (catName || '').trim().toLowerCase())
       .reduce((sum, e) => {
         const amount =
@@ -104,7 +107,7 @@ export function BudgetCategoriesView({
     return sum + amount;
   }, 0);
 
-  const totalFixedSum = (fixedExpenses || []).reduce((sum, e) => {
+  const totalFixedSum = (activeExpenses || []).reduce((sum, e) => {
     const amount =
       e.isVariable && e.periodOverrides && currentPeriodId && e.periodOverrides[currentPeriodId] !== undefined
         ? e.periodOverrides[currentPeriodId]
@@ -421,7 +424,6 @@ export function BudgetCategoriesView({
                               type="text"
                               inputMode="numeric"
                               pattern="[0-9]*"
-                              autoFocus
                               value={inlineInputValue}
                               onBlur={() => {
                                 const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);

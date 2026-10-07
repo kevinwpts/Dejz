@@ -23,6 +23,7 @@ interface CancelSubscriptionModalProps {
   expense: FixedExpense;
   config: Config;
   onDeleteExpense?: (id: string) => void;
+  onUpdateExpense?: (expense: FixedExpense) => void;
 }
 
 export function CancelSubscriptionModal({
@@ -31,6 +32,7 @@ export function CancelSubscriptionModal({
   expense,
   config,
   onDeleteExpense,
+  onUpdateExpense,
 }: CancelSubscriptionModalProps) {
   useScrollLock(isOpen);
   const isEn = config.language === 'en';
@@ -38,6 +40,14 @@ export function CancelSubscriptionModal({
   const [loading, setLoading] = useState(true);
   const [details, setDetails] = useState<CancellationInfo | null>(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showMarkCancelled, setShowMarkCancelled] = useState(false);
+  const [cancelDate, setCancelDate] = useState<string>(() => {
+    if (expense?.cancellationDate) return expense.cancellationDate;
+    // Default to end of current month
+    const now = new Date();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return lastDay.toISOString().split('T')[0];
+  });
 
   useEffect(() => {
     if (!isOpen || !expense) return;
@@ -260,6 +270,65 @@ export function CancelSubscriptionModal({
               </div>
             ) : null}
 
+            {/* Mark as Cancelled with Date Section */}
+            {onUpdateExpense && (
+              <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.08] space-y-2">
+                {!showMarkCancelled ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowMarkCancelled(true)}
+                    className="w-full py-3 px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] shadow-xs"
+                  >
+                    <Clock size={15} />
+                    <span>{expense.isCancelled ? (isEn ? 'Edit cancellation date' : 'Ändra uppsägningsdatum') : (isEn ? 'Mark as cancelled & set date' : 'Markera som uppsagt & sätt sista dag')}</span>
+                  </button>
+                ) : (
+                  <div className="p-4 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] space-y-3">
+                    <p className="text-xs font-semibold text-[var(--text-primary)]">
+                      {isEn ? 'When does this subscription expire?' : 'När sägs abonnemanget upp / sista giltighetsdag?'}
+                    </p>
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-medium text-[var(--text-secondary)] block">
+                        {isEn ? 'Uppsägningsdatum' : 'Sista dag (uppsägningsdatum)'}
+                      </label>
+                      <input
+                        type="date"
+                        value={cancelDate}
+                        onChange={(e) => setCancelDate(e.target.value)}
+                        className="w-full h-10 px-3 bg-[var(--bg-color)] border border-black/10 dark:border-white/10 rounded-[12px] text-xs font-semibold text-[var(--text-primary)] outline-none"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowMarkCancelled(false)}
+                        className="py-2.5 px-3 rounded-[12px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/10 text-[var(--text-primary)] text-xs font-semibold cursor-pointer active:scale-[0.98]"
+                      >
+                        {isEn ? 'Cancel' : 'Avbryt'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          feedback.success();
+                          onUpdateExpense({
+                            ...expense,
+                            isCancelled: true,
+                            cancellationDate: cancelDate,
+                            cancelledAt: expense.cancelledAt || Date.now(),
+                          });
+                          setShowMarkCancelled(false);
+                          onClose();
+                        }}
+                        className="py-2.5 px-3 rounded-[12px] bg-[var(--accent-color)] text-[var(--on-accent)] text-xs font-semibold cursor-pointer active:scale-[0.98]"
+                      >
+                        {isEn ? 'Save status' : 'Spara status'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Confirm Delete Section */}
             {onDeleteExpense && (
               <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
@@ -267,10 +336,10 @@ export function CancelSubscriptionModal({
                   <button
                     type="button"
                     onClick={() => setShowConfirmDelete(true)}
-                    className="w-full py-3 px-4 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
+                    className="w-full py-2.5 px-4 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
                   >
                     <Trash2 size={14} />
-                    <span>{isEn ? 'Already cancelled? Remove from budget' : 'Redan uppsagt? Ta bort från budgeten'}</span>
+                    <span>{isEn ? 'Remove permanently' : 'Ta bort permanent från budget'}</span>
                   </button>
                 ) : (
                   <div className="p-4 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] space-y-3">
@@ -283,7 +352,7 @@ export function CancelSubscriptionModal({
                         onClick={() => setShowConfirmDelete(false)}
                         className="py-2.5 px-3 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-primary)] text-xs font-semibold border border-black/5 dark:border-white/5 cursor-pointer active:scale-[0.98]"
                       >
-                        {isEn ? 'Keep in budget' : 'Behåll'}
+                        {isEn ? 'Keep' : 'Behåll'}
                       </button>
                       <button
                         type="button"

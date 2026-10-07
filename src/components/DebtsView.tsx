@@ -349,7 +349,6 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
             onChange={(e) => setPersonName(e.target.value)}
             placeholder={isEn ? 'e.g. Rasmus' : 't.ex. Rasmus eller Pia'}
             className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-3.5 text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
-            autoFocus
           />
         </div>
 

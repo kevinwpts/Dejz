@@ -49,18 +49,6 @@ export function SearchModal({
   const _isSv = config.language === 'sv';
 
   useEffect(() => {
-    if (isOpen) {
-      requestAnimationFrame(() => {
-        inputRef.current?.focus();
-      });
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 40);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
@@ -118,7 +106,6 @@ export function SearchModal({
                 <Search size={18} className="text-[var(--text-tertiary)] shrink-0 mr-2.5" />
                 <input 
                   ref={inputRef}
-                  autoFocus
                   type="text" 
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
