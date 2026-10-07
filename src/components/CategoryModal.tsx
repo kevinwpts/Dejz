@@ -11,8 +11,9 @@ interface CategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   type?: 'expense' | 'income';
-  initialData: { name: string; icon: string; color?: string; index?: number } | null;
-  onSave: (data: { name: string; icon: string; color?: string; index?: number }) => void;
+  currency?: string;
+  initialData: { name: string; icon: string; color?: string; budget?: number | null; index?: number } | null;
+  onSave: (data: { name: string; icon: string; color?: string; budget?: number | null; index?: number }) => void;
   onDelete?: (index: number) => void;
   t: (key: TranslationKey) => string;
 }
@@ -22,7 +23,8 @@ const PRESET_COLORS = [...DEFAULT_CATEGORY_PALETTE];
 export function CategoryModal({ 
   isOpen, 
   onClose, 
-  type: _type = 'expense',
+  type = 'expense',
+  currency = 'kr',
   initialData, 
   onSave, 
   onDelete, 
@@ -31,6 +33,7 @@ export function CategoryModal({
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('receipt');
   const [color, setColor] = useState('#6658E8');
+  const [budget, setBudget] = useState('');
   const [showIconPicker, setShowIconPicker] = useState(false);
 
   useEffect(() => {
@@ -38,6 +41,7 @@ export function CategoryModal({
       setName(initialData?.name || '');
       setIcon(initialData?.icon || 'receipt');
       setColor(initialData?.color || '#6658E8');
+      setBudget(initialData?.budget !== undefined && initialData?.budget !== null ? String(initialData.budget) : '');
       setShowIconPicker(false);
     }
   }, [isOpen, initialData]);
@@ -46,7 +50,13 @@ export function CategoryModal({
 
   const handleSave = () => {
     if (!name.trim()) return;
-    onSave({ name: name.trim(), icon, color, index: initialData?.index });
+    onSave({ 
+      name: name.trim(), 
+      icon, 
+      color, 
+      budget: type === 'expense' ? (budget ? Number(budget) : null) : undefined,
+      index: initialData?.index 
+    });
   };
 
   return (
@@ -114,6 +124,29 @@ export function CategoryModal({
               autoFocus
             />
           </div>
+
+          {/* Budget Field (Only for expense categories) */}
+          {type !== 'income' && (
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
+                {t('budget')}
+              </label>
+              <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-3.5 h-11 focus-within:border-[var(--accent-color)] transition-all">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value.replace(/\D/g, ''))}
+                  className="w-full bg-transparent border-none text-sm font-bold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none font-amount tabular-nums"
+                  placeholder="0"
+                />
+                <span className="text-xs font-bold text-[var(--text-secondary)] pl-2 select-none">
+                  {currency}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Color palette */}
           <div className="space-y-2">
