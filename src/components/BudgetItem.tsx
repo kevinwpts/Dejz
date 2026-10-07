@@ -2,7 +2,7 @@ import React from 'react';
 import { CategoryIcon } from './CategoryIcon';
 import { Language, TranslationKey } from '../i18n';
 import { formatAmount, capitalize, formatDeductionDayDisplay } from '../utils/format';
-import { Config, Frequency } from '../types';
+import { Config } from '../types';
 import { TransactionLogo } from './TransactionLogo';
 import { getCategoryIconName } from '../utils/icons';
 import { Calendar } from 'lucide-react';
@@ -38,12 +38,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   const hasOverride = Boolean(item.isVariable && currentPeriodId && item.periodOverrides && item.periodOverrides[currentPeriodId] !== undefined);
   const rawAmount = hasOverride ? item.periodOverrides[currentPeriodId] : (item.amount || 0);
   
-  let displayAmount = rawAmount;
-  if (item.frequency && item.frequency !== Frequency.MONTHLY) {
-    if (item.frequency === Frequency.QUARTERLY) displayAmount = rawAmount / 3;
-    else if (item.frequency === Frequency.SEMI_ANNUALLY) displayAmount = rawAmount / 6;
-    else if (item.frequency === Frequency.ANNUALLY) displayAmount = rawAmount / 12;
-  }
+  const displayAmount = rawAmount;
 
   // Format deduction info for right side under amount
   const dayString = item.deductionDay ? formatDeductionDayDisplay(item.deductionDay, language, true) : '';
@@ -52,10 +47,19 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   const matchedPaymentMethod = React.useMemo(() => {
     if (!paymentString) return null;
     const pMethods = config?.paymentMethods && config.paymentMethods.length > 0 ? config.paymentMethods : DEFAULT_PAYMENT_METHODS;
-    const found = pMethods.find((pm: any) => {
+    let found = pMethods.find((pm: any) => {
       const pmName = typeof pm === 'string' ? pm : pm?.name;
       return (pmName || '').trim().toLowerCase() === paymentString.trim().toLowerCase();
     });
+    if (!found) {
+      found = pMethods.find((pm: any) => {
+        const pmName = typeof pm === 'string' ? pm : pm?.name;
+        if (!pmName) return false;
+        const normPm = pmName.trim().toLowerCase();
+        const normPay = paymentString.trim().toLowerCase();
+        return normPm.includes(normPay) || normPay.includes(normPm);
+      });
+    }
     if (found) {
       if (typeof found === 'string') {
         const defaultFound = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === (found as string).toLowerCase());
@@ -151,9 +155,9 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
               </span>
             )}
             {paymentString && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none truncate max-w-[90px] sm:max-w-[120px]">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none truncate max-w-[180px] sm:max-w-[260px]">
                 <CategoryIcon icon={pmIconKey} size="2xs" className="shrink-0" />
-                <span className="truncate">{paymentString}</span>
+                <span className="truncate">{matchedPaymentMethod?.name || paymentString}</span>
               </span>
             )}
           </div>

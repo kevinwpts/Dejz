@@ -62,6 +62,7 @@ export function BudgetView({
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
   });
+  const [activeFreqTab, setActiveFreqTab] = React.useState<Frequency>(Frequency.MONTHLY);
 
   React.useEffect(() => {
     if (initialSection === 'category-budgets' || initialSection === 'allocate') {
@@ -164,9 +165,8 @@ export function BudgetView({
   }, [activeFixedExpenses, fixedSortBy]);
 
   const filteredFixedExpenses = React.useMemo(() => {
-    if (_selectedFreqFilter === 'all') return sortedFixedExpenses;
-    return sortedFixedExpenses.filter(e => (e.frequency || Frequency.MONTHLY) === _selectedFreqFilter);
-  }, [sortedFixedExpenses, _selectedFreqFilter]);
+    return sortedFixedExpenses.filter(e => (e.frequency || Frequency.MONTHLY) === activeFreqTab);
+  }, [sortedFixedExpenses, activeFreqTab]);
 
   const sortedSavings = React.useMemo(() => {
     const list = config?.monthlySavingsItems ? [...config.monthlySavingsItems] : [];
@@ -195,17 +195,22 @@ export function BudgetView({
     return sum + amount;
   }, 0);
 
-  const totalFixedSum = (activeFixedExpenses || []).reduce((sum, e) => {
-    const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
-      ? e.periodOverrides[currentPeriodId]
-      : (Number(e.amount) || 0);
-    switch (e.frequency) {
-      case Frequency.QUARTERLY: return sum + amount / 3;
-      case Frequency.SEMI_ANNUALLY: return sum + amount / 6;
-      case Frequency.ANNUALLY: return sum + amount / 12;
-      default: return sum + amount;
-    }
-  }, 0);
+  const fixedSumsByFrequency = React.useMemo(() => {
+    const sums: Record<Frequency, number> = {
+      [Frequency.MONTHLY]: 0,
+      [Frequency.QUARTERLY]: 0,
+      [Frequency.SEMI_ANNUALLY]: 0,
+      [Frequency.ANNUALLY]: 0,
+    };
+    (activeFixedExpenses || []).forEach(e => {
+      const freq = e.frequency || Frequency.MONTHLY;
+      const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
+        ? e.periodOverrides[currentPeriodId]
+        : (Number(e.amount) || 0);
+      sums[freq] = (sums[freq] || 0) + amount;
+    });
+    return sums;
+  }, [activeFixedExpenses, currentPeriodId]);
 
   const totalSavingsSum = stats?.totalSavings !== undefined
     ? stats.totalSavings
@@ -290,14 +295,18 @@ export function BudgetView({
       {/* Overview Hero Section - Dynamic based on filter */}
       <div className="text-center flex flex-col items-center gap-1 py-1 select-none">
         <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block">
-          {budgetFilter === 'fixed' && (config?.language === 'en' ? 'Total fixed expenses' : 'Totala fasta utgifter')}
+          {budgetFilter === 'fixed' && (
+            config?.language === 'en' 
+              ? `Fixed expenses (${activeFreqTab === Frequency.MONTHLY ? 'Monthly' : activeFreqTab === Frequency.QUARTERLY ? 'Quarterly' : activeFreqTab === Frequency.SEMI_ANNUALLY ? 'Semi-annually' : 'Annually'})` 
+              : `Fasta utgifter (${activeFreqTab === Frequency.MONTHLY ? 'månadsvis' : activeFreqTab === Frequency.QUARTERLY ? 'kvartalsvis' : activeFreqTab === Frequency.SEMI_ANNUALLY ? 'halvårsvis' : 'årsvis'})`
+          )}
           {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
           {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
         </span>
         <div className="flex items-baseline justify-center gap-1.5">
           <AnimatedNumber 
             value={Math.round(
-              budgetFilter === 'fixed' ? totalFixedSum :
+              budgetFilter === 'fixed' ? (fixedSumsByFrequency[activeFreqTab] || 0) :
               budgetFilter === 'income' ? totalIncomeSum :
               totalSavingsSum
             )} 
@@ -307,8 +316,14 @@ export function BudgetView({
               return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
-          <span className="text-sm sm:text-base font-normal text-[var(--text-secondary)]">
+          <span className="text-sm sm:text-base font-normal text-[var(--text-secondary)] border-none">
             {config?.currency || 'kr'}
+            {budgetFilter === 'fixed' && (
+              activeFreqTab === Frequency.MONTHLY ? (config?.language === 'en' ? '/mo' : '/mån') :
+              activeFreqTab === Frequency.QUARTERLY ? (config?.language === 'en' ? '/quarter' : '/kvartal') :
+              activeFreqTab === Frequency.SEMI_ANNUALLY ? (config?.language === 'en' ? '/half-year' : '/halvår') :
+              (config?.language === 'en' ? '/yr' : '/år')
+            )}
           </span>
         </div>
       </div>
@@ -392,6 +407,36 @@ export function BudgetView({
           {/* Fixed Expenses Section */}
           {budgetFilter === 'fixed' && (
             <div className="space-y-5">
+              {/* Beautiful Segmented Frequency Tabs with embedded totals */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 bg-black/[0.03] dark:bg-white/5 rounded-2xl border border-black/[0.02] dark:border-white/[0.02] mb-2">
+                {[
+                  { value: Frequency.MONTHLY, label: config?.language === 'en' ? 'Monthly' : 'Månadsvis' },
+                  { value: Frequency.QUARTERLY, label: config?.language === 'en' ? 'Quarterly' : 'Kvartalsvis' },
+                  { value: Frequency.SEMI_ANNUALLY, label: config?.language === 'en' ? 'Semi-annually' : 'Halvårsvis' },
+                  { value: Frequency.ANNUALLY, label: config?.language === 'en' ? 'Annually' : 'Årsvis' },
+                ].map((opt) => {
+                  const isActive = activeFreqTab === opt.value;
+                  const sum = fixedSumsByFrequency[opt.value] || 0;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setActiveFreqTab(opt.value)}
+                      className={`flex flex-col items-center justify-center py-2 px-3 rounded-xl transition-all cursor-pointer border-none ${
+                        isActive
+                          ? 'bg-white dark:bg-zinc-800 text-[var(--text-primary)] shadow-xs font-semibold'
+                          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] bg-transparent'
+                      }`}
+                    >
+                      <span className="text-[10px] uppercase tracking-wider font-medium opacity-80">{opt.label}</span>
+                      <span className="text-[13px] font-semibold font-amount tabular-nums mt-0.5">
+                        {formatAmount(Math.round(sum), config?.language)} {config?.currency || 'kr'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
               <div className="flex flex-wrap items-center justify-between gap-3 px-1 mb-4">
                 {/* Single compact sort toggle button */}
                 <button
@@ -437,44 +482,34 @@ export function BudgetView({
               </div>
 
               {filteredFixedExpenses.length > 0 ? (
-                Object.entries(
-                  filteredFixedExpenses.reduce((acc, exp) => {
-                    const freq = exp.frequency || Frequency.MONTHLY;
-                    if (!acc[freq]) acc[freq] = [];
-                    acc[freq].push(exp);
-                    return acc;
-                  }, {} as Record<string, FixedExpense[]>)
-                ).map(([freq, items]) => (
-                  <div key={freq} className="space-y-2">
-                    <div className="flex items-center gap-3 px-1 pt-1">
-                      <span className="text-xs font-semibold font-display tracking-wider text-[var(--text-secondary)]">
-                        {Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq) 
-                          ? t(`freq_${Object.keys(Frequency).find(k => Frequency[k as keyof typeof Frequency] === freq)!.toLowerCase()}` as TranslationKey)
-                          : freq}
-                      </span>
-                    </div>
-                    <div className="space-y-2.5">
-                      {items.map((expense) => (
-                        <BudgetItem 
-                          key={expense.id}
-                          item={expense} 
-                          onClick={() => onViewFixedExpense(expense)} 
-                          currency={config.currency} 
-                          type="expense"
-                          language={config.language as Language}
-                          t={t}
-                          config={config}
-                          currentPeriodId={currentPeriodId}
-                          isGrouped={true}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))
+                <div className="space-y-2.5">
+                  {filteredFixedExpenses.map((expense) => (
+                    <BudgetItem 
+                      key={expense.id}
+                      item={expense} 
+                      onClick={() => onViewFixedExpense(expense)} 
+                      currency={config.currency} 
+                      type="expense"
+                      language={config.language as Language}
+                      t={t}
+                      config={config}
+                      currentPeriodId={currentPeriodId}
+                      isGrouped={true}
+                    />
+                  ))}
+                </div>
               ) : (
                 <EmptyState 
-                  title={config.language === 'en' ? 'No fixed expenses added yet' : 'Inga fasta utgifter inlagda än'} 
-                  description={config.language === 'en' ? 'Add rent, bills, and subscriptions to track upcoming payments.' : 'Lägg in hyra, räkningar och abonnemang för att få full koll på fasta kostnader.'}
+                  title={
+                    activeFreqTab === Frequency.MONTHLY
+                      ? (config.language === 'en' ? 'No monthly expenses' : 'Inga månadsutgifter inlagda')
+                      : activeFreqTab === Frequency.QUARTERLY
+                      ? (config.language === 'en' ? 'No quarterly expenses' : 'Inga kvartalsutgifter inlagda')
+                      : activeFreqTab === Frequency.SEMI_ANNUALLY
+                      ? (config.language === 'en' ? 'No semi-annual expenses' : 'Inga halvårsutgifter inlagda')
+                      : (config.language === 'en' ? 'No annual expenses' : 'Inga årsutgifter inlagda')
+                  } 
+                  description={config.language === 'en' ? 'Add subscriptions or bills to track upcoming payments.' : 'Lägg in abonnemang eller räkningar för att få full koll.'}
                   actionLabel={`+ ${t('newFixedExpense')}`}
                   onAction={onAddFixedExpense}
                 />

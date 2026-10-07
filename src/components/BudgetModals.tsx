@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useDragControls } from 'motion/react';
 
 import { X, Check, Trash2, ChevronDown, PiggyBank, Pencil, ChevronRight, Calendar, Repeat, CreditCard, Clock } from 'lucide-react';
 import { Income, FixedExpense, Frequency, Category, Config, MonthlySaving } from '../types';
+import { DEFAULT_PAYMENT_METHODS } from '../constants';
 import { TranslationKey } from '../i18n';
 import { formatAmount, parseAmount, formatDeductionDayDisplay, getDeductionDayOptions } from '../utils/format';
 import { fetchLogoForName, getLogoUrl, findKnownBrandDomain } from '../utils/logo';
@@ -688,7 +689,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
           {/* Category Selector Bottom Sheet Modal */}
           {isCategorySelectorOpen && typeof document !== 'undefined' && document.body && createPortal(
-            <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategorySelectorOpen(false)} />
               <motion.div
                 initial={{ y: '100%', opacity: 0 }}
@@ -1231,6 +1232,22 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
   const [showIconSelector, setShowIconSelector] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isCategorySelectorOpen, setIsCategorySelectorOpen] = useState(false);
+
+  const pmIcon = React.useMemo(() => {
+    if (!paymentMethod) return <CreditCard size={14} strokeWidth={2} />;
+    const found = (config?.paymentMethods || DEFAULT_PAYMENT_METHODS).find((pm: any) => {
+      const pmName = typeof pm === 'string' ? pm : pm?.name;
+      return pmName?.toLowerCase() === paymentMethod.toLowerCase();
+    });
+    const nameToMatch = typeof found === 'string' ? found : found?.name || paymentMethod;
+    const isDefault = DEFAULT_PAYMENT_METHODS.some(dm => dm.name.toLowerCase() === nameToMatch.toLowerCase());
+    if (isDefault) {
+      const IconComp = getPaymentMethodIcon(nameToMatch);
+      if (IconComp) return <IconComp size={14} strokeWidth={2} />;
+    }
+    const iconKey = (found && typeof found !== 'string') ? (found.icon || 'credit-card') : 'credit-card';
+    return <CategoryIcon icon={iconKey} size="2xs" noBackground />;
+  }, [paymentMethod, config?.paymentMethods]);
   
   const amountInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -1544,7 +1561,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               </span>
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                  <CreditCard size={14} strokeWidth={2} />
+                  {pmIcon}
                 </div>
                 <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                   {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}
@@ -1653,7 +1670,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
           {/* Category Selector Bottom Sheet Modal */}
           {isCategorySelectorOpen && typeof document !== 'undefined' && document.body && createPortal(
-            <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategorySelectorOpen(false)} />
               <motion.div
                 initial={{ y: '100%', opacity: 0 }}
@@ -2123,6 +2140,22 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
   const amountInputRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
+  const pmIcon = React.useMemo(() => {
+    if (!paymentMethod) return <CreditCard size={14} strokeWidth={2} />;
+    const found = (config?.paymentMethods || DEFAULT_PAYMENT_METHODS).find((pm: any) => {
+      const pmName = typeof pm === 'string' ? pm : pm?.name;
+      return pmName?.toLowerCase() === paymentMethod.toLowerCase();
+    });
+    const nameToMatch = typeof found === 'string' ? found : found?.name || paymentMethod;
+    const isDefault = DEFAULT_PAYMENT_METHODS.some(dm => dm.name.toLowerCase() === nameToMatch.toLowerCase());
+    if (isDefault) {
+      const IconComp = getPaymentMethodIcon(nameToMatch);
+      if (IconComp) return <IconComp size={14} strokeWidth={2} />;
+    }
+    const iconKey = (found && typeof found !== 'string') ? (found.icon || 'credit-card') : 'credit-card';
+    return <CategoryIcon icon={iconKey} size="2xs" noBackground />;
+  }, [paymentMethod, config?.paymentMethods]);
+
   useEffect(() => {
     if (!name || name.trim().length < 2) {
       if (!manualSelectionThisSession) {
@@ -2391,7 +2424,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
-                    <CreditCard size={14} strokeWidth={2} />
+                    {pmIcon}
                   </div>
                   <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
                     {paymentMethod || (config?.language === 'en' ? 'Select method' : 'Välj metod')}

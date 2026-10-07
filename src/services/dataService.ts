@@ -543,7 +543,10 @@ export const dataService = {
         : (e.period_overrides?._start_month !== undefined && e.period_overrides?._start_month !== null ? Number(e.period_overrides._start_month) : undefined),
       isVariable: e.is_variable,
       periodOverrides: e.period_overrides || {},
-      note: e.note || undefined
+      note: e.note || undefined,
+      isCancelled: e.is_cancelled || false,
+      cancellationDate: e.cancellation_date || undefined,
+      cancelledAt: e.cancelled_at || undefined
     }));
   },
 
@@ -582,7 +585,10 @@ export const dataService = {
       start_month: expense.startMonth !== undefined ? expense.startMonth : null,
       is_variable: expense.isVariable,
       period_overrides: periodOverrides,
-      note: expense.note && expense.note.trim() ? expense.note.trim() : null
+      note: expense.note && expense.note.trim() ? expense.note.trim() : null,
+      is_cancelled: expense.isCancelled || false,
+      cancellation_date: expense.cancellationDate || null,
+      cancelled_at: expense.cancelledAt || null
     };
 
     const currentPayload = { ...payload };

@@ -3,6 +3,7 @@ import {
   Wallet, 
   Home, 
   Car, 
+  Chrome,
   Zap, 
   Smartphone, 
   Wifi, 
@@ -1188,6 +1189,7 @@ export const ICON_MAP: Record<string, any> = {
   tent: Tent,
   compass: Compass,
   globe: Globe,
+  chrome: Chrome,
   sun: Sun,
   moon: Moon,
   wind: Wind,
@@ -1811,6 +1813,8 @@ export const suggestCategory = (
 export const getPaymentMethodIcon = (method: string): any => {
   const m = method.toLowerCase();
   if (m.includes('apple')) return Apple;
+  if (m.includes('google')) return Chrome;
+  if (m.includes('kivra')) return Mail;
   if (m.includes('kort')) return CreditCard;
   if (m.includes('swish')) return Smartphone;
   if (m.includes('klarna')) return ShoppingBag;

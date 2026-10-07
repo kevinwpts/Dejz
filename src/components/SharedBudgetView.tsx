@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Users2, Copy, Check, Heart, UserCheck, MessageSquare, ShieldCheck } from 'lucide-react';
+import { Users2, Copy, Check, UserCheck, MessageSquare, ShieldCheck } from 'lucide-react';
 import { Config } from '../types';
 import { Button } from './ui';
 
@@ -56,8 +56,8 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
     >
       {/* 1. Header Hero */}
       <div className="p-6 rounded-[24px] bg-[var(--surface-color)] text-center space-y-3 relative overflow-hidden border border-black/[0.04] dark:border-white/[0.04]">
-        <div className="w-14 h-14 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto">
-          <Heart size={26} strokeWidth={2} className="fill-rose-500/20" />
+        <div className="w-14 h-14 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center mx-auto">
+          <Users2 size={26} strokeWidth={2} />
         </div>
 
         <div className="space-y-1">

@@ -512,16 +512,16 @@ h6 {
   }
 
   .app-header-scrolled {
-    background-color: color-mix(in srgb, var(--bg-color) 88%, transparent);
+    background-color: var(--bg-color);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+    border-bottom: 1px solid var(--border-subtle);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   }
 
   .dark .app-header-scrolled,
   .black-theme .app-header-scrolled {
-    background-color: color-mix(in srgb, var(--bg-color) 88%, transparent);
+    background-color: var(--bg-color);
     border-bottom-color: rgba(255, 255, 255, 0.08);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
   }

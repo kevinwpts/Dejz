@@ -24,6 +24,8 @@ export const DEFAULT_PAYMENT_METHODS = [
   { name: "Swish", icon: "smartphone", color: "#10b981" },
   { name: "Autogiro", icon: "refresh", color: "#6366f1" },
   { name: "Apple", icon: "apple", color: "#374151" },
+  { name: "Google", icon: "chrome", color: "#4285F4" },
+  { name: "Kivra", icon: "mail", color: "#13C5A6" },
   { name: "Klarna", icon: "shopping-bag", color: "#f472b6" },
   { name: "PayPal", icon: "wallet", color: "#0284c7" },
   { name: "Faktura", icon: "receipt", color: "#f59e0b" },

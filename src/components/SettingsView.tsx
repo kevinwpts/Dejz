@@ -128,7 +128,8 @@ export function SettingsView({
         {/* Clean grouped list */}
         <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {methodsList.map((method: any, index: number) => {
-            const IconComp = getPaymentMethodIcon(method.name);
+            const isDefault = DEFAULT_PAYMENT_METHODS.some(dm => dm.name.toLowerCase() === method.name.toLowerCase());
+            const IconComp = isDefault ? getPaymentMethodIcon(method.name) : null;
             return (
               <button
                 key={method.name || index}
@@ -573,11 +574,33 @@ export function SettingsView({
 
       <PaymentMethodModal
         isOpen={isPaymentMethodModalOpen}
-        onClose={() => setIsPaymentMethodModalOpen(false)}
+        onClose={() => {
+          setIsPaymentMethodModalOpen(false);
+          setPaymentMethodModalData(null);
+        }}
         initialName={paymentMethodModalData?.name}
-        initialIcon={paymentMethodModalData?.index !== undefined ? (typeof config.paymentMethods[paymentMethodModalData.index] === 'string' ? 'credit-card' : (config.paymentMethods[paymentMethodModalData.index]?.icon || 'credit-card')) : 'credit-card'}
-        initialColor={paymentMethodModalData?.index !== undefined ? (typeof config.paymentMethods[paymentMethodModalData.index] === 'string' ? '#6366f1' : (config.paymentMethods[paymentMethodModalData.index]?.color || '#6366f1')) : '#6366f1'}
+        initialIcon={(() => {
+          if (paymentMethodModalData?.index === undefined) return 'credit-card';
+          const method = config.paymentMethods[paymentMethodModalData.index];
+          if (!method) return 'credit-card';
+          if (typeof method === 'string') {
+            const found = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === method.toLowerCase());
+            return found?.icon || 'credit-card';
+          }
+          return method.icon || 'credit-card';
+        })()}
+        initialColor={(() => {
+          if (paymentMethodModalData?.index === undefined) return '#6366f1';
+          const method = config.paymentMethods[paymentMethodModalData.index];
+          if (!method) return '#6366f1';
+          if (typeof method === 'string') {
+            const found = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === method.toLowerCase());
+            return found?.color || '#6366f1';
+          }
+          return method.color || '#6366f1';
+        })()}
         onSave={(name, icon, color) => {
+          const oldName = paymentMethodModalData?.name;
           const methods = [...(config.paymentMethods || [])].map((m) => {
             if (typeof m === 'string') {
               const found = DEFAULT_PAYMENT_METHODS.find(dm => dm.name.toLowerCase() === m.toLowerCase());
@@ -590,13 +613,37 @@ export function SettingsView({
           } else {
             methods.push({ name, icon, color });
           }
-          setConfig({ ...config, paymentMethods: methods });
+
+          const updatedConfig = { ...config, paymentMethods: methods };
+
+          if (oldName && oldName.trim() && oldName.trim().toLowerCase() !== name.trim().toLowerCase()) {
+            if (updatedConfig.fixedExpenses) {
+              updatedConfig.fixedExpenses = updatedConfig.fixedExpenses.map(fe => 
+                fe.paymentMethod === oldName ? { ...fe, paymentMethod: name } : fe
+              );
+            }
+            if (updatedConfig.incomes) {
+              updatedConfig.incomes = updatedConfig.incomes.map(inc => 
+                inc.paymentMethod === oldName ? { ...inc, paymentMethod: name } : inc
+              );
+            }
+            if (updatedConfig.savings) {
+              updatedConfig.savings = updatedConfig.savings.map(s => 
+                s.paymentMethod === oldName ? { ...s, paymentMethod: name } : s
+              );
+            }
+          }
+
+          setConfig(updatedConfig);
+          if (onRefresh) onRefresh();
           setIsPaymentMethodModalOpen(false);
+          setPaymentMethodModalData(null);
         }}
         onDelete={paymentMethodModalData?.index !== undefined ? () => {
           const methods = [...(config.paymentMethods || [])].filter((_, i) => i !== paymentMethodModalData.index);
           setConfig({ ...config, paymentMethods: methods });
           setIsPaymentMethodModalOpen(false);
+          setPaymentMethodModalData(null);
         } : undefined}
         t={t}
       />
