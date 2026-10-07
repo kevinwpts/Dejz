@@ -450,7 +450,7 @@ export function BudgetView({
               </div>
 
               {sortedFixedExpenses.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-10">
                   {([
                     { freq: Frequency.MONTHLY, label: config.language === 'en' ? 'Monthly' : 'Månadsvis', suffix: config.language === 'en' ? '/mo' : '/mån' },
                     { freq: Frequency.QUARTERLY, label: config.language === 'en' ? 'Quarterly' : 'Kvartalsvis', suffix: config.language === 'en' ? '/quarter' : '/kvartal' },
@@ -503,7 +503,7 @@ export function BudgetView({
 
               {/* Cancelled Subscriptions Native Section */}
               {cancelledFixedExpenses.length > 0 && (
-                <div className="space-y-3 pt-5 mt-5 border-t border-dashed border-black/[0.08] dark:border-white/10">
+                <div className="space-y-3 pt-8 mt-8 border-t border-dashed border-black/[0.08] dark:border-white/10">
                   <div className="flex items-center justify-between px-1.5 select-none">
                     <h3 className="text-xs font-semibold text-amber-600 dark:text-amber-500 tracking-wider uppercase flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
