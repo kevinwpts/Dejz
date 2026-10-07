@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, Sparkles, Wand2 } from 'lucide-react';
 import { Config, Income, FixedExpense, Frequency, Category } from '../types';
 import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
 import { CategoryModal } from './CategoryModal';
 import { ConfirmModal } from './ConfirmModal';
+import { SmartBudgetWizardModal } from './SmartBudgetWizardModal';
 import { Button, Modal } from './ui';
 import { formatAmount } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
@@ -48,6 +49,7 @@ export function BudgetCategoriesView({
   const [editingCategoryName, setEditingCategoryName] = useState<string | null>(null);
   const [inlineInputValue, setInlineInputValue] = useState<string>('');
   const [showResetBudgetConfirm, setShowResetBudgetConfirm] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   // --- Category Modal State ---
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -320,6 +322,31 @@ export function BudgetCategoriesView({
 
       {activeCategoryType === 'expense' ? (
         <>
+          {/* Smart Budgetguide Banner */}
+          <div className="bg-gradient-to-r from-[var(--accent-color)]/10 via-[var(--accent-color)]/5 to-transparent border border-[var(--accent-color)]/20 rounded-[20px] p-3.5 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[var(--accent-color)]/15 text-[var(--accent-color)] flex items-center justify-center shrink-0">
+                <Sparkles size={16} strokeWidth={2.5} />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-xs font-bold text-[var(--text-primary)] block leading-tight">
+                  {isEn ? 'Smart Budget Wizard' : 'Smart Budgetguide'}
+                </span>
+                <span className="text-[11px] text-[var(--text-secondary)] font-medium block leading-tight">
+                  {isEn ? 'Set up your budget step-by-step' : 'Ställ in din budget steg för steg'}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsWizardOpen(true)}
+              className="px-3.5 py-2 rounded-[12px] bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-bold shrink-0 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5"
+            >
+              <Wand2 size={13} strokeWidth={2.5} />
+              <span>{isEn ? 'Start' : 'Starta'}</span>
+            </button>
+          </div>
+
           {/* 1. Minimal och supertydlig toppmodul */}
           <motion.div
             initial={{ opacity: 0, y: 6 }}
@@ -690,6 +717,19 @@ export function BudgetCategoriesView({
           t={t}
         />
       )}
+
+      <SmartBudgetWizardModal
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        config={config}
+        setConfig={setConfig}
+        incomes={incomes}
+        fixedExpenses={fixedExpenses}
+        stats={stats}
+        currentPeriodId={currentPeriodId}
+        transactions={transactions}
+        t={t}
+      />
     </div>
   );
 }

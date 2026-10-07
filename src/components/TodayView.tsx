@@ -494,7 +494,7 @@ export function TodayView({
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           <AnimatePresence mode="popLayout">
             {displayedVariableTransactions.length > 0 ? (
               <motion.div className="space-y-2.5" key="transactions">
