@@ -202,12 +202,13 @@ export function CategoryBottomSheetModal({
                         {categoryData.isOverBudget ? (
                           <>
                             <span className="text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-500 font-amount tabular-nums">
-                              +{formatAmount(Math.abs(categoryData.remaining), language)} {curr}
+                              {formatAmount(Math.abs(categoryData.remaining), language)} {curr}
                             </span>
-                            <span className="text-xs sm:text-sm font-semibold text-rose-600 dark:text-rose-500">
-                              {isEn 
-                                ? `over budget (budget: ${formatAmount(Math.round(categoryData.budget), language)} ${curr})` 
-                                : `över budget (budget: ${formatAmount(Math.round(categoryData.budget), language)} ${curr})`}
+                            <span className="text-xs sm:text-sm font-medium text-rose-600 dark:text-rose-400">
+                              {isEn ? 'over' : 'över'}{' '}
+                              <span className="font-semibold text-rose-600 dark:text-rose-400 font-amount tabular-nums">
+                                {formatAmount(Math.round(categoryData.budget), language)} {curr}
+                              </span>
                             </span>
                           </>
                         ) : (
