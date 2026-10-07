@@ -4,6 +4,7 @@ import { Calendar, Clock, Info, X } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { BudgetGauge } from './BudgetGauge';
 import { formatAmount } from '../utils/format';
+import { feedback } from '../utils/feedback';
 
 interface GreetingModuleProps {
   userName?: string;
@@ -36,6 +37,8 @@ interface GreetingModuleProps {
   categoryBudgets?: React.ReactNode;
 }
 
+type PeriodDisplayAlternative = 'pill' | 'progress' | 'card' | 'integrated' | 'double' | 'all';
+
 export function GreetingModule({
   currency,
   language,
@@ -50,7 +53,34 @@ export function GreetingModule({
   const isEn = language === 'en';
   const [isPeriodInfoOpen, setIsPeriodInfoOpen] = useState(false);
   const [isCalculationInfoOpen, setIsCalculationInfoOpen] = useState(false);
-  const [selectedAlternative, setSelectedAlternative] = useState<'pill' | 'progress' | 'card' | 'integrated' | 'double'>('pill');
+  
+  const [selectedAlternative, setSelectedAlternative] = useState<PeriodDisplayAlternative>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('dejz_period_display_style');
+      if (saved && ['pill', 'progress', 'card', 'integrated', 'double', 'all'].includes(saved)) {
+        return saved as PeriodDisplayAlternative;
+      }
+    }
+    return 'pill';
+  });
+
+  const handleSelectAlternative = (id: PeriodDisplayAlternative) => {
+    try {
+      if (typeof feedback?.selection === 'function') {
+        feedback.selection();
+      }
+    } catch (_err) {
+      // safe fallback
+    }
+    setSelectedAlternative(id);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('dejz_period_display_style', id);
+      } catch (_err) {
+        // safe fallback
+      }
+    }
+  };
 
   const effectiveRemainingDays = useMemo(() => {
     if (!stats) return 1;
@@ -107,24 +137,22 @@ export function GreetingModule({
       >
         {/* Interactive Alternative Design Selector */}
         <div className="flex justify-center mb-4 px-2">
-          <div className="inline-flex items-center gap-0.5 p-1 bg-black/[0.03] dark:bg-white/[0.04] rounded-[14px] overflow-x-auto max-w-full no-scrollbar">
+          <div className="inline-flex items-center gap-0.5 p-1 bg-black/[0.04] dark:bg-white/[0.05] rounded-[14px] overflow-x-auto max-w-full no-scrollbar border border-black/[0.04] dark:border-white/[0.05]">
             {[
               { id: 'pill', label: isEn ? 'Pill' : 'Original' },
               { id: 'progress', label: isEn ? 'Timeline' : 'Tidslinje' },
               { id: 'card', label: isEn ? 'Card' : 'Kort' },
               { id: 'integrated', label: isEn ? 'Integrated' : 'Integrerad' },
               { id: 'double', label: isEn ? 'Double' : 'Dubbel' },
+              { id: 'all', label: isEn ? 'Show All' : 'Visa alla' },
             ].map((opt) => (
               <button
                 key={opt.id}
                 type="button"
-                onClick={() => {
-                  if (typeof feedback.selection === 'function') feedback.selection();
-                  setSelectedAlternative(opt.id as any);
-                }}
-                className={`px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold rounded-[10px] transition-all cursor-pointer whitespace-nowrap border-none select-none ${
+                onClick={() => handleSelectAlternative(opt.id as PeriodDisplayAlternative)}
+                className={`px-2.5 py-1 text-[10.5px] sm:text-[11px] font-semibold rounded-[10px] transition-all cursor-pointer whitespace-nowrap border-none select-none ${
                   selectedAlternative === opt.id
-                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-sm'
+                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-sm font-bold'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
               >
@@ -144,9 +172,9 @@ export function GreetingModule({
           onOpenInfo={() => setIsCalculationInfoOpen(true)}
           timeText={
             selectedAlternative === 'integrated'
-              ? (stats?.isPastPeriod ? (isEn ? 'Period Ended' : 'Perioden avslutad') : `${effectiveRemainingDays} ${isEn ? 'days until payday' : 'dagar kvar till lön'}`)
+              ? (stats?.isPastPeriod ? (isEn ? 'Period Ended' : 'Perioden avslutad') : `${effectiveRemainingDays} ${isEn ? 'days left' : 'dagar kvar'} · ${periodIntervalText}`)
               : selectedAlternative === 'double'
-              ? (isEn ? 'Outer: Money · Inner: Time' : 'Yttre: Pengar · Inre: Tid')
+              ? (isEn ? `Time: ${effectiveRemainingDays}d left · ${periodIntervalText}` : `Tid: ${effectiveRemainingDays} dagar kvar · ${periodIntervalText}`)
               : undefined
           }
           timeRatio={
@@ -157,8 +185,13 @@ export function GreetingModule({
         />
 
         {/* 1. Original Pill Design */}
-        {selectedAlternative === 'pill' && (
-          <div className="flex justify-center mt-1 sm:mt-2">
+        {(selectedAlternative === 'pill' || selectedAlternative === 'all') && (
+          <div className="flex flex-col items-center justify-center mt-2 sm:mt-2.5">
+            {selectedAlternative === 'all' && (
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] mb-1">
+                1. Original (Pill)
+              </span>
+            )}
             <button
               type="button"
               onClick={() => setIsPeriodInfoOpen(true)}
@@ -182,8 +215,13 @@ export function GreetingModule({
         )}
 
         {/* 2. Linear Timeline/Progress Design */}
-        {selectedAlternative === 'progress' && (
-          <div className="w-full max-w-[320px] mx-auto mt-4 px-4 py-3 rounded-2xl bg-black/[0.015] dark:bg-white/[0.025] border border-black/[0.03] dark:border-white/[0.05] animate-fade-in text-left">
+        {(selectedAlternative === 'progress' || selectedAlternative === 'all') && (
+          <div className="w-full max-w-[320px] mx-auto mt-3 px-4 py-3 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] animate-fade-in text-left">
+            {selectedAlternative === 'all' && (
+              <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] mb-1.5">
+                2. Tidslinje (Progress Bar)
+              </div>
+            )}
             <div className="flex justify-between items-center text-[10px] text-[var(--text-secondary)] font-medium mb-1.5 px-0.5">
               <span>{periodIntervalText.split(' \u2013 ')[0] || 'Start'}</span>
               <span>{periodIntervalText.split(' \u2013 ')[1] || 'Slut'}</span>
@@ -210,9 +248,14 @@ export function GreetingModule({
         )}
 
         {/* 3. Interactive Large Countdown Widget Card */}
-        {selectedAlternative === 'card' && (
-          <div className="w-full max-w-[320px] mx-auto mt-4 p-4 rounded-[22px] bg-white dark:bg-[#161616] border border-black/[0.04] dark:border-white/[0.06] shadow-sm flex items-center justify-between gap-4 animate-fade-in text-left">
+        {(selectedAlternative === 'card' || selectedAlternative === 'all') && (
+          <div className="w-full max-w-[320px] mx-auto mt-3 p-4 rounded-[22px] bg-white dark:bg-[#161616] border border-black/[0.05] dark:border-white/[0.08] shadow-sm flex items-center justify-between gap-4 animate-fade-in text-left">
             <div className="flex flex-col">
+              {selectedAlternative === 'all' && (
+                <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] mb-1">
+                  3. Widget-kort
+                </span>
+              )}
               <span className="text-[9px] font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider">
                 {isEn ? 'Days left' : 'Dagar kvar'}
               </span>
@@ -237,6 +280,13 @@ export function GreetingModule({
                 {stats?.totalDaysInPeriod} {isEn ? 'days total' : 'dagar totalt'}
               </span>
             </div>
+          </div>
+        )}
+
+        {/* Explanatory note in 'all' mode */}
+        {selectedAlternative === 'all' && (
+          <div className="text-center mt-3 text-[11px] text-[var(--text-tertiary)]">
+            {isEn ? '4. Integrated & 5. Double are displayed directly in the gauge circle above' : '4. Integrerad & 5. Dubbel visas direkt inuti mätaren ovan när de väljs'}
           </div>
         )}
       </motion.div>
