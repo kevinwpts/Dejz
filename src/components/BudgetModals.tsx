@@ -201,10 +201,11 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                   const cat = [...(config.incomeCategories || []), ...(config.categories || [])].find(
                     c => (c?.name || '').trim().toLowerCase() === searchCat
                   );
-                  const iconKey = income.icon || cat?.icon || getCategoryIconName(catName);
+                  const iconKey = cat?.icon || getCategoryIconName(catName);
+                  const catColor = cat?.color || getCategoryColor(catName, config.incomeCategories);
                   return (
                     <>
-                      {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />}
+                      {iconKey && <CategoryIcon icon={iconKey} color={catColor} size="xs" />}
                       <span className="text-[14px] font-medium text-[var(--text-primary)]">{catName}</span>
                     </>
                   );
@@ -1006,10 +1007,11 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                   const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
                     c => (c?.name || '').trim().toLowerCase() === searchCat
                   );
-                  const iconKey = expense.icon || cat?.icon || getCategoryIconName(catName);
+                  const iconKey = cat?.icon || getCategoryIconName(catName);
+                  const catColor = cat?.color || getCategoryColor(catName, config.categories);
                   return (
                     <>
-                      {iconKey && <CategoryIcon icon={iconKey} color={cat?.color} size="xs" />}
+                      {iconKey && <CategoryIcon icon={iconKey} color={catColor} size="xs" />}
                       <span className="text-[14px] font-medium text-[var(--text-primary)]">{catName}</span>
                     </>
                   );

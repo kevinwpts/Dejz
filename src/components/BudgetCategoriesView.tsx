@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Check, Sparkles, Wand2 } from 'lucide-react';
+import { Plus, Check } from 'lucide-react';
 import { Config, Income, FixedExpense, Frequency, Category } from '../types';
 import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
 import { CategoryModal } from './CategoryModal';
 import { ConfirmModal } from './ConfirmModal';
-import { SmartBudgetWizardModal } from './SmartBudgetWizardModal';
 import { Button, Modal } from './ui';
 import { formatAmount } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
@@ -49,7 +48,6 @@ export function BudgetCategoriesView({
   const [editingCategoryName, setEditingCategoryName] = useState<string | null>(null);
   const [inlineInputValue, setInlineInputValue] = useState<string>('');
   const [showResetBudgetConfirm, setShowResetBudgetConfirm] = useState(false);
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   // --- Category Modal State ---
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -322,45 +320,20 @@ export function BudgetCategoriesView({
 
       {activeCategoryType === 'expense' ? (
         <>
-          {/* Smart Budgetguide Banner */}
-          <div className="bg-gradient-to-r from-[var(--accent-color)]/10 via-[var(--accent-color)]/5 to-transparent border border-[var(--accent-color)]/20 rounded-[20px] p-3.5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[var(--accent-color)]/15 text-[var(--accent-color)] flex items-center justify-center shrink-0">
-                <Sparkles size={16} strokeWidth={2.5} />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-xs font-bold text-[var(--text-primary)] block leading-tight">
-                  {isEn ? 'Smart Budget Wizard' : 'Smart Budgetguide'}
-                </span>
-                <span className="text-[11px] text-[var(--text-secondary)] font-medium block leading-tight">
-                  {isEn ? 'Set up your budget step-by-step' : 'Ställ in din budget steg för steg'}
-                </span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsWizardOpen(true)}
-              className="px-3.5 py-2 rounded-[12px] bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-bold shrink-0 transition-all active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5"
-            >
-              <Wand2 size={13} strokeWidth={2.5} />
-              <span>{isEn ? 'Start' : 'Starta'}</span>
-            </button>
-          </div>
-
-          {/* 1. Minimal och supertydlig toppmodul */}
+          {/* 1. Toppmodul */}
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
-            className="bg-[var(--surface-color)] rounded-[22px] p-5 border-none shadow-none space-y-3"
+            className="bg-[var(--surface-color)] rounded-[20px] p-4 space-y-2.5"
           >
             <div className="flex items-baseline justify-between">
               <div className="space-y-0.5">
-                <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
                   {isEn ? 'Left to allocate' : 'Kvar att fördela'}
                 </span>
                 <div
-                  className={`text-2xl sm:text-3xl font-extrabold tracking-tight font-amount tabular-nums ${
+                  className={`text-2xl font-extrabold tracking-tight font-amount tabular-nums ${
                     isOverAllocated
                       ? 'text-rose-600 dark:text-rose-400'
                       : remainingToAllocate === 0
@@ -369,7 +342,7 @@ export function BudgetCategoriesView({
                   }`}
                 >
                   {remainingToAllocate === 0
-                    ? (isEn ? '0 kr (All set)' : '0 kr (Allt fördelat)')
+                    ? '0 kr'
                     : `${formatAmount(remainingToAllocate, config.language)} ${curr}`}
                 </div>
               </div>
@@ -392,7 +365,7 @@ export function BudgetCategoriesView({
             </div>
           </motion.div>
 
-          {/* 2. Utgiftskategorier – Ren och luftig design */}
+          {/* 2. Utgiftskategorier – Färgglada kort */}
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <span className="text-xs font-semibold text-[var(--text-secondary)]">
@@ -413,24 +386,28 @@ export function BudgetCategoriesView({
                 const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
                 const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
                 const isEditingThis = editingCategoryName === cat.name;
+                const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
 
                 return (
                   <div
                     key={cat.id || index}
-                    style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.categories) }}
                     onClick={(e) => {
                       if (!isEditingThis && !(e.target as HTMLElement).closest('input')) {
                         handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
                       }
                     }}
-                    className="relative p-4 rounded-[20px] flex flex-col justify-between h-[135px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden text-white group"
+                    style={{
+                      backgroundColor: `${catColor}18`,
+                      borderColor: `${catColor}35`,
+                    }}
+                    className="relative p-3.5 rounded-[18px] border flex flex-col justify-between h-[125px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden group hover:border-black/20 dark:hover:border-white/30"
                   >
                     <div className="flex items-center justify-between">
-                      <CategoryIcon icon={cat.icon} size="md" noBackground whiteIcon />
+                      <CategoryIcon icon={cat.icon} color={catColor} solidBackground whiteIcon size="md" />
                     </div>
 
-                    <div className="space-y-2">
-                      <span className="text-[14px] font-bold text-white block truncate leading-tight">
+                    <div className="space-y-1.5">
+                      <span className="text-xs font-bold text-[var(--text-primary)] block truncate leading-tight">
                         {cat.name}
                       </span>
 
@@ -439,7 +416,7 @@ export function BudgetCategoriesView({
                         className="w-full"
                       >
                         {isEditingThis ? (
-                          <div className="flex items-center justify-between bg-black/40 backdrop-blur-md rounded-[10px] px-2 py-1 border border-white/40">
+                          <div className="flex items-center justify-between bg-white/80 dark:bg-black/40 rounded-[10px] px-2 py-1 border border-[var(--accent-color)]">
                             <input
                               type="text"
                               inputMode="numeric"
@@ -471,10 +448,10 @@ export function BudgetCategoriesView({
                                   e.currentTarget.blur();
                                 }
                               }}
-                              className="w-full bg-transparent border-none text-left text-xs font-bold text-white font-amount tabular-nums outline-none placeholder-white/50"
+                              className="w-full bg-transparent border-none text-left text-xs font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none placeholder-[var(--text-tertiary)]"
                               placeholder="0"
                             />
-                            <span className="text-[10px] font-bold text-white/80 select-none pl-1">
+                            <span className="text-[10px] font-bold text-[var(--text-secondary)] select-none pl-1">
                               {curr}
                             </span>
                           </div>
@@ -486,9 +463,9 @@ export function BudgetCategoriesView({
                               setEditingCategoryName(cat.name);
                               setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
                             }}
-                            className="w-full py-1 px-2 rounded-[10px] bg-black/20 hover:bg-black/30 transition-colors flex items-center justify-between border border-white/10 cursor-pointer"
+                            className="w-full py-1 px-2 rounded-[10px] bg-white/60 dark:bg-black/30 hover:bg-white/90 dark:hover:bg-black/50 transition-colors flex items-center justify-between border border-black/5 dark:border-white/10 cursor-pointer backdrop-blur-xs"
                           >
-                            <span className="text-xs font-bold font-amount tabular-nums text-white">
+                            <span className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)]">
                               {catBudget > 0 ? `${formatAmount(catBudget, config.language)} ${curr}` : `0 ${curr}`}
                             </span>
                           </button>
@@ -520,18 +497,22 @@ export function BudgetCategoriesView({
 
           <div className="grid grid-cols-2 gap-3">
             {incomeCategoriesList.map((cat, index) => {
+              const catColor = cat.color || getCategoryColor(cat.name, config?.incomeCategories);
               return (
                 <div
                   key={cat.id || index}
-                  style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.incomeCategories) }}
                   onClick={() => handleEditCategory('income', index, cat.name, cat.icon, cat.color)}
-                  className="relative p-4 rounded-[20px] flex flex-col justify-between h-[110px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden text-white group"
+                  style={{
+                    backgroundColor: `${catColor}18`,
+                    borderColor: `${catColor}35`,
+                  }}
+                  className="relative p-3.5 rounded-[18px] border flex flex-col justify-between h-[105px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden group hover:border-black/20 dark:hover:border-white/30"
                 >
                   <div className="flex items-center justify-between">
-                    <CategoryIcon icon={cat.icon} size="md" noBackground whiteIcon />
+                    <CategoryIcon icon={cat.icon} color={catColor} solidBackground whiteIcon size="md" />
                   </div>
 
-                  <span className="text-[14px] font-bold text-white block truncate leading-tight">
+                  <span className="text-xs font-bold text-[var(--text-primary)] block truncate leading-tight">
                     {cat.name}
                   </span>
                 </div>
@@ -717,19 +698,6 @@ export function BudgetCategoriesView({
           t={t}
         />
       )}
-
-      <SmartBudgetWizardModal
-        isOpen={isWizardOpen}
-        onClose={() => setIsWizardOpen(false)}
-        config={config}
-        setConfig={setConfig}
-        incomes={incomes}
-        fixedExpenses={fixedExpenses}
-        stats={stats}
-        currentPeriodId={currentPeriodId}
-        transactions={transactions}
-        t={t}
-      />
     </div>
   );
 }

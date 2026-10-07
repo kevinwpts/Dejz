@@ -159,21 +159,6 @@ export function SettingsView({
           })}
         </div>
 
-        {/* Dashed Add New Button at bottom */}
-        <button
-          type="button"
-          onClick={() => {
-            setPaymentMethodModalData({ name: '' });
-            setIsPaymentMethodModalOpen(true);
-          }}
-          className="w-full py-3.5 px-4 rounded-[18px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex items-center justify-center gap-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer group active:scale-[0.99]"
-        >
-          <div className="w-5 h-5 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
-            <Plus size={13} strokeWidth={2.5} />
-          </div>
-          <span>{config.language === 'en' ? 'Add new payment method' : 'Lägg till betalningsmetod'}</span>
-        </button>
-
         {/* Reset button placed under everything */}
         <div className="pt-2 pb-1 flex justify-center">
           <button
