@@ -129,16 +129,16 @@ export function GreetingModule({
         <button
           type="button"
           onClick={handleCardClick}
-          className="w-full max-w-[320px] mx-auto mt-4 p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between gap-4 animate-fade-in text-left cursor-pointer hover:bg-black/[0.04] dark:hover:bg-white/[0.05] active:scale-[0.99] transition-all"
+          className="w-full sm:max-w-lg mx-auto mt-4 px-5 py-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between gap-5 animate-fade-in text-left cursor-pointer hover:bg-black/[0.04] dark:hover:bg-white/[0.05] active:scale-[0.99] transition-all"
         >
           <div className="flex flex-col">
-            <span className="text-[9px] font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider">
+            <span className="text-[10px] font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider">
               {isEn ? 'Days left' : 'Dagar kvar'}
             </span>
-            <span className="text-[28px] font-bold font-amount leading-none text-[var(--accent-color)] mt-1.5 select-none tabular-nums">
+            <span className="text-[28px] sm:text-[30px] font-bold font-amount leading-none text-[var(--accent-color)] mt-1.5 select-none tabular-nums">
               {stats?.isPastPeriod ? '0' : effectiveRemainingDays}
             </span>
-            <span className="text-[11px] font-medium text-[var(--text-secondary)] mt-1">
+            <span className="text-[11.5px] font-medium text-[var(--text-secondary)] mt-1">
               {isEn ? 'until next payday' : 'till nästa lön'}
             </span>
           </div>
@@ -146,10 +146,10 @@ export function GreetingModule({
           <div className="h-10 w-[1px] bg-black/[0.06] dark:bg-white/[0.08]" />
 
           <div className="flex flex-col items-end text-right">
-            <span className="text-[9px] font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider">
+            <span className="text-[10px] font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider">
               {isEn ? 'Current period' : 'Aktuell period'}
             </span>
-            <span className="text-[13.5px] font-bold text-[var(--text-primary)] mt-1.5">
+            <span className="text-[14px] sm:text-[15px] font-bold text-[var(--text-primary)] mt-1.5 tracking-tight">
               {periodIntervalText}
             </span>
           </div>
