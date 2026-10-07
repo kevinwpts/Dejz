@@ -249,11 +249,6 @@ export function TransactionItem({
                   renderCategoryBadge(transaction.category)
                 )}
 
-                {transaction.note && !isFixedItem && (
-                  <span className="text-[11px] font-normal text-[var(--text-tertiary)] truncate min-w-0 flex-1">
-                    • {transaction.note}
-                  </span>
-                )}
                 {transaction.receiptUrl && (
                   <Paperclip className="w-3 h-3 text-[var(--text-tertiary)] shrink-0" />
                 )}

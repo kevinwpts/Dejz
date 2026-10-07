@@ -5676,7 +5676,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
+            className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
             onClick={() => {
               feedback.tap();
               setIsPlusMenuOpen(false);
@@ -5696,7 +5696,7 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-[#EFECE6] dark:bg-[#1C1C1C] w-full rounded-t-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
+              className="bg-[#EFECE6] dark:bg-[#1C1C1C] w-full sm:max-w-xl rounded-t-[32px] sm:rounded-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle / Drag Pill */}

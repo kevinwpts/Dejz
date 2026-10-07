@@ -537,7 +537,7 @@ export function SettingsView({
         onClose={() => setIsPaydayModalOpen(false)}
         title={config.language === 'en' ? 'Choose payday' : 'Välj lönedag'}
         subtitle={config.language === 'en' ? 'Select the day of the month you receive your salary' : 'Välj vilken dag i månaden du får lön'}
-        size="sm"
+        size="md"
       >
         <div className="grid grid-cols-5 sm:grid-cols-7 gap-2.5 py-2">
           {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {

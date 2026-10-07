@@ -417,7 +417,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
+      className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -432,7 +432,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[28px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -1313,7 +1313,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
+      className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -1328,7 +1328,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[28px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -2190,7 +2190,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
+      className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
       onMouseDown={(e) => {
         backdropMouseDownTarget.current = e.target;
       }}
@@ -2205,7 +2205,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full max-w-none rounded-t-[28px] relative flex flex-col overflow-hidden max-h-[92dvh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}

@@ -129,12 +129,6 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                 {language === 'en' ? 'Cancelled' : 'Uppsagd'}
               </span>
             )}
-
-            {item.note && (
-              <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] truncate min-w-0 flex-1">
-                • {item.note}
-              </span>
-            )}
           </div>
         </div>
       </div>
