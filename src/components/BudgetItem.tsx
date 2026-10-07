@@ -80,29 +80,59 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   return (
     <div 
       onClick={onClick}
-      className="px-4 py-3.5 sm:py-4 min-h-[68px] relative z-10 flex items-center justify-between gap-3 group transition-colors duration-150 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-[12px] shadow-none border-none cursor-pointer select-none"
+      className="px-4 py-3 sm:py-3.5 min-h-[64px] relative z-10 flex items-center gap-3 group transition-colors duration-150 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-[12px] shadow-none border-none cursor-pointer select-none"
     >
-      {/* Left side: Logo + Name + Category / Details */}
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="relative flex-shrink-0">
-          <BudgetItemLogo item={item} type={type} config={config} />
-          {item.isVariable && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent-color)] border-none rounded-full flex items-center justify-center z-10 select-none">
-              <span className="text-[8px] font-extrabold text-[var(--on-accent)] leading-none flex items-center justify-center text-center -translate-y-[0.5px]">
-                {t('variableShort' as any)}
-              </span>
-            </div>
-          )}
-        </div>
-        
-        <div className="min-w-0 flex-1 flex flex-col justify-center">
+      {/* Logo */}
+      <div className="relative flex-shrink-0">
+        <BudgetItemLogo item={item} type={type} config={config} />
+        {item.isVariable && (
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent-color)] border-none rounded-full flex items-center justify-center z-10 select-none">
+            <span className="text-[8px] font-extrabold text-[var(--on-accent)] leading-none flex items-center justify-center text-center -translate-y-[0.5px]">
+              {t('variableShort' as any)}
+            </span>
+          </div>
+        )}
+      </div>
+      
+      {/* Main Content: 2 clean aligned rows */}
+      <div className="min-w-0 flex-1 flex flex-col justify-center gap-0.5">
+        {/* Row 1: Title & Price in line, title stretches all the way */}
+        <div className="flex items-baseline justify-between gap-2.5 min-w-0">
           <p 
-            className="text-[14px] font-medium text-[var(--text-primary)] leading-snug break-words tracking-tight w-full min-w-0"
+            className="text-[14px] font-medium text-[var(--text-primary)] leading-snug truncate tracking-tight flex-1 min-w-0"
             title={displayName}
           >
             {displayName}
           </p>
-          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)]">
+          <div className="flex-shrink-0 whitespace-nowrap pl-1 text-right">
+            {(() => {
+              let freqSuffix = '';
+              if (type === 'expense' && item.frequency) {
+                const freq = item.frequency;
+                if (freq === 'Månadsvis' || freq === 'MONTHLY' || freq === Frequency.MONTHLY) {
+                  freqSuffix = language === 'en' ? '/mo' : '/mån';
+                } else if (freq === 'Kvartalsvis' || freq === 'QUARTERLY' || freq === Frequency.QUARTERLY) {
+                  freqSuffix = language === 'en' ? '/quarter' : '/kvartal';
+                } else if (freq === 'Halvårsvis' || freq === 'SEMI_ANNUALLY' || freq === Frequency.SEMI_ANNUALLY) {
+                  freqSuffix = language === 'en' ? '/half-year' : '/halvår';
+                } else if (freq === 'Årsvis' || freq === 'ANNUALLY' || freq === Frequency.ANNUALLY) {
+                  freqSuffix = language === 'en' ? '/yr' : '/år';
+                }
+              }
+              return (
+                <p className={`text-[14px] font-normal whitespace-nowrap tracking-tight ${amountColor}`}>
+                  <span className="opacity-75 mr-0.5">{type === 'income' ? '+' : '−'}</span>
+                  <span className="font-amount tabular-nums font-normal tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
+                  <span className="text-[11px] font-normal opacity-75 ml-[2px]">{currency}{freqSuffix}</span>
+                </p>
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* Row 2: Category & Status (left) & Payment Method / Deduction Day (right) */}
+        <div className="flex items-center justify-between gap-2 min-w-0 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-1.5 min-w-0 overflow-hidden flex-1">
             {!isSaving && item.category && (
               <div className="flex items-center gap-1 shrink-0 text-[var(--text-secondary)]">
                 {(() => {
@@ -122,7 +152,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                   }
                   return null;
                 })()}
-                <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] tracking-tight whitespace-nowrap truncate max-w-[130px] sm:max-w-[180px]">
+                <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] tracking-tight whitespace-nowrap truncate max-w-[140px] sm:max-w-[220px]">
                   {capitalize(item.category || '')}
                 </span>
               </div>
@@ -134,51 +164,25 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
               </span>
             )}
           </div>
-        </div>
-      </div>
-      
-      {/* Right side: Amount + Deduction metadata */}
-      <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-        {(() => {
-          let freqSuffix = '';
-          if (type === 'expense' && item.frequency) {
-            const freq = item.frequency;
-            if (freq === 'Månadsvis' || freq === 'MONTHLY' || freq === Frequency.MONTHLY) {
-              freqSuffix = language === 'en' ? '/mo' : '/mån';
-            } else if (freq === 'Kvartalsvis' || freq === 'QUARTERLY' || freq === Frequency.QUARTERLY) {
-              freqSuffix = language === 'en' ? '/quarter' : '/kvartal';
-            } else if (freq === 'Halvårsvis' || freq === 'SEMI_ANNUALLY' || freq === Frequency.SEMI_ANNUALLY) {
-              freqSuffix = language === 'en' ? '/half-year' : '/halvår';
-            } else if (freq === 'Årsvis' || freq === 'ANNUALLY' || freq === Frequency.ANNUALLY) {
-              freqSuffix = language === 'en' ? '/yr' : '/år';
-            }
-          }
-          return (
-            <p className={`text-[14px] font-normal whitespace-nowrap tracking-tight ${amountColor}`}>
-              <span className="opacity-75 mr-0.5">{type === 'income' ? '+' : '−'}</span>
-              <span className="font-amount tabular-nums font-normal tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
-              <span className="text-[11px] font-normal opacity-75 ml-[2px]">{currency}{freqSuffix}</span>
-            </p>
-          );
-        })()}
 
-        {/* Right-aligned deduction metadata micro-badges */}
-        {(dayString || paymentString) && (
-          <div className="flex items-center gap-1 mt-1 justify-end max-w-full overflow-hidden">
-            {dayString && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none tabular-nums">
-                <Calendar size={10} strokeWidth={2} className="opacity-70 shrink-0" />
-                <span>{dayString}</span>
-              </span>
-            )}
-            {paymentString && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none truncate max-w-[180px] sm:max-w-[260px]">
-                <CategoryIcon icon={pmIconKey} size="2xs" className="shrink-0" />
-                <span className="truncate">{matchedPaymentMethod?.name || paymentString}</span>
-              </span>
-            )}
-          </div>
-        )}
+          {/* Right side: deduction day and payment method pills */}
+          {(dayString || paymentString) && (
+            <div className="flex items-center gap-1 shrink-0 justify-end max-w-[60%] overflow-hidden">
+              {dayString && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none tabular-nums">
+                  <Calendar size={10} strokeWidth={2} className="opacity-70 shrink-0" />
+                  <span>{dayString}</span>
+                </span>
+              )}
+              {paymentString && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none truncate max-w-[140px] sm:max-w-[200px]">
+                  <CategoryIcon icon={pmIconKey} size="2xs" className="shrink-0" />
+                  <span className="truncate">{matchedPaymentMethod?.name || paymentString}</span>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

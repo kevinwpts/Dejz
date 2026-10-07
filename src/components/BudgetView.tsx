@@ -412,7 +412,7 @@ export function BudgetView({
             freqFilter === 'all' ? (
               <>
                 <span>{config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter'}</span>
-                <span className="text-[11px] opacity-85 font-normal">
+                <span className="text-[10px] text-[var(--text-tertiary)] font-normal">
                   {config?.language === 'en' ? '(average/month)' : '(snitt/månad)'}
                 </span>
               </>
