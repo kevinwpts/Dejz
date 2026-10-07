@@ -369,7 +369,7 @@ export function BudgetView({
           <FilterMenuModal
             isOpen={isFreqFilterModalOpen}
             onClose={() => setIsFreqFilterModalOpen(false)}
-            title={config?.language === 'en' ? 'Select frequency' : 'Välj periodicitet'}
+            title={config?.language === 'en' ? 'Select frequency' : 'Välj period'}
             selectedId={freqFilter}
             onSelect={(id) => setFreqFilter(id as 'all' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually')}
             options={[
@@ -405,11 +405,18 @@ export function BudgetView({
 
       {/* Overview Hero Section - Dynamic based on filter */}
       <div className="text-center flex flex-col items-center gap-1 py-1 select-none">
-        <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block">
+        <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] flex items-center justify-center gap-1 flex-wrap">
           {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
           {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
           {budgetFilter === 'fixed' && (
-            freqFilter === 'all' ? (config?.language === 'en' ? 'Fixed expenses (average/month)' : 'Fasta utgifter (snitt/månad)') :
+            freqFilter === 'all' ? (
+              <>
+                <span>{config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter'}</span>
+                <span className="text-[11px] opacity-85 font-normal">
+                  {config?.language === 'en' ? '(average/month)' : '(snitt/månad)'}
+                </span>
+              </>
+            ) :
             freqFilter === 'monthly' ? (config?.language === 'en' ? 'Total monthly expenses' : 'Totala månadsutgifter') :
             freqFilter === 'quarterly' ? (config?.language === 'en' ? 'Total quarterly expenses' : 'Totala kvartalsutgifter') :
             freqFilter === 'semi-annually' ? (config?.language === 'en' ? 'Total semi-annual expenses' : 'Totala halvårsutgifter') :

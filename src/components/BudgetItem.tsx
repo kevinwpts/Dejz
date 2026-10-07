@@ -75,7 +75,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
 
   const amountColor = type === 'income' 
     ? 'text-emerald-600 dark:text-emerald-400' 
-    : 'text-[#777168] dark:text-[#A8A8A8]';
+    : 'text-[var(--text-primary)]';
 
   return (
     <div 
@@ -97,7 +97,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           <p 
-            className="text-[14px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight w-full min-w-0"
+            className="text-[14px] font-medium text-[var(--text-primary)] leading-snug break-words tracking-tight w-full min-w-0"
             title={displayName}
           >
             {displayName}
@@ -154,10 +154,10 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
             }
           }
           return (
-            <p className={`text-[12px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
+            <p className={`text-[14px] font-normal whitespace-nowrap tracking-tight ${amountColor}`}>
               <span className="opacity-75 mr-0.5">{type === 'income' ? '+' : '−'}</span>
-              <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
-              <span className="text-[10px] font-normal text-[#777168] dark:text-[#A8A8A8] ml-[2px]">{currency}{freqSuffix}</span>
+              <span className="font-amount tabular-nums font-normal tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
+              <span className="text-[11px] font-normal opacity-75 ml-[2px]">{currency}{freqSuffix}</span>
             </p>
           );
         })()}

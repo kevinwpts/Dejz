@@ -212,7 +212,7 @@ export function TransactionItem({
             <div className="min-w-0 flex-1 flex flex-col justify-center">
               {/* Primary Merchant Name + Fixed Icon Badge */}
               <div className="flex items-center gap-1.5 min-w-0">
-                <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight flex-1 min-w-0">
+                <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug break-words tracking-tight flex-1 min-w-0">
                   {merchantName}
                 </p>
                 {isFixedItem && (
