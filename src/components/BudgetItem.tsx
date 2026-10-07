@@ -97,7 +97,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           <p 
-            className="text-[14px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight"
+            className="text-[14px] font-medium text-[var(--text-primary)] leading-snug whitespace-nowrap overflow-hidden text-ellipsis tracking-tight w-full min-w-0"
             title={displayName}
           >
             {displayName}
