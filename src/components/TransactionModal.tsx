@@ -52,7 +52,7 @@ interface TransactionModalProps {
   };
 }
 
-const COLORS = ['#1C1C1C', '#2D2D2D', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#555555', '#444444'];
+const _COLORS = ['#1C1C1C', '#2D2D2D', '#3A3A3A', '#4A4A4A', '#5A5A5A', '#6A6A6A', '#555555', '#444444'];
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -761,38 +761,249 @@ export function TransactionModal({
 
           {/* 2. Grouped Details Module with Dividers */}
           <div className="rounded-[22px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
-            {/* Row 1: Category */}
-            <div 
-              onClick={() => {
-                if (typeof feedback?.light === 'function') feedback.light();
-                setActiveSplitIndex(null);
-                setIsCategoryPickerOpen(true);
-              }}
-              className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all cursor-pointer group min-h-[60px]"
-            >
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
-                {t('category')}
-              </span>
-              <div className="flex items-center gap-2 min-w-0">
-                <div 
-                  className="w-7 h-7 rounded-[14px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
-                  style={{ 
-                    backgroundColor: currentCatData?.color || 'var(--accent-color)',
-                  }}
-                >
-                  <CategoryIcon 
-                    icon={currentCatData?.icon || 'tag'} 
-                    size="sm" 
-                    noBackground 
-                    whiteIcon 
-                  />
+            {/* Row 1: Category or Split Categories */}
+            {type === 'expense' && splits.length > 0 ? (
+              /* Inline Split Category View */
+              <div className="p-4 space-y-3 bg-black/[0.015] dark:bg-white/[0.02]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-bold text-[var(--text-primary)]">
+                      {currentLang === 'en' ? 'Category Split' : 'Uppdelade kategorier'}
+                    </span>
+                    {/* Balance Status Indicator (shows only if there is a remaining difference) */}
+                    {(() => {
+                      const totalVal = parseAmount(amount);
+                      const currentSum = splits.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+                      const diff = totalVal - currentSum;
+                      if (Math.abs(diff) < 0.5) return null;
+                      return (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-amount tabular-nums">
+                          {formatAmount(Math.max(0, diff).toString())} {currency} {currentLang === 'en' ? 'left' : 'kvar'}
+                        </span>
+                      );
+                    })()}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      setSplits([]);
+                    }}
+                    className="text-xs font-semibold text-rose-500 hover:text-rose-600 p-1 cursor-pointer"
+                  >
+                    {currentLang === 'en' ? 'Cancel split' : 'Ta bort uppdelning'}
+                  </button>
                 </div>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
-                  {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
-                </span>
-                <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-0.5" />
+
+                {/* Split Category Rows */}
+                <div className="space-y-2">
+                  {splits.map((split, index) => {
+                    const catData = categories.find(c => c.name === split.category);
+
+                    return (
+                      <div key={split.id || index} className="flex items-center justify-between p-2 rounded-[14px] bg-[var(--surface-color)] border border-black/5 dark:border-white/5 gap-2">
+                        {/* Category Selector Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (typeof feedback?.light === 'function') feedback.light();
+                            setActiveSplitIndex(index);
+                            setIsCategoryPickerOpen(true);
+                          }}
+                          className="flex items-center gap-2 flex-1 min-w-0 text-left cursor-pointer group"
+                        >
+                          <div 
+                            className="w-7 h-7 rounded-[10px] flex items-center justify-center text-white shrink-0 shadow-2xs"
+                            style={{ backgroundColor: split.category ? (catData?.color || getCategoryColor(split.category, categories)) : 'var(--surface-muted)' }}
+                          >
+                            <CategoryIcon icon={catData?.icon || 'tag'} size="xs" color={split.category ? "#fff" : "var(--text-tertiary)"} />
+                          </div>
+                          <span className="text-[13px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] truncate">
+                            {split.category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
+                          </span>
+                        </button>
+
+                        {/* Amount Input with Auto-balancing on other splits */}
+                        <div className="flex items-center gap-1 shrink-0">
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={split.amount ?? ''}
+                            onChange={(e) => {
+                              const rawVal = parseAmount(e.target.value);
+                              const totalVal = parseAmount(amount);
+
+                              if (splits.length <= 1) return;
+
+                              if (splits.length === 2) {
+                                // 2 splits: editing index automatically adjusts the other split!
+                                const otherIndex = index === 0 ? 1 : 0;
+                                const clampedVal = Math.min(totalVal, Math.max(0, rawVal));
+                                const newSplits = [...splits];
+                                newSplits[index] = { ...newSplits[index], amount: clampedVal };
+                                newSplits[otherIndex] = { ...newSplits[otherIndex], amount: totalVal - clampedVal };
+                                setSplits(newSplits);
+                              } else {
+                                // 3 or more splits: editing index adjusts target, and adjusts either the last or second-to-last split
+                                const targetAdjustIndex = index === splits.length - 1 ? splits.length - 2 : splits.length - 1;
+                                
+                                const fixedSum = splits.reduce((sum, s, i) => {
+                                  if (i === index || i === targetAdjustIndex) return sum;
+                                  return sum + (Number(s.amount) || 0);
+                                }, 0);
+
+                                const maxForEdit = Math.max(0, totalVal - fixedSum);
+                                const clampedVal = Math.min(maxForEdit, Math.max(0, rawVal));
+                                const remainder = Math.max(0, totalVal - fixedSum - clampedVal);
+
+                                const newSplits = [...splits];
+                                newSplits[index] = { ...newSplits[index], amount: clampedVal };
+                                newSplits[targetAdjustIndex] = { ...newSplits[targetAdjustIndex], amount: remainder };
+                                setSplits(newSplits);
+                              }
+                            }}
+                            className="w-20 bg-black/5 dark:bg-white/5 rounded-[10px] px-2 py-1 text-[13.5px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-right outline-none focus:ring-1 focus:ring-[var(--accent-color)]"
+                            placeholder="0"
+                          />
+                          <span className="text-[11px] font-bold text-[var(--text-tertiary)] select-none font-amount">
+                            {currency}
+                          </span>
+
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              if (typeof feedback?.light === 'function') feedback.light();
+                              const totalVal = parseAmount(amount);
+                              const newSplits = splits.filter((_, i) => i !== index);
+                              if (newSplits.length <= 1) {
+                                setSplits([]);
+                              } else {
+                                // Redistribute to maintain total sum
+                                const perSplit = Math.floor(totalVal / newSplits.length);
+                                let rem = totalVal - perSplit * newSplits.length;
+                                setSplits(newSplits.map(s => {
+                                  const add = rem > 0 ? 1 : 0;
+                                  if (rem > 0) rem--;
+                                  return { ...s, amount: perSplit + add };
+                                }));
+                              }
+                            }}
+                            className="w-6 h-6 flex items-center justify-center text-[var(--text-tertiary)] hover:text-rose-500 rounded-full transition-all cursor-pointer"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Action buttons: + Kategori & Fördela jämnt */}
+                <div className="flex items-center justify-between pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      const totalVal = parseAmount(amount);
+                      const usedCats = splits.map(s => s.category);
+                      const unusedCat = categories.find(c => !usedCats.includes(c.name))?.name || '';
+                      const newCount = splits.length + 1;
+                      const perSplit = Math.floor(totalVal / newCount);
+                      let rem = totalVal - perSplit * newCount;
+
+                      const updatedSplits = splits.map(s => {
+                        const add = rem > 0 ? 1 : 0;
+                        if (rem > 0) rem--;
+                        return { ...s, amount: perSplit + add };
+                      });
+                      updatedSplits.push({ id: Math.random().toString(), amount: perSplit + (rem > 0 ? 1 : 0), category: unusedCat, tags: [] });
+                      setSplits(updatedSplits);
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-bold text-[var(--accent-color)] hover:opacity-80 cursor-pointer py-1 px-2.5 rounded-[10px] bg-[var(--accent-color)]/10"
+                  >
+                    <Plus size={14} strokeWidth={2.5} />
+                    <span>{currentLang === 'en' ? 'Add category' : 'Kategori'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      const totalVal = parseAmount(amount);
+                      if (splits.length === 0) return;
+                      const perSplit = Math.floor(totalVal / splits.length);
+                      let remainder = totalVal - perSplit * splits.length;
+                      setSplits(splits.map(s => {
+                        const add = remainder > 0 ? 1 : 0;
+                        if (remainder > 0) remainder--;
+                        return { ...s, amount: perSplit + add };
+                      }));
+                    }}
+                    className="text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                  >
+                    {currentLang === 'en' ? 'Equalize' : 'Fördela jämnt'}
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* Single Category Row with Inline Split Button */
+              <div className="p-4 flex items-center justify-between min-h-[60px] gap-2">
+                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                  {t('category')}
+                </span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <div 
+                    onClick={() => {
+                      if (typeof feedback?.light === 'function') feedback.light();
+                      setActiveSplitIndex(null);
+                      setIsCategoryPickerOpen(true);
+                    }}
+                    className="flex items-center gap-2 p-1.5 px-2.5 rounded-[14px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer group"
+                  >
+                    <div 
+                      className="w-6 h-6 rounded-[10px] flex items-center justify-center shrink-0 text-white shadow-2xs"
+                      style={{ 
+                        backgroundColor: currentCatData?.color || 'var(--accent-color)',
+                      }}
+                    >
+                      <CategoryIcon 
+                        icon={currentCatData?.icon || 'tag'} 
+                        size="xs" 
+                        noBackground 
+                        whiteIcon 
+                      />
+                    </div>
+                    <span className="text-[13.5px] font-bold text-[var(--text-primary)] truncate max-w-[120px] sm:max-w-[160px]">
+                      {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
+                    </span>
+                    <ChevronRight size={15} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 shrink-0" />
+                  </div>
+
+                  {type === 'expense' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof feedback?.light === 'function') feedback.light();
+                        const totalVal = parseAmount(amount);
+                        const cat1 = category || categories[0]?.name || '';
+                        const cat2 = categories.find(c => c.name !== cat1)?.name || categories[1]?.name || '';
+                        const half = Math.floor(totalVal / 2);
+                        setSplits([
+                          { id: Math.random().toString(), amount: half, category: cat1, tags: [] },
+                          { id: Math.random().toString(), amount: totalVal - half, category: cat2, tags: [] }
+                        ]);
+                      }}
+                      className="h-8 px-2.5 rounded-[12px] bg-[var(--accent-color)]/10 hover:bg-[var(--accent-color)]/20 text-[var(--accent-color)] text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 active:scale-95"
+                      title="Dela upp i flera kategorier"
+                    >
+                      <Plus size={13} strokeWidth={2.5} />
+                      <span>{currentLang === 'en' ? 'Split' : 'Dela upp'}</span>
+                    </button>
+                    )}
+                </div>
+              </div>
+            )}
 
             {/* Row 2: Date */}
             <div className="p-4 flex items-center justify-between min-h-[60px]">
@@ -950,191 +1161,10 @@ export function TransactionModal({
                 </div>
               )}
             </div>
-
-            {/* Row 5: Split categories toggle if expense */}
-            {type === 'expense' && splits.length === 0 && (
-              <div className="p-4 flex items-center justify-between min-h-[60px]">
-                <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight">
-                  {currentLang === 'en' ? 'Split across categories' : 'Dela upp i fler kategorier'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof feedback?.light === 'function') feedback.light();
-                    const total = parseAmount(amount);
-                    setSplits([
-                      { id: Math.random().toString(), amount: total, category: category || categories[0]?.name || '', tags: [] },
-                      { id: Math.random().toString(), amount: 0, category: '', tags: [] }
-                    ]);
-                  }}
-                  className="px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 hover:bg-[var(--accent-color)] hover:text-[var(--text-on-accent)] text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer"
-                >
-                  <Plus size={12} strokeWidth={2.5} />
-                  <span>{currentLang === 'en' ? 'Add' : 'Dela upp'}</span>
-                </button>
-              </div>
-            )}
           </div>
+        </div>
 
-              {/* Split Transaction Details if Active */}
-              {type === 'expense' && splits.length > 0 && (
-                <div className="space-y-4 pt-1">
-                  <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    className="space-y-6 bg-[var(--surface-color)] p-4 rounded-[22px] border-none shadow-none overflow-hidden"
-                  >
-                    {/* Splits List with Sliders */}
-                    <div className="space-y-6">
-                      {splits.map((split, index) => {
-                        const catData = categories.find(c => c.name === split.category);
-                        const totalVal = parseAmount(amount);
-                        
-                        return (
-                          <div key={split.id} className="space-y-3 p-3 bg-black/[0.03] dark:bg-white/[0.04] rounded-[14px] border-none shadow-none group">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div 
-                                  className="w-10 h-10 rounded-[12px] flex items-center justify-center text-white shadow-xs transition-all"
-                                  style={{ backgroundColor: split.category ? (catData?.color || getCategoryColor(split.category, categories)) : 'var(--surface-muted)' }}
-                                >
-                                  <CategoryIcon icon={catData?.icon || 'tag'} size="sm" color={split.category ? "#fff" : "var(--text-tertiary)"} />
-                                </div>
-                                <div className="flex flex-col">
-                                  <span className={`text-[13px] font-bold ${split.category ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}>
-                                    {split.category || 'Välj kategori'}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <div className="flex flex-col items-end">
-                                  <div className="flex items-center gap-1">
-                                    <input
-                                      type="text"
-                                      inputMode="decimal"
-                                      value={split.amount || ''}
-                                      onChange={(e) => {
-                                        const val = parseAmount(e.target.value);
-                                        const newSplits = [...splits];
-                                        newSplits[index].amount = val;
-                                        setSplits(newSplits);
-                                      }}
-                                      className="w-24 bg-transparent border-none text-[16px] font-bold text-[var(--text-primary)] text-right outline-none p-0"
-                                    />
-                                    <span className="text-[12px] font-bold text-[var(--text-secondary)] opacity-40">{currency}</span>
-                                  </div>
-                                  <div className="h-0.5 w-full bg-[var(--accent-color)]/20 rounded-full mt-0.5" />
-                                </div>
-                                <button 
-                                  onClick={() => {
-                                    const newSplits = splits.filter((_, i) => i !== index);
-                                    if (newSplits.length === 1) {
-                                      newSplits[0].amount = totalVal;
-                                    }
-                                    setSplits(newSplits);
-                                  }}
-                                  className="w-8 h-8 flex items-center justify-center text-[var(--text-tertiary)] hover:text-danger hover:bg-danger/10 rounded-full transition-all ml-1 cursor-pointer"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
-                            </div>
-                            
-                            {/* Slider for Split */}
-                            <div className="px-1">
-                              <input 
-                                type="range"
-                                min="0"
-                                max={totalVal}
-                                step="1"
-                                value={split.amount}
-                                onChange={(e) => {
-                                  const newVal = parseFloat(e.target.value);
-                                  const newSplits = [...splits];
-                                  const diff = newVal - split.amount;
-                                  newSplits[index].amount = newVal;
-                                  
-                                  if (newSplits.length > 1) {
-                                    const otherIndices = newSplits.map((_, i) => i).filter(i => i !== index);
-                                    const otherSum = otherIndices.reduce((sum, i) => sum + newSplits[i].amount, 0);
-                                    
-                                    if (otherSum > 0) {
-                                      otherIndices.forEach(i => {
-                                        const share = newSplits[i].amount / otherSum;
-                                        newSplits[i].amount = Math.max(0, newSplits[i].amount - (diff * share));
-                                      });
-                                    } else {
-                                      const nextIdx = (index + 1) % newSplits.length;
-                                      newSplits[nextIdx].amount = Math.max(0, totalVal - newVal);
-                                    }
-                                    
-                                    const finalSum = newSplits.reduce((sum, s) => sum + s.amount, 0);
-                                    const finalDiff = totalVal - finalSum;
-                                    if (Math.abs(finalDiff) > 0.01) {
-                                       const lastIdx = otherIndices[otherIndices.length - 1] ?? index;
-                                       newSplits[lastIdx].amount = Math.max(0, newSplits[lastIdx].amount + finalDiff);
-                                    }
-                                  }
-                                  setSplits(newSplits);
-                                }}
-                                className="w-full accent-accent h-2 bg-black/10 dark:bg-white/10 rounded-full appearance-none cursor-pointer border border-black/10 dark:border-white/10"
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Quick Category Add */}
-                    <div className="space-y-3">
-                       <div className="flex items-center justify-between px-1">
-                         <span className="text-xs font-semibold text-[var(--text-secondary)]">Lägg till kategori</span>
-                       </div>
-                       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar -mx-2 px-2">
-                         {categories.map(cat => {
-                           const isAlreadyInSplit = splits.some(s => s.category === cat.name);
-                           return (
-                             <button
-                               key={cat.name}
-                               disabled={isAlreadyInSplit}
-                               type="button"
-                               onClick={() => {
-                                  const emptySplitIndex = splits.findIndex(s => s.category === '');
-                                  if (emptySplitIndex !== -1) {
-                                    const newSplits = [...splits];
-                                    newSplits[emptySplitIndex].category = cat.name;
-                                    setSplits(newSplits);
-                                  } else {
-                                    const totalVal = parseAmount(amount);
-                                    const currentSum = splits.reduce((sum, s) => sum + s.amount, 0);
-                                    const remainder = Math.max(0, totalVal - currentSum);
-                                    setSplits([...splits, { id: Math.random().toString(), amount: remainder, category: cat.name, tags: [] }]);
-                                  }
-                               }}
-                               className={`flex-shrink-0 flex flex-col items-center gap-1.5 p-2 rounded-[14px] transition-all cursor-pointer ${
-                                 isAlreadyInSplit 
-                                   ? 'bg-black/5 dark:bg-white/5 border-transparent opacity-40' 
-                                   : 'bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/[0.08] active:scale-95 shadow-none border-none'
-                               }`}
-                             >
-                               <div 
-                                 className="w-10 h-10 rounded-[12px] flex items-center justify-center text-white"
-                                 style={{ backgroundColor: cat.color || COLORS[0] }}
-                               >
-                                 <CategoryIcon icon={cat.icon} size="sm" color="#fff" />
-                               </div>
-                               <span className="text-[10px] font-bold tracking-tight max-w-[60px] truncate">{cat.name}</span>
-                             </button>
-                           );
-                         })}
-                       </div>
-                    </div>
-                  </motion.div>
-                </div>
-              )}
-          </div>
-
-          {/* Register / Save Button & Delete Button */}
+        {/* Register / Save Button & Delete Button */}
           <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
             <button 
               type="button"

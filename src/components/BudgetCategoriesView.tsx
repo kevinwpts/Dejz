@@ -9,7 +9,7 @@ import { ConfirmModal } from './ConfirmModal';
 import { Button, Modal } from './ui';
 import { formatAmount } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
-import { DEFAULT_EXPENSE_CATEGORIES } from '../constants';
+import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 
 export interface BudgetCategoriesViewProps {
   config: Config;
@@ -41,6 +41,8 @@ export function BudgetCategoriesView({
 }: BudgetCategoriesViewProps) {
   const curr = config?.currency || 'kr';
   const isEn = config.language === 'en';
+
+  const [activeCategoryType, setActiveCategoryType] = useState<'expense' | 'income'>('expense');
 
   // --- Inline Budget Editing State ---
   const [editingCategoryName, setEditingCategoryName] = useState<string | null>(null);
@@ -285,167 +287,232 @@ export function BudgetCategoriesView({
     }
   };
 
-  const categoriesList = (config.categories as Category[]) || [];
+  const categoriesList = (config.categories as Category[]) || DEFAULT_EXPENSE_CATEGORIES;
+  const incomeCategoriesList = (config.incomeCategories as Category[]) || DEFAULT_INCOME_CATEGORIES;
 
   return (
     <div className="space-y-5 font-sans pb-10 max-w-md mx-auto">
-      {/* 1. Minimal och supertydlig toppmodul */}
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="bg-[var(--surface-color)] rounded-[22px] p-5 border-none shadow-none space-y-3"
-      >
-        <div className="flex items-baseline justify-between">
-          <div className="space-y-0.5">
-            <span className="text-xs font-semibold text-[var(--text-secondary)]">
-              {isEn ? 'Left to allocate' : 'Kvar att fördela'}
-            </span>
-            <div
-              className={`text-2xl sm:text-3xl font-extrabold tracking-tight font-amount tabular-nums ${
-                isOverAllocated
-                  ? 'text-rose-600 dark:text-rose-400'
-                  : remainingToAllocate === 0
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-[var(--text-primary)]'
-              }`}
-            >
-              {remainingToAllocate === 0
-                ? (isEn ? '0 kr (All set)' : '0 kr (Allt fördelat)')
-                : `${formatAmount(remainingToAllocate, config.language)} ${curr}`}
+      {/* 0. Flikväljare: Utgifter / Inkomster */}
+      <div className="flex bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[16px] gap-1">
+        <button
+          type="button"
+          onClick={() => setActiveCategoryType('expense')}
+          className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer border-none ${
+            activeCategoryType === 'expense'
+              ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+          }`}
+        >
+          {isEn ? 'Expenses' : 'Utgifter'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveCategoryType('income')}
+          className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer border-none ${
+            activeCategoryType === 'income'
+              ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+          }`}
+        >
+          {isEn ? 'Income' : 'Inkomster'}
+        </button>
+      </div>
+
+      {activeCategoryType === 'expense' ? (
+        <>
+          {/* 1. Minimal och supertydlig toppmodul */}
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="bg-[var(--surface-color)] rounded-[22px] p-5 border-none shadow-none space-y-3"
+          >
+            <div className="flex items-baseline justify-between">
+              <div className="space-y-0.5">
+                <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                  {isEn ? 'Left to allocate' : 'Kvar att fördela'}
+                </span>
+                <div
+                  className={`text-2xl sm:text-3xl font-extrabold tracking-tight font-amount tabular-nums ${
+                    isOverAllocated
+                      ? 'text-rose-600 dark:text-rose-400'
+                      : remainingToAllocate === 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-[var(--text-primary)]'
+                  }`}
+                >
+                  {remainingToAllocate === 0
+                    ? (isEn ? '0 kr (All set)' : '0 kr (Allt fördelat)')
+                    : `${formatAmount(remainingToAllocate, config.language)} ${curr}`}
+                </div>
+              </div>
+
+              <div className="text-right text-xs font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
+              </div>
+            </div>
+
+            {/* Diskret förloppslinje */}
+            <div className="w-full h-1.5 bg-black/[0.04] dark:bg-white/[0.06] rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${
+                  isOverAllocated ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
+                }`}
+                style={{
+                  width: `${Math.min(100, Math.round((totalCategoryAllocated / (totalPoolToAllocate || 1)) * 100))}%`,
+                }}
+              />
+            </div>
+          </motion.div>
+
+          {/* 2. Utgiftskategorier – Ren och luftig design */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                {isEn ? 'Expense Categories' : 'Utgiftskategorier'}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<Plus size={14} strokeWidth={2.5} />}
+                onClick={() => handleAddCategory('expense')}
+              >
+                {t('newCategory')}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {categoriesList.map((cat, index) => {
+                const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
+                const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
+                const isEditingThis = editingCategoryName === cat.name;
+
+                return (
+                  <div
+                    key={cat.id || index}
+                    style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.categories) }}
+                    onClick={(e) => {
+                      if (!isEditingThis && !(e.target as HTMLElement).closest('input')) {
+                        handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
+                      }
+                    }}
+                    className="relative p-4 rounded-[20px] flex flex-col justify-between h-[135px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden text-white group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <CategoryIcon icon={cat.icon} size="md" noBackground whiteIcon />
+                    </div>
+
+                    <div className="space-y-2">
+                      <span className="text-[14px] font-bold text-white block truncate leading-tight">
+                        {cat.name}
+                      </span>
+
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full"
+                      >
+                        {isEditingThis ? (
+                          <div className="flex items-center justify-between bg-black/40 backdrop-blur-md rounded-[10px] px-2 py-1 border border-white/40">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              autoFocus
+                              value={inlineInputValue}
+                              onBlur={() => {
+                                const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
+                                const updatedCategories = (config.categories || []).map((c) => {
+                                  if (c.name === cat.name) {
+                                    return { ...c, budget: finalVal > 0 ? finalVal : null };
+                                  }
+                                  return c;
+                                });
+                                try {
+                                  localStorage.setItem('dejz_has_saved_initial_budget', 'true');
+                                } catch (_e) {
+                                  // ignore
+                                }
+                                setConfig({ ...config, categories: updatedCategories, hasSavedInitialBudget: true });
+                                setEditingCategoryName(null);
+                              }}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '');
+                                setInlineInputValue(val);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.currentTarget.blur();
+                                }
+                              }}
+                              className="w-full bg-transparent border-none text-left text-xs font-bold text-white font-amount tabular-nums outline-none placeholder-white/50"
+                              placeholder="0"
+                            />
+                            <span className="text-[10px] font-bold text-white/80 select-none pl-1">
+                              {curr}
+                            </span>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingCategoryName(cat.name);
+                              setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
+                            }}
+                            className="w-full py-1 px-2 rounded-[10px] bg-black/20 hover:bg-black/30 transition-colors flex items-center justify-between border border-white/10 cursor-pointer"
+                          >
+                            <span className="text-xs font-bold font-amount tabular-nums text-white">
+                              {catBudget > 0 ? `${formatAmount(catBudget, config.language)} ${curr}` : `0 ${curr}`}
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-
-          <div className="text-right text-xs font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
-            {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
+        </>
+      ) : (
+        /* Inkomstkategorier */
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-semibold text-[var(--text-secondary)]">
+              {isEn ? 'Income Categories' : 'Inkomstkategorier'}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Plus size={14} strokeWidth={2.5} />}
+              onClick={() => handleAddCategory('income')}
+            >
+              {t('newCategory')}
+            </Button>
           </div>
-        </div>
 
-        {/* Diskret förloppslinje */}
-        <div className="w-full h-1.5 bg-black/[0.04] dark:bg-white/[0.06] rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-300 ${
-              isOverAllocated ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
-            }`}
-            style={{
-              width: `${Math.min(100, Math.round((totalCategoryAllocated / (totalPoolToAllocate || 1)) * 100))}%`,
-            }}
-          />
-        </div>
-      </motion.div>
+          <div className="grid grid-cols-2 gap-3">
+            {incomeCategoriesList.map((cat, index) => {
+              return (
+                <div
+                  key={cat.id || index}
+                  style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.incomeCategories) }}
+                  onClick={() => handleEditCategory('income', index, cat.name, cat.icon, cat.color)}
+                  className="relative p-4 rounded-[20px] flex flex-col justify-between h-[110px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden text-white group"
+                >
+                  <div className="flex items-center justify-between">
+                    <CategoryIcon icon={cat.icon} size="md" noBackground whiteIcon />
+                  </div>
 
-      {/* 2. Kategorikort – Ren och luftig design */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-semibold text-[var(--text-secondary)]">
-            {isEn ? 'Categories' : 'Kategorier'}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            icon={<Plus size={14} strokeWidth={2.5} />}
-            onClick={() => handleAddCategory('expense')}
-          >
-            {t('newCategory')}
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          {categoriesList.map((cat, index) => {
-            const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
-            const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
-            const isEditingThis = editingCategoryName === cat.name;
-
-            return (
-              <div
-                key={cat.id || index}
-                style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.categories) }}
-                onClick={(e) => {
-                  // If not tapping directly into input, open modal to edit details
-                  if (!isEditingThis && !(e.target as HTMLElement).closest('input')) {
-                    handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
-                  }
-                }}
-                className="relative p-4 rounded-[20px] flex flex-col justify-between h-[135px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden text-white group"
-              >
-                {/* Top: Category Icon */}
-                <div className="flex items-center justify-between">
-                  <CategoryIcon icon={cat.icon} size="md" noBackground whiteIcon />
-                </div>
-
-                {/* Bottom: Name + Budget Pill */}
-                <div className="space-y-2">
                   <span className="text-[14px] font-bold text-white block truncate leading-tight">
                     {cat.name}
                   </span>
-
-                  {/* Quick Budget Pill */}
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-full"
-                  >
-                    {isEditingThis ? (
-                      <div className="flex items-center justify-between bg-black/40 backdrop-blur-md rounded-[10px] px-2 py-1 border border-white/40">
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          autoFocus
-                          value={inlineInputValue}
-                          onBlur={() => {
-                            const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
-                            const updatedCategories = (config.categories || []).map((c) => {
-                              if (c.name === cat.name) {
-                                return { ...c, budget: finalVal > 0 ? finalVal : null };
-                              }
-                              return c;
-                            });
-                            try {
-                              localStorage.setItem('dejz_has_saved_initial_budget', 'true');
-                            } catch (_e) {
-                              // ignore
-                            }
-                            setConfig({ ...config, categories: updatedCategories, hasSavedInitialBudget: true });
-                            setEditingCategoryName(null);
-                          }}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, '');
-                            setInlineInputValue(val);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.currentTarget.blur();
-                            }
-                          }}
-                          className="w-full bg-transparent border-none text-left text-xs font-bold text-white font-amount tabular-nums outline-none placeholder-white/50"
-                          placeholder="0"
-                        />
-                        <span className="text-[10px] font-bold text-white/80 select-none pl-1">
-                          {curr}
-                        </span>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingCategoryName(cat.name);
-                          setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
-                        }}
-                        className="w-full py-1 px-2 rounded-[10px] bg-black/20 hover:bg-black/30 transition-colors flex items-center justify-between border border-white/10 cursor-pointer"
-                      >
-                        <span className="text-xs font-bold font-amount tabular-nums text-white">
-                          {catBudget > 0 ? `${formatAmount(catBudget, config.language)} ${curr}` : `0 ${curr}`}
-                        </span>
-                      </button>
-                    )}
-                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 3. Minimal footer */}
       <div className="pt-2 space-y-2">
@@ -615,6 +682,7 @@ export function BudgetCategoriesView({
             setConfig({
               ...config,
               categories: DEFAULT_EXPENSE_CATEGORIES,
+              incomeCategories: DEFAULT_INCOME_CATEGORIES,
             });
             setIsResetCategoriesModalOpen(false);
           }}
