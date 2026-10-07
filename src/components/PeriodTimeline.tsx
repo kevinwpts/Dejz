@@ -203,6 +203,25 @@ export function PeriodTimeline({
     scrollToElement(targetEl, 'smooth');
   };
 
+  const nextPaydayDate = useMemo(() => {
+    if (stats?.periodEnd) {
+      const d = new Date(stats.periodEnd);
+      d.setDate(d.getDate() + 1);
+      return d;
+    }
+    if (calendarDays && calendarDays.length > 0) {
+      const lastDay = calendarDays[calendarDays.length - 1];
+      if (lastDay?.date) {
+        const d = new Date(lastDay.date);
+        d.setDate(d.getDate() + 1);
+        return d;
+      }
+    }
+    return null;
+  }, [stats?.periodEnd, calendarDays]);
+
+  const nextPaydayDayNumber = nextPaydayDate ? nextPaydayDate.getDate() : null;
+
   return (
     <div className="relative group/timeline w-full my-1 sm:my-1.5 font-sans overflow-visible" id="period_timeline_wrapper">
       {/* Left Scroll Arrow Button */}
@@ -241,6 +260,7 @@ export function PeriodTimeline({
           const dayTime = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate()).getTime();
           const isSelected = selectedTime === dayTime;
           const isRealToday = dayTime === todayTime;
+          const isFirstDay = index === 0;
           const dayNumber = dayDate.getDate();
 
           // Weekday label (e.g. Mån, Tis or Mon, Tue)
@@ -279,7 +299,7 @@ export function PeriodTimeline({
                   : 'bg-white/60 text-[#716E68] hover:text-[#242321] dark:bg-white/[0.02] dark:text-[#9CA6BC]/70 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.045] scale-95 opacity-85'
               }`}
             >
-              {/* Day of Week */}
+              {/* Day of Week / Lön / Today */}
               <span
                 className={`text-[8px] sm:text-[8.5px] tracking-wider leading-none font-medium ${
                   isSelected
@@ -288,10 +308,12 @@ export function PeriodTimeline({
                     ? 'text-[#242321] dark:text-white'
                     : isRealToday
                     ? 'text-[#242321] dark:text-[#C7CDDC]'
+                    : isFirstDay
+                    ? 'text-[#242321] dark:text-white font-semibold'
                     : 'text-[#716E68] dark:text-[#9CA6BC]/70'
                 }`}
               >
-                {isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}
+                {isFirstDay ? (isEn ? 'Payday' : 'Lön') : (isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort)}
               </span>
 
               {/* Day Number */}
@@ -315,9 +337,11 @@ export function PeriodTimeline({
         <div
           className="flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[54px] h-[50px] sm:h-[56px] p-1.5 rounded-[14px] bg-black/5 dark:bg-white/[0.04] text-[#242321] dark:text-white border-none select-none shrink-0 cursor-default pointer-events-none scale-95 opacity-80 ml-0.5 shadow-none"
         >
-          <span className="text-[12px] leading-none">💰</span>
-          <span className="text-[8px] sm:text-[8.5px] font-medium tracking-wider">
+          <span className="text-[8px] sm:text-[8.5px] tracking-wider leading-none font-medium text-[#716E68] dark:text-[#9CA6BC]/70">
             {isEn ? 'Payday' : 'Lön'}
+          </span>
+          <span className="text-[15px] sm:text-[16px] leading-none font-medium tabular-nums font-amount text-[#242321] dark:text-[#C7CDDC]">
+            {nextPaydayDayNumber ?? '💰'}
           </span>
         </div>
       </div>
