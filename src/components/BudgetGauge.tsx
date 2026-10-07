@@ -10,6 +10,8 @@ interface BudgetGaugeProps {
   language: string;
   label?: string;
   onOpenInfo?: () => void;
+  timeText?: string;
+  timeRatio?: number;
 }
 
 export function BudgetGauge({
@@ -19,6 +21,8 @@ export function BudgetGauge({
   language,
   label = 'Kvar att spendera',
   onOpenInfo,
+  timeText,
+  timeRatio,
 }: BudgetGaugeProps) {
   // Respect prefers-reduced-motion
   const prefersReducedMotion = useMemo(() => {
@@ -40,6 +44,7 @@ export function BudgetGauge({
 
   // Original standard semi-circle arc path geometry
   const gaugePath = "M 22 180 A 158 158 0 0 1 338 180";
+  const innerGaugePath = "M 42 180 A 138 138 0 0 1 318 180";
 
   return (
     <div className="w-full max-w-[360px] mx-auto px-4 relative select-none">
@@ -75,6 +80,36 @@ export function BudgetGauge({
                 : 'stroke-dashoffset 400ms cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           />
+
+          {/* Concentric Layer 3 (Time Tracker): Thinner inner track showing elapsed time */}
+          {timeRatio !== undefined && (
+            <>
+              <path
+                d={innerGaugePath}
+                fill="none"
+                strokeWidth="10"
+                strokeLinecap="butt"
+                pathLength={100}
+                className="stroke-[#E2DDD4]/40 dark:stroke-white/5 transition-colors duration-300"
+              />
+              <path
+                d={innerGaugePath}
+                fill="none"
+                stroke="var(--accent-color)"
+                strokeWidth="10"
+                strokeLinecap="butt"
+                pathLength={100}
+                strokeDasharray="100 100"
+                strokeDashoffset={100 * (1 - timeRatio)}
+                className="opacity-40"
+                style={{
+                  transition: prefersReducedMotion
+                    ? 'none'
+                    : 'stroke-dashoffset 400ms cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
+              />
+            </>
+          )}
         </svg>
 
         {/* Text centered inside the semi-circle arc */}
@@ -118,6 +153,13 @@ export function BudgetGauge({
               {currency || 'kr'}
             </span>
           </div>
+
+          {/* Integrated Time Countdown */}
+          {timeText && (
+            <span className="text-[11px] font-semibold text-[#6D6962] dark:text-[#A8A8A8] mt-1.5 block leading-none select-none tracking-tight animate-fade-in">
+              {timeText}
+            </span>
+          )}
         </div>
       </div>
     </div>

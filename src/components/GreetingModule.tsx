@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Calendar, Clock, Info, X } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { BudgetGauge } from './BudgetGauge';
+import { formatAmount } from '../utils/format';
 
 interface GreetingModuleProps {
   userName?: string;
@@ -49,6 +50,7 @@ export function GreetingModule({
   const isEn = language === 'en';
   const [isPeriodInfoOpen, setIsPeriodInfoOpen] = useState(false);
   const [isCalculationInfoOpen, setIsCalculationInfoOpen] = useState(false);
+  const [selectedAlternative, setSelectedAlternative] = useState<'pill' | 'progress' | 'card' | 'integrated' | 'double'>('pill');
 
   const effectiveRemainingDays = useMemo(() => {
     if (!stats) return 1;
@@ -103,6 +105,35 @@ export function GreetingModule({
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className="w-full -mt-2 sm:-mt-3 pt-0 mb-4 sm:mb-5 select-none px-1"
       >
+        {/* Interactive Alternative Design Selector */}
+        <div className="flex justify-center mb-4 px-2">
+          <div className="inline-flex items-center gap-0.5 p-1 bg-black/[0.03] dark:bg-white/[0.04] rounded-[14px] overflow-x-auto max-w-full no-scrollbar">
+            {[
+              { id: 'pill', label: isEn ? 'Pill' : 'Original' },
+              { id: 'progress', label: isEn ? 'Timeline' : 'Tidslinje' },
+              { id: 'card', label: isEn ? 'Card' : 'Kort' },
+              { id: 'integrated', label: isEn ? 'Integrated' : 'Integrerad' },
+              { id: 'double', label: isEn ? 'Double' : 'Dubbel' },
+            ].map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => {
+                  if (typeof feedback.selection === 'function') feedback.selection();
+                  setSelectedAlternative(opt.id as any);
+                }}
+                className={`px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold rounded-[10px] transition-all cursor-pointer whitespace-nowrap border-none select-none ${
+                  selectedAlternative === opt.id
+                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-sm'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Budget Gauge */}
         <BudgetGauge
           remainingCents={stats?.remainingPeriodCents || 0}
@@ -111,30 +142,103 @@ export function GreetingModule({
           language={language}
           label={t('totalRemaining')}
           onOpenInfo={() => setIsCalculationInfoOpen(true)}
+          timeText={
+            selectedAlternative === 'integrated'
+              ? (stats?.isPastPeriod ? (isEn ? 'Period Ended' : 'Perioden avslutad') : `${effectiveRemainingDays} ${isEn ? 'days until payday' : 'dagar kvar till lön'}`)
+              : selectedAlternative === 'double'
+              ? (isEn ? 'Outer: Money · Inner: Time' : 'Yttre: Pengar · Inre: Tid')
+              : undefined
+          }
+          timeRatio={
+            selectedAlternative === 'double'
+              ? (stats?.totalDaysInPeriod ? (stats.totalDaysInPeriod - effectiveRemainingDays) / stats.totalDaysInPeriod : 0)
+              : undefined
+          }
         />
 
-        {/* Proposal 1: Subtle horizontal status pill directly below gauge */}
-        <div className="flex justify-center mt-1 sm:mt-2">
-          <button
-            type="button"
-            onClick={() => setIsPeriodInfoOpen(true)}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] active:scale-98 border border-black/[0.06] dark:border-white/[0.08] text-xs transition-all cursor-pointer shadow-2xs group"
-          >
-            <div className="flex items-center gap-1.5 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-              <Calendar size={13} className="text-[var(--accent-color)] shrink-0" strokeWidth={2.2} />
-              <span className="font-medium tracking-tight">{periodIntervalText}</span>
+        {/* 1. Original Pill Design */}
+        {selectedAlternative === 'pill' && (
+          <div className="flex justify-center mt-1 sm:mt-2">
+            <button
+              type="button"
+              onClick={() => setIsPeriodInfoOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] active:scale-98 border border-black/[0.06] dark:border-white/[0.08] text-xs transition-all cursor-pointer shadow-2xs group"
+            >
+              <div className="flex items-center gap-1.5 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                <Calendar size={13} className="text-[var(--accent-color)] shrink-0" strokeWidth={2.2} />
+                <span className="font-medium tracking-tight">{periodIntervalText}</span>
+              </div>
+
+              <span className="w-1 h-1 rounded-full bg-black/20 dark:bg-white/20 shrink-0" />
+
+              <div className="flex items-center gap-1.5 text-[var(--text-primary)]">
+                <Clock size={13} className="text-[var(--accent-color)] shrink-0" strokeWidth={2.2} />
+                <span className="font-semibold tracking-tight">
+                  {stats?.isPastPeriod ? (isEn ? 'Ended' : 'Avslutad') : `${daysValueText} ${isEn ? '' : 'kvar'}`}
+                </span>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* 2. Linear Timeline/Progress Design */}
+        {selectedAlternative === 'progress' && (
+          <div className="w-full max-w-[320px] mx-auto mt-4 px-4 py-3 rounded-2xl bg-black/[0.015] dark:bg-white/[0.025] border border-black/[0.03] dark:border-white/[0.05] animate-fade-in text-left">
+            <div className="flex justify-between items-center text-[10px] text-[var(--text-secondary)] font-medium mb-1.5 px-0.5">
+              <span>{periodIntervalText.split(' \u2013 ')[0] || 'Start'}</span>
+              <span>{periodIntervalText.split(' \u2013 ')[1] || 'Slut'}</span>
+            </div>
+            
+            {/* Progress Bar Track */}
+            <div className="h-1.5 w-full bg-[#E2DDD4] dark:bg-white/10 rounded-full overflow-hidden relative">
+              <div 
+                className="h-full bg-[var(--accent-color)] rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(100, Math.max(0, ((stats?.totalDaysInPeriod - effectiveRemainingDays) / stats?.totalDaysInPeriod) * 100))}%` }}
+              />
             </div>
 
-            <span className="w-1 h-1 rounded-full bg-black/20 dark:bg-white/20 shrink-0" />
-
-            <div className="flex items-center gap-1.5 text-[var(--text-primary)]">
-              <Clock size={13} className="text-[var(--accent-color)] shrink-0" strokeWidth={2.2} />
-              <span className="font-semibold tracking-tight">
-                {stats?.isPastPeriod ? (isEn ? 'Ended' : 'Avslutad') : `${daysValueText} ${isEn ? '' : 'kvar'}`}
+            <div className="flex justify-between items-center mt-2 px-0.5">
+              <span className="text-[11px] font-semibold text-[var(--text-primary)] flex items-center gap-1">
+                <Clock size={11} className="text-[var(--accent-color)]" strokeWidth={2.5} />
+                {stats?.isPastPeriod ? (isEn ? 'Ended' : 'Avslutad') : `${daysValueText} ${isEn ? 'left' : 'kvar'}`}
+              </span>
+              <span className="text-[10px] font-medium text-[var(--text-tertiary)]">
+                {Math.round(((stats?.totalDaysInPeriod - effectiveRemainingDays) / stats?.totalDaysInPeriod) * 100)}% {isEn ? 'elapsed' : 'passerat'}
               </span>
             </div>
-          </button>
-        </div>
+          </div>
+        )}
+
+        {/* 3. Interactive Large Countdown Widget Card */}
+        {selectedAlternative === 'card' && (
+          <div className="w-full max-w-[320px] mx-auto mt-4 p-4 rounded-[22px] bg-white dark:bg-[#161616] border border-black/[0.04] dark:border-white/[0.06] shadow-sm flex items-center justify-between gap-4 animate-fade-in text-left">
+            <div className="flex flex-col">
+              <span className="text-[9px] font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider">
+                {isEn ? 'Days left' : 'Dagar kvar'}
+              </span>
+              <span className="text-[28px] font-bold font-amount leading-none text-[var(--accent-color)] mt-1.5 select-none tabular-nums">
+                {stats?.isPastPeriod ? '0' : effectiveRemainingDays}
+              </span>
+              <span className="text-[11px] font-medium text-[var(--text-secondary)] mt-1">
+                {isEn ? 'until next payday' : 'till nästa lön'}
+              </span>
+            </div>
+
+            <div className="h-10 w-[1px] bg-black/[0.06] dark:bg-white/[0.08]" />
+
+            <div className="flex flex-col items-end text-right">
+              <span className="text-[9px] font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider">
+                {isEn ? 'Period range' : 'Periodgränser'}
+              </span>
+              <span className="text-[13px] font-semibold text-[var(--text-primary)] mt-1.5">
+                {periodIntervalText}
+              </span>
+              <span className="text-[10px] font-medium text-[var(--text-secondary)] mt-1">
+                {stats?.totalDaysInPeriod} {isEn ? 'days total' : 'dagar totalt'}
+              </span>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* 2. DINA BUDGETAR CAROUSEL */}
