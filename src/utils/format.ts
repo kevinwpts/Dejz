@@ -117,13 +117,12 @@ export const formatDeductionDayDisplay = (day?: number | null, language: string 
   const isEn = language === 'en' || language === 'en-US';
 
   if (day === 1) {
-    if (short) return isEn ? '1st (First day)' : '1:a (Första dagen)';
-    return isEn ? '1st (First day of month)' : 'Första dagen i månaden (1:a)';
+    return isEn ? '1st' : '1:a';
   }
 
   if (day === 31 || day === 99 || day === 32) {
     if (short) return isEn ? 'Last day' : 'Sista dagen';
-    return isEn ? 'Sista dagen i månaden' : 'Sista dagen i månaden';
+    return isEn ? 'Last day of month' : 'Sista dagen i månaden';
   }
 
   return formatOrdinalDay(day, language);

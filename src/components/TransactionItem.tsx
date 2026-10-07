@@ -211,24 +211,24 @@ export function TransactionItem({
             
             <div className="min-w-0 flex-1 flex flex-col justify-center">
               {/* Primary Merchant Name + Fixed Icon Badge */}
-              <div className="flex items-center gap-1.5 min-w-0">
+              <div className="flex items-center min-w-0">
                 <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug break-words tracking-tight flex-1 min-w-0">
-                  {merchantName}
+                  <span>{merchantName}</span>
+                  {isFixedItem && (
+                    <span 
+                      title={getL10n(
+                        transaction.type === 'income' ? 'Fast inkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast sparande' : 'Fast utgift',
+                        transaction.type === 'income' ? 'Fixed income' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fixed savings' : 'Fixed expense',
+                        transaction.type === 'income' ? 'Fast inntekt' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast sparing' : 'Fast utgift',
+                        transaction.type === 'income' ? 'Fast indkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast opsparing' : 'Fast udgift',
+                        transaction.type === 'income' ? 'Kiinteä tulo' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Kiinteä säästö' : 'Kiinteä kulu'
+                      )}
+                      className="inline-flex items-center justify-center p-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-tertiary)] border border-black/5 dark:border-white/10 shrink-0 select-none align-middle ml-1.5 -translate-y-[1px]"
+                    >
+                      <RotateCw size={9.5} strokeWidth={2.4} className="shrink-0" />
+                    </span>
+                  )}
                 </p>
-                {isFixedItem && (
-                  <span 
-                    title={getL10n(
-                      transaction.type === 'income' ? 'Fast inkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast sparande' : 'Fast utgift',
-                      transaction.type === 'income' ? 'Fixed income' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fixed savings' : 'Fixed expense',
-                      transaction.type === 'income' ? 'Fast inntekt' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast sparing' : 'Fast utgift',
-                      transaction.type === 'income' ? 'Fast indkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast opsparing' : 'Fast udgift',
-                      transaction.type === 'income' ? 'Kiinteä tulo' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Kiinteä säästö' : 'Kiinteä kulu'
-                    )}
-                    className="inline-flex items-center justify-center p-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-tertiary)] border border-black/5 dark:border-white/10 shrink-0 select-none"
-                  >
-                    <RotateCw size={9.5} strokeWidth={2.4} className="shrink-0" />
-                  </span>
-                )}
               </div>
               
               {/* Secondary Details: smaller category icon & text */}

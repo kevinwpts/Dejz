@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, CreditCard, Globe, Palette, Coins, ChevronRight, SlidersHorizontal, Bell } from 'lucide-react';
+import { Calendar, CreditCard, Globe, Palette, Coins, ChevronRight, SlidersHorizontal, Bell, Ban } from 'lucide-react';
 import { Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -30,6 +30,7 @@ interface SettingsMainViewProps {
   onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
   onNavigate: (tab: string, section?: string) => void;
   initialSection?: 'main' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications';
+  onCancelledSubscriptionsClick?: () => void;
 }
 
 export function SettingsMainView({
@@ -55,7 +56,8 @@ export function SettingsMainView({
   transactions,
   onMigrateAndDeleteCategory,
   onNavigate,
-  initialSection = 'main'
+  initialSection = 'main',
+  onCancelledSubscriptionsClick
 }: SettingsMainViewProps) {
   const [activeSection, setActiveSection] = useState<'main' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications'>(initialSection);
 
@@ -250,6 +252,27 @@ export function SettingsMainView({
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{config?.language === 'en' ? 'Notifications' : 'Notiser'}</span>
               <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 mt-0.5">
                 {config?.language === 'en' ? 'Manage notification preferences' : 'Anpassa vilka notiser du vill få'}
+              </span>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+        </button>
+
+        <button
+          type="button"
+          onClick={onCancelledSubscriptionsClick}
+          className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3.5 min-w-0 pr-2">
+            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+              <Ban size={18} strokeWidth={2} className="text-rose-500" />
+            </div>
+            <div className="min-w-0 flex flex-col justify-center">
+              <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                {config?.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
+              </span>
+              <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 mt-0.5">
+                {config?.language === 'en' ? 'History and reactivate subscriptions' : 'Visa historik och återaktivera tjänster'}
               </span>
             </div>
           </div>

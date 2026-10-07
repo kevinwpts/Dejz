@@ -56,6 +56,7 @@ import { AppHeader } from "./components/AppHeader";
 import { DejziSummaryModal } from "./components/DejziSummaryModal";
 import { ProfileView } from "./components/ProfileView";
 import { SettingsMainView } from "./components/SettingsMainView";
+import { CancelledSubscriptionsModal } from "./components/CancelledSubscriptionsModal";
 import { AddToHomeScreenModal } from "./components/AddToHomeScreenModal";
 import { CookieConsentModal } from "./components/CookieConsentModal";
 import { getLogoUrl } from "./utils/logo";
@@ -610,6 +611,7 @@ export default function App() {
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
     useState(false);
   const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
+  const [isCancelledSubscriptionsOpen, setIsCancelledSubscriptionsOpen] = useState(false);
   const [isManageAccountModalOpen, setIsManageAccountModalOpen] =
     useState(false);
   const [legalModal, setLegalModal] = useState<{
@@ -3752,6 +3754,7 @@ export default function App() {
         if (isFeedbackModalOpen) { setIsFeedbackModalOpen(false); modalClosed = true; }
     if (isDeleteAccountModalOpen) { setIsDeleteAccountModalOpen(false); modalClosed = true; }
     if (isSecurityModalOpen) { setIsSecurityModalOpen(false); modalClosed = true; }
+    if (isCancelledSubscriptionsOpen) { setIsCancelledSubscriptionsOpen(false); modalClosed = true; }
     if (isManageAccountModalOpen) { setIsManageAccountModalOpen(false); modalClosed = true; }
     if (isVariableUpdateModalOpen) { setIsVariableUpdateModalOpen(false); modalClosed = true; }
     if (legalModal.isOpen) { setLegalModal(p => ({ ...p, isOpen: false })); modalClosed = true; }
@@ -4853,6 +4856,7 @@ export default function App() {
                 onRenameCategory={handleRenameCategory}
                 transactions={transactions}
                 onMigrateAndDeleteCategory={handleMigrateAndDeleteCategory}
+                onCancelledSubscriptionsClick={() => setIsCancelledSubscriptionsOpen(true)}
               />
             </div>
           )}
@@ -4962,6 +4966,7 @@ export default function App() {
                 setCurrentPeriodDate={setCurrentPeriodDate}
                 periods={periods}
                 onViewTransaction={setViewingTransaction}
+                onCancelledSubscriptionsClick={() => setIsCancelledSubscriptionsOpen(true)}
               />
             </div>
           )}
@@ -5273,6 +5278,38 @@ export default function App() {
             t={t}
             addToast={addToast}
             userEmail={session?.user?.email}
+          />
+        )}
+
+        {isCancelledSubscriptionsOpen && config && (
+          <CancelledSubscriptionsModal
+            isOpen={isCancelledSubscriptionsOpen}
+            onClose={() => setIsCancelledSubscriptionsOpen(false)}
+            fixedExpenses={fixedExpenses}
+            onUpdateExpense={async (updatedExpense) => {
+              try {
+                await dataService.saveFixedExpense(session?.user?.id || (isDemoMode ? "demo-user" : "local-user"), updatedExpense);
+                setFixedExpenses((prev) =>
+                  prev.map((e) => (e.id === updatedExpense.id ? updatedExpense : e))
+                );
+                addToast(
+                  config.language === 'en' 
+                    ? 'Subscription updated!' 
+                    : 'Abonnemanget uppdaterades!',
+                  'success'
+                );
+              } catch (err) {
+                console.error("Error updating fixed expense from cancelled list:", err);
+                addToast(
+                  config.language === 'en' 
+                    ? 'Failed to update subscription' 
+                    : 'Kunde inte uppdatera abonnemanget',
+                  'error'
+                );
+              }
+            }}
+            onDeleteExpense={handleDeleteFixedExpense}
+            config={config}
           />
         )}
 

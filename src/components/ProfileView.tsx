@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell } from 'lucide-react';
+import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, Ban } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -56,6 +56,7 @@ interface ProfileViewProps {
   onViewTransaction: (t: Transaction) => void;
   onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
   onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
+  onCancelledSubscriptionsClick?: () => void;
 }
 
 export function ProfileView({ 
@@ -102,6 +103,7 @@ export function ProfileView({
   onViewTransaction,
   onRenameCategory,
   onMigrateAndDeleteCategory,
+  onCancelledSubscriptionsClick,
 }: ProfileViewProps) {
   const [activePage, setActivePage] = useState<'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'pro' | 'receipts' | 'debts' | 'sharedBudget' | 'guides' | 'notifications' | 'admin'>(initialSection as any);
 
@@ -432,6 +434,13 @@ export function ProfileView({
               label={config.language === 'en' ? 'Notifications' : 'Notiser'} 
               subtitle={config.language === 'en' ? 'Manage notification preferences' : 'Anpassa vilka notiser du vill få'}
               onClick={() => handleSectionClick('notifications')} 
+            />
+            <SettingsMenuItem 
+              icon={Ban} 
+              label={config.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'} 
+              subtitle={config.language === 'en' ? 'History and reactivate subscriptions' : 'Visa historik och återaktivera tjänster'}
+              onClick={onCancelledSubscriptionsClick} 
+              iconTextColor="text-rose-500"
             />
             <SettingsMenuItem 
               icon={Palette} 
