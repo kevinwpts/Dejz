@@ -95,8 +95,10 @@ export interface Config {
   paymentMethods: PaymentMethod[];
   initialSpent: number;
   notifications: {
-    salaryDayReminder: boolean;
-    weeklySummary: boolean;
+    salaryDayReminder?: boolean;
+    weeklySummary?: boolean;
+    variableAmountsReminder?: boolean;
+    fixedExpenseDueReminder?: boolean;
     lastSurplusPromptDate?: string;
   };
   securityLock: boolean;

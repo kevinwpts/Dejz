@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Check, Sun, Moon, Monitor, Calendar, Clock, ChevronRight, RotateCcw } from 'lucide-react';
+import { Plus, Check, Sun, Moon, Monitor, Calendar, Clock, ChevronRight, RotateCcw, Bell, Receipt } from 'lucide-react';
 import { Config } from '../types';
 import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
@@ -15,7 +15,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
 
 interface SettingsViewProps {
-  activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency';
+  activeSection: 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'notifications';
   onBack: () => void;
   config: Config;
   setConfig: (config: Config) => void;
@@ -372,8 +372,121 @@ export function SettingsView({
     );
   };
 
+  const renderNotificationsSettings = () => {
+    const isEn = config.language === 'en';
+    const notifs = config.notifications || {};
+
+    const handleToggle = (key: keyof NonNullable<Config['notifications']>) => {
+      setConfig({
+        ...config,
+        notifications: {
+          ...config.notifications,
+          [key]: notifs[key] === false ? true : false,
+        },
+      });
+    };
+
+    return (
+      <div className="w-full py-2 space-y-4">
+        <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-[var(--surface-color)] backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] shadow-none">
+          {/* 1. Variable Amounts / Rörliga belopp */}
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3.5 min-w-0 pr-4">
+              <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
+                <Receipt size={18} strokeWidth={2} />
+              </div>
+              <div className="min-w-0 flex flex-col justify-center">
+                <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                  {isEn ? 'Variable amounts' : 'Rörliga belopp'}
+                </span>
+                <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                  {isEn
+                    ? 'Reminders when a new period starts to enter updated amounts for variable bills and income'
+                    : 'Påminnelse vid ny månad/period att fylla i belopp för rörliga räkningar och inkomster'}
+                </span>
+              </div>
+            </div>
+            <ToggleSwitch
+              isOn={notifs.variableAmountsReminder !== false}
+              onToggle={() => handleToggle('variableAmountsReminder')}
+            />
+          </div>
+
+          {/* 2. Salary / Lön & Utbetalningar */}
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3.5 min-w-0 pr-4">
+              <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
+                <Calendar size={18} strokeWidth={2} />
+              </div>
+              <div className="min-w-0 flex flex-col justify-center">
+                <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                  {isEn ? 'Payday & income' : 'Lön & utbetalningar'}
+                </span>
+                <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                  {isEn
+                    ? 'Notification on payday when your new budget period starts'
+                    : 'Notis på lönedagen när den nya budgetperioden påbörjas'}
+                </span>
+              </div>
+            </div>
+            <ToggleSwitch
+              isOn={notifs.salaryDayReminder !== false}
+              onToggle={() => handleToggle('salaryDayReminder')}
+            />
+          </div>
+
+          {/* 3. Fixed Expense Due Dates / Fasta utgifter & förfallodagar */}
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3.5 min-w-0 pr-4">
+              <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
+                <Clock size={18} strokeWidth={2} />
+              </div>
+              <div className="min-w-0 flex flex-col justify-center">
+                <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                  {isEn ? 'Fixed expense due dates' : 'Fasta utgifter & förfallodagar'}
+                </span>
+                <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                  {isEn
+                    ? 'Reminders before fixed subscriptions or bills are due'
+                    : 'Påminnelse innan fasta abonnemang och räkningar dras'}
+                </span>
+              </div>
+            </div>
+            <ToggleSwitch
+              isOn={notifs.fixedExpenseDueReminder !== false}
+              onToggle={() => handleToggle('fixedExpenseDueReminder')}
+            />
+          </div>
+
+          {/* 4. Weekly Summary & Budget Alerts / Veckoöversikt & budgetvarningar */}
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3.5 min-w-0 pr-4">
+              <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
+                <Bell size={18} strokeWidth={2} />
+              </div>
+              <div className="min-w-0 flex flex-col justify-center">
+                <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
+                  {isEn ? 'Weekly summary & budget alerts' : 'Veckoöversikt & budgetvarningar'}
+                </span>
+                <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
+                  {isEn
+                    ? 'Weekly overview and warnings when nearing category budget limits'
+                    : 'Veckovis sammanfattning samt notis när du närmar dig en budgetgräns'}
+                </span>
+              </div>
+            </div>
+            <ToggleSwitch
+              isOn={notifs.weeklySummary !== false}
+              onToggle={() => handleToggle('weeklySummary')}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-6 font-sans pb-12 max-w-md mx-auto">
+    <div className="space-y-6 font-sans pb-12 max-w-2xl mx-auto w-full">
       <div>
         {activeSection === 'salary' && (
           <div className="w-full py-2 space-y-4">
@@ -455,6 +568,7 @@ export function SettingsView({
         {activeSection === 'language' && renderLanguageSettings()}
         {activeSection === 'appearance' && renderAppearanceSettings()}
         {activeSection === 'currency' && renderCurrencySettings()}
+        {activeSection === 'notifications' && renderNotificationsSettings()}
       </div>
 
       <PaymentMethodModal

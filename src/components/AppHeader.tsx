@@ -34,15 +34,19 @@ export function AppHeader({
   activeTab,
 }: AppHeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(() => typeof window !== "undefined" ? window.scrollY > 15 : false);
   const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     lastScrollYRef.current = window.scrollY;
+    setIsScrolled(window.scrollY > 15);
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const lastScrollY = lastScrollYRef.current;
       const delta = currentScrollY - lastScrollY;
+
+      setIsScrolled(currentScrollY > 15);
 
       // Always show when near the very top of the page
       if (currentScrollY <= 25) {
@@ -65,20 +69,23 @@ export function AppHeader({
   // Reset visibility when changing tab or view title
   useEffect(() => {
     setIsVisible(true);
+    setIsScrolled(window.scrollY > 15);
     lastScrollYRef.current = window.scrollY;
   }, [activeTab, title]);
 
   return (
     <header
-      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top,0px))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] bg-transparent border-none ${
+      className={`fixed ${isDemoMode ? 'top-[calc(2.6rem+env(safe-area-inset-top,0px))]' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isDemoMode ? '' : 'pt-[env(safe-area-inset-top,0px)]'
       } ${
         isVisible
           ? 'translate-y-0 opacity-100 pointer-events-auto'
           : '-translate-y-full opacity-0 pointer-events-none'
+      } ${
+        isScrolled ? 'app-header-scrolled' : 'app-header-top'
       }`}
     >
-      <div className="max-w-xl mx-auto px-4 h-14 sm:h-16 flex justify-between items-center w-full gap-2 relative">
+      <div className="max-w-2xl mx-auto px-4 h-14 sm:h-16 flex justify-between items-center w-full gap-2 relative">
         {/* Left: Back button with title for subpages OR Dejz brand logo for main tabs */}
         <div className="flex items-center gap-2.5 shrink-0 z-10 min-w-0">
           {onBack ? (

@@ -688,13 +688,13 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
           {/* Category Selector Bottom Sheet Modal */}
           {isCategorySelectorOpen && typeof document !== 'undefined' && document.body && createPortal(
-            <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategorySelectorOpen(false)} />
               <motion.div
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -1653,13 +1653,13 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
           {/* Category Selector Bottom Sheet Modal */}
           {isCategorySelectorOpen && typeof document !== 'undefined' && document.body && createPortal(
-            <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4">
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategorySelectorOpen(false)} />
               <motion.div
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-md bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />

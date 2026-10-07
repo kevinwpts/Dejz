@@ -52,7 +52,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-6 pb-20 max-w-md mx-auto font-sans"
+      className="space-y-6 pb-20 max-w-2xl mx-auto w-full font-sans"
     >
       {/* 1. Header Hero */}
       <div className="p-6 rounded-[24px] bg-[var(--surface-color)] text-center space-y-3 relative overflow-hidden border border-black/[0.04] dark:border-white/[0.04]">

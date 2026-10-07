@@ -502,6 +502,30 @@ h6 {
     display: none;
   }
 
+  /* App Header Backdrop & Background States */
+  .app-header-top {
+    background-color: transparent;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
+  }
+
+  .app-header-scrolled {
+    background-color: color-mix(in srgb, var(--bg-color) 88%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  }
+
+  .dark .app-header-scrolled,
+  .black-theme .app-header-scrolled {
+    background-color: color-mix(in srgb, var(--bg-color) 88%, transparent);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  }
+
   h1,
   h2,
   h3,

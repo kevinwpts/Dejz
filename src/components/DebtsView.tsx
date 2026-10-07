@@ -111,7 +111,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 pb-20 max-w-md mx-auto font-sans"
+      className="space-y-5 pb-20 max-w-2xl mx-auto w-full font-sans"
     >
       {/* 1. Header Summary Cards */}
       <div className="grid grid-cols-2 gap-3">

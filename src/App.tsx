@@ -264,6 +264,9 @@ export default function App() {
     | "categories"
     | "paymentMethods"
     | "language"
+    | "appearance"
+    | "currency"
+    | "notifications"
   >("main");
   const [budgetSection, setBudgetSection] = useState<string | null>(null);
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
@@ -3235,12 +3238,15 @@ export default function App() {
     const currentPeriodId = stats.periodId;
     const { periodStart, periodEnd } = stats;
 
+    const allowVariable = config.notifications?.variableAmountsReminder !== false;
+
     // 1. Variable fixed expenses
-    fixedExpenses.forEach((e) => {
-      if (
-        e.isVariable &&
-        (!e.periodOverrides || e.periodOverrides[currentPeriodId] === undefined)
-      ) {
+    if (allowVariable) {
+      fixedExpenses.forEach((e) => {
+        if (
+          e.isVariable &&
+          (!e.periodOverrides || e.periodOverrides[currentPeriodId] === undefined)
+        ) {
         const isDue = isVariableItemDue(
           e.deductionDay || 1,
           periodStart,
@@ -3329,6 +3335,7 @@ export default function App() {
         }
       }
     });
+    }
 
     return notifs;
   }, [config, stats, fixedExpenses, incomes, dismissedNotificationIds]);
