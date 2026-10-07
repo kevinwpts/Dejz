@@ -224,13 +224,7 @@ export function TransactionItem({
                       transaction.type === 'income' ? 'Fast indkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast opsparing' : 'Fast udgift',
                       transaction.type === 'income' ? 'Kiinteä tulo' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Kiinteä säästö' : 'Kiinteä kulu'
                     )}
-                    className={`inline-flex items-center justify-center p-0.5 rounded-full border shrink-0 select-none ${
-                      transaction.type === 'income' 
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' 
-                        : (transaction.type === 'saving' || transaction.type === 'savings')
-                        ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
-                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                    }`}
+                    className="inline-flex items-center justify-center p-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-tertiary)] border border-black/5 dark:border-white/10 shrink-0 select-none"
                   >
                     <RotateCw size={9.5} strokeWidth={2.4} className="shrink-0" />
                   </span>
