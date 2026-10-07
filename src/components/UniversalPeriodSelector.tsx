@@ -108,6 +108,11 @@ export function UniversalPeriodSelector({
           <span className="text-xs sm:text-[13px] font-bold tracking-tight truncate text-[var(--text-primary)]">
             {month}
           </span>
+          {actuallyIsCurrent && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
+              Nu
+            </span>
+          )}
           {!actuallyIsCurrent && (
             <button
               type="button"
@@ -154,6 +159,11 @@ export function UniversalPeriodSelector({
         <span className="text-xs sm:text-[13px] font-bold font-display tracking-wider text-[var(--text-primary)]">
           {month}
         </span>
+        {actuallyIsCurrent && (
+          <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
+            Nu
+          </span>
+        )}
         <ChevronDown size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors shrink-0" />
       </button>
     );
@@ -190,6 +200,11 @@ export function UniversalPeriodSelector({
               <span className="text-base sm:text-lg font-bold font-display tracking-wider text-[var(--text-primary)] group-hover/label:text-[var(--text-primary)] transition-colors">
                 {month}
               </span>
+              {actuallyIsCurrent && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
+                  Nu
+                </span>
+              )}
               <CalendarIcon size={14} className="text-[var(--text-secondary)] group-hover/label:text-[var(--text-primary)] transition-colors" />
               <ChevronDown size={13} className="text-[var(--text-secondary)] group-hover/label:text-[var(--text-primary)] transition-opacity" />
             </div>

@@ -407,6 +407,13 @@ export function LogView({
         <FilterSelectButton
           icon={<CalendarIcon size={15} strokeWidth={2} />}
           value={activeFilterLabel || getL10n('Alla perioder', 'All periods')}
+          badge={
+            selectedPeriod?.isCurrent ? (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
+                {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
+              </span>
+            ) : undefined
+          }
           onClick={() => {
             const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
             setModalPeriod(initial);

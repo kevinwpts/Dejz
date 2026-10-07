@@ -6,6 +6,7 @@ export interface FilterSelectButtonProps {
   icon?: React.ReactNode;
   label?: string;
   value: string;
+  badge?: React.ReactNode;
   onClick: () => void;
   className?: string;
   disabled?: boolean;
@@ -17,6 +18,7 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
   icon,
   label,
   value,
+  badge,
   onClick,
   className = '',
   disabled = false,
@@ -42,9 +44,16 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
               {label}
             </span>
           )}
-          <span className="block text-xs sm:text-[13px] font-semibold text-[var(--text-primary)] truncate leading-tight">
-            {value}
-          </span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="block text-xs sm:text-[13px] font-semibold text-[var(--text-primary)] truncate leading-tight">
+              {value}
+            </span>
+            {badge && (
+              <span className="shrink-0">
+                {badge}
+              </span>
+            )}
+          </div>
         </div>
       </div>
       <ChevronDown

@@ -271,6 +271,13 @@ export function AnalysisView({
         <FilterSelectButton
           icon={<Calendar size={15} strokeWidth={2} />}
           value={effectiveStats?.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}
+          badge={
+            currentPeriod?.isCurrent ? (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
+                {isEn ? 'Current' : 'Nu'}
+              </span>
+            ) : undefined
+          }
           onClick={() => setIsPeriodModalOpen(true)}
           className="flex-[1.25] min-w-0"
         />
