@@ -148,22 +148,6 @@ export function BudgetView({
   const activeFixedExpenses = React.useMemo(() => getActiveFixedExpenses(fixedExpenses), [fixedExpenses]);
   const cancelledFixedExpenses = React.useMemo(() => getCancelledFixedExpenses(fixedExpenses), [fixedExpenses]);
 
-  const filteredCancelledFixedExpenses = React.useMemo(() => {
-    if (freqFilter === 'monthly') {
-      return cancelledFixedExpenses.filter(e => {
-        const freq = e.frequency || Frequency.MONTHLY;
-        return freq === Frequency.MONTHLY || freq === Frequency.QUARTERLY || freq === Frequency.SEMI_ANNUALLY;
-      });
-    }
-    if (freqFilter === 'annually') {
-      return cancelledFixedExpenses.filter(e => {
-        const freq = e.frequency || Frequency.MONTHLY;
-        return freq === Frequency.ANNUALLY;
-      });
-    }
-    return cancelledFixedExpenses;
-  }, [cancelledFixedExpenses, freqFilter]);
-
   const sortedFixedExpenses = React.useMemo(() => {
     const list = [...(activeFixedExpenses || [])];
     if (fixedSortBy === 'day') {
@@ -179,6 +163,46 @@ export function BudgetView({
       return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
   }, [activeFixedExpenses, fixedSortBy]);
+
+  const filteredCancelledFixedExpenses = React.useMemo(() => {
+    if (freqFilter === 'all') return cancelledFixedExpenses;
+    return cancelledFixedExpenses.filter(e => {
+      const freq = e.frequency || Frequency.MONTHLY;
+      if (freqFilter === 'monthly') return freq === Frequency.MONTHLY;
+      if (freqFilter === 'quarterly') return freq === Frequency.QUARTERLY;
+      if (freqFilter === 'semi-annually') return freq === Frequency.SEMI_ANNUALLY;
+      if (freqFilter === 'annually') return freq === Frequency.ANNUALLY;
+      return true;
+    });
+  }, [cancelledFixedExpenses, freqFilter]);
+
+  const filteredActiveFixedExpenses = React.useMemo(() => {
+    if (freqFilter === 'all') return sortedFixedExpenses;
+    return sortedFixedExpenses.filter(e => {
+      const freq = e.frequency || Frequency.MONTHLY;
+      if (freqFilter === 'monthly') return freq === Frequency.MONTHLY;
+      if (freqFilter === 'quarterly') return freq === Frequency.QUARTERLY;
+      if (freqFilter === 'semi-annually') return freq === Frequency.SEMI_ANNUALLY;
+      if (freqFilter === 'annually') return freq === Frequency.ANNUALLY;
+      return true;
+    });
+  }, [sortedFixedExpenses, freqFilter]);
+
+  const totalMonthlyFixedAverage = React.useMemo(() => {
+    return (sortedFixedExpenses || []).reduce((sum, e) => {
+      const freq = e.frequency || Frequency.MONTHLY;
+      const amount = (e.isVariable && e.periodOverrides && e.periodOverrides[currentPeriodId] !== undefined)
+        ? e.periodOverrides[currentPeriodId]
+        : (Number(e.amount) || 0);
+
+      let monthlyAmount = amount;
+      if (freq === Frequency.QUARTERLY) monthlyAmount = amount / 3;
+      else if (freq === Frequency.SEMI_ANNUALLY) monthlyAmount = amount / 6;
+      else if (freq === Frequency.ANNUALLY) monthlyAmount = amount / 12;
+
+      return sum + monthlyAmount;
+    }, 0);
+  }, [sortedFixedExpenses, currentPeriodId]);
 
 
 
@@ -209,7 +233,7 @@ export function BudgetView({
     return sum + amount;
   }, 0);
 
-  const groupedFixedExpenses = React.useMemo(() => {
+  const _groupedFixedExpenses = React.useMemo(() => {
     const groups: Record<Frequency, any[]> = {
       [Frequency.MONTHLY]: [],
       [Frequency.QUARTERLY]: [],
@@ -307,6 +331,8 @@ export function BudgetView({
             value={
               freqFilter === 'all' ? (config?.language === 'en' ? 'All' : 'Alla') :
               freqFilter === 'monthly' ? (config?.language === 'en' ? 'Monthly' : 'Månadsvis') :
+              freqFilter === 'quarterly' ? (config?.language === 'en' ? 'Quarterly' : 'Kvartalsvis') :
+              freqFilter === 'semi-annually' ? (config?.language === 'en' ? 'Semi-annually' : 'Halvårsvis') :
               (config?.language === 'en' ? 'Annually' : 'Årsvis')
             }
             onClick={() => setIsFreqFilterModalOpen(true)}
@@ -345,7 +371,7 @@ export function BudgetView({
             onClose={() => setIsFreqFilterModalOpen(false)}
             title={config?.language === 'en' ? 'Select frequency' : 'Välj periodicitet'}
             selectedId={freqFilter}
-            onSelect={(id) => setFreqFilter(id as 'all' | 'monthly' | 'annually')}
+            onSelect={(id) => setFreqFilter(id as 'all' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually')}
             options={[
               {
                 id: 'all',
@@ -355,6 +381,16 @@ export function BudgetView({
               {
                 id: 'monthly',
                 label: config?.language === 'en' ? 'Monthly' : 'Månadsvis',
+                icon: <Calendar size={16} strokeWidth={2} />,
+              },
+              {
+                id: 'quarterly',
+                label: config?.language === 'en' ? 'Quarterly' : 'Kvartalsvis',
+                icon: <Calendar size={16} strokeWidth={2} />,
+              },
+              {
+                id: 'semi-annually',
+                label: config?.language === 'en' ? 'Semi-annually' : 'Halvårsvis',
                 icon: <Calendar size={16} strokeWidth={2} />,
               },
               {
@@ -368,30 +404,42 @@ export function BudgetView({
       </div>
 
       {/* Overview Hero Section - Dynamic based on filter */}
-      {budgetFilter !== 'fixed' && (
-        <div className="text-center flex flex-col items-center gap-1 py-1 select-none">
-          <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block">
-            {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
-            {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
+      <div className="text-center flex flex-col items-center gap-1 py-1 select-none">
+        <span className="text-[14px] font-normal text-[#6D6962] dark:text-[#A8A8A8] block">
+          {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
+          {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
+          {budgetFilter === 'fixed' && (
+            freqFilter === 'all' ? (config?.language === 'en' ? 'Fixed expenses (average/month)' : 'Fasta utgifter (snitt/månad)') :
+            freqFilter === 'monthly' ? (config?.language === 'en' ? 'Total monthly expenses' : 'Totala månadsutgifter') :
+            freqFilter === 'quarterly' ? (config?.language === 'en' ? 'Total quarterly expenses' : 'Totala kvartalsutgifter') :
+            freqFilter === 'semi-annually' ? (config?.language === 'en' ? 'Total semi-annual expenses' : 'Totala halvårsutgifter') :
+            (config?.language === 'en' ? 'Total annual expenses' : 'Totala årsutgifter')
+          )}
+        </span>
+        <div className="flex items-baseline justify-center gap-1.5">
+          <AnimatedNumber 
+            value={Math.round(
+              budgetFilter === 'income' ? totalIncomeSum :
+              budgetFilter === 'savings' ? totalSavingsSum :
+              (
+                freqFilter === 'all' ? totalMonthlyFixedAverage :
+                freqFilter === 'monthly' ? groupedFixedSums[Frequency.MONTHLY] :
+                freqFilter === 'quarterly' ? groupedFixedSums[Frequency.QUARTERLY] :
+                freqFilter === 'semi-annually' ? groupedFixedSums[Frequency.SEMI_ANNUALLY] :
+                groupedFixedSums[Frequency.ANNUALLY]
+              )
+            )} 
+            className="text-[34px] sm:text-[38px] md:text-[42px] leading-tight font-semibold font-amount tabular-nums tracking-tight text-[var(--text-primary)]"
+            formatter={(val) => {
+              const prefix = budgetFilter === 'income' ? '+' : '−';
+              return `${prefix}${formatAmount(val, config?.language)}`;
+            }}
+          />
+          <span className="text-sm sm:text-base font-normal text-[var(--text-secondary)] border-none">
+            {config?.currency || 'kr'}
           </span>
-          <div className="flex items-baseline justify-center gap-1.5">
-            <AnimatedNumber 
-              value={Math.round(
-                budgetFilter === 'income' ? totalIncomeSum :
-                totalSavingsSum
-              )} 
-              className="text-[34px] sm:text-[38px] md:text-[42px] leading-tight font-semibold font-amount tabular-nums tracking-tight text-[var(--text-primary)]"
-              formatter={(val) => {
-                const prefix = budgetFilter === 'income' ? '+' : '−';
-                return `${prefix}${formatAmount(val, config?.language)}`;
-              }}
-            />
-            <span className="text-sm sm:text-base font-normal text-[var(--text-secondary)] border-none">
-              {config?.currency || 'kr'}
-            </span>
-          </div>
         </div>
-      )}
+      </div>
 
 
       <AnimatePresence mode="wait">
@@ -507,63 +555,35 @@ export function BudgetView({
                 </Button>
               </div>
 
-              {sortedFixedExpenses.length > 0 ? (
-                <div className="space-y-10">
-                  {([
-                    { freq: Frequency.MONTHLY, label: config.language === 'en' ? 'Monthly' : 'Månadsvis', suffix: config.language === 'en' ? '/mo' : '/mån' },
-                    { freq: Frequency.QUARTERLY, label: config.language === 'en' ? 'Quarterly' : 'Kvartalsvis', suffix: config.language === 'en' ? '/quarter' : '/kvartal' },
-                    { freq: Frequency.SEMI_ANNUALLY, label: config.language === 'en' ? 'Semi-annually' : 'Halvårsvis', suffix: config.language === 'en' ? '/half-year' : '/halvår' },
-                    { freq: Frequency.ANNUALLY, label: config.language === 'en' ? 'Annually' : 'Årsvis', suffix: config.language === 'en' ? '/yr' : '/år' },
-                  ] as const)
-                    .filter(({ freq }) => {
-                      if (freqFilter === 'monthly') {
-                        return freq === Frequency.MONTHLY || freq === Frequency.QUARTERLY || freq === Frequency.SEMI_ANNUALLY;
-                      }
-                      if (freqFilter === 'annually') {
-                        return freq === Frequency.ANNUALLY;
-                      }
-                      return true;
-                    })
-                    .map(({ freq, label, suffix }) => {
-                      const items = groupedFixedExpenses[freq];
-                      if (!items || items.length === 0) return null;
-
-                      const sum = groupedFixedSums[freq] || 0;
-
-                      return (
-                        <div key={freq} className="space-y-3">
-                          <div className="flex items-baseline justify-between px-1.5 select-none">
-                            <h3 className="text-xs font-semibold text-[var(--text-secondary)] tracking-wider uppercase">
-                              {label}
-                            </h3>
-                            <span className="text-base font-bold text-[var(--text-primary)] font-amount tabular-nums">
-                              {formatAmount(Math.round(sum), config.language)} {config.currency || 'kr'}{suffix}
-                            </span>
-                          </div>
-                          <div className="space-y-2.5">
-                            {items.map((expense) => (
-                              <BudgetItem 
-                                key={expense.id}
-                                item={expense} 
-                                onClick={() => onViewFixedExpense(expense)} 
-                                currency={config.currency} 
-                                type="expense"
-                                language={config.language as Language}
-                                t={t}
-                                config={config}
-                                currentPeriodId={currentPeriodId}
-                                isGrouped={true}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
+              {filteredActiveFixedExpenses.length > 0 ? (
+                <div className="space-y-2.5">
+                  {filteredActiveFixedExpenses.map((expense) => (
+                    <BudgetItem 
+                      key={expense.id}
+                      item={expense} 
+                      onClick={() => onViewFixedExpense(expense)} 
+                      currency={config.currency} 
+                      type="expense"
+                      language={config.language as Language}
+                      t={t}
+                      config={config}
+                      currentPeriodId={currentPeriodId}
+                      isGrouped={true}
+                    />
+                  ))}
                 </div>
               ) : (
                 <EmptyState 
-                  title={config.language === 'en' ? 'No fixed expenses added yet' : 'Inga fasta utgifter inlagda än'} 
-                  description={config.language === 'en' ? 'Add subscriptions or bills to track upcoming payments.' : 'Lägg in abonnemang eller räkningar för att få full koll.'}
+                  title={
+                    freqFilter === 'all'
+                      ? (config.language === 'en' ? 'No fixed expenses added yet' : 'Inga fasta utgifter inlagda än')
+                      : (config.language === 'en' ? 'No expenses matching this period' : 'Inga utgifter för denna periodicity')
+                  } 
+                  description={
+                    freqFilter === 'all'
+                      ? (config.language === 'en' ? 'Add subscriptions or bills to track upcoming payments.' : 'Lägg in abonnemang eller räkningar för att få full koll.')
+                      : (config.language === 'en' ? 'Add a fixed expense with this period to see it here.' : 'Lägg till en fast utgift med denna period för att se den här.')
+                  }
                   actionLabel={`+ ${t('newFixedExpense')}`}
                   onAction={onAddFixedExpense}
                 />
