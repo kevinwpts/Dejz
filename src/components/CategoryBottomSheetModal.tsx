@@ -121,9 +121,11 @@ export function CategoryBottomSheetModal({
   const iconKey = categoryData?.iconName || matchedCategory?.icon || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');
   const IconComponent = ICON_MAP[iconKey] || ICON_MAP['Tag'];
 
-  const _spentPct = useMemo(() => {
+  const remainingPct = useMemo(() => {
     if (!categoryData?.hasBudget || !categoryData?.budget || categoryData.budget <= 0) return 0;
-    return Math.min(100, Math.round((categoryData.spent / categoryData.budget) * 100));
+    if (categoryData.isOverBudget || categoryData.remaining <= 0) return 0;
+    const rawPct = Math.round((categoryData.remaining / categoryData.budget) * 100);
+    return Math.max(1, Math.min(100, rawPct));
   }, [categoryData]);
 
   if (!targetCategoryName || typeof document === 'undefined' || !document.body) return null;
@@ -231,18 +233,20 @@ export function CategoryBottomSheetModal({
                           ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' 
                           : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-black/5 dark:border-white/10'
                       }`}>
-                        {Math.round((categoryData.spent / (categoryData.budget || 1)) * 100)}%
+                        {categoryData.isOverBudget ? 0 : remainingPct}%
                       </span>
                     </div>
 
-                    {/* Progress Bar */}
-                    <div className="w-full h-2 bg-black/[0.05] dark:bg-white/[0.08] rounded-full overflow-hidden">
+                    {/* Progress Bar (starts at 100% and depletes as budget is used) */}
+                    <div className={`w-full h-2 rounded-full overflow-hidden transition-colors ${
+                      categoryData.isOverBudget 
+                        ? 'bg-rose-500/15 dark:bg-rose-500/20' 
+                        : 'bg-black/[0.05] dark:bg-white/[0.08]'
+                    }`}>
                       <div
-                        className={`h-full rounded-full transition-all duration-300 ${
-                          categoryData.isOverBudget ? 'bg-rose-500' : ''
-                        }`}
+                        className="h-full rounded-full transition-all duration-300"
                         style={{
-                          width: `${Math.min(100, Math.round((categoryData.spent / (categoryData.budget || 1)) * 100))}%`,
+                          width: `${categoryData.isOverBudget ? 0 : remainingPct}%`,
                           backgroundColor: !categoryData.isOverBudget ? categoryColor : undefined,
                         }}
                       />
