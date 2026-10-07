@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { Info } from 'lucide-react';
 import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
 
@@ -18,7 +17,6 @@ export function BudgetGauge({
   currency,
   language,
   label = 'Kvar att spendera',
-  onOpenInfo,
 }: BudgetGaugeProps) {
   // Respect prefers-reduced-motion
   const prefersReducedMotion = useMemo(() => {
@@ -78,27 +76,16 @@ export function BudgetGauge({
         </svg>
 
         {/* Text centered inside the semi-circle arc */}
-        <div className="absolute inset-x-0 bottom-8 sm:bottom-10 flex flex-col items-center justify-center text-center pointer-events-none">
-          {/* Heading with minimal Info button */}
+        <div className="absolute inset-x-0 bottom-6 sm:bottom-8 flex flex-col items-center justify-center text-center pointer-events-none">
+          {/* Heading */}
           <div className="flex items-center justify-center gap-1.5 pointer-events-auto">
-            <span className="text-[14px] font-medium text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
+            <span className="text-[13px] sm:text-[14px] font-medium text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
               {label}
             </span>
-            {onOpenInfo && (
-              <button
-                type="button"
-                onClick={onOpenInfo}
-                className="w-5 h-5 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-black/5 dark:bg-white/5 transition-all cursor-pointer active:scale-90"
-                aria-label="Period- och löneinformation"
-                title="Period- och löneinformation"
-              >
-                <Info size={11} strokeWidth={2} />
-              </button>
-            )}
           </div>
 
           {/* Remaining amount: ~38px, semibold, Swedish number format */}
-          <div className="flex items-baseline justify-center gap-1.5 mt-1">
+          <div className="flex items-baseline justify-center gap-1.5 mt-0.5 sm:mt-1">
             <AnimatedNumber
               value={remainingCents}
               className={`text-[34px] sm:text-[38px] font-semibold leading-none font-amount tabular-nums tracking-tight ${

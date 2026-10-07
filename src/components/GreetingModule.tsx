@@ -111,27 +111,27 @@ export function GreetingModule({
           label={t('totalRemaining')}
         />
 
-        {/* Integrated Period & Payday Micro-Cards (Proposal 2) */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-2.5 mt-2 sm:mt-3 max-w-[380px] mx-auto px-2">
-          {/* Card 1: Period */}
-          <div className="bg-[var(--surface-color)] rounded-[18px] p-2.5 sm:p-3 flex flex-col justify-center text-left border border-black/[0.04] dark:border-white/[0.06]">
-            <span className="text-[10px] font-semibold text-[var(--text-secondary)] tracking-tight">
-              {isEn ? 'Period' : 'Period'}
-            </span>
-            <span className="text-[12px] sm:text-[13px] font-bold text-[var(--text-primary)] truncate font-sans mt-0.5">
-              {periodIntervalText}
-            </span>
-          </div>
+        {/* Proposal 1: Subtle horizontal status pill directly below gauge */}
+        <div className="flex justify-center mt-1 sm:mt-2">
+          <button
+            type="button"
+            onClick={() => setIsPeriodInfoOpen(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.07] dark:hover:bg-white/[0.1] active:scale-98 border border-black/[0.06] dark:border-white/[0.08] text-xs transition-all cursor-pointer shadow-2xs group"
+          >
+            <div className="flex items-center gap-1.5 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+              <Calendar size={13} className="text-[var(--accent-color)] shrink-0" strokeWidth={2.2} />
+              <span className="font-medium tracking-tight">{periodIntervalText}</span>
+            </div>
 
-          {/* Card 2: Next Payday */}
-          <div className="bg-[var(--surface-color)] rounded-[18px] p-2.5 sm:p-3 flex flex-col justify-center text-left border border-black/[0.04] dark:border-white/[0.06]">
-            <span className="text-[10px] font-semibold text-[var(--text-secondary)] tracking-tight">
-              {isEn ? 'Next payday' : 'Nästa lön'}
-            </span>
-            <span className="text-[12px] sm:text-[13px] font-bold text-[var(--text-primary)] truncate font-sans mt-0.5">
-              {stats?.isPastPeriod ? (isEn ? 'Ended' : 'Avslutad') : `${daysValueText} ${isEn ? '' : 'kvar'}`}
-            </span>
-          </div>
+            <span className="w-1 h-1 rounded-full bg-black/20 dark:bg-white/20 shrink-0" />
+
+            <div className="flex items-center gap-1.5 text-[var(--text-primary)]">
+              <Clock size={13} className="text-[var(--accent-color)] shrink-0" strokeWidth={2.2} />
+              <span className="font-semibold tracking-tight">
+                {stats?.isPastPeriod ? (isEn ? 'Ended' : 'Avslutad') : `${daysValueText} ${isEn ? '' : 'kvar'}`}
+              </span>
+            </div>
+          </button>
         </div>
       </motion.div>
 
