@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Check, RotateCcw, Pencil } from 'lucide-react';
+import { Plus, Check } from 'lucide-react';
 import { Config, Income, FixedExpense, Frequency, Category } from '../types';
 import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
@@ -40,6 +40,7 @@ export function BudgetCategoriesView({
   onDone,
 }: BudgetCategoriesViewProps) {
   const curr = config?.currency || 'kr';
+  const isEn = config.language === 'en';
 
   // --- Inline Budget Editing State ---
   const [editingCategoryName, setEditingCategoryName] = useState<string | null>(null);
@@ -71,7 +72,7 @@ export function BudgetCategoriesView({
   } | null>(null);
   const [isResetCategoriesModalOpen, setIsResetCategoriesModalOpen] = useState(false);
 
-  // --- Budget Calculations ---
+  // --- Calculations ---
   const getFixedSpentForCategory = (catName: string) => {
     return (fixedExpenses || [])
       .filter((e) => (e.category || '').trim().toLowerCase() === (catName || '').trim().toLowerCase())
@@ -287,76 +288,40 @@ export function BudgetCategoriesView({
   const categoriesList = (config.categories as Category[]) || [];
 
   return (
-    <div className="space-y-6 font-sans pb-12 max-w-md mx-auto">
-      {/* 1. Tydlig budgetöversikt i en toppmodul */}
+    <div className="space-y-5 font-sans pb-10 max-w-md mx-auto">
+      {/* 1. Minimal och supertydlig toppmodul */}
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
-        className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-4"
+        transition={{ duration: 0.2 }}
+        className="bg-[var(--surface-color)] rounded-[22px] p-5 border-none shadow-none space-y-3"
       >
-        <div className="flex items-center justify-between">
-          <span className="text-[14px] font-semibold text-[var(--text-secondary)] tracking-tight">
-            {config.language === 'en' ? 'Budget overview' : 'Budgetöversikt'}
-          </span>
-          <span className="text-xs font-semibold text-[var(--text-secondary)]">
-            {categoriesList.length} {config.language === 'en' ? 'categories' : 'kategorier'}
-          </span>
-        </div>
-
-        {/* Beloppet som återstår med störst visuell tyngd */}
-        <div className="space-y-1">
-          <div
-            className={`text-[26px] sm:text-[32px] leading-tight font-extrabold tracking-tight font-amount tabular-nums ${
-              isOverAllocated ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
-            }`}
-          >
-            {remainingToAllocate > 0 ? (
-              <>
-                <span className="font-amount tabular-nums">
-                  {formatAmount(remainingToAllocate, config.language)} {curr}
-                </span>
-                <span className="text-base sm:text-lg font-medium text-[var(--text-secondary)] font-sans ml-1.5">
-                  {config.language === 'en' ? 'left to allocate' : 'kvar att fördela'}
-                </span>
-              </>
-            ) : remainingToAllocate === 0 ? (
-              <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 text-xl sm:text-2xl py-1 font-sans font-bold">
-                ✓ {config.language === 'en' ? 'All allocated! 🎉' : 'Allt är fördelat! 🎉'}
-              </span>
-            ) : (
-              <>
-                <span className="font-amount tabular-nums">
-                  {formatAmount(Math.abs(remainingToAllocate), config.language)} {curr}
-                </span>
-                <span className="text-base sm:text-lg font-medium text-rose-500/80 font-sans ml-1.5">
-                  {config.language === 'en' ? 'overallocated' : 'överfördelat'}
-                </span>
-              </>
-            )}
+        <div className="flex items-baseline justify-between">
+          <div className="space-y-0.5">
+            <span className="text-xs font-semibold text-[var(--text-secondary)]">
+              {isEn ? 'Left to allocate' : 'Kvar att fördela'}
+            </span>
+            <div
+              className={`text-2xl sm:text-3xl font-extrabold tracking-tight font-amount tabular-nums ${
+                isOverAllocated
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : remainingToAllocate === 0
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-[var(--text-primary)]'
+              }`}
+            >
+              {remainingToAllocate === 0
+                ? (isEn ? '0 kr (All set)' : '0 kr (Allt fördelat)')
+                : `${formatAmount(remainingToAllocate, config.language)} ${curr}`}
+            </div>
           </div>
 
-          {/* Kompletterande mindre information */}
-          <div className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)]">
-            <span className="font-amount tabular-nums">
-              {formatAmount(totalCategoryAllocated, config.language)}
-            </span>{' '}
-            {config.language === 'en' ? 'of' : 'av'}{' '}
-            <span className="font-amount tabular-nums">
-              {formatAmount(totalPoolToAllocate, config.language)}
-            </span>{' '}
-            {curr} {config.language === 'en' ? 'allocated' : 'fördelat'}
-            {totalSavingsSum > 0 && (
-              <span className="block text-[11px] font-normal opacity-75 mt-0.5">
-                {config.language === 'en'
-                  ? `(Income ${formatAmount(totalIncomeSum, config.language)} − Savings ${formatAmount(totalSavingsSum, config.language)} ${curr})`
-                  : `(Inkomst ${formatAmount(totalIncomeSum, config.language)} − Sparande ${formatAmount(totalSavingsSum, config.language)} ${curr})`}
-              </span>
-            )}
+          <div className="text-right text-xs font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+            {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
           </div>
         </div>
 
-        {/* Diskret förloppsindikator */}
+        {/* Diskret förloppslinje */}
         <div className="w-full h-1.5 bg-black/[0.04] dark:bg-white/[0.06] rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${
@@ -369,23 +334,23 @@ export function BudgetCategoriesView({
         </div>
       </motion.div>
 
-      {/* 2. Kategorikorten med direkt budget och redigering */}
+      {/* 2. Kategorikort – Ren och luftig design */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-            {config.language === 'en' ? 'Expense Categories & Budget' : 'Utgiftskategorier & Budget'}
+          <span className="text-xs font-semibold text-[var(--text-secondary)]">
+            {isEn ? 'Categories' : 'Kategorier'}
           </span>
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
-            icon={<Plus size={14} strokeWidth={2} />}
+            icon={<Plus size={14} strokeWidth={2.5} />}
             onClick={() => handleAddCategory('expense')}
           >
             {t('newCategory')}
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3.5">
+        <div className="grid grid-cols-2 gap-3">
           {categoriesList.map((cat, index) => {
             const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
             const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
@@ -395,167 +360,124 @@ export function BudgetCategoriesView({
               <div
                 key={cat.id || index}
                 style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.categories) }}
-                className="relative p-3.5 sm:p-4 rounded-[22px] flex flex-col justify-between h-[155px] sm:h-[165px] transition-all shadow-sm overflow-hidden text-white"
+                onClick={(e) => {
+                  // If not tapping directly into input, open modal to edit details
+                  if (!isEditingThis && !(e.target as HTMLElement).closest('input')) {
+                    handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
+                  }
+                }}
+                className="relative p-4 rounded-[20px] flex flex-col justify-between h-[135px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden text-white group"
               >
-                {/* Top: Icon & Edit button */}
-                <div className="flex items-start justify-between w-full">
-                  <div
-                    onClick={() => handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget)}
-                    className="cursor-pointer hover:scale-105 active:scale-95 transition-transform"
-                    title={config.language === 'en' ? 'Edit icon & color' : 'Ändra ikon och färg'}
-                  >
-                    <CategoryIcon icon={cat.icon} size="md" noBackground whiteIcon />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget)}
-                    className="w-7 h-7 rounded-full bg-black/15 hover:bg-black/25 flex items-center justify-center text-white/90 hover:text-white transition-all cursor-pointer active:scale-90"
-                    title={config.language === 'en' ? 'Edit name, icon, color & budget' : 'Ändra namn, ikon, färg & budget'}
-                  >
-                    <Pencil size={13} strokeWidth={2.5} />
-                  </button>
+                {/* Top: Category Icon */}
+                <div className="flex items-center justify-between">
+                  <CategoryIcon icon={cat.icon} size="md" noBackground whiteIcon />
                 </div>
 
-                {/* Middle: Category Name & Fixed expense info if any */}
-                <div
-                  onClick={() => handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget)}
-                  className="cursor-pointer min-w-0"
-                >
-                  <span className="text-[14px] sm:text-[15px] font-bold text-white block truncate drop-shadow-xs">
+                {/* Bottom: Name + Budget Pill */}
+                <div className="space-y-2">
+                  <span className="text-[14px] font-bold text-white block truncate leading-tight">
                     {cat.name}
                   </span>
-                  {fixedSpent > 0 ? (
-                    <span className="text-[10.5px] sm:text-[11px] font-medium text-white/85 block truncate mt-0.5">
-                      {formatAmount(fixedSpent, config.language)} {curr} {config.language === 'en' ? 'fixed' : 'fast'}
-                    </span>
-                  ) : (
-                    <span className="text-[10.5px] font-normal text-white/70 block truncate mt-0.5">
-                      {config.language === 'en' ? 'Budget' : 'Budget'}
-                    </span>
-                  )}
-                </div>
 
-                {/* Bottom: Budget Input Pill */}
-                <div className="w-full pt-1">
-                  {isEditingThis ? (
-                    <div className="flex items-center justify-between bg-black/35 backdrop-blur-md rounded-[12px] px-2.5 py-1.5 border border-white/40">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        autoFocus
-                        value={inlineInputValue}
-                        onBlur={() => {
-                          const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
-                          const updatedCategories = (config.categories || []).map((c) => {
-                            if (c.name === cat.name) {
-                              return { ...c, budget: finalVal > 0 ? finalVal : null };
+                  {/* Quick Budget Pill */}
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full"
+                  >
+                    {isEditingThis ? (
+                      <div className="flex items-center justify-between bg-black/40 backdrop-blur-md rounded-[10px] px-2 py-1 border border-white/40">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          autoFocus
+                          value={inlineInputValue}
+                          onBlur={() => {
+                            const finalVal = Math.max(fixedSpent, Number(inlineInputValue) || 0);
+                            const updatedCategories = (config.categories || []).map((c) => {
+                              if (c.name === cat.name) {
+                                return { ...c, budget: finalVal > 0 ? finalVal : null };
+                              }
+                              return c;
+                            });
+                            try {
+                              localStorage.setItem('dejz_has_saved_initial_budget', 'true');
+                            } catch (_e) {
+                              // ignore
                             }
-                            return c;
-                          });
-                          try {
-                            localStorage.setItem('dejz_has_saved_initial_budget', 'true');
-                          } catch (_e) {
-                            // ignore localStorage error
-                          }
-                          setConfig({ ...config, categories: updatedCategories, hasSavedInitialBudget: true });
-                          setEditingCategoryName(null);
+                            setConfig({ ...config, categories: updatedCategories, hasSavedInitialBudget: true });
+                            setEditingCategoryName(null);
+                          }}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            setInlineInputValue(val);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          className="w-full bg-transparent border-none text-left text-xs font-bold text-white font-amount tabular-nums outline-none placeholder-white/50"
+                          placeholder="0"
+                        />
+                        <span className="text-[10px] font-bold text-white/80 select-none pl-1">
+                          {curr}
+                        </span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingCategoryName(cat.name);
+                          setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
                         }}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
-                          setInlineInputValue(val);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        className="w-full bg-transparent border-none text-left text-xs sm:text-sm font-bold text-white font-amount tabular-nums outline-none placeholder-white/50"
-                        placeholder="0"
-                      />
-                      <span className="text-[11px] font-bold text-white/80 select-none pl-1">
-                        {curr}
-                      </span>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingCategoryName(cat.name);
-                        setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
-                      }}
-                      className="w-full py-1.5 px-2.5 rounded-[12px] bg-black/20 hover:bg-black/30 active:scale-[0.97] transition-all cursor-pointer flex items-center justify-between border border-white/10"
-                    >
-                      <span className="text-[12px] sm:text-[13px] font-bold font-amount tabular-nums text-white">
-                        {catBudget > 0 ? `${formatAmount(catBudget, config.language)} ${curr}` : `0 ${curr}`}
-                      </span>
-                      <span className="text-[10px] font-semibold text-white/80">
-                        {catBudget > 0 ? (config.language === 'en' ? 'Edit' : 'Ändra') : (config.language === 'en' ? 'Set' : 'Sätt')}
-                      </span>
-                    </button>
-                  )}
+                        className="w-full py-1 px-2 rounded-[10px] bg-black/20 hover:bg-black/30 transition-colors flex items-center justify-between border border-white/10 cursor-pointer"
+                      >
+                        <span className="text-xs font-bold font-amount tabular-nums text-white">
+                          {catBudget > 0 ? `${formatAmount(catBudget, config.language)} ${curr}` : `0 ${curr}`}
+                        </span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })}
-
-          {/* Dashed Add New Category Card */}
-          <button
-            type="button"
-            onClick={() => handleAddCategory('expense')}
-            className="h-[155px] sm:h-[165px] p-4 rounded-[22px] border-2 border-dashed border-black/10 dark:border-white/15 hover:border-[var(--accent-color)] dark:hover:border-[var(--accent-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.02] flex flex-col items-center justify-center gap-2.5 transition-all cursor-pointer group active:scale-[0.98]"
-          >
-            <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] group-hover:bg-[var(--accent-color)]/10 transition-colors">
-              <Plus size={20} strokeWidth={2} />
-            </div>
-            <span className="text-xs font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors text-center">
-              {t('newCategory')}
-            </span>
-          </button>
         </div>
       </div>
 
-      {/* 3. Spara & Nollställ / Återställ */}
-      <div className="pt-2 space-y-2.5">
+      {/* 3. Minimal footer */}
+      <div className="pt-2 space-y-2">
         <button
           type="button"
           onClick={handleSaveBudgetDone}
-          className="w-full h-12 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-none"
+          className="w-full h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-none"
         >
           <Check size={16} strokeWidth={2.5} />
-          {config.language === 'en' ? 'Done, save budget' : 'Klar, spara budgeten'}
+          {isEn ? 'Done' : 'Klar'}
         </button>
 
-        <div className="flex items-center justify-center gap-4 pt-1">
+        <div className="flex items-center justify-center gap-3 pt-1">
           <button
             type="button"
             onClick={() => setShowResetBudgetConfirm(true)}
-            className="py-2 px-3 text-center text-xs font-semibold text-[var(--text-secondary)] hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            className="py-1 px-2 text-xs font-medium text-[var(--text-tertiary)] hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
           >
-            <RotateCcw size={13} strokeWidth={2} />
-            <span>{config.language === 'en' ? 'Reset budget' : 'Nollställ budgeten'}</span>
+            {isEn ? 'Reset budget' : 'Nollställ budget'}
           </button>
-
-          <span className="text-[var(--text-tertiary)] opacity-40">•</span>
-
+          <span className="text-[var(--text-tertiary)] opacity-30">•</span>
           <button
             type="button"
             onClick={() => setIsResetCategoriesModalOpen(true)}
-            className="py-2 px-3 text-center text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            className="py-1 px-2 text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            <RotateCcw size={13} strokeWidth={2} />
-            <span>
-              {config.language === 'en'
-                ? 'Reset categories'
-                : 'Återställ kategorier'}
-            </span>
+            {isEn ? 'Reset categories' : 'Återställ kategorier'}
           </button>
         </div>
       </div>
 
-      {/* --- Modals --- */}
-      {/* 1. Category Modal (Create / Edit name, icon, color, budget, delete) */}
+      {/* Modals */}
       <CategoryModal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
@@ -570,18 +492,17 @@ export function BudgetCategoriesView({
         t={t}
       />
 
-      {/* 2. Reset Budget Modal */}
       {showResetBudgetConfirm && (
         <ConfirmModal
           isOpen={showResetBudgetConfirm}
-          title={config.language === 'en' ? 'Reset budget?' : 'Nollställ budgeten?'}
+          title={isEn ? 'Reset budget?' : 'Nollställ budget?'}
           message={
-            config.language === 'en'
-              ? 'Do you want to reset all category budgets to 0? Your income, fixed expenses, and savings will remain unchanged.'
-              : 'Vill du nollställa alla kategoribudgetar till 0 kr? Dina inkomster, fasta utgifter och sparande påverkas inte.'
+            isEn
+              ? 'Reset all category budgets to 0?'
+              : 'Vill du nollställa alla kategoribudgetar till 0 kr?'
           }
-          confirmText={config.language === 'en' ? 'Reset budget' : 'Nollställ budget'}
-          cancelText={config.language === 'en' ? 'Cancel' : 'Avbryt'}
+          confirmText={isEn ? 'Reset' : 'Nollställ'}
+          cancelText={isEn ? 'Cancel' : 'Avbryt'}
           variant="danger"
           onConfirm={handleResetCategoryBudgets}
           onCancel={() => setShowResetBudgetConfirm(false)}
@@ -589,32 +510,28 @@ export function BudgetCategoriesView({
         />
       )}
 
-      {/* 3. Delete Category Migration Modal */}
       {deleteMigrationData && (
         <Modal
           isOpen={!!deleteMigrationData}
           onClose={() => setDeleteMigrationData(null)}
           title={
-            config.language === 'en'
+            isEn
               ? `Delete ${deleteMigrationData.category.name}?`
               : `Ta bort ${deleteMigrationData.category.name}?`
           }
           showCloseButton={true}
-          bodyClassName="p-6 space-y-4"
+          bodyClassName="p-5 space-y-4"
         >
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
-            {config.language === 'en'
-              ? `This category is used by ${deleteMigrationData.count} transactions. Choose which category to move them to before deleting.`
-              : `Kategorin används av ${deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till innan den tas bort.`}
+            {isEn
+              ? `This category is used by ${deleteMigrationData.count} transactions. Choose which category to move them to.`
+              : `Kategorin används av ${deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till.`}
           </p>
-          <div className="space-y-2 mb-2">
-            <label className="text-xs font-semibold font-display tracking-wider text-[var(--text-secondary)]">
-              {config.language === 'en' ? 'Move transactions to:' : 'Flytta transaktioner till:'}
-            </label>
+          <div className="space-y-1.5">
             <select
               value={targetMigrationId}
               onChange={(e) => setTargetMigrationId(e.target.value)}
-              className="w-full h-[48px] bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] px-3 text-[14px] font-normal text-[var(--text-primary)] outline-none"
+              className="w-full h-11 bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] px-3 text-sm font-medium text-[var(--text-primary)] outline-none"
             >
               {(deleteMigrationData.type === 'income'
                 ? config.incomeCategories || []
@@ -628,7 +545,7 @@ export function BudgetCategoriesView({
                 ))}
             </select>
           </div>
-          <div className="flex flex-col gap-2.5 pt-2">
+          <div className="flex flex-col gap-2 pt-1">
             <Button
               onClick={() => {
                 onMigrateAndDeleteCategory?.(
@@ -641,35 +558,34 @@ export function BudgetCategoriesView({
               variant="danger"
               fullWidth
             >
-              {config.language === 'en' ? 'Move & Delete' : 'Flytta & ta bort'}
+              {isEn ? 'Move & Delete' : 'Flytta & ta bort'}
             </Button>
             <Button
               onClick={() => setDeleteMigrationData(null)}
               variant="ghost"
               fullWidth
             >
-              {config.language === 'en' ? 'Cancel' : 'Avbryt'}
+              {isEn ? 'Cancel' : 'Avbryt'}
             </Button>
           </div>
         </Modal>
       )}
 
-      {/* 4. Delete Category Direct Confirm Modal */}
       {deleteConfirmIndex && (
         <ConfirmModal
           isOpen={!!deleteConfirmIndex}
           title={
-            config.language === 'en'
+            isEn
               ? `Delete ${deleteConfirmIndex.category.name}?`
               : `Ta bort ${deleteConfirmIndex.category.name}?`
           }
           message={
-            config.language === 'en'
-              ? 'Are you sure you want to delete this category? It is not used by any transactions.'
-              : 'Är du säker på att du vill ta bort denna kategori? Den används inte av några transaktioner.'
+            isEn
+              ? 'Are you sure you want to delete this category?'
+              : 'Är du säker på att du vill ta bort denna kategori?'
           }
-          confirmText={config.language === 'en' ? 'Delete' : 'Ta bort'}
-          cancelText={config.language === 'en' ? 'Cancel' : 'Avbryt'}
+          confirmText={isEn ? 'Delete' : 'Ta bort'}
+          cancelText={isEn ? 'Cancel' : 'Avbryt'}
           onConfirm={() => {
             const field = deleteConfirmIndex.type === 'income' ? 'incomeCategories' : 'categories';
             const currentCategories = (config[field] as Category[]) || [];
@@ -683,22 +599,17 @@ export function BudgetCategoriesView({
         />
       )}
 
-      {/* 5. Reset Categories to Default Modal */}
       {isResetCategoriesModalOpen && (
         <ConfirmModal
           isOpen={isResetCategoriesModalOpen}
-          title={
-            config.language === 'en'
-              ? 'Reset categories to default?'
-              : 'Återställ kategorier till standard?'
-          }
+          title={isEn ? 'Reset categories?' : 'Återställ kategorier?'}
           message={
-            config.language === 'en'
-              ? 'This will restore all standard expense categories with their original colors and icons.'
-              : 'Detta återställer alla utgiftskategorier till standardlistan med ursprungliga ikoner och färger.'
+            isEn
+              ? 'Restore standard categories?'
+              : 'Vill du återställa till standardkategorierna?'
           }
-          confirmText={config.language === 'en' ? 'Reset' : 'Återställ'}
-          cancelText={config.language === 'en' ? 'Cancel' : 'Avbryt'}
+          confirmText={isEn ? 'Reset' : 'Återställ'}
+          cancelText={isEn ? 'Cancel' : 'Avbryt'}
           variant="danger"
           onConfirm={() => {
             setConfig({
