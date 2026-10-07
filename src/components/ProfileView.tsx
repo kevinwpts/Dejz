@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ToggleSwitch } from './ToggleSwitch';
-import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen } from 'lucide-react';
+import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, SlidersHorizontal, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -47,7 +47,7 @@ interface ProfileViewProps {
   transactions: Transaction[];
   incomes: Income[];
   fixedExpenses: FixedExpense[];
-  initialSection?: 'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'pro' | 'receipts';
+  initialSection?: 'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'pro' | 'receipts' | 'debts' | 'sharedBudget' | 'guides' | 'notifications';
   setCurrentPeriodDate: (date: Date) => void;
   periods: any[];
   onCalculatorClick?: () => void;
@@ -103,7 +103,7 @@ export function ProfileView({
   onRenameCategory,
   onMigrateAndDeleteCategory,
 }: ProfileViewProps) {
-  const [activePage, setActivePage] = useState<'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'pro' | 'receipts' | 'admin'>(initialSection as any);
+  const [activePage, setActivePage] = useState<'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'pro' | 'receipts' | 'debts' | 'sharedBudget' | 'guides' | 'notifications' | 'admin'>(initialSection as any);
 
   const isAdmin = user?.email?.toLowerCase() === 'kevinwpts@gmail.com' || profile?.role === 'admin' || user?.user_metadata?.role === 'admin';
 
@@ -399,32 +399,24 @@ export function ProfileView({
               label={config.language === 'en' ? 'Debts & IOUs' : 'Skyldig (Skulder & utlägg)'} 
               subtitle={config.language === 'en' ? 'Track who owes who' : 'Håll koll på vem som är skyldig vem'}
               onClick={() => handleSectionClick('debts')} 
-              iconBgColor="bg-amber-500/10"
-              iconTextColor="text-amber-600 dark:text-amber-400"
             />
             <SettingsMenuItem 
               icon={Receipt} 
               label={config.language === 'en' ? 'Receipts' : 'Kvitton'} 
               subtitle={config.language === 'en' ? 'All saved receipts' : 'Alla sparade kvitton'}
               onClick={() => handleSectionClick('receipts')} 
-              iconBgColor="bg-sky-500/10"
-              iconTextColor="text-sky-600 dark:text-sky-400"
             />
             <SettingsMenuItem 
               icon={Users2} 
               label={config.language === 'en' ? 'Shared budget' : 'Delad budget (Par-läge)'} 
               subtitle={config.language === 'en' ? 'Budget together with partner' : 'Budgetera ihop med din partner'}
               onClick={() => handleSectionClick('sharedBudget')} 
-              iconBgColor="bg-rose-500/10"
-              iconTextColor="text-rose-500 dark:text-rose-400"
             />
             <SettingsMenuItem 
               icon={BookOpen} 
               label={config.language === 'en' ? 'Guides & instructions' : 'Guider & Instruktioner'} 
               subtitle={config.language === 'en' ? 'Learn how features work' : 'Så fungerar funktionerna i appen'}
               onClick={() => handleSectionClick('guides')} 
-              iconBgColor="bg-indigo-500/10"
-              iconTextColor="text-indigo-600 dark:text-indigo-400"
             />
           </div>
         </div>
@@ -435,6 +427,12 @@ export function ProfileView({
             {t('appSettings')}
           </h4>
           <div className="overflow-hidden rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+            <SettingsMenuItem 
+              icon={Bell} 
+              label={config.language === 'en' ? 'Notifications' : 'Notiser'} 
+              subtitle={config.language === 'en' ? 'Manage notification preferences' : 'Anpassa vilka notiser du vill få'}
+              onClick={() => handleSectionClick('notifications')} 
+            />
             <SettingsMenuItem 
               icon={Palette} 
               label={t('appearance' as any) || 'Utseende'} 

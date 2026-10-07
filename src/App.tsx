@@ -257,6 +257,7 @@ export default function App() {
     | "debts"
     | "sharedBudget"
     | "guides"
+    | "notifications"
   >("main");
   const [settingsSection, setSettingsSection] = useState<
     | "main"
