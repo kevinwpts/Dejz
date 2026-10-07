@@ -18,6 +18,7 @@ export function PeriodTimeline({
   selectedDate,
   onSelectDate,
   language = 'sv',
+  stats,
   categoryFilter = null,
   showFixedInCalendar = true,
 }: PeriodTimelineProps) {
