@@ -193,32 +193,91 @@ export function CategoryBottomSheetModal({
 
             {/* Scrollable Body Content */}
             <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0">
-              {/* Category Budget Status Card - Ultra-compact, clean & lightweight */}
-              <div className="py-2.5 px-3.5 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shrink-0 space-y-1.5">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-baseline gap-1.5">
-                    {categoryData?.hasBudget ? (
-                      categoryData.isOverBudget ? (
-                        <span className="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-500 font-amount tabular-nums">
-                          +{formatAmount(Math.abs(categoryData.remaining), language)} {curr}
+              {/* Category Budget Status Card - Clear context of spent vs total budget */}
+              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shrink-0 space-y-2.5">
+                {categoryData?.hasBudget ? (
+                  <>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        {categoryData.isOverBudget ? (
+                          <>
+                            <span className="text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-500 font-amount tabular-nums">
+                              +{formatAmount(Math.abs(categoryData.remaining), language)} {curr}
+                            </span>
+                            <span className="text-xs sm:text-sm font-semibold text-rose-600 dark:text-rose-500">
+                              {isEn 
+                                ? `over budget (budget: ${formatAmount(Math.round(categoryData.budget), language)} ${curr})` 
+                                : `över budget (budget: ${formatAmount(Math.round(categoryData.budget), language)} ${curr})`}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                              {formatAmount(categoryData.remaining, language)} {curr}
+                            </span>
+                            <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
+                              {isEn ? 'left of' : 'kvar av'}{' '}
+                              <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
+                                {formatAmount(Math.round(categoryData.budget), language)} {curr}
+                              </span>
+                            </span>
+                          </>
+                        )}
+                      </div>
+
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border tabular-nums shrink-0 ${
+                        categoryData.isOverBudget 
+                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' 
+                          : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-black/5 dark:border-white/10'
+                      }`}>
+                        {Math.round((categoryData.spent / (categoryData.budget || 1)) * 100)}%
+                      </span>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 bg-black/[0.05] dark:bg-white/[0.08] rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          categoryData.isOverBudget ? 'bg-rose-500' : ''
+                        }`}
+                        style={{
+                          width: `${Math.min(100, Math.round((categoryData.spent / (categoryData.budget || 1)) * 100))}%`,
+                          backgroundColor: !categoryData.isOverBudget ? categoryColor : undefined,
+                        }}
+                      />
+                    </div>
+
+                    {/* Clear Context: Spenderat X kr av Y kr budget */}
+                    <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] font-medium pt-0.5">
+                      <div className="flex items-center gap-1">
+                        <span className="opacity-80">{isEn ? 'Spent' : 'Spenderat'}:</span>
+                        <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
+                          {formatAmount(Math.round(categoryData.spent), language)} {curr}
                         </span>
-                      ) : (
-                        <span className="text-lg sm:text-xl font-bold text-[var(--text-primary)] font-amount tabular-nums">
-                          {formatAmount(categoryData.remaining, language)} {curr}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="opacity-80">{isEn ? 'Budget' : 'Satt budget'}:</span>
+                        <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
+                          {formatAmount(Math.round(categoryData.budget), language)} {curr}
                         </span>
-                      )
-                    ) : (
-                      <span className="text-lg sm:text-xl font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] font-amount tabular-nums">
                         {formatAmount(categoryData?.spent || 0, language)} {curr}
                       </span>
-                    )}
-                    <span className="text-xs font-medium text-[var(--text-secondary)]">
-                      {categoryData?.hasBudget
-                        ? (categoryData.isOverBudget ? (isEn ? 'over budget' : 'över budget') : (isEn ? 'left' : 'kvar'))
-                        : (isEn ? 'spent' : 'totalt spenderat')}
-                    </span>
+                      <span className="text-xs font-medium text-[var(--text-secondary)]">
+                        {isEn ? 'total spent' : 'totalt spenderat'}
+                      </span>
+                    </div>
+                    <p className="text-[11.5px] text-[var(--text-tertiary)] mt-1">
+                      {isEn ? 'No budget set for this category' : 'Ingen budget satt för denna kategori'}
+                    </p>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Transactions List */}
