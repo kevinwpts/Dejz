@@ -402,6 +402,32 @@ export function TodayView({
                     </motion.button>
                   );
                 })}
+
+                {/* Manage Button at the end of the category carousel */}
+                <motion.button
+                  key="manage-categories"
+                  initial={{ opacity: 0, scale: 0.97, x: 6 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  transition={{ delay: 0.04 + categoryBudgetData.length * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
+                  onClick={() => {
+                    if (typeof feedback.light === 'function') feedback.light();
+                    onNavigate("budget", "category-budgets");
+                  }}
+                  className="flex-shrink-0 w-[100px] sm:w-[110px] h-[100px] sm:h-[110px] p-3 rounded-[22px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/15 dark:border-white/15 flex flex-col items-center justify-between text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                  aria-label={lang === 'en' ? 'Manage budget' : 'Hantera budget'}
+                >
+                  <div className="w-8 h-8 rounded-[12px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                    <SlidersHorizontal size={16} strokeWidth={2} />
+                  </div>
+
+                  <span className="text-[12px] font-bold text-[var(--text-primary)] tracking-tight max-w-[90px] truncate px-0.5">
+                    {lang === 'en' ? 'Manage' : 'Hantera'}
+                  </span>
+
+                  <span className="text-[10px] font-medium text-[var(--text-secondary)] tracking-tight whitespace-nowrap bg-black/[0.04] dark:bg-white/[0.06] px-2 py-0.5 rounded-full">
+                    {lang === 'en' ? 'Budget' : 'Budget'}
+                  </span>
+                </motion.button>
               </div>
             ) : (
               <button
