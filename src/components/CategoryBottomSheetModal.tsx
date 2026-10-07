@@ -247,21 +247,7 @@ export function CategoryBottomSheetModal({
                       />
                     </div>
 
-                    {/* Clear Context: Spenderat X kr av Y kr budget */}
-                    <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] font-medium pt-0.5">
-                      <div className="flex items-center gap-1">
-                        <span className="opacity-80">{isEn ? 'Spent' : 'Spenderat'}:</span>
-                        <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
-                          {formatAmount(Math.round(categoryData.spent), language)} {curr}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="opacity-80">{isEn ? 'Budget' : 'Satt budget'}:</span>
-                        <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
-                          {formatAmount(Math.round(categoryData.budget), language)} {curr}
-                        </span>
-                      </div>
-                    </div>
+
                   </>
                 ) : (
                   <div>
