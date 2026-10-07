@@ -529,40 +529,35 @@ export function TodayView({
 
           {/* Fixed transactions for the day */}
           {displayedFixedTransactions.length > 0 && (
-            <div className="space-y-2 pt-1">
-              <h4 className="text-[11px] font-bold tracking-wider text-[var(--text-tertiary)] px-1">
-                {lang === "en" ? "Fixed transactions" : "Fasta transaktioner"}
-              </h4>
-              <div className="space-y-2.5">
-                {displayedFixedTransactions.map((item) => {
-                  const tx: Transaction = {
-                    id: item.id,
-                    merchant: item.merchant,
-                    category: item.category,
-                    amount: item.amount,
-                    type: item.type as any,
-                    date: selectedDate.toISOString(),
-                  };
+            <div className="space-y-2.5">
+              {displayedFixedTransactions.map((item) => {
+                const tx: Transaction = {
+                  id: item.id,
+                  merchant: item.merchant,
+                  category: item.category,
+                  amount: item.amount,
+                  type: item.type as any,
+                  date: selectedDate.toISOString(),
+                };
 
-                  return (
-                    <TransactionItem
-                      key={item.id}
-                      transaction={tx}
-                      isFixed={true}
-                      config={config}
-                      onClick={() => {
-                        if (item.type === "income" && onViewIncome) {
-                          onViewIncome(item.originalItem);
-                        } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
-                          onViewMonthlySaving(item.originalItem);
-                        } else if (onViewFixedExpense) {
-                          onViewFixedExpense(item.originalItem);
-                        }
-                      }}
-                    />
-                  );
-                })}
-              </div>
+                return (
+                  <TransactionItem
+                    key={item.id}
+                    transaction={tx}
+                    isFixed={true}
+                    config={config}
+                    onClick={() => {
+                      if (item.type === "income" && onViewIncome) {
+                        onViewIncome(item.originalItem);
+                      } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
+                        onViewMonthlySaving(item.originalItem);
+                      } else if (onViewFixedExpense) {
+                        onViewFixedExpense(item.originalItem);
+                      }
+                    }}
+                  />
+                );
+              })}
             </div>
           )}
         </div>
