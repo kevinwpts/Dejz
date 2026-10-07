@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
+import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, LayoutGrid } from 'lucide-react';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
@@ -57,6 +57,8 @@ export function BudgetView({
 }: BudgetViewProps) {
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
   const [isBudgetFilterModalOpen, setIsBudgetFilterModalOpen] = React.useState(false);
+  const [freqFilter, setFreqFilter] = React.useState<'all' | 'monthly' | 'annually'>('all');
+  const [isFreqFilterModalOpen, setIsFreqFilterModalOpen] = React.useState(false);
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
   });
@@ -145,6 +147,22 @@ export function BudgetView({
 
   const activeFixedExpenses = React.useMemo(() => getActiveFixedExpenses(fixedExpenses), [fixedExpenses]);
   const cancelledFixedExpenses = React.useMemo(() => getCancelledFixedExpenses(fixedExpenses), [fixedExpenses]);
+
+  const filteredCancelledFixedExpenses = React.useMemo(() => {
+    if (freqFilter === 'monthly') {
+      return cancelledFixedExpenses.filter(e => {
+        const freq = e.frequency || Frequency.MONTHLY;
+        return freq === Frequency.MONTHLY || freq === Frequency.QUARTERLY || freq === Frequency.SEMI_ANNUALLY;
+      });
+    }
+    if (freqFilter === 'annually') {
+      return cancelledFixedExpenses.filter(e => {
+        const freq = e.frequency || Frequency.MONTHLY;
+        return freq === Frequency.ANNUALLY;
+      });
+    }
+    return cancelledFixedExpenses;
+  }, [cancelledFixedExpenses, freqFilter]);
 
   const sortedFixedExpenses = React.useMemo(() => {
     const list = [...(activeFixedExpenses || [])];
@@ -267,7 +285,7 @@ export function BudgetView({
       className="space-y-6 font-sans"
     >
       {/* Budget Filter Single Selector Button */}
-      <div className="w-full">
+      <div className="flex items-center gap-2 w-full">
         <FilterSelectButton
           icon={
             budgetFilter === 'fixed' ? <Calendar size={15} strokeWidth={2} /> :
@@ -280,8 +298,21 @@ export function BudgetView({
             (t('monthlySavings' as TranslationKey) || (config?.language === 'en' ? 'Monthly savings' : 'Månadssparande'))
           }
           onClick={() => setIsBudgetFilterModalOpen(true)}
-          className="w-full"
+          className={budgetFilter === 'fixed' ? 'flex-[1.25] min-w-0' : 'w-full'}
         />
+
+        {budgetFilter === 'fixed' && (
+          <FilterSelectButton
+            icon={<LayoutGrid size={15} strokeWidth={2} />}
+            value={
+              freqFilter === 'all' ? (config?.language === 'en' ? 'All' : 'Alla') :
+              freqFilter === 'monthly' ? (config?.language === 'en' ? 'Monthly' : 'Månadsvis') :
+              (config?.language === 'en' ? 'Annually' : 'Årsvis')
+            }
+            onClick={() => setIsFreqFilterModalOpen(true)}
+            className="flex-1 min-w-0"
+          />
+        )}
 
         <FilterMenuModal
           isOpen={isBudgetFilterModalOpen}
@@ -307,6 +338,33 @@ export function BudgetView({
             },
           ]}
         />
+
+        {budgetFilter === 'fixed' && (
+          <FilterMenuModal
+            isOpen={isFreqFilterModalOpen}
+            onClose={() => setIsFreqFilterModalOpen(false)}
+            title={config?.language === 'en' ? 'Select frequency' : 'Välj periodicitet'}
+            selectedId={freqFilter}
+            onSelect={(id) => setFreqFilter(id as 'all' | 'monthly' | 'annually')}
+            options={[
+              {
+                id: 'all',
+                label: config?.language === 'en' ? 'All' : 'Alla',
+                icon: <LayoutGrid size={16} strokeWidth={2} />,
+              },
+              {
+                id: 'monthly',
+                label: config?.language === 'en' ? 'Monthly' : 'Månadsvis',
+                icon: <Calendar size={16} strokeWidth={2} />,
+              },
+              {
+                id: 'annually',
+                label: config?.language === 'en' ? 'Annually' : 'Årsvis',
+                icon: <Calendar size={16} strokeWidth={2} />,
+              },
+            ]}
+          />
+        )}
       </div>
 
       {/* Overview Hero Section - Dynamic based on filter */}
@@ -456,41 +514,51 @@ export function BudgetView({
                     { freq: Frequency.QUARTERLY, label: config.language === 'en' ? 'Quarterly' : 'Kvartalsvis', suffix: config.language === 'en' ? '/quarter' : '/kvartal' },
                     { freq: Frequency.SEMI_ANNUALLY, label: config.language === 'en' ? 'Semi-annually' : 'Halvårsvis', suffix: config.language === 'en' ? '/half-year' : '/halvår' },
                     { freq: Frequency.ANNUALLY, label: config.language === 'en' ? 'Annually' : 'Årsvis', suffix: config.language === 'en' ? '/yr' : '/år' },
-                  ] as const).map(({ freq, label, suffix }) => {
-                    const items = groupedFixedExpenses[freq];
-                    if (!items || items.length === 0) return null;
+                  ] as const)
+                    .filter(({ freq }) => {
+                      if (freqFilter === 'monthly') {
+                        return freq === Frequency.MONTHLY || freq === Frequency.QUARTERLY || freq === Frequency.SEMI_ANNUALLY;
+                      }
+                      if (freqFilter === 'annually') {
+                        return freq === Frequency.ANNUALLY;
+                      }
+                      return true;
+                    })
+                    .map(({ freq, label, suffix }) => {
+                      const items = groupedFixedExpenses[freq];
+                      if (!items || items.length === 0) return null;
 
-                    const sum = groupedFixedSums[freq] || 0;
+                      const sum = groupedFixedSums[freq] || 0;
 
-                    return (
-                      <div key={freq} className="space-y-3">
-                        <div className="flex items-baseline justify-between px-1.5 select-none">
-                          <h3 className="text-xs font-semibold text-[var(--text-secondary)] tracking-wider uppercase">
-                            {label}
-                          </h3>
-                          <span className="text-base font-bold text-[var(--text-primary)] font-amount tabular-nums">
-                            {formatAmount(Math.round(sum), config.language)} {config.currency || 'kr'}{suffix}
-                          </span>
+                      return (
+                        <div key={freq} className="space-y-3">
+                          <div className="flex items-baseline justify-between px-1.5 select-none">
+                            <h3 className="text-xs font-semibold text-[var(--text-secondary)] tracking-wider uppercase">
+                              {label}
+                            </h3>
+                            <span className="text-base font-bold text-[var(--text-primary)] font-amount tabular-nums">
+                              {formatAmount(Math.round(sum), config.language)} {config.currency || 'kr'}{suffix}
+                            </span>
+                          </div>
+                          <div className="space-y-2.5">
+                            {items.map((expense) => (
+                              <BudgetItem 
+                                key={expense.id}
+                                item={expense} 
+                                onClick={() => onViewFixedExpense(expense)} 
+                                currency={config.currency} 
+                                type="expense"
+                                language={config.language as Language}
+                                t={t}
+                                config={config}
+                                currentPeriodId={currentPeriodId}
+                                isGrouped={true}
+                              />
+                            ))}
+                          </div>
                         </div>
-                        <div className="space-y-2.5">
-                          {items.map((expense) => (
-                            <BudgetItem 
-                              key={expense.id}
-                              item={expense} 
-                              onClick={() => onViewFixedExpense(expense)} 
-                              currency={config.currency} 
-                              type="expense"
-                              language={config.language as Language}
-                              t={t}
-                              config={config}
-                              currentPeriodId={currentPeriodId}
-                              isGrouped={true}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               ) : (
                 <EmptyState 
@@ -502,7 +570,7 @@ export function BudgetView({
               )}
 
               {/* Cancelled Subscriptions Native Section */}
-              {cancelledFixedExpenses.length > 0 && (
+              {filteredCancelledFixedExpenses.length > 0 && (
                 <div className="space-y-3 pt-8 mt-8 border-t border-dashed border-black/[0.08] dark:border-white/10">
                   <div className="flex items-center justify-between px-1.5 select-none">
                     <h3 className="text-xs font-semibold text-amber-600 dark:text-amber-500 tracking-wider uppercase flex items-center gap-1.5">
@@ -510,11 +578,11 @@ export function BudgetView({
                       {config.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
                     </h3>
                     <span className="text-xs font-medium text-[var(--text-secondary)]">
-                      {cancelledFixedExpenses.length}
+                      {filteredCancelledFixedExpenses.length}
                     </span>
                   </div>
                   <div className="space-y-2.5 opacity-60 hover:opacity-100 transition-opacity duration-200">
-                    {cancelledFixedExpenses.map((expense) => (
+                    {filteredCancelledFixedExpenses.map((expense) => (
                       <BudgetItem 
                         key={expense.id}
                         item={expense} 
