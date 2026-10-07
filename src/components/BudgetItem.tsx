@@ -2,7 +2,7 @@ import React from 'react';
 import { CategoryIcon } from './CategoryIcon';
 import { Language, TranslationKey } from '../i18n';
 import { formatAmount, capitalize, formatDeductionDayDisplay } from '../utils/format';
-import { Config } from '../types';
+import { Config, Frequency } from '../types';
 import { TransactionLogo } from './TransactionLogo';
 import { getCategoryIconName } from '../utils/icons';
 import { Calendar } from 'lucide-react';
@@ -139,11 +139,28 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
       
       {/* Right side: Amount + Deduction metadata */}
       <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-        <p className={`text-[12px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
-          <span className="opacity-75 mr-0.5">{type === 'income' ? '+' : '−'}</span>
-          <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
-          <span className="text-[10px] font-normal text-[#777168] dark:text-[#A8A8A8] ml-[2px]">{currency}</span>
-        </p>
+        {(() => {
+          let freqSuffix = '';
+          if (type === 'expense' && item.frequency) {
+            const freq = item.frequency;
+            if (freq === 'Månadsvis' || freq === 'MONTHLY' || freq === Frequency.MONTHLY) {
+              freqSuffix = language === 'en' ? '/mo' : '/mån';
+            } else if (freq === 'Kvartalsvis' || freq === 'QUARTERLY' || freq === Frequency.QUARTERLY) {
+              freqSuffix = language === 'en' ? '/quarter' : '/kvartal';
+            } else if (freq === 'Halvårsvis' || freq === 'SEMI_ANNUALLY' || freq === Frequency.SEMI_ANNUALLY) {
+              freqSuffix = language === 'en' ? '/half-year' : '/halvår';
+            } else if (freq === 'Årsvis' || freq === 'ANNUALLY' || freq === Frequency.ANNUALLY) {
+              freqSuffix = language === 'en' ? '/yr' : '/år';
+            }
+          }
+          return (
+            <p className={`text-[12px] font-medium whitespace-nowrap tracking-tight ${amountColor}`}>
+              <span className="opacity-75 mr-0.5">{type === 'income' ? '+' : '−'}</span>
+              <span className="font-amount tabular-nums font-medium tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
+              <span className="text-[10px] font-normal text-[#777168] dark:text-[#A8A8A8] ml-[2px]">{currency}{freqSuffix}</span>
+            </p>
+          );
+        })()}
 
         {/* Right-aligned deduction metadata micro-badges */}
         {(dayString || paymentString) && (
