@@ -26,13 +26,12 @@ export function BudgetSummaryModule({
   transactions, 
   fixedExpenses, 
   totalSpentOverride,
-  budgetUsedPctOverride,
   remainingBudgetOverride,
   effectiveBudgetOverride,
   previousPeriodComparisonText,
   filterMode = 'all'
 }: BudgetSummaryModuleProps) {
-  const [activeInfoModal, setActiveInfoModal] = useState<'remaining' | 'budgetUsed' | null>(null);
+  const [isRemainingInfoOpen, setIsRemainingInfoOpen] = useState(false);
 
   const filteredExpenses = useMemo(() => {
     if (!stats || !transactions) return [];
@@ -97,10 +96,6 @@ export function BudgetSummaryModule({
     ? remainingBudgetOverride 
     : (effectiveBudget - totalSpent);
 
-  const budgetUsedPct = budgetUsedPctOverride !== undefined 
-    ? budgetUsedPctOverride 
-    : (effectiveBudget > 0 ? Math.round((totalSpent / effectiveBudget) * 100) : 0);
-
   if (!stats) return null;
 
   const isOverBudget = remainingBudget < 0;
@@ -126,8 +121,8 @@ export function BudgetSummaryModule({
 
   return (
     <div className="space-y-3 font-sans">
-      {/* Clean Single Summary Card */}
-      <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-5">
+      {/* Clean Single Summary Card without progress bar */}
+      <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border-none shadow-none">
         {/* Top Split: Spenderat (Large) vs Kvar att spendera (Slightly smaller) */}
         <div className="grid grid-cols-2 gap-4 items-start">
           {/* Spenderat */}
@@ -158,7 +153,7 @@ export function BudgetSummaryModule({
               </span>
               <button
                 type="button"
-                onClick={() => setActiveInfoModal('remaining')}
+                onClick={() => setIsRemainingInfoOpen(true)}
                 className="w-4 h-4 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center justify-center transition-colors cursor-pointer"
                 title="Förklaring"
                 aria-label="Förklaring"
@@ -179,40 +174,13 @@ export function BudgetSummaryModule({
             </div>
           </div>
         </div>
-
-        {/* Progress Bar & Label section */}
-        <div 
-          onClick={() => setActiveInfoModal('budgetUsed')}
-          className="space-y-2 pt-2 cursor-pointer group"
-        >
-          {/* Progress Bar */}
-          <div className="w-full h-2.5 rounded-full bg-black/[0.04] dark:bg-white/[0.06] overflow-hidden">
-            <div 
-              className="h-full rounded-full transition-all duration-500"
-              style={{ 
-                width: `${Math.min(100, Math.max(0, budgetUsedPct))}%`,
-                backgroundColor: isOverBudget ? '#E11D48' : 'var(--accent-color)'
-              }}
-            />
-          </div>
-
-          {/* Label under progressbar */}
-          <div className="flex items-center justify-between text-[13px] font-medium text-[var(--text-secondary)]">
-            <span>
-              <span className="font-amount tabular-nums font-semibold text-[var(--text-primary)]">{budgetUsedPct}%</span> {isEn ? 'of budget used' : 'av budgeten använd'}
-            </span>
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[11px] text-[var(--accent-color)]">
-              {isEn ? 'View details' : 'Visa detaljer'}
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* Info Modal för Kvar att spendera */}
-      {activeInfoModal === 'remaining' && (
+      {isRemainingInfoOpen && (
         <Modal
           isOpen={true}
-          onClose={() => setActiveInfoModal(null)}
+          onClose={() => setIsRemainingInfoOpen(false)}
           title={isPastPeriod 
             ? (isEn ? 'Left at period end' : 'Kvar vid periodens slut')
             : (isEn ? 'Remaining to spend' : 'Kvar att spendera')}
@@ -222,29 +190,11 @@ export function BudgetSummaryModule({
             <p>
               {isEn 
                 ? (isPastPeriod
-                    ? 'Remaining budget at period end is calculated as your total period income (or disposable pot) minus your total spent and recorded fixed expenses.'
-                    : 'Remaining budget is calculated as your total period income (or disposable pot) minus your total spent and recorded fixed expenses.')
+                    ? 'Remaining at period end reflects the financial result for the entire period (income minus fixed expenses due in the period, planned savings, and variable expenses). This amount applies to your overall finances for the period, regardless of which expense filter is selected in the analysis.'
+                    : 'Remaining to spend reflects how much money is available for your entire finances until next payday (income minus fixed expenses due in the period, planned savings, and variable expenses spent so far). This amount applies to your overall finances for the period, regardless of which expense filter is selected in the analysis.')
                 : (isPastPeriod
-                    ? 'Kvar vid periodens slut beräknas som din totala inkomst för perioden (eller rörlig pott) minus det du har spenderat och bokförda fasta utgifter.'
-                    : 'Kvar att spendera beräknas som din totala inkomst för perioden (eller rörlig pott) minus det du har spenderat och bokförda fasta utgifter.')}
-            </p>
-          </div>
-        </Modal>
-      )}
-
-      {/* Info Modal för Budget Used */}
-      {activeInfoModal === 'budgetUsed' && (
-        <Modal
-          isOpen={true}
-          onClose={() => setActiveInfoModal(null)}
-          title={isEn ? 'Budget usage' : 'Budgetanvändning'}
-          size="sm"
-        >
-          <div className="space-y-3.5 text-[14px] text-[var(--text-secondary)]">
-            <p>
-              {isEn
-                ? `You have used ${budgetUsedPct}% (${formatAmount(Math.round(totalSpent), config.language)} ${config.currency || 'kr'}) of your total budget of ${formatAmount(Math.round(effectiveBudget), config.language)} ${config.currency || 'kr'}.`
-                : `Du har använt ${budgetUsedPct}% (${formatAmount(Math.round(totalSpent), config.language)} ${config.currency || 'kr'}) av din totala budget på ${formatAmount(Math.round(effectiveBudget), config.language)} ${config.currency || 'kr'}.`}
+                    ? 'Kvar vid periodens slut visar det faktiska kvarvarande beloppet för hela periodens ekonomi (inkomster minus fasta utgifter som hör till perioden, planerat sparande och rörliga utgifter). Beloppet gäller hela din ekonomi för perioden, oavsett vilket utgiftsfilter du har valt i analysen.'
+                    : 'Kvar att spendera visar hur mycket pengar som finns kvar för hela din ekonomi fram till nästa lön (inkomster minus fasta utgifter som hör till perioden, planerat sparande och rörliga utgifter som redan spenderats). Beloppet gäller hela din ekonomi för perioden, oavsett vilket utgiftsfilter du har valt i analysen.')}
             </p>
           </div>
         </Modal>
