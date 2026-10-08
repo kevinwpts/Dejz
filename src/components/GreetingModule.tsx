@@ -8,32 +8,15 @@ import { getBudgetStatus } from '../utils/budgetStatus';
 
 interface GreetingModuleProps {
   userName?: string;
-  availableForD: number;
   currency: string;
-  isToday: boolean;
-  date: Date;
   language: string;
   stats: any;
   t: (key: TranslationKey, params?: Record<string, string | number>) => string;
   calendarDays: any[];
-  setSelectedDate: (date: Date) => void;
-  setCurrentPeriodDate?: (date: Date) => void;
   periodStart: Date;
   periodEnd: Date;
-  isFuturePeriod: boolean;
-  isPastPeriod: boolean;
-  periods?: any[];
-  variant?: 'default' | 'compact';
-  showPeriodSelector?: boolean;
-  avatarUrl?: string | null;
-  onNavigate: (tab: string, section?: string) => void;
-  showFixedInCalendar?: boolean;
-  isCurrentPeriod?: boolean;
-  currentPeriodDate?: Date;
-  config: any;
-  onUpdateConfig?: (newConfig: any) => void;
-  allTransactions?: any[];
 }
+
 export function GreetingModule({
   currency,
   language,
