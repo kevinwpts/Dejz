@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, RotateCcw, Trash2, CheckCircle2, Clock, Sparkles, Pencil } from 'lucide-react';
+import { BottomSheet } from './ui';
+import { RotateCcw, Trash2, CheckCircle2, Clock, Sparkles, Pencil } from 'lucide-react';
+
 import { FixedExpense, Config } from '../types';
 import { formatAmount } from '../utils/format';
 import { isExpenseCancelledAndExpired } from '../utils/cancellation';
@@ -71,47 +71,15 @@ export function CancelledSubscriptionsModal({
     setEditingExpenseId(null);
   };
 
-  const modalContent = (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0"
-        />
-
-        <motion.div
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-          onClick={(e) => e.stopPropagation()}
-          className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans"
-        >
-          {/* Handle */}
-          <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
-
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
-            <div>
-              <h3 className="text-base sm:text-lg font-semibold font-display tracking-tight text-[var(--text-primary)]">
-                {isEn ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
-              </h3>
-              <p className="text-xs font-medium text-[var(--text-tertiary)] mt-0.5">
-                {isEn ? 'Overview of ended or cancelling subscriptions' : 'Översikt över uppsagda och avslutade tjänster'}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer border-none shadow-none"
-            >
-              <X size={17} strokeWidth={2} />
-            </button>
-          </div>
+  return (
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEn ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
+      subtitle={isEn ? 'Overview of ended or cancelling subscriptions' : 'Översikt över uppsagda och avslutade tjänster'}
+      size="lg"
+      zIndex={140}
+    >
 
           {/* Body */}
           <div className="p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
@@ -268,20 +236,7 @@ export function CancelledSubscriptionsModal({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-black/[0.06] dark:border-white/[0.08] bg-white dark:bg-[#1C1C1C] flex justify-end shrink-0 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full sm:w-auto px-6 h-11 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-primary)] text-sm font-semibold border border-black/5 dark:border-white/10 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center"
-            >
-              {isEn ? 'Close' : 'Stäng'}
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
+    </BottomSheet>
   );
-
-  if (typeof document === 'undefined' || !document.body) return null;
-  return createPortal(modalContent, document.body);
 }
+

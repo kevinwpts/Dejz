@@ -5659,11 +5659,11 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-[#EFECE6] dark:bg-[#1C1C1C] w-full sm:max-w-xl rounded-t-[32px] sm:rounded-[32px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
+              className="bg-[var(--bg-color)] dark:bg-[#191919] w-full sm:max-w-xl rounded-t-[28px] sm:rounded-[28px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle / Drag Pill */}
-              <div className="w-12 h-1.5 bg-black/20 dark:bg-white/20 rounded-full mx-auto my-1 shrink-0 cursor-grab active:cursor-grabbing" />
+              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-1 mb-2 shrink-0 cursor-grab active:cursor-grabbing" />
 
               {/* The 3 Action Buttons */}
               <div className="grid grid-cols-3 gap-3 justify-items-center py-2">
