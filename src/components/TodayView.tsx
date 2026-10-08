@@ -411,7 +411,7 @@ export function TodayView({
                   transition={{ delay: 0.04 + categoryBudgetData.length * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                   onClick={() => {
                     if (typeof feedback.light === 'function') feedback.light();
-                    onNavigate("profile", "categories");
+                    onNavigate("budget");
                   }}
                   className="flex-shrink-0 w-[100px] sm:w-[110px] h-[100px] sm:h-[110px] p-3 rounded-[22px] bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/5 border-none flex flex-col items-center justify-between text-center group cursor-pointer transition-all active:scale-95 shadow-none"
                   aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}

@@ -340,7 +340,7 @@ export function BudgetCategoriesView({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="bg-[var(--surface-color)] rounded-[20px] p-4 space-y-2.5"
+              className="sticky top-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md rounded-[20px] p-4 shadow-sm border border-black/[0.04] dark:border-white/[0.04] space-y-2.5"
             >
               <div className="flex items-baseline justify-between">
                 <div className="space-y-0.5">
@@ -348,7 +348,7 @@ export function BudgetCategoriesView({
                     {isEn ? 'Left to allocate' : 'Kvar att fördela'}
                   </span>
                   <div
-                    className={`text-2xl font-extrabold tracking-tight font-amount tabular-nums ${
+                    className={`text-xl font-extrabold tracking-tight font-amount tabular-nums ${
                       isOverAllocated
                         ? 'text-rose-600 dark:text-rose-400'
                         : remainingToAllocate === 0
@@ -362,13 +362,13 @@ export function BudgetCategoriesView({
                   </div>
                 </div>
 
-                <div className="text-right text-xs font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                <div className="text-right text-[11px] font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
                   {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
                 </div>
               </div>
 
               {/* Diskret förloppslinje */}
-              <div className="w-full h-1.5 bg-black/[0.04] dark:bg-white/[0.06] rounded-full overflow-hidden">
+              <div className="w-full h-1 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
                     isOverAllocated ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
