@@ -288,7 +288,7 @@ export function ReceiptCameraModal({
       <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-black">
         {/* Error Fallback */}
         {cameraError ? (
-          <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-[28px] bg-[#1C1C1C] border border-white/[0.08] space-y-4">
+          <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-[16px] bg-[#1C1C1C] border border-white/[0.08] space-y-4">
             <div className="w-14 h-14 mx-auto rounded-full bg-white/10 border border-white/10 text-white flex items-center justify-center">
               <AlertCircle size={26} strokeWidth={2} />
             </div>

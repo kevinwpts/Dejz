@@ -24,7 +24,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     const baseStyles =
       'inline-flex items-center justify-center transition-all duration-150 active:scale-90 select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none shrink-0';
 
-    const shapeStyles = shape === 'circle' ? 'rounded-full' : 'rounded-[14px]';
+    const shapeStyles = shape === 'circle' ? 'rounded-full' : 'rounded-[8px]';
 
     const sizeStyles = {
       xs: 'w-6 h-6 text-xs',

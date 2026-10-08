@@ -49,7 +49,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             disabled={disabled}
-            className={`w-full h-[48px] bg-black/5 dark:bg-white/5 border-none rounded-[14px] ${icon ? 'pl-10' : 'px-4'} ${
+            className={`w-full h-[48px] bg-black/5 dark:bg-white/5 border-none rounded-[10px] ${icon ? 'pl-10' : 'px-4'} ${
               iconRight ? 'pr-10' : 'px-4'
             } font-normal text-sm text-[#1C1917] dark:text-white caret-[var(--accent-color)] outline-none transition-all placeholder:font-normal placeholder-[#777168] dark:placeholder-[#B8B8B8] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
             {...props}

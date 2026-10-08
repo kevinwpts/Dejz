@@ -25,15 +25,15 @@ export function SegmentedControl<T extends string = string>({
   className = '',
 }: SegmentedControlProps<T>) {
   const sizeStyles = {
-    sm: 'p-1 rounded-full text-xs',
-    md: 'p-1 rounded-full text-xs sm:text-sm',
-    lg: 'p-1.5 rounded-full text-sm',
+    sm: 'p-1 rounded-[8px] text-xs',
+    md: 'p-1 rounded-[10px] text-xs sm:text-sm',
+    lg: 'p-1.5 rounded-[10px] text-sm',
   }[size];
 
   const itemSizeStyles = {
-    sm: 'py-1.5 px-3 rounded-full',
-    md: 'py-2 px-4 rounded-full',
-    lg: 'py-2.5 px-5 rounded-full',
+    sm: 'py-1.5 px-3 rounded-[6px]',
+    md: 'py-2 px-4 rounded-[8px]',
+    lg: 'py-2.5 px-5 rounded-[8px]',
   }[size];
 
   return (

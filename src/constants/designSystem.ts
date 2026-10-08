@@ -62,13 +62,13 @@ export const DS = {
   colors: DEJZ_COLORS,
 
   radius: {
-    modal: 'rounded-t-[28px] sm:rounded-[28px]',
-    card: 'rounded-[22px]',
-    input: 'rounded-[14px]',
-    button: 'rounded-[14px]',
-    icon: 'rounded-[14px]',
+    modal: 'rounded-t-[16px] sm:rounded-[16px]',
+    card: 'rounded-[12px]',
+    input: 'rounded-[10px]',
+    button: 'rounded-[10px]',
+    icon: 'rounded-[8px]',
     pill: 'rounded-full',
-    bottomNav: 'rounded-[28px]',
+    bottomNav: 'rounded-[16px]',
   },
 
   heights: {

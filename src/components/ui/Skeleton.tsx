@@ -8,12 +8,12 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const roundedMap = {
   none: 'rounded-none',
-  sm: 'rounded-full',
-  md: 'rounded-[14px]',
-  lg: 'rounded-[14px]',
-  xl: 'rounded-[22px]',
-  '2xl': 'rounded-[22px]',
-  '3xl': 'rounded-[28px]',
+  sm: 'rounded-[6px]',
+  md: 'rounded-[8px]',
+  lg: 'rounded-[10px]',
+  xl: 'rounded-[12px]',
+  '2xl': 'rounded-[12px]',
+  '3xl': 'rounded-[16px]',
   full: 'rounded-full',
 };
 
@@ -44,7 +44,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
 export const TransactionItemSkeleton: React.FC = () => {
   return (
-    <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-4 flex items-center justify-between gap-3 shadow-none border-none select-none">
+    <div className="bg-white dark:bg-[#1C1C1C] rounded-[12px] p-4 flex items-center justify-between gap-3 shadow-none border-none select-none">
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Logo skeleton */}
         <Skeleton className="w-[42px] h-[42px] shrink-0" rounded="full" />

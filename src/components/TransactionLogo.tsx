@@ -67,23 +67,23 @@ export function TransactionLogo({
 
   const sizeConfig = {
     xl: {
-      container: 'w-16 h-16 rounded-[14px]',
+      container: 'w-16 h-16 rounded-[10px]',
       icon: 30,
     },
     lg: {
-      container: 'w-14 h-14 rounded-[14px]',
+      container: 'w-14 h-14 rounded-[10px]',
       icon: 26,
     },
     md: {
-      container: 'w-[42px] h-[42px] rounded-[12px]',
+      container: 'w-[42px] h-[42px] rounded-[8px]',
       icon: 20,
     },
     sm: {
-      container: 'w-8 h-8 rounded-[12px]',
+      container: 'w-8 h-8 rounded-[6px]',
       icon: 15,
     },
   }[size] || {
-    container: 'w-[42px] h-[42px] rounded-[12px]',
+    container: 'w-[42px] h-[42px] rounded-[8px]',
     icon: 20,
   };
 

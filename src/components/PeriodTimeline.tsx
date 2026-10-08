@@ -271,7 +271,7 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[54px] h-[50px] sm:h-[56px] p-1.5 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative border shadow-none ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[54px] h-[50px] sm:h-[56px] p-1.5 rounded-[8px] transition-all duration-200 cursor-pointer select-none shrink-0 relative border shadow-none ${
                 isSelected
                   ? 'bg-[var(--accent-color)]/15 dark:bg-[var(--accent-color)]/25 border-[var(--accent-color)]/60 text-[var(--text-primary)] scale-105 font-semibold z-10 opacity-100'
                   : hasCategoryMatch
