@@ -563,6 +563,7 @@ export function SettingsView({
             onMigrateAndDeleteCategory={onMigrateAndDeleteCategory}
             initialTab="budget"
             onDone={onBack}
+            userId={userId}
           />
         )}
 
@@ -581,6 +582,7 @@ export function SettingsView({
             onMigrateAndDeleteCategory={onMigrateAndDeleteCategory}
             initialTab="categories"
             onDone={onBack}
+            userId={userId}
           />
         )}
         {activeSection === 'paymentMethods' && renderPaymentMethodsSettings()}

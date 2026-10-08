@@ -11,6 +11,7 @@ import { formatAmount } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
 import { getActiveFixedExpenses } from '../utils/cancellation';
+import { dataService } from '../services/dataService';
 
 export interface BudgetCategoriesViewProps {
   config: Config;
@@ -26,6 +27,7 @@ export interface BudgetCategoriesViewProps {
   initialTab?: 'budget' | 'categories';
   mode?: 'all' | 'budget' | 'categories';
   onDone?: () => void;
+  userId?: string;
 }
 
 export function BudgetCategoriesView({
@@ -42,6 +44,7 @@ export function BudgetCategoriesView({
   initialTab,
   mode,
   onDone,
+  userId,
 }: BudgetCategoriesViewProps) {
   const curr = config?.currency || 'kr';
   const isEn = config.language === 'en';
@@ -743,12 +746,16 @@ export function BudgetCategoriesView({
           confirmText={isEn ? 'Reset' : 'Återställ'}
           cancelText={isEn ? 'Cancel' : 'Avbryt'}
           variant="danger"
-          onConfirm={() => {
-            setConfig({
+          onConfirm={async () => {
+            const updatedConfig = {
               ...config,
               categories: DEFAULT_EXPENSE_CATEGORIES,
               incomeCategories: DEFAULT_INCOME_CATEGORIES,
-            });
+            };
+            setConfig(updatedConfig);
+            if (userId) {
+              await dataService.saveSettings(userId, updatedConfig);
+            }
             setIsResetCategoriesModalOpen(false);
           }}
           onCancel={() => setIsResetCategoriesModalOpen(false)}

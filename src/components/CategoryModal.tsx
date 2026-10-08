@@ -153,27 +153,18 @@ export function CategoryModal({
 
           {/* Color palette */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between ml-0.5 mr-1">
-              <label className="text-xs font-semibold text-[var(--text-secondary)]">
-                {t('color')}
-              </label>
-              {/* Custom hex color input picker */}
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono text-[var(--text-tertiary)]">{color}</span>
-                <div className="relative w-6 h-6 rounded-full overflow-hidden border border-[var(--border-color)] cursor-pointer shadow-xs">
-                  <input
-                    type="color"
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    className="absolute inset-0 -translate-x-2 -translate-y-2 w-12 h-12 cursor-pointer opacity-0"
-                    title="Välj anpassad färg"
-                  />
-                  <div className="w-full h-full" style={{ backgroundColor: color }} />
-                </div>
-              </div>
-            </div>
-
             <div className="grid grid-cols-8 gap-2 bg-[var(--surface-muted)] p-2.5 rounded-[16px] border border-[var(--border-color)]">
+              {/* Custom hex color input picker */}
+              <div className="relative w-full aspect-square rounded-full overflow-hidden border border-[var(--border-color)] cursor-pointer shadow-xs">
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="absolute inset-0 -translate-x-2 -translate-y-2 w-12 h-12 cursor-pointer opacity-0"
+                  title="Välj anpassad färg"
+                />
+                <div className="w-full h-full" style={{ backgroundColor: color }} />
+              </div>
               {PRESET_COLORS.map((c) => {
                 const isSelected = color.toLowerCase() === c.toLowerCase();
                 return (

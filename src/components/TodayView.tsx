@@ -413,7 +413,7 @@ export function TodayView({
                     if (typeof feedback.light === 'function') feedback.light();
                     onNavigate("profile", "categories");
                   }}
-                  className="flex-shrink-0 w-[100px] sm:w-[110px] h-[100px] sm:h-[110px] p-3 rounded-[22px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/15 dark:border-white/15 flex flex-col items-center justify-between text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                  className="flex-shrink-0 w-[100px] sm:w-[110px] h-[100px] sm:h-[110px] p-3 rounded-[22px] bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/5 border-none flex flex-col items-center justify-between text-center group cursor-pointer transition-all active:scale-95 shadow-none"
                   aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
                 >
                   <div className="w-8 h-8 rounded-[12px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
@@ -424,7 +424,7 @@ export function TodayView({
                     {lang === 'en' ? 'Manage' : 'Hantera'}
                   </span>
 
-                  <span className="text-[10px] font-medium text-[var(--text-secondary)] tracking-tight whitespace-nowrap bg-black/[0.04] dark:bg-white/[0.06] px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-medium text-[var(--text-secondary)] tracking-tight whitespace-nowrap">
                     {lang === 'en' ? 'Budget' : 'Budget'}
                   </span>
                 </motion.button>

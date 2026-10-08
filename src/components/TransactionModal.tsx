@@ -732,9 +732,16 @@ export function TransactionModal({
                       setAmount(evaluateAndFormatAmount(amount));
                     }
                   }}
-                  placeholder="0"
                   className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] text-[var(--text-primary)] w-full leading-none"
+                  placeholder="0"
                 />
+                <button
+                  type="button"
+                  onClick={() => {}}
+                  className="text-[10px] font-bold text-[var(--text-secondary)] whitespace-nowrap bg-black/[0.04] dark:bg-white/[0.06] px-2 py-1 rounded-[10px]"
+                >
+                  {currentLang === 'en' ? 'Split' : 'Dela upp'}
+                </button>
               </div>
             </div>
           </div>
@@ -746,7 +753,7 @@ export function TransactionModal({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden p-3 bg-[var(--surface-color)] rounded-[22px]"
+                className="overflow-hidden"
               >
                 <CalendarWidget 
                   calendarDays={calendarDays}
