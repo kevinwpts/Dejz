@@ -124,7 +124,7 @@ export function SettingsView({
         </div>
 
         {/* Clean grouped list */}
-        <div className="bg-[var(--surface-color)] rounded-[8px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-[var(--surface-color)] rounded-[8px] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {methodsList.map((method: any, index: number) => {
             const isDefault = DEFAULT_PAYMENT_METHODS.some(dm => dm.name.toLowerCase() === method.name.toLowerCase());
             const IconComp = isDefault ? getPaymentMethodIcon(method.name) : null;
@@ -183,7 +183,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2">
-        <div className="bg-[var(--surface-color)] rounded-[8px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-[var(--surface-color)] rounded-[8px] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {languages.map((l) => {
             const isSelected = config.language === l.code;
             return (
@@ -246,7 +246,7 @@ export function SettingsView({
                     const isDark = mode.id === 'dark' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                     setConfig({ ...config, themeMode: mode.id as any, darkMode: isDark });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[8px] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer ${
+                  className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[8px] transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none border-[var(--accent-color)]'
                       : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
@@ -277,7 +277,7 @@ export function SettingsView({
                   onClick={() => {
                     setConfig({ ...config, themeColor: theme.hex });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[8px] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer active:scale-95 ${
+                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[8px] transition-all cursor-pointer active:scale-95 ${
                     isSelected
                       ? 'bg-[var(--surface-color)] ring-2 ring-[var(--accent-color)] shadow-none'
                       : 'bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
@@ -329,7 +329,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2">
-        <div className="bg-[var(--surface-color)] rounded-[8px] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+        <div className="bg-[var(--surface-color)] rounded-[8px] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrencyCode === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
@@ -387,7 +387,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2 space-y-4">
-        <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[8px] bg-[var(--surface-color)] backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] shadow-none">
+        <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[8px] bg-[var(--surface-color)] backdrop-blur-xl shadow-none">
           {/* 1. Variable Amounts / Rörliga belopp */}
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3.5 min-w-0 pr-4">
@@ -489,7 +489,7 @@ export function SettingsView({
       <div>
         {activeSection === 'salary' && (
           <div className="w-full py-2 space-y-4">
-            <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[8px] bg-[var(--surface-color)] backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] shadow-none">
+            <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[8px] bg-[var(--surface-color)] backdrop-blur-xl shadow-none">
               
               {/* Payday Setting Row */}
               <button

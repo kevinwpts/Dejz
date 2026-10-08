@@ -29,12 +29,7 @@ export function BudgetGauge({
   remainingDays,
   totalDays,
 }: BudgetGaugeProps) {
-  // Respect prefers-reduced-motion
-  const prefersReducedMotion = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }, []);
-
+  const isEn = language === 'en';
   const isNegative = remainingCents < 0;
 
   // Derive status from economic state and remaining time
@@ -49,91 +44,21 @@ export function BudgetGauge({
     });
   }, [remainingCents, disposablePotCents, remainingDays, totalDays, timeRatio]);
 
-  // Calculate fill ratio between 0 and 1
-  const fillRatio = useMemo(() => {
+  // Calculate spent ratio between 0 and 100%
+  const spentRatio = useMemo(() => {
     if (disposablePotCents <= 0) return 0;
-    const ratio = remainingCents / disposablePotCents;
-    return Math.max(0, Math.min(1, ratio));
+    const spent = disposablePotCents - remainingCents;
+    const ratio = (spent / disposablePotCents) * 100;
+    return Math.max(0, Math.min(100, ratio));
   }, [remainingCents, disposablePotCents]);
 
-  // Dash offset calculated with normalized pathLength = 100
-  const dashOffset = 100 * (1 - fillRatio);
-
-  // Original standard semi-circle arc path geometry
-  const gaugePath = "M 22 180 A 158 158 0 0 1 338 180";
-  const innerGaugePath = "M 42 180 A 138 138 0 0 1 318 180";
-
   return (
-    <div className="w-full max-w-[360px] mx-auto px-4 relative select-none">
-      <div className="relative w-full aspect-[360/198]">
-        <svg
-          viewBox="0 0 360 198"
-          preserveAspectRatio="xMidYMid meet"
-          className="w-full h-auto block overflow-visible"
-        >
-          {/* Layer 1: Background track in discrete neutral theme color */}
-          <path
-            d={gaugePath}
-            fill="none"
-            strokeWidth="30"
-            strokeLinecap="butt"
-            pathLength={100}
-            className="stroke-[#E2DDD4] dark:stroke-white/10 transition-colors duration-300"
-          />
-
-          {/* Layer 2: Fill arc using current status color (decoupled from user accent color) */}
-          <path
-            d={gaugePath}
-            fill="none"
-            stroke={status.colorHex}
-            strokeWidth="30"
-            strokeLinecap="butt"
-            pathLength={100}
-            strokeDasharray="100 100"
-            strokeDashoffset={dashOffset}
-            style={{
-              transition: prefersReducedMotion
-                ? 'none'
-                : 'stroke-dashoffset 400ms cubic-bezier(0.16, 1, 0.3, 1), stroke 300ms ease',
-            }}
-          />
-
-          {/* Concentric Layer 3 (Time Tracker): Thinner inner track showing elapsed time */}
-          {timeRatio !== undefined && (
-            <>
-              <path
-                d={innerGaugePath}
-                fill="none"
-                strokeWidth="10"
-                strokeLinecap="butt"
-                pathLength={100}
-                className="stroke-[#E2DDD4]/40 dark:stroke-white/5 transition-colors duration-300"
-              />
-              <path
-                d={innerGaugePath}
-                fill="none"
-                stroke={status.colorHex}
-                strokeWidth="10"
-                strokeLinecap="butt"
-                pathLength={100}
-                strokeDasharray="100 100"
-                strokeDashoffset={100 * (1 - timeRatio)}
-                className="opacity-35"
-                style={{
-                  transition: prefersReducedMotion
-                    ? 'none'
-                    : 'stroke-dashoffset 400ms cubic-bezier(0.16, 1, 0.3, 1), stroke 300ms ease',
-                }}
-              />
-            </>
-          )}
-        </svg>
-
-        {/* Text centered inside the semi-circle arc */}
-        <div className="absolute inset-x-0 bottom-7 sm:bottom-8 flex flex-col items-center justify-center text-center pointer-events-none">
-          {/* Heading & Info Button */}
-          <div className="flex items-center justify-center gap-1.5 pointer-events-auto">
-            <span className="text-xs sm:text-[13px] font-medium text-[var(--text-secondary)] block leading-snug">
+    <div className="w-full select-none">
+      <div className="bg-[var(--surface-color)] rounded-[16px] p-5 sm:p-6 shadow-sm relative overflow-hidden transition-all">
+        {/* Top Header Row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)] tracking-tight">
               {label}
             </span>
             {onOpenInfo && (
@@ -142,42 +67,65 @@ export function BudgetGauge({
                 onClick={onOpenInfo}
                 className="p-1 -m-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
                 aria-label="Info"
-                title={language === 'en' ? 'How is this calculated?' : 'Hur beräknas detta?'}
+                title={isEn ? 'How is this calculated?' : 'Hur beräknas detta?'}
               >
-                <Icon name="info" size={12.5} />
+                <Icon name="info" size={13} />
               </button>
             )}
           </div>
 
-          {/* Remaining amount: Swedish number format, app's standard text color */}
-          <div className="flex items-baseline justify-center gap-1 mt-1">
-            <AnimatedNumber
-              value={remainingCents}
-              className={`text-[34px] sm:text-[38px] md:text-[42px] font-semibold leading-none font-amount tabular-nums tracking-tight ${
-                isNegative
-                  ? 'text-rose-500 dark:text-rose-400'
-                  : 'text-[var(--text-primary)]'
-              }`}
-              formatter={(val) => formatAmount(val, language)}
-            />
-            <span
-              className={`text-sm sm:text-base font-normal leading-none ${
-                isNegative
-                  ? 'text-rose-500/80 dark:text-rose-400/80'
-                  : 'text-[var(--text-secondary)]'
-              }`}
-            >
-              {currency || 'kr'}
-            </span>
+          {/* Status Indicator (fully round dot without text) */}
+          <div className="flex items-center justify-center w-7 h-7 rounded-full bg-black/[0.03] dark:bg-white/[0.05]">
+            <span className="w-3 h-3 rounded-full shrink-0 shadow-xs" style={{ backgroundColor: status.colorHex }} />
           </div>
-
-          {/* Integrated Time Countdown */}
-          {timeText && (
-            <span className="text-xs font-medium text-[var(--text-secondary)] mt-1.5 block leading-none select-none tracking-tight animate-fade-in">
-              {timeText}
-            </span>
-          )}
         </div>
+
+        {/* Large Amount Display */}
+        <div className="flex items-baseline gap-1.5 my-2">
+          <AnimatedNumber
+            value={remainingCents}
+            className={`text-[36px] sm:text-[42px] font-extrabold leading-none font-amount tabular-nums tracking-tight ${
+              isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
+            }`}
+            formatter={(val) => formatAmount(val, language)}
+          />
+          <span
+            className={`text-base sm:text-lg font-medium leading-none ${
+              isNegative ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
+            }`}
+          >
+            {currency || 'kr'}
+          </span>
+        </div>
+
+        {/* Progress Bar (fully rounded) */}
+        <div className="mt-4 mb-3 space-y-1.5">
+          <div className="flex justify-between items-center text-[11px] font-medium text-[var(--text-secondary)]">
+            <span>{isEn ? 'Budget usage' : 'Budgetanvändning'}</span>
+            <span className="font-amount tabular-nums">{Math.round(spentRatio)}%</span>
+          </div>
+          <div className="relative h-3 w-full bg-black/[0.04] dark:bg-white/[0.06] rounded-full overflow-hidden">
+            <div
+              className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out"
+              style={{
+                width: `${spentRatio}%`,
+                backgroundColor: status.colorHex,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Bottom Time / Payday Countdown Info */}
+        {timeText && (
+          <div className="pt-3 border-t border-black/[0.03] dark:border-white/[0.04] flex items-center justify-between text-xs text-[var(--text-secondary)]">
+            <span className="font-medium tracking-tight">{timeText}</span>
+            {remainingDays !== undefined && totalDays !== undefined && (
+              <span className="font-amount tabular-nums text-[11px] opacity-80">
+                {isEn ? `Day ${totalDays - remainingDays + 1} of ${totalDays}` : `Dag ${totalDays - remainingDays + 1} av ${totalDays}`}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
