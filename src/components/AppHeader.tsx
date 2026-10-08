@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
-import { DejzLogo } from "./DejzLogo";
 
 interface AppHeaderProps {
   userName?: string;
@@ -105,18 +104,30 @@ export function AppHeader({
             </>
           ) : (
             <button
-              type="button"
-              onClick={() => onNavigate("today")}
+              onClick={() => onNavigate("profile")}
               className="flex items-center gap-2 transition-transform active:scale-95 cursor-pointer py-1 select-none"
-              aria-label="Dejz"
-              title="Dejz"
+              aria-label="Profil"
+              title="Profil"
             >
-              <DejzLogo className="h-5 sm:h-[22px] w-auto" textColor="var(--text-primary)" />
+              <div className={`w-9 h-9 rounded-full overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center ${
+                activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
+              }`}>
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <User size={18} strokeWidth={2} className="text-[#6D6962] dark:text-[#A8A8A8]" />
+                )}
+              </div>
             </button>
           )}
         </div>
 
-        {/* Right Actions: Notifications + Search + Profile Avatar at the far right */}
+        {/* Right Actions: Notifications + Search */}
         <div className="flex items-center gap-1 shrink-0 z-10">
           {/* 1. Notifications */}
           {onOpenNotifications && (
@@ -150,29 +161,6 @@ export function AppHeader({
             title={language === 'en' ? 'Search' : 'Sök'}
           >
             <Search size={20} strokeWidth={2} />
-          </button>
-
-          {/* 3. Profile Avatar completely to the far right */}
-          <button
-            onClick={() => onNavigate("profile")}
-            className="min-w-[40px] min-h-[40px] w-10 h-10 flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ml-0.5"
-            aria-label="Profil"
-            title="Profil"
-          >
-            <div className={`w-8 h-8 rounded-full overflow-hidden border-none bg-black/5 dark:bg-white/5 flex items-center justify-center ${
-              activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
-            }`}>
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <User size={16} strokeWidth={2} className="text-[#6D6962] dark:text-[#A8A8A8]" />
-              )}
-            </div>
           </button>
         </div>
       </div>
