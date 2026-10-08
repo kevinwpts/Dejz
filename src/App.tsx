@@ -811,11 +811,9 @@ export default function App() {
           'Shopping & Kläder': { name: 'Shopping', icon: 'shopping', color: '#ec4899' },
           'Restaurang & Fika': { name: 'Restaurang', icon: 'utensils', color: '#f97316' },
           'Streaming & Media': { name: 'Streaming', icon: 'tv', color: '#8b5cf6' },
-          'Boende & Hushåll': { name: 'Boende', icon: 'home', color: '#6366f1' },
           'Transport & Pendling': { name: 'Transport', icon: 'car', color: '#0ea5e9' },
           'Abonnemang & Tjänster': { name: 'Abonnemang', icon: 'smartphone', color: '#3b82f6' },
           'Nöje & Fritid': { name: 'Nöjen', icon: 'drama', color: '#a855f7' },
-          'Träning & Hälsa': { name: 'Hälsa', icon: 'dumbbell', color: '#10b981' },
           'Räkningar & Avgifter': { name: 'Räkningar', icon: 'receipt', color: '#64748b' },
           'Resor & Semester': { name: 'Resor', icon: 'plane', color: '#06b6d4' },
         };
@@ -2089,11 +2087,9 @@ export default function App() {
           'Shopping & Kläder': { name: 'Shopping', icon: 'shopping', color: '#ec4899' },
           'Restaurang & Fika': { name: 'Restaurang', icon: 'utensils', color: '#f97316' },
           'Streaming & Media': { name: 'Streaming', icon: 'tv', color: '#8b5cf6' },
-          'Boende & Hushåll': { name: 'Boende', icon: 'home', color: '#6366f1' },
           'Transport & Pendling': { name: 'Transport', icon: 'car', color: '#0ea5e9' },
           'Abonnemang & Tjänster': { name: 'Abonnemang', icon: 'smartphone', color: '#3b82f6' },
           'Nöje & Fritid': { name: 'Nöjen', icon: 'drama', color: '#a855f7' },
-          'Träning & Hälsa': { name: 'Hälsa', icon: 'dumbbell', color: '#10b981' },
           'Räkningar & Avgifter': { name: 'Räkningar', icon: 'receipt', color: '#64748b' },
           'Resor & Semester': { name: 'Resor', icon: 'plane', color: '#06b6d4' },
         };
