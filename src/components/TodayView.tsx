@@ -387,7 +387,7 @@ export function TodayView({
                         animate={{ opacity: 1, scale: 1, x: 0 }}
                         transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                         onClick={() => handleCategoryClick(cat.name)}
-                        className="flex-shrink-0 w-[114px] sm:w-[122px] h-[106px] sm:h-[110px] p-3 rounded-[18px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
+                        className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[18px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
                       >
                         {/* Top: Icon + Name */}
                         <div className="flex items-center gap-2 min-w-0 w-full">
@@ -431,17 +431,6 @@ export function TodayView({
                               : (lang === 'en' ? 'spent' : 'spenderat')}
                           </p>
                         </div>
-
-                        {/* Delicate Mini Progress Bar */}
-                        <div className="w-full h-1 bg-black/[0.05] dark:bg-white/[0.08] rounded-full overflow-hidden">
-                          <div 
-                            className="h-full rounded-full transition-all duration-300"
-                            style={{ 
-                              width: `${Math.min(100, Math.max(0, cat.percentage))}%`,
-                              backgroundColor: cat.isOverBudget ? '#EF4444' : catColor
-                            }}
-                          />
-                        </div>
                       </motion.button>
                     );
                   })}
@@ -456,7 +445,7 @@ export function TodayView({
                       if (typeof feedback.light === 'function') feedback.light();
                       onNavigate("profile", "budget");
                     }}
-                    className="flex-shrink-0 w-[96px] sm:w-[104px] h-[106px] sm:h-[110px] p-3 rounded-[18px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                    className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[18px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
                     aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
                   >
                     <div className="w-7 h-7 rounded-[9px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
