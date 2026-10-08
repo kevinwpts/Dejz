@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
+import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, LayoutGrid, PieChart, CircleHalf, CalendarCheck } from 'lucide-react';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
@@ -340,11 +340,31 @@ export function BudgetView({
         {budgetFilter === 'fixed' && (
           <FilterButtonGroup
             options={[
-              { id: 'all', label: config?.language === 'en' ? 'All' : 'Alla' },
-              { id: 'monthly', label: config?.language === 'en' ? 'Monthly' : 'Månad' },
-              { id: 'quarterly', label: config?.language === 'en' ? 'Quarterly' : 'Kvartal' },
-              { id: 'semi-annually', label: config?.language === 'en' ? 'Semi-annually' : 'Halvår' },
-              { id: 'annually', label: config?.language === 'en' ? 'Annually' : 'År' },
+              {
+                id: 'all',
+                label: config?.language === 'en' ? 'All' : 'Alla',
+                icon: <LayoutGrid size={14} strokeWidth={2} />,
+              },
+              {
+                id: 'monthly',
+                label: config?.language === 'en' ? 'Monthly' : 'Månad',
+                icon: <Calendar size={14} strokeWidth={2} />,
+              },
+              {
+                id: 'quarterly',
+                label: config?.language === 'en' ? 'Quarterly' : 'Kvartal',
+                icon: <PieChart size={14} strokeWidth={2} />,
+              },
+              {
+                id: 'semi-annually',
+                label: config?.language === 'en' ? 'Semi-annually' : 'Halvår',
+                icon: <CircleHalf size={14} strokeWidth={2} />,
+              },
+              {
+                id: 'annually',
+                label: config?.language === 'en' ? 'Annually' : 'År',
+                icon: <CalendarCheck size={14} strokeWidth={2} />,
+              },
             ]}
             selectedId={freqFilter}
             onSelect={(id) => setFreqFilter(id as 'all' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually')}
@@ -480,7 +500,7 @@ export function BudgetView({
             <div className="space-y-4">
               {filteredActiveFixedExpenses.length > 0 ? (
                 <>
-                  <div className="flex flex-wrap items-center justify-between gap-3 px-1 mb-1">
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-1">
                     {/* Single compact sort toggle button */}
                     <button
                       type="button"
@@ -555,7 +575,7 @@ export function BudgetView({
             <div className="space-y-4">
               {sortedSavings.length > 0 ? (
                 <>
-                  <div className="flex flex-wrap items-center justify-between gap-3 px-1 mb-1">
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-1">
                     {/* Single compact sort toggle button */}
                     <button
                       type="button"

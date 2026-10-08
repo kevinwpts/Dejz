@@ -4,7 +4,6 @@ import {
   Wallet, 
   ArrowUpRight, 
   ArrowDownLeft, 
-  FileText, 
   LayoutGrid, 
   Calendar as CalendarIcon, 
   ChevronLeft,
@@ -56,7 +55,7 @@ export function LogView({
   currentLang,
   periods
 }: LogViewProps) {
-  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'receipt'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isPeriodPickerOpen, setIsPeriodPickerOpen] = useState(false);
@@ -300,7 +299,6 @@ export function LogView({
         // 3. Type filter
         let matchesType = false;
         if (typeFilter === 'all') matchesType = true;
-        else if (typeFilter === 'receipt') matchesType = !!e.receiptUrl;
         else matchesType = e.type === typeFilter;
         
         return matchesType;
@@ -440,14 +438,9 @@ export function LogView({
               label: t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster'),
               icon: <ArrowUpRight size={14} strokeWidth={2.5} />,
             },
-            {
-              id: 'receipt',
-              label: t('receipt' as TranslationKey) || (config.language === 'en' ? 'Receipts' : 'Kvitton'),
-              icon: <FileText size={14} strokeWidth={2} />,
-            },
           ]}
           selectedId={typeFilter}
-          onSelect={(id) => setTypeFilter(id as 'all' | 'expense' | 'income' | 'receipt')}
+          onSelect={(id) => setTypeFilter(id as 'all' | 'expense' | 'income')}
           ariaLabel={getL10n('Filtrera transaktioner', 'Filter transactions')}
         />
       </div>
