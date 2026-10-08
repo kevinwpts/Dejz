@@ -29,7 +29,7 @@ export function BudgetItemLogo({ item, type, config }: { item: any, type: 'incom
   return <TransactionLogo transaction={tx} config={config} />;
 }
 
-export function BudgetItem({ item, onClick, currency, type = 'expense', language, t, config, currentPeriodId, isGrouped: _isGrouped }: BudgetItemProps) {
+export function BudgetItem({ item, onClick, currency, type = 'expense', language, t, config, currentPeriodId, isGrouped }: BudgetItemProps) {
   const isFixed = Boolean(item.frequency || item.deductionDay); 
   const isSaving = !isFixed && type === 'expense' && !('category' in item);
   
@@ -80,7 +80,9 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   return (
     <div 
       onClick={onClick}
-      className="px-4 py-3 sm:py-3.5 min-h-[64px] relative z-10 flex items-center gap-3 group transition-colors duration-150 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] rounded-[12px] shadow-none border-none cursor-pointer select-none"
+      className={`px-4 py-3 sm:py-3.5 min-h-[64px] relative z-10 flex items-center gap-3 group transition-colors duration-150 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] ${
+        isGrouped ? 'rounded-none' : 'rounded-[12px]'
+      } shadow-none border-none cursor-pointer select-none`}
     >
       {/* Logo */}
       <div className="relative flex-shrink-0">

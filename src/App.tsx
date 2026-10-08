@@ -3564,10 +3564,10 @@ export default function App() {
       targetTab = section === "log" || section === "transactions" ? "transactions" : "analysis";
     }
 
-    // Map budget allocate and category-budgets to unified profile categories
-    if (targetTab === "budget" && (targetSection === "allocate" || targetSection === "category-budgets")) {
+    // Map budget allocate and category-budgets to unified profile budget
+    if (targetTab === "budget" && (targetSection === "allocate" || targetSection === "category-budgets" || targetSection === "budget")) {
       targetTab = "profile";
-      targetSection = "categories";
+      targetSection = "budget";
     }
 
     const isDifferent =

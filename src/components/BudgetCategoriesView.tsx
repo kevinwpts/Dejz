@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, RotateCcw, ChevronRight } from 'lucide-react';
 import { Config, Income, FixedExpense, Frequency, Category } from '../types';
 import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
@@ -385,51 +385,20 @@ export function BudgetCategoriesView({
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <span className="text-xs font-semibold text-[var(--text-secondary)]">
-                {effectiveMode === 'budget' 
-                  ? (isEn ? 'Category Budgets' : 'Kategoribudgetar')
-                  : (isEn ? 'Expense Categories' : 'Utgiftskategorier')}
+                {categoriesList.length} {isEn ? 'categories' : 'kategorier'}
               </span>
-              {effectiveMode !== 'budget' && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon={<Plus size={14} strokeWidth={2.5} />}
-                  onClick={() => handleAddCategory('expense')}
-                >
-                  {t('newCategory')}
-                </Button>
-              )}
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Plus size={14} strokeWidth={2} />}
+                onClick={() => handleAddCategory('expense')}
+              >
+                {t('newCategory')}
+              </Button>
             </div>
 
-            {effectiveMode === 'categories' ? (
-              /* Rent kategoriläge: enhetliga kort för namn, ikon och färg */
-              <div className="grid grid-cols-2 gap-3">
-                {categoriesList.map((cat, index) => {
-                  const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
-                  return (
-                    <div
-                      key={cat.id || index}
-                      onClick={() => handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget)}
-                      style={{
-                        backgroundColor: `${catColor}18`,
-                        borderColor: `${catColor}35`,
-                      }}
-                      className="relative p-3.5 rounded-[18px] border flex flex-col justify-between h-[105px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden group hover:border-black/20 dark:hover:border-white/30"
-                    >
-                      <div className="flex items-center justify-between">
-                        <CategoryIcon icon={cat.icon} color={catColor} solidBackground whiteIcon size="md" />
-                      </div>
-
-                      <span className="text-xs font-bold text-[var(--text-primary)] block truncate leading-tight">
-                        {cat.name}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Budgetläge: kort med inline budgetfördelning */
-              <div className="grid grid-cols-2 gap-3">
+            {/* Enhetlig grupperad lista i samma layout som Betalningsmetoder */}
+            <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
               {categoriesList.map((cat, index) => {
                 const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
                 const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
@@ -439,39 +408,50 @@ export function BudgetCategoriesView({
                 return (
                   <div
                     key={cat.id || index}
-                    onClick={(e) => {
-                      if (!isEditingThis && !(e.target as HTMLElement).closest('input')) {
-                        if (effectiveMode === 'budget') {
+                    onClick={() => {
+                      if (effectiveMode === 'budget') {
+                        if (!isEditingThis) {
                           setEditingCategoryName(cat.name);
                           setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
-                        } else {
-                          handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
                         }
+                      } else {
+                        handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
                       }
                     }}
-                    style={{
-                      backgroundColor: `${catColor}18`,
-                      borderColor: `${catColor}35`,
-                    }}
-                    className="relative p-3.5 rounded-[18px] border flex flex-col justify-between h-[125px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden group hover:border-black/20 dark:hover:border-white/30"
+                    className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
                   >
-                    <div className="flex items-center justify-between">
-                      <CategoryIcon icon={cat.icon} color={catColor} solidBackground whiteIcon size="md" />
+                    {/* Vänster: Tydlig rund ikon med hel färg & kategorinamn */}
+                    <div className="flex items-center gap-3.5 min-w-0 pr-2">
+                      <div
+                        style={{ backgroundColor: catColor }}
+                        className="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0 shadow-2xs"
+                      >
+                        <CategoryIcon icon={cat.icon} size="sm" noBackground whiteIcon color="#ffffff" />
+                      </div>
+                      <div className="min-w-0 flex flex-col justify-center">
+                        <span className="text-sm font-semibold text-[var(--text-primary)] tracking-tight truncate">
+                          {cat.name}
+                        </span>
+                        {fixedSpent > 0 && effectiveMode === 'budget' && (
+                          <span className="text-[11px] font-normal text-[var(--text-tertiary)] truncate mt-0.5">
+                            {isEn ? 'Fixed: ' : 'Fasta: '}
+                            {formatAmount(fixedSpent, config.language)} {curr}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <span className="text-xs font-bold text-[var(--text-primary)] block truncate leading-tight">
-                        {cat.name}
-                      </span>
-
-                      <div
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full"
-                      >
+                    {/* Höger: Budgetbelopp (i budgetläge) eller pil */}
+                    {effectiveMode === 'budget' ? (
+                      <div className="flex items-center gap-2 shrink-0">
                         {isEditingThis ? (
-                          <div className="flex items-center justify-between bg-white/80 dark:bg-black/40 rounded-[10px] px-2 py-1 border border-[var(--accent-color)]">
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center bg-white dark:bg-black/40 rounded-[12px] px-2.5 py-1 border border-[var(--accent-color)] shadow-xs"
+                          >
                             <input
                               type="text"
+                              autoFocus
                               inputMode="numeric"
                               pattern="[0-9]*"
                               value={inlineInputValue}
@@ -500,10 +480,10 @@ export function BudgetCategoriesView({
                                   e.currentTarget.blur();
                                 }
                               }}
-                              className="w-full bg-transparent border-none text-left text-xs font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none placeholder-[var(--text-tertiary)]"
+                              className="w-16 bg-transparent border-none text-right text-sm font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none"
                               placeholder="0"
                             />
-                            <span className="text-[10px] font-bold text-[var(--text-secondary)] select-none pl-1">
+                            <span className="text-xs font-semibold text-[var(--text-secondary)] pl-1 select-none">
                               {curr}
                             </span>
                           </div>
@@ -515,60 +495,81 @@ export function BudgetCategoriesView({
                               setEditingCategoryName(cat.name);
                               setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
                             }}
-                            className="w-full py-1 px-2 rounded-[10px] bg-white/60 dark:bg-black/30 hover:bg-white/90 dark:hover:bg-black/50 transition-colors flex items-center justify-between border border-black/5 dark:border-white/10 cursor-pointer backdrop-blur-xs"
+                            className="px-3 py-1.5 rounded-[12px] bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] transition-colors border border-black/[0.04] dark:border-white/[0.06] cursor-pointer flex items-center gap-1 active:scale-95"
                           >
-                            <span className="text-xs font-bold font-amount tabular-nums text-[var(--text-primary)]">
-                              {catBudget > 0 ? `${formatAmount(catBudget, config.language)} ${curr}` : `0 ${curr}`}
+                            <span className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)]">
+                              {catBudget > 0 ? formatAmount(catBudget, config.language) : '0'}
+                            </span>
+                            <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                              {curr}
                             </span>
                           </button>
                         )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
+                          }}
+                          className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1 rounded-full transition-colors cursor-pointer"
+                          title={isEn ? "Edit category" : "Redigera kategori"}
+                        >
+                          <ChevronRight size={16} strokeWidth={2} />
+                        </button>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="text-[var(--text-tertiary)] shrink-0 pl-2 group-hover:text-[var(--text-secondary)] transition-colors">
+                        <ChevronRight size={16} strokeWidth={2} />
+                      </div>
+                    )}
                   </div>
                 );
               })}
-              </div>
-            )}
+            </div>
           </div>
         </>
       ) : (
-        /* Inkomstkategorier */
+        /* Inkomstkategorier i samma layout som Betalningsmetoder */
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-semibold text-[var(--text-secondary)]">
-              {isEn ? 'Income Categories' : 'Inkomstkategorier'}
+              {incomeCategoriesList.length} {isEn ? 'categories' : 'kategorier'}
             </span>
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
-              icon={<Plus size={14} strokeWidth={2.5} />}
+              icon={<Plus size={14} strokeWidth={2} />}
               onClick={() => handleAddCategory('income')}
             >
               {t('newCategory')}
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             {incomeCategoriesList.map((cat, index) => {
               const catColor = cat.color || getCategoryColor(cat.name, config?.incomeCategories);
               return (
-                <div
+                <button
                   key={cat.id || index}
+                  type="button"
                   onClick={() => handleEditCategory('income', index, cat.name, cat.icon, cat.color)}
-                  style={{
-                    backgroundColor: `${catColor}18`,
-                    borderColor: `${catColor}35`,
-                  }}
-                  className="relative p-3.5 rounded-[18px] border flex flex-col justify-between h-[105px] transition-all cursor-pointer active:scale-[0.98] shadow-xs overflow-hidden group hover:border-black/20 dark:hover:border-white/30"
+                  className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
                 >
-                  <div className="flex items-center justify-between">
-                    <CategoryIcon icon={cat.icon} color={catColor} solidBackground whiteIcon size="md" />
+                  <div className="flex items-center gap-3.5 min-w-0 pr-2">
+                    <div
+                      style={{ backgroundColor: catColor }}
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0 shadow-2xs"
+                    >
+                      <CategoryIcon icon={cat.icon} size="sm" noBackground whiteIcon color="#ffffff" />
+                    </div>
+                    <span className="text-sm font-semibold text-[var(--text-primary)] tracking-tight truncate">
+                      {cat.name}
+                    </span>
                   </div>
-
-                  <span className="text-xs font-bold text-[var(--text-primary)] block truncate leading-tight">
-                    {cat.name}
-                  </span>
-                </div>
+                  <div className="text-[var(--text-tertiary)] shrink-0 pl-2 group-hover:text-[var(--text-secondary)] transition-colors">
+                    <ChevronRight size={16} strokeWidth={2} />
+                  </div>
+                </button>
               );
             })}
           </div>
@@ -576,7 +577,7 @@ export function BudgetCategoriesView({
       )}
 
       {/* 3. Minimal footer */}
-      <div className="pt-2 space-y-2">
+      <div className="pt-2 space-y-3">
         <button
           type="button"
           onClick={handleSaveBudgetDone}
@@ -586,26 +587,26 @@ export function BudgetCategoriesView({
           {isEn ? 'Done' : 'Klar'}
         </button>
 
-        <div className="flex items-center justify-center gap-3 pt-1">
+        {/* Återställ-knapp i samma stil som betalningsmetoder */}
+        <div className="flex flex-col items-center gap-2 pt-1">
           {effectiveMode !== 'categories' && (
             <button
               type="button"
               onClick={() => setShowResetBudgetConfirm(true)}
-              className="py-1 px-2 text-xs font-medium text-[var(--text-tertiary)] hover:text-rose-500 dark:hover:text-rose-400 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-[var(--text-tertiary)] hover:text-rose-500 dark:hover:text-rose-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
             >
-              {isEn ? 'Reset budget' : 'Nollställ budget'}
+              <RotateCcw size={13} strokeWidth={2} />
+              <span>{isEn ? 'Reset budget to 0' : 'Nollställ budget'}</span>
             </button>
-          )}
-          {effectiveMode === 'all' && (
-            <span className="text-[var(--text-tertiary)] opacity-30">•</span>
           )}
           {effectiveMode !== 'budget' && (
             <button
               type="button"
               onClick={() => setIsResetCategoriesModalOpen(true)}
-              className="py-1 px-2 text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
             >
-              {isEn ? 'Reset categories' : 'Återställ kategorier'}
+              <RotateCcw size={13} strokeWidth={2} />
+              <span>{isEn ? 'Reset categories to default' : 'Återställ kategorier'}</span>
             </button>
           )}
         </div>
