@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown } from 'lucide-react';
+import { Icon } from './Icon';
 import { feedback } from '../../utils/feedback';
 
 export interface FilterSelectButtonProps {
@@ -56,9 +56,9 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
           </div>
         </div>
       </div>
-      <ChevronDown
+      <Icon
+        name="caret-down"
         size={14}
-        strokeWidth={2.5}
         className="text-[var(--text-secondary)] shrink-0 ml-1"
       />
     </button>

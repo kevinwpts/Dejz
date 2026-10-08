@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import { Icon } from './Icon';
 
 export interface ListRowProps {
   icon?: React.ReactNode;
@@ -74,7 +74,8 @@ export const ListRow: React.FC<ListRowProps> = ({
         )}
         {rightElement}
         {showChevron && (
-          <ChevronRight
+          <Icon
+            name="caret-right"
             size={16}
             className="text-[var(--text-tertiary)] ml-1 shrink-0"
           />

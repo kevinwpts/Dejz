@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Loader2, X, Check } from 'lucide-react';
+import { Icon } from './Icon';
 
 export interface SmartInputFeedbackData {
   type: 'success' | 'error';
@@ -41,7 +41,7 @@ export const SmartInputLabel: React.FC<SmartInputLabelProps> = ({
             : { duration: 0.2 }
         }
       >
-        <Sparkles size={13} strokeWidth={2} className="text-[#05B862]" />
+        <Icon name="sparkles" size={13} className="text-[#05B862]" />
       </motion.span>
       <span className="text-xs font-medium text-[var(--text-secondary)] dark:text-[#A8A8A8] tracking-tight">
         {label}
@@ -79,7 +79,7 @@ export const SmartInputFeedback: React.FC<SmartInputFeedbackProps> = ({
         } ${className}`}
       >
         {feedback.type === 'success' && (
-          <Check size={12} strokeWidth={2.5} className="text-[#05B862] shrink-0" />
+          <Icon name="check" size={12} className="text-[#05B862] shrink-0" />
         )}
         <span>{feedback.message}</span>
       </motion.div>
@@ -208,7 +208,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
                 hasInsideSubmit ? 'right-12 sm:right-13.5' : 'right-2.5'
               }`}
             >
-              <X size={14} />
+              <Icon name="x" size={14} />
             </button>
           )}
 
@@ -220,9 +220,9 @@ export const SmartInput: React.FC<SmartInputProps> = ({
               className="absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[var(--accent-color)]"
             >
               {isProcessing ? (
-                <Loader2 size={14} className="animate-spin" />
+                <Icon name="spinner" size={14} className="animate-spin" />
               ) : (
-                submitIcon || <Check size={14} strokeWidth={2.5} />
+                submitIcon || <Icon name="check" size={14} />
               )}
             </button>
           )}
@@ -236,7 +236,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             className="h-[46px] px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-xs sm:text-sm flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
           >
             {isProcessing ? (
-              <Loader2 size={15} className="animate-spin" />
+              <Icon name="spinner" size={15} className="animate-spin" />
             ) : (
               <span>{submitText}</span>
             )}

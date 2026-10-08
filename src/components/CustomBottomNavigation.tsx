@@ -1,12 +1,6 @@
 import React from "react";
-import {
-  Home,
-  History,
-  BarChart3,
-  WalletCards,
-  Plus,
-} from "lucide-react";
 import { Language } from "../i18n";
+import { Icon, IconName } from "./ui/Icon";
 
 type Tab = "today" | "transactions" | "analysis" | "budget" | "profile" | "allocate";
 
@@ -58,7 +52,7 @@ export function CustomBottomNavigation({
           aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
           title={isEn ? "Add transaction" : "Lägg till transaktion"}
         >
-          <Plus size={28} strokeWidth={2} className="text-[var(--on-accent)]" />
+          <Icon name="plus" size={28} weight="bold" className="text-[var(--on-accent)]" />
         </button>
       </div>
 
@@ -66,16 +60,15 @@ export function CustomBottomNavigation({
       <nav className="relative z-10 w-full max-w-xl mx-auto h-[62px] grid grid-cols-5 items-end pb-3.5 px-3.5 sm:px-6">
         {/* 1. Hem */}
         <NavItem
-          icon={Home}
+          iconName="house"
           label={isEn ? "Home" : "Hem"}
           isActive={activeTab === "today"}
           onClick={() => setActiveTab("today")}
-          fillOnActive
         />
 
         {/* 2. Historik */}
         <NavItem
-          icon={History}
+          iconName="clock-counter-clockwise"
           label={isEn ? "History" : "Historik"}
           isActive={activeTab === "transactions"}
           onClick={() => setActiveTab("transactions")}
@@ -86,7 +79,7 @@ export function CustomBottomNavigation({
 
         {/* 4. Analys */}
         <NavItem
-          icon={BarChart3}
+          iconName="chart-bar"
           label={isEn ? "Analysis" : "Analys"}
           isActive={activeTab === "analysis"}
           onClick={() => setActiveTab("analysis")}
@@ -94,7 +87,7 @@ export function CustomBottomNavigation({
 
         {/* 5. Ekonomi */}
         <NavItem
-          icon={WalletCards}
+          iconName="wallet"
           label={isEn ? "Finances" : "Ekonomi"}
           isActive={isBudgetActive}
           onClick={() => {
@@ -111,17 +104,15 @@ export function CustomBottomNavigation({
 }
 
 function NavItem({
-  icon: Icon,
+  iconName,
   label,
   isActive,
   onClick,
-  fillOnActive = false,
 }: {
-  icon: React.ComponentType<any>;
+  iconName: IconName;
   label: string;
   isActive: boolean;
   onClick: () => void;
-  fillOnActive?: boolean;
 }) {
   return (
     <button
@@ -136,9 +127,9 @@ function NavItem({
       }`}
     >
       <Icon 
-        size={20} 
-        strokeWidth={isActive ? 2.2 : 1.8} 
-        fill={isActive && fillOnActive ? "currentColor" : "none"}
+        name={iconName}
+        size={22} 
+        weight={isActive ? "fill" : "regular"}
         className="transition-colors"
       />
       <span className="text-[10.5px] leading-none tracking-tight mt-[3px]">

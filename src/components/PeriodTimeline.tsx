@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Icon } from './ui/Icon';
 import { feedback } from '../utils/feedback';
 
 interface PeriodTimelineProps {
@@ -218,7 +218,7 @@ export function PeriodTimeline({
             aria-label="Föregående dag"
             title="Föregående dag"
           >
-            <ChevronLeft size={14} strokeWidth={2.5} />
+            <Icon name="caret-left" size={14} />
           </button>
         </div>
       )}
@@ -331,7 +331,7 @@ export function PeriodTimeline({
             aria-label="Nästa dag"
             title="Nästa dag"
           >
-            <ChevronRight size={14} strokeWidth={2.5} />
+            <Icon name="caret-right" size={14} />
           </button>
         </div>
       )}

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Info, X } from 'lucide-react';
+import { Icon } from './ui';
 import { TranslationKey } from '../i18n';
 import { BudgetGauge } from './BudgetGauge';
 import { formatAmount } from '../utils/format';
@@ -94,7 +94,7 @@ export function GreetingModule({
             {/* Header */}
             <div className="flex items-center justify-between pb-1">
               <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold font-display tracking-wider text-xs uppercase">
-                <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2.4} />
+                <Icon name="info" size={16} className="text-[var(--accent-color)]" />
                 <span>{isEn ? 'Calculation Details' : 'Hur räknas det ut?'}</span>
               </div>
               <button
@@ -103,7 +103,7 @@ export function GreetingModule({
                 className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer border-none"
                 aria-label="Stäng"
               >
-                <X size={17} strokeWidth={2} />
+                <Icon name="x" size={17} />
               </button>
             </div>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check } from 'lucide-react';
+import { Icon } from './Icon';
 import { feedback } from '../../utils/feedback';
 
 export interface SelectionRowProps<T = string> {
@@ -61,7 +61,7 @@ export function SelectionRow<T = string>({
 
       {isSelected && (
         <div className="text-[var(--text-primary)] shrink-0 ml-2 pl-1">
-          <Check size={18} strokeWidth={2.5} />
+          <Icon name="check" size={18} />
         </div>
       )}
     </button>

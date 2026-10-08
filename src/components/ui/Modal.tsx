@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { X } from 'lucide-react';
+import { Icon } from './Icon';
 import { IconButton } from './IconButton';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
@@ -118,7 +118,7 @@ export const Modal: React.FC<ModalProps> = ({
                   {headerRight}
                   {showCloseButton && (
                     <IconButton
-                      icon={<X size={16} strokeWidth={2} />}
+                      icon={<Icon name="x" size={16} />}
                       onClick={onClose}
                       variant="muted"
                       size="sm"

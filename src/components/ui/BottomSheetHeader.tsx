@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { Icon } from './Icon';
 import { IconButton } from './IconButton';
 
 export interface BottomSheetHeaderProps {
@@ -39,7 +39,7 @@ export function BottomSheetHeader({
         </div>
         <div className="flex justify-end">
           <IconButton
-            icon={<X size={16} strokeWidth={2} />}
+            icon={<Icon name="x" size={16} />}
             onClick={onClose}
             variant="muted"
             size="sm"
@@ -58,7 +58,7 @@ export function BottomSheetHeader({
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <IconButton
-            icon={<X size={16} strokeWidth={2} />}
+            icon={<Icon name="x" size={16} />}
             onClick={onClose}
             variant="muted"
             size="sm"
@@ -89,7 +89,7 @@ export function BottomSheetHeader({
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
         <IconButton
-          icon={<X size={16} strokeWidth={2} />}
+          icon={<Icon name="x" size={16} />}
           onClick={onClose}
           variant="muted"
           size="sm"

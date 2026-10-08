@@ -1,8 +1,8 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import { Icon, IconName } from './Icon';
 
 export interface EmptyStateProps {
-  icon?: LucideIcon;
+  icon?: IconName;
   title: string;
   description?: React.ReactNode;
   actionLabel?: string;
@@ -11,7 +11,7 @@ export interface EmptyStateProps {
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  icon: Icon,
+  icon,
   title,
   description,
   actionLabel,
@@ -22,9 +22,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     <div
       className={`bg-[var(--surface-color)] rounded-[8px] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-none border-none ${className}`}
     >
-      {Icon && (
+      {icon && (
         <div className="w-12 h-12 rounded-[6px] bg-black/[0.04] dark:bg-white/[0.06] border-none flex items-center justify-center text-[var(--text-secondary)] mb-3 shrink-0">
-          <Icon size={20} strokeWidth={2} />
+          <Icon name={icon} size={20} />
         </div>
       )}
       <div className="space-y-1 max-w-sm flex flex-col items-center">

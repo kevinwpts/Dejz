@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Info } from 'lucide-react';
+import { Icon } from './ui/Icon';
 import { Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
@@ -16,7 +16,7 @@ interface BudgetSummaryModuleProps {
   budgetUsedPctOverride?: number;
   remainingBudgetOverride?: number;
   effectiveBudgetOverride?: number;
-  previousPeriodComparisonText?: string | null;
+  _previousPeriodComparisonText?: string | null;
   filterMode?: 'all' | 'variable' | 'fixed';
 }
 
@@ -28,7 +28,7 @@ export function BudgetSummaryModule({
   totalSpentOverride,
   remainingBudgetOverride,
   effectiveBudgetOverride,
-  previousPeriodComparisonText,
+  _previousPeriodComparisonText,
   filterMode = 'all'
 }: BudgetSummaryModuleProps) {
   const [isRemainingInfoOpen, setIsRemainingInfoOpen] = useState(false);
@@ -138,11 +138,6 @@ export function BudgetSummaryModule({
                 {config.currency || "kr"}
               </span>
             </div>
-            {previousPeriodComparisonText && (
-              <p className="text-[11px] sm:text-[12px] font-normal text-[var(--text-secondary)] leading-tight tracking-tight pt-0.5">
-                {previousPeriodComparisonText}
-              </p>
-            )}
           </div>
 
           {/* Kvar att spendera */}
@@ -158,7 +153,7 @@ export function BudgetSummaryModule({
                 title="Förklaring"
                 aria-label="Förklaring"
               >
-                <Info size={12} strokeWidth={2} />
+                <Icon name="info" size={12} />
               </button>
             </div>
             <div className="flex items-baseline justify-end gap-1.5">

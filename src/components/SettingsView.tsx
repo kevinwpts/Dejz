@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Check, Sun, Moon, Monitor, Calendar, Clock, ChevronRight, RotateCcw, Bell, Receipt } from 'lucide-react';
+import { Icon } from './ui/Icon';
 import { Config } from '../types';
 import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
@@ -113,7 +113,7 @@ export function SettingsView({
           <Button
             variant="secondary"
             size="sm"
-            icon={<Plus size={14} strokeWidth={2} />}
+            icon={<Icon name="plus" size={14} />}
             onClick={() => {
               setPaymentMethodModalData({ name: '' });
               setIsPaymentMethodModalOpen(true);
@@ -151,7 +151,7 @@ export function SettingsView({
                   </span>
                 </div>
                 <div className="text-[var(--text-tertiary)] shrink-0 pl-2 group-hover:text-[var(--text-secondary)] transition-colors">
-                  <ChevronRight size={16} strokeWidth={2} />
+                  <Icon name="caret-right" size={16} />
                 </div>
               </button>
             );
@@ -165,7 +165,7 @@ export function SettingsView({
             onClick={() => setIsResetPaymentMethodsModalOpen(true)}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
           >
-            <RotateCcw size={13} strokeWidth={2} />
+            <Icon name="arrow-counter-clockwise" size={13} />
             <span>{config.language === 'en' ? 'Reset payment methods to default' : 'Återställ betalningsmetoder till standard'}</span>
           </button>
         </div>
@@ -203,7 +203,7 @@ export function SettingsView({
                 </div>
                 {isSelected && (
                   <div className="text-[var(--accent-color)] shrink-0 pl-2">
-                    <Check size={18} strokeWidth={2} />
+                    <Icon name="check" size={18} />
                   </div>
                 )}
               </button>
@@ -234,9 +234,9 @@ export function SettingsView({
           </label>
           <div className="grid grid-cols-3 gap-2.5">
             {[
-              { id: 'system', label: isEn ? 'System' : 'System', icon: <Monitor size={18} /> },
-              { id: 'light', label: isEn ? 'Light' : 'Ljust', icon: <Sun size={18} /> },
-              { id: 'dark', label: isEn ? 'Dark' : 'Mörkt', icon: <Moon size={18} /> },
+              { id: 'system', label: isEn ? 'System' : 'System', icon: <Icon name="monitor" size={18} /> },
+              { id: 'light', label: isEn ? 'Light' : 'Ljust', icon: <Icon name="sun" size={18} /> },
+              { id: 'dark', label: isEn ? 'Dark' : 'Mörkt', icon: <Icon name="moon" size={18} /> },
             ].map((mode) => {
               const isSelected = config.themeMode === mode.id || (!config.themeMode && mode.id === 'system');
               return (
@@ -287,7 +287,7 @@ export function SettingsView({
                     className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white transition-transform border border-black/10 dark:border-white/20 shadow-2xs"
                     style={{ backgroundColor: theme.hex }}
                   >
-                    {isSelected && <Check size={15} strokeWidth={2.5} />}
+                    {isSelected && <Icon name="check" size={15} weight="bold" />}
                   </div>
                   <span className={`text-[11px] font-medium tracking-tight truncate w-full text-center ${
                     isSelected ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-secondary)]'
@@ -360,7 +360,7 @@ export function SettingsView({
 
                 {isSelected && (
                   <div className="text-[var(--accent-color)] shrink-0 pl-2">
-                    <Check size={18} strokeWidth={2} />
+                    <Icon name="check" size={18} />
                   </div>
                 )}
               </button>
@@ -392,7 +392,7 @@ export function SettingsView({
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3.5 min-w-0 pr-4">
               <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                <Receipt size={18} strokeWidth={2} />
+                <Icon name="receipt" size={18} />
               </div>
               <div className="min-w-0 flex flex-col justify-center">
                 <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
@@ -415,7 +415,7 @@ export function SettingsView({
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3.5 min-w-0 pr-4">
               <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                <Calendar size={18} strokeWidth={2} />
+                <Icon name="calendar" size={18} />
               </div>
               <div className="min-w-0 flex flex-col justify-center">
                 <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
@@ -438,7 +438,7 @@ export function SettingsView({
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3.5 min-w-0 pr-4">
               <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                <Clock size={18} strokeWidth={2} />
+                <Icon name="clock" size={18} />
               </div>
               <div className="min-w-0 flex flex-col justify-center">
                 <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
@@ -461,7 +461,7 @@ export function SettingsView({
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3.5 min-w-0 pr-4">
               <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                <Bell size={18} strokeWidth={2} />
+                <Icon name="bell" size={18} />
               </div>
               <div className="min-w-0 flex flex-col justify-center">
                 <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
@@ -499,7 +499,7 @@ export function SettingsView({
               >
                 <div className="flex items-center gap-3.5 min-w-0 pr-2">
                   <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                    <Calendar size={18} strokeWidth={2} />
+                    <Icon name="calendar" size={18} />
                   </div>
                   <div className="min-w-0 flex flex-col justify-center">
                     <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
@@ -516,7 +516,7 @@ export function SettingsView({
                       ? `The ${formatOrdinalDay(config.payday || 25, 'en')}` 
                       : `Den ${formatOrdinalDay(config.payday || 25, 'sv')}`}
                   </span>
-                  <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform" />
+                  <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </button>
 
@@ -524,7 +524,7 @@ export function SettingsView({
               <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3.5 min-w-0 pr-4">
                   <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                    <Clock size={18} strokeWidth={2} />
+                    <Icon name="clock" size={18} />
                   </div>
                   <div className="min-w-0 flex flex-col justify-center">
                     <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">

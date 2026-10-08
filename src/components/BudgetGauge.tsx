@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
 import { getBudgetStatus } from '../utils/budgetStatus';
-import { Info } from 'lucide-react';
+import { Icon } from './ui/Icon';
 
 interface BudgetGaugeProps {
   remainingCents: number;
@@ -144,7 +144,7 @@ export function BudgetGauge({
                 aria-label="Info"
                 title={language === 'en' ? 'How is this calculated?' : 'Hur beräknas detta?'}
               >
-                <Info size={12.5} strokeWidth={2.4} />
+                <Icon name="info" size={12.5} />
               </button>
             )}
           </div>

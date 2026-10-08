@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown } from 'lucide-react';
+import { Icon } from './Icon';
 
 export interface SelectOption {
   value: string;
@@ -67,7 +67,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           </select>
 
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none flex items-center justify-center">
-            <ChevronDown size={16} />
+            <Icon name="caret-down" size={16} />
           </div>
         </div>
 

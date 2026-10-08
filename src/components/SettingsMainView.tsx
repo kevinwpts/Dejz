@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, CreditCard, Globe, Palette, Coins, ChevronRight, Bell, Ban, PieChart, Tag } from 'lucide-react';
 import { Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
 import { formatPaydaySummary } from '../utils/format';
+import { Icon } from './ui/Icon';
 
 interface SettingsMainViewProps {
   onBack: () => void;
@@ -104,10 +104,6 @@ export function SettingsMainView({
           userId={userId}
           session={session}
           onRefresh={onRefresh}
-          onNavigateToProfile={() => {
-            setActiveSection('main');
-            onNavigate('settings', 'main');
-          }}
           onResetSavingsPot={onResetSavingsPot}
           onResetCompletedGoals={onResetCompletedGoals}
           onClearTransactions={onClearTransactions}
@@ -116,6 +112,8 @@ export function SettingsMainView({
           onRenameCategory={onRenameCategory}
           transactions={transactions}
           onMigrateAndDeleteCategory={onMigrateAndDeleteCategory}
+          onNavigate={onNavigate}
+          onCancelledSubscriptionsClick={onCancelledSubscriptionsClick}
           incomes={incomes}
           fixedExpenses={fixedExpenses}
           stats={stats}
@@ -126,7 +124,7 @@ export function SettingsMainView({
   }
 
   return (
-    <motion.div
+    <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
@@ -140,7 +138,7 @@ export function SettingsMainView({
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <Calendar size={18} strokeWidth={2} />
+              <Icon name="calendar" size={18} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('salary')}</span>
@@ -151,7 +149,7 @@ export function SettingsMainView({
               </span>
             </div>
           </div>
-          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+          <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
 
         <button
@@ -161,7 +159,7 @@ export function SettingsMainView({
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <PieChart size={18} strokeWidth={2} />
+              <Icon name="chart-pie" size={18} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
@@ -172,7 +170,7 @@ export function SettingsMainView({
               </span>
             </div>
           </div>
-          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+          <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
 
         <button
@@ -182,7 +180,7 @@ export function SettingsMainView({
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <Tag size={18} strokeWidth={2} />
+              <Icon name="tag" size={18} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
@@ -193,7 +191,7 @@ export function SettingsMainView({
               </span>
             </div>
           </div>
-          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+          <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
 
         <button
@@ -203,7 +201,7 @@ export function SettingsMainView({
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <CreditCard size={18} strokeWidth={2} />
+              <Icon name="credit-card" size={18} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{config?.language === 'en' ? 'Payment methods' : 'Betalmetoder'}</span>
@@ -212,7 +210,7 @@ export function SettingsMainView({
               </span>
             </div>
           </div>
-          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+          <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
 
         <button
@@ -222,7 +220,7 @@ export function SettingsMainView({
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <Coins size={18} strokeWidth={2} />
+              <Icon name="coins" size={18} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{config?.language === 'en' ? 'Currency' : 'Valuta'}</span>
@@ -231,7 +229,7 @@ export function SettingsMainView({
               </span>
             </div>
           </div>
-          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+          <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
 
         <button
@@ -241,7 +239,7 @@ export function SettingsMainView({
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <Globe size={18} strokeWidth={2} />
+              <Icon name="globe" size={18} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('language')}</span>
@@ -250,7 +248,7 @@ export function SettingsMainView({
               </span>
             </div>
           </div>
-          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+          <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
 
         <button
@@ -260,7 +258,7 @@ export function SettingsMainView({
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <Palette size={18} strokeWidth={2} />
+              <Icon name="palette" size={18} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{config?.language === 'en' ? 'Appearance' : 'Utseende'}</span>
@@ -269,7 +267,7 @@ export function SettingsMainView({
               </span>
             </div>
           </div>
-          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+          <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
 
         <button
@@ -279,7 +277,7 @@ export function SettingsMainView({
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <Bell size={18} strokeWidth={2} />
+              <Icon name="bell" size={18} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{config?.language === 'en' ? 'Notifications' : 'Notiser'}</span>
@@ -288,7 +286,7 @@ export function SettingsMainView({
               </span>
             </div>
           </div>
-          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+          <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
 
         <button
@@ -298,7 +296,7 @@ export function SettingsMainView({
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
-              <Ban size={18} strokeWidth={2} className="text-rose-500" />
+              <Icon name="ban" size={18} className="text-rose-500" />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
@@ -309,7 +307,7 @@ export function SettingsMainView({
               </span>
             </div>
           </div>
-          <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+          <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
       </div>
     </motion.div>

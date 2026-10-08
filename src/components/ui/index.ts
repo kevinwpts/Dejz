@@ -19,5 +19,6 @@ export * from './MerchantLogo';
 export * from './Skeleton';
 export * from './FilterButtonGroup';
 export * from './BottomSheet';
+export * from './Icon';
 
 

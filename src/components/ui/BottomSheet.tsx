@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Check } from 'lucide-react';
+import { Icon } from './Icon';
 import { feedback } from '../../utils/feedback';
 import { useScrollLock } from '../../hooks/useScrollLock';
 
@@ -138,7 +138,7 @@ export function BottomSheet({
                       className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95 border-none shadow-none"
                       aria-label="Stäng"
                     >
-                      <X size={16} strokeWidth={2.5} />
+                      <Icon name="x" size={16} />
                     </button>
                   )}
                 </div>
@@ -252,7 +252,7 @@ export function BottomSheetOption<T = string>({
         {rightElement}
         {isSelected && (
           <div className="text-[var(--text-primary)] pl-1 shrink-0">
-            <Check size={18} strokeWidth={2.5} />
+            <Icon name="check" size={18} />
           </div>
         )}
       </div>
