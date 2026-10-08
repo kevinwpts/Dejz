@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Trash2 } from 'lucide-react';
+import { Check, Trash2, Palette } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { suggestIcon } from '../utils/icons';
 import { IconPickerModal } from './IconPickerModal';
@@ -49,6 +49,7 @@ export function CategoryModal({
   }, [isOpen, initialData]);
 
   const isEdit = initialData?.index !== undefined;
+  const isCustomSelected = !PRESET_COLORS.some((c) => c.toLowerCase() === color.toLowerCase());
 
   const handleSave = () => {
     if (!name.trim()) return;
@@ -155,15 +156,31 @@ export function CategoryModal({
           <div className="space-y-2">
             <div className="grid grid-cols-8 gap-2 bg-[var(--surface-muted)] p-2.5 rounded-[12px] border border-[var(--border-color)]">
               {/* Custom hex color input picker */}
-              <div className="relative w-full aspect-square rounded-full overflow-hidden border border-[var(--border-color)] cursor-pointer shadow-xs">
+              <div 
+                className={`relative w-full aspect-square rounded-full border border-[var(--border-color)] cursor-pointer shadow-xs flex items-center justify-center group transition-all duration-200 active:scale-95 ${
+                  isCustomSelected ? 'scale-110 ring-2 ring-white dark:ring-[#1C1C1C] shadow-md z-10' : 'hover:scale-105'
+                }`}
+                style={{ background: 'conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)' }}
+              >
                 <input
                   type="color"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
-                  className="absolute inset-0 -translate-x-2 -translate-y-2 w-12 h-12 cursor-pointer opacity-0"
+                  className="absolute inset-0 w-full h-full cursor-pointer opacity-0 z-20"
                   title="Välj anpassad färg"
                 />
-                <div className="w-full h-full" style={{ backgroundColor: color }} />
+                <div 
+                  className="w-6 h-6 rounded-full shadow-xs flex items-center justify-center z-10 transition-transform group-hover:scale-110 border border-black/5 dark:border-white/10"
+                  style={{ 
+                    backgroundColor: isCustomSelected ? color : 'var(--bg-card)',
+                  }}
+                >
+                  {isCustomSelected ? (
+                    <Check size={11} strokeWidth={3} className="text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]" />
+                  ) : (
+                    <Palette size={12} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
+                  )}
+                </div>
               </div>
               {PRESET_COLORS.map((c) => {
                 const isSelected = color.toLowerCase() === c.toLowerCase();
