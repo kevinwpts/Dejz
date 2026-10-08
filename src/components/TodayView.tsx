@@ -4,6 +4,10 @@ import {
   RotateCcw,
   SlidersHorizontal,
   ChevronRight,
+  Calendar,
+  Clock,
+  Info,
+  X,
 } from "lucide-react";
 import {
   Transaction,
@@ -21,7 +25,6 @@ import { ICON_MAP, getCategoryIconName, isEmojiString } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
 import { feedback } from "../utils/feedback";
-import { designSystem } from "../constants/designSystem";
 import { getCategoryColor } from "../utils/categoryColors";
 
 interface TodayViewProps {
@@ -109,6 +112,50 @@ export function TodayView({
   }, [selectedDate]);
 
   const calendarDays = stats?.days || [];
+
+  const [isPeriodInfoOpen, setIsPeriodInfoOpen] = useState(false);
+
+  const effectiveRemainingDays = useMemo(() => {
+    if (!stats) return 1;
+    const normDate = new Date();
+    normDate.setHours(0, 0, 0, 0);
+    const index = calendarDays.findIndex((d: any) => {
+      const dDate = new Date(d.date);
+      dDate.setHours(0, 0, 0, 0);
+      return dDate.getTime() === normDate.getTime();
+    });
+    if (index !== -1) {
+      return Math.max(1, calendarDays.length - index);
+    }
+    return stats?.remainingDays || 1;
+  }, [calendarDays, stats?.remainingDays]);
+
+  const periodIntervalText = useMemo(() => {
+    const start = stats?.periodStart;
+    const end = stats?.periodEnd;
+    if (!start || !end) return '—';
+    const startDate = typeof start === 'string' ? new Date(start) : start;
+    const endDate = typeof end === 'string' ? new Date(end) : end;
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return '—';
+
+    const formatDate = (d: Date) => {
+      const formatted = d.toLocaleDateString(lang === 'en' ? 'en-US' : 'sv-SE', {
+        day: 'numeric',
+        month: 'short',
+      });
+      return formatted.replace(/\.$/, '');
+    };
+
+    return `${formatDate(startDate)} \u2013 ${formatDate(endDate)}`;
+  }, [stats?.periodStart, stats?.periodEnd, lang]);
+
+  const daysValueText = useMemo(() => {
+    if (stats?.isPastPeriod) {
+      return lang === 'en' ? 'Ended' : 'Avslutad';
+    }
+    const days = effectiveRemainingDays;
+    return lang === 'en' ? `${days} ${days === 1 ? 'day' : 'days'}` : `${days} ${days === 1 ? 'dag' : 'dagar'}`;
+  }, [stats?.isPastPeriod, effectiveRemainingDays, lang]);
 
   const isTodaySelected = useMemo(() => {
     return normalizedSelectedDate.toDateString() === new Date().toDateString();
@@ -304,7 +351,7 @@ export function TodayView({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* 1. Greeting & Hero Module */}
+      {/* 1. Free-floating Hero Gauge & Kvar att Spendera */}
       <GreetingModule
         userName={userName}
         availableForD={todayData?.availableForD || stats?.availableForD || 0}
@@ -334,159 +381,61 @@ export function TodayView({
         onQuickAddExpense={onQuickAddExpense}
         onOpenCalculator={onOpenCalculator}
         allTransactions={allTransactions}
-        categoryBudgets={
-          <div className="mt-1 sm:mt-2 pb-1">
-            {!hasSavedBudget ? (
-              <button
-                type="button"
-                onClick={() => onNavigate("profile", "budget")}
-                className="w-full p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-[14px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
-                    <SlidersHorizontal size={18} strokeWidth={2} />
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] leading-snug">
-                      {lang === "en" ? "Set up your budget" : "Sätt upp din budget"}
-                    </p>
-                    <p className="text-[11px] font-medium text-[var(--text-secondary)] mt-0.5">
-                      {lang === "en" ? "Set limits per category to track spending" : "Fördela din budget på dina kategorier"}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
-              </button>
-            ) : categoryBudgetData.length > 0 ? (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight">
-                    {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof feedback.light === 'function') feedback.light();
-                      onNavigate("profile", "budget");
-                    }}
-                    className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-                  >
-                    {lang === "en" ? "Manage" : "Hantera"}
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-hide -mx-1 px-1">
-                  {categoryBudgetData.map((cat, index) => {
-                    const Icon = ICON_MAP[cat.iconName];
-                    const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
-
-                    return (
-                      <motion.button
-                        key={cat.name}
-                        initial={{ opacity: 0, scale: 0.97, x: 6 }}
-                        animate={{ opacity: 1, scale: 1, x: 0 }}
-                        transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
-                        onClick={() => handleCategoryClick(cat.name)}
-                        className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[18px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
-                      >
-                        {/* Top: Icon + Name */}
-                        <div className="flex items-center gap-2 min-w-0 w-full">
-                          <div 
-                            className="w-7 h-7 rounded-[10px] flex items-center justify-center shrink-0"
-                            style={{ 
-                              backgroundColor: `${catColor}18`, 
-                              color: catColor 
-                            }}
-                          >
-                            {isEmojiString(cat.iconName) ? (
-                              <span className="text-[15px] leading-none">{cat.iconName}</span>
-                            ) : Icon ? (
-                              <Icon size={14} strokeWidth={2.2} />
-                            ) : (
-                              <div className="w-2 h-2 rounded-full bg-current" />
-                            )}
-                          </div>
-                          <span className="text-[12px] font-semibold text-[var(--text-primary)] tracking-tight truncate flex-1 min-w-0">
-                            {cat.name}
-                          </span>
-                        </div>
-
-                        {/* Amount */}
-                        <div className="space-y-0.5">
-                          <p className={`text-[12px] sm:text-[13px] font-bold font-amount tabular-nums tracking-tight truncate ${
-                            cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
-                          }`}>
-                            {(() => {
-                              const currency = config?.currency || 'kr';
-                              if (!cat.hasBudget) {
-                                return `${formatAmount(Math.round(cat.spent), lang)} ${currency}`;
-                              }
-                              const rem = Math.round(cat.remaining);
-                              return `${formatAmount(rem, lang)} ${currency}`;
-                            })()}
-                          </p>
-                          <p className="text-[10px] font-normal text-[var(--text-tertiary)] tracking-tight leading-none">
-                            {cat.hasBudget 
-                              ? (cat.remaining < 0 ? (lang === 'en' ? 'over budget' : 'över budget') : (lang === 'en' ? 'left to spend' : 'kvar att spendera'))
-                              : (lang === 'en' ? 'spent' : 'spenderat')}
-                          </p>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-
-                  {/* Manage Button at the end of the category carousel */}
-                  <motion.button
-                    key="manage-categories"
-                    initial={{ opacity: 0, scale: 0.97, x: 6 }}
-                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                    transition={{ delay: 0.04 + categoryBudgetData.length * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
-                    onClick={() => {
-                      if (typeof feedback.light === 'function') feedback.light();
-                      onNavigate("profile", "budget");
-                    }}
-                    className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[18px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
-                    aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
-                  >
-                    <div className="w-7 h-7 rounded-[9px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-                      <SlidersHorizontal size={14} strokeWidth={2} />
-                    </div>
-
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] tracking-tight">
-                      {lang === 'en' ? 'Manage' : 'Hantera'}
-                    </span>
-                  </motion.button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => onNavigate("profile", "budget")}
-                className="w-full p-4 rounded-[22px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-[14px] bg-black/[0.04] dark:bg-white/5 border-none flex items-center justify-center text-[var(--text-secondary)] transition-colors">
-                    <SlidersHorizontal size={15} strokeWidth={2} />
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
-                      {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
-                    </p>
-                    <p className="text-[11px] font-normal text-[var(--text-secondary)]">
-                      {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight size={15} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
-              </button>
-            )}
-          </div>
-        }
       />
 
-      {/* 2. Period Timeline */}
-      {calendarDays && calendarDays.length > 0 && (
-        <div className="pt-2">
+      {/* Module 1: Time & Period (Unified Period & Calendar Timeline Widget) */}
+      <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[24px] p-4 sm:p-5 space-y-4 shadow-sm animate-fade-in">
+        {/* Period & Payday Status Bar */}
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof feedback?.tap === 'function') feedback.tap();
+            setIsPeriodInfoOpen(true);
+          }}
+          className="w-full flex items-center justify-between gap-3 text-left cursor-pointer active:scale-[0.99] transition-all bg-transparent border-none p-0"
+        >
+          {/* Left: Current Period */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-[10px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+              <Calendar size={14} strokeWidth={2} />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider leading-none">
+                {lang === 'en' ? 'Current period' : 'Aktuell period'}
+              </span>
+              <span className="text-[13px] font-semibold text-[var(--text-primary)] tracking-tight truncate mt-1">
+                {periodIntervalText}
+              </span>
+            </div>
+          </div>
+
+          <div className="h-6 w-[1px] bg-black/[0.06] dark:border-white/[0.08] shrink-0" />
+
+          {/* Right: Days Remaining */}
+          <div className="flex items-center gap-2.5 shrink-0 text-right">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider leading-none">
+                {lang === 'en' ? 'Next payday' : 'Nästa lön'}
+              </span>
+              <span className="text-[13px] font-semibold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-1">
+                {stats?.isPastPeriod
+                  ? (lang === 'en' ? 'Ended' : 'Avslutad')
+                  : (lang === 'en'
+                      ? `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'day left' : 'days left'}`
+                      : `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'dag kvar' : 'dagar kvar'}`)}
+              </span>
+            </div>
+            <div className="w-7 h-7 rounded-[10px] bg-black/[0.04] dark:bg-white/5 text-[var(--text-secondary)] flex items-center justify-center shrink-0">
+              <Clock size={14} strokeWidth={2} />
+            </div>
+          </div>
+        </button>
+
+        {/* Divider inside Card */}
+        <div className="h-[1px] bg-black/[0.04] dark:bg-white/[0.04]" />
+
+        {/* PeriodTimeline calendar */}
+        {calendarDays && calendarDays.length > 0 && (
           <PeriodTimeline
             calendarDays={calendarDays}
             selectedDate={normalizedSelectedDate}
@@ -496,13 +445,161 @@ export function TodayView({
             isCurrentPeriod={isCurrentPeriod}
             showFixedInCalendar={config?.showFixedExpensesInCalendar}
           />
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* 3. Selected Day's Transactions */}
-      <div className="space-y-4 pt-2">
-        <div className="flex items-center justify-between px-1">
-          <h3 className={designSystem.typography.contentSectionTitle}>
+      {/* Module 2: Category Budgets Widget */}
+      <div className="animate-fade-in">
+        {!hasSavedBudget ? (
+          <button
+            type="button"
+            onClick={() => onNavigate("profile", "budget")}
+            className="w-full p-4 rounded-[22px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-[14px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
+                <SlidersHorizontal size={18} strokeWidth={2} />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] leading-snug">
+                  {lang === "en" ? "Set up your budget" : "Sätt upp din budget"}
+                </p>
+                <p className="text-[11px] font-medium text-[var(--text-secondary)] mt-0.5">
+                  {lang === "en" ? "Set limits per category to track spending" : "Fördela din budget på dina kategorier"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+          </button>
+        ) : categoryBudgetData.length > 0 ? (
+          <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[24px] p-4 sm:p-5 space-y-3.5 shadow-sm">
+            <div className="flex items-center justify-between px-0.5">
+              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight uppercase">
+                {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof feedback.light === 'function') feedback.light();
+                  onNavigate("profile", "budget");
+                }}
+                className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              >
+                {lang === "en" ? "Manage" : "Hantera"}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+              {categoryBudgetData.map((cat, index) => {
+                const Icon = ICON_MAP[cat.iconName];
+                const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
+
+                return (
+                  <motion.button
+                    key={cat.name}
+                    initial={{ opacity: 0, scale: 0.97, x: 6 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
+                    onClick={() => handleCategoryClick(cat.name)}
+                    className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[18px] bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
+                  >
+                    {/* Top: Icon + Name */}
+                    <div className="flex items-center gap-2 min-w-0 w-full">
+                      <div 
+                        className="w-7 h-7 rounded-[10px] flex items-center justify-center shrink-0"
+                        style={{ 
+                          backgroundColor: `${catColor}18`, 
+                          color: catColor 
+                        }}
+                      >
+                        {isEmojiString(cat.iconName) ? (
+                          <span className="text-[15px] leading-none">{cat.iconName}</span>
+                        ) : Icon ? (
+                          <Icon size={14} strokeWidth={2.2} />
+                        ) : (
+                          <div className="w-2 h-2 rounded-full bg-current" />
+                        )}
+                      </div>
+                      <span className="text-[12px] font-semibold text-[var(--text-primary)] tracking-tight truncate flex-1 min-w-0">
+                        {cat.name}
+                      </span>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="space-y-0.5">
+                      <p className={`text-[12px] sm:text-[13px] font-bold font-amount tabular-nums tracking-tight truncate ${
+                        cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
+                      }`}>
+                        {(() => {
+                          const currency = config?.currency || 'kr';
+                          if (!cat.hasBudget) {
+                            return `${formatAmount(Math.round(cat.spent), lang)} ${currency}`;
+                          }
+                          const rem = Math.round(cat.remaining);
+                          return `${formatAmount(rem, lang)} ${currency}`;
+                        })()}
+                      </p>
+                      <p className="text-[10px] font-normal text-[var(--text-tertiary)] tracking-tight leading-none">
+                        {cat.hasBudget 
+                          ? (cat.remaining < 0 ? (lang === 'en' ? 'over budget' : 'över budget') : (lang === 'en' ? 'left to spend' : 'kvar att spendera'))
+                          : (lang === 'en' ? 'spent' : 'spenderat')}
+                      </p>
+                    </div>
+                  </motion.button>
+                );
+              })}
+
+              {/* Manage Button at the end of the category carousel */}
+              <motion.button
+                key="manage-categories"
+                initial={{ opacity: 0, scale: 0.97, x: 6 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                transition={{ delay: 0.04 + categoryBudgetData.length * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
+                onClick={() => {
+                  if (typeof feedback.light === 'function') feedback.light();
+                  onNavigate("profile", "budget");
+                }}
+                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[18px] bg-black/[0.01] dark:bg-white/[0.02] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
+              >
+                <div className="w-7 h-7 rounded-[9px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                  <SlidersHorizontal size={14} strokeWidth={2} />
+                </div>
+
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] tracking-tight">
+                  {lang === 'en' ? 'Manage' : 'Hantera'}
+                </span>
+              </motion.button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onNavigate("profile", "budget")}
+            className="w-full p-4 rounded-[22px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-[14px] bg-black/[0.04] dark:bg-white/5 border-none flex items-center justify-center text-[var(--text-secondary)] transition-colors">
+                <SlidersHorizontal size={15} strokeWidth={2} />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
+                  {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
+                </p>
+                <p className="text-[11px] font-normal text-[var(--text-secondary)]">
+                  {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={15} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
+          </button>
+        )}
+      </div>
+
+      {/* Module 3: Selected Day's Transactions Widget */}
+      <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[24px] p-4 sm:p-5 space-y-4 shadow-sm animate-fade-in">
+        <div className="flex items-center justify-between px-0.5">
+          <h3 className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight uppercase">
             {stats.isPastPeriod
               ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
               : selectedDate.toDateString() === new Date().toDateString()
@@ -515,7 +612,7 @@ export function TodayView({
           {!isTodaySelected && (
             <button
               onClick={handleGoToToday}
-              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-white dark:bg-white/[0.04] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.07] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-[18px] text-xs font-medium text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
+              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
             >
               <RotateCcw size={11} strokeWidth={2.5} />
               <span>{lang === "en" ? "Today" : "Idag"}</span>
@@ -523,10 +620,10 @@ export function TodayView({
           )}
         </div>
 
-        <div className="space-y-2.5">
+        <div className="space-y-1">
           <AnimatePresence mode="popLayout">
             {displayedVariableTransactions.length > 0 ? (
-              <motion.div className="space-y-2.5" key="transactions">
+              <motion.div className="space-y-0" key="transactions">
                 {displayedVariableTransactions.map((transaction: Transaction, index: number) => (
                   <motion.div
                     key={transaction.id}
@@ -534,6 +631,7 @@ export function TodayView({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 15 }}
                     transition={{ delay: index * 0.02 }}
+                    className="border-b border-black/[0.04] dark:border-white/[0.04] last:border-none"
                   >
                     <TransactionItem
                       transaction={transaction}
@@ -542,6 +640,7 @@ export function TodayView({
                       language={lang}
                       currency={config?.currency || 'kr'}
                       config={config}
+                      variant="transparent"
                     />
                   </motion.div>
                 ))}
@@ -558,7 +657,7 @@ export function TodayView({
 
           {/* Fixed transactions for the day */}
           {displayedFixedTransactions.length > 0 && (
-            <div className="space-y-2.5">
+            <div className="space-y-0">
               {displayedFixedTransactions.map((item) => {
                 const tx: Transaction = {
                   id: item.id,
@@ -570,27 +669,98 @@ export function TodayView({
                 };
 
                 return (
-                  <TransactionItem
-                    key={item.id}
-                    transaction={tx}
-                    isFixed={true}
-                    config={config}
-                    onClick={() => {
-                      if (item.type === "income" && onViewIncome) {
-                        onViewIncome(item.originalItem);
-                      } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
-                        onViewMonthlySaving(item.originalItem);
-                      } else if (onViewFixedExpense) {
-                        onViewFixedExpense(item.originalItem);
-                      }
-                    }}
-                  />
+                  <div key={item.id} className="border-b border-black/[0.04] dark:border-white/[0.04] last:border-none">
+                    <TransactionItem
+                      transaction={tx}
+                      isFixed={true}
+                      config={config}
+                      variant="transparent"
+                      onClick={() => {
+                        if (item.type === "income" && onViewIncome) {
+                          onViewIncome(item.originalItem);
+                        } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
+                          onViewMonthlySaving(item.originalItem);
+                        } else if (onViewFixedExpense) {
+                          onViewFixedExpense(item.originalItem);
+                        }
+                      }}
+                    />
+                  </div>
                 );
               })}
             </div>
           )}
         </div>
       </div>
+
+      {/* Period & Payday Info Modal */}
+      {isPeriodInfoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
+          <div 
+            className="fixed inset-0" 
+            onClick={() => setIsPeriodInfoOpen(false)} 
+          />
+          <div className="relative w-full max-w-[320px] bg-white dark:bg-[#1C1C1C] rounded-[28px] p-5 border border-black/[0.08] dark:border-white/[0.08] shadow-2xl space-y-4 z-10 text-left font-sans animate-fade-in">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-1">
+              <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold font-display tracking-wider text-sm">
+                <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2} />
+                <span>{lang === 'en' ? 'Period & Payday' : 'Period & Nästa Lön'}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPeriodInfoOpen(false)}
+                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer border-none"
+                aria-label="Stäng"
+              >
+                <X size={17} strokeWidth={2} />
+              </button>
+            </div>
+
+            {/* Content items */}
+            <div className="space-y-2.5 pt-1">
+              {/* Period */}
+              <div className="flex items-center gap-3 p-3 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
+                <div className="w-8 h-8 rounded-[14px] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
+                  <Calendar size={16} strokeWidth={2} />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] font-bold text-[var(--text-tertiary)] tracking-wider">
+                    {lang === 'en' ? 'Current period' : 'Aktuell period'}
+                  </span>
+                  <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate">
+                    {periodIntervalText}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payday / Next Salary */}
+              <div className="flex items-center gap-3 p-3 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
+                <div className="w-8 h-8 rounded-[14px] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
+                  <Clock size={16} strokeWidth={2} />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] font-bold text-[var(--text-tertiary)] tracking-wider">
+                    {lang === 'en' ? 'Next payday' : 'Nästa lön'}
+                  </span>
+                  <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate">
+                    {daysValueText} {lang === 'en' ? 'until payday' : 'kvar till lön'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Close action */}
+            <button
+              type="button"
+              onClick={() => setIsPeriodInfoOpen(false)}
+              className="w-full h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-xs flex items-center justify-center border-none mt-2"
+            >
+              {lang === 'en' ? 'Close' : 'Stäng'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Category Quick View Bottom Sheet Modal */}
       <CategoryBottomSheetModal
