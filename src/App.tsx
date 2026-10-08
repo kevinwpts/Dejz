@@ -169,6 +169,39 @@ const normalizePaymentMethods = (methods: any[] | null | undefined): any[] => {
   });
 };
 
+let hasGloballyDismissedOnboarding = false;
+
+export const isGloballyDismissedOnboarding = (userId?: string) => {
+  if (hasGloballyDismissedOnboarding) return true;
+  try {
+    if (sessionStorage.getItem('dejz_onboarding_dismissed') === 'true') return true;
+    if (localStorage.getItem('dejz_onboarding_skipped') === 'true') return true;
+    if (localStorage.getItem('dejz_onboarding_completed') === 'true') return true;
+    if (userId) {
+      if (localStorage.getItem(`dejz_onboarding_skipped_${userId}`) === 'true') return true;
+      if (localStorage.getItem(`dejz_onboarding_completed_${userId}`) === 'true') return true;
+    }
+  } catch (_e) {
+    // Ignore storage availability errors
+  }
+  return false;
+};
+
+export const markGloballyDismissedOnboarding = (userId?: string) => {
+  hasGloballyDismissedOnboarding = true;
+  try {
+    sessionStorage.setItem('dejz_onboarding_dismissed', 'true');
+    localStorage.setItem('dejz_onboarding_skipped', 'true');
+    localStorage.setItem('dejz_onboarding_completed', 'true');
+    if (userId) {
+      localStorage.setItem(`dejz_onboarding_skipped_${userId}`, 'true');
+      localStorage.setItem(`dejz_onboarding_completed_${userId}`, 'true');
+    }
+  } catch (_e) {
+    // Ignore storage write errors
+  }
+};
+
 // Header component removed as per user request to save space.
 
 // Rebuild trigger: Accent theme
@@ -1401,6 +1434,7 @@ export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [showWelcome, setShowWelcome] = useState(true);
   const [isOnboarding, setIsOnboarding] = useState(false);
+  const hasDismissedOnboardingSession = useRef(false);
 
   // Continuously record scroll position for current active tab (ignore while onboarding)
   useEffect(() => {
@@ -2020,12 +2054,36 @@ export default function App() {
         setTrialEnd(dbProfile.trial_end);
         setNextBillingDate(dbProfile.next_billing_date);
 
-        // Check if onboarding is needed (missing name)
-        // We check both profile table and auth metadata
+        // Check if onboarding is needed
+        // If the user has already completed or skipped onboarding (locally or remotely), NEVER show it again
+        const activeUserId = session.user.id;
+        const isLocallyDone =
+          localStorage.getItem(`dejz_onboarding_completed_${activeUserId}`) === 'true' ||
+          localStorage.getItem(`dejz_onboarding_skipped_${activeUserId}`) === 'true' ||
+          localStorage.getItem('dejz_onboarding_completed') === 'true' ||
+          localStorage.getItem('dejz_onboarding_skipped') === 'true';
+
+        const isMetaDone =
+          session.user.user_metadata?.onboarding_completed === true ||
+          session.user.user_metadata?.onboarding_skipped === true;
+
+        const isDbDone = dbProfile.onboarding_completed === true;
+
         const hasName =
-          dbProfile.full_name || session.user.user_metadata?.full_name;
-        if (!hasName) {
+          Boolean((dbProfile.full_name || session.user.user_metadata?.full_name)?.trim());
+
+        const shouldSkipOnboarding =
+          isLocallyDone ||
+          isMetaDone ||
+          isDbDone ||
+          hasName ||
+          hasDismissedOnboardingSession.current ||
+          isGloballyDismissedOnboarding(activeUserId);
+
+        if (!shouldSkipOnboarding) {
           setIsOnboarding(true);
+        } else {
+          setIsOnboarding(false);
         }
       } else {
         console.warn(
@@ -4913,18 +4971,54 @@ export default function App() {
           isPro={isPro(subscriptionStatus)}
           onClose={() => {
             setIsOnboarding(false);
+            hasDismissedOnboardingSession.current = true;
             const activeUserId = session?.user?.id || "demo-user";
+            markGloballyDismissedOnboarding(activeUserId);
+            try {
+              localStorage.setItem(`dejz_onboarding_skipped_${activeUserId}`, 'true');
+              localStorage.setItem(`dejz_onboarding_completed_${activeUserId}`, 'true');
+              localStorage.setItem('dejz_onboarding_completed', 'true');
+              localStorage.setItem('dejz_onboarding_skipped', 'true');
+            } catch (storageErr) {
+              console.warn("Could not save onboarding skip to localStorage:", storageErr);
+            }
+
+            if (session?.user) {
+              supabase.auth.updateUser({
+                data: { onboarding_completed: true, onboarding_skipped: true }
+              }).catch((authErr) => {
+                console.warn("Could not save onboarding skip in user_metadata:", authErr);
+              });
+            }
+
             try {
               dataService.updateProfile(activeUserId, { onboarding_completed: true });
             } catch (err) {
-              console.warn("Could not mark onboarding completed on exit:", err);
+              console.warn("Could not mark onboarding completed on exit in profile:", err);
             }
           }}
           onComplete={async (data) => {
             setIsOnboarding(false);
+            hasDismissedOnboardingSession.current = true;
             tabScrollPositions.current['today'] = 0;
             window.scrollTo({ top: 0, behavior: 'instant' as any });
             const activeUserId = session?.user?.id || "demo-user";
+            markGloballyDismissedOnboarding(activeUserId);
+
+            try {
+              localStorage.setItem(`dejz_onboarding_completed_${activeUserId}`, 'true');
+              localStorage.setItem('dejz_onboarding_completed', 'true');
+            } catch (storageErr) {
+              console.warn("Could not save onboarding completion to localStorage:", storageErr);
+            }
+
+            if (session?.user) {
+              supabase.auth.updateUser({
+                data: { onboarding_completed: true }
+              }).catch((authErr) => {
+                console.warn("Could not save onboarding completion in user_metadata:", authErr);
+              });
+            }
 
             try {
               // 1. Update full name in profiles table if available

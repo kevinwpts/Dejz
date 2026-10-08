@@ -54,8 +54,8 @@ export function SegmentedControl<T extends string = string>({
               fullWidth ? 'flex-1' : ''
             } ${
               isSelected
-                ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none font-semibold'
-                : 'text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white'
+                ? 'bg-[#242321] text-white dark:bg-stone-100 dark:text-[#242321] shadow-none font-medium'
+                : 'text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white font-medium'
             }`}
           >
             {option.icon && <span className="shrink-0">{option.icon}</span>}
@@ -64,7 +64,7 @@ export function SegmentedControl<T extends string = string>({
               <span
                 className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${
                   isSelected
-                    ? 'bg-black/15 text-inherit'
+                    ? 'bg-white/20 dark:bg-black/15 text-white dark:text-[#242321]'
                     : 'bg-black/5 dark:bg-white/5 text-[#6E6961] dark:text-[#B8B8B8]'
                 }`}
               >

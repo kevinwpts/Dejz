@@ -79,23 +79,23 @@ export function FilterButtonGroup<T extends string = string>({
                 }
                 onSelect(option.id);
               }}
-              className={`flex-shrink-0 whitespace-nowrap h-9 sm:h-[38px] px-3.5 sm:px-4 rounded-[14px] inline-flex items-center justify-center gap-1.5 text-xs sm:text-[13px] font-semibold transition-all duration-150 cursor-pointer active:scale-[0.98] ${
+              className={`flex-shrink-0 whitespace-nowrap h-9 sm:h-[38px] px-3.5 sm:px-4 rounded-[14px] inline-flex items-center justify-center gap-1.5 text-xs sm:text-[13px] font-medium transition-all duration-150 cursor-pointer active:scale-[0.98] ${
                 isSelected
-                  ? 'bg-[var(--accent-color)] text-[var(--on-accent)] border border-transparent shadow-xs'
+                  ? 'bg-[#242321] text-white dark:bg-stone-100 dark:text-[#242321] border border-transparent shadow-xs'
                   : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-black/[0.04] dark:border-white/[0.06]'
               }`}
             >
               {option.icon && (
-                <span className={`shrink-0 transition-colors ${isSelected ? 'text-[var(--on-accent)]' : 'text-[var(--text-secondary)]'}`}>
+                <span className={`shrink-0 transition-colors ${isSelected ? 'text-white dark:text-[#242321]' : 'text-[var(--text-secondary)]'}`}>
                   {option.icon}
                 </span>
               )}
               <span>{option.label}</span>
               {option.badge !== undefined && (
                 <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full shrink-0 ${
                     isSelected
-                      ? 'bg-black/15 text-inherit'
+                      ? 'bg-white/20 dark:bg-black/15 text-white dark:text-[#242321]'
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
                   }`}
                 >

@@ -28,16 +28,16 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         </div>
       )}
       <div className="space-y-1 max-w-sm flex flex-col items-center">
-        <h3 className="text-sm font-bold text-[var(--text-primary)] tracking-tight">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] tracking-tight">
           {title}
         </h3>
         {description && (
           typeof description === 'string' ? (
-            <p className="text-xs font-medium text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-xs font-normal text-[var(--text-secondary)] leading-relaxed">
               {description}
             </p>
           ) : (
-            <div className="text-xs font-medium text-[var(--text-secondary)] leading-relaxed">
+            <div className="text-xs font-normal text-[var(--text-secondary)] leading-relaxed">
               {description}
             </div>
           )
@@ -47,7 +47,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         <button
           type="button"
           onClick={onAction}
-          className="mt-4 h-8 px-4 bg-[#1C1917] dark:bg-[var(--accent-color)] text-[var(--text-on-accent)] dark:text-[var(--on-accent)] rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-none active:scale-95 select-none hover:opacity-90"
+          className="mt-4 h-9 px-4 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] rounded-[14px] text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-none active:scale-[0.98] select-none"
         >
           {actionLabel}
         </button>

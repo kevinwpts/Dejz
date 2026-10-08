@@ -1393,6 +1393,17 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                   fullWidth
                   onClick={() => {
                     setShowExitConfirm(false);
+                    try {
+                      sessionStorage.setItem('dejz_onboarding_dismissed', 'true');
+                      if (userId) {
+                        localStorage.setItem(`dejz_onboarding_skipped_${userId}`, 'true');
+                        localStorage.setItem(`dejz_onboarding_completed_${userId}`, 'true');
+                      }
+                      localStorage.setItem('dejz_onboarding_completed', 'true');
+                      localStorage.setItem('dejz_onboarding_skipped', 'true');
+                    } catch (_storageErr) {
+                      // ignore localStorage errors
+                    }
                     if (onClose) {
                       onClose();
                     } else {

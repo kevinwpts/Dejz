@@ -393,7 +393,7 @@ export function BudgetCategoriesView({
                 <button
                   type="button"
                   onClick={() => handleAddCategory('expense')}
-                  className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
+                  className="h-9 px-4 rounded-[14px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
                 >
                   <Plus size={14} strokeWidth={2.5} />
                   <span>{t('newCategory')}</span>
@@ -401,8 +401,8 @@ export function BudgetCategoriesView({
               )}
             </div>
 
-            {/* Enhetlig grupperad lista i samma layout som Betalningsmetoder */}
-            <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+            {/* Separata kort med mellanrum, precis som transaktionskort */}
+            <div className="space-y-2.5">
               {categoriesList.map((cat, index) => {
                 const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
                 const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
@@ -422,7 +422,7 @@ export function BudgetCategoriesView({
                         handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
                       }
                     }}
-                    className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
+                    className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[12px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
                   >
                     {/* Vänster: Tydlig rund ikon med hel färg & kategorinamn */}
                     <div className="flex items-center gap-3.5 min-w-0 pr-2">
@@ -531,14 +531,14 @@ export function BudgetCategoriesView({
             <button
               type="button"
               onClick={() => handleAddCategory('income')}
-              className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
+              className="h-9 px-4 rounded-[14px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
             >
               <Plus size={14} strokeWidth={2.5} />
               <span>{t('newCategory')}</span>
             </button>
           </div>
 
-          <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="space-y-2.5">
             {incomeCategoriesList.map((cat, index) => {
               const catColor = cat.color || getCategoryColor(cat.name, config?.incomeCategories);
               return (
@@ -546,7 +546,7 @@ export function BudgetCategoriesView({
                   key={cat.id || index}
                   type="button"
                   onClick={() => handleEditCategory('income', index, cat.name, cat.icon, cat.color)}
-                  className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
+                  className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[12px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
                 >
                   <div className="flex items-center gap-3.5 min-w-0 pr-2">
                     <div

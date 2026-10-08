@@ -149,10 +149,31 @@ export const dataService = {
       localStorage.setItem('demo_profile', JSON.stringify(updatedProfile));
       return;
     }
-    const { error } = await supabase
+    const payload = { ...updates };
+    let { error } = await supabase
       .from('profiles')
-      .update(updates)
+      .update(payload)
       .eq('id', userId);
+
+    let attempts = 0;
+    while (error && attempts < 5) {
+      attempts++;
+      const missingCol = extractMissingColumn(error);
+      if (missingCol && missingCol in payload) {
+        delete payload[missingCol];
+        if (Object.keys(payload).length === 0) {
+          error = null;
+          break;
+        }
+        const retryResult = await supabase
+          .from('profiles')
+          .update(payload)
+          .eq('id', userId);
+        error = retryResult.error;
+      } else {
+        break;
+      }
+    }
     
     if (error) throw error;
   },

@@ -137,24 +137,24 @@ export function GreetingModule({
               <Calendar size={14} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider leading-none">
+              <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider leading-none">
                 {isEn ? 'Current period' : 'Aktuell period'}
               </span>
-              <span className="text-[13px] font-bold text-[var(--text-primary)] tracking-tight truncate mt-1">
+              <span className="text-[13px] font-semibold text-[var(--text-primary)] tracking-tight truncate mt-1">
                 {periodIntervalText}
               </span>
             </div>
           </div>
 
-          <div className="h-6 w-[1px] bg-black/[0.06] dark:bg-white/[0.08] shrink-0" />
+          <div className="h-6 w-[1px] bg-black/[0.06] dark:border-white/[0.08] shrink-0" />
 
           {/* Right: Days Remaining */}
           <div className="flex items-center gap-2.5 shrink-0 text-right">
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider leading-none">
+              <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider leading-none">
                 {isEn ? 'Next payday' : 'Nästa lön'}
               </span>
-              <span className="text-[13px] font-bold text-[var(--accent-color)] font-amount tabular-nums tracking-tight mt-1">
+              <span className="text-[13px] font-semibold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-1">
                 {stats?.isPastPeriod
                   ? (isEn ? 'Ended' : 'Avslutad')
                   : (isEn
@@ -162,8 +162,8 @@ export function GreetingModule({
                       : `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'dag kvar' : 'dagar kvar'}`)}
               </span>
             </div>
-            <div className="w-7 h-7 rounded-[10px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
-              <Clock size={14} strokeWidth={2.2} />
+            <div className="w-7 h-7 rounded-[10px] bg-black/[0.04] dark:bg-white/5 text-[var(--text-secondary)] flex items-center justify-center shrink-0">
+              <Clock size={14} strokeWidth={2} />
             </div>
           </div>
         </button>

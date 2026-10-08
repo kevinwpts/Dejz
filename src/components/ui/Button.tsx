@@ -28,7 +28,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-semibold transition-all duration-150 select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100';
+      'inline-flex items-center justify-center transition-all duration-150 select-none cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100';
 
     const sizeStyles = {
       sm: 'h-8 px-3.5 rounded-full text-[13px] gap-1.5 active:scale-95',
@@ -38,21 +38,21 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary:
-        'bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 active:opacity-80 shadow-none border-none',
+        'bg-[#242321] text-white dark:bg-stone-100 dark:text-[#242321] font-semibold hover:opacity-90 active:opacity-80 shadow-none border-none',
       secondary:
-        'bg-black/5 dark:bg-white/5 text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/10 active:bg-black/15 dark:active:bg-white/15 border-none',
+        'bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-stone-200 font-medium hover:bg-black/10 dark:hover:bg-white/15 active:bg-black/15 dark:active:bg-white/20 border-none',
       pill:
-        'bg-black/5 dark:bg-white/5 text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/10 border-none rounded-full',
+        'bg-black/5 dark:bg-white/10 text-[#1C1917] dark:text-stone-200 font-medium hover:bg-black/10 dark:hover:bg-white/15 border-none rounded-full',
       accent:
-        'bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] border-none',
+        'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] border-none',
       danger:
-        'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 border-none',
+        'bg-black/5 dark:bg-white/10 text-rose-600 dark:text-rose-400 font-medium hover:bg-black/10 dark:hover:bg-white/15 border-none',
       ghost:
-        'bg-transparent text-[var(--accent-color)] hover:bg-black/5 dark:hover:bg-white/5',
+        'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 font-medium',
       outline:
-        'bg-transparent text-[#1C1917] dark:text-white border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5',
+        'bg-transparent text-[#1C1917] dark:text-stone-200 border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 font-medium',
       subtle:
-        'bg-black/5 dark:bg-white/5 text-[#1C1917] dark:text-white hover:bg-black/10 dark:hover:bg-white/10',
+        'bg-black/5 dark:bg-white/5 text-[#1C1917] dark:text-stone-200 hover:bg-black/10 dark:hover:bg-white/10 font-medium',
     }[variant];
 
     const widthStyle = fullWidth ? 'w-full' : '';

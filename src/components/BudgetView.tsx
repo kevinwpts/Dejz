@@ -410,58 +410,60 @@ export function BudgetView({
         >
           {/* Incomes Section */}
           {budgetFilter === 'income' && (
-            <div className="space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-                {/* Single compact sort toggle button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (incomeSortBy === 'day') setIncomeSortBy('name');
-                    else if (incomeSortBy === 'name') setIncomeSortBy('amount');
-                    else setIncomeSortBy('day');
-                  }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
-                  title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
-                >
-                  <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                  <span className="text-[var(--text-secondary)] font-normal">
-                    {config.language === 'en' ? 'Sort:' : 'Sortera:'}
-                  </span>
-                  <span className="font-semibold text-[var(--text-primary)]">
-                    {incomeSortBy === 'day' 
-                      ? (config.language === 'en' ? 'Day' : 'Ankomstdag')
-                      : incomeSortBy === 'name'
-                      ? (config.language === 'en' ? 'Name' : 'Namn')
-                      : (config.language === 'en' ? 'Amount' : 'Belopp')
-                    }
-                  </span>
-                </button>
-                <button 
-                  type="button"
-                  onClick={onAddIncome} 
-                  className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
-                >
-                  <Plus size={14} strokeWidth={2.5} />
-                  <span>{t('newIncome')}</span>
-                </button>
-              </div>
-
+            <div className="space-y-4">
               {sortedIncomes.length > 0 ? (
-                <div className="space-y-2.5">
-                  {sortedIncomes.map((income) => (
-                    <BudgetItem 
-                      key={income.id}
-                      item={income} 
-                      onClick={() => onViewIncome(income)} 
-                      currency={config.currency} 
-                      type="income"
-                      language={config.language as Language}
-                      t={t}
-                      config={config}
-                      currentPeriodId={currentPeriodId}
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+                    {/* Single compact sort toggle button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (incomeSortBy === 'day') setIncomeSortBy('name');
+                        else if (incomeSortBy === 'name') setIncomeSortBy('amount');
+                        else setIncomeSortBy('day');
+                      }}
+                      className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
+                    >
+                      <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
+                      <span className="text-[var(--text-secondary)] font-normal">
+                        {config.language === 'en' ? 'Sort:' : 'Sortera:'}
+                      </span>
+                      <span className="font-medium text-[var(--text-primary)]">
+                        {incomeSortBy === 'day' 
+                          ? (config.language === 'en' ? 'Day' : 'Ankomstdag')
+                          : incomeSortBy === 'name'
+                          ? (config.language === 'en' ? 'Name' : 'Namn')
+                          : (config.language === 'en' ? 'Amount' : 'Belopp')
+                        }
+                      </span>
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={onAddIncome} 
+                      className="h-9 px-4 rounded-[14px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+                    >
+                      <Plus size={14} strokeWidth={2} />
+                      <span>{t('newIncome')}</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {sortedIncomes.map((income) => (
+                      <BudgetItem 
+                        key={income.id}
+                        item={income} 
+                        onClick={() => onViewIncome(income)} 
+                        currency={config.currency} 
+                        type="income"
+                        language={config.language as Language}
+                        t={t}
+                        config={config}
+                        currentPeriodId={currentPeriodId}
+                      />
+                    ))}
+                  </div>
+                </>
               ) : (
                 <EmptyState 
                   title={config.language === 'en' ? 'No income added yet' : 'Ingen inkomst inlagd än'} 
@@ -475,64 +477,66 @@ export function BudgetView({
 
           {/* Fixed Expenses Section */}
           {budgetFilter === 'fixed' && (
-            <div className="space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3 px-1 mb-4">
-                {/* Single compact sort toggle button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (fixedSortBy === 'day') setFixedSortBy('name');
-                    else if (fixedSortBy === 'name') setFixedSortBy('amount');
-                    else setFixedSortBy('day');
-                  }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
-                  title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
-                >
-                  <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                  <span className="text-[var(--text-secondary)] font-normal">
-                    {config.language === 'en' ? 'Sort:' : 'Sortera:'}
-                  </span>
-                  <span className="font-semibold text-[var(--text-primary)]">
-                    {fixedSortBy === 'day' 
-                      ? (config.language === 'en' ? 'Day' : 'Dragningsdag')
-                      : fixedSortBy === 'name'
-                      ? (config.language === 'en' ? 'Name' : 'Namn')
-                      : (config.language === 'en' ? 'Amount' : 'Belopp')
-                    }
-                  </span>
-                </button>
-                <button 
-                  type="button"
-                  onClick={onAddFixedExpense} 
-                  className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
-                >
-                  <Plus size={14} strokeWidth={2.5} />
-                  <span>{t('newFixedExpense')}</span>
-                </button>
-              </div>
-
+            <div className="space-y-4">
               {filteredActiveFixedExpenses.length > 0 ? (
-                <div className="space-y-2.5">
-                  {filteredActiveFixedExpenses.map((expense) => (
-                    <BudgetItem 
-                      key={expense.id}
-                      item={expense} 
-                      onClick={() => onViewFixedExpense(expense)} 
-                      currency={config.currency} 
-                      type="expense"
-                      language={config.language as Language}
-                      t={t}
-                      config={config}
-                      currentPeriodId={currentPeriodId}
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-1 mb-1">
+                    {/* Single compact sort toggle button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (fixedSortBy === 'day') setFixedSortBy('name');
+                        else if (fixedSortBy === 'name') setFixedSortBy('amount');
+                        else setFixedSortBy('day');
+                      }}
+                      className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
+                    >
+                      <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
+                      <span className="text-[var(--text-secondary)] font-normal">
+                        {config.language === 'en' ? 'Sort:' : 'Sortera:'}
+                      </span>
+                      <span className="font-medium text-[var(--text-primary)]">
+                        {fixedSortBy === 'day' 
+                          ? (config.language === 'en' ? 'Day' : 'Dragningsdag')
+                          : fixedSortBy === 'name'
+                          ? (config.language === 'en' ? 'Name' : 'Namn')
+                          : (config.language === 'en' ? 'Amount' : 'Belopp')
+                        }
+                      </span>
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={onAddFixedExpense} 
+                      className="h-9 px-4 rounded-[14px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+                    >
+                      <Plus size={14} strokeWidth={2} />
+                      <span>{t('newFixedExpense')}</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {filteredActiveFixedExpenses.map((expense) => (
+                      <BudgetItem 
+                        key={expense.id}
+                        item={expense} 
+                        onClick={() => onViewFixedExpense(expense)} 
+                        currency={config.currency} 
+                        type="expense"
+                        language={config.language as Language}
+                        t={t}
+                        config={config}
+                        currentPeriodId={currentPeriodId}
+                      />
+                    ))}
+                  </div>
+                </>
               ) : (
                 <EmptyState 
                   title={
                     freqFilter === 'all'
                       ? (config.language === 'en' ? 'No fixed expenses added yet' : 'Inga fasta utgifter inlagda än')
-                      : (config.language === 'en' ? 'No expenses matching this period' : 'Inga utgifter för denna periodicity')
+                      : (config.language === 'en' ? 'No expenses matching this period' : 'Inga utgifter för denna period')
                   } 
                   description={
                     freqFilter === 'all'
@@ -549,57 +553,59 @@ export function BudgetView({
           {/* Monthly Savings Section */}
           {budgetFilter === 'savings' && (
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 px-1 mb-4">
-                {/* Single compact sort toggle button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (savingSortBy === 'day') setSavingSortBy('name');
-                    else if (savingSortBy === 'name') setSavingSortBy('amount');
-                    else setSavingSortBy('day');
-                  }}
-                  className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border-none text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
-                  title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
-                >
-                  <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                  <span className="text-[var(--text-secondary)] font-normal">
-                    {config.language === 'en' ? 'Sort:' : 'Sortera:'}
-                  </span>
-                  <span className="font-semibold text-[var(--text-primary)]">
-                    {savingSortBy === 'day' 
-                      ? (config.language === 'en' ? 'Day' : 'Dragningsdag') 
-                      : savingSortBy === 'name' 
-                        ? (config.language === 'en' ? 'Name' : 'Namn') 
-                        : (config.language === 'en' ? 'Amount' : 'Belopp')}
-                  </span>
-                </button>
-
-                <button 
-                  type="button"
-                  onClick={onAddMonthlySaving} 
-                  className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
-                >
-                  <Plus size={14} strokeWidth={2.5} />
-                  <span>{t('newMonthlySaving')}</span>
-                </button>
-              </div>
-
               {sortedSavings.length > 0 ? (
-                <div className="space-y-2.5">
-                  {sortedSavings.map((saving) => (
-                    <BudgetItem 
-                      key={saving.id}
-                      item={saving} 
-                      onClick={() => onViewMonthlySaving(saving)} 
-                      currency={config.currency} 
-                      type="expense"
-                      language={config.language as Language}
-                      t={t}
-                      config={config}
-                      currentPeriodId={currentPeriodId}
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-1 mb-1">
+                    {/* Single compact sort toggle button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (savingSortBy === 'day') setSavingSortBy('name');
+                        else if (savingSortBy === 'name') setSavingSortBy('amount');
+                        else setSavingSortBy('day');
+                      }}
+                      className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
+                    >
+                      <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
+                      <span className="text-[var(--text-secondary)] font-normal">
+                        {config.language === 'en' ? 'Sort:' : 'Sortera:'}
+                      </span>
+                      <span className="font-medium text-[var(--text-primary)]">
+                        {savingSortBy === 'day' 
+                          ? (config.language === 'en' ? 'Day' : 'Dragningsdag') 
+                          : savingSortBy === 'name' 
+                            ? (config.language === 'en' ? 'Name' : 'Namn') 
+                            : (config.language === 'en' ? 'Amount' : 'Belopp')}
+                      </span>
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={onAddMonthlySaving} 
+                      className="h-9 px-4 rounded-[14px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+                    >
+                      <Plus size={14} strokeWidth={2} />
+                      <span>{t('newMonthlySaving')}</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {sortedSavings.map((saving) => (
+                      <BudgetItem 
+                        key={saving.id}
+                        item={saving} 
+                        onClick={() => onViewMonthlySaving(saving)} 
+                        currency={config.currency} 
+                        type="expense"
+                        language={config.language as Language}
+                        t={t}
+                        config={config}
+                        currentPeriodId={currentPeriodId}
+                      />
+                    ))}
+                  </div>
+                </>
               ) : (
                 <EmptyState 
                   title={config.language === 'en' ? 'No monthly savings added yet' : 'Inget månadssparande inlagt än'} 

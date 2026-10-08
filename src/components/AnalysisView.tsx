@@ -437,14 +437,14 @@ export function AnalysisView({
       />
 
       {/* DONUT DIAGRAM & FÖRDELNING */}
-      <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-6">
-        <div className="flex items-center justify-between px-0.5">
-          <h2 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
-            {isEn ? 'Distribution' : 'Fördelning'}
-          </h2>
-        </div>
+      {categoryData.length > 0 && (
+        <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-6">
+          <div className="flex items-center justify-between px-0.5">
+            <h2 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
+              {isEn ? 'Distribution' : 'Fördelning'}
+            </h2>
+          </div>
 
-        {chartItems.length > 0 ? (
           <div className="space-y-6">
             {/* Donut Chart */}
             <div className="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto flex items-center justify-center">
@@ -496,22 +496,18 @@ export function AnalysisView({
               </div>
             </div>
           </div>
-        ) : (
-          <div className="py-8 text-center text-[13px] text-[var(--text-secondary)]">
-            {isEn ? 'No spending recorded for this period' : 'Inga utgifter registrerade för denna period'}
-          </div>
-        )}
-      </div>
-
-      {/* FULLSTÄNDIG KATEGORILISTA */}
-      <div className="space-y-3 pb-8">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
-            {t('categories')}
-          </h3>
         </div>
+      )}
 
-        {categoryData.length > 0 ? (
+      {/* FULLSTÄNDIG KATEGORILISTA ELLER GEMENSAM TOMVY */}
+      {categoryData.length > 0 ? (
+        <div className="space-y-3 pb-8">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
+              {t('categories')}
+            </h3>
+          </div>
+
           <div className="bg-[var(--surface-color)] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
@@ -661,13 +657,19 @@ export function AnalysisView({
               );
             })}
           </div>
-        ) : (
+        </div>
+      ) : (
+        <div className="pb-8">
           <EmptyState
-            title={t('noData')}
-            description={isEn ? 'No expenses recorded for this period' : 'Inga utgifter finns registrerade för den valda perioden'}
+            title={isEn ? 'No expenses yet' : 'Inga utgifter ännu'}
+            description={
+              isEn
+                ? 'There are no expenses to show for this selection.'
+                : 'Det finns inga utgifter att visa för det här urvalet.'
+            }
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
