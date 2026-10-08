@@ -386,14 +386,16 @@ export function BudgetCategoriesView({
                   ? (isEn ? 'Category Budgets' : 'Kategoribudgetar')
                   : (isEn ? 'Expense Categories' : 'Utgiftskategorier')}
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={<Plus size={14} strokeWidth={2.5} />}
-                onClick={() => handleAddCategory('expense')}
-              >
-                {t('newCategory')}
-              </Button>
+              {effectiveMode !== 'budget' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<Plus size={14} strokeWidth={2.5} />}
+                  onClick={() => handleAddCategory('expense')}
+                >
+                  {t('newCategory')}
+                </Button>
+              )}
             </div>
 
             {effectiveMode === 'categories' ? (
@@ -436,7 +438,12 @@ export function BudgetCategoriesView({
                     key={cat.id || index}
                     onClick={(e) => {
                       if (!isEditingThis && !(e.target as HTMLElement).closest('input')) {
-                        handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
+                        if (effectiveMode === 'budget') {
+                          setEditingCategoryName(cat.name);
+                          setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
+                        } else {
+                          handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
+                        }
                       }
                     }}
                     style={{

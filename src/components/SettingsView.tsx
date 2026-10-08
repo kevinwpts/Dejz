@@ -42,7 +42,6 @@ interface SettingsViewProps {
   fixedExpenses?: any[];
   stats?: any;
   currentPeriodId?: string;
-  initialCategorySubTab?: 'budget' | 'categories';
 }
 
 export function SettingsView({ 
@@ -73,7 +72,6 @@ export function SettingsView({
   fixedExpenses = [],
   stats,
   currentPeriodId,
-  initialCategorySubTab = 'budget',
 }: SettingsViewProps) {
   // Reset scroll position when switching sections
   React.useEffect(() => {

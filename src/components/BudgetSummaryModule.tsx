@@ -109,14 +109,14 @@ export function BudgetSummaryModule({
         <div className="grid grid-cols-2 gap-4 items-start">
           {/* Spenderat */}
           <div className="space-y-1">
-            <span className="text-[11.5px] font-semibold text-[var(--text-secondary)] tracking-wider block">
+            <span className="text-xs font-semibold text-[var(--text-secondary)] block">
               {isPastPeriod ? (isEn ? 'Total spent' : 'Spenderat') : (isEn ? 'Spent so far' : 'Spenderat')}
             </span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-[26px] sm:text-[32px] font-bold font-amount tabular-nums text-[var(--text-primary)] tracking-tight">
                 {formatAmount(Math.round(totalSpent), config.language)}
               </span>
-              <span className="text-sm font-medium text-[var(--text-secondary)]">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
                 {config.currency || "kr"}
               </span>
             </div>
@@ -125,7 +125,7 @@ export function BudgetSummaryModule({
           {/* Kvar att spendera */}
           <div className="space-y-1 text-right">
             <div className="flex items-center justify-end gap-1">
-              <span className="text-[11.5px] font-semibold text-[var(--text-secondary)] tracking-wider">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
                 {isPastPeriod ? (isOverBudget ? (isEn ? 'Over budget' : 'Över budget') : (isEn ? 'Left' : 'Kvar')) : (isEn ? 'Remaining' : 'Kvar')}
               </span>
               <button
@@ -139,13 +139,13 @@ export function BudgetSummaryModule({
               </button>
             </div>
             <div className="flex items-baseline justify-end gap-1.5">
-              <span className={`text-[22px] sm:text-[27px] font-bold font-amount tabular-nums tracking-tight ${
+              <span className={`text-xl font-bold font-amount tabular-nums tracking-tight ${
                 isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
               }`}>
                 {isOverBudget ? '−' : ''}
                 {formatAmount(Math.round(isOverBudget && isPastPeriod ? Math.abs(remainingBudget) : Math.max(0, remainingBudget)), config.language)}
               </span>
-              <span className="text-sm font-medium text-[var(--text-secondary)]">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
                 {config.currency || "kr"}
               </span>
             </div>

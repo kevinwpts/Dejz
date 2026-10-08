@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, CreditCard, Globe, Palette, Coins, ChevronRight, SlidersHorizontal, Bell, Ban, PieChart, Tag } from 'lucide-react';
+import { Calendar, CreditCard, Globe, Palette, Coins, ChevronRight, Bell, Ban, PieChart, Tag } from 'lucide-react';
 import { Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';

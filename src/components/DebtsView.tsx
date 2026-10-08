@@ -114,25 +114,25 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       className="space-y-5 pb-20 max-w-2xl mx-auto w-full font-sans"
     >
       {/* 1. Header Summary Cards */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {/* Att få (Skyldig mig) */}
-        <div className="p-4 rounded-[20px] bg-[var(--surface-color)] border-none space-y-1">
+        <div className="p-5 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
             <ArrowDownLeft size={14} strokeWidth={2.5} />
             <span>{isEn ? 'To receive' : 'Att få tillbaka'}</span>
           </div>
-          <div className="text-xl sm:text-2xl font-extrabold text-[var(--text-primary)] font-amount tabular-nums tracking-tight">
+          <div className="text-xl font-extrabold text-[var(--text-primary)] font-amount tabular-nums tracking-tight">
             +{formatAmount(totalOweMe, config.language)} {curr}
           </div>
         </div>
 
         {/* Att betala (Jag är skyldig) */}
-        <div className="p-4 rounded-[20px] bg-[var(--surface-color)] border-none space-y-1">
+        <div className="p-5 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-500 dark:text-rose-400">
             <ArrowUpRight size={14} strokeWidth={2.5} />
             <span>{isEn ? 'To pay' : 'Att betala'}</span>
           </div>
-          <div className="text-xl sm:text-2xl font-extrabold text-[var(--text-primary)] font-amount tabular-nums tracking-tight">
+          <div className="text-xl font-extrabold text-[var(--text-primary)] font-amount tabular-nums tracking-tight">
             -{formatAmount(totalIOwe, config.language)} {curr}
           </div>
         </div>

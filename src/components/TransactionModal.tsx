@@ -717,6 +717,9 @@ export function TransactionModal({
                 onClick={() => amountInputRef.current?.focus()}
                 className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full"
               >
+                <span className="text-2xl sm:text-3xl font-extrabold text-[var(--text-secondary)] select-none mr-2 mb-1 sm:mb-2 font-sans shrink-0">
+                  {currency}
+                </span>
                 <input
                   ref={amountInputRef}
                   type="text"
@@ -732,9 +735,6 @@ export function TransactionModal({
                   placeholder="0"
                   className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] text-[var(--text-primary)] w-full leading-none"
                 />
-                <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] select-none ml-2 mb-1.5 font-sans shrink-0">
-                  {currency}
-                </span>
               </div>
             </div>
           </div>
@@ -1393,6 +1393,7 @@ export function TransactionModal({
             setIsAddingCategory(false);
           }}
           t={t}
+          hideBudget={true}
         />
 
         <ReceiptCameraModal

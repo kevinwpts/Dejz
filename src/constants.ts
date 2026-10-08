@@ -8,6 +8,8 @@ export const DEFAULT_EXPENSE_CATEGORIES = [
   { id: 'shopping', name: "Shopping", icon: "shopping", color: "#ec4899" },
   { id: 'nojen', name: "Nöje & Fritid", icon: "drama", color: "#8b5cf6" },
   { id: 'boende', name: "Boende & Hushåll", icon: "home", color: "#6366f1" },
+  { id: 'forsakringar', name: "Försäkringar", icon: "shield", color: "#0284c7" },
+  { id: 'abonnemang', name: "Abonnemang", icon: "smartphone", color: "#3b82f6" },
   { id: 'ovrigt', name: "Övrigt", icon: "package", color: "#0d9488" }
 ];
 

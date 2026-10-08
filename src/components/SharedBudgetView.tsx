@@ -55,13 +55,13 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
       className="space-y-6 pb-20 max-w-2xl mx-auto w-full font-sans"
     >
       {/* 1. Header Hero */}
-      <div className="p-6 rounded-[24px] bg-[var(--surface-color)] text-center space-y-3 relative overflow-hidden border border-black/[0.04] dark:border-white/[0.04]">
-        <div className="w-14 h-14 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center mx-auto">
+      <div className="p-6 rounded-[22px] bg-[var(--surface-color)] text-center space-y-3 relative overflow-hidden border border-black/[0.04] dark:border-white/[0.04] shadow-2xs">
+        <div className="w-14 h-14 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-[var(--text-primary)] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center mx-auto">
           <Users2 size={26} strokeWidth={2} />
         </div>
 
         <div className="space-y-1">
-          <h2 className="text-xl font-extrabold text-[var(--text-primary)] tracking-tight">
+          <h2 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">
             {isEn ? 'Shared Budget with Partner' : 'Delad budget med partner'}
           </h2>
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed max-w-xs mx-auto">

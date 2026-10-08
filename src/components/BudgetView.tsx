@@ -9,7 +9,7 @@ import { FilterSelectButton, FilterMenuModal, Button } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
-import { getActiveFixedExpenses, getCancelledFixedExpenses } from '../utils/cancellation';
+import { getActiveFixedExpenses } from '../utils/cancellation';
 
 interface BudgetViewProps {
   allTransactions?: any[];
@@ -146,7 +146,6 @@ export function BudgetView({
   }, [incomes, incomeSortBy]);
 
   const activeFixedExpenses = React.useMemo(() => getActiveFixedExpenses(fixedExpenses), [fixedExpenses]);
-  const cancelledFixedExpenses = React.useMemo(() => getCancelledFixedExpenses(fixedExpenses), [fixedExpenses]);
 
   const sortedFixedExpenses = React.useMemo(() => {
     const list = [...(activeFixedExpenses || [])];
@@ -163,18 +162,6 @@ export function BudgetView({
       return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
   }, [activeFixedExpenses, fixedSortBy]);
-
-  const filteredCancelledFixedExpenses = React.useMemo(() => {
-    if (freqFilter === 'all') return cancelledFixedExpenses;
-    return cancelledFixedExpenses.filter(e => {
-      const freq = e.frequency || Frequency.MONTHLY;
-      if (freqFilter === 'monthly') return freq === Frequency.MONTHLY;
-      if (freqFilter === 'quarterly') return freq === Frequency.QUARTERLY;
-      if (freqFilter === 'semi-annually') return freq === Frequency.SEMI_ANNUALLY;
-      if (freqFilter === 'annually') return freq === Frequency.ANNUALLY;
-      return true;
-    });
-  }, [cancelledFixedExpenses, freqFilter]);
 
   const filteredActiveFixedExpenses = React.useMemo(() => {
     if (freqFilter === 'all') return sortedFixedExpenses;
@@ -594,37 +581,6 @@ export function BudgetView({
                   actionLabel={`+ ${t('newFixedExpense')}`}
                   onAction={onAddFixedExpense}
                 />
-              )}
-
-              {/* Cancelled Subscriptions Native Section */}
-              {filteredCancelledFixedExpenses.length > 0 && (
-                <div className="space-y-3 pt-8 mt-8 border-t border-dashed border-black/[0.08] dark:border-white/10">
-                  <div className="flex items-center justify-between px-1.5 select-none">
-                    <h3 className="text-xs font-semibold text-amber-600 dark:text-amber-500 tracking-wider uppercase flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
-                      {config.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
-                    </h3>
-                    <span className="text-xs font-medium text-[var(--text-secondary)]">
-                      {filteredCancelledFixedExpenses.length}
-                    </span>
-                  </div>
-                  <div className="space-y-2.5 opacity-60 hover:opacity-100 transition-opacity duration-200">
-                    {filteredCancelledFixedExpenses.map((expense) => (
-                      <BudgetItem 
-                        key={expense.id}
-                        item={expense} 
-                        onClick={() => onViewFixedExpense(expense)} 
-                        currency={config.currency} 
-                        type="expense"
-                        language={config.language as Language}
-                        t={t}
-                        config={config}
-                        currentPeriodId={currentPeriodId}
-                        isGrouped={true}
-                      />
-                    ))}
-                  </div>
-                </div>
               )}
             </div>
           )}

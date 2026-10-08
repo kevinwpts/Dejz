@@ -493,6 +493,9 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 onClick={() => amountInputRef.current?.focus()}
                 className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
               >
+                <span className="text-2xl sm:text-3xl font-extrabold text-[var(--text-secondary)] select-none mr-2 mb-1 sm:mb-2 font-sans shrink-0">
+                  {currency}
+                </span>
                 <input
                   ref={amountInputRef}
                   type="text"
@@ -508,9 +511,6 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                   placeholder="0"
                   className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none"
                 />
-                <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] select-none ml-2 mb-1.5 font-sans shrink-0">
-                  {currency}
-                </span>
               </div>
             </div>
           </div>
@@ -1405,6 +1405,9 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 onClick={() => amountInputRef.current?.focus()}
                 className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
               >
+                <span className="text-2xl sm:text-3xl font-extrabold text-[var(--text-secondary)] select-none mr-2 mb-1 sm:mb-2 font-sans shrink-0">
+                  {currency}
+                </span>
                 <input
                   ref={amountInputRef}
                   type="text"
@@ -1420,9 +1423,6 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   placeholder="0"
                   className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder-[var(--text-tertiary)] w-full leading-none"
                 />
-                <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] select-none ml-2 mb-1.5 font-sans shrink-0">
-                  {currency}
-                </span>
               </div>
             </div>
           </div>
@@ -2301,6 +2301,9 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 onClick={() => amountInputRef.current?.focus()}
                 className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
               >
+                <span className="text-2xl sm:text-3xl font-extrabold text-[var(--text-secondary)] select-none mr-2 mb-1 sm:mb-2 font-sans shrink-0">
+                  {currency}
+                </span>
                 <input
                   ref={amountInputRef}
                   type="text"
@@ -2316,9 +2319,6 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   placeholder="0"
                   className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder-[var(--text-tertiary)] w-full leading-none"
                 />
-                <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] select-none ml-2 mb-1.5 font-sans shrink-0">
-                  {currency}
-                </span>
               </div>
             </div>
           </div>
