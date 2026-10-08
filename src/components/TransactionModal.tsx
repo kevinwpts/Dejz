@@ -753,7 +753,7 @@ export function TransactionModal({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
+                className="overflow-hidden rounded-[22px] bg-[var(--surface-color)] p-2 mb-4"
               >
                 <CalendarWidget 
                   calendarDays={calendarDays}
