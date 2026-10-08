@@ -93,7 +93,7 @@ export function GreetingModule({
           <div className="relative w-full max-w-[340px] bg-white dark:bg-[#1C1C1C] rounded-[12px] p-5 border border-black/[0.08] dark:border-white/[0.08] shadow-2xl space-y-4 z-10 text-left font-sans">
             {/* Header */}
             <div className="flex items-center justify-between pb-1">
-              <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold font-display tracking-wider text-xs uppercase">
+              <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold text-sm">
                 <Icon name="info" size={16} className="text-[var(--accent-color)]" />
                 <span>{isEn ? 'Calculation Details' : 'Hur räknas det ut?'}</span>
               </div>

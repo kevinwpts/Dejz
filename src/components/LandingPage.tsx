@@ -156,7 +156,7 @@ export function LandingPage({
             {/* LEFT COLUMN: Text, CTAs, Trust */}
             <div className="lg:col-span-6 space-y-8">
               <div className="space-y-4">
-                <h1 className="text-5xl lg:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
+                <h1 className="text-5xl lg:text-6xl font-semibold font-unbounded tracking-tight text-slate-900 leading-[1.2]">
                   Hela din ekonomi.<br />
                   Svart på vitt.
                 </h1>
@@ -241,7 +241,7 @@ export function LandingPage({
           {/* ==================== MOBILE LAYOUT (block lg:hidden) ==================== */}
           <div className="block lg:hidden space-y-6">
             <div className="space-y-4">
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 leading-[1.1]">
+              <h1 className="text-3xl sm:text-4xl font-semibold font-unbounded tracking-tight text-slate-900 leading-[1.25]">
                 Hela din ekonomi.<br />
                 Svart på vitt.
               </h1>
@@ -336,7 +336,7 @@ export function LandingPage({
       <section id="how-it-works" className="py-24 bg-slate-50 border-y border-slate-200/80">
         <div className="max-w-[1240px] mx-auto px-6 sm:px-8 space-y-14">
           <div className="max-w-2xl space-y-3">
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-semibold font-unbounded tracking-tight text-slate-900 leading-snug">
               Så fungerar Dejz
             </h2>
             <p className="text-base sm:text-lg text-slate-600">
@@ -443,7 +443,7 @@ export function LandingPage({
             {/* Right Text (~55% / col-span-7) */}
             <div className="lg:col-span-7 space-y-8">
               <div className="space-y-4">
-                <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
+                <h2 className="text-2xl sm:text-3xl font-semibold font-unbounded tracking-tight text-slate-900 leading-snug">
                   Din ekonomi, på dina villkor.
                 </h2>
                 <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
@@ -507,7 +507,7 @@ export function LandingPage({
               {/* Left Content (wider left column) */}
               <div className="lg:col-span-5 space-y-6">
                 <div className="space-y-4">
-                  <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 leading-[1.12] max-w-sm">
+                  <h2 className="text-2xl sm:text-3xl font-semibold font-unbounded tracking-tight text-slate-900 leading-[1.25] max-w-sm">
                     Allt du behöver<br />
                     – samlat på ett ställe.
                   </h2>
@@ -597,7 +597,7 @@ export function LandingPage({
       <section className="py-12 px-6 sm:px-8 max-w-[1240px] mx-auto">
         <div className="bg-slate-900 text-white rounded-[28px] p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-xl border border-slate-800">
           <div className="space-y-2 text-center lg:text-left">
-            <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-xs">
+            <h2 className="text-xl sm:text-3xl font-semibold font-unbounded tracking-tight text-white leading-snug">
               Redo att få koll på ekonomin?
             </h2>
             <p className="text-slate-200 text-sm sm:text-lg font-medium leading-relaxed">

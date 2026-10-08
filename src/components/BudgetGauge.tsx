@@ -133,14 +133,14 @@ export function BudgetGauge({
         <div className="absolute inset-x-0 bottom-7 sm:bottom-8 flex flex-col items-center justify-center text-center pointer-events-none">
           {/* Heading & Info Button */}
           <div className="flex items-center justify-center gap-1.5 pointer-events-auto">
-            <span className="text-[13px] sm:text-[14px] font-medium text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
+            <span className="text-xs sm:text-[13px] font-medium text-[var(--text-secondary)] block leading-snug">
               {label}
             </span>
             {onOpenInfo && (
               <button
                 type="button"
                 onClick={onOpenInfo}
-                className="p-1 -m-1 rounded-full text-[#6D6962]/75 hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
+                className="p-1 -m-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
                 aria-label="Info"
                 title={language === 'en' ? 'How is this calculated?' : 'Hur beräknas detta?'}
               >
@@ -153,7 +153,7 @@ export function BudgetGauge({
           <div className="flex items-baseline justify-center gap-1 mt-1">
             <AnimatedNumber
               value={remainingCents}
-              className={`text-[34px] sm:text-[38px] font-semibold leading-none font-amount tabular-nums tracking-tight ${
+              className={`text-[34px] sm:text-[38px] md:text-[42px] font-semibold leading-none font-amount tabular-nums tracking-tight ${
                 isNegative
                   ? 'text-rose-500 dark:text-rose-400'
                   : 'text-[var(--text-primary)]'
@@ -161,7 +161,7 @@ export function BudgetGauge({
               formatter={(val) => formatAmount(val, language)}
             />
             <span
-              className={`text-[18px] sm:text-[20px] font-normal leading-none ${
+              className={`text-sm sm:text-base font-normal leading-none ${
                 isNegative
                   ? 'text-rose-500/80 dark:text-rose-400/80'
                   : 'text-[var(--text-secondary)]'
@@ -173,7 +173,7 @@ export function BudgetGauge({
 
           {/* Integrated Time Countdown */}
           {timeText && (
-            <span className="text-[11px] font-semibold text-[#6D6962] dark:text-[#A8A8A8] mt-1.5 block leading-none select-none tracking-tight animate-fade-in">
+            <span className="text-xs font-medium text-[var(--text-secondary)] mt-1.5 block leading-none select-none tracking-tight animate-fade-in">
               {timeText}
             </span>
           )}

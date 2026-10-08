@@ -422,16 +422,11 @@ export function BudgetCategoriesView({
                         handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
                       }
                     }}
-                    className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[8px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
+                    className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
                   >
                     {/* Vänster: Tydlig rund ikon med hel färg & kategorinamn */}
                     <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                      <div
-                        style={{ backgroundColor: catColor }}
-                        className="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0 shadow-2xs"
-                      >
-                        <CategoryIcon icon={cat.icon} size="sm" noBackground whiteIcon color="#ffffff" />
-                      </div>
+                      <CategoryIcon icon={cat.icon} color={catColor} size="md" />
                       <div className="min-w-0 flex flex-col justify-center">
                         <span className="text-sm font-semibold text-[var(--text-primary)] tracking-tight truncate">
                           {cat.name}
@@ -546,15 +541,10 @@ export function BudgetCategoriesView({
                   key={cat.id || index}
                   type="button"
                   onClick={() => handleEditCategory('income', index, cat.name, cat.icon, cat.color)}
-                  className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[8px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
+                  className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
                 >
                   <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                    <div
-                      style={{ backgroundColor: catColor }}
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-white shrink-0 shadow-2xs"
-                    >
-                      <CategoryIcon icon={cat.icon} size="sm" noBackground whiteIcon color="#ffffff" />
-                    </div>
+                    <CategoryIcon icon={cat.icon} color={catColor} size="md" />
                     <span className="text-sm font-semibold text-[var(--text-primary)] tracking-tight truncate">
                       {cat.name}
                     </span>

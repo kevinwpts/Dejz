@@ -18,6 +18,7 @@ import {
 } from "../types";
 import { TranslationKey } from "../i18n";
 import { TransactionItem } from "./TransactionItem";
+import { CategoryIcon } from "./CategoryIcon";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { PeriodTimeline } from "./PeriodTimeline";
@@ -352,7 +353,7 @@ export function TodayView({
   return (
     <div className="space-y-6 font-sans">
       {/* 1. Compact Period & Payday Status Module (Top of page, no icons) */}
-      <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[8px] p-3 sm:p-3.5 shadow-sm animate-fade-in">
+      <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[14px] p-3.5 sm:p-4 shadow-sm animate-fade-in">
         <button
           type="button"
           onClick={() => {
@@ -363,22 +364,22 @@ export function TodayView({
         >
           {/* Left: Current Period */}
           <div className="flex flex-col min-w-0">
-            <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider leading-none">
+            <span className="text-xs font-medium text-[var(--text-secondary)] tracking-tight leading-tight">
               {lang === 'en' ? 'Current period' : 'Aktuell period'}
             </span>
-            <span className="text-[13px] font-semibold text-[var(--text-primary)] tracking-tight truncate mt-1">
+            <span className="text-sm font-semibold text-[var(--text-primary)] tracking-tight truncate mt-1">
               {periodIntervalText}
             </span>
           </div>
 
-          <div className="h-6 w-[1px] bg-black/[0.06] dark:border-white/[0.08] shrink-0" />
+          <div className="h-7 w-[1px] bg-black/[0.06] dark:bg-white/[0.08] shrink-0" />
 
           {/* Right: Days Remaining */}
           <div className="flex flex-col items-end shrink-0 text-right">
-            <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider leading-none">
+            <span className="text-xs font-medium text-[var(--text-secondary)] tracking-tight leading-tight">
               {lang === 'en' ? 'Next payday' : 'Nästa lön'}
             </span>
-            <span className="text-[13px] font-semibold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-1">
+            <span className="text-sm font-semibold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-1">
               {stats?.isPastPeriod
                 ? (lang === 'en' ? 'Ended' : 'Avslutad')
                 : (lang === 'en'
@@ -427,10 +428,10 @@ export function TodayView({
           <button
             type="button"
             onClick={() => onNavigate("profile", "budget")}
-            className="w-full p-4 rounded-[8px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
+            className="w-full p-4 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-[6px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-[10px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
                 <SlidersHorizontal size={18} strokeWidth={2} />
               </div>
               <div>
@@ -445,9 +446,9 @@ export function TodayView({
             <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
           </button>
         ) : categoryBudgetData.length > 0 ? (
-          <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[8px] p-4 sm:p-5 space-y-3.5 shadow-sm">
+          <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[14px] p-4 sm:p-5 space-y-3.5 shadow-sm">
             <div className="flex items-center justify-between px-0.5">
-              <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight uppercase">
+              <span className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)] tracking-tight">
                 {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
               </span>
               <button
@@ -456,7 +457,7 @@ export function TodayView({
                   if (typeof feedback.light === 'function') feedback.light();
                   onNavigate("profile", "budget");
                 }}
-                className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
                 {lang === "en" ? "Manage" : "Hantera"}
               </button>
@@ -474,33 +475,19 @@ export function TodayView({
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                     onClick={() => handleCategoryClick(cat.name)}
-                    className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[8px] bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
+                    className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[12px] bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
                   >
                     {/* Top: Icon + Name */}
                     <div className="flex items-center gap-2 min-w-0 w-full">
-                      <div 
-                        className="w-7 h-7 rounded-[6px] flex items-center justify-center shrink-0"
-                        style={{ 
-                          backgroundColor: `${catColor}18`, 
-                          color: catColor 
-                        }}
-                      >
-                        {isEmojiString(cat.iconName) ? (
-                          <span className="text-[15px] leading-none">{cat.iconName}</span>
-                        ) : Icon ? (
-                          <Icon size={14} strokeWidth={2.2} />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-current" />
-                        )}
-                      </div>
-                      <span className="text-[12px] font-semibold text-[var(--text-primary)] tracking-tight truncate flex-1 min-w-0">
+                      <CategoryIcon icon={cat.iconName} color={catColor} size="xs" />
+                      <span className="text-xs font-medium text-[var(--text-primary)] tracking-tight truncate flex-1 min-w-0">
                         {cat.name}
                       </span>
                     </div>
 
                     {/* Amount */}
                     <div className="space-y-0.5">
-                      <p className={`text-[12px] sm:text-[13px] font-bold font-amount tabular-nums tracking-tight truncate ${
+                      <p className={`text-xs sm:text-[13px] font-semibold font-amount tabular-nums tracking-tight truncate ${
                         cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
                       }`}>
                         {(() => {
@@ -512,7 +499,7 @@ export function TodayView({
                           return `${formatAmount(rem, lang)} ${currency}`;
                         })()}
                       </p>
-                      <p className="text-[10px] font-normal text-[var(--text-tertiary)] tracking-tight leading-none">
+                      <p className="text-[11px] font-normal text-[var(--text-secondary)] tracking-tight leading-none">
                         {cat.hasBudget 
                           ? (cat.remaining < 0 ? (lang === 'en' ? 'over budget' : 'över budget') : (lang === 'en' ? 'left to spend' : 'kvar att spendera'))
                           : (lang === 'en' ? 'spent' : 'spenderat')}
@@ -532,14 +519,14 @@ export function TodayView({
                   if (typeof feedback.light === 'function') feedback.light();
                   onNavigate("profile", "budget");
                 }}
-                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[8px] bg-black/[0.01] dark:bg-white/[0.02] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[12px] bg-black/[0.01] dark:bg-white/[0.02] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
                 aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
               >
-                <div className="w-7 h-7 rounded-[6px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                <div className="w-7 h-7 rounded-[8px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
                   <SlidersHorizontal size={14} strokeWidth={2} />
                 </div>
 
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] tracking-tight">
+                <span className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] tracking-tight">
                   {lang === 'en' ? 'Manage' : 'Hantera'}
                 </span>
               </motion.button>
@@ -549,10 +536,10 @@ export function TodayView({
           <button
             type="button"
             onClick={() => onNavigate("profile", "budget")}
-            className="w-full p-4 rounded-[8px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
+            className="w-full p-4 rounded-[14px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-[6px] bg-black/[0.04] dark:bg-white/5 border-none flex items-center justify-center text-[var(--text-secondary)] transition-colors">
+              <div className="w-9 h-9 rounded-[10px] bg-black/[0.04] dark:bg-white/5 border-none flex items-center justify-center text-[var(--text-secondary)] transition-colors">
                 <SlidersHorizontal size={15} strokeWidth={2} />
               </div>
               <div>
@@ -586,20 +573,31 @@ export function TodayView({
 
       {/* Date Header directly under the timeline */}
       <div className="flex items-center justify-between px-1 pt-1">
-        <h3 className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight uppercase">
-          {stats.isPastPeriod
-            ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
-            : selectedDate.toDateString() === new Date().toDateString()
-              ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
-              : selectedDate.toLocaleDateString(
-                  lang === "en" ? "en-US" : "sv-SE",
-                  { day: "numeric", month: "long" },
-                )}
-        </h3>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-[var(--text-secondary)] tracking-tight">
+            {stats.isPastPeriod
+              ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
+              : selectedDate.toDateString() === new Date().toDateString()
+                ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
+                : selectedDate.toLocaleDateString(
+                    lang === "en" ? "en-US" : "sv-SE",
+                    { day: "numeric", month: "long" },
+                  )}
+          </span>
+          {(displayedVariableTransactions.length > 0 || displayedFixedTransactions.length > 0) && (
+            <span className="text-[11px] font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
+              {(displayedVariableTransactions.length + displayedFixedTransactions.length)} {
+                (displayedVariableTransactions.length + displayedFixedTransactions.length) === 1
+                  ? (lang === 'en' ? 'transaktion' : 'transaktion')
+                  : (lang === 'en' ? 'transaktioner' : 'transaktioner')
+              }
+            </span>
+          )}
+        </div>
         {!isTodaySelected && (
           <button
             onClick={handleGoToToday}
-            className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
+            className="flex items-center gap-1.5 px-2.5 h-6 rounded-[10px] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
           >
             <RotateCcw size={11} strokeWidth={2.5} />
             <span>{lang === "en" ? "Today" : "Idag"}</span>
@@ -687,9 +685,9 @@ export function TodayView({
           <div className="relative w-full max-w-[320px] bg-white dark:bg-[#1C1C1C] rounded-[12px] p-5 border border-black/[0.08] dark:border-white/[0.08] shadow-2xl space-y-4 z-10 text-left font-sans animate-fade-in">
             {/* Header */}
             <div className="flex items-center justify-between pb-1">
-              <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold font-display tracking-wider text-sm">
+              <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold text-sm">
                 <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2} />
-                <span>{lang === 'en' ? 'Period & Payday' : 'Period & Nästa Lön'}</span>
+                <span>{lang === 'en' ? 'Period & Payday' : 'Period & nästa lön'}</span>
               </div>
               <button
                 type="button"
@@ -704,30 +702,30 @@ export function TodayView({
             {/* Content items */}
             <div className="space-y-2.5 pt-1">
               {/* Period */}
-              <div className="flex items-center gap-3 p-3 rounded-[6px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-                <div className="w-8 h-8 rounded-[6px] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
+              <div className="flex items-center gap-3 p-3 rounded-[12px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
+                <div className="w-8 h-8 rounded-[8px] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
                   <Calendar size={16} strokeWidth={2} />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-bold text-[var(--text-tertiary)] tracking-wider">
+                  <span className="text-xs font-medium text-[var(--text-secondary)]">
                     {lang === 'en' ? 'Current period' : 'Aktuell period'}
                   </span>
-                  <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate">
+                  <span className="text-sm font-semibold text-[var(--text-primary)] truncate mt-0.5">
                     {periodIntervalText}
                   </span>
                 </div>
               </div>
 
               {/* Payday / Next Salary */}
-              <div className="flex items-center gap-3 p-3 rounded-[6px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-                <div className="w-8 h-8 rounded-[6px] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
+              <div className="flex items-center gap-3 p-3 rounded-[12px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
+                <div className="w-8 h-8 rounded-[8px] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
                   <Clock size={16} strokeWidth={2} />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] font-bold text-[var(--text-tertiary)] tracking-wider">
+                  <span className="text-xs font-medium text-[var(--text-secondary)]">
                     {lang === 'en' ? 'Next payday' : 'Nästa lön'}
                   </span>
-                  <span className="text-[13.5px] font-semibold text-[var(--text-primary)] truncate">
+                  <span className="text-sm font-semibold text-[var(--text-primary)] font-amount tabular-nums truncate mt-0.5">
                     {daysValueText} {lang === 'en' ? 'until payday' : 'kvar till lön'}
                   </span>
                 </div>
@@ -738,7 +736,7 @@ export function TodayView({
             <button
               type="button"
               onClick={() => setIsPeriodInfoOpen(false)}
-              className="w-full h-11 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-xs flex items-center justify-center border-none mt-2"
+              className="w-full h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-xs flex items-center justify-center border-none mt-2"
             >
               {lang === 'en' ? 'Close' : 'Stäng'}
             </button>

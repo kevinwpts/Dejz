@@ -551,12 +551,7 @@ export function AnalysisView({
                   >
                     <div className="flex items-center justify-between gap-3 w-full">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div 
-                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-[6px] flex items-center justify-center text-white shrink-0 shadow-2xs"
-                          style={{ backgroundColor: item.color || '#6366f1' }}
-                        >
-                          <CategoryIcon icon={item.icon} size="sm" noBackground whiteIcon />
-                        </div>
+                        <CategoryIcon icon={item.icon} color={item.color || '#6366f1'} size="md" />
 
                         <div className="min-w-0 flex-1 flex flex-col justify-center">
                           <p className="text-[14px] font-medium text-[var(--text-primary)] leading-tight truncate tracking-tight">

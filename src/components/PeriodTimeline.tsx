@@ -214,7 +214,7 @@ export function PeriodTimeline({
           <button
             type="button"
             onClick={() => handleStep('prev')}
-            className="pointer-events-auto w-6 h-6 rounded-full bg-white/[0.035] hover:bg-white/[0.07] text-[#C7CDDC] border-none flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-none"
+            className="pointer-events-auto w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-none flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-none"
             aria-label="Föregående dag"
             title="Föregående dag"
           >
@@ -290,16 +290,16 @@ export function PeriodTimeline({
 
               {/* Day of Week / Today */}
               <span
-                className={`text-[8px] sm:text-[8.5px] tracking-wider leading-none font-medium ${
+                className={`text-[9px] sm:text-[10px] leading-none font-medium ${
                   isSelected
                     ? 'text-[var(--text-primary)] font-semibold'
                     : hasCategoryMatch
-                    ? 'text-[#242321] dark:text-white'
+                    ? 'text-[var(--text-primary)]'
                     : isRealToday
                     ? 'text-[var(--accent-color)] font-bold'
                     : isFirstDay
-                    ? 'text-[#242321] dark:text-white font-semibold'
-                    : 'text-[#716E68] dark:text-[#9CA6BC]/70'
+                    ? 'text-[var(--text-primary)] font-semibold'
+                    : 'text-[var(--text-secondary)]'
                 }`}
               >
                 {isRealToday ? (isEn ? 'Today' : 'Idag') : dayWeekdayShort}
@@ -327,7 +327,7 @@ export function PeriodTimeline({
           <button
             type="button"
             onClick={() => handleStep('next')}
-            className="pointer-events-auto w-6 h-6 rounded-full bg-white/[0.035] hover:bg-white/[0.07] text-[#C7CDDC] border-none flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-none"
+            className="pointer-events-auto w-6 h-6 rounded-full bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-none flex items-center justify-center transition-all duration-150 cursor-pointer active:scale-90 shadow-none"
             aria-label="Nästa dag"
             title="Nästa dag"
           >

@@ -820,12 +820,11 @@ export function TransactionModal({
                           }}
                           className="flex items-center gap-2 flex-1 min-w-0 text-left cursor-pointer group"
                         >
-                          <div 
-                            className="w-7 h-7 rounded-[10px] flex items-center justify-center text-white shrink-0 shadow-2xs"
-                            style={{ backgroundColor: split.category ? (catData?.color || getCategoryColor(split.category, categories)) : 'var(--surface-muted)' }}
-                          >
-                            <CategoryIcon icon={catData?.icon || 'tag'} size="xs" color={split.category ? "#fff" : "var(--text-tertiary)"} />
-                          </div>
+                          <CategoryIcon 
+                            icon={catData?.icon || 'tag'} 
+                            color={split.category ? (catData?.color || getCategoryColor(split.category, categories)) : '#716e68'} 
+                            size="xs" 
+                          />
                           <span className="text-[13px] font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] truncate">
                             {split.category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                           </span>
@@ -968,19 +967,11 @@ export function TransactionModal({
                     }}
                     className="flex items-center gap-2 p-1.5 px-2.5 rounded-[8px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer group"
                   >
-                    <div 
-                      className="w-6 h-6 rounded-[10px] flex items-center justify-center shrink-0 text-white shadow-2xs"
-                      style={{ 
-                        backgroundColor: currentCatData?.color || 'var(--accent-color)',
-                      }}
-                    >
-                      <CategoryIcon 
-                        icon={currentCatData?.icon || 'tag'} 
-                        size="xs" 
-                        noBackground 
-                        whiteIcon 
-                      />
-                    </div>
+                    <CategoryIcon 
+                      icon={currentCatData?.icon || 'tag'} 
+                      color={currentCatData?.color || 'var(--accent-color)'}
+                      size="xs" 
+                    />
                     <span className="text-[13.5px] font-bold text-[var(--text-primary)] truncate max-w-[120px] sm:max-w-[160px]">
                       {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                     </span>
@@ -1346,18 +1337,17 @@ export function TransactionModal({
                             }
                             setIsCategoryPickerOpen(false);
                           }}
-                          style={{ backgroundColor: cat.color || '#6366f1' }}
-                          className={`h-28 sm:h-32 p-3.5 rounded-[8px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
-                            isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
+                          className={`h-24 sm:h-28 p-3.5 rounded-[14px] flex flex-col items-center justify-center gap-2 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-none relative overflow-hidden text-center ${
+                            isSelected ? 'ring-2 ring-[var(--accent-color)] ring-offset-2 ring-offset-white dark:ring-offset-[#1C1C1C]' : ''
                           }`}
                         >
-                          <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />
-                          <span className="text-[14px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
+                          <CategoryIcon icon={cat.icon} color={cat.color} size="lg" />
+                          <span className="text-[13px] font-semibold text-[var(--text-primary)] text-center truncate w-full px-1">
                             {cat.name}
                           </span>
                           {isSelected && (
-                            <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
-                              <Check size={14} strokeWidth={2.5} />
+                            <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white">
+                              <Check size={11} strokeWidth={2.5} />
                             </div>
                           )}
                         </button>

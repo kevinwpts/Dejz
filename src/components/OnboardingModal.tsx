@@ -705,7 +705,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="name" />
                         <div className="mt-5 sm:mt-6 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.nameQuestion}
                           </h3>
                         </div>
@@ -755,7 +755,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="payday" payday={payday} />
                         <div className="mt-5 sm:mt-6 space-y-1 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.paydayQuestion}
                           </h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
@@ -867,7 +867,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="income" />
                         <div className="mt-5 sm:mt-6 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.incomeQuestion}
                           </h3>
                         </div>
@@ -945,7 +945,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="expenses" />
                         <div className="mt-5 sm:mt-6 space-y-1 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.expensesQuestion}
                           </h3>
                           <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium max-w-[280px] mx-auto leading-relaxed">
@@ -1107,7 +1107,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="goals" />
                         <div className="mt-5 sm:mt-6 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.savingsQuestion}
                           </h3>
                         </div>
@@ -1232,7 +1232,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="text-center pb-2 sm:pb-2.5">
                         <OnboardingCharacterArt step="summary" />
                         <div className="mt-5 sm:mt-6 space-y-1 text-center">
-                          <h3 className="text-xl font-bold text-[var(--text-primary)] tracking-tight">
+                          <h3 className="text-[17px] sm:text-lg font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
                             {s.summaryQuestion}
                           </h3>
                           <p className="text-xs font-medium text-[var(--text-secondary)]">

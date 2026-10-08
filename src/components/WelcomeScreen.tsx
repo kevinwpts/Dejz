@@ -31,7 +31,7 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
           </div>
           
           <div className="space-y-3 max-w-sm">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+            <h2 className="text-xl sm:text-2xl font-semibold font-unbounded tracking-tight text-[var(--text-primary)] leading-normal">
               Se exakt vad du kan spendera idag.
             </h2>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium leading-relaxed">
