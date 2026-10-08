@@ -157,7 +157,7 @@ export function GuidesView({ config }: GuidesViewProps) {
           </button>
 
           {/* Guide Header */}
-          <div className="p-5 rounded-[22px] bg-[var(--surface-color)] space-y-2 border border-black/[0.04] dark:border-white/[0.04]">
+          <div className="p-5 rounded-[8px] bg-[var(--surface-color)] space-y-2 border border-black/[0.04] dark:border-white/[0.04]">
             <div className="flex items-center gap-2 text-xs font-bold text-[var(--accent-color)]">
               <selectedGuide.icon size={16} strokeWidth={2.5} />
               <span>{selectedGuide.readTime} {isEn ? 'read' : 'lästid'}</span>
@@ -175,7 +175,7 @@ export function GuidesView({ config }: GuidesViewProps) {
             {selectedGuide.steps.map((step, idx) => (
               <div
                 key={idx}
-                className="p-5 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.04] space-y-3"
+                className="p-5 rounded-[8px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.04] space-y-3"
               >
                 <h3 className="text-sm font-bold text-[var(--text-primary)]">
                   {step.title}
@@ -187,7 +187,7 @@ export function GuidesView({ config }: GuidesViewProps) {
 
                 {/* Screenshot Placeholder */}
                 {step.imagePlaceholder && (
-                  <div className="rounded-[16px] bg-black/[0.02] dark:bg-white/[0.03] border-2 border-dashed border-black/10 dark:border-white/10 p-6 flex flex-col items-center justify-center gap-2 text-center text-[var(--text-tertiary)]">
+                  <div className="rounded-[8px] bg-black/[0.02] dark:bg-white/[0.03] border-2 border-dashed border-black/10 dark:border-white/10 p-6 flex flex-col items-center justify-center gap-2 text-center text-[var(--text-tertiary)]">
                     <ImageIcon size={24} strokeWidth={1.5} className="opacity-50" />
                     <span className="text-[11px] font-medium">
                       {step.imagePlaceholder}
@@ -200,7 +200,7 @@ export function GuidesView({ config }: GuidesViewProps) {
 
                 {/* Tip box if any */}
                 {step.tip && (
-                  <div className="p-3 rounded-[14px] bg-[var(--accent-color)]/10 text-[var(--text-primary)] text-xs flex items-start gap-2">
+                  <div className="p-3 rounded-[8px] bg-[var(--accent-color)]/10 text-[var(--text-primary)] text-xs flex items-start gap-2">
                     <CheckCircle size={15} className="text-[var(--accent-color)] shrink-0 mt-0.5" />
                     <span className="leading-snug">{step.tip}</span>
                   </div>
@@ -212,7 +212,7 @@ export function GuidesView({ config }: GuidesViewProps) {
       ) : (
         /* Guides Index List */
         <div className="space-y-4">
-          <div className="p-5 rounded-[22px] bg-[var(--surface-color)] text-center space-y-2 border border-black/[0.04] dark:border-white/[0.04]">
+          <div className="p-5 rounded-[8px] bg-[var(--surface-color)] text-center space-y-2 border border-black/[0.04] dark:border-white/[0.04]">
             <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center mx-auto">
               <BookOpen size={22} strokeWidth={2} />
             </div>
@@ -234,10 +234,10 @@ export function GuidesView({ config }: GuidesViewProps) {
                   key={g.id}
                   type="button"
                   onClick={() => setSelectedGuideId(g.id)}
-                  className="w-full p-4 rounded-[20px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-black/[0.04] dark:border-white/[0.04] transition-all flex items-center justify-between gap-3 text-left cursor-pointer active:scale-[0.99] group shadow-none"
+                  className="w-full p-4 rounded-[8px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-black/[0.04] dark:border-white/[0.04] transition-all flex items-center justify-between gap-3 text-left cursor-pointer active:scale-[0.99] group shadow-none"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-10 h-10 rounded-[14px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-[8px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <Icon size={18} strokeWidth={2} />
                     </div>
                     <div className="min-w-0">

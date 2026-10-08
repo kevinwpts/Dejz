@@ -308,11 +308,11 @@ export function BudgetCategoriesView({
     <div className="space-y-5 font-sans pb-10 max-w-2xl mx-auto w-full">
       {/* 0. Flikväljare: Utgifter / Inkomster (döljs i rent budgetläge) */}
       {effectiveMode !== 'budget' && (
-        <div className="flex bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[16px] gap-1">
+        <div className="flex bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[8px] gap-1">
           <button
             type="button"
             onClick={() => setActiveCategoryType('expense')}
-            className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer border-none ${
+            className={`flex-1 py-2 text-xs font-bold rounded-[6px] transition-all cursor-pointer border-none ${
               activeCategoryType === 'expense'
                 ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -323,7 +323,7 @@ export function BudgetCategoriesView({
           <button
             type="button"
             onClick={() => setActiveCategoryType('income')}
-            className={`flex-1 py-2 text-xs font-bold rounded-[12px] transition-all cursor-pointer border-none ${
+            className={`flex-1 py-2 text-xs font-bold rounded-[6px] transition-all cursor-pointer border-none ${
               activeCategoryType === 'income'
                 ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -342,7 +342,7 @@ export function BudgetCategoriesView({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="sticky top-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md rounded-[20px] p-4 shadow-sm border border-black/[0.04] dark:border-white/[0.04] space-y-2.5"
+              className="sticky top-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md rounded-[8px] p-4 shadow-sm border border-black/[0.04] dark:border-white/[0.04] space-y-2.5"
             >
               <div className="flex items-baseline justify-between">
                 <div className="space-y-0.5">
@@ -393,7 +393,7 @@ export function BudgetCategoriesView({
                 <button
                   type="button"
                   onClick={() => handleAddCategory('expense')}
-                  className="h-9 px-4 rounded-[14px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+                  className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
                 >
                   <Plus size={14} strokeWidth={2.5} />
                   <span>{t('newCategory')}</span>
@@ -422,7 +422,7 @@ export function BudgetCategoriesView({
                         handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
                       }
                     }}
-                    className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[12px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
+                    className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[8px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
                   >
                     {/* Vänster: Tydlig rund ikon med hel färg & kategorinamn */}
                     <div className="flex items-center gap-3.5 min-w-0 pr-2">
@@ -451,7 +451,7 @@ export function BudgetCategoriesView({
                         {isEditingThis ? (
                           <div
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center bg-white dark:bg-black/40 rounded-[12px] px-2.5 py-1 border border-[var(--accent-color)] shadow-xs"
+                            className="flex items-center bg-white dark:bg-black/40 rounded-[6px] px-2.5 py-1 border border-[var(--accent-color)] shadow-xs"
                           >
                             <input
                               type="text"
@@ -499,7 +499,7 @@ export function BudgetCategoriesView({
                               setEditingCategoryName(cat.name);
                               setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
                             }}
-                            className="px-3 py-1.5 rounded-[12px] bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] transition-colors border border-black/[0.04] dark:border-white/[0.06] cursor-pointer flex items-center gap-1 active:scale-95"
+                            className="px-3 py-1.5 rounded-[6px] bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] transition-colors border border-black/[0.04] dark:border-white/[0.06] cursor-pointer flex items-center gap-1 active:scale-95"
                           >
                             <span className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)]">
                               {catBudget > 0 ? formatAmount(catBudget, config.language) : '0'}
@@ -531,7 +531,7 @@ export function BudgetCategoriesView({
             <button
               type="button"
               onClick={() => handleAddCategory('income')}
-              className="h-9 px-4 rounded-[14px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+              className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
             >
               <Plus size={14} strokeWidth={2.5} />
               <span>{t('newCategory')}</span>
@@ -546,7 +546,7 @@ export function BudgetCategoriesView({
                   key={cat.id || index}
                   type="button"
                   onClick={() => handleEditCategory('income', index, cat.name, cat.icon, cat.color)}
-                  className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[12px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
+                  className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[8px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
                 >
                   <div className="flex items-center gap-3.5 min-w-0 pr-2">
                     <div
@@ -574,7 +574,7 @@ export function BudgetCategoriesView({
         <button
           type="button"
           onClick={handleSaveBudgetDone}
-          className="w-full h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-none"
+          className="w-full h-11 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-none"
         >
           <Check size={16} strokeWidth={2.5} />
           {isEn ? 'Done' : 'Klar'}
@@ -662,7 +662,7 @@ export function BudgetCategoriesView({
             <select
               value={targetMigrationId}
               onChange={(e) => setTargetMigrationId(e.target.value)}
-              className="w-full h-11 bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] px-3 text-sm font-medium text-[var(--text-primary)] outline-none"
+              className="w-full h-11 bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[8px] px-3 text-sm font-medium text-[var(--text-primary)] outline-none"
             >
               {(deleteMigrationData.type === 'income'
                 ? config.incomeCategories || []

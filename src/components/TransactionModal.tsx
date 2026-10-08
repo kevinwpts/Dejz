@@ -605,7 +605,7 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[16px] sm:rounded-[16px] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[12px] sm:rounded-[12px] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -645,7 +645,7 @@ export function TransactionModal({
 
           {/* Type Segmented Grid (when creating new transaction) */}
           {_onChangeType && !transaction && (
-            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-white/5 rounded-[14px] border border-black/[0.04] dark:border-white/[0.06]">
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-white/5 rounded-[8px] border border-black/[0.04] dark:border-white/[0.06]">
               <button
                 type="button"
                 onClick={() => {
@@ -678,12 +678,12 @@ export function TransactionModal({
           )}
 
           {/* 1. Main Hero Card: Icon + Merchant & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[22px] bg-[var(--surface-color)] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[8px] bg-[var(--surface-color)] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-[14px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-[8px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
@@ -753,7 +753,7 @@ export function TransactionModal({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden rounded-[22px] bg-[var(--surface-color)] p-2 mb-4"
+                className="overflow-hidden rounded-[8px] bg-[var(--surface-color)] p-2 mb-4"
               >
                 <CalendarWidget 
                   calendarDays={calendarDays}
@@ -767,7 +767,7 @@ export function TransactionModal({
           </AnimatePresence>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[22px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+          <div className="rounded-[8px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
             {/* Row 1: Category or Split Categories */}
             {type === 'expense' && splits.length > 0 ? (
               /* Inline Split Category View */
@@ -809,7 +809,7 @@ export function TransactionModal({
                     const catData = categories.find(c => c.name === split.category);
 
                     return (
-                      <div key={split.id || index} className="flex items-center justify-between p-2 rounded-[14px] bg-[var(--surface-color)] border border-black/5 dark:border-white/5 gap-2">
+                      <div key={split.id || index} className="flex items-center justify-between p-2 rounded-[8px] bg-[var(--surface-color)] border border-black/5 dark:border-white/5 gap-2">
                         {/* Category Selector Button */}
                         <button
                           type="button"
@@ -966,7 +966,7 @@ export function TransactionModal({
                       setActiveSplitIndex(null);
                       setIsCategoryPickerOpen(true);
                     }}
-                    className="flex items-center gap-2 p-1.5 px-2.5 rounded-[14px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer group"
+                    className="flex items-center gap-2 p-1.5 px-2.5 rounded-[8px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer group"
                   >
                     <div 
                       className="w-6 h-6 rounded-[10px] flex items-center justify-center shrink-0 text-white shadow-2xs"
@@ -1238,7 +1238,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[16px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[12px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
                   <div>
@@ -1305,7 +1305,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.94, opacity: 0, y: 16 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[16px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
+                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[12px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
               >
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
                   <div>
@@ -1347,7 +1347,7 @@ export function TransactionModal({
                             setIsCategoryPickerOpen(false);
                           }}
                           style={{ backgroundColor: cat.color || '#6366f1' }}
-                          className={`h-28 sm:h-32 p-3.5 rounded-[22px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                          className={`h-28 sm:h-32 p-3.5 rounded-[8px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
@@ -1372,7 +1372,7 @@ export function TransactionModal({
                         setIsCategoryPickerOpen(false);
                         setIsAddingCategory(true);
                       }}
-                      className="w-full py-2.5 rounded-[14px] border border-dashed border-black/15 dark:border-white/15 text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] hover:border-black/30 dark:hover:border-white/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 rounded-[8px] border border-dashed border-black/15 dark:border-white/15 text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] hover:border-black/30 dark:hover:border-white/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={15} strokeWidth={2.5} />
                       <span>{t('newCategory')}</span>

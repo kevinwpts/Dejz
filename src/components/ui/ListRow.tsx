@@ -36,7 +36,7 @@ export const ListRow: React.FC<ListRowProps> = ({
   return (
     <div
       onClick={isClickable ? onClick : undefined}
-      className={`bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] p-3.5 sm:p-4 rounded-[12px] flex items-center justify-between transition-all select-none ${
+      className={`bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] p-3.5 sm:p-4 rounded-[8px] flex items-center justify-between transition-all select-none ${
         isClickable
           ? 'cursor-pointer hover:bg-black/5 dark:hover:bg-white/[0.04] active:scale-[0.99]'
           : ''
@@ -45,7 +45,7 @@ export const ListRow: React.FC<ListRowProps> = ({
       <div className="flex items-center gap-3 min-w-0 pr-2">
         {icon && (
           <div
-            className={`w-9 h-9 rounded-[8px] flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
+            className={`w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}
           >
             {icon}
           </div>

@@ -70,7 +70,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
       bodyClassName="p-6 sm:p-7 text-center"
     >
       <div className="text-center">
-        <div className="w-12 h-12 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] rounded-[14px] flex items-center justify-center mx-auto mb-4 border border-black/5 dark:border-white/10">
+        <div className="w-12 h-12 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] rounded-[8px] flex items-center justify-center mx-auto mb-4 border border-black/5 dark:border-white/10">
           <Lock size={24} strokeWidth={2} />
         </div>
 
@@ -80,7 +80,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
 
         {view === 'menu' && (
           <div className="space-y-2.5">
-            <div className="w-full flex items-center justify-between p-3.5 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px]">
+            <div className="w-full flex items-center justify-between p-3.5 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px]">
               <div className="flex items-center gap-3">
                 <Smartphone size={18} strokeWidth={2} className="text-[var(--text-secondary)]" />
                 <span className="text-sm font-semibold text-[var(--text-primary)]">{t('appLock')}</span>
@@ -92,7 +92,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
             </div>
 
             {pinEnabled && (
-              <div className="w-full flex items-center justify-between p-3.5 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px]">
+              <div className="w-full flex items-center justify-between p-3.5 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px]">
                 <div className="flex items-center gap-3">
                   <Fingerprint size={18} strokeWidth={2} className="text-[var(--text-secondary)]" />
                   <span className="text-sm font-semibold text-[var(--text-primary)]">{t('biometrics')}</span>

@@ -84,7 +84,7 @@ export function CancelledSubscriptionsModal({
           {/* Body */}
           <div className="p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
             {/* Total Savings Banner */}
-            <div className="p-4 rounded-[22px] bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 flex items-center justify-between gap-3">
+            <div className="p-4 rounded-[8px] bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                   <Sparkles size={20} strokeWidth={2} />
@@ -125,7 +125,7 @@ export function CancelledSubscriptionsModal({
                   return (
                     <div
                       key={item.id}
-                      className="p-4 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] space-y-3"
+                      className="p-4 rounded-[8px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] space-y-3"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
@@ -207,7 +207,7 @@ export function CancelledSubscriptionsModal({
 
                       {/* Inline Date Editor */}
                       {isEditingThis && (
-                        <div className="pt-2 space-y-2 bg-black/[0.02] dark:bg-white/[0.03] p-3 rounded-[14px]">
+                        <div className="pt-2 space-y-2 bg-black/[0.02] dark:bg-white/[0.03] p-3 rounded-[8px]">
                           <label className="text-xs font-semibold text-[var(--text-secondary)] block">
                             {isEn ? 'Cancellation / End date' : 'Uppsägningsdatum / Sista giltighetsdag'}
                           </label>

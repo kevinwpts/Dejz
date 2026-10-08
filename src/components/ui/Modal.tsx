@@ -90,7 +90,7 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0, y: center ? 20 : 30, scale: center ? 0.95 : 0.98 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] dark:bg-[#191919] ${
-              center ? 'rounded-[16px] border' : 'rounded-t-[16px] sm:rounded-[16px] border-t sm:border'
+              center ? 'rounded-[12px] border' : 'rounded-t-[12px] sm:rounded-[12px] border-t sm:border'
             } border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Pill */}

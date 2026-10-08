@@ -172,10 +172,10 @@ export function AdminDashboardView({
       </div>
 
       {/* Admin Hero Card */}
-      <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-4">
+      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-[16px] bg-gradient-to-tr from-amber-500 to-orange-400 text-white flex items-center justify-center shadow-md shadow-amber-500/20">
+            <div className="w-12 h-12 rounded-[8px] bg-gradient-to-tr from-amber-500 to-orange-400 text-white flex items-center justify-center shadow-md shadow-amber-500/20">
               <ShieldCheck size={26} strokeWidth={2} />
             </div>
             <div>
@@ -195,7 +195,7 @@ export function AdminDashboardView({
               loadAdminStats();
               addToast(isEn ? 'Data refreshed' : 'Data uppdaterad', 'success');
             }}
-            className="w-9 h-9 rounded-[14px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95"
+            className="w-9 h-9 rounded-[8px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95"
             title={isEn ? 'Refresh' : 'Uppdatera'}
           >
             <RefreshCw size={16} strokeWidth={2} />
@@ -203,7 +203,7 @@ export function AdminDashboardView({
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
-          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[14px] border border-black/[0.04] dark:border-white/[0.04]">
+          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[8px] border border-black/[0.04] dark:border-white/[0.04]">
             <span className="text-[11px] font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Database' : 'Databas'}
             </span>
@@ -222,7 +222,7 @@ export function AdminDashboardView({
             </div>
           </div>
 
-          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[14px] border border-black/[0.04] dark:border-white/[0.04]">
+          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[8px] border border-black/[0.04] dark:border-white/[0.04]">
             <span className="text-[11px] font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Subscription' : 'Status'}
             </span>
@@ -231,7 +231,7 @@ export function AdminDashboardView({
             </span>
           </div>
 
-          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[14px] border border-black/[0.04] dark:border-white/[0.04]">
+          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[8px] border border-black/[0.04] dark:border-white/[0.04]">
             <span className="text-[11px] font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Transactions' : 'Transaktioner'}
             </span>
@@ -240,7 +240,7 @@ export function AdminDashboardView({
             </span>
           </div>
 
-          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[14px] border border-black/[0.04] dark:border-white/[0.04]">
+          <div className="p-3 bg-black/[0.02] dark:bg-white/[0.03] rounded-[8px] border border-black/[0.04] dark:border-white/[0.04]">
             <span className="text-[11px] font-medium text-[var(--text-secondary)] block">
               {isEn ? 'Categories' : 'Kategorier'}
             </span>
@@ -252,7 +252,7 @@ export function AdminDashboardView({
       </div>
 
       {/* Subscription Simulator */}
-      <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-3.5">
+      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-3.5">
         <div className="flex items-center gap-2">
           <Sparkles size={18} strokeWidth={2} className="text-[var(--accent-color)]" />
           <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
@@ -269,7 +269,7 @@ export function AdminDashboardView({
           <button
             type="button"
             onClick={() => handleSimulateSubscription('pro')}
-            className={`py-3 px-3 rounded-[14px] text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
+            className={`py-3 px-3 rounded-[8px] text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
               subscriptionStatus === 'pro'
                 ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-sm'
                 : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10'
@@ -282,7 +282,7 @@ export function AdminDashboardView({
           <button
             type="button"
             onClick={() => handleSimulateSubscription('trial')}
-            className={`py-3 px-3 rounded-[14px] text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
+            className={`py-3 px-3 rounded-[8px] text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
               subscriptionStatus === 'trial'
                 ? 'bg-amber-500 text-white shadow-sm'
                 : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10'
@@ -295,7 +295,7 @@ export function AdminDashboardView({
           <button
             type="button"
             onClick={() => handleSimulateSubscription('free')}
-            className={`py-3 px-3 rounded-[14px] text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
+            className={`py-3 px-3 rounded-[8px] text-xs font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 active:scale-95 ${
               !subscriptionStatus || subscriptionStatus === 'free'
                 ? 'bg-black/80 dark:bg-white/80 text-white dark:text-black shadow-sm'
                 : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10'
@@ -308,7 +308,7 @@ export function AdminDashboardView({
       </div>
 
       {/* Quick Test Account Tools (Admin Only) */}
-      <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-4">
+      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-4">
         <div className="flex items-center gap-2">
           <Sparkles size={18} strokeWidth={2} className="text-amber-500" />
           <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
@@ -332,7 +332,7 @@ export function AdminDashboardView({
                 window.location.reload();
               }, 400);
             }}
-            className="p-4 rounded-[16px] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] border border-black/[0.05] dark:border-white/[0.06] text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
+            className="p-4 rounded-[8px] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] border border-black/[0.05] dark:border-white/[0.06] text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
@@ -370,7 +370,7 @@ export function AdminDashboardView({
                 window.location.reload();
               }, 400);
             }}
-            className="p-4 rounded-[16px] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] border border-black/[0.05] dark:border-white/[0.06] text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
+            className="p-4 rounded-[8px] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.07] border border-black/[0.05] dark:border-white/[0.06] text-left transition-all cursor-pointer active:scale-[0.98] group flex flex-col justify-between space-y-2"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[var(--text-primary)] tracking-tight">
@@ -386,7 +386,7 @@ export function AdminDashboardView({
       </div>
 
       {/* User Feedback Module */}
-      <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-4">
+      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MessageSquare size={18} strokeWidth={2} className="text-indigo-500" />
@@ -408,7 +408,7 @@ export function AdminDashboardView({
             {feedbackList.map((item) => (
               <div
                 key={item.id}
-                className="p-3.5 bg-black/[0.02] dark:bg-white/[0.03] rounded-[14px] border border-black/[0.04] dark:border-white/[0.05] space-y-2 group"
+                className="p-3.5 bg-black/[0.02] dark:bg-white/[0.03] rounded-[8px] border border-black/[0.04] dark:border-white/[0.05] space-y-2 group"
               >
                 <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
                   <span className="font-mono opacity-60">
@@ -442,7 +442,7 @@ export function AdminDashboardView({
       </div>
 
       {/* Developer & Diagnostic Tools */}
-      <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-4">
+      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-black/[0.04] dark:border-white/[0.06] shadow-none space-y-4">
         <div className="flex items-center gap-2">
           <Database size={18} strokeWidth={2} className="text-emerald-500" />
           <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
@@ -454,7 +454,7 @@ export function AdminDashboardView({
           <button
             type="button"
             onClick={handleCopyDiagnostics}
-            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-[14px] border border-black/[0.04] dark:border-white/[0.04] text-xs font-semibold text-[var(--text-primary)] transition-all cursor-pointer active:scale-[0.99]"
+            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-[8px] border border-black/[0.04] dark:border-white/[0.04] text-xs font-semibold text-[var(--text-primary)] transition-all cursor-pointer active:scale-[0.99]"
           >
             <div className="flex items-center gap-2.5">
               <FileCode size={16} strokeWidth={2} className="text-[var(--text-secondary)]" />
@@ -479,7 +479,7 @@ export function AdminDashboardView({
                 addToast('Kunde inte rensa cache', 'error');
               }
             }}
-            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-[14px] border border-black/[0.04] dark:border-white/[0.04] text-xs font-semibold text-[var(--text-primary)] transition-all cursor-pointer active:scale-[0.99]"
+            className="w-full flex items-center justify-between p-3.5 bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.05] dark:hover:bg-white/[0.06] rounded-[8px] border border-black/[0.04] dark:border-white/[0.04] text-xs font-semibold text-[var(--text-primary)] transition-all cursor-pointer active:scale-[0.99]"
           >
             <div className="flex items-center gap-2.5">
               <RefreshCw size={16} strokeWidth={2} className="text-[var(--text-secondary)]" />
@@ -509,14 +509,14 @@ export function AdminDashboardView({
             <button
               type="button"
               onClick={() => handleDeleteFeedback(deleteConfirmId)}
-              className="w-full h-11 rounded-[14px] bg-rose-600 text-white font-semibold text-xs transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full h-11 rounded-[8px] bg-rose-600 text-white font-semibold text-xs transition-all active:scale-[0.98] cursor-pointer"
             >
               {isEn ? 'Delete' : 'Ta bort'}
             </button>
             <button
               type="button"
               onClick={() => setDeleteConfirmId(null)}
-              className="w-full h-11 rounded-[14px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] font-semibold text-xs transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full h-11 rounded-[8px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] font-semibold text-xs transition-all active:scale-[0.98] cursor-pointer"
             >
               {isEn ? 'Cancel' : 'Avbryt'}
             </button>

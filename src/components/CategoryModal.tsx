@@ -93,7 +93,7 @@ export function CategoryModal({
           <button 
             type="button"
             onClick={() => setShowIconPicker(true)}
-            className="w-20 h-20 rounded-[22px] flex items-center justify-center transition-all active:scale-95 group cursor-pointer shadow-sm relative overflow-hidden"
+            className="w-20 h-20 rounded-[8px] flex items-center justify-center transition-all active:scale-95 group cursor-pointer shadow-sm relative overflow-hidden"
             style={{ backgroundColor: color }}
             title="Välj ikon"
           >
@@ -123,7 +123,7 @@ export function CategoryModal({
                   if (suggested) setIcon(suggested);
                 }
               }}
-              className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-3.5 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
+              className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
               placeholder={t('name')}
             />
           </div>
@@ -134,7 +134,7 @@ export function CategoryModal({
               <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
                 {t('budget')}
               </label>
-              <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-3.5 h-11 focus-within:border-[var(--accent-color)] transition-all">
+              <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 h-11 focus-within:border-[var(--accent-color)] transition-all">
                 <input
                   type="text"
                   inputMode="numeric"
@@ -153,7 +153,7 @@ export function CategoryModal({
 
           {/* Color palette */}
           <div className="space-y-2">
-            <div className="grid grid-cols-8 gap-2 bg-[var(--surface-muted)] p-2.5 rounded-[16px] border border-[var(--border-color)]">
+            <div className="grid grid-cols-8 gap-2 bg-[var(--surface-muted)] p-2.5 rounded-[12px] border border-[var(--border-color)]">
               {/* Custom hex color input picker */}
               <div className="relative w-full aspect-square rounded-full overflow-hidden border border-[var(--border-color)] cursor-pointer shadow-xs">
                 <input
@@ -193,7 +193,7 @@ export function CategoryModal({
             type="button"
             onClick={handleSave}
             disabled={!name.trim()}
-            className="w-full h-12 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            className="w-full h-12 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
             <Check size={18} strokeWidth={2} />
             <span>{t('save')}</span>

@@ -64,13 +64,13 @@
   --color-info-container: var(--info-container);
   --color-scrim: var(--scrim-color);
 
-  --radius-4xl: 16px;
-  --radius-3xl: 14px;
-  --radius-2xl: 12px;
-  --radius-xl: 10px;
-  --radius-lg: 10px;
-  --radius-md: 8px;
-  --radius-sm: 6px;
+  --radius-4xl: 12px;
+  --radius-3xl: 10px;
+  --radius-2xl: 8px;
+  --radius-xl: 8px;
+  --radius-lg: 8px;
+  --radius-md: 6px;
+  --radius-sm: 4px;
 
   --shadow-2xs: none;
   --shadow-xs: none;
@@ -652,7 +652,7 @@ h6 {
 
 @layer components {
   .module-surface {
-    @apply rounded-[22px];
+    @apply rounded-[8px];
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
@@ -660,7 +660,7 @@ h6 {
 
   .surface-card,
   .glass-card {
-    border-radius: 22px;
+    border-radius: 8px;
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
@@ -669,7 +669,7 @@ h6 {
   }
 
   .profile-card {
-    border-radius: 22px;
+    border-radius: 8px;
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
@@ -679,35 +679,35 @@ h6 {
   }
 
   .flat-card {
-    border-radius: 22px;
+    border-radius: 8px;
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
   }
 
   .surface-elevated {
-    border-radius: 22px;
+    border-radius: 8px;
     background: var(--surface-elevated-gradient);
     border: none;
     box-shadow: none;
   }
 
   .surface-solid {
-    border-radius: 22px;
+    border-radius: 8px;
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
   }
 
   .surface-muted {
-    border-radius: 14px;
+    border-radius: 8px;
     background: var(--surface-muted);
     border: none;
     box-shadow: none;
   }
 
   .accent-button {
-    @apply inline-flex items-center justify-center font-semibold px-5 py-2.5 rounded-[14px] transition-all;
+    @apply inline-flex items-center justify-center font-semibold px-5 py-2.5 rounded-[8px] transition-all;
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
     border: none;
@@ -716,7 +716,7 @@ h6 {
   }
 
   .accent-button-full {
-    @apply inline-flex items-center justify-center font-semibold px-5 py-3.5 rounded-[14px] transition-all w-full;
+    @apply inline-flex items-center justify-center font-semibold px-5 py-3.5 rounded-[8px] transition-all w-full;
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
     border: none;
@@ -749,7 +749,7 @@ h6 {
   }
 
   .input-field {
-    @apply w-full font-medium px-4 py-3 rounded-[14px] border transition-all;
+    @apply w-full font-medium px-4 py-3 rounded-[8px] border transition-all;
     background: var(--surface-gradient);
     border-color: var(--border-color);
     color: var(--text-primary);

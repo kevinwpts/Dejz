@@ -116,7 +116,7 @@ export function NotificationsView({
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="p-5 sm:p-6 rounded-[22px] bg-[var(--surface-color)] transition-all flex flex-col gap-4 relative shadow-xs"
+            className="p-5 sm:p-6 rounded-[8px] bg-[var(--surface-color)] transition-all flex flex-col gap-4 relative shadow-xs"
           >
             {/* Top status bar */}
             <div className="flex items-center justify-between gap-3">
@@ -180,7 +180,7 @@ export function NotificationsView({
                         if (e.key === 'Escape') setEditingId(null);
                       }}
                       placeholder={String(n.expectedAmount || 0)}
-                      className="w-full h-12 bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[14px] px-4 pr-14 text-lg font-bold font-amount text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)] transition-all"
+                      className="w-full h-12 bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[8px] px-4 pr-14 text-lg font-bold font-amount text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)] transition-all"
                     />
                     <span className="absolute right-4 text-xs font-bold text-[var(--text-secondary)] pointer-events-none">
                       {currency}
@@ -191,7 +191,7 @@ export function NotificationsView({
                     <button
                       type="button"
                       onClick={() => handleSaveCustom(n)}
-                      className="h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-1.5 hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+                      className="h-11 rounded-[8px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-1.5 hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
                     >
                       <Check size={16} strokeWidth={2.5} />
                       <span>{t('save')}</span>
@@ -200,7 +200,7 @@ export function NotificationsView({
                     <button
                       type="button"
                       onClick={() => setEditingId(null)}
-                      className="h-11 rounded-[14px] bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold text-xs flex items-center justify-center transition-all cursor-pointer active:scale-[0.98]"
+                      className="h-11 rounded-[8px] bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold text-xs flex items-center justify-center transition-all cursor-pointer active:scale-[0.98]"
                     >
                       <span>{t('cancel')}</span>
                     </button>
@@ -224,7 +224,7 @@ export function NotificationsView({
                         handleStartEdit(n);
                       }
                     }}
-                    className="w-full py-3 px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-2 hover:opacity-95 active:scale-[0.98] transition-all shadow-xs cursor-pointer"
+                    className="w-full py-3 px-4 rounded-[8px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-xs flex items-center justify-center gap-2 hover:opacity-95 active:scale-[0.98] transition-all shadow-xs cursor-pointer"
                   >
                     <Edit3 size={15} strokeWidth={2} />
                     <span>{config.language === 'en' ? 'Set amount' : 'Ange belopp'}</span>
@@ -236,7 +236,7 @@ export function NotificationsView({
                       if (typeof feedback?.success === 'function') feedback.success();
                       onConfirmStandard(n.item);
                     }}
-                    className="w-full py-3 px-4 rounded-[14px] bg-[var(--surface-muted)] text-[var(--text-primary)] font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-[var(--surface-color)] active:scale-[0.98] transition-all cursor-pointer"
+                    className="w-full py-3 px-4 rounded-[8px] bg-[var(--surface-muted)] text-[var(--text-primary)] font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-[var(--surface-color)] active:scale-[0.98] transition-all cursor-pointer"
                   >
                     <Check size={15} className="text-neutral-800 dark:text-white" strokeWidth={2.5} />
                     <span>

@@ -30,12 +30,12 @@ export function SelectionRow<T = string>({
         else if (typeof feedback?.tap === 'function') feedback.tap();
         onClick();
       }}
-      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[10px] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] ${className}`}
+      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[8px] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {icon && (
           <div
-            className="w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]"
+            className="w-8 h-8 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]"
           >
             {icon}
           </div>

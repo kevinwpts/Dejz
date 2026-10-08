@@ -44,7 +44,7 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md z-[150] pointer-events-auto"
         >
-          <div className="bg-[var(--bg-color)] border-none rounded-[22px] p-5 sm:p-6 shadow-2xl space-y-4 relative font-sans">
+          <div className="bg-[var(--bg-color)] border-none rounded-[8px] p-5 sm:p-6 shadow-2xl space-y-4 relative font-sans">
             <button
               type="button"
               onClick={handleDismiss}
@@ -54,7 +54,7 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
               <X size={17} strokeWidth={2} />
             </button>
             <div className="flex items-start gap-3.5 pr-6">
-              <div className="w-10 h-10 rounded-[14px] bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center shrink-0 text-[var(--text-primary)] border border-black/5 dark:border-white/10">
+              <div className="w-10 h-10 rounded-[8px] bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center shrink-0 text-[var(--text-primary)] border border-black/5 dark:border-white/10">
                 <Cookie size={20} />
               </div>
               <div className="space-y-1">
@@ -78,14 +78,14 @@ export function CookieConsentModal({ t, onOpenPrivacyPolicy }: CookieConsentModa
               <button
                 type="button"
                 onClick={handleAcceptNecessary}
-                className="w-full sm:flex-1 h-11 px-4 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border border-black/5 dark:border-white/10 rounded-[14px] text-xs font-semibold hover:bg-black/10 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
+                className="w-full sm:flex-1 h-11 px-4 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border border-black/5 dark:border-white/10 rounded-[8px] text-xs font-semibold hover:bg-black/10 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
               >
                 {t('acceptNecessary')}
               </button>
               <button
                 type="button"
                 onClick={handleAcceptAll}
-                className="w-full sm:flex-1 h-11 px-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[14px] text-xs font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer shadow-xs"
+                className="w-full sm:flex-1 h-11 px-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-[8px] text-xs font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer shadow-xs"
               >
                 <Check size={14} strokeWidth={2.5} />
                 {t('acceptAll')}

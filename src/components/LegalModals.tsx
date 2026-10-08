@@ -110,7 +110,7 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
         return (
           <div className="space-y-6 text-sm text-[var(--text-secondary)] leading-relaxed">
             <div className="surface-card p-6 flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-[22px] bg-accent/10 text-accent flex items-center justify-center">
+              <div className="w-16 h-16 rounded-[8px] bg-accent/10 text-accent flex items-center justify-center">
                 <Mail size={32} />
               </div>
               <div>
@@ -164,12 +164,12 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="relative w-full sm:max-w-lg bg-[var(--bg-color)] max-h-[85vh] sm:max-h-[90vh] mt-[env(safe-area-inset-top,0px)] rounded-t-[16px] sm:rounded-[16px] border-none overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-2xl font-sans"
+        className="relative w-full sm:max-w-lg bg-[var(--bg-color)] max-h-[85vh] sm:max-h-[90vh] mt-[env(safe-area-inset-top,0px)] rounded-t-[12px] sm:rounded-[12px] border-none overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-2xl font-sans"
       >
             {/* Header */}
             <div className="p-5 sm:p-6 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[14px] bg-[var(--surface-color)] flex items-center justify-center border-none">
+                <div className="w-10 h-10 rounded-[8px] bg-[var(--surface-color)] flex items-center justify-center border-none">
                   {getIcon()}
                 </div>
                 <div>

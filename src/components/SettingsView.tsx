@@ -124,7 +124,7 @@ export function SettingsView({
         </div>
 
         {/* Clean grouped list */}
-        <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-[var(--surface-color)] rounded-[8px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {methodsList.map((method: any, index: number) => {
             const isDefault = DEFAULT_PAYMENT_METHODS.some(dm => dm.name.toLowerCase() === method.name.toLowerCase());
             const IconComp = isDefault ? getPaymentMethodIcon(method.name) : null;
@@ -183,7 +183,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2">
-        <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <div className="bg-[var(--surface-color)] rounded-[8px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {languages.map((l) => {
             const isSelected = config.language === l.code;
             return (
@@ -246,7 +246,7 @@ export function SettingsView({
                     const isDark = mode.id === 'dark' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                     setConfig({ ...config, themeMode: mode.id as any, darkMode: isDark });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer ${
+                  className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[8px] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none border-[var(--accent-color)]'
                       : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
@@ -277,7 +277,7 @@ export function SettingsView({
                   onClick={() => {
                     setConfig({ ...config, themeColor: theme.hex });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[14px] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer active:scale-95 ${
+                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[8px] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer active:scale-95 ${
                     isSelected
                       ? 'bg-[var(--surface-color)] ring-2 ring-[var(--accent-color)] shadow-none'
                       : 'bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
@@ -329,7 +329,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2">
-        <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+        <div className="bg-[var(--surface-color)] rounded-[8px] border border-black/[0.06] dark:border-white/[0.08] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrencyCode === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
@@ -387,11 +387,11 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2 space-y-4">
-        <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-[var(--surface-color)] backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] shadow-none">
+        <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[8px] bg-[var(--surface-color)] backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] shadow-none">
           {/* 1. Variable Amounts / Rörliga belopp */}
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3.5 min-w-0 pr-4">
-              <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
+              <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
                 <Receipt size={18} strokeWidth={2} />
               </div>
               <div className="min-w-0 flex flex-col justify-center">
@@ -414,7 +414,7 @@ export function SettingsView({
           {/* 2. Salary / Lön & Utbetalningar */}
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3.5 min-w-0 pr-4">
-              <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
+              <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
                 <Calendar size={18} strokeWidth={2} />
               </div>
               <div className="min-w-0 flex flex-col justify-center">
@@ -437,7 +437,7 @@ export function SettingsView({
           {/* 3. Fixed Expense Due Dates / Fasta utgifter & förfallodagar */}
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3.5 min-w-0 pr-4">
-              <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
+              <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
                 <Clock size={18} strokeWidth={2} />
               </div>
               <div className="min-w-0 flex flex-col justify-center">
@@ -460,7 +460,7 @@ export function SettingsView({
           {/* 4. Weekly Summary & Budget Alerts / Veckoöversikt & budgetvarningar */}
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-3.5 min-w-0 pr-4">
-              <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
+              <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
                 <Bell size={18} strokeWidth={2} />
               </div>
               <div className="min-w-0 flex flex-col justify-center">
@@ -489,7 +489,7 @@ export function SettingsView({
       <div>
         {activeSection === 'salary' && (
           <div className="w-full py-2 space-y-4">
-            <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-[var(--surface-color)] backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] shadow-none">
+            <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[8px] bg-[var(--surface-color)] backdrop-blur-xl border border-black/[0.06] dark:border-white/[0.08] shadow-none">
               
               {/* Payday Setting Row */}
               <button
@@ -498,7 +498,7 @@ export function SettingsView({
                 className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer text-left group"
               >
                 <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                  <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
+                  <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
                     <Calendar size={18} strokeWidth={2} />
                   </div>
                   <div className="min-w-0 flex flex-col justify-center">
@@ -523,7 +523,7 @@ export function SettingsView({
               {/* Weekend Handling Row */}
               <div className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3.5 min-w-0 pr-4">
-                  <div className="w-9 h-9 rounded-[14px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
+                  <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
                     <Clock size={18} strokeWidth={2} />
                   </div>
                   <div className="min-w-0 flex flex-col justify-center">
@@ -731,7 +731,7 @@ export function SettingsView({
                   handleUpdatePayday(day);
                   setIsPaydayModalOpen(false);
                 }}
-                className={`py-3 rounded-[14px] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
+                className={`py-3 rounded-[6px] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
                   isSelected
                     ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-md scale-105'
                     : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/15'

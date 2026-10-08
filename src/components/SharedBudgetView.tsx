@@ -55,7 +55,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
       className="space-y-6 pb-20 max-w-2xl mx-auto w-full font-sans"
     >
       {/* 1. Header Hero */}
-      <div className="p-6 rounded-[22px] bg-[var(--surface-color)] text-center space-y-3 relative overflow-hidden border border-black/[0.04] dark:border-white/[0.04] shadow-2xs">
+      <div className="p-6 rounded-[8px] bg-[var(--surface-color)] text-center space-y-3 relative overflow-hidden border border-black/[0.04] dark:border-white/[0.04] shadow-2xs">
         <div className="w-14 h-14 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-[var(--text-primary)] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center mx-auto">
           <Users2 size={26} strokeWidth={2} />
         </div>
@@ -76,7 +76,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
       {isConnected ? (
         <div className="space-y-4">
           {/* Connected Card */}
-          <div className="p-5 rounded-[22px] bg-emerald-500/10 border border-emerald-500/20 space-y-4">
+          <div className="p-5 rounded-[8px] bg-emerald-500/10 border border-emerald-500/20 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-xs">
@@ -125,12 +125,12 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
       ) : (
         <div className="space-y-5">
           {/* Step 1: My Invite Code */}
-          <div className="p-5 rounded-[22px] bg-[var(--surface-color)] space-y-3 border border-black/[0.04] dark:border-white/[0.04]">
+          <div className="p-5 rounded-[8px] bg-[var(--surface-color)] space-y-3 border border-black/[0.04] dark:border-white/[0.04]">
             <span className="text-xs font-semibold text-[var(--text-secondary)] block">
               {isEn ? '1. Your invite code' : '1. Din inbjudningskod'}
             </span>
 
-            <div className="flex items-center justify-between p-3 rounded-[16px] bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/5">
+            <div className="flex items-center justify-between p-3 rounded-[8px] bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/5">
               <span className="text-base font-bold font-mono tracking-widest text-[var(--text-primary)]">
                 {myInviteCode}
               </span>
@@ -138,7 +138,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="px-3 py-1.5 rounded-[10px] bg-[var(--accent-color)] text-[var(--on-accent)] text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
+                className="px-3 py-1.5 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
               >
                 {copied ? <Check size={13} strokeWidth={2.5} /> : <Copy size={13} strokeWidth={2} />}
                 <span>{copied ? (isEn ? 'Copied' : 'Kopierad') : (isEn ? 'Copy' : 'Kopiera')}</span>
@@ -153,7 +153,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
           </div>
 
           {/* Step 2: Enter Partner's Code */}
-          <div className="p-5 rounded-[22px] bg-[var(--surface-color)] space-y-3.5 border border-black/[0.04] dark:border-white/[0.04]">
+          <div className="p-5 rounded-[8px] bg-[var(--surface-color)] space-y-3.5 border border-black/[0.04] dark:border-white/[0.04]">
             <span className="text-xs font-semibold text-[var(--text-secondary)] block">
               {isEn ? '2. Or join your partner’s budget' : '2. Eller anslut med partnerns kod'}
             </span>
@@ -164,7 +164,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
                 value={partnerNameInput}
                 onChange={(e) => setPartnerNameInput(e.target.value)}
                 placeholder={isEn ? "Partner's name (e.g. Anna)" : "Partnerns namn (t.ex. Anna)"}
-                className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-3.5 text-sm font-semibold text-[var(--text-primary)] outline-none"
+                className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 text-sm font-semibold text-[var(--text-primary)] outline-none"
               />
 
               <input
@@ -172,7 +172,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
                 value={partnerCodeInput}
                 onChange={(e) => setPartnerCodeInput(e.target.value.toUpperCase())}
                 placeholder="DEJZ-XXXX"
-                className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-3.5 text-sm font-mono font-bold tracking-wider text-[var(--text-primary)] outline-none placeholder:font-sans placeholder:font-normal"
+                className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 text-sm font-mono font-bold tracking-wider text-[var(--text-primary)] outline-none placeholder:font-sans placeholder:font-normal"
               />
             </div>
 
@@ -188,19 +188,19 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
 
           {/* Value props */}
           <div className="grid grid-cols-3 gap-2.5 pt-1 text-center">
-            <div className="p-3 rounded-[16px] bg-[var(--surface-color)] space-y-1">
+            <div className="p-3 rounded-[8px] bg-[var(--surface-color)] space-y-1">
               <Users2 size={16} className="mx-auto text-[var(--accent-color)]" />
               <span className="text-[10.5px] font-bold text-[var(--text-primary)] block">
                 {isEn ? 'Shared pot' : 'Delad pott'}
               </span>
             </div>
-            <div className="p-3 rounded-[16px] bg-[var(--surface-color)] space-y-1">
+            <div className="p-3 rounded-[8px] bg-[var(--surface-color)] space-y-1">
               <MessageSquare size={16} className="mx-auto text-[var(--accent-color)]" />
               <span className="text-[10.5px] font-bold text-[var(--text-primary)] block">
                 {isEn ? 'Chat & notes' : 'Snabbchatt'}
               </span>
             </div>
-            <div className="p-3 rounded-[16px] bg-[var(--surface-color)] space-y-1">
+            <div className="p-3 rounded-[8px] bg-[var(--surface-color)] space-y-1">
               <ShieldCheck size={16} className="mx-auto text-[var(--accent-color)]" />
               <span className="text-[10.5px] font-bold text-[var(--text-primary)] block">
                 {isEn ? '100% Private' : '100% Privat'}

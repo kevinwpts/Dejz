@@ -128,7 +128,7 @@ export function ManageAccountModal({
           {/* Profile Avatar Upload */}
           <div className="text-center py-1 flex flex-col items-center justify-center">
             <label htmlFor="avatar-modal" className="relative w-16 h-16 mb-2 block cursor-pointer group">
-              <div className="w-16 h-16 rounded-[22px] overflow-hidden border-none bg-[var(--surface-color)] relative group-hover:scale-105 active:scale-95 transition-all shadow-none">
+              <div className="w-16 h-16 rounded-[8px] overflow-hidden border-none bg-[var(--surface-color)] relative group-hover:scale-105 active:scale-95 transition-all shadow-none">
                 {avatarUrl ? (
                   <img 
                     src={avatarUrl} 

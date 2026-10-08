@@ -8,12 +8,12 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const roundedMap = {
   none: 'rounded-none',
-  sm: 'rounded-[6px]',
-  md: 'rounded-[8px]',
-  lg: 'rounded-[10px]',
-  xl: 'rounded-[12px]',
-  '2xl': 'rounded-[12px]',
-  '3xl': 'rounded-[16px]',
+  sm: 'rounded-[4px]',
+  md: 'rounded-[6px]',
+  lg: 'rounded-[8px]',
+  xl: 'rounded-[8px]',
+  '2xl': 'rounded-[10px]',
+  '3xl': 'rounded-[12px]',
   full: 'rounded-full',
 };
 
@@ -44,7 +44,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
 export const TransactionItemSkeleton: React.FC = () => {
   return (
-    <div className="bg-white dark:bg-[#1C1C1C] rounded-[12px] p-4 flex items-center justify-between gap-3 shadow-none border-none select-none">
+    <div className="bg-white dark:bg-[#1C1C1C] rounded-[8px] p-4 flex items-center justify-between gap-3 shadow-none border-none select-none">
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Logo skeleton */}
         <Skeleton className="w-[42px] h-[42px] shrink-0" rounded="full" />
@@ -88,7 +88,7 @@ export const AppSkeleton: React.FC<{ language?: string }> = ({ language: _langua
         </div>
 
         {/* 2. Hero Greeting & Gauge Skeleton Card */}
-        <div className="bg-white dark:bg-[#1C1C1C] rounded-[22px] p-5 sm:p-6 shadow-none border-none space-y-5">
+        <div className="bg-white dark:bg-[#1C1C1C] rounded-[8px] p-5 sm:p-6 shadow-none border-none space-y-5">
           <div className="flex items-center justify-between">
             <div className="space-y-1.5">
               <Skeleton className="h-3.5 w-24" rounded="sm" />
@@ -129,7 +129,7 @@ export const AppSkeleton: React.FC<{ language?: string }> = ({ language: _langua
             {Array.from({ length: 7 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white dark:bg-[#1C1C1C] rounded-[14px] p-2 flex flex-col items-center gap-1.5 py-3 shadow-none border-none"
+                className="bg-white dark:bg-[#1C1C1C] rounded-[8px] p-2 flex flex-col items-center gap-1.5 py-3 shadow-none border-none"
               >
                 <Skeleton className="w-3 h-2" rounded="sm" />
                 <Skeleton className="w-6 h-4" rounded="sm" />

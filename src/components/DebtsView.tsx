@@ -116,7 +116,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       {/* 1. Header Summary Cards */}
       <div className="grid grid-cols-2 gap-4">
         {/* Att få (Skyldig mig) */}
-        <div className="p-5 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs space-y-1">
+        <div className="p-5 rounded-[8px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
             <ArrowDownLeft size={14} strokeWidth={2.5} />
             <span>{isEn ? 'To receive' : 'Att få tillbaka'}</span>
@@ -127,7 +127,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
         </div>
 
         {/* Att betala (Jag är skyldig) */}
-        <div className="p-5 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs space-y-1">
+        <div className="p-5 rounded-[8px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-500 dark:text-rose-400">
             <ArrowUpRight size={14} strokeWidth={2.5} />
             <span>{isEn ? 'To pay' : 'Att betala'}</span>
@@ -140,7 +140,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
 
       {/* 2. Filter tabs & Add Button */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1 bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[14px]">
+        <div className="flex items-center gap-1 bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[8px]">
           <button
             type="button"
             onClick={() => setActiveTab('all')}
@@ -179,7 +179,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
         <button
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
+          className="h-9 px-4 rounded-[8px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
         >
           <Plus size={14} strokeWidth={2.5} />
           <span>{isEn ? 'Add' : 'Lägg till'}</span>
@@ -200,14 +200,14 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className={`p-4 rounded-[20px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between gap-3 transition-all ${
+                  className={`p-4 rounded-[8px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between gap-3 transition-all ${
                     item.isSettled ? 'opacity-50' : ''
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     {/* Avatar initial */}
                     <div
-                      className={`w-10 h-10 rounded-[14px] flex items-center justify-center font-bold text-sm shrink-0 ${
+                      className={`w-10 h-10 rounded-[8px] flex items-center justify-center font-bold text-sm shrink-0 ${
                         item.isSettled
                           ? 'bg-black/5 dark:bg-white/5 text-[var(--text-tertiary)]'
                           : isOweMe
@@ -284,7 +284,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
               );
             })
           ) : (
-            <div className="p-8 text-center rounded-[22px] bg-[var(--surface-color)] space-y-2">
+            <div className="p-8 text-center rounded-[8px] bg-[var(--surface-color)] space-y-2">
               <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center mx-auto text-[var(--text-secondary)]">
                 <Clock size={18} strokeWidth={2} />
               </div>
@@ -311,7 +311,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
         bodyClassName="p-5 space-y-4"
       >
         {/* Type toggle */}
-        <div className="grid grid-cols-2 gap-2 bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[14px]">
+        <div className="grid grid-cols-2 gap-2 bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[8px]">
           <button
             type="button"
             onClick={() => setDebtType('owe_me')}
@@ -348,7 +348,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
             value={personName}
             onChange={(e) => setPersonName(e.target.value)}
             placeholder={isEn ? 'e.g. Rasmus' : 't.ex. Rasmus eller Pia'}
-            className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-3.5 text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
+            className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
           />
         </div>
 
@@ -357,7 +357,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
             {isEn ? 'Amount' : 'Belopp'}
           </label>
-          <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-3.5 h-11 focus-within:border-[var(--accent-color)]">
+          <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 h-11 focus-within:border-[var(--accent-color)]">
             <input
               type="text"
               inputMode="numeric"
@@ -383,7 +383,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={isEn ? 'e.g. Dinner, concert ticket' : 't.ex. Middag, biobiljett, bensin'}
-            className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[14px] px-3.5 text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
+            className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
           />
         </div>
 
@@ -391,7 +391,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           type="button"
           onClick={handleSaveDebt}
           disabled={!personName.trim() || !amount}
-          className="w-full h-12 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-none"
+          className="w-full h-12 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-none"
         >
           <Check size={18} strokeWidth={2} />
           <span>{isEn ? 'Save' : 'Spara'}</span>

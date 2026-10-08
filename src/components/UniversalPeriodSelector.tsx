@@ -153,7 +153,7 @@ export function UniversalPeriodSelector({
       <button 
         type="button"
         onClick={handleCenterClick}
-        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer group select-none active:scale-95 shadow-none"
+        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[8px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer group select-none active:scale-95 shadow-none"
       >
         <CalendarIcon size={13} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
         <span className="text-xs sm:text-[13px] font-bold font-display tracking-wider text-[var(--text-primary)]">
@@ -194,7 +194,7 @@ export function UniversalPeriodSelector({
           <button 
             type="button"
             onClick={handleCenterClick}
-            className="flex flex-col items-center group/label px-4 py-1.5 rounded-[14px] hover:bg-[var(--surface-muted)] transition-all cursor-pointer active:scale-95"
+            className="flex flex-col items-center group/label px-4 py-1.5 rounded-[8px] hover:bg-[var(--surface-muted)] transition-all cursor-pointer active:scale-95"
           >
             <div className="flex items-center gap-1.5">
               <span className="text-base sm:text-lg font-bold font-display tracking-wider text-[var(--text-primary)] group-hover/label:text-[var(--text-primary)] transition-colors">

@@ -97,7 +97,7 @@ export function SearchModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.98 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="bg-[var(--bg-color)] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[16px] border-none shadow-2xl flex flex-col overflow-hidden font-sans"
+            className="bg-[var(--bg-color)] w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[85vh] sm:rounded-[12px] border-none shadow-2xl flex flex-col overflow-hidden font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Search Bar */}

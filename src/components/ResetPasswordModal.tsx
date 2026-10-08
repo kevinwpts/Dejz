@@ -68,7 +68,7 @@ export function ResetPasswordModal({
     >
       {success ? (
         <div className="text-center py-6 space-y-4">
-          <div className="w-14 h-14 bg-emerald-500/10 text-emerald-500 rounded-[14px] flex items-center justify-center mx-auto border border-emerald-500/20 shadow-xs">
+          <div className="w-14 h-14 bg-emerald-500/10 text-emerald-500 rounded-[8px] flex items-center justify-center mx-auto border border-emerald-500/20 shadow-xs">
             <CheckCircle2 size={30} strokeWidth={2} />
           </div>
           <div className="space-y-1">
@@ -83,7 +83,7 @@ export function ResetPasswordModal({
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1 text-left pr-8">
-            <div className="w-10 h-10 rounded-[14px] bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center mb-3 border-none">
+            <div className="w-10 h-10 rounded-[8px] bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center mb-3 border-none">
               <Lock size={18} strokeWidth={2} />
             </div>
             <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">

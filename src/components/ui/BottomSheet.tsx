@@ -96,7 +96,7 @@ export function BottomSheet({
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] dark:bg-[#191919] text-[var(--text-primary)] rounded-t-[16px] sm:rounded-[16px] border-none shadow-2xl ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
+            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] dark:bg-[#191919] text-[var(--text-primary)] rounded-t-[12px] sm:rounded-[12px] border-none shadow-2xl ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Handle */}
             {showDragHandle && (
@@ -215,11 +215,11 @@ export function BottomSheetOption<T = string>({
           onClick();
         }
       }}
-      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[10px] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none ${className}`}
+      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[8px] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {icon && (
-          <div className="w-8 h-8 rounded-[8px] bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+          <div className="w-8 h-8 rounded-[6px] bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 text-[var(--text-primary)]">
             {icon}
           </div>
         )}

@@ -132,14 +132,14 @@ export function SettingsMainView({
       exit={{ opacity: 0, y: -10 }}
       className="space-y-4 max-w-md mx-auto"
     >
-      <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs">
+      <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[8px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs">
         <button
           type="button"
           onClick={() => handleSectionClick('salary')}
           className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+            <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
               <Calendar size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -160,7 +160,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+            <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
               <PieChart size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -181,7 +181,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+            <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
               <Tag size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -202,7 +202,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+            <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
               <CreditCard size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -221,7 +221,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+            <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
               <Coins size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -240,7 +240,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+            <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
               <Globe size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -259,7 +259,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+            <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
               <Palette size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -278,7 +278,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+            <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
               <Bell size={18} strokeWidth={2} />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
@@ -297,7 +297,7 @@ export function SettingsMainView({
           className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:scale-[0.99] transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3.5 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
+            <div className="w-10 h-10 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04]">
               <Ban size={18} strokeWidth={2} className="text-rose-500" />
             </div>
             <div className="min-w-0 flex flex-col justify-center">

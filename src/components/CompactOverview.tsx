@@ -26,7 +26,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
   return (
     <div className="space-y-8 px-4">
       {/* Budget Status */}
-      <div className="p-5 rounded-[22px] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] shadow-none">
+      <div className="p-5 rounded-[12px] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] shadow-none">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xs font-semibold text-[var(--text-secondary)]">
             {t('budgetUsage')}

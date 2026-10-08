@@ -438,7 +438,7 @@ export function AnalysisView({
 
       {/* DONUT DIAGRAM & FÖRDELNING */}
       {categoryData.length > 0 && (
-        <div className="bg-[var(--surface-color)] rounded-[22px] p-5 sm:p-6 border-none shadow-none space-y-6">
+        <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border-none shadow-none space-y-6">
           <div className="flex items-center justify-between px-0.5">
             <h2 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
               {isEn ? 'Distribution' : 'Fördelning'}
@@ -508,7 +508,7 @@ export function AnalysisView({
             </h3>
           </div>
 
-          <div className="bg-[var(--surface-color)] rounded-[22px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+          <div className="bg-[var(--surface-color)] rounded-[8px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               
@@ -552,7 +552,7 @@ export function AnalysisView({
                     <div className="flex items-center justify-between gap-3 w-full">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div 
-                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-[14px] flex items-center justify-center text-white shrink-0 shadow-2xs"
+                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-[6px] flex items-center justify-center text-white shrink-0 shadow-2xs"
                           style={{ backgroundColor: item.color || '#6366f1' }}
                         >
                           <CategoryIcon icon={item.icon} size="sm" noBackground whiteIcon />

@@ -22,11 +22,11 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const baseStyles = 'overflow-hidden transition-all duration-150 border-none shadow-none';
 
     const variantStyles = {
-      default: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[12px] shadow-none',
-      hero: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[12px] shadow-none',
-      nested: 'bg-black/5 dark:bg-white/5 border-none rounded-[10px]',
-      flat: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[12px]',
-      elevated: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[12px] shadow-none',
+      default: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[8px] shadow-none',
+      hero: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[8px] shadow-none',
+      nested: 'bg-black/5 dark:bg-white/5 border-none rounded-[6px]',
+      flat: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[8px]',
+      elevated: 'bg-white dark:bg-[#1C1C1C] border-none rounded-[8px] shadow-none',
     }[variant];
 
     const paddingStyles = {

@@ -90,7 +90,7 @@ export function GreetingModule({
             className="fixed inset-0" 
             onClick={() => setIsCalculationInfoOpen(false)} 
           />
-          <div className="relative w-full max-w-[340px] bg-white dark:bg-[#1C1C1C] rounded-[16px] p-5 border border-black/[0.08] dark:border-white/[0.08] shadow-2xl space-y-4 z-10 text-left font-sans">
+          <div className="relative w-full max-w-[340px] bg-white dark:bg-[#1C1C1C] rounded-[12px] p-5 border border-black/[0.08] dark:border-white/[0.08] shadow-2xl space-y-4 z-10 text-left font-sans">
             {/* Header */}
             <div className="flex items-center justify-between pb-1">
               <div className="flex items-center gap-2 text-[var(--text-primary)] font-bold font-display tracking-wider text-xs uppercase">
@@ -115,7 +115,7 @@ export function GreetingModule({
             </p>
 
             {/* Status Explanation Card */}
-            <div className={`p-3 rounded-[10px] border flex items-start gap-2.5 ${status.badgeBgClass} border-black/5 dark:border-white/10`}>
+            <div className={`p-3 rounded-[6px] border flex items-start gap-2.5 ${status.badgeBgClass} border-black/5 dark:border-white/10`}>
               <div className="w-2.5 h-2.5 rounded-full shrink-0 mt-1 shadow-xs" style={{ backgroundColor: status.colorHex }} />
               <div className="flex flex-col min-w-0 text-xs">
                 <span className={`font-bold ${status.badgeTextClass}`}>
@@ -180,7 +180,7 @@ export function GreetingModule({
               )}
 
               {/* 7. Remaining to Spend */}
-              <div className="flex justify-between items-center text-xs py-2 px-2 bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/20 rounded-lg border border-[var(--accent-color)]/15">
+              <div className="flex justify-between items-center text-xs py-2 px-2 bg-[var(--accent-color)]/10 dark:bg-[var(--accent-color)]/20 rounded-[8px] border border-[var(--accent-color)]/15">
                 <span className="font-bold text-[var(--text-primary)]">{isEn ? 'Remaining to Spend' : 'Kvar att spendera'}</span>
                 <span className="font-extrabold text-[var(--text-primary)] font-amount tabular-nums">
                   {formatAmount(stats?.remainingPeriodCents || 0, language)} {currency}
@@ -192,7 +192,7 @@ export function GreetingModule({
             <button
               type="button"
               onClick={() => setIsCalculationInfoOpen(false)}
-              className="w-full h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-xs flex items-center justify-center border-none mt-2"
+              className="w-full h-11 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-xs flex items-center justify-center border-none mt-2"
             >
               {isEn ? 'Got it' : 'Jag förstår'}
             </button>
