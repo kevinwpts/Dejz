@@ -358,76 +358,116 @@ export function TodayView({
                 <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
               </button>
             ) : categoryBudgetData.length > 0 ? (
-              <div className="flex items-center gap-3.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
-                {categoryBudgetData.map((cat, index) => {
-                  const Icon = ICON_MAP[cat.iconName];
-
-                  return (
-                    <motion.button
-                      key={cat.name}
-                      initial={{ opacity: 0, scale: 0.97, x: 6 }}
-                      animate={{ opacity: 1, scale: 1, x: 0 }}
-                      transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
-                      onClick={() => handleCategoryClick(cat.name)}
-                      style={{ backgroundColor: cat.color || getCategoryColor(cat.name, config?.categories) }}
-                      className="flex-shrink-0 w-[100px] sm:w-[110px] h-[100px] sm:h-[110px] p-3 rounded-[22px] flex flex-col items-center justify-between text-center group cursor-pointer border-none shadow-sm transition-transform active:scale-95"
-                    >
-                      <div className="flex items-center justify-center pt-1 text-white">
-                        {isEmojiString(cat.iconName) ? (
-                          <span className="text-[20px] leading-none">{cat.iconName}</span>
-                        ) : Icon ? (
-                          <Icon size={22} strokeWidth={2} />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-white" />
-                        )}
-                      </div>
-
-                      <span className="text-[12px] font-bold text-white tracking-tight max-w-[90px] truncate px-0.5 drop-shadow-xs">
-                        {cat.name}
-                      </span>
-
-                      <span className="text-[10px] font-medium text-white/95 tabular-nums tracking-tight whitespace-nowrap bg-black/15 px-2 py-0.5 rounded-full">
-                        {(() => {
-                          const currency = config?.currency || 'kr';
-                          if (!cat.hasBudget) {
-                            return `${formatAmount(Math.round(cat.spent), lang)} ${currency}`;
-                          }
-                          const rem = Math.round(cat.remaining);
-                          if (rem < 0) {
-                            return `${formatAmount(rem, lang)} ${currency}`;
-                          }
-                          return `${formatAmount(rem, lang)} ${currency} ${lang === 'en' ? 'left' : 'kvar'}`;
-                        })()}
-                      </span>
-                    </motion.button>
-                  );
-                })}
-
-                {/* Manage Button at the end of the category carousel */}
-                <motion.button
-                  key="manage-categories"
-                  initial={{ opacity: 0, scale: 0.97, x: 6 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 0.04 + categoryBudgetData.length * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
-                  onClick={() => {
-                    if (typeof feedback.light === 'function') feedback.light();
-                    onNavigate("profile", "budget");
-                  }}
-                  className="flex-shrink-0 w-[100px] sm:w-[110px] h-[100px] sm:h-[110px] p-3 rounded-[22px] bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/5 border-none flex flex-col items-center justify-between text-center group cursor-pointer transition-all active:scale-95 shadow-none"
-                  aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
-                >
-                  <div className="w-8 h-8 rounded-[12px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-                    <SlidersHorizontal size={16} strokeWidth={2} />
-                  </div>
-
-                  <span className="text-[12px] font-bold text-[var(--text-primary)] tracking-tight max-w-[90px] truncate px-0.5">
-                    {lang === 'en' ? 'Manage' : 'Hantera'}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight">
+                    {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback.light === 'function') feedback.light();
+                      onNavigate("profile", "budget");
+                    }}
+                    className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                  >
+                    {lang === "en" ? "Manage" : "Hantera"}
+                  </button>
+                </div>
 
-                  <span className="text-[10px] font-medium text-[var(--text-secondary)] tracking-tight whitespace-nowrap">
-                    {lang === 'en' ? 'Budget' : 'Budget'}
-                  </span>
-                </motion.button>
+                <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-hide -mx-1 px-1">
+                  {categoryBudgetData.map((cat, index) => {
+                    const Icon = ICON_MAP[cat.iconName];
+                    const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
+
+                    return (
+                      <motion.button
+                        key={cat.name}
+                        initial={{ opacity: 0, scale: 0.97, x: 6 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
+                        onClick={() => handleCategoryClick(cat.name)}
+                        className="flex-shrink-0 w-[114px] sm:w-[122px] h-[106px] sm:h-[110px] p-3 rounded-[18px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
+                      >
+                        {/* Top: Icon + Name */}
+                        <div className="flex items-center gap-2 min-w-0 w-full">
+                          <div 
+                            className="w-7 h-7 rounded-[10px] flex items-center justify-center shrink-0"
+                            style={{ 
+                              backgroundColor: `${catColor}18`, 
+                              color: catColor 
+                            }}
+                          >
+                            {isEmojiString(cat.iconName) ? (
+                              <span className="text-[15px] leading-none">{cat.iconName}</span>
+                            ) : Icon ? (
+                              <Icon size={14} strokeWidth={2.2} />
+                            ) : (
+                              <div className="w-2 h-2 rounded-full bg-current" />
+                            )}
+                          </div>
+                          <span className="text-[12px] font-semibold text-[var(--text-primary)] tracking-tight truncate flex-1 min-w-0">
+                            {cat.name}
+                          </span>
+                        </div>
+
+                        {/* Amount */}
+                        <div className="space-y-0.5">
+                          <p className={`text-[12px] sm:text-[13px] font-bold font-amount tabular-nums tracking-tight truncate ${
+                            cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
+                          }`}>
+                            {(() => {
+                              const currency = config?.currency || 'kr';
+                              if (!cat.hasBudget) {
+                                return `${formatAmount(Math.round(cat.spent), lang)} ${currency}`;
+                              }
+                              const rem = Math.round(cat.remaining);
+                              return `${formatAmount(rem, lang)} ${currency}`;
+                            })()}
+                          </p>
+                          <p className="text-[10px] font-normal text-[var(--text-tertiary)] tracking-tight leading-none">
+                            {cat.hasBudget 
+                              ? (cat.remaining < 0 ? (lang === 'en' ? 'over budget' : 'över budget') : (lang === 'en' ? 'left to spend' : 'kvar att spendera'))
+                              : (lang === 'en' ? 'spent' : 'spenderat')}
+                          </p>
+                        </div>
+
+                        {/* Delicate Mini Progress Bar */}
+                        <div className="w-full h-1 bg-black/[0.05] dark:bg-white/[0.08] rounded-full overflow-hidden">
+                          <div 
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{ 
+                              width: `${Math.min(100, Math.max(0, cat.percentage))}%`,
+                              backgroundColor: cat.isOverBudget ? '#EF4444' : catColor
+                            }}
+                          />
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+
+                  {/* Manage Button at the end of the category carousel */}
+                  <motion.button
+                    key="manage-categories"
+                    initial={{ opacity: 0, scale: 0.97, x: 6 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    transition={{ delay: 0.04 + categoryBudgetData.length * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
+                    onClick={() => {
+                      if (typeof feedback.light === 'function') feedback.light();
+                      onNavigate("profile", "budget");
+                    }}
+                    className="flex-shrink-0 w-[96px] sm:w-[104px] h-[106px] sm:h-[110px] p-3 rounded-[18px] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                    aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
+                  >
+                    <div className="w-7 h-7 rounded-[9px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                      <SlidersHorizontal size={14} strokeWidth={2} />
+                    </div>
+
+                    <span className="text-[11px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] tracking-tight">
+                      {lang === 'en' ? 'Manage' : 'Hantera'}
+                    </span>
+                  </motion.button>
+                </div>
               </div>
             ) : (
               <button

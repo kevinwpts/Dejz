@@ -125,33 +125,46 @@ export function GreetingModule({
           onOpenInfo={() => setIsCalculationInfoOpen(true)}
         />
 
-        {/* Interactive Large Countdown Widget Card */}
+        {/* Interactive Unified Period & Payday Status Bar */}
         <button
           type="button"
           onClick={handleCardClick}
-          className="w-full sm:max-w-lg mx-auto mt-4 px-5 py-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between gap-5 animate-fade-in text-left cursor-pointer hover:bg-black/[0.04] dark:hover:bg-white/[0.05] active:scale-[0.99] transition-all"
+          className="w-full sm:max-w-md mx-auto mt-3 px-4 py-3 rounded-[18px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between gap-3 animate-fade-in text-left cursor-pointer active:scale-[0.99] transition-all shadow-none"
         >
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider">
-              {isEn ? 'Days left' : 'Dagar kvar'}
-            </span>
-            <span className="text-[28px] sm:text-[30px] font-bold font-amount leading-none text-[var(--accent-color)] mt-1.5 select-none tabular-nums">
-              {stats?.isPastPeriod ? '0' : effectiveRemainingDays}
-            </span>
-            <span className="text-[11.5px] font-medium text-[var(--text-secondary)] mt-1">
-              {isEn ? 'until next payday' : 'till nästa lön'}
-            </span>
+          {/* Left: Current Period */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-[10px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+              <Calendar size={14} strokeWidth={2} />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider leading-none">
+                {isEn ? 'Current period' : 'Aktuell period'}
+              </span>
+              <span className="text-[13px] font-bold text-[var(--text-primary)] tracking-tight truncate mt-1">
+                {periodIntervalText}
+              </span>
+            </div>
           </div>
 
-          <div className="h-10 w-[1px] bg-black/[0.06] dark:bg-white/[0.08]" />
+          <div className="h-6 w-[1px] bg-black/[0.06] dark:bg-white/[0.08] shrink-0" />
 
-          <div className="flex flex-col items-end text-right">
-            <span className="text-[10px] font-extrabold text-[var(--text-tertiary)] uppercase tracking-wider">
-              {isEn ? 'Current period' : 'Aktuell period'}
-            </span>
-            <span className="text-[14px] sm:text-[15px] font-bold text-[var(--text-primary)] mt-1.5 tracking-tight">
-              {periodIntervalText}
-            </span>
+          {/* Right: Days Remaining */}
+          <div className="flex items-center gap-2.5 shrink-0 text-right">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider leading-none">
+                {isEn ? 'Next payday' : 'Nästa lön'}
+              </span>
+              <span className="text-[13px] font-bold text-[var(--accent-color)] font-amount tabular-nums tracking-tight mt-1">
+                {stats?.isPastPeriod
+                  ? (isEn ? 'Ended' : 'Avslutad')
+                  : (isEn
+                      ? `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'day left' : 'days left'}`
+                      : `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'dag kvar' : 'dagar kvar'}`)}
+              </span>
+            </div>
+            <div className="w-7 h-7 rounded-[10px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
+              <Clock size={14} strokeWidth={2.2} />
+            </div>
           </div>
         </button>
       </motion.div>
