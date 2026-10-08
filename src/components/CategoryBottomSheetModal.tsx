@@ -152,12 +152,28 @@ export function CategoryBottomSheetModal({
   const iconKey = categoryData?.iconName || matchedCategory?.icon || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');
   const IconComponent = ICON_MAP[iconKey] || ICON_MAP['Tag'];
 
-  const remainingPct = useMemo(() => {
-    if (!categoryData?.hasBudget || !categoryData?.budget || categoryData.budget <= 0) return 0;
-    if (categoryData.isOverBudget || categoryData.remaining <= 0) return 0;
-    const rawPct = Math.round((categoryData.remaining / categoryData.budget) * 100);
-    return Math.max(1, Math.min(100, rawPct));
-  }, [categoryData]);
+  const actualFixedSpent = categoryData?.fixedSpent !== undefined 
+    ? Math.round(categoryData.fixedSpent) 
+    : Math.round(totalFixedAmount);
+
+  const actualVariableSpent = categoryData?.variableSpent !== undefined
+    ? Math.round(categoryData.variableSpent)
+    : Math.round(displayTransactions.reduce((s, tx) => s + (Number(tx.amount) || 0), 0));
+
+  const actualTotalSpent = categoryData?.spent !== undefined
+    ? Math.round(categoryData.spent)
+    : Math.round(actualFixedSpent + actualVariableSpent);
+
+  const budget = categoryData?.budget !== undefined 
+    ? Math.round(categoryData.budget) 
+    : Math.round(Number(matchedCategory?.budget) || 0);
+
+  const hasBudget = budget > 0;
+  const remaining = budget - actualTotalSpent;
+
+  const usedPercentage = hasBudget
+    ? Math.round((actualTotalSpent / budget) * 100)
+    : 0;
 
   if (!targetCategoryName || typeof document === 'undefined' || !document.body) return null;
 
@@ -226,110 +242,104 @@ export function CategoryBottomSheetModal({
 
             {/* Scrollable Body Content */}
             <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0">
-              {/* Category Budget Status Card - Clear context of spent vs total budget */}
-              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shrink-0 space-y-2.5">
-                {categoryData?.hasBudget ? (
-                  <>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-baseline gap-1.5 flex-wrap">
-                        {categoryData.isOverBudget ? (
-                          <>
-                            <span className="text-xl sm:text-2xl font-bold text-rose-600 dark:text-rose-500 font-amount tabular-nums">
-                              {formatAmount(Math.abs(categoryData.remaining), language)} {curr}
-                            </span>
-                            <span className="text-xs sm:text-sm font-medium text-rose-600 dark:text-rose-400">
-                              {isEn ? 'over' : 'över'}{' '}
-                              <span className="font-semibold text-rose-600 dark:text-rose-400 font-amount tabular-nums">
-                                {formatAmount(Math.round(categoryData.budget), language)} {curr}
-                              </span>
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] font-amount tabular-nums">
-                              {formatAmount(categoryData.remaining, language)} {curr}
-                            </span>
-                            <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                              {isEn ? 'left of' : 'kvar av'}{' '}
-                              <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
-                                {formatAmount(Math.round(categoryData.budget), language)} {curr}
-                              </span>
-                            </span>
-                          </>
-                        )}
-                      </div>
+              {/* Category Budget Status Card */}
+              <div className="p-4 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shrink-0 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  {/* Left: Main text + Subtext */}
+                  <div className="flex flex-col min-w-0">
+                    {hasBudget ? (
+                      <>
+                        <span
+                          className={`text-xl sm:text-2xl font-bold font-amount tabular-nums tracking-tight ${
+                            remaining < 0
+                              ? 'text-rose-600 dark:text-rose-500'
+                              : 'text-[var(--text-primary)]'
+                          }`}
+                        >
+                          {remaining < 0
+                            ? `${formatAmount(Math.abs(remaining), language)} ${curr} ${isEn ? 'over budget' : 'över budget'}`
+                            : remaining === 0
+                            ? `0 ${curr} ${isEn ? 'left' : 'kvar'}`
+                            : `${formatAmount(remaining, language)} ${curr} ${isEn ? 'left' : 'kvar'}`}
+                        </span>
+                        <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] mt-0.5">
+                          {remaining < 0
+                            ? `Budget: ${formatAmount(budget, language)} ${curr}`
+                            : `${isEn ? 'of' : 'av'} ${formatAmount(budget, language)} ${curr}`}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+                          {isEn ? 'No budget set' : 'Ingen budget satt'}
+                        </span>
+                        <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] mt-0.5">
+                          {actualTotalSpent > 0
+                            ? `${formatAmount(actualTotalSpent, language)} ${curr} ${isEn ? 'total spent' : 'totalt spenderat'}`
+                            : (isEn ? 'No expenses recorded' : 'Inga utgifter registrerade')}
+                        </span>
+                      </>
+                    )}
+                  </div>
 
-                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border tabular-nums shrink-0 ${
-                        categoryData.isOverBudget 
-                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' 
-                          : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-black/5 dark:border-white/10'
-                      }`}>
-                        {categoryData.isOverBudget ? 0 : remainingPct}%
-                      </span>
-                    </div>
+                  {/* Right: Percentage pill (only when hasBudget) */}
+                  {hasBudget && (
+                    <span
+                      className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border tabular-nums shrink-0 whitespace-nowrap mt-0.5 ${
+                        remaining < 0
+                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                          : remaining === 0
+                          ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-black/5 dark:border-white/10'
+                          : actualTotalSpent === 0
+                          ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-black/5 dark:border-white/10'
+                          : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                      }`}
+                    >
+                      {usedPercentage} % {isEn ? 'used' : 'använt'}
+                    </span>
+                  )}
+                </div>
 
-                    {/* Progress Bar (starts at 100% and depletes as budget is used) */}
-                    <div className={`w-full h-2 rounded-full overflow-hidden transition-colors ${
-                      categoryData.isOverBudget 
-                        ? 'bg-rose-500/15 dark:bg-rose-500/20' 
+                {/* Progress Bar (only when hasBudget) */}
+                {hasBudget && (
+                  <div
+                    className={`w-full h-2 rounded-full overflow-hidden transition-colors ${
+                      remaining < 0
+                        ? 'bg-rose-500/15 dark:bg-rose-500/20'
                         : 'bg-black/[0.05] dark:bg-white/[0.08]'
-                    }`}>
-                      <div
-                        className="h-full rounded-full transition-all duration-300"
-                        style={{
-                          width: `${categoryData.isOverBudget ? 0 : remainingPct}%`,
-                          backgroundColor: !categoryData.isOverBudget ? categoryColor : undefined,
-                        }}
-                      />
-                    </div>
+                    }`}
+                  >
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        remaining < 0
+                          ? 'bg-rose-500 dark:bg-rose-500'
+                          : remaining === 0
+                          ? 'bg-neutral-400 dark:bg-neutral-500'
+                          : 'bg-emerald-500 dark:bg-emerald-400'
+                      }`}
+                      style={{
+                        width: `${remaining < 0 ? 100 : Math.min(100, Math.max(0, usedPercentage))}%`,
+                      }}
+                    />
+                  </div>
+                )}
 
-                    {/* Fixed vs Variable Breakdown Pill */}
-                    {((categoryData?.fixedSpent !== undefined && categoryData.fixedSpent > 0) || totalFixedAmount > 0) && (
-                      <div className="flex items-center gap-2 pt-1 border-t border-black/[0.04] dark:border-white/[0.04] text-[11px] text-[var(--text-secondary)] flex-wrap">
-                        <span className="font-medium">
-                          {isEn ? 'Fixed: ' : 'Varav fasta: '}
-                          <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
-                            {formatAmount(categoryData?.fixedSpent || totalFixedAmount, language)} {curr}
-                          </span>
-                        </span>
-                        {categoryData?.variableSpent !== undefined && categoryData.variableSpent > 0 && (
-                          <>
-                            <span>•</span>
-                            <span className="font-medium">
-                              {isEn ? 'Variable: ' : 'Rörliga: '}
-                              <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
-                                {formatAmount(categoryData.variableSpent, language)} {curr}
-                              </span>
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] font-amount tabular-nums">
-                        {formatAmount(categoryData?.spent || 0, language)} {curr}
+                {/* Fixed vs Variable Breakdown under summary */}
+                {(actualFixedSpent > 0 || actualVariableSpent > 0) && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-black/[0.04] dark:border-white/[0.04] text-[11px] text-[var(--text-secondary)] flex-wrap">
+                    <span className="font-medium">
+                      {isEn ? 'Fixed: ' : 'Varav fasta: '}
+                      <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
+                        {formatAmount(actualFixedSpent, language)} {curr}
                       </span>
-                      <span className="text-xs font-medium text-[var(--text-secondary)]">
-                        {isEn ? 'total spent' : 'totalt spenderat'}
+                    </span>
+                    <span>•</span>
+                    <span className="font-medium">
+                      {isEn ? 'Variable: ' : 'Rörliga: '}
+                      <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
+                        {formatAmount(actualVariableSpent, language)} {curr}
                       </span>
-                    </div>
-                    <p className="text-[11.5px] text-[var(--text-tertiary)] mt-1">
-                      {isEn ? 'No budget set for this category' : 'Ingen budget satt för denna kategori'}
-                    </p>
-
-                    {((categoryData?.fixedSpent !== undefined && categoryData.fixedSpent > 0) || totalFixedAmount > 0) && (
-                      <div className="flex items-center gap-2 pt-1 mt-1 border-t border-black/[0.04] dark:border-white/[0.04] text-[11px] text-[var(--text-secondary)] flex-wrap">
-                        <span className="font-medium">
-                          {isEn ? 'Fixed: ' : 'Varav fasta: '}
-                          <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
-                            {formatAmount(categoryData?.fixedSpent || totalFixedAmount, language)} {curr}
-                          </span>
-                        </span>
-                      </div>
-                    )}
+                    </span>
                   </div>
                 )}
               </div>
