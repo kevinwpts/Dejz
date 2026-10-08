@@ -548,7 +548,7 @@ h6 {
   .header-title,
   .heading-display {
     color: var(--text-primary);
-    font-family: var(--font-display) !important;
+    font-family: var(--font-display);
     line-height: 1.15;
   }
 
@@ -955,6 +955,10 @@ html, body {
 }
 [class*="rounded-[28px]"] {
   border-radius: 32px !important;
+}
+
+.font-unbounded {
+  font-family: var(--font-unbounded) !important;
 }
 
 

@@ -22,7 +22,7 @@ import { CategoryIcon } from "./CategoryIcon";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { PeriodTimeline } from "./PeriodTimeline";
-import { ICON_MAP, getCategoryIconName, isEmojiString } from "../utils/icons";
+import { getCategoryIconName } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
 import { feedback } from "../utils/feedback";
@@ -465,7 +465,6 @@ export function TodayView({
 
             <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
               {categoryBudgetData.map((cat, index) => {
-                const Icon = ICON_MAP[cat.iconName];
                 const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
 
                 return (
