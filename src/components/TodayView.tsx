@@ -383,72 +383,7 @@ export function TodayView({
         allTransactions={allTransactions}
       />
 
-      {/* Module 1: Time & Period (Unified Period & Calendar Timeline Widget) */}
-      <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[24px] p-4 sm:p-5 space-y-4 shadow-sm animate-fade-in">
-        {/* Period & Payday Status Bar */}
-        <button
-          type="button"
-          onClick={() => {
-            if (typeof feedback?.tap === 'function') feedback.tap();
-            setIsPeriodInfoOpen(true);
-          }}
-          className="w-full flex items-center justify-between gap-3 text-left cursor-pointer active:scale-[0.99] transition-all bg-transparent border-none p-0"
-        >
-          {/* Left: Current Period */}
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-[10px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
-              <Calendar size={14} strokeWidth={2} />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider leading-none">
-                {lang === 'en' ? 'Current period' : 'Aktuell period'}
-              </span>
-              <span className="text-[13px] font-semibold text-[var(--text-primary)] tracking-tight truncate mt-1">
-                {periodIntervalText}
-              </span>
-            </div>
-          </div>
-
-          <div className="h-6 w-[1px] bg-black/[0.06] dark:border-white/[0.08] shrink-0" />
-
-          {/* Right: Days Remaining */}
-          <div className="flex items-center gap-2.5 shrink-0 text-right">
-            <div className="flex flex-col items-end">
-              <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider leading-none">
-                {lang === 'en' ? 'Next payday' : 'Nästa lön'}
-              </span>
-              <span className="text-[13px] font-semibold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-1">
-                {stats?.isPastPeriod
-                  ? (lang === 'en' ? 'Ended' : 'Avslutad')
-                  : (lang === 'en'
-                      ? `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'day left' : 'days left'}`
-                      : `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'dag kvar' : 'dagar kvar'}`)}
-              </span>
-            </div>
-            <div className="w-7 h-7 rounded-[10px] bg-black/[0.04] dark:bg-white/5 text-[var(--text-secondary)] flex items-center justify-center shrink-0">
-              <Clock size={14} strokeWidth={2} />
-            </div>
-          </div>
-        </button>
-
-        {/* Divider inside Card */}
-        <div className="h-[1px] bg-black/[0.04] dark:bg-white/[0.04]" />
-
-        {/* PeriodTimeline calendar */}
-        {calendarDays && calendarDays.length > 0 && (
-          <PeriodTimeline
-            calendarDays={calendarDays}
-            selectedDate={normalizedSelectedDate}
-            onSelectDate={setSelectedDate}
-            stats={stats}
-            language={lang}
-            isCurrentPeriod={isCurrentPeriod}
-            showFixedInCalendar={config?.showFixedExpensesInCalendar}
-          />
-        )}
-      </div>
-
-      {/* Module 2: Category Budgets Widget */}
+      {/* Module 1: Category Budgets Widget */}
       <div className="animate-fade-in">
         {!hasSavedBudget ? (
           <button
@@ -596,100 +531,168 @@ export function TodayView({
         )}
       </div>
 
-      {/* Module 3: Selected Day's Transactions Widget */}
+      {/* Module 2: Unified Timeline & Transactions Module */}
       <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[24px] p-4 sm:p-5 space-y-4 shadow-sm animate-fade-in">
-        <div className="flex items-center justify-between px-0.5">
-          <h3 className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight uppercase">
-            {stats.isPastPeriod
-              ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
-              : selectedDate.toDateString() === new Date().toDateString()
-                ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
-                : selectedDate.toLocaleDateString(
-                    lang === "en" ? "en-US" : "sv-SE",
-                    { day: "numeric", month: "long" },
-                  )}
-          </h3>
-          {!isTodaySelected && (
-            <button
-              onClick={handleGoToToday}
-              className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
-            >
-              <RotateCcw size={11} strokeWidth={2.5} />
-              <span>{lang === "en" ? "Today" : "Idag"}</span>
-            </button>
-          )}
-        </div>
-
-        <div className="space-y-1">
-          <AnimatePresence mode="popLayout">
-            {displayedVariableTransactions.length > 0 ? (
-              <motion.div className="space-y-0" key="transactions">
-                {displayedVariableTransactions.map((transaction: Transaction, index: number) => (
-                  <motion.div
-                    key={transaction.id}
-                    initial={{ opacity: 0, x: -15 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 15 }}
-                    transition={{ delay: index * 0.02 }}
-                    className="border-b border-black/[0.04] dark:border-white/[0.04] last:border-none"
-                  >
-                    <TransactionItem
-                      transaction={transaction}
-                      onView={onViewTransaction}
-                      onDelete={onDeleteTransaction}
-                      language={lang}
-                      currency={config?.currency || 'kr'}
-                      config={config}
-                      variant="transparent"
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : displayedFixedTransactions.length === 0 ? (
-              <EmptyState
-                title={isTodaySelected ? (lang === "en" ? "No transactions recorded yet" : "Inga transaktioner registrerade än") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
-                description={isTodaySelected ? (lang === "en" ? "Add an expense or income to track today's spending." : "Lägg till en utgift eller inkomst för att hålla koll på dagsbudgeten.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
-                onAction={() => onAddTransaction(selectedDate)}
-                actionLabel={`+ ${t("addExpense")}`}
-              />
-            ) : null}
-          </AnimatePresence>
-
-          {/* Fixed transactions for the day */}
-          {displayedFixedTransactions.length > 0 && (
-            <div className="space-y-0">
-              {displayedFixedTransactions.map((item) => {
-                const tx: Transaction = {
-                  id: item.id,
-                  merchant: item.merchant,
-                  category: item.category,
-                  amount: item.amount,
-                  type: item.type as any,
-                  date: selectedDate.toISOString(),
-                };
-
-                return (
-                  <div key={item.id} className="border-b border-black/[0.04] dark:border-white/[0.04] last:border-none">
-                    <TransactionItem
-                      transaction={tx}
-                      isFixed={true}
-                      config={config}
-                      variant="transparent"
-                      onClick={() => {
-                        if (item.type === "income" && onViewIncome) {
-                          onViewIncome(item.originalItem);
-                        } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
-                          onViewMonthlySaving(item.originalItem);
-                        } else if (onViewFixedExpense) {
-                          onViewFixedExpense(item.originalItem);
-                        }
-                      }}
-                    />
-                  </div>
-                );
-              })}
+        {/* Period & Payday Status Bar */}
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof feedback?.tap === 'function') feedback.tap();
+            setIsPeriodInfoOpen(true);
+          }}
+          className="w-full flex items-center justify-between gap-3 text-left cursor-pointer active:scale-[0.99] transition-all bg-transparent border-none p-0"
+        >
+          {/* Left: Current Period */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-[10px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] shrink-0">
+              <Calendar size={14} strokeWidth={2} />
             </div>
-          )}
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider leading-none">
+                {lang === 'en' ? 'Current period' : 'Aktuell period'}
+              </span>
+              <span className="text-[13px] font-semibold text-[var(--text-primary)] tracking-tight truncate mt-1">
+                {periodIntervalText}
+              </span>
+            </div>
+          </div>
+
+          <div className="h-6 w-[1px] bg-black/[0.06] dark:border-white/[0.08] shrink-0" />
+
+          {/* Right: Days Remaining */}
+          <div className="flex items-center gap-2.5 shrink-0 text-right">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wider leading-none">
+                {lang === 'en' ? 'Next payday' : 'Nästa lön'}
+              </span>
+              <span className="text-[13px] font-semibold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-1">
+                {stats?.isPastPeriod
+                  ? (lang === 'en' ? 'Ended' : 'Avslutad')
+                  : (lang === 'en'
+                      ? `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'day left' : 'days left'}`
+                      : `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'dag kvar' : 'dagar kvar'}`)}
+              </span>
+            </div>
+            <div className="w-7 h-7 rounded-[10px] bg-black/[0.04] dark:bg-white/5 text-[var(--text-secondary)] flex items-center justify-center shrink-0">
+              <Clock size={14} strokeWidth={2} />
+            </div>
+          </div>
+        </button>
+
+        {/* Divider inside Card */}
+        <div className="h-[1px] bg-black/[0.04] dark:bg-white/[0.04]" />
+
+        {/* PeriodTimeline calendar */}
+        {calendarDays && calendarDays.length > 0 && (
+          <PeriodTimeline
+            calendarDays={calendarDays}
+            selectedDate={normalizedSelectedDate}
+            onSelectDate={setSelectedDate}
+            stats={stats}
+            language={lang}
+            isCurrentPeriod={isCurrentPeriod}
+            showFixedInCalendar={config?.showFixedExpensesInCalendar}
+          />
+        )}
+
+        {/* Divider between Timeline and Transactions */}
+        <div className="h-[1px] bg-black/[0.04] dark:bg-white/[0.04]" />
+
+        {/* Selected Day's Transactions Section (under the timeline) */}
+        <div className="space-y-3 pt-0.5">
+          <div className="flex items-center justify-between px-0.5">
+            <h3 className="text-[12px] font-semibold text-[var(--text-secondary)] tracking-tight uppercase">
+              {stats.isPastPeriod
+                ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
+                : selectedDate.toDateString() === new Date().toDateString()
+                  ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
+                  : selectedDate.toLocaleDateString(
+                      lang === "en" ? "en-US" : "sv-SE",
+                      { day: "numeric", month: "long" },
+                    )}
+            </h3>
+            {!isTodaySelected && (
+              <button
+                onClick={handleGoToToday}
+                className="flex items-center gap-1.5 px-3 h-7 rounded-full bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-xs font-semibold text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
+              >
+                <RotateCcw size={11} strokeWidth={2.5} />
+                <span>{lang === "en" ? "Today" : "Idag"}</span>
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <AnimatePresence mode="popLayout">
+              {displayedVariableTransactions.length > 0 ? (
+                <motion.div className="space-y-0" key="transactions">
+                  {displayedVariableTransactions.map((transaction: Transaction, index: number) => (
+                    <motion.div
+                      key={transaction.id}
+                      initial={{ opacity: 0, x: -15 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 15 }}
+                      transition={{ delay: index * 0.02 }}
+                      className="border-b border-black/[0.04] dark:border-white/[0.04] last:border-none"
+                    >
+                      <TransactionItem
+                        transaction={transaction}
+                        onView={onViewTransaction}
+                        onDelete={onDeleteTransaction}
+                        language={lang}
+                        currency={config?.currency || 'kr'}
+                        config={config}
+                        variant="transparent"
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              ) : displayedFixedTransactions.length === 0 ? (
+                <EmptyState
+                  title={isTodaySelected ? (lang === "en" ? "No transactions recorded yet" : "Inga transaktioner registrerade än") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
+                  description={isTodaySelected ? (lang === "en" ? "Add an expense or income to track today's spending." : "Lägg till en utgift eller inkomst för att hålla koll på dagsbudgeten.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
+                  onAction={() => onAddTransaction(selectedDate)}
+                  actionLabel={`+ ${t("addExpense")}`}
+                />
+              ) : null}
+            </AnimatePresence>
+
+            {/* Fixed transactions for the day */}
+            {displayedFixedTransactions.length > 0 && (
+              <div className="space-y-0">
+                {displayedFixedTransactions.map((item) => {
+                  const tx: Transaction = {
+                    id: item.id,
+                    merchant: item.merchant,
+                    category: item.category,
+                    amount: item.amount,
+                    type: item.type as any,
+                    date: selectedDate.toISOString(),
+                  };
+
+                  return (
+                    <div key={item.id} className="border-b border-black/[0.04] dark:border-white/[0.04] last:border-none">
+                      <TransactionItem
+                        transaction={tx}
+                        isFixed={true}
+                        config={config}
+                        variant="transparent"
+                        onClick={() => {
+                          if (item.type === "income" && onViewIncome) {
+                            onViewIncome(item.originalItem);
+                          } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
+                            onViewMonthlySaving(item.originalItem);
+                          } else if (onViewFixedExpense) {
+                            onViewFixedExpense(item.originalItem);
+                          }
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
