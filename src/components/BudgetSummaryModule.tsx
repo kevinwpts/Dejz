@@ -15,6 +15,8 @@ interface BudgetSummaryModuleProps {
   largestCategoryOverride?: { name: string; amount: number };
   budgetUsedPctOverride?: number;
   remainingBudgetOverride?: number;
+  effectiveBudgetOverride?: number;
+  previousPeriodComparisonText?: string | null;
   filterMode?: 'all' | 'variable' | 'fixed';
 }
 
@@ -26,6 +28,8 @@ export function BudgetSummaryModule({
   totalSpentOverride,
   budgetUsedPctOverride,
   remainingBudgetOverride,
+  effectiveBudgetOverride,
+  previousPeriodComparisonText,
   filterMode = 'all'
 }: BudgetSummaryModuleProps) {
   const [activeInfoModal, setActiveInfoModal] = useState<'remaining' | 'budgetUsed' | null>(null);
@@ -77,6 +81,7 @@ export function BudgetSummaryModule({
   }, [stats]);
 
   const effectiveBudget = useMemo(() => {
+    if (effectiveBudgetOverride !== undefined) return effectiveBudgetOverride;
     if (!stats) return 0;
     if (filterMode === 'variable') {
       return stats.disposablePot || 0;
@@ -86,7 +91,7 @@ export function BudgetSummaryModule({
     }
     if (stats.totalIncome > 0) return Math.max(0, stats.totalIncome - (stats.totalSavings || 0));
     return (stats.disposablePot || 0) + (stats.totalFixed || 0);
-  }, [stats, filterMode]);
+  }, [stats, filterMode, effectiveBudgetOverride]);
 
   const remainingBudget = remainingBudgetOverride !== undefined 
     ? remainingBudgetOverride 
@@ -120,13 +125,18 @@ export function BudgetSummaryModule({
                 {config.currency || "kr"}
               </span>
             </div>
+            {previousPeriodComparisonText && (
+              <p className="text-[11px] sm:text-[12px] font-normal text-[var(--text-secondary)] leading-tight tracking-tight pt-0.5">
+                {previousPeriodComparisonText}
+              </p>
+            )}
           </div>
 
           {/* Kvar att spendera */}
           <div className="space-y-1 text-right">
             <div className="flex items-center justify-end gap-1">
               <span className="text-xs font-medium text-[var(--text-secondary)]">
-                {isPastPeriod ? (isOverBudget ? (isEn ? 'Over budget' : 'Över budget') : (isEn ? 'Left' : 'Kvar')) : (isEn ? 'Remaining' : 'Kvar')}
+                {isPastPeriod ? (isEn ? 'Left at period end' : 'Kvar vid periodens slut') : (isEn ? 'Remaining' : 'Kvar')}
               </span>
               <button
                 type="button"
@@ -143,7 +153,7 @@ export function BudgetSummaryModule({
                 isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
               }`}>
                 {isOverBudget ? '−' : ''}
-                {formatAmount(Math.round(isOverBudget && isPastPeriod ? Math.abs(remainingBudget) : Math.max(0, remainingBudget)), config.language)}
+                {formatAmount(Math.round(Math.abs(remainingBudget)), config.language)}
               </span>
               <span className="text-xs font-medium text-[var(--text-secondary)]">
                 {config.currency || "kr"}
@@ -185,14 +195,20 @@ export function BudgetSummaryModule({
         <Modal
           isOpen={true}
           onClose={() => setActiveInfoModal(null)}
-          title={isEn ? 'Remaining to spend' : 'Kvar att spendera'}
+          title={isPastPeriod 
+            ? (isEn ? 'Left at period end' : 'Kvar vid periodens slut')
+            : (isEn ? 'Remaining to spend' : 'Kvar att spendera')}
           size="sm"
         >
           <div className="space-y-3.5 text-[14px] text-[var(--text-secondary)]">
             <p>
               {isEn 
-                ? 'Remaining budget is calculated as your total period income (or disposable pot) minus your total spent and recorded fixed expenses.'
-                : 'Kvar att spendera beräknas som din totala inkomst för perioden (eller rörlig pott) minus det du har spenderat och bokförda fasta utgifter.'}
+                ? (isPastPeriod
+                    ? 'Remaining budget at period end is calculated as your total period income (or disposable pot) minus your total spent and recorded fixed expenses.'
+                    : 'Remaining budget is calculated as your total period income (or disposable pot) minus your total spent and recorded fixed expenses.')
+                : (isPastPeriod
+                    ? 'Kvar vid periodens slut beräknas som din totala inkomst för perioden (eller rörlig pott) minus det du har spenderat och bokförda fasta utgifter.'
+                    : 'Kvar att spendera beräknas som din totala inkomst för perioden (eller rörlig pott) minus det du har spenderat och bokförda fasta utgifter.')}
             </p>
           </div>
         </Modal>

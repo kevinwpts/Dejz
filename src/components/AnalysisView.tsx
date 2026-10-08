@@ -188,29 +188,32 @@ export function AnalysisView({
 
   const effectiveBudget = useMemo(() => {
     if (!stats) return 0;
+    const extraInc = stats.isPastPeriod
+      ? (stats.totalExtraIncomeInPeriod || 0)
+      : (stats.totalExtraIncomeUpToToday || 0);
+
     if (analysisFilter === 'variable') {
-      return stats.disposablePot || 0;
+      return (stats.disposablePot || 0) + extraInc;
     }
     if (analysisFilter === 'fixed') {
       return stats.totalFixed || 0;
     }
-    if (stats.totalIncome > 0) return Math.max(0, stats.totalIncome - (stats.totalSavings || 0));
-    return (stats.disposablePot || 0) + (stats.totalFixed || 0);
+    if (stats.totalIncome > 0) {
+      return Math.max(0, stats.totalIncome + extraInc - (stats.totalSavings || 0));
+    }
+    return (stats.disposablePot || 0) + (stats.totalFixed || 0) + extraInc;
   }, [stats, analysisFilter]);
 
   const remainingBudget = useMemo(() => {
     if (!stats) return 0;
-    if (analysisFilter === 'variable') {
-      return (stats.disposablePot || 0) - totalSpent;
-    }
-    if (analysisFilter === 'fixed') {
-      return (stats.totalFixed || 0) - totalSpent;
-    }
-    if (stats.remainingPeriodCents !== undefined) {
-      return stats.remainingPeriodCents;
-    }
     return effectiveBudget - totalSpent;
-  }, [stats, analysisFilter, totalSpent, effectiveBudget]);
+  }, [stats, effectiveBudget, totalSpent]);
+
+  const budgetUsedPct = useMemo(() => {
+    if (!stats) return 0;
+    if (effectiveBudget <= 0) return 0;
+    return Math.max(0, Math.round((totalSpent / effectiveBudget) * 100));
+  }, [stats, effectiveBudget, totalSpent]);
 
   const largestCategory = useMemo(() => {
     if (categoryData.length === 0) return { name: "", amount: 0 };
@@ -218,11 +221,80 @@ export function AnalysisView({
     return { name: first.name, amount: first.value };
   }, [categoryData]);
 
-  const budgetUsedPct = useMemo(() => {
-    if (!stats) return 0;
-    if (effectiveBudget <= 0) return 0;
-    return Math.max(0, Math.round((totalSpent / effectiveBudget) * 100));
-  }, [stats, effectiveBudget, totalSpent]);
+  // Previous Period Comparison Logic
+  const previousPeriod = useMemo(() => {
+    if (!periods || periods.length === 0 || !stats?.periodStart) return null;
+    const currentStartMs = new Date(stats.periodStart).getTime();
+    const sorted = [...periods]
+      .filter(p => p.start && new Date(p.start).getTime() < currentStartMs)
+      .sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
+    return sorted[0] || null;
+  }, [periods, stats?.periodStart]);
+
+  const previousPeriodSpent = useMemo(() => {
+    if (!previousPeriod || !transactions) return null;
+    const pStartMs = new Date(previousPeriod.start).getTime();
+    const pEndMs = new Date(previousPeriod.end).getTime() + 86399999;
+
+    const includeVariable = analysisFilter === 'all' || analysisFilter === 'variable';
+    const includeFixed = analysisFilter === 'all' || analysisFilter === 'fixed';
+
+    let prevSpent = 0;
+
+    if (includeVariable) {
+      transactions.forEach(e => {
+        if (e.timestamp >= pStartMs && e.timestamp <= pEndMs) {
+          if (e.type === 'expense' || e.type === 'savings') {
+            if (e.type !== 'income') {
+              prevSpent += Number(e.amount) || 0;
+            }
+          }
+        }
+      });
+    }
+
+    if (includeFixed && fixedExpenses) {
+      fixedExpenses.forEach((e: FixedExpense) => {
+        let amount = Number(e.amount) || 0;
+        if (e.isVariable && e.periodOverrides && previousPeriod.periodId && e.periodOverrides[previousPeriod.periodId] !== undefined) {
+          amount = Number(e.periodOverrides[previousPeriod.periodId]) || 0;
+        } else {
+          switch (e.frequency) {
+            case Frequency.QUARTERLY: amount = amount / 3; break;
+            case Frequency.SEMI_ANNUALLY: amount = amount / 6; break;
+            case Frequency.ANNUALLY: amount = amount / 12; break;
+            default: break;
+          }
+        }
+        prevSpent += amount;
+      });
+    }
+
+    return prevSpent;
+  }, [previousPeriod, transactions, fixedExpenses, analysisFilter]);
+
+  const previousPeriodComparisonText = useMemo(() => {
+    if (previousPeriodSpent === null) return null;
+
+    const currentSpentRound = Math.round(totalSpent);
+    const prevSpentRound = Math.round(previousPeriodSpent);
+    const diff = currentSpentRound - prevSpentRound;
+
+    if (diff < 0) {
+      const absDiff = Math.abs(diff);
+      return isEn 
+        ? `${formatAmount(absDiff, config.language)} ${config.currency || 'kr'} less than previous period`
+        : `${formatAmount(absDiff, config.language)} ${config.currency || 'kr'} mindre än föregående period`;
+    }
+
+    if (diff > 0) {
+      return isEn
+        ? `${formatAmount(diff, config.language)} ${config.currency || 'kr'} more than previous period`
+        : `${formatAmount(diff, config.language)} ${config.currency || 'kr'} mer än föregående period`;
+    }
+
+    return isEn ? 'Same as previous period' : 'Samma som föregående period';
+  }, [previousPeriodSpent, totalSpent, isEn, config.language, config.currency]);
 
   // Donut chart / list items data: Top 5 categories + "Övriga kategorier"
   const chartItems = useMemo(() => {
@@ -344,6 +416,8 @@ export function AnalysisView({
         largestCategoryOverride={largestCategory}
         budgetUsedPctOverride={budgetUsedPct}
         remainingBudgetOverride={remainingBudget}
+        effectiveBudgetOverride={effectiveBudget}
+        previousPeriodComparisonText={previousPeriodComparisonText}
         filterMode={analysisFilter}
       />
 
@@ -427,31 +501,31 @@ export function AnalysisView({
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               
+              const catNameTrimmed = (item.name || '').trim().toLowerCase();
               const categoryTransactions = analysisFilter === 'fixed' ? [] : filteredExpenses
                 .filter(t => {
-                  const catName = item.name;
                   if (t.type === 'income') {
-                    if (t.category === 'Budgetökning' && catName === 'Spargris') return true;
+                    if (t.category === 'Budgetökning' && catNameTrimmed === 'spargris') return true;
                     return false;
                   }
                   
-                  const catNameTrimmed = (catName || '').trim();
                   const transactionSplits = (t as any).splits;
                   if (transactionSplits && transactionSplits.length > 0) {
-                    return transactionSplits.some((s: any) => (s.category || '').trim() === catNameTrimmed);
+                    return transactionSplits.some((s: any) => (s.category || '').trim().toLowerCase() === catNameTrimmed);
                   }
                   
-                  return (t.category || '').trim() === catNameTrimmed;
+                  return (t.category || '').trim().toLowerCase() === catNameTrimmed;
                 })
                 .sort((a, b) => b.timestamp - a.timestamp);
                 
               const categoryFixedExpenses = analysisFilter === 'variable' ? [] : fixedExpenses
                   .filter(e => {
-                    const catName = e.category || t('fixedExpenses');
-                    return catName === item.name;
+                    const catName = (e.category || t('fixedExpenses')).trim().toLowerCase();
+                    return catName === catNameTrimmed;
                   });
 
               const totalItemCount = categoryTransactions.length + categoryFixedExpenses.length;
+              const categoryPct = totalSpent > 0 ? Math.round((item.value / totalSpent) * 100) : 0;
 
               return (
                 <div key={item.name} className="transition-colors">
@@ -474,7 +548,9 @@ export function AnalysisView({
                           </p>
                           <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[12px] text-[var(--text-secondary)]">
                             <span>
-                              {totalItemCount} {isEn ? (totalItemCount === 1 ? 'item' : 'items') : 'st'}
+                              {totalItemCount} {isEn 
+                                ? (totalItemCount === 1 ? 'transaction' : 'transactions') 
+                                : (totalItemCount === 1 ? 'transaktion' : 'transaktioner')}
                             </span>
                           </div>
                         </div>
@@ -486,6 +562,9 @@ export function AnalysisView({
                             {formatAmount(Math.round(item.value), config.language)}
                             <span className="text-[12px] font-normal text-[var(--text-secondary)] ml-[2.5px]">{config.currency}</span>
                           </p>
+                          <span className="text-[12px] font-normal font-amount tabular-nums text-[var(--text-secondary)] mt-0.5 leading-tight">
+                            {categoryPct}%
+                          </span>
                         </div>
                         <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
                           <ChevronDown size={18} strokeWidth={2} />
@@ -541,6 +620,7 @@ export function AnalysisView({
                                       currency={config.currency || 'kr'}
                                       onClick={() => onViewFixedExpense?.(fe)}
                                       onView={() => onViewFixedExpense?.(fe)}
+                                      variant="nested"
                                     />
                                   </div>
                                 );

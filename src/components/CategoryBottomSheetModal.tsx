@@ -323,25 +323,6 @@ export function CategoryBottomSheetModal({
                     />
                   </div>
                 )}
-
-                {/* Fixed vs Variable Breakdown under summary */}
-                {(actualFixedSpent > 0 || actualVariableSpent > 0) && (
-                  <div className="flex items-center gap-2 pt-2 border-t border-black/[0.04] dark:border-white/[0.04] text-[11px] text-[var(--text-secondary)] flex-wrap">
-                    <span className="font-medium">
-                      {isEn ? 'Fixed: ' : 'Varav fasta: '}
-                      <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
-                        {formatAmount(actualFixedSpent, language)} {curr}
-                      </span>
-                    </span>
-                    <span>•</span>
-                    <span className="font-medium">
-                      {isEn ? 'Variable: ' : 'Rörliga: '}
-                      <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
-                        {formatAmount(actualVariableSpent, language)} {curr}
-                      </span>
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* Expenses List: Fixed Expenses and Variable Transactions */}
