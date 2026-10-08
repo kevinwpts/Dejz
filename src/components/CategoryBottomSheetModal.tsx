@@ -1,14 +1,13 @@
 import React, { useMemo } from 'react';
-import { ShoppingBag } from 'lucide-react';
 import { Transaction, Config, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
-import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
 import { feedback } from '../utils/feedback';
 import { TransactionItem } from './TransactionItem';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
 import { BottomSheet } from './ui';
+import { CategoryIcon } from './CategoryIcon';
 
 interface CategoryBottomSheetModalProps {
   isOpen: boolean;
@@ -134,9 +133,6 @@ export function CategoryBottomSheetModal({
     }, 0);
   }, [matchingFixedExpenses, stats?.periodId]);
 
-  // Icon calculation
-  const iconKey = categoryData?.iconName || matchedCategory?.icon || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');
-  const IconComponent = ICON_MAP[iconKey] || ICON_MAP['Tag'];
 
   const actualFixedSpent = categoryData?.fixedSpent !== undefined 
     ? Math.round(categoryData.fixedSpent) 
@@ -169,18 +165,12 @@ export function CategoryBottomSheetModal({
       onClose={onClose}
       size="md"
       headerLeading={
-        <div
-          className="w-10 h-10 rounded-[8px] flex items-center justify-center shrink-0 text-white shadow-xs"
-          style={{ backgroundColor: categoryColor }}
-        >
-          {isEmojiString(iconKey) ? (
-            <span className="text-xl leading-none">{iconKey}</span>
-          ) : IconComponent ? (
-            <IconComponent size={20} className="text-white" strokeWidth={2} />
-          ) : (
-            <ShoppingBag size={20} className="text-white" strokeWidth={2} />
-          )}
-        </div>
+        <CategoryIcon 
+          icon={iconKey} 
+          color={categoryColor} 
+          size="md" 
+          variant="primary" 
+        />
       }
       title={targetCategoryName}
       bodyClassName="px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0"

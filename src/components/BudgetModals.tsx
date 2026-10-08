@@ -204,10 +204,10 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                     c => (c?.name || '').trim().toLowerCase() === searchCat
                   );
                   const iconKey = cat?.icon || getCategoryIconName(catName);
-                  const catColor = cat?.color || getCategoryColor(catName, config.incomeCategories);
+                  const _catColor = cat?.color || getCategoryColor(catName, config.incomeCategories);
                   return (
                     <>
-                      {iconKey && <CategoryIcon icon={iconKey} color={catColor} size="xs" />}
+                      {iconKey && <CategoryIcon icon={iconKey} variant="minimal" size="xs" />}
                       <span className="text-[14px] font-medium text-[var(--text-primary)]">{catName}</span>
                     </>
                   );
@@ -529,19 +529,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
-                <div 
-                  className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
-                  style={{ 
-                    backgroundColor: (categories || []).find(c => c.name === category)?.color || 'var(--accent-color)'
-                  }}
-                >
-                  <CategoryIcon 
-                    icon={(categories || []).find(c => c.name === category)?.icon || 'tag'} 
-                    size="sm" 
-                    noBackground 
-                    whiteIcon 
-                  />
-                </div>
+                <CategoryIcon 
+                  icon={(categories || []).find(c => c.name === category)?.icon || 'tag'} 
+                  color={(categories || []).find(c => c.name === category)?.color || 'var(--accent-color)'}
+                  size="xs" 
+                  variant="primary" 
+                />
                 <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || t('income')}
                 </span>
@@ -1024,10 +1017,10 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                     c => (c?.name || '').trim().toLowerCase() === searchCat
                   );
                   const iconKey = cat?.icon || getCategoryIconName(catName);
-                  const catColor = cat?.color || getCategoryColor(catName, config.categories);
+                  const _catColor = cat?.color || getCategoryColor(catName, config.categories);
                   return (
                     <>
-                      {iconKey && <CategoryIcon icon={iconKey} color={catColor} size="xs" />}
+                      {iconKey && <CategoryIcon icon={iconKey} variant="minimal" size="xs" />}
                       <span className="text-[14px] font-medium text-[var(--text-primary)]">{catName}</span>
                     </>
                   );
@@ -1441,19 +1434,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
-                <div 
-                  className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 text-white shadow-2xs"
-                  style={{ 
-                    backgroundColor: categories.find(c => c.name === category)?.color || 'var(--accent-color)'
-                  }}
-                >
-                  <CategoryIcon 
-                    icon={categories.find(c => c.name === category)?.icon || 'receipt'} 
-                    size="sm" 
-                    noBackground 
-                    whiteIcon 
-                  />
-                </div>
+                <CategoryIcon 
+                  icon={categories.find(c => c.name === category)?.icon || 'receipt'} 
+                  color={categories.find(c => c.name === category)?.color || 'var(--accent-color)'}
+                  size="xs" 
+                  variant="primary" 
+                />
                 <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || (config?.language === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
@@ -2006,7 +1992,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
                 {t('type')}
               </span>
               <div className="flex items-center justify-end gap-2">
-                <CategoryIcon icon={saving.icon || 'piggy-bank'} size="xs" />
+                <CategoryIcon icon={saving.icon || 'piggy-bank'} variant="minimal" size="xs" />
                 <span className="text-[14px] font-medium text-[var(--text-primary)]">
                   {t('monthlySavings')}
                 </span>

@@ -94,15 +94,14 @@ export function CategoryModal({
           <button 
             type="button"
             onClick={() => setShowIconPicker(true)}
-            className="w-20 h-20 rounded-[8px] flex items-center justify-center transition-all active:scale-95 group cursor-pointer shadow-sm relative overflow-hidden"
-            style={{ backgroundColor: color }}
+            className="rounded-full transition-all active:scale-95 group cursor-pointer shadow-sm relative overflow-hidden"
             title="Välj ikon"
           >
             <CategoryIcon 
               icon={icon} 
+              color={color}
               size="xl" 
-              noBackground 
-              whiteIcon 
+              variant="primary" 
             />
           </button>
         </div>

@@ -114,7 +114,7 @@ export function TransactionItem({
         {iconKey ? (
           <CategoryIcon 
             icon={iconKey} 
-            color="currentColor" 
+            variant="minimal" 
             size="2xs" 
           />
         ) : null}

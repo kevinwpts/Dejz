@@ -2,57 +2,62 @@ import React from 'react';
 import { Tag } from 'lucide-react';
 import { ICON_MAP, resolveLucideIcon, isEmojiString } from '../utils/icons';
 
-interface CategoryIconProps {
+export interface CategoryIconProps {
   icon?: string;
   color?: string;
+  variant?: 'primary' | 'minimal';
   size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   isActive?: boolean;
+  // Backwards compatibility props
   solidBackground?: boolean;
   whiteIcon?: boolean;
   noBackground?: boolean;
 }
 
-// Helper to convert hex color to light/dark tinted and saturated HSL variants
-function getHslColors(hexColor: string | undefined) {
-  let cleanHex = (hexColor || '#6366f1').trim().toLowerCase();
-  
-  if (cleanHex.startsWith('var(')) {
-    cleanHex = '#6366f1';
+/**
+ * Ensures category color is rich, saturated, and never washed-out/pale pastel.
+ * Guarantees crisp contrast for the white icon in Primary variant across Light & Dark mode.
+ */
+function getRichCategoryColor(color: string | undefined): string {
+  if (!color) return '#6658E8';
+  let clean = color.trim();
+  if (clean.startsWith('var(')) {
+    return '#6658E8';
   }
-  
-  if (!cleanHex.startsWith('#')) {
-    const colorMap: Record<string, string> = {
-      red: '#ef4444',
-      orange: '#f97316',
-      amber: '#f59e0b',
-      yellow: '#eab308',
-      green: '#10b981',
-      emerald: '#10b981',
-      teal: '#14b8a6',
-      cyan: '#06b6d4',
-      sky: '#0ea5e9',
-      blue: '#3b82f6',
-      indigo: '#6366f1',
-      violet: '#8b5cf6',
-      purple: '#a855f7',
-      fuchsia: '#d946ef',
-      pink: '#ec4899',
-      rose: '#f43f5e',
-      slate: '#64748b',
-      gray: '#6b7280',
+  if (!clean.startsWith('#')) {
+    const namedColors: Record<string, string> = {
+      indigo: '#6658E8',
+      purple: '#A855F7',
+      blue: '#3B82F6',
+      cyan: '#06B6D4',
+      teal: '#14B8A6',
+      green: '#10B981',
+      lime: '#84CC16',
+      emerald: '#10B981',
+      yellow: '#EAB308',
+      amber: '#F59E0B',
+      orange: '#F97316',
+      red: '#EF4444',
+      rose: '#F43F5E',
+      pink: '#EC4899',
+      fuchsia: '#D946EF',
+      slate: '#64748B',
+      gray: '#6B7280',
     };
-    cleanHex = colorMap[cleanHex] || '#6366f1';
+    return namedColors[clean.toLowerCase()] || '#6658E8';
   }
 
-  cleanHex = cleanHex.replace('#', '');
-  if (cleanHex.length === 3) {
-    cleanHex = cleanHex.split('').map(char => char + char).join('');
+  // Parse hex
+  clean = clean.replace('#', '');
+  if (clean.length === 3) {
+    clean = clean.split('').map(c => c + c).join('');
   }
-  
-  const r = parseInt(cleanHex.substring(0, 2), 16) / 255 || 0;
-  const g = parseInt(cleanHex.substring(2, 4), 16) / 255 || 0;
-  const b = parseInt(cleanHex.substring(4, 6), 16) / 255 || 0;
+  if (clean.length !== 6) return '#6658E8';
+
+  const r = parseInt(clean.substring(0, 2), 16) / 255;
+  const g = parseInt(clean.substring(2, 4), 16) / 255;
+  const b = parseInt(clean.substring(4, 6), 16) / 255;
 
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
@@ -71,93 +76,117 @@ function getHslColors(hexColor: string | undefined) {
     h /= 6;
   }
 
+  // Ensure saturation is high (>= 70%) and lightness is deep/medium (32% - 52%)
+  // to avoid pale pastel colors and ensure perfect contrast with white icon
   const hue = Math.round(h * 360);
-  const sat = Math.round(s * 100);
+  const saturatedS = Math.max(Math.round(s * 100), 70);
+  let adjustedL = Math.round(l * 100);
+  if (adjustedL > 54) {
+    adjustedL = 48;
+  } else if (adjustedL < 28) {
+    adjustedL = 36;
+  }
 
-  // Light Mode Colors:
-  // Background: Lightly tinted (very light, lower-medium saturation)
-  // Icon: Saturated and darker for high legibility
-  const bgLight = `hsl(${hue}, ${Math.max(sat, 35)}%, 93%)`;
-  const iconLight = `hsl(${hue}, ${Math.max(sat, 80)}%, 38%)`;
-
-  // Dark Mode Colors:
-  // Background: Darkly tinted background
-  // Icon: Saturated and light color for high contrast
-  const bgDark = `hsl(${hue}, ${Math.min(sat, 45)}%, 14%)`;
-  const iconDark = `hsl(${hue}, ${Math.max(sat, 85)}%, 75%)`;
-
-  return { bgLight, iconLight, bgDark, iconDark };
+  return `hsl(${hue}, ${saturatedS}%, ${adjustedL}%)`;
 }
 
-export function CategoryIcon({ 
-  icon, 
-  color, 
-  size = 'md', 
+export function CategoryIcon({
+  icon,
+  color,
+  variant = 'primary',
+  size = 'md',
   className = '',
   isActive = false,
-  solidBackground: _solidBackground = false,
-  whiteIcon: _whiteIcon = false,
-  noBackground: _noBackground = false,
+  solidBackground: _solidBackground,
+  whiteIcon: _whiteIcon,
+  noBackground = false,
 }: CategoryIconProps) {
-  // Always resolve Lucide icon key
   const iconKey = icon ? resolveLucideIcon(icon) : 'receipt';
   const IconComp = (iconKey && ICON_MAP[iconKey]) ? ICON_MAP[iconKey] : Tag;
   const isEmoji = isEmojiString(icon);
 
-  // Universal sizes with beautiful proportions and circular layout
-  const sizeClasses = {
+  // Determine variant (minimal if noBackground is passed or variant is minimal)
+  const isMinimal = variant === 'minimal' || noBackground;
+
+  if (isMinimal) {
+    // 2. Minimal Category Icon
+    // - Only a small category icon, NO background or circle
+    // - Dark gray/black in Light Mode, Light gray/white in Dark Mode
+    // - No category color
+    // - Discreet size
+    const minimalSizes = {
+      '2xs': 11,
+      xs: 13,
+      sm: 15,
+      md: 17,
+      lg: 20,
+      xl: 24,
+    };
+
+    const strokeWidth = size === '2xs' || size === 'xs' ? 2.2 : 2;
+
+    return (
+      <span 
+        className={`inline-flex items-center justify-center shrink-0 select-none text-neutral-700 dark:text-neutral-300 transition-colors ${className}`}
+        aria-hidden="true"
+      >
+        {isEmoji ? (
+          <span style={{ fontSize: `${minimalSizes[size]}px` }} className="leading-none flex items-center justify-center">
+            {icon}
+          </span>
+        ) : (
+          <IconComp size={minimalSizes[size]} strokeWidth={strokeWidth} />
+        )}
+      </span>
+    );
+  }
+
+  // 1. Primary Category Icon
+  // - Round circle with category's own color as background
+  // - Dark, saturated and clear colors (no pale pastels)
+  // - White icon centered in circle
+  // - Same look in Light Mode and Dark Mode
+  const primaryContainerSizes = {
     '2xs': 'w-[18px] h-[18px]',
     xs: 'w-6 h-6',
     sm: 'w-8 h-8',
     md: 'w-[34px] h-[34px] sm:w-9 sm:h-9',
     lg: 'w-11 h-11',
-    xl: 'w-12 h-12',
+    xl: 'w-14 h-14 sm:w-16 sm:h-16',
   };
 
-  const iconSizes = {
-    '2xs': 10.5,
-    xs: 14,
+  const primaryIconSizes = {
+    '2xs': 10,
+    xs: 13,
     sm: 16,
-    md: 20,
-    lg: 24,
-    xl: 26,
+    md: 19,
+    lg: 22,
+    xl: 28,
   };
 
-  // 2.5 stroke for compact sizes to increase clarity, 2 for larger ones
-  const strokeWidth = size === '2xs' || size === 'xs' ? 2.5 : 2;
-
-  const { bgLight, iconLight, bgDark, iconDark } = getHslColors(color);
-
-  // If active, increase tint saturation or opacity slightly
-  const activeStyles = isActive ? {
-    '--bg-light': `hsl(${parseInt(bgLight.split(',')[0].replace('hsl(', ''))}, 65%, 90%)`,
-    '--bg-dark': `hsl(${parseInt(bgDark.split(',')[0].replace('hsl(', ''))}, 50%, 18%)`,
-  } : {};
-
-  const customStyles = {
-    '--bg-light': bgLight,
-    '--icon-light': iconLight,
-    '--bg-dark': bgDark,
-    '--icon-dark': iconDark,
-    ...activeStyles,
-  } as React.CSSProperties;
+  const strokeWidth = size === '2xs' || size === 'xs' ? 2.2 : 2;
+  const richBgColor = getRichCategoryColor(color);
 
   return (
-    <div 
-      className={`flex items-center justify-center flex-shrink-0 rounded-full transition-all bg-[var(--bg-light)] text-[var(--icon-light)] dark:bg-[var(--bg-dark)] dark:text-[var(--icon-dark)] ${sizeClasses[size]} ${className}`}
-      style={customStyles}
+    <div
+      className={`rounded-full flex items-center justify-center shrink-0 text-white select-none transition-transform ${primaryContainerSizes[size]} ${
+        isActive ? 'ring-2 ring-white shadow-sm scale-105' : ''
+      } ${className}`}
+      style={{ backgroundColor: richBgColor }}
+      aria-hidden="true"
     >
       {isEmoji ? (
         <span 
-          style={{ fontSize: `${iconSizes[size] - 2}px` }} 
-          className="leading-none select-none flex items-center justify-center"
+          style={{ fontSize: `${primaryIconSizes[size] - 2}px` }} 
+          className="leading-none flex items-center justify-center"
         >
           {icon}
         </span>
       ) : (
         <IconComp 
-          size={iconSizes[size]} 
-          strokeWidth={strokeWidth} 
+          size={primaryIconSizes[size]} 
+          strokeWidth={strokeWidth}
+          className="text-white"
         />
       )}
     </div>
