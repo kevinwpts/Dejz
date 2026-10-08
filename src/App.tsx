@@ -3651,13 +3651,9 @@ export default function App() {
         setNavHistory(nextStack);
         if (previous) {
           setActiveTab(previous.tab);
-          if (previous.tab === "profile") {
-            setProfileSection(previous.section || "main");
-          } else if (previous.tab === "settings") {
-            setSettingsSection(previous.section || "main");
-          } else if (previous.tab === "budget") {
-            setBudgetSection(previous.section || null);
-          }
+          setProfileSection(previous.tab === "profile" ? (previous.section || "main") : "main");
+          setSettingsSection(previous.tab === "settings" ? (previous.section || "main") : "main");
+          setBudgetSection(previous.tab === "budget" ? (previous.section || null) : null);
           return true;
         }
       }
@@ -4745,6 +4741,7 @@ export default function App() {
                 avatarUrl={avatarUrl}
                 config={config}
                 initialSection={profileSection}
+                navTrigger={navTrigger}
                 setConfig={async (newConfig) => {
                   try {
                     setConfig(newConfig);

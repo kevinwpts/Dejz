@@ -574,6 +574,8 @@ export function TodayView({
         categoryData={categoryBudgetData.find(c => c.name.toLowerCase() === selectedCategoryModalName?.toLowerCase()) || null}
         selectedDate={selectedDate}
         allTransactions={allTransactions}
+        fixedExpenses={fixedExpenses}
+        onViewFixedExpense={onViewFixedExpense}
         stats={stats}
         config={config}
         language={lang}
@@ -581,6 +583,7 @@ export function TodayView({
         onDeleteTransaction={onDeleteTransaction}
         onAddTransaction={onAddTransaction}
         onNavigate={onNavigate}
+        t={t}
       />
     </div>
   );

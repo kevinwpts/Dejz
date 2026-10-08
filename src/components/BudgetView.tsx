@@ -282,6 +282,7 @@ export function BudgetView({
         transactions={_allTransactions}
         t={t}
         initialTab="budget"
+        mode="budget"
         onDone={handleCloseCategoryBudgets}
       />
     );

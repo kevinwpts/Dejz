@@ -47,7 +47,8 @@ interface ProfileViewProps {
   transactions: Transaction[];
   incomes: Income[];
   fixedExpenses: FixedExpense[];
-  initialSection?: 'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'pro' | 'receipts' | 'debts' | 'sharedBudget' | 'guides' | 'notifications';
+  initialSection?: 'main' | 'manageAccount' | 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'pro' | 'receipts' | 'debts' | 'sharedBudget' | 'guides' | 'notifications';
+  navTrigger?: number;
   setCurrentPeriodDate: (date: Date) => void;
   periods: any[];
   onCalculatorClick?: () => void;
@@ -93,6 +94,7 @@ export function ProfileView({
   incomes: _incomes = [],
   fixedExpenses: _fixedExpenses = [],
   initialSection = 'main',
+  navTrigger,
   setCurrentPeriodDate: _setCurrentPeriodDate,
   periods: _periods = [],
   onCalculatorClick: _onCalculatorClick,
@@ -103,13 +105,30 @@ export function ProfileView({
   onRenameCategory,
   onMigrateAndDeleteCategory,
 }: ProfileViewProps) {
-  const [activePage, setActivePage] = useState<'main' | 'manageAccount' | 'salary' | 'categories' | 'paymentMethods' | 'language' | 'appearance' | 'currency' | 'pro' | 'receipts' | 'debts' | 'sharedBudget' | 'guides' | 'notifications' | 'admin'>(initialSection as any);
+  const [activePage, setActivePage] = useState<
+    | 'main'
+    | 'manageAccount'
+    | 'salary'
+    | 'budget'
+    | 'categories'
+    | 'paymentMethods'
+    | 'language'
+    | 'appearance'
+    | 'currency'
+    | 'pro'
+    | 'receipts'
+    | 'debts'
+    | 'sharedBudget'
+    | 'guides'
+    | 'notifications'
+    | 'admin'
+  >(initialSection as any);
 
   const isAdmin = user?.email?.toLowerCase() === 'kevinwpts@gmail.com' || profile?.role === 'admin' || user?.user_metadata?.role === 'admin';
 
   useEffect(() => {
     setActivePage(initialSection as any);
-  }, [initialSection]);
+  }, [initialSection, navTrigger]);
 
   if (activePage === 'admin') {
     return (
@@ -194,7 +213,10 @@ export function ProfileView({
       >
         <SettingsView 
           activeSection={activePage as any}
-          onBack={() => setActivePage('main')}
+          onBack={() => {
+            setActivePage('main');
+            onNavigate('profile', 'main');
+          }}
           config={config}
           setConfig={setConfig}
           t={t}
@@ -212,7 +234,10 @@ export function ProfileView({
           userId={userId}
           session={session}
           onRefresh={onRefresh}
-          onNavigateToProfile={() => setActivePage('main')}
+          onNavigateToProfile={() => {
+            setActivePage('main');
+            onNavigate('profile', 'main');
+          }}
           onResetSavingsPot={onResetSavingsPot}
           onResetCompletedGoals={onResetCompletedGoals}
           onClearTransactions={onClearTransactions}

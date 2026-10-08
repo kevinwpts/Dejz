@@ -2,11 +2,13 @@ import React, { useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ShoppingBag } from 'lucide-react';
-import { Transaction, Config } from '../types';
+import { Transaction, Config, FixedExpense } from '../types';
+import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
 import { ICON_MAP, getCategoryIconName, isEmojiString } from '../utils/icons';
 import { feedback } from '../utils/feedback';
 import { TransactionItem } from './TransactionItem';
+import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
 import { useScrollLock } from '../hooks/useScrollLock';
 
@@ -19,6 +21,8 @@ interface CategoryBottomSheetModalProps {
     iconName?: string;
     spent: number;
     budget: number;
+    variableSpent?: number;
+    fixedSpent?: number;
     remaining: number;
     hasBudget: boolean;
     isOverBudget: boolean;
@@ -26,6 +30,8 @@ interface CategoryBottomSheetModalProps {
   } | null;
   selectedDate: Date;
   allTransactions: Transaction[];
+  fixedExpenses?: FixedExpense[];
+  onViewFixedExpense?: (expense: FixedExpense) => void;
   stats?: any;
   config: Config;
   language?: string;
@@ -33,6 +39,7 @@ interface CategoryBottomSheetModalProps {
   onDeleteTransaction?: (id: string) => void;
   onAddTransaction?: (type?: string, prefill?: any) => void;
   onNavigate?: (tab: string, section?: string) => void;
+  t?: (key: TranslationKey) => string;
 }
 
 export function CategoryBottomSheetModal({
@@ -42,11 +49,14 @@ export function CategoryBottomSheetModal({
   categoryData,
   selectedDate: _selectedDate,
   allTransactions = [],
+  fixedExpenses = [],
+  onViewFixedExpense,
   stats,
   config,
   language = 'sv',
   onViewTransaction,
   onDeleteTransaction,
+  t,
 }: CategoryBottomSheetModalProps) {
   const isEn = language === 'en';
   const curr = config?.currency || 'kr';
@@ -116,6 +126,27 @@ export function CategoryBottomSheetModal({
   }, [targetCategoryName, allTransactions, stats?.periodStart, stats?.periodEnd]);
 
   const displayTransactions = periodTransactions;
+
+  // Filter fixed expenses for this category
+  const matchingFixedExpenses = useMemo(() => {
+    if (!targetCategoryName || !fixedExpenses || fixedExpenses.length === 0) return [];
+    const normCat = targetCategoryName.trim().toLowerCase();
+    return fixedExpenses.filter((fe) => {
+      if (!fe || fe.isCancelled) return false;
+      const feCat = (fe.category || '').trim().toLowerCase();
+      return feCat === normCat;
+    });
+  }, [targetCategoryName, fixedExpenses]);
+
+  const totalFixedAmount = useMemo(() => {
+    return matchingFixedExpenses.reduce((sum, fe) => {
+      const amount =
+        fe.isVariable && stats?.periodId && fe.periodOverrides && fe.periodOverrides[stats.periodId] !== undefined
+          ? fe.periodOverrides[stats.periodId]
+          : Number(fe.amount) || 0;
+      return sum + amount;
+    }, 0);
+  }, [matchingFixedExpenses, stats?.periodId]);
 
   // Icon calculation
   const iconKey = categoryData?.iconName || matchedCategory?.icon || (targetCategoryName ? getCategoryIconName(targetCategoryName) : 'Tag');
@@ -252,7 +283,28 @@ export function CategoryBottomSheetModal({
                       />
                     </div>
 
-
+                    {/* Fixed vs Variable Breakdown Pill */}
+                    {((categoryData?.fixedSpent !== undefined && categoryData.fixedSpent > 0) || totalFixedAmount > 0) && (
+                      <div className="flex items-center gap-2 pt-1 border-t border-black/[0.04] dark:border-white/[0.04] text-[11px] text-[var(--text-secondary)] flex-wrap">
+                        <span className="font-medium">
+                          {isEn ? 'Fixed: ' : 'Varav fasta: '}
+                          <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
+                            {formatAmount(categoryData?.fixedSpent || totalFixedAmount, language)} {curr}
+                          </span>
+                        </span>
+                        {categoryData?.variableSpent !== undefined && categoryData.variableSpent > 0 && (
+                          <>
+                            <span>•</span>
+                            <span className="font-medium">
+                              {isEn ? 'Variable: ' : 'Rörliga: '}
+                              <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
+                                {formatAmount(categoryData.variableSpent, language)} {curr}
+                              </span>
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div>
@@ -267,32 +319,102 @@ export function CategoryBottomSheetModal({
                     <p className="text-[11.5px] text-[var(--text-tertiary)] mt-1">
                       {isEn ? 'No budget set for this category' : 'Ingen budget satt för denna kategori'}
                     </p>
+
+                    {((categoryData?.fixedSpent !== undefined && categoryData.fixedSpent > 0) || totalFixedAmount > 0) && (
+                      <div className="flex items-center gap-2 pt-1 mt-1 border-t border-black/[0.04] dark:border-white/[0.04] text-[11px] text-[var(--text-secondary)] flex-wrap">
+                        <span className="font-medium">
+                          {isEn ? 'Fixed: ' : 'Varav fasta: '}
+                          <span className="font-semibold text-[var(--text-primary)] font-amount tabular-nums">
+                            {formatAmount(categoryData?.fixedSpent || totalFixedAmount, language)} {curr}
+                          </span>
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Transactions List */}
-              <div className="space-y-2 flex-1 flex flex-col min-h-0 pt-0.5">
-                {displayTransactions.length > 0 ? (
-                  <div className="space-y-2.5 overflow-y-auto no-scrollbar pr-0.5 flex-1">
-                    {displayTransactions.map((tx) => (
-                      <TransactionItem
-                        key={tx.id}
-                        transaction={tx}
-                        config={config}
-                        onView={onViewTransaction}
-                        onDelete={onDeleteTransaction}
-                        showDate={true}
-                      />
-                    ))}
+              {/* Expenses List: Fixed Expenses and Variable Transactions */}
+              <div className="space-y-3.5 flex-1 flex flex-col min-h-0 pt-0.5">
+                {/* 1. Fasta utgifter (om det finns för denna kategori) */}
+                {matchingFixedExpenses.length > 0 && (
+                  <div className="space-y-1.5 shrink-0">
+                    <div className="flex items-center justify-between px-1">
+                      <span className="text-[12px] font-bold text-[var(--text-secondary)] tracking-tight">
+                        {isEn ? 'Fixed expenses' : 'Fasta utgifter'} ({matchingFixedExpenses.length})
+                      </span>
+                      <span className="text-[11px] font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                        {formatAmount(totalFixedAmount, language)} {curr}
+                      </span>
+                    </div>
+
+                    <div className="bg-[var(--surface-color)] rounded-[20px] border border-black/[0.06] dark:border-white/[0.08] overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+                      {matchingFixedExpenses.map((fe) => (
+                        <BudgetItem
+                          key={fe.id}
+                          item={fe}
+                          onClick={() => {
+                            if (typeof feedback.light === 'function') feedback.light();
+                            if (onViewFixedExpense) onViewFixedExpense(fe);
+                          }}
+                          currency={curr}
+                          type="expense"
+                          language={language as any}
+                          t={t || ((k: any) => k)}
+                          config={config}
+                          currentPeriodId={stats?.periodId}
+                          isGrouped={true}
+                        />
+                      ))}
+                    </div>
                   </div>
-                ) : (
-                  <EmptyState
-                    title={isEn ? 'No expenses in this category' : 'Inga utgifter i denna kategori'}
-                    description={isEn ? 'No expenses recorded in this category during the selected period.' : 'Inga utgifter registrerade i denna kategori under den valda perioden.'}
-                    className="py-6"
-                  />
                 )}
+
+                {/* 2. Rörliga transaktioner */}
+                <div className="space-y-2 flex-1 flex flex-col min-h-0">
+                  {matchingFixedExpenses.length > 0 && (
+                    <div className="flex items-center justify-between px-1 pt-1">
+                      <span className="text-[12px] font-bold text-[var(--text-secondary)] tracking-tight">
+                        {isEn ? 'Variable transactions' : 'Rörliga utgifter'} ({displayTransactions.length})
+                      </span>
+                      {displayTransactions.length > 0 && (
+                        <span className="text-[11px] font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                          {formatAmount(
+                            displayTransactions.reduce((s, tx) => s + (Number(tx.amount) || 0), 0),
+                            language
+                          )} {curr}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {displayTransactions.length > 0 ? (
+                    <div className="space-y-2.5 overflow-y-auto no-scrollbar pr-0.5 flex-1">
+                      {displayTransactions.map((tx) => (
+                        <TransactionItem
+                          key={tx.id}
+                          transaction={tx}
+                          config={config}
+                          onView={onViewTransaction}
+                          onDelete={onDeleteTransaction}
+                          showDate={true}
+                        />
+                      ))}
+                    </div>
+                  ) : matchingFixedExpenses.length > 0 ? (
+                    <div className="p-4 rounded-[18px] bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.03] dark:border-white/[0.04] text-center">
+                      <p className="text-xs text-[var(--text-tertiary)]">
+                        {isEn ? 'No variable expenses recorded in this period' : 'Inga rörliga utgifter registrerade denna period'}
+                      </p>
+                    </div>
+                  ) : (
+                    <EmptyState
+                      title={isEn ? 'No expenses in this category' : 'Inga utgifter i denna kategori'}
+                      description={isEn ? 'No expenses recorded in this category during the selected period.' : 'Inga utgifter registrerade i denna kategori under den valda perioden.'}
+                      className="py-6"
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>

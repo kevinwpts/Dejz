@@ -212,11 +212,13 @@ export function BudgetCategoriesView({
     color?: string,
     budget?: number | null
   ) => {
+    if (effectiveMode === 'budget') return;
     setCategoryModalData({ type, index, name, icon, color, budget });
     setIsCategoryModalOpen(true);
   };
 
   const handleAddCategory = (type: 'income' | 'expense') => {
+    if (effectiveMode === 'budget') return;
     setCategoryModalData({ type, name: '', icon: 'tag', budget: null });
     setIsCategoryModalOpen(true);
   };
@@ -387,14 +389,16 @@ export function BudgetCategoriesView({
               <span className="text-xs font-semibold text-[var(--text-secondary)]">
                 {categoriesList.length} {isEn ? 'categories' : 'kategorier'}
               </span>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<Plus size={14} strokeWidth={2} />}
-                onClick={() => handleAddCategory('expense')}
-              >
-                {t('newCategory')}
-              </Button>
+              {effectiveMode !== 'budget' && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<Plus size={14} strokeWidth={2} />}
+                  onClick={() => handleAddCategory('expense')}
+                >
+                  {t('newCategory')}
+                </Button>
+              )}
             </div>
 
             {/* Enhetlig grupperad lista i samma layout som Betalningsmetoder */}
@@ -505,17 +509,6 @@ export function BudgetCategoriesView({
                             </span>
                           </button>
                         )}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
-                          }}
-                          className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] p-1 rounded-full transition-colors cursor-pointer"
-                          title={isEn ? "Edit category" : "Redigera kategori"}
-                        >
-                          <ChevronRight size={16} strokeWidth={2} />
-                        </button>
                       </div>
                     ) : (
                       <div className="text-[var(--text-tertiary)] shrink-0 pl-2 group-hover:text-[var(--text-secondary)] transition-colors">
@@ -613,20 +606,22 @@ export function BudgetCategoriesView({
       </div>
 
       {/* Modals */}
-      <CategoryModal
-        isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
-        type={categoryModalData?.type || 'expense'}
-        currency={curr}
-        initialData={categoryModalData}
-        onSave={handleSaveCategoryModal}
-        onDelete={(index) => {
-          handleDeleteCategory(categoryModalData!.type, index);
-          setIsCategoryModalOpen(false);
-        }}
-        t={t}
-        hideBudget={effectiveMode === 'categories'}
-      />
+      {effectiveMode !== 'budget' && (
+        <CategoryModal
+          isOpen={isCategoryModalOpen}
+          onClose={() => setIsCategoryModalOpen(false)}
+          type={categoryModalData?.type || 'expense'}
+          currency={curr}
+          initialData={categoryModalData}
+          onSave={handleSaveCategoryModal}
+          onDelete={(index) => {
+            handleDeleteCategory(categoryModalData!.type, index);
+            setIsCategoryModalOpen(false);
+          }}
+          t={t}
+          hideBudget={effectiveMode === 'categories'}
+        />
+      )}
 
       {showResetBudgetConfirm && (
         <ConfirmModal
