@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
+import { getBudgetStatus } from '../utils/budgetStatus';
 import { Info } from 'lucide-react';
 
 interface BudgetGaugeProps {
@@ -12,6 +13,8 @@ interface BudgetGaugeProps {
   onOpenInfo?: () => void;
   timeText?: string;
   timeRatio?: number;
+  remainingDays?: number;
+  totalDays?: number;
 }
 
 export function BudgetGauge({
@@ -23,6 +26,8 @@ export function BudgetGauge({
   onOpenInfo,
   timeText,
   timeRatio,
+  remainingDays,
+  totalDays,
 }: BudgetGaugeProps) {
   // Respect prefers-reduced-motion
   const prefersReducedMotion = useMemo(() => {
@@ -31,6 +36,18 @@ export function BudgetGauge({
   }, []);
 
   const isNegative = remainingCents < 0;
+
+  // Derive status from economic state and remaining time
+  const status = useMemo(() => {
+    const calcRemainingDays = remainingDays ?? (timeRatio !== undefined ? Math.round(timeRatio * 30) : 15);
+    const calcTotalDays = totalDays ?? 30;
+    return getBudgetStatus({
+      remainingCents,
+      disposablePotCents,
+      remainingDays: calcRemainingDays,
+      totalDays: calcTotalDays,
+    });
+  }, [remainingCents, disposablePotCents, remainingDays, totalDays, timeRatio]);
 
   // Calculate fill ratio between 0 and 1
   const fillRatio = useMemo(() => {
@@ -54,7 +71,7 @@ export function BudgetGauge({
           preserveAspectRatio="xMidYMid meet"
           className="w-full h-auto block overflow-visible"
         >
-          {/* Layer 1: Background track in grey */}
+          {/* Layer 1: Background track in discrete neutral theme color */}
           <path
             d={gaugePath}
             fill="none"
@@ -64,11 +81,11 @@ export function BudgetGauge({
             className="stroke-[#E2DDD4] dark:stroke-white/10 transition-colors duration-300"
           />
 
-          {/* Layer 2: Fill arc using accent color */}
+          {/* Layer 2: Fill arc using current status color (decoupled from user accent color) */}
           <path
             d={gaugePath}
             fill="none"
-            stroke="var(--accent-color)"
+            stroke={status.colorHex}
             strokeWidth="30"
             strokeLinecap="butt"
             pathLength={100}
@@ -77,7 +94,7 @@ export function BudgetGauge({
             style={{
               transition: prefersReducedMotion
                 ? 'none'
-                : 'stroke-dashoffset 400ms cubic-bezier(0.16, 1, 0.3, 1)',
+                : 'stroke-dashoffset 400ms cubic-bezier(0.16, 1, 0.3, 1), stroke 300ms ease',
             }}
           />
 
@@ -95,17 +112,17 @@ export function BudgetGauge({
               <path
                 d={innerGaugePath}
                 fill="none"
-                stroke="var(--accent-color)"
+                stroke={status.colorHex}
                 strokeWidth="10"
                 strokeLinecap="butt"
                 pathLength={100}
                 strokeDasharray="100 100"
                 strokeDashoffset={100 * (1 - timeRatio)}
-                className="opacity-40"
+                className="opacity-35"
                 style={{
                   transition: prefersReducedMotion
                     ? 'none'
-                    : 'stroke-dashoffset 400ms cubic-bezier(0.16, 1, 0.3, 1)',
+                    : 'stroke-dashoffset 400ms cubic-bezier(0.16, 1, 0.3, 1), stroke 300ms ease',
                 }}
               />
             </>
@@ -114,7 +131,7 @@ export function BudgetGauge({
 
         {/* Text centered inside the semi-circle arc */}
         <div className="absolute inset-x-0 bottom-7 sm:bottom-8 flex flex-col items-center justify-center text-center pointer-events-none">
-          {/* Heading */}
+          {/* Heading & Info Button */}
           <div className="flex items-center justify-center gap-1.5 pointer-events-auto">
             <span className="text-[13px] sm:text-[14px] font-medium text-[#6D6962] dark:text-[#A8A8A8] block leading-snug">
               {label}
@@ -132,7 +149,7 @@ export function BudgetGauge({
             )}
           </div>
 
-          {/* Remaining amount: Swedish number format */}
+          {/* Remaining amount: Swedish number format, app's standard text color */}
           <div className="flex items-baseline justify-center gap-1 mt-1">
             <AnimatedNumber
               value={remainingCents}

@@ -5,6 +5,7 @@ import { TranslationKey } from '../i18n';
 import { BudgetGauge } from './BudgetGauge';
 import { formatAmount } from '../utils/format';
 import { feedback } from '../utils/feedback';
+import { getBudgetStatus } from '../utils/budgetStatus';
 
 interface GreetingModuleProps {
   userName?: string;
@@ -95,6 +96,23 @@ export function GreetingModule({
     return isEn ? `${days} ${days === 1 ? 'day' : 'days'}` : `${days} ${days === 1 ? 'dag' : 'dagar'}`;
   }, [stats?.isPastPeriod, effectiveRemainingDays, isEn]);
 
+  const totalDaysInPeriod = useMemo(() => {
+    if (!periodStart || !periodEnd) return 30;
+    const start = new Date(periodStart).getTime();
+    const end = new Date(periodEnd).getTime();
+    const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    return diff > 0 ? diff : 30;
+  }, [periodStart, periodEnd]);
+
+  const status = useMemo(() => {
+    return getBudgetStatus({
+      remainingCents: stats?.remainingPeriodCents || 0,
+      disposablePotCents: stats?.disposablePot || 0,
+      remainingDays: effectiveRemainingDays,
+      totalDays: totalDaysInPeriod,
+    });
+  }, [stats?.remainingPeriodCents, stats?.disposablePot, effectiveRemainingDays, totalDaysInPeriod]);
+
   const handleCardClick = () => {
     try {
       if (typeof feedback?.tap === 'function') {
@@ -115,7 +133,7 @@ export function GreetingModule({
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         className="w-full -mt-2 sm:-mt-3 pt-0 mb-4 sm:mb-5 select-none px-1"
       >
-        {/* Budget Gauge */}
+        {/* Budget Gauge with Status-based Color */}
         <BudgetGauge
           remainingCents={stats?.remainingPeriodCents || 0}
           disposablePotCents={stats?.disposablePot || 0}
@@ -123,6 +141,8 @@ export function GreetingModule({
           language={language}
           label={t('totalRemaining')}
           onOpenInfo={() => setIsCalculationInfoOpen(true)}
+          remainingDays={effectiveRemainingDays}
+          totalDays={totalDaysInPeriod}
         />
 
         {/* Interactive Unified Period & Payday Status Bar */}
@@ -273,6 +293,19 @@ export function GreetingModule({
                 ? 'Your remaining budget is what is left for variable spending after deducting bills and savings from your income.' 
                 : 'Kvar att spendera är vad som återstår för rörliga köp under perioden efter att fasta utgifter och sparande räknats bort.'}
             </p>
+
+            {/* Status Explanation Card */}
+            <div className={`p-3 rounded-[16px] border flex items-start gap-2.5 ${status.badgeBgClass} border-black/5 dark:border-white/10`}>
+              <div className="w-2.5 h-2.5 rounded-full shrink-0 mt-1 shadow-xs" style={{ backgroundColor: status.colorHex }} />
+              <div className="flex flex-col min-w-0 text-xs">
+                <span className={`font-bold ${status.badgeTextClass}`}>
+                  {isEn ? status.labelEn : status.labelSv}
+                </span>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 leading-snug">
+                  {isEn ? status.descriptionEn : status.descriptionSv}
+                </p>
+              </div>
+            </div>
 
             {/* Real-time Math Breakdown */}
             <div className="space-y-2 pt-1">

@@ -271,27 +271,32 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[54px] h-[50px] sm:h-[56px] p-1.5 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative border-none shadow-none ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[54px] h-[50px] sm:h-[56px] p-1.5 rounded-[14px] transition-all duration-200 cursor-pointer select-none shrink-0 relative border shadow-none ${
                 isSelected
-                  ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-none scale-105 font-medium z-10 opacity-100'
+                  ? 'bg-[var(--accent-color)]/15 dark:bg-[var(--accent-color)]/25 border-[var(--accent-color)]/60 text-[var(--text-primary)] scale-105 font-semibold z-10 opacity-100'
                   : hasCategoryMatch
-                  ? 'bg-black/5 text-[#242321] dark:bg-white/10 dark:text-white hover:bg-black/10 dark:hover:bg-white/[0.15] scale-100 opacity-100'
+                  ? 'bg-black/5 text-[#242321] dark:bg-white/10 dark:text-white border-transparent hover:bg-black/10 dark:hover:bg-white/[0.15] scale-100 opacity-100'
                   : isRealToday
-                  ? 'bg-white text-[#242321] dark:bg-white/[0.04] dark:text-[#C7CDDC] hover:bg-black/5 dark:hover:bg-white/[0.07] scale-95 opacity-90'
+                  ? 'bg-black/5 dark:bg-white/10 text-[#242321] dark:text-[#E2E8F0] border-black/10 dark:border-white/15 scale-100 font-semibold opacity-100'
                   : categoryFilter
-                  ? 'bg-white/40 text-[#716E68]/50 hover:text-[#242321] dark:bg-white/[0.015] dark:text-[#9CA6BC]/40 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.04] scale-95 opacity-60'
-                  : 'bg-white/60 text-[#716E68] hover:text-[#242321] dark:bg-white/[0.02] dark:text-[#9CA6BC]/70 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.045] scale-95 opacity-85'
+                  ? 'bg-white/40 text-[#716E68]/50 border-transparent hover:text-[#242321] dark:bg-white/[0.015] dark:text-[#9CA6BC]/40 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.04] scale-95 opacity-60'
+                  : 'bg-white/60 text-[#716E68] border-transparent hover:text-[#242321] dark:bg-white/[0.02] dark:text-[#9CA6BC]/70 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.045] scale-95 opacity-85'
               }`}
             >
-              {/* Day of Week / Lön / Today */}
+              {/* Selection indicator line at top */}
+              {isSelected && (
+                <span className="w-4 h-0.5 rounded-full bg-[var(--accent-color)] absolute top-1 left-1/2 -translate-x-1/2" />
+              )}
+
+              {/* Day of Week / Today */}
               <span
                 className={`text-[8px] sm:text-[8.5px] tracking-wider leading-none font-medium ${
                   isSelected
-                    ? 'text-[var(--text-on-accent)]'
+                    ? 'text-[var(--text-primary)] font-semibold'
                     : hasCategoryMatch
                     ? 'text-[#242321] dark:text-white'
                     : isRealToday
-                    ? 'text-[#242321] dark:text-[#C7CDDC]'
+                    ? 'text-[var(--accent-color)] font-bold'
                     : isFirstDay
                     ? 'text-[#242321] dark:text-white font-semibold'
                     : 'text-[#716E68] dark:text-[#9CA6BC]/70'
@@ -302,16 +307,14 @@ export function PeriodTimeline({
 
               {/* Day Number */}
               <span className={`text-[15px] sm:text-[16px] leading-none font-medium tabular-nums font-amount ${
-                isSelected ? 'text-[var(--text-on-accent)]' : ''
+                isSelected ? 'text-[var(--text-primary)] font-bold' : ''
               }`}>
                 {dayNumber}
               </span>
 
               {/* Fixed Item or Category Match Indicator Dot */}
               {((showFixedInCalendar && day.hasFixedItems) || (hasCategoryMatch && !isSelected)) && (
-                <span className={`w-1 h-1 rounded-full absolute bottom-1 shadow-none ${
-                  isSelected ? 'bg-[var(--text-on-accent)]' : 'bg-[var(--accent-color)]'
-                }`} />
+                <span className="w-1 h-1 rounded-full absolute bottom-1 shadow-none bg-[var(--accent-color)]" />
               )}
             </button>
           );
