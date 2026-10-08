@@ -89,7 +89,7 @@ export const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: center ? 20 : 30, scale: center ? 0.95 : 0.98 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`relative w-full ${sizeStyles} bg-white dark:bg-[#1C1C1C] ${
+            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] dark:bg-[#191919] ${
               center ? 'rounded-[28px] border' : 'rounded-t-[28px] sm:rounded-[28px] border-t sm:border'
             } border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
@@ -103,12 +103,12 @@ export const Modal: React.FC<ModalProps> = ({
               <div className={`flex items-center justify-between px-5 pt-4 pb-2 shrink-0 ${headerClassName}`}>
                 <div className="flex flex-col pr-4 min-w-0">
                   {title && (
-                    <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight truncate">
+                    <h2 className="text-lg sm:text-xl font-semibold text-[var(--text-primary)] tracking-tight truncate">
                       {title}
                     </h2>
                   )}
                   {subtitle && (
-                    <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5 truncate">
+                    <p className="text-xs text-[var(--text-secondary)] font-normal mt-0.5 truncate">
                       {subtitle}
                     </p>
                   )}
@@ -130,13 +130,13 @@ export const Modal: React.FC<ModalProps> = ({
             )}
 
             {/* Content Body */}
-            <div className={`flex-1 overflow-y-auto ${bodyClassName ?? 'px-5 py-4 space-y-4'} text-[#1C1917] dark:text-white`}>
+            <div className={`flex-1 overflow-y-auto ${bodyClassName ?? 'px-5 py-4 space-y-4'} text-[var(--text-primary)]`}>
               {children}
             </div>
 
             {/* Footer / Actions */}
             {footer && (
-              <div className="px-5 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] bg-white dark:bg-[#1C1C1C] shrink-0">
+              <div className="px-5 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] bg-[var(--bg-color)] dark:bg-[#191919] shrink-0">
                 {footer}
               </div>
             )}

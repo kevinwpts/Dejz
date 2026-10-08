@@ -1,0 +1,284 @@
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Check } from 'lucide-react';
+import { feedback } from '../../utils/feedback';
+import { useScrollLock } from '../../hooks/useScrollLock';
+
+export interface BottomSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: React.ReactNode;
+  subtitle?: React.ReactNode;
+  headerLeading?: React.ReactNode;
+  headerRight?: React.ReactNode;
+  showCloseButton?: boolean;
+  showDragHandle?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+  className?: string;
+  bodyClassName?: string;
+  zIndex?: number;
+  maxHeight?: string;
+}
+
+export function BottomSheet({
+  isOpen,
+  onClose,
+  title,
+  subtitle,
+  headerLeading,
+  headerRight,
+  showCloseButton = true,
+  showDragHandle = true,
+  size = 'md',
+  children,
+  footer,
+  className = '',
+  bodyClassName,
+  zIndex = 110,
+  maxHeight = 'max-h-[90dvh] sm:max-h-[85vh]',
+}: BottomSheetProps) {
+  useScrollLock(isOpen);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Handle ESC key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  const sizeStyles = {
+    sm: 'sm:max-w-md',
+    md: 'sm:max-w-lg',
+    lg: 'sm:max-w-xl',
+    xl: 'sm:max-w-2xl',
+    full: 'sm:max-w-3xl',
+  }[size];
+
+  const hasHeader = Boolean(title || subtitle || headerLeading || headerRight || showCloseButton);
+
+  if (!mounted || typeof document === 'undefined' || !document.body) {
+    return null;
+  }
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div
+          className="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          style={{ zIndex }}
+        >
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
+          />
+
+          {/* Bottom Sheet Card */}
+          <motion.div
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] dark:bg-[#191919] text-[var(--text-primary)] rounded-t-[28px] sm:rounded-[28px] border-none shadow-2xl ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
+          >
+            {/* Mobile Drag Handle */}
+            {showDragHandle && (
+              <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
+            )}
+
+            {/* Header */}
+            {hasHeader && (
+              <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-black/[0.06] dark:border-white/[0.08]">
+                <div className="flex items-center gap-3 min-w-0 pr-3 flex-1">
+                  {headerLeading && (
+                    <div className="shrink-0">
+                      {headerLeading}
+                    </div>
+                  )}
+                  <div className="flex flex-col min-w-0 flex-1">
+                    {title && (
+                      <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] font-display truncate">
+                        {title}
+                      </h2>
+                    )}
+                    {subtitle && (
+                      <p className="text-xs text-[var(--text-secondary)] font-normal truncate mt-0.5">
+                        {subtitle}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {headerRight}
+                  {showCloseButton && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof feedback?.light === 'function') feedback.light();
+                        onClose();
+                      }}
+                      className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer shrink-0 active:scale-95 border-none shadow-none"
+                      aria-label="Stäng"
+                    >
+                      <X size={16} strokeWidth={2.5} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Scrollable Body */}
+            <div
+              className={`flex-1 overflow-y-auto ${
+                bodyClassName ?? 'px-5 sm:px-6 py-4 space-y-3.5 custom-scrollbar'
+              } min-h-0`}
+            >
+              {children}
+            </div>
+
+            {/* Footer */}
+            {footer && (
+              <div className="px-5 sm:px-6 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] border-t border-black/[0.06] dark:border-white/[0.08] shrink-0 bg-[var(--bg-color)] dark:bg-[#191919]">
+                {footer}
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+}
+
+/**
+ * Standardized option row for bottom sheets and selection menus.
+ *
+ * Requirements:
+ * - Valt alternativ markeras med tydligare text (font-semibold) och en diskret bock (Check).
+ * - INGEN färgad bakgrund!
+ * - Neutral subtil hover-yta.
+ * - Stöd för underrubriker, badges, ikoner och extra element.
+ */
+export interface BottomSheetOptionProps<T = string> {
+  id?: T;
+  label: React.ReactNode;
+  subtitle?: React.ReactNode;
+  icon?: React.ReactNode;
+  badge?: React.ReactNode;
+  isSelected?: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+  rightElement?: React.ReactNode;
+  className?: string;
+}
+
+export function BottomSheetOption<T = string>({
+  label,
+  subtitle,
+  icon,
+  badge,
+  isSelected = false,
+  onClick,
+  disabled = false,
+  rightElement,
+  className = '',
+}: BottomSheetOptionProps<T>) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => {
+        if (!disabled) {
+          if (typeof feedback?.selection === 'function') {
+            feedback.selection();
+          } else if (typeof feedback?.tap === 'function') {
+            feedback.tap();
+          }
+          onClick();
+        }
+      }}
+      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[14px] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none ${className}`}
+    >
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        {icon && (
+          <div className="w-8 h-8 rounded-[12px] bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+            {icon}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span
+              className={`text-sm sm:text-[14px] tracking-tight truncate leading-tight ${
+                isSelected
+                  ? 'font-semibold text-[var(--text-primary)]'
+                  : 'font-medium text-[var(--text-secondary)]'
+              }`}
+            >
+              {label}
+            </span>
+            {badge && (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] shrink-0">
+                {badge}
+              </span>
+            )}
+          </div>
+          {subtitle && (
+            <p className="text-[11.5px] text-[var(--text-secondary)] font-normal truncate mt-0.5 leading-tight">
+              {subtitle}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 shrink-0 ml-2">
+        {rightElement}
+        {isSelected && (
+          <div className="text-[var(--text-primary)] pl-1 shrink-0">
+            <Check size={18} strokeWidth={2.5} />
+          </div>
+        )}
+      </div>
+    </button>
+  );
+}
+
+// Aliases for convenience
+export const BottomSheetOptionRow = BottomSheetOption;
+export const BottomSheetItem = BottomSheetOption;
+
+export interface BottomSheetSectionProps {
+  title?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function BottomSheetSection({ title, children, className = '' }: BottomSheetSectionProps) {
+  return (
+    <div className={`space-y-1.5 ${className}`}>
+      {title && (
+        <h3 className="px-3 text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider uppercase font-display">
+          {title}
+        </h3>
+      )}
+      <div className="space-y-0.5">{children}</div>
+    </div>
+  );
+}

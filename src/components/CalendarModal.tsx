@@ -59,7 +59,7 @@ export function CalendarModal({
                   <CalendarIcon size={16} strokeWidth={2} />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold font-display tracking-tight text-[var(--text-primary)] leading-tight">
+                  <h3 className="text-base font-semibold font-display tracking-tight text-[var(--text-primary)] leading-tight">
                     {language === 'en' ? 'Select period' : 'Välj period'}
                   </h3>
                   <p className="text-xs font-semibold text-[var(--text-secondary)] mt-0.5">

@@ -445,7 +445,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 max-w-xl mx-auto w-full">
           {/* Top Bar with Title & Close */}
           <div className="flex items-center justify-between pb-1 px-1">
-            <h2 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-tight">
               {income 
                 ? (config?.language === 'en' ? 'Edit Income' : 'Redigera inkomst') 
                 : (config?.language === 'en' ? 'New Income' : 'Ny inkomst')}
@@ -1357,7 +1357,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 max-w-xl mx-auto w-full">
           {/* Top Bar with Title & Close */}
           <div className="flex items-center justify-between pb-1 px-1">
-            <h2 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-tight">
               {expense 
                 ? (config?.language === 'en' ? 'Edit Fixed Expense' : 'Redigera fast utgift') 
                 : (config?.language === 'en' ? 'New Fixed Expense' : 'Ny fast utgift')}
@@ -2248,7 +2248,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-5 space-y-3.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10 max-w-xl mx-auto w-full">
           {/* Top Bar with Title & Close */}
           <div className="flex items-center justify-between pb-1 px-1">
-            <h2 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-tight">
               {saving ? `${t('edit')} ${saving.name}` : `${t('new')} ${t('monthlySavings').toLowerCase()}`}
             </h2>
             <button 

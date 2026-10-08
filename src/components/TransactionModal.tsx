@@ -626,7 +626,7 @@ export function TransactionModal({
 
           {/* Top Bar with Title & Close */}
           <div className="flex items-center justify-between pb-1 px-1">
-            <h2 className="text-[17px] font-bold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-tight">
               {transaction 
                 ? (currentLang === 'en' ? 'Edit Transaction' : 'Redigera transaktion') 
                 : (type === 'income' 

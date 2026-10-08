@@ -125,7 +125,7 @@ export function IconPickerModal({
                 <Sparkles size={18} />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
+                <h3 className="text-base sm:text-lg font-semibold font-display tracking-tight text-[var(--text-primary)]">
                   Välj ikon
                 </h3>
               </div>

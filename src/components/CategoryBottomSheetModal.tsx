@@ -1,7 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, ShoppingBag } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { ShoppingBag } from 'lucide-react';
 import { Transaction, Config, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
@@ -10,7 +8,7 @@ import { feedback } from '../utils/feedback';
 import { TransactionItem } from './TransactionItem';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
-import { useScrollLock } from '../hooks/useScrollLock';
+import { BottomSheet } from './ui';
 
 interface CategoryBottomSheetModalProps {
   isOpen: boolean;
@@ -61,18 +59,6 @@ export function CategoryBottomSheetModal({
   const isEn = language === 'en';
   const curr = config?.currency || 'kr';
 
-  useScrollLock(isOpen);
-
-  // ESC key handler
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   const targetCategoryName = categoryName || categoryData?.name;
 
@@ -177,71 +163,28 @@ export function CategoryBottomSheetModal({
 
   if (!targetCategoryName || typeof document === 'undefined' || !document.body) return null;
 
-  return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center pointer-events-auto p-0 sm:p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.22 }}
-            onClick={() => {
-              if (typeof feedback.light === 'function') feedback.light();
-              onClose();
-            }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
-          />
-
-          {/* Bottom Sheet Drawer */}
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="relative w-full sm:max-w-lg bg-[var(--bg-color)] border-none rounded-t-[28px] sm:rounded-[28px] shadow-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col z-10 overflow-hidden font-sans text-[var(--text-primary)]"
-          >
-            {/* Top Grab Handle */}
-            <div className="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20 mx-auto mt-2.5 mb-1 shrink-0 sm:hidden" />
-
-            {/* Header: Category Identity & Close Button */}
-            <div className="flex items-center justify-between px-5 sm:px-6 pt-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
-              <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 text-white shadow-xs"
-                  style={{ backgroundColor: categoryColor }}
-                >
-                  {isEmojiString(iconKey) ? (
-                    <span className="text-xl leading-none">{iconKey}</span>
-                  ) : IconComponent ? (
-                    <IconComponent size={20} className="text-white" strokeWidth={2} />
-                  ) : (
-                    <ShoppingBag size={20} className="text-white" strokeWidth={2} />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)] truncate">
-                    {targetCategoryName}
-                  </h2>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof feedback.light === 'function') feedback.light();
-                  onClose();
-                }}
-                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer border-none shadow-none"
-                aria-label="Stäng"
-              >
-                <X size={17} strokeWidth={2} />
-              </button>
-            </div>
-
-            {/* Scrollable Body Content */}
-            <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0">
+  return (
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      size="md"
+      headerLeading={
+        <div
+          className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 text-white shadow-xs"
+          style={{ backgroundColor: categoryColor }}
+        >
+          {isEmojiString(iconKey) ? (
+            <span className="text-xl leading-none">{iconKey}</span>
+          ) : IconComponent ? (
+            <IconComponent size={20} className="text-white" strokeWidth={2} />
+          ) : (
+            <ShoppingBag size={20} className="text-white" strokeWidth={2} />
+          )}
+        </div>
+      }
+      title={targetCategoryName}
+      bodyClassName="px-5 sm:px-6 pt-3.5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-3.5 no-scrollbar flex flex-col min-h-0"
+    >
               {/* Category Budget Status Card */}
               <div className="p-4 rounded-[22px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shrink-0 space-y-3">
                 <div className="flex items-start justify-between gap-3">
@@ -407,11 +350,7 @@ export function CategoryBottomSheetModal({
                   )}
                 </div>
               </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>,
-    document.body
+    </BottomSheet>
   );
 }
+
