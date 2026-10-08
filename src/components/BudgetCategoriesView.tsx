@@ -390,14 +390,14 @@ export function BudgetCategoriesView({
                 {categoriesList.length} {isEn ? 'categories' : 'kategorier'}
               </span>
               {effectiveMode !== 'budget' && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<Plus size={14} strokeWidth={2} />}
+                <button
+                  type="button"
                   onClick={() => handleAddCategory('expense')}
+                  className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
                 >
-                  {t('newCategory')}
-                </Button>
+                  <Plus size={14} strokeWidth={2.5} />
+                  <span>{t('newCategory')}</span>
+                </button>
               )}
             </div>
 
@@ -528,14 +528,14 @@ export function BudgetCategoriesView({
             <span className="text-xs font-semibold text-[var(--text-secondary)]">
               {incomeCategoriesList.length} {isEn ? 'categories' : 'kategorier'}
             </span>
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<Plus size={14} strokeWidth={2} />}
+            <button
+              type="button"
               onClick={() => handleAddCategory('income')}
+              className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
             >
-              {t('newCategory')}
-            </Button>
+              <Plus size={14} strokeWidth={2.5} />
+              <span>{t('newCategory')}</span>
+            </button>
           </div>
 
           <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">

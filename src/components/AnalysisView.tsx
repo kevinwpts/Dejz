@@ -6,7 +6,7 @@ import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
 import { BudgetSummaryModule } from './BudgetSummaryModule';
-import { FilterSelectButton, FilterMenuModal } from './ui';
+import { FilterSelectButton, FilterButtonGroup } from './ui';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { formatAmount } from '../utils/format';
 import { isFixedItemDueInPeriod } from '../utils/date';
@@ -64,27 +64,28 @@ export function AnalysisView({
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('all');
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const isEn = config.language === 'en';
 
-  const filterOptions = useMemo(() => [
-    {
-      id: 'all' as const,
-      label: t('all' as TranslationKey) || (isEn ? 'All expenses' : 'Alla utgifter'),
-      icon: <LayoutGrid size={16} strokeWidth={2} />,
-    },
-    {
-      id: 'variable' as const,
-      label: t('variableExpenses' as TranslationKey) || (isEn ? 'Variable expenses' : 'Rörliga utgifter'),
-      icon: <TrendingUp size={16} strokeWidth={2} />,
-    },
-    {
-      id: 'fixed' as const,
-      label: t('fixedExpenses' as TranslationKey) || (isEn ? 'Fixed expenses' : 'Fasta utgifter'),
-      icon: <Calendar size={16} strokeWidth={2} />,
-    },
-  ], [isEn, t]);
+  // Format date interval like Hem e.g. "24 sep – 22 okt"
+  const periodIntervalText = useMemo(() => {
+    const start = stats?.periodStart || currentPeriod?.start;
+    const end = stats?.periodEnd || currentPeriod?.end;
+    if (!start || !end) return null;
+    const startDate = typeof start === 'string' ? new Date(start) : start;
+    const endDate = typeof end === 'string' ? new Date(end) : end;
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return null;
+
+    const formatDate = (d: Date) => {
+      const formatted = d.toLocaleDateString(isEn ? 'en-US' : 'sv-SE', {
+        day: 'numeric',
+        month: 'short',
+      });
+      return formatted.replace(/\.$/, '');
+    };
+
+    return `${formatDate(startDate)} \u2013 ${formatDate(endDate)}`;
+  }, [stats?.periodStart, stats?.periodEnd, currentPeriod?.start, currentPeriod?.end, isEn]);
 
   const effectiveStats = stats;
 
@@ -353,12 +354,12 @@ export function AnalysisView({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Top Selectors: Period (Left) & Content Filter (Right) */}
-      <div className="flex items-center gap-2 w-full">
-        {/* Left: Period Button */}
+      {/* Top Controls: Period Dropdown (Main) & Direct Spending Filter Buttons */}
+      <div className="space-y-2.5">
+        {/* Main Period Selector Dropdown */}
         <FilterSelectButton
           icon={<Calendar size={15} strokeWidth={2} />}
-          value={effectiveStats?.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}
+          value={periodIntervalText || effectiveStats?.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}
           badge={
             currentPeriod?.isCurrent ? (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
@@ -367,23 +368,34 @@ export function AnalysisView({
             ) : undefined
           }
           onClick={() => setIsPeriodModalOpen(true)}
-          className="flex-[1.25] min-w-0"
+          className="w-full"
         />
 
-        {/* Right: Content Filter Button */}
-        <FilterSelectButton
-          icon={
-            analysisFilter === 'all' ? <LayoutGrid size={15} strokeWidth={2} /> :
-            analysisFilter === 'variable' ? <TrendingUp size={15} strokeWidth={2} /> :
-            <Calendar size={15} strokeWidth={2} />
-          }
-          value={
-            analysisFilter === 'all' ? (t('all' as TranslationKey) || (isEn ? 'All' : 'Alla')) :
-            analysisFilter === 'variable' ? (isEn ? 'Variable' : 'Rörliga') :
-            (isEn ? 'Fixed' : 'Fasta')
-          }
-          onClick={() => setIsFilterModalOpen(true)}
-          className="flex-1 min-w-0"
+        {/* Direct Spending Filter Buttons */}
+        <FilterButtonGroup
+          options={[
+            {
+              id: 'all',
+              label: t('all' as TranslationKey) || (isEn ? 'All' : 'Alla'),
+              icon: <LayoutGrid size={14} strokeWidth={2} />,
+            },
+            {
+              id: 'variable',
+              label: isEn ? 'Variable' : 'Rörliga',
+              icon: <TrendingUp size={14} strokeWidth={2} />,
+            },
+            {
+              id: 'fixed',
+              label: isEn ? 'Fixed' : 'Fasta',
+              icon: <Calendar size={14} strokeWidth={2} />,
+            },
+          ]}
+          selectedId={analysisFilter}
+          onSelect={(id) => {
+            setAnalysisFilter(id as 'all' | 'variable' | 'fixed');
+            setExpandedCategory(null);
+          }}
+          ariaLabel={isEn ? 'Filter spending' : 'Filtrera utgifter'}
         />
       </div>
 
@@ -406,19 +418,6 @@ export function AnalysisView({
         showCalendarOption={false}
         showAllPeriodsOption={false}
         currentLang={config.language}
-      />
-
-      {/* Content Filter Modal */}
-      <FilterMenuModal
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        title={isEn ? 'Filter spending' : 'Filtrera utgifter'}
-        selectedId={analysisFilter}
-        onSelect={(id) => {
-          setAnalysisFilter(id as 'all' | 'variable' | 'fixed');
-          setExpandedCategory(null);
-        }}
-        options={filterOptions}
       />
 
       {/* Unified Budget Summary Card */}

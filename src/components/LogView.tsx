@@ -15,7 +15,7 @@ import { Transaction, Config, FixedExpense, Income, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
-import { FilterSelectButton, FilterMenuModal } from './ui';
+import { FilterSelectButton, FilterButtonGroup } from './ui';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { formatFullDate } from '../utils/date';
@@ -57,7 +57,6 @@ export function LogView({
   periods
 }: LogViewProps) {
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'receipt'>('all');
-  const [isTypeFilterModalOpen, setIsTypeFilterModalOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isPeriodPickerOpen, setIsPeriodPickerOpen] = useState(false);
@@ -401,9 +400,9 @@ export function LogView({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Top Selectors: Period (Left) & Type Filter (Right) */}
-      <div className="flex items-center gap-2 w-full">
-        {/* Left: Period Button */}
+      {/* Top Controls: Period Dropdown (Main) & Direct Type Filter Buttons */}
+      <div className="space-y-2.5">
+        {/* Main Period Selector Dropdown */}
         <FilterSelectButton
           icon={<CalendarIcon size={15} strokeWidth={2} />}
           value={activeFilterLabel || getL10n('Alla perioder', 'All periods')}
@@ -419,58 +418,37 @@ export function LogView({
             setModalPeriod(initial);
             setIsPeriodPickerOpen(true);
           }}
-          className="flex-[1.25] min-w-0"
+          className="w-full"
           variant="cardDarker"
         />
 
-        {/* Right: Type Filter Button */}
-        <FilterSelectButton
-          icon={
-            typeFilter === 'all' ? <LayoutGrid size={15} strokeWidth={2} /> :
-            typeFilter === 'expense' ? <ArrowDownLeft size={15} strokeWidth={2.5} /> :
-            typeFilter === 'income' ? <ArrowUpRight size={15} strokeWidth={2.5} /> :
-            <FileText size={15} strokeWidth={2} />
-          }
-          value={
-            typeFilter === 'all' ? (t('all' as TranslationKey) || (config.language === 'en' ? 'All' : 'Alla')) :
-            typeFilter === 'expense' ? (t('expense' as TranslationKey) || (config.language === 'en' ? 'Expenses' : 'Utgifter')) :
-            typeFilter === 'income' ? (t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster')) :
-            (t('receipt' as TranslationKey) || (config.language === 'en' ? 'Receipts' : 'Kvitton'))
-          }
-          onClick={() => setIsTypeFilterModalOpen(true)}
-          className="flex-1 min-w-0"
-          variant="cardDarker"
-        />
-
-        {/* Type Filter Modal */}
-        <FilterMenuModal
-          isOpen={isTypeFilterModalOpen}
-          onClose={() => setIsTypeFilterModalOpen(false)}
-          title={getL10n('Filtrera transaktioner', 'Filter transactions', 'Filtrer transaksjoner', 'Filtrer transaktioner', 'Suodata tapahtumia')}
-          selectedId={typeFilter}
-          onSelect={(id) => setTypeFilter(id as 'all' | 'expense' | 'income' | 'receipt')}
+        {/* Direct Type Filter Buttons */}
+        <FilterButtonGroup
           options={[
             {
               id: 'all',
-              label: t('all' as TranslationKey) || (config.language === 'en' ? 'All transactions' : 'Alla transaktioner'),
-              icon: <LayoutGrid size={16} strokeWidth={2} />,
+              label: t('all' as TranslationKey) || (config.language === 'en' ? 'All' : 'Alla'),
+              icon: <LayoutGrid size={14} strokeWidth={2} />,
             },
             {
               id: 'expense',
               label: t('expense' as TranslationKey) || (config.language === 'en' ? 'Expenses' : 'Utgifter'),
-              icon: <ArrowDownLeft size={16} strokeWidth={2.5} />,
+              icon: <ArrowDownLeft size={14} strokeWidth={2.5} />,
             },
             {
               id: 'income',
               label: t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster'),
-              icon: <ArrowUpRight size={16} strokeWidth={2.5} />,
+              icon: <ArrowUpRight size={14} strokeWidth={2.5} />,
             },
             {
               id: 'receipt',
               label: t('receipt' as TranslationKey) || (config.language === 'en' ? 'Receipts' : 'Kvitton'),
-              icon: <FileText size={16} strokeWidth={2} />,
+              icon: <FileText size={14} strokeWidth={2} />,
             },
           ]}
+          selectedId={typeFilter}
+          onSelect={(id) => setTypeFilter(id as 'all' | 'expense' | 'income' | 'receipt')}
+          ariaLabel={getL10n('Filtrera transaktioner', 'Filter transactions')}
         />
       </div>
 

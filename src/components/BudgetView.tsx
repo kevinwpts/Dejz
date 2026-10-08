@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, LayoutGrid } from 'lucide-react';
+import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown } from 'lucide-react';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
-import { FilterSelectButton, FilterMenuModal, Button } from './ui';
+import { FilterSelectButton, FilterMenuModal, FilterButtonGroup } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
@@ -57,8 +57,7 @@ export function BudgetView({
 }: BudgetViewProps) {
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
   const [isBudgetFilterModalOpen, setIsBudgetFilterModalOpen] = React.useState(false);
-  const [freqFilter, setFreqFilter] = React.useState<'all' | 'monthly' | 'annually'>('all');
-  const [isFreqFilterModalOpen, setIsFreqFilterModalOpen] = React.useState(false);
+  const [freqFilter, setFreqFilter] = React.useState<'all' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually'>('all');
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
   });
@@ -296,8 +295,8 @@ export function BudgetView({
       transition={{ duration: 0.35 }}
       className="space-y-6 font-sans"
     >
-      {/* Budget Filter Single Selector Button */}
-      <div className="flex items-center gap-2 w-full">
+      {/* Top Controls: Main Dropdown (Fasta utgifter / Inkomster / Månadssparande) & Direct Interval Filter Buttons */}
+      <div className="space-y-2.5">
         <FilterSelectButton
           icon={
             budgetFilter === 'fixed' ? <Calendar size={15} strokeWidth={2} /> :
@@ -310,23 +309,8 @@ export function BudgetView({
             (t('monthlySavings' as TranslationKey) || (config?.language === 'en' ? 'Monthly savings' : 'Månadssparande'))
           }
           onClick={() => setIsBudgetFilterModalOpen(true)}
-          className={budgetFilter === 'fixed' ? 'flex-[1.25] min-w-0' : 'w-full'}
+          className="w-full"
         />
-
-        {budgetFilter === 'fixed' && (
-          <FilterSelectButton
-            icon={<LayoutGrid size={15} strokeWidth={2} />}
-            value={
-              freqFilter === 'all' ? (config?.language === 'en' ? 'All' : 'Alla') :
-              freqFilter === 'monthly' ? (config?.language === 'en' ? 'Monthly' : 'Månadsvis') :
-              freqFilter === 'quarterly' ? (config?.language === 'en' ? 'Quarterly' : 'Kvartalsvis') :
-              freqFilter === 'semi-annually' ? (config?.language === 'en' ? 'Semi-annually' : 'Halvårsvis') :
-              (config?.language === 'en' ? 'Annually' : 'Årsvis')
-            }
-            onClick={() => setIsFreqFilterModalOpen(true)}
-            className="flex-1 min-w-0"
-          />
-        )}
 
         <FilterMenuModal
           isOpen={isBudgetFilterModalOpen}
@@ -354,39 +338,17 @@ export function BudgetView({
         />
 
         {budgetFilter === 'fixed' && (
-          <FilterMenuModal
-            isOpen={isFreqFilterModalOpen}
-            onClose={() => setIsFreqFilterModalOpen(false)}
-            title={config?.language === 'en' ? 'Select frequency' : 'Välj period'}
+          <FilterButtonGroup
+            options={[
+              { id: 'all', label: config?.language === 'en' ? 'All' : 'Alla' },
+              { id: 'monthly', label: config?.language === 'en' ? 'Monthly' : 'Månad' },
+              { id: 'quarterly', label: config?.language === 'en' ? 'Quarterly' : 'Kvartal' },
+              { id: 'semi-annually', label: config?.language === 'en' ? 'Semi-annually' : 'Halvår' },
+              { id: 'annually', label: config?.language === 'en' ? 'Annually' : 'År' },
+            ]}
             selectedId={freqFilter}
             onSelect={(id) => setFreqFilter(id as 'all' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually')}
-            options={[
-              {
-                id: 'all',
-                label: config?.language === 'en' ? 'All' : 'Alla',
-                icon: <LayoutGrid size={16} strokeWidth={2} />,
-              },
-              {
-                id: 'monthly',
-                label: config?.language === 'en' ? 'Monthly' : 'Månadsvis',
-                icon: <Calendar size={16} strokeWidth={2} />,
-              },
-              {
-                id: 'quarterly',
-                label: config?.language === 'en' ? 'Quarterly' : 'Kvartalsvis',
-                icon: <Calendar size={16} strokeWidth={2} />,
-              },
-              {
-                id: 'semi-annually',
-                label: config?.language === 'en' ? 'Semi-annually' : 'Halvårsvis',
-                icon: <Calendar size={16} strokeWidth={2} />,
-              },
-              {
-                id: 'annually',
-                label: config?.language === 'en' ? 'Annually' : 'Årsvis',
-                icon: <Calendar size={16} strokeWidth={2} />,
-              },
-            ]}
+            ariaLabel={config?.language === 'en' ? 'Payment interval' : 'Betalningsintervall'}
           />
         )}
       </div>
@@ -434,13 +396,6 @@ export function BudgetView({
             {config?.currency || 'kr'}
           </span>
         </div>
-        {budgetFilter === 'fixed' && freqFilter === 'all' && (
-          <p className="text-[11px] text-[var(--text-secondary)] opacity-80 mt-1 text-center max-w-xs px-2 leading-tight">
-            {config?.language === 'en' 
-              ? 'The monthly average is a comparison value and not necessarily the amount deducted during the current pay period.'
-              : 'Månadsgenomsnittet är ett jämförelsevärde och inte nödvändigtvis beloppet som dras under den aktuella löneperioden.'}
-          </p>
-        )}
       </div>
 
 
@@ -492,7 +447,7 @@ export function BudgetView({
               </div>
 
               {sortedIncomes.length > 0 ? (
-                <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+                <div className="space-y-2.5">
                   {sortedIncomes.map((income) => (
                     <BudgetItem 
                       key={income.id}
@@ -504,7 +459,6 @@ export function BudgetView({
                       t={t}
                       config={config}
                       currentPeriodId={currentPeriodId}
-                      isGrouped={true}
                     />
                   ))}
                 </div>
@@ -547,18 +501,18 @@ export function BudgetView({
                     }
                   </span>
                 </button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<Plus size={14} strokeWidth={2} />}
-                  onClick={onAddFixedExpense}
+                <button 
+                  type="button"
+                  onClick={onAddFixedExpense} 
+                  className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
                 >
-                  {t('newFixedExpense')}
-                </Button>
+                  <Plus size={14} strokeWidth={2.5} />
+                  <span>{t('newFixedExpense')}</span>
+                </button>
               </div>
 
               {filteredActiveFixedExpenses.length > 0 ? (
-                <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+                <div className="space-y-2.5">
                   {filteredActiveFixedExpenses.map((expense) => (
                     <BudgetItem 
                       key={expense.id}
@@ -570,7 +524,6 @@ export function BudgetView({
                       t={t}
                       config={config}
                       currentPeriodId={currentPeriodId}
-                      isGrouped={true}
                     />
                   ))}
                 </div>
@@ -621,18 +574,18 @@ export function BudgetView({
                   </span>
                 </button>
 
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<Plus size={14} strokeWidth={2} />}
-                  onClick={onAddMonthlySaving}
+                <button 
+                  type="button"
+                  onClick={onAddMonthlySaving} 
+                  className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
                 >
-                  {t('newMonthlySaving')}
-                </Button>
+                  <Plus size={14} strokeWidth={2.5} />
+                  <span>{t('newMonthlySaving')}</span>
+                </button>
               </div>
 
               {sortedSavings.length > 0 ? (
-                <div className="bg-[var(--surface-color)] rounded-[22px] border border-black/[0.06] dark:border-white/[0.08] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+                <div className="space-y-2.5">
                   {sortedSavings.map((saving) => (
                     <BudgetItem 
                       key={saving.id}
@@ -644,7 +597,6 @@ export function BudgetView({
                       t={t}
                       config={config}
                       currentPeriodId={currentPeriodId}
-                      isGrouped={true}
                     />
                   ))}
                 </div>

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Check, ArrowDownLeft, ArrowUpRight, Trash2, Clock, CheckCircle2 } from 'lucide-react';
 import { Config, Debt } from '../types';
 import { formatAmount } from '../utils/format';
-import { Button, Modal } from './ui';
+import { Modal } from './ui';
 
 interface DebtsViewProps {
   onBack: () => void;
@@ -176,14 +176,14 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           </button>
         </div>
 
-        <Button
-          variant="secondary"
-          size="sm"
-          icon={<Plus size={14} strokeWidth={2.5} />}
+        <button
+          type="button"
           onClick={() => setIsAddModalOpen(true)}
+          className="h-9 px-4 rounded-[14px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
         >
-          {isEn ? 'Add' : 'Lägg till'}
-        </Button>
+          <Plus size={14} strokeWidth={2.5} />
+          <span>{isEn ? 'Add' : 'Lägg till'}</span>
+        </button>
       </div>
 
       {/* 3. Debt List */}
