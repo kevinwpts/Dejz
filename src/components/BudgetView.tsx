@@ -434,6 +434,13 @@ export function BudgetView({
             {config?.currency || 'kr'}
           </span>
         </div>
+        {budgetFilter === 'fixed' && freqFilter === 'all' && (
+          <p className="text-[11px] text-[var(--text-secondary)] opacity-80 mt-1 text-center max-w-xs px-2 leading-tight">
+            {config?.language === 'en' 
+              ? 'The monthly average is a comparison value and not necessarily the amount deducted during the current pay period.'
+              : 'Månadsgenomsnittet är ett jämförelsevärde och inte nödvändigtvis beloppet som dras under den aktuella löneperioden.'}
+          </p>
+        )}
       </div>
 
 

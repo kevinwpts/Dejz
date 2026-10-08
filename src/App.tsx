@@ -102,6 +102,7 @@ import {
   getPeriodName,
   getPeriodId,
   isVariableItemDue,
+  isFixedItemDueInPeriod,
   parseReceiptDate,
 } from "./utils/date";
 import { uploadLogo } from "./services/storageService";
@@ -2543,66 +2544,18 @@ export default function App() {
           },
           0,
         );
-        const isFixedItemDueInPeriod = (
-          fe: { frequency?: Frequency; startMonth?: number; deductionDay?: number }
-        ): boolean => {
-          const freq = fe.frequency || Frequency.MONTHLY;
-          if (freq === Frequency.MONTHLY) {
-            return true;
-          }
-
-          const startM = fe.startMonth;
-          if (startM === undefined) return true;
-
-          const day = fe.deductionDay || 1;
-          const startYear = periodStart.getFullYear();
-          const endYear = periodEnd.getFullYear();
-
-          if (freq === Frequency.ANNUALLY) {
-            const dates = [
-              new Date(startYear, startM, day),
-              new Date(endYear, startM, day)
-            ];
-            return dates.some(d => d >= periodStart && d <= periodEnd);
-          }
-
-          if (freq === Frequency.SEMI_ANNUALLY) {
-            const months = [startM, (startM + 6) % 12];
-            const dates: Date[] = [];
-            months.forEach(m => {
-              dates.push(new Date(startYear, m, day));
-              if (endYear !== startYear) {
-                dates.push(new Date(endYear, m, day));
-              }
-            });
-            return dates.some(d => d >= periodStart && d <= periodEnd);
-          }
-
-          if (freq === Frequency.QUARTERLY) {
-            const months = [startM, (startM + 3) % 12, (startM + 6) % 12, (startM + 9) % 12];
-            const dates: Date[] = [];
-            months.forEach(m => {
-              dates.push(new Date(startYear, m, day));
-              if (endYear !== startYear) {
-                dates.push(new Date(endYear, m, day));
-              }
-            });
-            return dates.some(d => d >= periodStart && d <= periodEnd);
-          }
-
-          return true;
-        };
+        const checkFixedDue = (fe: any) => isFixedItemDueInPeriod(fe, periodStart, periodEnd);
 
         const activeFixed = getActiveFixedExpenses(fixedExpenses);
         const totalFixed = activeFixed.reduce((sum, e) => {
           const amount = getAmountForPeriod(e);
-          const isDue = isFixedItemDueInPeriod(e);
+          const isDue = checkFixedDue(e);
           return isDue ? sum + amount : sum;
         }, 0);
         const savingsFromItems = config.monthlySavingsItems?.reduce(
           (sum, item) => {
             const amount = getAmountForPeriod(item);
-            const isDue = isFixedItemDueInPeriod(item);
+            const isDue = checkFixedDue(item);
             return isDue ? sum + amount : sum;
           },
           0,
@@ -2975,7 +2928,7 @@ export default function App() {
         if (fixedExpenses) {
           fixedExpenses.forEach((fe) => {
             const amount = getAmountForPeriod(fe);
-            const isDue = isFixedItemDueInPeriod(fe);
+            const isDue = checkFixedDue(fe);
             const periodAmount = isDue ? amount : 0;
             const catName = fe.category ? fe.category.trim() : "Fasta utgifter";
             fixedExpenseCategoryMap[catName] = (fixedExpenseCategoryMap[catName] || 0) + periodAmount;

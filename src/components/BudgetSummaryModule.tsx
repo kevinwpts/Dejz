@@ -106,6 +106,24 @@ export function BudgetSummaryModule({
   const isOverBudget = remainingBudget < 0;
   const isEn = config.language === 'en';
 
+  const spentLabel = useMemo(() => {
+    if (filterMode === 'variable') {
+      return isEn ? 'Variable expenses' : 'Rörliga utgifter';
+    }
+    if (filterMode === 'fixed') {
+      return isEn ? 'Fixed expenses' : 'Fasta utgifter';
+    }
+    return isPastPeriod 
+      ? (isEn ? 'Total expenses' : 'Totala utgifter') 
+      : (isEn ? 'Total expenses' : 'Totala utgifter');
+  }, [filterMode, isPastPeriod, isEn]);
+
+  const remainingLabel = useMemo(() => {
+    return isPastPeriod
+      ? (isEn ? 'Left at period end' : 'Kvar vid periodens slut')
+      : (isEn ? 'Remaining to spend' : 'Kvar att spendera');
+  }, [isPastPeriod, isEn]);
+
   return (
     <div className="space-y-3 font-sans">
       {/* Clean Single Summary Card */}
@@ -115,7 +133,7 @@ export function BudgetSummaryModule({
           {/* Spenderat */}
           <div className="space-y-1">
             <span className="text-xs font-semibold text-[var(--text-secondary)] block">
-              {isPastPeriod ? (isEn ? 'Total spent' : 'Spenderat') : (isEn ? 'Spent so far' : 'Spenderat')}
+              {spentLabel}
             </span>
             <div className="flex items-baseline gap-1.5">
               <span className="text-[26px] sm:text-[32px] font-bold font-amount tabular-nums text-[var(--text-primary)] tracking-tight">
@@ -136,7 +154,7 @@ export function BudgetSummaryModule({
           <div className="space-y-1 text-right">
             <div className="flex items-center justify-end gap-1">
               <span className="text-xs font-medium text-[var(--text-secondary)]">
-                {isPastPeriod ? (isEn ? 'Left at period end' : 'Kvar vid periodens slut') : (isEn ? 'Remaining' : 'Kvar')}
+                {remainingLabel}
               </span>
               <button
                 type="button"

@@ -1,4 +1,4 @@
-import { WeekendAdjustment, PaydayType } from '../types';
+import { WeekendAdjustment, PaydayType, Frequency } from '../types';
 
 export const getActualPayday = (year: number, month: number, paydayType: PaydayType, targetDay: number, adjustment: WeekendAdjustment) => {
   let day: number;
@@ -182,4 +182,48 @@ export const parseReceiptDate = (dateStr: any): Date | null => {
 
   const parsed = new Date(trimmed);
   return isNaN(parsed.getTime()) ? null : parsed;
+};
+
+export const isFixedItemDueInPeriod = (
+  fe: { frequency?: Frequency; startMonth?: number; deductionDay?: number },
+  periodStart: Date,
+  periodEnd: Date
+): boolean => {
+  const freq = fe.frequency || Frequency.MONTHLY;
+  if (freq === Frequency.MONTHLY) {
+    return true;
+  }
+
+  const startM = fe.startMonth !== undefined ? fe.startMonth : 0;
+  const day = fe.deductionDay || 1;
+
+  const yearsToCheck = Array.from(new Set([
+    periodStart.getFullYear() - 1,
+    periodStart.getFullYear(),
+    periodEnd.getFullYear(),
+    periodEnd.getFullYear() + 1
+  ]));
+
+  let months: number[] = [startM];
+  if (freq === Frequency.SEMI_ANNUALLY) {
+    months = [startM, (startM + 6) % 12];
+  } else if (freq === Frequency.QUARTERLY) {
+    months = [startM, (startM + 3) % 12, (startM + 6) % 12, (startM + 9) % 12];
+  }
+
+  const pStartMs = new Date(periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate()).getTime();
+  const pEndMs = new Date(periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate(), 23, 59, 59, 999).getTime();
+
+  for (const year of yearsToCheck) {
+    for (const month of months) {
+      const maxDaysInMonth = new Date(year, month + 1, 0).getDate();
+      const actualDay = Math.min(day, maxDaysInMonth);
+      const d = new Date(year, month, actualDay).getTime();
+      if (d >= pStartMs && d <= pEndMs) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 };

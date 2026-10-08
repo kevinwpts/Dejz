@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, LayoutGrid, TrendingUp, Calendar } from 'lucide-react';
-import { Transaction, FixedExpense, Config, Frequency } from '../types';
+import { Transaction, FixedExpense, Config } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
@@ -9,6 +9,7 @@ import { BudgetSummaryModule } from './BudgetSummaryModule';
 import { FilterSelectButton, FilterMenuModal } from './ui';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { formatAmount } from '../utils/format';
+import { isFixedItemDueInPeriod } from '../utils/date';
 import { getCategoryIconName } from '../utils/icons';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryColor } from '../utils/categoryColors';
@@ -128,15 +129,16 @@ export function AnalysisView({
       });
     }
 
-    if (includeFixed) {
-      fixedExpenses.forEach((e: FixedExpense) => {
+    if (includeFixed && stats?.periodStart && stats?.periodEnd) {
+      const activeFixed = (fixedExpenses || []).filter((e: any) => !e.isArchived && !e.archived);
+      activeFixed.forEach((e: FixedExpense) => {
+        const isDue = isFixedItemDueInPeriod(e, stats.periodStart, stats.periodEnd);
+        if (!isDue) return;
+
         const category = e.category || t('fixedExpenses');
         let amount = Number(e.amount) || 0;
-        switch (e.frequency) {
-          case Frequency.QUARTERLY: amount = amount / 3; break;
-          case Frequency.SEMI_ANNUALLY: amount = amount / 6; break;
-          case Frequency.ANNUALLY: amount = amount / 12; break;
-          default: break;
+        if (e.isVariable && e.periodOverrides && stats?.periodId && e.periodOverrides[stats.periodId] !== undefined) {
+          amount = Number(e.periodOverrides[stats.periodId]) || 0;
         }
         
         if (analysisFilter !== 'variable') {
@@ -181,39 +183,54 @@ export function AnalysisView({
       totalFixed: fixedSum, 
       totalSpentInPeriod: spentSum,
     };
-  }, [filteredExpenses, fixedExpenses, t, analysisFilter, config.categories, config.incomeCategories]);
+  }, [filteredExpenses, fixedExpenses, t, analysisFilter, config.categories, config.incomeCategories, stats?.periodStart, stats?.periodEnd, stats?.periodId]);
 
-  const totalSpent = (analysisFilter === 'fixed' ? 0 : totalSpentInPeriod) + 
-    (analysisFilter !== 'variable' ? totalFixed : 0);
+  // 1. Spenderat-belopp baserat på valt filter:
+  // Alla -> Totala utgifter (rörliga + fasta i perioden)
+  // Rörliga -> Rörliga utgifter
+  // Fasta -> Fasta utgifter i perioden
+  const totalSpent = useMemo(() => {
+    if (analysisFilter === 'variable') {
+      return totalSpentInPeriod;
+    }
+    if (analysisFilter === 'fixed') {
+      return totalFixed;
+    }
+    return totalSpentInPeriod + totalFixed;
+  }, [analysisFilter, totalSpentInPeriod, totalFixed]);
 
-  const effectiveBudget = useMemo(() => {
+  // 2. Gemensam disponibel budget för perioden:
+  // Inkomster − fasta utgifter som hör till perioden − planerat sparande (+ extra inkomster till idag)
+  const disposableBudget = useMemo(() => {
     if (!stats) return 0;
+    const basePot = stats.disposablePot || 0;
     const extraInc = stats.isPastPeriod
       ? (stats.totalExtraIncomeInPeriod || 0)
       : (stats.totalExtraIncomeUpToToday || 0);
+    return basePot + extraInc;
+  }, [stats]);
 
-    if (analysisFilter === 'variable') {
-      return (stats.disposablePot || 0) + extraInc;
-    }
-    if (analysisFilter === 'fixed') {
-      return stats.totalFixed || 0;
-    }
-    if (stats.totalIncome > 0) {
-      return Math.max(0, stats.totalIncome + extraInc - (stats.totalSavings || 0));
-    }
-    return (stats.disposablePot || 0) + (stats.totalFixed || 0) + extraInc;
-  }, [stats, analysisFilter]);
-
+  // 3. Kvar att spendera (eller Kvar vid periodens slut för avslutade perioder)
+  // ALLTID samma belopp oavsett om filtret är Alla, Rörliga eller Fasta:
+  // Kvar att spendera = Inkomster − fasta utgifter som hör till perioden − planerat sparande − rörliga utgifter
+  // Överensstämmer 100% med Hemfliken för aktuell period.
   const remainingBudget = useMemo(() => {
     if (!stats) return 0;
-    return effectiveBudget - totalSpent;
-  }, [stats, effectiveBudget, totalSpent]);
+    if (stats.remainingPeriodCents !== undefined) {
+      return Math.round(stats.remainingPeriodCents);
+    }
+    return Math.round(disposableBudget - totalSpentInPeriod);
+  }, [stats, disposableBudget, totalSpentInPeriod]);
 
+  // 4. Budgetprocenten:
+  // Progressbaren ska ALLTID visa hur stor del av den disponibla budgeten som förbrukats av rörliga utgifter.
+  // Procenten ändras INTE när användaren växlar mellan Alla, Rörliga och Fasta.
   const budgetUsedPct = useMemo(() => {
-    if (!stats) return 0;
-    if (effectiveBudget <= 0) return 0;
-    return Math.max(0, Math.round((totalSpent / effectiveBudget) * 100));
-  }, [stats, effectiveBudget, totalSpent]);
+    if (disposableBudget <= 0) {
+      return totalSpentInPeriod > 0 ? 100 : 0;
+    }
+    return Math.max(0, Math.round((totalSpentInPeriod / disposableBudget) * 100));
+  }, [disposableBudget, totalSpentInPeriod]);
 
   const largestCategory = useMemo(() => {
     if (categoryData.length === 0) return { name: "", amount: 0 };
@@ -233,8 +250,10 @@ export function AnalysisView({
 
   const previousPeriodSpent = useMemo(() => {
     if (!previousPeriod || !transactions) return null;
-    const pStartMs = new Date(previousPeriod.start).getTime();
-    const pEndMs = new Date(previousPeriod.end).getTime() + 86399999;
+    const pStart = new Date(previousPeriod.start);
+    const pEnd = new Date(previousPeriod.end);
+    const pStartMs = pStart.getTime();
+    const pEndMs = pEnd.getTime() + 86399999;
 
     const includeVariable = analysisFilter === 'all' || analysisFilter === 'variable';
     const includeFixed = analysisFilter === 'all' || analysisFilter === 'fixed';
@@ -254,17 +273,14 @@ export function AnalysisView({
     }
 
     if (includeFixed && fixedExpenses) {
-      fixedExpenses.forEach((e: FixedExpense) => {
+      const activeFixed = (fixedExpenses || []).filter((e: any) => !e.isArchived && !e.archived);
+      activeFixed.forEach((e: FixedExpense) => {
+        const isDue = isFixedItemDueInPeriod(e, pStart, pEnd);
+        if (!isDue) return;
+
         let amount = Number(e.amount) || 0;
         if (e.isVariable && e.periodOverrides && previousPeriod.periodId && e.periodOverrides[previousPeriod.periodId] !== undefined) {
           amount = Number(e.periodOverrides[previousPeriod.periodId]) || 0;
-        } else {
-          switch (e.frequency) {
-            case Frequency.QUARTERLY: amount = amount / 3; break;
-            case Frequency.SEMI_ANNUALLY: amount = amount / 6; break;
-            case Frequency.ANNUALLY: amount = amount / 12; break;
-            default: break;
-          }
         }
         prevSpent += amount;
       });
@@ -416,7 +432,7 @@ export function AnalysisView({
         largestCategoryOverride={largestCategory}
         budgetUsedPctOverride={budgetUsedPct}
         remainingBudgetOverride={remainingBudget}
-        effectiveBudgetOverride={effectiveBudget}
+        effectiveBudgetOverride={disposableBudget}
         previousPeriodComparisonText={previousPeriodComparisonText}
         filterMode={analysisFilter}
       />
@@ -518,8 +534,13 @@ export function AnalysisView({
                 })
                 .sort((a, b) => b.timestamp - a.timestamp);
                 
-              const categoryFixedExpenses = analysisFilter === 'variable' ? [] : fixedExpenses
+              const categoryFixedExpenses = analysisFilter === 'variable' || !stats?.periodStart || !stats?.periodEnd 
+                ? [] 
+                : (fixedExpenses || [])
                   .filter(e => {
+                    if (e.isArchived || e.archived) return false;
+                    const isDue = isFixedItemDueInPeriod(e, stats.periodStart, stats.periodEnd);
+                    if (!isDue) return false;
                     const catName = (e.category || t('fixedExpenses')).trim().toLowerCase();
                     return catName === catNameTrimmed;
                   });
