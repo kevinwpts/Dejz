@@ -20,7 +20,7 @@ export function PeriodTimeline({
   language = 'sv',
   _stats,
   categoryFilter = null,
-  showFixedInCalendar = true,
+  _showFixedInCalendar = true,
 }: PeriodTimelineProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
@@ -283,10 +283,7 @@ export function PeriodTimeline({
                   : 'bg-white/60 text-[#716E68] border-transparent hover:text-[#242321] dark:bg-white/[0.02] dark:text-[#9CA6BC]/70 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.045] scale-95 opacity-85'
               }`}
             >
-              {/* Selection indicator line at top */}
-              {isSelected && (
-                <span className="w-4 h-0.5 rounded-full bg-[var(--accent-color)] absolute top-1 left-1/2 -translate-x-1/2" />
-              )}
+
 
               {/* Day of Week / Today */}
               <span
@@ -312,10 +309,7 @@ export function PeriodTimeline({
                 {dayNumber}
               </span>
 
-              {/* Fixed Item or Category Match Indicator Dot */}
-              {((showFixedInCalendar && day.hasFixedItems) || (hasCategoryMatch && !isSelected)) && (
-                <span className="w-1 h-1 rounded-full absolute bottom-1 shadow-none bg-[var(--accent-color)]" />
-              )}
+
             </button>
           );
         })}

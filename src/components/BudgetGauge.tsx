@@ -15,6 +15,7 @@ interface BudgetGaugeProps {
   timeRatio?: number;
   remainingDays?: number;
   totalDays?: number;
+  calendarDays?: any[];
 }
 
 export function BudgetGauge({
@@ -28,6 +29,7 @@ export function BudgetGauge({
   timeRatio,
   remainingDays,
   totalDays,
+  calendarDays = [],
 }: BudgetGaugeProps) {
   const isEn = language === 'en';
   const isNegative = remainingCents < 0;
@@ -44,13 +46,36 @@ export function BudgetGauge({
     });
   }, [remainingCents, disposablePotCents, remainingDays, totalDays, timeRatio]);
 
-  // Calculate spent ratio between 0 and 100%
-  const spentRatio = useMemo(() => {
-    if (disposablePotCents <= 0) return 0;
-    const spent = disposablePotCents - remainingCents;
-    const ratio = (spent / disposablePotCents) * 100;
-    return Math.max(0, Math.min(100, ratio));
-  }, [remainingCents, disposablePotCents]);
+  // Compute trend data from day 1 to today
+  const chartData = useMemo(() => {
+    if (!calendarDays || calendarDays.length === 0) return [];
+    const todayIdx = calendarDays.findIndex((d: any) => d.isToday);
+    const endIndex = todayIdx !== -1 ? todayIdx : calendarDays.length - 1;
+    const slice = calendarDays.slice(0, endIndex + 1);
+    return slice.map((d: any) => d.availableForD ?? 0);
+  }, [calendarDays]);
+
+  const { pathD, areaD, points } = useMemo(() => {
+    if (chartData.length < 2) return { pathD: '', areaD: '', points: [] };
+    const minVal = Math.min(...chartData);
+    const maxVal = Math.max(...chartData);
+    const range = maxVal - minVal || 1;
+    const width = 130;
+    const height = 44;
+
+    const pts = chartData.map((val, i) => {
+      const x = (i / (chartData.length - 1)) * width;
+      const y = height - ((val - minVal) / range) * (height - 10) - 5;
+      return { x, y };
+    });
+
+    const pD = pts.reduce((acc, pt, i) => {
+      return i === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`;
+    }, '');
+
+    const aD = `${pD} L ${width} ${height} L 0 ${height} Z`;
+    return { pathD: pD, areaD: aD, points: pts };
+  }, [chartData]);
 
   return (
     <div className="w-full select-none">
@@ -80,39 +105,62 @@ export function BudgetGauge({
           </div>
         </div>
 
-        {/* Large Amount Display */}
-        <div className="flex items-baseline gap-1.5 my-2">
-          <AnimatedNumber
-            value={remainingCents}
-            className={`text-[36px] sm:text-[42px] font-extrabold leading-none font-amount tabular-nums tracking-tight ${
-              isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
-            }`}
-            formatter={(val) => formatAmount(val, language)}
-          />
-          <span
-            className={`text-base sm:text-lg font-medium leading-none ${
-              isNegative ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
-            }`}
-          >
-            {currency || 'kr'}
-          </span>
-        </div>
-
-        {/* Progress Bar (fully rounded) */}
-        <div className="mt-4 mb-3 space-y-1.5">
-          <div className="flex justify-between items-center text-[11px] font-medium text-[var(--text-secondary)]">
-            <span>{isEn ? 'Budget usage' : 'Budgetanvändning'}</span>
-            <span className="font-amount tabular-nums">{Math.round(spentRatio)}%</span>
-          </div>
-          <div className="relative h-3 w-full bg-black/[0.04] dark:bg-white/[0.06] rounded-full overflow-hidden">
-            <div
-              className="absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out"
-              style={{
-                width: `${spentRatio}%`,
-                backgroundColor: status.colorHex,
-              }}
+        {/* Amount & Trend Line Chart Row */}
+        <div className="flex items-center justify-between gap-4 my-2">
+          {/* Large Amount Display */}
+          <div className="flex items-baseline gap-1.5">
+            <AnimatedNumber
+              value={remainingCents}
+              className={`text-[34px] sm:text-[40px] font-extrabold leading-none font-amount tabular-nums tracking-tight ${
+                isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
+              }`}
+              formatter={(val) => formatAmount(val, language)}
             />
+            <span
+              className={`text-base sm:text-lg font-medium leading-none ${
+                isNegative ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
+              }`}
+            >
+              {currency || 'kr'}
+            </span>
           </div>
+
+          {/* Trend Line Chart (Day 1 -> Today) */}
+          {chartData.length > 1 && (
+            <div className="hidden xs:flex flex-col items-end shrink-0">
+              <span className="text-[10px] font-medium text-[var(--text-secondary)] mb-1 tracking-tight">
+                {isEn ? 'Trend (Day 1 → Today)' : 'Trend (Dag 1 → Idag)'}
+              </span>
+              <div className="relative w-[120px] sm:w-[136px] h-[42px]">
+                <svg viewBox="0 0 130 44" className="w-full h-full overflow-visible">
+                  <defs>
+                    <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={status.colorHex} stopOpacity="0.25" />
+                      <stop offset="100%" stopColor={status.colorHex} stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <path d={areaD} fill="url(#trendGradient)" />
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke={status.colorHex}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {points.length > 0 && (
+                    <circle
+                      cx={points[points.length - 1].x}
+                      cy={points[points.length - 1].y}
+                      r="3.5"
+                      fill={status.colorHex}
+                      className="shadow-sm"
+                    />
+                  )}
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bottom Time / Payday Countdown Info */}

@@ -80,6 +80,7 @@ export function GreetingModule({
           onOpenInfo={() => setIsCalculationInfoOpen(true)}
           remainingDays={effectiveRemainingDays}
           totalDays={totalDaysInPeriod}
+          calendarDays={calendarDays}
         />
       </motion.div>
 

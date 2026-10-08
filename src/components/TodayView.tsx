@@ -352,7 +352,39 @@ export function TodayView({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* 1. Compact Period & Payday Status Module (Top of page, no icons) */}
+      {/* 1. Free-floating Hero Gauge & Kvar att Spendera */}
+      <GreetingModule
+        userName={userName}
+        availableForD={todayData?.availableForD || stats?.availableForD || 0}
+        currency={config?.currency || 'kr'}
+        isToday={!!selectedDayData?.isToday}
+        date={normalizedSelectedDate}
+        language={lang}
+        stats={stats}
+        t={t}
+        calendarDays={calendarDays}
+        setSelectedDate={setSelectedDate}
+        setCurrentPeriodDate={setCurrentPeriodDate}
+        periodStart={stats.periodStart}
+        periodEnd={stats.periodEnd}
+        isFuturePeriod={stats.isFuturePeriod}
+        isPastPeriod={stats.isPastPeriod}
+        periods={periods}
+        avatarUrl={avatarUrl}
+        onNavigate={onNavigate}
+        showFixedInCalendar={config?.showFixedExpensesInCalendar}
+        isCurrentPeriod={isCurrentPeriod}
+        currentPeriodDate={currentPeriodDate}
+        config={config}
+        onUpdateConfig={onUpdateConfig}
+        onAddExpense={() => onAddTransaction(selectedDate)}
+        onAddIncome={() => onAddIncome(selectedDate)}
+        onQuickAddExpense={onQuickAddExpense}
+        onOpenCalculator={onOpenCalculator}
+        allTransactions={allTransactions}
+      />
+
+      {/* 2. Compact Period & Payday Status Module (Placed under kvar att spendera) */}
       <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[14px] p-3.5 sm:p-4 shadow-sm animate-fade-in">
         <button
           type="button"
@@ -390,45 +422,13 @@ export function TodayView({
         </button>
       </div>
 
-      {/* 2. Free-floating Hero Gauge & Kvar att Spendera */}
-      <GreetingModule
-        userName={userName}
-        availableForD={todayData?.availableForD || stats?.availableForD || 0}
-        currency={config?.currency || 'kr'}
-        isToday={!!selectedDayData?.isToday}
-        date={normalizedSelectedDate}
-        language={lang}
-        stats={stats}
-        t={t}
-        calendarDays={calendarDays}
-        setSelectedDate={setSelectedDate}
-        setCurrentPeriodDate={setCurrentPeriodDate}
-        periodStart={stats.periodStart}
-        periodEnd={stats.periodEnd}
-        isFuturePeriod={stats.isFuturePeriod}
-        isPastPeriod={stats.isPastPeriod}
-        periods={periods}
-        avatarUrl={avatarUrl}
-        onNavigate={onNavigate}
-        showFixedInCalendar={config?.showFixedExpensesInCalendar}
-        isCurrentPeriod={isCurrentPeriod}
-        currentPeriodDate={currentPeriodDate}
-        config={config}
-        onUpdateConfig={onUpdateConfig}
-        onAddExpense={() => onAddTransaction(selectedDate)}
-        onAddIncome={() => onAddIncome(selectedDate)}
-        onQuickAddExpense={onQuickAddExpense}
-        onOpenCalculator={onOpenCalculator}
-        allTransactions={allTransactions}
-      />
-
-      {/* Module 1: Category Budgets Widget */}
+      {/* 3. Category Budgets (No module card wrapper) */}
       <div className="animate-fade-in">
         {!hasSavedBudget ? (
           <button
             type="button"
             onClick={() => onNavigate("profile", "budget")}
-            className="w-full p-4 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
+            className="w-full p-4 rounded-[14px] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/[0.08] dark:border-white/[0.1] text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
           >
             <div className="flex items-center gap-3.5">
               <div className="w-10 h-10 rounded-[10px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
@@ -446,7 +446,7 @@ export function TodayView({
             <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
           </button>
         ) : categoryBudgetData.length > 0 ? (
-          <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[14px] p-4 sm:p-5 space-y-3.5 shadow-sm">
+          <div className="space-y-3">
             <div className="flex items-center justify-between px-0.5">
               <span className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)] tracking-tight">
                 {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
@@ -474,7 +474,7 @@ export function TodayView({
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                     onClick={() => handleCategoryClick(cat.name)}
-                    className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[12px] bg-black/[0.02] dark:bg-white/[0.03] hover:bg-black/[0.04] dark:hover:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
+                    className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[12px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
                   >
                     {/* Top: Icon + Name */}
                     <div className="flex items-center gap-2 min-w-0 w-full">
@@ -518,7 +518,7 @@ export function TodayView({
                   if (typeof feedback.light === 'function') feedback.light();
                   onNavigate("profile", "budget");
                 }}
-                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[12px] bg-black/[0.01] dark:bg-white/[0.02] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[12px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
                 aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
               >
                 <div className="w-7 h-7 rounded-[8px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
@@ -531,28 +531,7 @@ export function TodayView({
               </motion.button>
             </div>
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => onNavigate("profile", "budget")}
-            className="w-full p-4 rounded-[14px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] text-[var(--text-primary)] shadow-none transition-all flex items-center justify-between text-left group cursor-pointer"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-[10px] bg-black/[0.04] dark:bg-white/5 border-none flex items-center justify-center text-[var(--text-secondary)] transition-colors">
-                <SlidersHorizontal size={15} strokeWidth={2} />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
-                  {lang === "en" ? "Allocate your budget" : "Fördela din vardagsbudget"}
-                </p>
-                <p className="text-[11px] font-normal text-[var(--text-secondary)]">
-                  {lang === "en" ? "Set limits per category" : "Sätt gränser per kategori"}
-                </p>
-              </div>
-            </div>
-            <ChevronRight size={15} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
-          </button>
-        )}
+        ) : null}
       </div>
 
       {/* Period Timeline directly on beige background (no wrapping card or dividing lines) */}
