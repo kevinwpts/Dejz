@@ -56,7 +56,7 @@ export function SettingsView({
   onExportData: _onExportData,
   onLegalClick: _onLegalClick,
   profile: _profile,
-  userId: _userId,
+  userId,
   session: _session,
   onRefresh: _onRefresh,
   onNavigateToProfile: _onNavigateToProfile,
