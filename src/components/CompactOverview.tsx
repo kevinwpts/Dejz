@@ -29,10 +29,10 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
       {/* Budget Status */}
       <Card variant="default" padding="lg">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-semibold text-[var(--text-secondary)]">
+          <h3 className="text-label font-semibold text-[var(--text-secondary)]">
             {t('budgetUsage')}
           </h3>
-          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+          <span className="text-label font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
             {budgetUsage.toFixed(0)}%
           </span>
         </div>
@@ -44,7 +44,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
           />
         </div>
         
-        <p className="text-[13px] text-[var(--text-secondary)] font-normal">
+        <p className="text-secondary">
           <span className="text-[var(--text-primary)] font-medium font-amount tabular-nums">
             {formatAmount(totalExpenses, config.language)}
           </span>
@@ -54,16 +54,16 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
 
       {/* Category Totals */}
       <div className="space-y-3">
-        <h3 className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight ml-1">
+        <h3 className="text-card-title ml-1">
           {t('categories')}
         </h3>
         <div className="grid grid-cols-1 gap-2">
           {Object.entries(categoryTotals).slice(0, 4).map(([cat, amount]) => (
-            <Card key={cat} variant="default" padding="md" isInteractive className="flex items-center justify-between">
-              <span className="text-sm font-medium text-[var(--text-primary)] leading-tight truncate tracking-tight">
+            <Card key={cat} variant="default" padding="md" className="flex items-center justify-between">
+              <span className="text-body-medium leading-tight truncate">
                 {cat}
               </span>
-              <span className="text-sm font-medium text-[var(--text-primary)] font-amount tabular-nums">
+              <span className="text-body-medium tabular-nums">
                 {formatAmount(amount, config.language)}
               </span>
             </Card>
@@ -73,7 +73,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
 
       {/* Recent Transactions */}
       <div className="space-y-4">
-        <h3 className="text-xs font-medium text-[var(--text-secondary)] opacity-70 ml-1">
+        <h3 className="text-label opacity-70 ml-1">
           {t('recentTransactions')}
         </h3>
         <div className="space-y-1">

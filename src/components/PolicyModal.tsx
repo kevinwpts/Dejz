@@ -17,7 +17,7 @@ export const PolicyModal = ({ isOpen, onClose, title, content }: PolicyModalProp
       center
       size="xl"
       showCloseButton={true}
-      bodyClassName="p-6 sm:p-7 space-y-4 text-[var(--text-secondary)] leading-relaxed text-sm"
+      bodyClassName="p-6 sm:p-7 space-y-4 text-body text-[var(--text-secondary)] leading-relaxed"
     >
       {content}
     </Modal>

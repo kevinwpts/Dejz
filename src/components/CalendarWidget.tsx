@@ -68,7 +68,7 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
     <div className="w-full space-y-3">
       {/* Month / Year Navigator */}
       <div className="flex items-center justify-between px-1">
-        <span className="text-[14px] font-bold text-[var(--text-primary)] capitalize tracking-tight">
+        <span className="text-card-title font-bold text-[var(--text-primary)] capitalize tracking-tight">
           {monthNames[viewMonth]} {viewYear}
         </span>
         <div className="flex items-center gap-1">
@@ -92,7 +92,7 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
       {/* Weekday Headers */}
       <div className="grid grid-cols-7 gap-1">
         {[t('monInitial'), t('tueInitial'), t('wedInitial'), t('thuInitial'), t('friInitial'), t('satInitial'), t('sunInitial')].map((d, i) => (
-          <div key={i} className="text-center text-[11px] font-medium text-[var(--text-tertiary)] tracking-wider py-0.5">
+          <div key={i} className="text-center text-micro-label font-medium text-[var(--text-tertiary)] tracking-wider py-0.5">
             {d}
           </div>
         ))}
@@ -129,7 +129,7 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
                   : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
               }`}
             >
-              <span className={`text-[13px] sm:text-[14px] font-semibold tabular-nums leading-none text-center ${
+              <span className={`text-secondary font-semibold tabular-nums leading-none text-center ${
                 isSelected ? 'text-[var(--on-accent)] font-semibold' : isToday ? 'text-[var(--accent-color)] font-bold' : 'text-[var(--text-primary)] font-medium'
               }`}>
                 {dayDate.getDate()}

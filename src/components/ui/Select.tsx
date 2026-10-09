@@ -38,7 +38,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="text-xs font-semibold font-display tracking-wider text-[var(--text-secondary)]"
+            className="text-label font-semibold text-[var(--text-secondary)]"
           >
             {label}
           </label>
@@ -54,7 +54,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
-            className={`w-full h-[var(--height-input,48px)] bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-[var(--radius-input,14px)] ${icon ? 'pl-10' : 'px-4'} pr-10 font-normal text-[14px] text-[var(--text-primary)] outline-none transition-all cursor-pointer appearance-none ${className}`}
+            className={`w-full h-[var(--height-input,48px)] bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-[var(--radius-input,14px)] ${icon ? 'pl-10' : 'px-4'} pr-10 text-body outline-none transition-all cursor-pointer appearance-none ${className}`}
             {...props}
           >
             {options
@@ -72,13 +72,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         </div>
 
         {error && (
-          <p className="text-xs font-medium text-rose-600 dark:text-rose-400 mt-0.5">
+          <p className="text-label text-rose-600 dark:text-rose-400 mt-0.5">
             {error}
           </p>
         )}
 
         {helperText && !error && (
-          <p className="text-xs font-normal text-[#8C867C] dark:text-[#71717A] mt-0.5">
+          <p className="text-micro-label text-[#8C867C] dark:text-[#71717A] mt-0.5">
             {helperText}
           </p>
         )}

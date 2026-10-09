@@ -55,7 +55,7 @@ export function CalendarModal({
               onSelectDate(today);
               if (onPeriodChange) onPeriodChange(today);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 text-xs font-semibold text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 transition-colors active:scale-95 cursor-pointer border-none shadow-none"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 text-label font-semibold text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 transition-colors active:scale-95 cursor-pointer border-none shadow-none"
           >
             <RotateCcw size={12} strokeWidth={2.5} />
             <span>{language === 'en' ? 'Current' : 'Nuvarande'}</span>

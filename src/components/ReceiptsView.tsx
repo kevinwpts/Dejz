@@ -57,18 +57,18 @@ export function ReceiptsView({
       {receiptTransactions.length > 0 && (
         <Card variant="default" padding="lg" className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold font-display tracking-wider text-[var(--text-tertiary)]">
+            <span className="text-micro-label font-bold tracking-wider text-[var(--text-tertiary)]">
               {config.language === 'sv' ? 'Sammanställning' : 'Summary'}
             </span>
-            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-[var(--radius-badge,9999px)]">
+            <span className="text-micro-label font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-[var(--radius-badge,9999px)]">
               {filteredTransactions.length} {config.language === 'sv' ? 'stycken' : 'items'}
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-xl font-extrabold text-[var(--text-primary)] tracking-tight font-amount tabular-nums">
+            <span className="text-large-amount font-extrabold text-[var(--text-primary)] tracking-tight tabular-nums">
               {formatDisplayAmount(totalAmount)}
             </span>
-            <span className="text-xs font-medium text-[var(--text-secondary)]">
+            <span className="text-secondary font-medium text-[var(--text-secondary)]">
               {config.language === 'sv' ? 'totalt belopp' : 'total amount'}
             </span>
           </div>
@@ -130,7 +130,7 @@ export function ReceiptsView({
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="font-bold text-[12px] text-[var(--text-primary)] truncate">
+                          <span className="text-body-medium font-bold text-[var(--text-primary)] truncate">
                             {item.merchant || item.category}
                           </span>
                           {item.type === 'income' ? (
@@ -143,19 +143,19 @@ export function ReceiptsView({
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] font-semibold text-[var(--text-secondary)] opacity-60">
+                        <div className="flex items-center gap-2 text-micro-label font-semibold text-[var(--text-secondary)] opacity-60">
                           <span className="flex items-center gap-1">
                             <Calendar size={11} strokeWidth={2} />
                             {formatDate(item.timestamp)}
                           </span>
                           <span>•</span>
-                          <span className="flex items-center gap-1 text-[10px]">
+                          <span className="flex items-center gap-1 text-micro-label">
                             <Tag size={10} strokeWidth={2} />
                             {item.category}
                           </span>
                         </div>
                         {item.note && (
-                          <p className="text-[10px] text-[var(--text-secondary)] opacity-80 mt-1 truncate max-w-[180px]">
+                          <p className="text-micro-label text-[var(--text-secondary)] opacity-80 mt-1 truncate max-w-[180px]">
                             {item.note}
                           </p>
                         )}
@@ -164,7 +164,7 @@ export function ReceiptsView({
 
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <span className="font-extrabold text-[13.5px] text-[var(--text-primary)] font-amount tabular-nums">
+                        <span className="text-body-medium font-extrabold text-[var(--text-primary)] tabular-nums">
                           {formatDisplayAmount(item.amount)}
                         </span>
                       </div>

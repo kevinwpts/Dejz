@@ -10,7 +10,7 @@ export const Divider: React.FC<DividerProps> = ({ label, className = '' }) => {
     return (
       <div className={`flex items-center gap-3 my-4 ${className}`}>
         <div className="h-px bg-[var(--border-divider,var(--border-subtle))] flex-1" />
-        <span className="text-[12px] font-semibold text-[var(--text-secondary)] px-1">
+        <span className="text-label font-semibold text-[var(--text-secondary)] px-1">
           {label}
         </span>
         <div className="h-px bg-[var(--border-divider,var(--border-subtle))] flex-1" />

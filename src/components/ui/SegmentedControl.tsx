@@ -25,9 +25,9 @@ export function SegmentedControl<T extends string = string>({
   className = '',
 }: SegmentedControlProps<T>) {
   const sizeStyles = {
-    sm: 'p-1 rounded-[var(--radius-icon-button,6px)] text-xs',
-    md: 'p-1 rounded-[var(--radius-card-nested,10px)] text-xs sm:text-sm',
-    lg: 'p-1.5 rounded-[var(--radius-card-nested,10px)] text-sm',
+    sm: 'p-1 rounded-[var(--radius-icon-button,6px)] text-label',
+    md: 'p-1 rounded-[var(--radius-card-nested,10px)] text-secondary',
+    lg: 'p-1.5 rounded-[var(--radius-card-nested,10px)] text-body-medium',
   }[size];
 
   const itemSizeStyles = {
@@ -62,7 +62,7 @@ export function SegmentedControl<T extends string = string>({
             <span>{option.label}</span>
             {option.badge !== undefined && (
               <span
-                className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${
+                className={`text-micro-label font-medium px-1.5 py-0.5 rounded-full ${
                   isSelected
                     ? 'bg-white/20 dark:bg-black/15 text-white dark:text-[#242321]'
                     : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'

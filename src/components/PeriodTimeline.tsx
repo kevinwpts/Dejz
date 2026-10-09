@@ -287,7 +287,7 @@ export function PeriodTimeline({
 
               {/* Day of Week / Today */}
               <span
-                className={`text-[9px] sm:text-[10px] leading-none font-medium ${
+                className={`text-micro-label leading-none font-medium ${
                   isSelected
                     ? 'text-[var(--text-primary)] font-semibold'
                     : hasCategoryMatch
@@ -303,7 +303,7 @@ export function PeriodTimeline({
               </span>
 
               {/* Day Number */}
-              <span className={`text-[15px] sm:text-[16px] leading-none font-medium tabular-nums font-amount ${
+              <span className={`text-card-title leading-none font-medium tabular-nums ${
                 isSelected ? 'text-[var(--text-primary)] font-bold' : ''
               }`}>
                 {dayNumber}

@@ -28,16 +28,16 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         </div>
       )}
       <div className="space-y-1.5 max-w-sm flex flex-col items-center">
-        <h3 className="text-[13px] font-semibold font-unbounded text-[var(--text-primary)] tracking-tight leading-normal">
+        <h3 className="text-card-title text-center">
           {title}
         </h3>
         {description && (
           typeof description === 'string' ? (
-            <p className="text-[11px] font-normal text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-secondary text-center">
               {description}
             </p>
           ) : (
-            <div className="text-[11px] font-normal text-[var(--text-secondary)] leading-relaxed">
+            <div className="text-secondary text-center">
               {description}
             </div>
           )
@@ -47,7 +47,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         <button
           type="button"
           onClick={onAction}
-          className="mt-4 h-9 px-4 bg-[var(--surface-muted)] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] rounded-[var(--radius-button-sm,10px)] text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-none active:scale-[0.98] select-none"
+          className="mt-4 h-9 px-4 bg-[var(--surface-muted)] hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-primary)] rounded-[var(--radius-button-sm,10px)] text-label font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-none active:scale-[0.98] select-none"
         >
           {actionLabel}
         </button>

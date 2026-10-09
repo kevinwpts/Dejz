@@ -97,7 +97,7 @@ export function AppHeader({
                 <ChevronLeft size={18} strokeWidth={2} />
               </button>
               {title && (
-                <h1 className="text-[16px] sm:text-[17px] font-semibold tracking-tight truncate select-none leading-tight text-[#211F1C] dark:text-white">
+                <h1 className="text-section-title truncate select-none text-[var(--text-primary)]">
                   {title}
                 </h1>
               )}
@@ -139,7 +139,7 @@ export function AppHeader({
             >
               <Bell size={20} strokeWidth={2} />
               {notificationCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 min-w-[15px] h-[15px] px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-semibold flex items-center justify-center leading-none">
+                <span className="absolute top-1.5 right-1.5 min-w-[15px] h-[15px] px-0.5 rounded-full bg-rose-500 text-white text-micro-label font-semibold flex items-center justify-center leading-none">
                   {notificationCount}
                 </span>
               )}

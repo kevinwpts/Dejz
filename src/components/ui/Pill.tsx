@@ -19,8 +19,8 @@ export const Pill: React.FC<PillProps> = ({
   ...props
 }) => {
   const sizeStyles = {
-    sm: 'h-7 px-3 text-xs gap-1.5',
-    md: 'h-8 px-3.5 text-xs gap-1.5',
+    sm: 'h-7 px-3 text-label gap-1.5',
+    md: 'h-8 px-3.5 text-label gap-1.5',
   }[size];
 
   const activeStyles = active
@@ -38,7 +38,7 @@ export const Pill: React.FC<PillProps> = ({
       <span>{children}</span>
       {count !== undefined && (
         <span
-          className={`ml-1 text-[11px] font-medium px-1.5 py-0.2 rounded-full ${
+          className={`ml-1 text-micro-label font-medium px-1.5 py-0.2 rounded-full ${
             active
               ? 'bg-white/20 text-white dark:bg-black/20 dark:text-[#141414]'
               : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'

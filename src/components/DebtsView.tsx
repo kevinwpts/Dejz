@@ -117,22 +117,22 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       <div className="grid grid-cols-2 gap-4">
         {/* Att få (Skyldig mig) */}
         <Card variant="default" padding="lg" className="space-y-1">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+          <div className="flex items-center gap-1.5 text-label font-semibold text-emerald-600 dark:text-emerald-400">
             <ArrowDownLeft size={14} strokeWidth={2.5} />
             <span>{isEn ? 'To receive' : 'Att få tillbaka'}</span>
           </div>
-          <div className="text-xl font-extrabold text-[var(--text-primary)] font-amount tabular-nums tracking-tight">
+          <div className="text-large-amount text-[var(--text-primary)] font-amount tabular-nums">
             +{formatAmount(totalOweMe, config.language)} {curr}
           </div>
         </Card>
 
         {/* Att betala (Jag är skyldig) */}
         <Card variant="default" padding="lg" className="space-y-1">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-500 dark:text-rose-400">
+          <div className="flex items-center gap-1.5 text-label font-semibold text-rose-500 dark:text-rose-400">
             <ArrowUpRight size={14} strokeWidth={2.5} />
             <span>{isEn ? 'To pay' : 'Att betala'}</span>
           </div>
-          <div className="text-xl font-extrabold text-[var(--text-primary)] font-amount tabular-nums tracking-tight">
+          <div className="text-large-amount text-[var(--text-primary)] font-amount tabular-nums">
             -{formatAmount(totalIOwe, config.language)} {curr}
           </div>
         </Card>
@@ -182,7 +182,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                     <div className="flex items-center gap-3 min-w-0">
                       {/* Avatar initial */}
                       <div
-                        className={`w-10 h-10 rounded-[var(--radius-card-nested,8px)] flex items-center justify-center font-bold text-sm shrink-0 ${
+                        className={`w-10 h-10 rounded-[var(--radius-card-nested,8px)] flex items-center justify-center font-bold text-card-title shrink-0 ${
                           item.isSettled
                             ? 'bg-black/5 dark:bg-white/5 text-[var(--text-tertiary)]'
                             : isOweMe
@@ -195,11 +195,11 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+                          <span className="text-body-medium font-semibold text-[var(--text-primary)] truncate">
                             {item.personName}
                           </span>
                           <span
-                            className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-[var(--radius-badge,9999px)] ${
+                            className={`text-micro-label font-semibold px-1.5 py-0.2 rounded-[var(--radius-badge,9999px)] ${
                               isOweMe
                                 ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
                                 : 'text-rose-500 dark:text-rose-400 bg-rose-500/10'
@@ -210,7 +210,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                         </div>
 
                         {item.description && (
-                          <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5 font-medium">
+                          <p className="text-secondary text-[var(--text-secondary)] truncate mt-0.5">
                             {item.description}
                           </p>
                         )}
@@ -221,7 +221,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                     <div className="flex items-center gap-2 shrink-0">
                       <div className="text-right">
                         <span
-                          className={`text-sm sm:text-base font-bold font-amount tabular-nums block ${
+                          className={`text-body-medium font-semibold font-amount tabular-nums block ${
                             item.isSettled
                               ? 'line-through text-[var(--text-tertiary)]'
                               : isOweMe
@@ -286,7 +286,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           <button
             type="button"
             onClick={() => setDebtType('owe_me')}
-            className={`py-2 px-3 rounded-[var(--radius-btn,8px)] text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`py-2 px-3 rounded-[var(--radius-btn,8px)] text-label font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               debtType === 'owe_me'
                 ? 'bg-emerald-500 text-white shadow-xs'
                 : 'text-[var(--text-secondary)]'
@@ -298,7 +298,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           <button
             type="button"
             onClick={() => setDebtType('i_owe')}
-            className={`py-2 px-3 rounded-[var(--radius-btn,8px)] text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`py-2 px-3 rounded-[var(--radius-btn,8px)] text-label font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               debtType === 'i_owe'
                 ? 'bg-rose-500 text-white shadow-xs'
                 : 'text-[var(--text-secondary)]'

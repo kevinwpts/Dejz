@@ -27,12 +27,12 @@ export function BottomSheetHeader({
         </div>
         <div className="flex flex-col items-center justify-center text-center overflow-hidden px-2">
           {title && (
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
+            <h2 className="text-card-title truncate">
               {title}
             </h2>
           )}
           {subtitle && (
-            <p className="text-[11px] text-[var(--text-secondary)] dark:text-[#A8A8A8] truncate mt-0.5">
+            <p className="text-micro-label truncate mt-0.5">
               {subtitle}
             </p>
           )}
@@ -76,12 +76,12 @@ export function BottomSheetHeader({
         {leading}
         <div className="flex flex-col min-w-0">
           {title && (
-            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] dark:text-white truncate">
+            <h2 className="text-card-title truncate">
               {title}
             </h2>
           )}
           {subtitle && (
-            <p className="text-[11px] text-[var(--text-secondary)] dark:text-[#A8A8A8] truncate mt-0.5">
+            <p className="text-micro-label truncate mt-0.5">
               {subtitle}
             </p>
           )}

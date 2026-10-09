@@ -47,10 +47,10 @@ export function ConfirmModal({
           <AlertCircle size={28} strokeWidth={2} />
         </div>
 
-        <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] mb-2 tracking-tight">
+        <h2 className="text-section-title font-bold text-[var(--text-primary)] mb-2 tracking-tight">
           {title}
         </h2>
-        <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] mb-6 leading-relaxed opacity-80">
+        <p className="text-secondary font-medium text-[var(--text-secondary)] mb-6 leading-relaxed opacity-80">
           {message}
         </p>
 

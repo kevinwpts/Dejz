@@ -137,7 +137,7 @@ export function ManageAccountModal({
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-xl font-bold">
+                  <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-page-title font-bold">
                     {fullName ? fullName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -153,7 +153,7 @@ export function ManageAccountModal({
                 onChange={handleFileChange}
               />
             </label>
-            <p className="text-[11px] font-semibold text-[var(--text-secondary)] opacity-70">
+            <p className="text-micro-label font-semibold text-[var(--text-secondary)] opacity-70">
               Tryck för att ändra profilbild
             </p>
           </div>
@@ -180,7 +180,7 @@ export function ManageAccountModal({
 
           {identities.length > 0 && (
             <div className="space-y-2 pt-1">
-              <span className="text-[12px] font-semibold text-[var(--text-secondary)] px-1 block">
+              <span className="text-label font-semibold text-[var(--text-secondary)] px-1 block">
                 {t('connectedAccounts' as any) || 'Kopplade konton'}
               </span>
               <Card padding="none" className="overflow-hidden divide-y divide-[var(--border-color)]/50">

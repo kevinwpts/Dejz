@@ -31,9 +31,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       'inline-flex items-center justify-center font-medium transition-all duration-[var(--duration-normal,150ms)] select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30';
 
     const sizeStyles = {
-      sm: 'h-[var(--height-button-sm,32px)] px-3.5 rounded-[var(--radius-button-sm,10px)] text-xs sm:text-[13px] gap-1.5 active:scale-95',
-      md: 'h-[var(--height-button,48px)] px-5 rounded-[var(--radius-button,14px)] text-sm sm:text-[15px] gap-2 active:scale-[0.98]',
-      lg: 'h-[var(--height-button-lg,52px)] px-6 rounded-[var(--radius-button-lg,14px)] text-base gap-2.5 active:scale-[0.98]',
+      sm: 'h-[var(--height-button-sm,32px)] px-3.5 rounded-[var(--radius-button-sm,10px)] text-label gap-1.5 active:scale-95',
+      md: 'h-[var(--height-button,48px)] px-5 rounded-[var(--radius-button,14px)] text-body-medium gap-2 active:scale-[0.98]',
+      lg: 'h-[var(--height-button-lg,52px)] px-6 rounded-[var(--radius-button-lg,14px)] text-card-title gap-2.5 active:scale-[0.98]',
     }[size];
 
     const variantStyles = {

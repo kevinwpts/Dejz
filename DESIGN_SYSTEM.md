@@ -49,17 +49,23 @@ Dejz stöder **Light Mode**, **Dark Mode** och **Black Theme**. Färgerna hämta
 
 ---
 
-### 2.3 Typografi
-Dejz använder två distinkta typsnittsfamiljer med semantiska betydelser:
-*   **Outfit** (`font-sans`) – Används för samtliga rubrikroller, knappar, modalöverskrifter och siffror för en modern och sofistikerad känsla.
-*   **DM Sans** (`font-sans` för brödtext) – Används för löpande text, fältbeskrivningar, etiketter och finstilta data.
+### 2.3 Typografi – DM Sans och Central Semantisk Skala
+Dejz använder **DM Sans** genomgående som enda UI-typsnitt för alla rubriker, belopp och texter. All typografi styrs via en central semantisk skala:
 
-Hämta alltid storlekar och fontvikter via `DS.typography`:
-*   `DS.typography.heroAmount` – Stora ekonomiska siffror (monospaced siffror för perfekt linjering).
-*   `DS.typography.pageTitle` – Sidrubriker.
-*   `DS.typography.body` – Standard brödtext.
-*   `DS.typography.label` – Formuläretiketter.
-*   `DS.typography.caption` – Undertexter och metadata.
+| Typografisk roll | CSS Utility-klass | Storlek | Vikt | Radavstånd | Bokstavsavstånd | Användning |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Hero Amount** | `.text-hero-amount` | 36px | 700 | 1.1 | -0.03em | Appens viktigaste ekonomiska huvudbelopp (Kvar att spendera) |
+| **Large Amount** | `.text-large-amount` | 30px | 600 | 1.15 | -0.03em | Större ekonomiska delsummor och summeringar |
+| **Page Title** | `.text-page-title` | 24px | 600 | 1.25 | -0.025em | Sidrubriker, huvudvyer |
+| **Section Title** | `.text-section-title` | 18px | 600 | 1.3 | -0.015em | Sektionsrubriker, modaltitlar |
+| **Card Title** | `.text-card-title` | 16px | 600 | 1.35 | 0em | Korttitlar, listrubriker, dialog-delrubriker |
+| **Body** | `.text-body` | 15px | 400 | 1.5 | 0em | Standard brödtext, inmatningsfält |
+| **Body Medium** | `.text-body-medium` | 15px | 500 | 1.5 | 0em | Transaktionsrader, knappar, viktad brödtext |
+| **Secondary** | `.text-secondary` | 13px | 400 | 1.45 | 0em | Sekundärtext, förklarande text |
+| **Label** | `.text-label` | 12px | 500 | 1.35 | 0.01em | Fältetiketter, filterknappar, statusindikatorer |
+| **Micro Label** | `.text-micro-label` | 11px | 600 | 1.3 | 0.01em | Badges, pills, små diagrametiketter, datumstämplar |
+
+Dessa klasser är definierade som centrala `@utility` i `src/index.css` och tillgängliga via `DS.typography` i `src/constants/designSystem.ts`. Hårdkoda **aldrig** godtyckliga textstorlekar som `text-[13px]` eller `text-[17px]` i nya komponenter.
 
 ---
 

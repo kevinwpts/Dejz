@@ -72,10 +72,10 @@ export function ResetPasswordModal({
             <CheckCircle2 size={30} strokeWidth={2} />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
+            <h3 className="text-section-title font-bold text-[var(--text-primary)]">
               Lösenord uppdaterat!
             </h3>
-            <p className="text-xs font-medium text-[var(--text-secondary)]">
+            <p className="text-secondary font-medium text-[var(--text-secondary)]">
               Ditt nya lösenord har sparats och du kan nu fortsätta använda appen.
             </p>
           </div>
@@ -86,10 +86,10 @@ export function ResetPasswordModal({
             <div className="w-10 h-10 rounded-[8px] bg-[var(--surface-color)] text-[var(--text-primary)] flex items-center justify-center mb-3 border-none">
               <Lock size={18} strokeWidth={2} />
             </div>
-            <h3 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">
+            <h3 className="text-section-title font-bold text-[var(--text-primary)]">
               Välj ett nytt lösenord
             </h3>
-            <p className="text-xs text-[var(--text-secondary)]">
+            <p className="text-secondary text-[var(--text-secondary)]">
               Ange ditt nya lösenord nedan för att slutföra återställningen.
             </p>
           </div>

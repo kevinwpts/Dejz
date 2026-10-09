@@ -105,11 +105,11 @@ export function UniversalPeriodSelector({
             strokeWidth={2} 
             className="text-[var(--text-primary)] shrink-0" 
           />
-          <span className="text-xs sm:text-[13px] font-bold tracking-tight truncate text-[var(--text-primary)]">
+          <span className="text-label font-bold truncate text-[var(--text-primary)]">
             {month}
           </span>
           {actuallyIsCurrent && (
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
+            <span className="text-micro-label font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
               Nu
             </span>
           )}
@@ -156,11 +156,11 @@ export function UniversalPeriodSelector({
         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[8px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] transition-all cursor-pointer group select-none active:scale-95 shadow-none"
       >
         <CalendarIcon size={13} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
-        <span className="text-xs sm:text-[13px] font-bold font-display tracking-wider text-[var(--text-primary)]">
+        <span className="text-label font-bold text-[var(--text-primary)]">
           {month}
         </span>
         {actuallyIsCurrent && (
-          <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
+          <span className="text-micro-label font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
             Nu
           </span>
         )}
@@ -197,11 +197,11 @@ export function UniversalPeriodSelector({
             className="flex flex-col items-center group/label px-4 py-1.5 rounded-[8px] hover:bg-[var(--surface-muted)] transition-all cursor-pointer active:scale-95"
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-base sm:text-lg font-bold font-display tracking-wider text-[var(--text-primary)] group-hover/label:text-[var(--text-primary)] transition-colors">
+              <span className="text-card-title font-bold text-[var(--text-primary)] group-hover/label:text-[var(--text-primary)] transition-colors">
                 {month}
               </span>
               {actuallyIsCurrent && (
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
+                <span className="text-micro-label font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
                   Nu
                 </span>
               )}
@@ -209,18 +209,18 @@ export function UniversalPeriodSelector({
               <ChevronDown size={13} className="text-[var(--text-secondary)] group-hover/label:text-[var(--text-primary)] transition-opacity" />
             </div>
             {dates && (
-              <span className="text-xs font-medium text-[var(--text-secondary)] mt-0.5">
+              <span className="text-label text-[var(--text-secondary)] mt-0.5">
                 {dates}
               </span>
             )}
           </button>
         ) : (
           <div className="flex flex-col items-center px-4 py-1 select-none">
-            <span className="text-base sm:text-lg font-bold font-display tracking-wider text-[var(--text-primary)]">
+            <span className="text-card-title font-bold text-[var(--text-primary)]">
               {month}
             </span>
             {dates && (
-              <span className="text-xs font-medium text-[var(--text-secondary)] mt-0.5">
+              <span className="text-label text-[var(--text-secondary)] mt-0.5">
                 {dates}
               </span>
             )}

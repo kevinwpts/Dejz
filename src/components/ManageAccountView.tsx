@@ -144,7 +144,7 @@ export function ManageAccountView({
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-2xl font-bold">
+                  <div className="w-full h-full flex items-center justify-center bg-[var(--accent-color)]/10 text-[var(--accent-color)] text-page-title font-bold">
                     {fullName ? fullName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -160,7 +160,7 @@ export function ManageAccountView({
                 onChange={handleFileChange}
               />
             </label>
-            <p className="text-[11px] font-semibold text-[var(--text-secondary)] opacity-70">
+            <p className="text-micro-label font-semibold text-[var(--text-secondary)] opacity-70">
               Tryck för att ändra profilbild
             </p>
           </div>
@@ -202,7 +202,7 @@ export function ManageAccountView({
             {/* Connected Accounts */}
             {identities.length > 0 && (
               <div className="space-y-2">
-                <span className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5 block">
+                <span className="text-label font-semibold text-[var(--text-secondary)] px-1.5 block">
                   {t('connectedAccounts' as any) || 'Kopplade konton'}
                 </span>
                 <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">

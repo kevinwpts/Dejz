@@ -114,12 +114,12 @@ export function BottomSheet({
                   )}
                   <div className="flex flex-col min-w-0 flex-1">
                     {title && (
-                      <h2 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] font-display truncate">
+                      <h2 className="text-card-title truncate">
                         {title}
                       </h2>
                     )}
                     {subtitle && (
-                      <p className="text-xs text-[var(--text-secondary)] font-normal truncate mt-0.5">
+                      <p className="text-secondary truncate mt-0.5">
                         {subtitle}
                       </p>
                     )}
@@ -226,22 +226,22 @@ export function BottomSheetOption<T = string>({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span
-              className={`text-sm sm:text-[14px] tracking-tight truncate leading-tight ${
+              className={`text-secondary truncate leading-tight ${
                 isSelected
                   ? 'font-semibold text-[var(--text-primary)]'
-                  : 'font-medium text-[var(--text-secondary)]'
+                  : 'font-medium'
               }`}
             >
               {label}
             </span>
             {badge && (
-              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] shrink-0">
+              <span className="text-micro-label font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] shrink-0">
                 {badge}
               </span>
             )}
           </div>
           {subtitle && (
-            <p className="text-[11.5px] text-[var(--text-secondary)] font-normal truncate mt-0.5 leading-tight">
+            <p className="text-micro-label truncate mt-0.5 leading-tight">
               {subtitle}
             </p>
           )}
@@ -274,7 +274,7 @@ export function BottomSheetSection({ title, children, className = '' }: BottomSh
   return (
     <div className={`space-y-1.5 ${className}`}>
       {title && (
-        <h3 className="px-3 text-[11px] font-semibold text-[var(--text-secondary)] tracking-wider uppercase font-display">
+        <h3 className="px-3 text-micro-label tracking-wider uppercase">
           {title}
         </h3>
       )}

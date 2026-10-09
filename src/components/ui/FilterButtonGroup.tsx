@@ -79,7 +79,7 @@ export function FilterButtonGroup<T extends string = string>({
                 }
                 onSelect(option.id);
               }}
-              className={`flex-shrink-0 whitespace-nowrap h-9 sm:h-[38px] px-3.5 sm:px-4 rounded-[var(--radius-button,14px)] inline-flex items-center justify-center gap-1.5 text-xs sm:text-[13px] font-medium transition-all duration-150 cursor-pointer active:scale-[0.98] ${
+              className={`flex-shrink-0 whitespace-nowrap h-9 sm:h-[38px] px-3.5 sm:px-4 rounded-[var(--radius-button,14px)] inline-flex items-center justify-center gap-1.5 text-secondary font-medium transition-all duration-150 cursor-pointer active:scale-[0.98] ${
                 isSelected
                   ? 'bg-[#242321] text-white dark:bg-stone-100 dark:text-[#242321] border border-transparent shadow-xs'
                   : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-subtle)]'
@@ -93,7 +93,7 @@ export function FilterButtonGroup<T extends string = string>({
               <span>{option.label}</span>
               {option.badge !== undefined && (
                 <span
-                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full shrink-0 ${
+                  className={`text-micro-label font-medium px-1.5 py-0.5 rounded-full shrink-0 ${
                     isSelected
                       ? 'bg-white/20 dark:bg-black/15 text-white dark:text-[#242321]'
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'

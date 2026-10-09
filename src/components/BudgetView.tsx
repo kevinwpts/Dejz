@@ -375,14 +375,14 @@ export function BudgetView({
 
       {/* Overview Hero Section - Dynamic based on filter */}
       <div className="text-center flex flex-col items-center gap-1 py-1 select-none">
-        <span className="text-xs sm:text-[13px] font-medium text-[var(--text-secondary)] flex items-center justify-center gap-1 flex-wrap">
+        <span className="text-secondary font-medium flex items-center justify-center gap-1 flex-wrap">
           {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
           {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
           {budgetFilter === 'fixed' && (
             freqFilter === 'all' ? (
               <>
                 <span>{config?.language === 'en' ? 'Total fixed expenses' : 'Totala fasta utgifter'}</span>
-                <span className="text-[10px] text-[var(--text-tertiary)] font-normal">
+                <span className="text-micro-label text-[var(--text-tertiary)] font-normal">
                   {config?.language === 'en' ? '(average/month)' : '(snitt/månad)'}
                 </span>
               </>
@@ -406,13 +406,13 @@ export function BudgetView({
                 groupedFixedSums[Frequency.ANNUALLY]
               )
             )} 
-            className="text-[34px] sm:text-[38px] md:text-[42px] leading-tight font-semibold font-amount tabular-nums tracking-tight text-[var(--text-primary)]"
+            className="text-hero-amount leading-tight text-[var(--text-primary)]"
             formatter={(val) => {
               const prefix = budgetFilter === 'income' ? '+' : '−';
               return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
-          <span className="text-sm sm:text-base font-normal text-[var(--text-secondary)] border-none">
+          <span className="text-card-title text-[var(--text-secondary)] border-none">
             {config?.currency || 'kr'}
           </span>
         </div>
@@ -442,7 +442,7 @@ export function BudgetView({
                         else if (incomeSortBy === 'name') setIncomeSortBy('amount');
                         else setIncomeSortBy('day');
                       }}
-                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-label text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
@@ -509,7 +509,7 @@ export function BudgetView({
                         else if (fixedSortBy === 'name') setFixedSortBy('amount');
                         else setFixedSortBy('day');
                       }}
-                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-label text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
@@ -584,7 +584,7 @@ export function BudgetView({
                         else if (savingSortBy === 'name') setSavingSortBy('amount');
                         else setSavingSortBy('day');
                       }}
-                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-label text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />

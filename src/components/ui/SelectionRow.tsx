@@ -49,17 +49,17 @@ export function SelectionRow<T = string>({
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className={`text-xs sm:text-[13.5px] tracking-tight truncate ${isSelected ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-secondary)] font-medium'}`}>
+            <span className={`text-secondary truncate ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium'}`}>
               {label}
             </span>
             {badge && (
-              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] shrink-0">
+              <span className="text-micro-label font-medium px-1.5 py-0.5 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] shrink-0">
                 {badge}
               </span>
             )}
           </div>
           {subtitle && (
-            <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5 font-normal">
+            <p className="text-micro-label truncate mt-0.5 font-normal">
               {subtitle}
             </p>
           )}

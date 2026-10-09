@@ -211,10 +211,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+              <h2 className="text-page-title text-[var(--text-primary)]">
                 {t('checkEmailTitle' as any)}
               </h2>
-              <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
+              <p className="text-secondary leading-relaxed max-w-[320px] mx-auto">
                 {t('checkEmailDesc' as any)}
               </p>
             </div>
@@ -240,10 +240,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+              <h2 className="text-page-title text-[var(--text-primary)]">
                 {t('checkInboxTitle' as any)}
               </h2>
-              <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed max-w-[320px] mx-auto">
+              <p className="text-secondary leading-relaxed max-w-[320px] mx-auto">
                 {t('checkInboxDesc' as any, { email })}
               </p>
             </div>
@@ -270,10 +270,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
               </div>
 
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1.5 text-center">
+              <h1 className="text-page-title mb-1.5 text-center">
                 {t('forgotPasswordTitle' as any)}
               </h1>
-              <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)] text-center max-w-[320px] leading-relaxed">
+              <p className="text-secondary text-center max-w-[320px] leading-relaxed">
                 {t('forgotPasswordDesc' as any)}
               </p>
             </div>
@@ -310,10 +310,10 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                 <DejzLogo className="text-3xl font-black" textColor="var(--logo-color)" />
               </div>
 
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-1">
+              <h1 className="text-page-title mb-1">
                 {isRegistering ? t('createAccount') : t('welcome')}
               </h1>
-              <p className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
+              <p className="text-secondary">
                 {isRegistering ? t('createAccountSubtitle' as any) : t('loginSubtitle' as any)}
               </p>
             </div>
@@ -363,7 +363,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
                           setIsForgotPassword(true);
                           setError(null);
                         }}
-                        className="text-[12px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                        className="text-label font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                       >
                         {t('forgotPassword' as any)}
                       </button>
@@ -423,7 +423,7 @@ export function Auth({ onShowToast, onLegalClick, t, initialIsRegistering = fals
       </div>
 
       {/* Footer Legal Links */}
-      <div className="relative z-10 pt-4 flex items-center justify-center gap-4 text-xs font-semibold text-[var(--text-secondary)]">
+      <div className="relative z-10 pt-4 flex items-center justify-center gap-4 text-label font-semibold text-[var(--text-secondary)]">
         <button 
           onClick={() => onLegalClick('privacy')}
           className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"

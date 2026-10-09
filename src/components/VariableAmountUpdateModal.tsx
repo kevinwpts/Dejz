@@ -97,7 +97,7 @@ export function VariableAmountUpdateModal({
                   className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] text-[var(--text-primary)] px-6 py-6 rounded-[var(--radius-input,14px)] transition-all outline-none font-amount text-4xl sm:text-5xl font-bold tracking-tighter text-center pr-20 focus:border-[var(--accent-color)]"
                 />
                 <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <span className="text-xs font-semibold text-accent bg-accent/10 px-3 py-1.5 rounded-full">
+                  <span className="text-label font-semibold text-accent bg-accent/10 px-3 py-1.5 rounded-full">
                     {config.currency || 'kr'}
                   </span>
                 </div>

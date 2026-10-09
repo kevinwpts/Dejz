@@ -396,10 +396,10 @@ export function TodayView({
         >
           {/* Left: Current Period */}
           <div className="flex flex-col min-w-0">
-            <span className="text-xs font-medium text-[var(--text-secondary)] tracking-tight leading-tight">
+            <span className="text-label text-[var(--text-secondary)] leading-tight">
               {lang === 'en' ? 'Current period' : 'Aktuell period'}
             </span>
-            <span className="text-sm font-semibold text-[var(--text-primary)] tracking-tight truncate mt-1">
+            <span className="text-card-title text-[var(--text-primary)] truncate mt-1">
               {periodIntervalText}
             </span>
           </div>
@@ -408,10 +408,10 @@ export function TodayView({
 
           {/* Right: Days Remaining */}
           <div className="flex flex-col items-end shrink-0 text-right">
-            <span className="text-xs font-medium text-[var(--text-secondary)] tracking-tight leading-tight">
+            <span className="text-label text-[var(--text-secondary)] leading-tight">
               {lang === 'en' ? 'Next payday' : 'Nästa lön'}
             </span>
-            <span className="text-sm font-semibold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-1">
+            <span className="text-card-title text-[var(--text-primary)] font-amount tabular-nums truncate mt-1">
               {stats?.isPastPeriod
                 ? (lang === 'en' ? 'Ended' : 'Avslutad')
                 : (lang === 'en'
@@ -435,10 +435,10 @@ export function TodayView({
                 <SlidersHorizontal size={18} strokeWidth={2} />
               </div>
               <div>
-                <p className="text-xs sm:text-sm font-bold text-[var(--text-primary)] leading-snug">
+                <p className="text-card-title text-[var(--text-primary)] leading-snug">
                   {lang === "en" ? "Set up your budget" : "Sätt upp din budget"}
                 </p>
-                <p className="text-[11px] font-medium text-[var(--text-secondary)] mt-0.5">
+                <p className="text-micro-label text-[var(--text-secondary)] mt-0.5">
                   {lang === "en" ? "Set limits per category to track spending" : "Fördela din budget på dina kategorier"}
                 </p>
               </div>
@@ -448,7 +448,7 @@ export function TodayView({
         ) : categoryBudgetData.length > 0 ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between px-0.5">
-              <span className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)] tracking-tight">
+              <span className="text-label font-semibold text-[var(--text-secondary)]">
                 {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
               </span>
               <button
@@ -457,7 +457,7 @@ export function TodayView({
                   if (typeof feedback.light === 'function') feedback.light();
                   onNavigate("profile", "budget");
                 }}
-                className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                className="text-label text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
               >
                 {lang === "en" ? "Manage" : "Hantera"}
               </button>
@@ -479,14 +479,14 @@ export function TodayView({
                     {/* Top: Icon + Name */}
                     <div className="flex items-center gap-2 min-w-0 w-full">
                       <CategoryIcon icon={cat.iconName} color={catColor} size="xs" />
-                      <span className="text-xs font-medium text-[var(--text-primary)] tracking-tight truncate flex-1 min-w-0">
+                      <span className="text-label text-[var(--text-primary)] truncate flex-1 min-w-0">
                         {cat.name}
                       </span>
                     </div>
 
                     {/* Amount */}
                     <div className="space-y-0.5">
-                      <p className={`text-xs sm:text-[13px] font-semibold font-amount tabular-nums tracking-tight truncate ${
+                      <p className={`text-secondary font-semibold font-amount tabular-nums truncate ${
                         cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
                       }`}>
                         {(() => {
@@ -498,7 +498,7 @@ export function TodayView({
                           return `${formatAmount(rem, lang)} ${currency}`;
                         })()}
                       </p>
-                      <p className="text-[11px] font-normal text-[var(--text-secondary)] tracking-tight leading-none">
+                      <p className="text-micro-label text-[var(--text-secondary)] leading-none">
                         {cat.hasBudget 
                           ? (cat.remaining < 0 ? (lang === 'en' ? 'over budget' : 'över budget') : (lang === 'en' ? 'left to spend' : 'kvar att spendera'))
                           : (lang === 'en' ? 'spent' : 'spenderat')}
@@ -525,7 +525,7 @@ export function TodayView({
                   <SlidersHorizontal size={14} strokeWidth={2} />
                 </div>
 
-                <span className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] tracking-tight">
+                <span className="text-label text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
                   {lang === 'en' ? 'Manage' : 'Hantera'}
                 </span>
               </motion.button>
@@ -552,7 +552,7 @@ export function TodayView({
       {/* Date Header directly under the timeline */}
       <div className="flex items-center justify-between px-1 pt-1">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-[var(--text-secondary)] tracking-tight">
+          <span className="text-label font-medium text-[var(--text-secondary)]">
             {stats.isPastPeriod
               ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
               : selectedDate.toDateString() === new Date().toDateString()
@@ -563,7 +563,7 @@ export function TodayView({
                   )}
           </span>
           {(displayedVariableTransactions.length > 0 || displayedFixedTransactions.length > 0) && (
-            <span className="text-[11px] font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
+            <span className="text-micro-label font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
               {(displayedVariableTransactions.length + displayedFixedTransactions.length)} {
                 (displayedVariableTransactions.length + displayedFixedTransactions.length) === 1
                   ? (lang === 'en' ? 'transaktion' : 'transaktion')
@@ -575,7 +575,7 @@ export function TodayView({
         {!isTodaySelected && (
           <button
             onClick={handleGoToToday}
-            className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-btn,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
+            className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-btn,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
           >
             <RotateCcw size={11} strokeWidth={2.5} />
             <span>{lang === "en" ? "Today" : "Idag"}</span>
@@ -672,10 +672,10 @@ export function TodayView({
               <Calendar size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-medium text-[var(--text-secondary)]">
+              <span className="text-label text-[var(--text-secondary)]">
                 {lang === 'en' ? 'Current period' : 'Aktuell period'}
               </span>
-              <span className="text-sm font-semibold text-[var(--text-primary)] truncate mt-0.5">
+              <span className="text-card-title text-[var(--text-primary)] truncate mt-0.5">
                 {periodIntervalText}
               </span>
             </div>
@@ -687,10 +687,10 @@ export function TodayView({
               <Clock size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-medium text-[var(--text-secondary)]">
+              <span className="text-label text-[var(--text-secondary)]">
                 {lang === 'en' ? 'Next payday' : 'Nästa lön'}
               </span>
-              <span className="text-sm font-semibold text-[var(--text-primary)] font-amount tabular-nums truncate mt-0.5">
+              <span className="text-card-title text-[var(--text-primary)] font-amount tabular-nums truncate mt-0.5">
                 {daysValueText} {lang === 'en' ? 'until payday' : 'kvar till lön'}
               </span>
             </div>

@@ -238,15 +238,15 @@ export function TransactionViewModal({
             </div>
 
             {/* Title */}
-            <h2 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[var(--text-primary)] leading-tight max-w-[90%] truncate px-2">
+            <h2 className="text-page-title text-[var(--text-primary)] leading-tight max-w-[90%] truncate px-2">
               {merchantName}
             </h2>
 
             {/* Price */}
-            <p className={`text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+            <p className={`text-large-amount font-amount tabular-nums mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-80 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
               <span>{formatAmount(transaction.amount, config.language)}</span>
-              <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{config.currency}</span>
+              <span className="text-card-title text-[var(--text-secondary)] ml-1.5 self-end pb-1">{config.currency}</span>
             </p>
           </div>
 
@@ -254,7 +254,7 @@ export function TransactionViewModal({
           <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
             {/* Category */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="text-right">
@@ -270,8 +270,8 @@ export function TransactionViewModal({
                       return (
                         <div key={split.id || idx} className="flex items-center justify-end gap-2">
                           {iconKey && <CategoryIcon icon={iconKey} variant="minimal" size="sm" />}
-                          <span className="text-[14px] font-medium text-[var(--text-primary)]">{splitCatName}</span>
-                          <span className="text-[12px] font-normal text-[var(--text-secondary)]">({formatAmount(split.amount, config.language)} {config.currency})</span>
+                          <span className="text-body-medium font-medium text-[var(--text-primary)]">{splitCatName}</span>
+                          <span className="text-label text-[var(--text-secondary)]">({formatAmount(split.amount, config.language)} {config.currency})</span>
                         </div>
                       );
                     })}
@@ -288,7 +288,7 @@ export function TransactionViewModal({
                       if (!iconKey) return null;
                       return <CategoryIcon icon={iconKey} variant="minimal" size="sm" />;
                     })()}
-                    <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                    <span className="text-body-medium font-medium text-[var(--text-primary)]">
                       {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}
                     </span>
                   </div>
@@ -298,10 +298,10 @@ export function TransactionViewModal({
 
             {/* Date Field */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                 {t('date')}
               </span>
-              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-body-medium font-medium text-[var(--text-primary)] text-right tabular-nums">
                 {formattedDate}
               </span>
             </div>
@@ -309,10 +309,10 @@ export function TransactionViewModal({
             {/* Time Field */}
             {formattedTime && (
               <div className="py-3 flex items-center justify-between gap-4">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+                <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                   {config.language === 'en' ? 'Time' : config.language === 'fi' ? 'Aika' : 'Tid'}
                 </span>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+                <span className="text-body-medium font-medium text-[var(--text-primary)] text-right tabular-nums">
                   {formattedTime}
                 </span>
               </div>

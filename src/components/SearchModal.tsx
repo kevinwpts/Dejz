@@ -117,7 +117,7 @@ export function SearchModal({
                     "Søg transaktion, butik, kategori...",
                     "Etsi tilitapahtumaa, kauppaa, kategoriaa..."
                   )}
-                  className="w-full h-full bg-transparent text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none"
+                  className="w-full h-full bg-transparent text-body-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none"
                 />
                 {query && (
                   <button 
@@ -137,7 +137,7 @@ export function SearchModal({
               <button 
                 type="button"
                 onClick={onClose} 
-                className="h-10 px-3 rounded-full text-[13px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-all cursor-pointer shrink-0 active:scale-95"
+                className="h-10 px-3 rounded-full text-secondary font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10 transition-all cursor-pointer shrink-0 active:scale-95"
               >
                 {getL10n("Avbryt", "Cancel", "Avbryt", "Annuller", "Peruuta")}
               </button>
@@ -150,7 +150,7 @@ export function SearchModal({
                   <div className="w-12 h-12 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] opacity-60 flex items-center justify-center mx-auto mb-3">
                     <Search size={22} />
                   </div>
-                  <p className="text-[14px] font-semibold text-[var(--text-primary)]">
+                  <p className="text-card-title font-semibold text-[var(--text-primary)]">
                     {getL10n(
                       'Sök i din ekonomi',
                       'Search your finances',
@@ -159,7 +159,7 @@ export function SearchModal({
                       'Hae taloudestasi'
                     )}
                   </p>
-                  <p className="text-[12.5px] font-medium text-[var(--text-secondary)] opacity-70 mt-1 max-w-xs mx-auto">
+                  <p className="text-secondary font-medium text-[var(--text-secondary)] opacity-70 mt-1 max-w-xs mx-auto">
                     {getL10n(
                       'Skriv in butik, anteckning, kategori eller belopp för att söka.',
                       'Type a store, note, category or amount to search.',
@@ -172,7 +172,7 @@ export function SearchModal({
               ) : (
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between px-1">
-                    <span className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] opacity-70">
+                    <span className="text-micro-label font-bold tracking-wider text-[var(--text-secondary)] opacity-70">
                       {getL10n("Transaktioner", "Transactions", "Transaksjoner", "Transaktioner", "Tapahtumat")} ({matchingTransactions.length})
                     </span>
                   </div>

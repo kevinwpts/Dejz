@@ -101,7 +101,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         {/* Row 1: Title & Price in line, title stretches all the way */}
         <div className="flex items-baseline justify-between gap-2.5 min-w-0">
           <p 
-            className="text-[14px] font-medium text-[var(--text-primary)] leading-snug break-words tracking-tight flex-1 min-w-0"
+            className="text-body-medium text-[var(--text-primary)] leading-snug break-words flex-1 min-w-0"
             title={displayName}
           >
             {displayName}
@@ -122,10 +122,10 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                 }
               }
               return (
-                <p className={`text-[14px] font-normal whitespace-nowrap tracking-tight ${amountColor}`}>
+                <p className={`text-body-medium whitespace-nowrap ${amountColor}`}>
                   <span className="opacity-75 mr-0.5">{type === 'income' ? '+' : '−'}</span>
-                  <span className="font-amount tabular-nums font-normal tracking-tight">{formatAmount(Math.round(displayAmount), language)}</span>
-                  <span className="text-[11px] font-normal opacity-75 ml-[2px]">{currency}{freqSuffix}</span>
+                  <span className="tabular-nums font-normal">{formatAmount(Math.round(displayAmount), language)}</span>
+                  <span className="text-micro-label opacity-75 ml-[2px]">{currency}{freqSuffix}</span>
                 </p>
               );
             })()}
@@ -154,14 +154,14 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                   }
                   return null;
                 })()}
-                <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] tracking-tight whitespace-nowrap truncate max-w-[140px] sm:max-w-[220px]">
+                <span className="text-micro-label text-[#777168] dark:text-[#A8A8A8] whitespace-nowrap truncate max-w-[140px] sm:max-w-[220px]">
                   {capitalize(item.category || '')}
                 </span>
               </div>
             )}
 
             {item.isCancelled && (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-[var(--radius-badge,6px)] text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-[var(--radius-badge,6px)] text-micro-label font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
                 {language === 'en' ? 'Cancelled' : 'Uppsagd'}
               </span>
             )}
@@ -170,7 +170,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
           {/* Right side: deduction day and payment method combined into a single pill */}
           {(dayString || paymentString) && (
             <div className="flex items-center shrink-0 justify-end max-w-[65%] overflow-hidden">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-badge,6px)] text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none truncate tabular-nums">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-badge,6px)] text-micro-label font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none truncate tabular-nums">
                 {paymentString ? (
                   <CategoryIcon icon={pmIconKey} variant="minimal" size="2xs" className="shrink-0" />
                 ) : (

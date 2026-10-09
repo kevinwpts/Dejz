@@ -118,7 +118,7 @@ export function TransactionItem({
             size="2xs" 
           />
         ) : null}
-        <span className="text-[11px] font-normal text-[#777168] dark:text-[#A8A8A8] tracking-tight whitespace-nowrap">
+        <span className="text-micro-label text-[#777168] dark:text-[#A8A8A8] whitespace-nowrap">
           {capitalize(categoryName || '')}
           {amount !== undefined && <span className="ml-0.5 opacity-70">({formatAmount(amount, config?.language || 'sv')})</span>}
         </span>
@@ -168,7 +168,7 @@ export function TransactionItem({
               aria-label={getL10n('Ta bort', 'Delete')}
             >
               <Trash2 size={19} strokeWidth={2} />
-              <span className="text-[11px] font-medium tracking-tight">
+              <span className="text-micro-label font-medium tracking-tight">
                 {getL10n('Ta bort', 'Delete')}
               </span>
             </button>
@@ -212,7 +212,7 @@ export function TransactionItem({
             <div className="min-w-0 flex-1 flex flex-col justify-center">
               {/* Primary Merchant Name + Fixed Icon Badge */}
               <div className="flex items-center min-w-0">
-                <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug break-words tracking-tight flex-1 min-w-0">
+                <p className="text-body-medium text-[var(--text-primary)] leading-snug break-words flex-1 min-w-0">
                   <span>{merchantName}</span>
                   {isFixedItem && (
                     <span 
@@ -235,7 +235,7 @@ export function TransactionItem({
               <div className="flex items-center gap-1.5 mt-0.5 min-w-0 overflow-hidden text-[var(--text-secondary)] flex-wrap">
                 {hideCategoryBadge ? (
                   (transaction.timestamp || transaction.date) ? (
-                    <span className="text-[11px] font-normal text-[var(--text-tertiary)] tabular-nums">
+                    <span className="text-micro-label text-[var(--text-tertiary)] tabular-nums">
                       {new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })}
                     </span>
                   ) : null
@@ -256,21 +256,21 @@ export function TransactionItem({
             </div>
           </div>
           
-          {/* Primary Amount: matching title size and color, normal weight */}
+          {/* Primary Amount: matching title size and color */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-            <p className={`text-[14px] font-normal whitespace-nowrap tracking-tight ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+            <p className={`text-body-medium whitespace-nowrap ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-75 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
-              <span className="font-amount tabular-nums font-normal tracking-tight">{formatAmount(finalAmount, config?.language || 'sv')}</span>
-              <span className="text-[11px] font-normal opacity-75 ml-[2px]">{config?.currency || 'kr'}</span>
+              <span className="tabular-nums font-normal">{formatAmount(finalAmount, config?.language || 'sv')}</span>
+              <span className="text-micro-label opacity-75 ml-[2px]">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixedItem ? (
-              <p className="text-[9.5px] font-normal text-[var(--text-tertiary)] mt-0.5 tabular-nums">
+              <p className="text-micro-label text-[var(--text-tertiary)] mt-0.5 tabular-nums">
                 {showDate 
                   ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
                   : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}
               </p>
             ) : isFixedItem && (
-              <span className="text-[9.5px] font-normal text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap tabular-nums">
+              <span className="text-micro-label text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap tabular-nums">
                 {transaction.deductionDay 
                   ? `${transaction.deductionDay}${config?.language === 'en' ? 'th' : ':e'}`
                   : (transaction.timestamp || transaction.date) 

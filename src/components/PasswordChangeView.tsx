@@ -72,11 +72,11 @@ export function PasswordChangeView({ onBack, t, addToast, userEmail }: PasswordC
           size="sm"
         />
         <div className="min-w-0">
-          <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)] truncate">
+          <h1 className="text-page-title font-bold text-[var(--text-primary)] truncate">
             {t('changePassword' as any) || 'Ändra lösenord'}
           </h1>
           {userEmail && (
-            <p className="text-[12px] font-normal text-[var(--text-secondary)] opacity-75 truncate">
+            <p className="text-label font-normal text-[var(--text-secondary)] opacity-75 truncate">
               {userEmail}
             </p>
           )}

@@ -154,21 +154,21 @@ export const DS = {
    * Standard Typography token classes
    */
   typography: {
-    heroAmount: 'text-[36px] font-bold leading-[1.1] tracking-[-0.03em] tabular-nums',
-    largeAmount: 'text-[30px] font-semibold leading-[1.15] tracking-[-0.03em] tabular-nums',
-    pageTitle: 'text-[24px] font-semibold leading-[1.25] tracking-[-0.025em] text-[var(--text-primary)]',
-    sectionTitle: 'text-[18px] font-semibold leading-[1.3] tracking-[-0.015em] text-[var(--text-primary)]',
-    cardTitle: 'text-[16px] font-semibold leading-[1.35] tracking-[0em] text-[var(--text-primary)]',
-    body: 'text-[15px] font-normal leading-[1.5] tracking-[0em] text-[var(--text-primary)]',
-    bodyMedium: 'text-[15px] font-medium leading-[1.5] tracking-[0em] text-[var(--text-primary)]',
-    secondary: 'text-[13px] font-normal leading-[1.45] tracking-[0em] text-[var(--text-secondary)]',
-    label: 'text-[12px] font-medium leading-[1.35] tracking-[0.01em] text-[var(--text-secondary)]',
-    micro: 'text-[11px] font-semibold leading-[1.3] tracking-[0.01em] text-[var(--text-secondary)]',
+    heroAmount: 'text-hero-amount',
+    largeAmount: 'text-large-amount',
+    pageTitle: 'text-page-title',
+    sectionTitle: 'text-section-title',
+    cardTitle: 'text-card-title',
+    body: 'text-body',
+    bodyMedium: 'text-body-medium',
+    secondary: 'text-secondary',
+    label: 'text-label',
+    micro: 'text-micro-label',
     // Keep existing utility roles mapped to new scale as needed
-    amount: 'text-[15px] font-medium leading-[1.5] tracking-[0em] tabular-nums',
-    metadata: 'text-[11px] font-medium leading-[1.3] tracking-[0.01em] text-[var(--text-tertiary)]',
-    button: 'text-[15px] font-semibold leading-[1.5] tracking-[0em]',
-    input: 'text-[15px] font-normal leading-[1.5] tracking-[0em]',
+    amount: 'text-body-medium tabular-nums',
+    metadata: 'text-micro-label',
+    button: 'text-body-medium',
+    input: 'text-body',
   },
 
   weights: {

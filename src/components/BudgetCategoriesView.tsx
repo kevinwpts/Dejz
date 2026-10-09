@@ -312,7 +312,7 @@ export function BudgetCategoriesView({
           <button
             type="button"
             onClick={() => setActiveCategoryType('expense')}
-            className={`flex-1 py-2 text-xs font-bold rounded-[6px] transition-all cursor-pointer border-none ${
+            className={`flex-1 py-2 text-label font-bold rounded-[6px] transition-all cursor-pointer border-none ${
               activeCategoryType === 'expense'
                 ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -323,7 +323,7 @@ export function BudgetCategoriesView({
           <button
             type="button"
             onClick={() => setActiveCategoryType('income')}
-            className={`flex-1 py-2 text-xs font-bold rounded-[6px] transition-all cursor-pointer border-none ${
+            className={`flex-1 py-2 text-label font-bold rounded-[6px] transition-all cursor-pointer border-none ${
               activeCategoryType === 'income'
                 ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -346,11 +346,11 @@ export function BudgetCategoriesView({
             >
               <div className="flex items-baseline justify-between">
                 <div className="space-y-0.5">
-                  <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
+                  <span className="text-micro-label font-semibold text-[var(--text-secondary)]">
                     {isEn ? 'Left to allocate' : 'Kvar att fördela'}
                   </span>
                   <div
-                    className={`text-xl font-extrabold tracking-tight font-amount tabular-nums ${
+                    className={`text-large-amount font-amount tabular-nums ${
                       isOverAllocated
                         ? 'text-rose-600 dark:text-rose-400'
                         : remainingToAllocate === 0
@@ -364,7 +364,7 @@ export function BudgetCategoriesView({
                   </div>
                 </div>
 
-                <div className="text-right text-[11px] font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
+                <div className="text-right text-micro-label font-semibold text-[var(--text-secondary)] font-amount tabular-nums">
                   {formatAmount(totalCategoryAllocated, config.language)} / {formatAmount(totalPoolToAllocate, config.language)} {curr}
                 </div>
               </div>
@@ -386,14 +386,14 @@ export function BudgetCategoriesView({
           {/* 2. Utgiftskategorier */}
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
-              <span className="text-xs font-semibold text-[var(--text-secondary)]">
+              <span className="text-label font-semibold text-[var(--text-secondary)]">
                 {categoriesList.length} {isEn ? 'categories' : 'kategorier'}
               </span>
               {effectiveMode !== 'budget' && (
                 <button
                   type="button"
                   onClick={() => handleAddCategory('expense')}
-                  className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+                  className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-label font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
                 >
                   <Plus size={14} strokeWidth={2.5} />
                   <span>{t('newCategory')}</span>
@@ -428,11 +428,11 @@ export function BudgetCategoriesView({
                     <div className="flex items-center gap-3.5 min-w-0 pr-2">
                       <CategoryIcon icon={cat.icon} color={catColor} size="md" />
                       <div className="min-w-0 flex flex-col justify-center">
-                        <span className="text-sm font-semibold text-[var(--text-primary)] tracking-tight truncate">
+                        <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate">
                           {cat.name}
                         </span>
                         {fixedSpent > 0 && effectiveMode === 'budget' && (
-                          <span className="text-[11px] font-normal text-[var(--text-tertiary)] truncate mt-0.5">
+                          <span className="text-micro-label font-normal text-[var(--text-tertiary)] truncate mt-0.5">
                             {isEn ? 'Fixed: ' : 'Fasta: '}
                             {formatAmount(fixedSpent, config.language)} {curr}
                           </span>
@@ -479,10 +479,10 @@ export function BudgetCategoriesView({
                                   e.currentTarget.blur();
                                 }
                               }}
-                              className="w-16 bg-transparent border-none text-right text-sm font-bold text-[var(--text-primary)] font-amount tabular-nums outline-none"
+                              className="w-16 bg-transparent border-none text-right text-body-medium font-semibold text-[var(--text-primary)] font-amount tabular-nums outline-none"
                               placeholder="0"
                             />
-                            <span className="text-xs font-semibold text-[var(--text-secondary)] pl-1 select-none">
+                            <span className="text-micro-label font-semibold text-[var(--text-secondary)] pl-1 select-none">
                               {curr}
                             </span>
                           </div>
@@ -496,10 +496,10 @@ export function BudgetCategoriesView({
                             }}
                             className="px-3 py-1.5 rounded-[6px] bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] transition-colors border border-black/[0.04] dark:border-white/[0.06] cursor-pointer flex items-center gap-1 active:scale-95"
                           >
-                            <span className="text-sm font-bold font-amount tabular-nums text-[var(--text-primary)]">
+                            <span className="text-body-medium font-semibold font-amount tabular-nums text-[var(--text-primary)]">
                               {catBudget > 0 ? formatAmount(catBudget, config.language) : '0'}
                             </span>
-                            <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                            <span className="text-micro-label font-semibold text-[var(--text-secondary)]">
                               {curr}
                             </span>
                           </button>
@@ -520,13 +520,13 @@ export function BudgetCategoriesView({
         /* Inkomstkategorier i samma layout som Betalningsmetoder */
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-semibold text-[var(--text-secondary)]">
+            <span className="text-label font-semibold text-[var(--text-secondary)]">
               {incomeCategoriesList.length} {isEn ? 'categories' : 'kategorier'}
             </span>
             <button
               type="button"
               onClick={() => handleAddCategory('income')}
-              className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+              className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-label font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
             >
               <Plus size={14} strokeWidth={2.5} />
               <span>{t('newCategory')}</span>
@@ -545,7 +545,7 @@ export function BudgetCategoriesView({
                 >
                   <div className="flex items-center gap-3.5 min-w-0 pr-2">
                     <CategoryIcon icon={cat.icon} color={catColor} size="md" />
-                    <span className="text-sm font-semibold text-[var(--text-primary)] tracking-tight truncate">
+                    <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate">
                       {cat.name}
                     </span>
                   </div>
@@ -564,7 +564,7 @@ export function BudgetCategoriesView({
         <button
           type="button"
           onClick={handleSaveBudgetDone}
-          className="w-full h-11 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-none"
+          className="w-full h-11 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] text-body-medium font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-none"
         >
           <Check size={16} strokeWidth={2.5} />
           {isEn ? 'Done' : 'Klar'}
@@ -576,7 +576,7 @@ export function BudgetCategoriesView({
             <button
               type="button"
               onClick={() => setShowResetBudgetConfirm(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-[var(--text-tertiary)] hover:text-rose-500 dark:hover:text-rose-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-label font-semibold text-[var(--text-tertiary)] hover:text-rose-500 dark:hover:text-rose-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
             >
               <RotateCcw size={13} strokeWidth={2} />
               <span>{isEn ? 'Reset budget to 0' : 'Nollställ budget'}</span>
@@ -586,7 +586,7 @@ export function BudgetCategoriesView({
             <button
               type="button"
               onClick={() => setIsResetCategoriesModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-label font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
             >
               <RotateCcw size={13} strokeWidth={2} />
               <span>{isEn ? 'Reset categories to default' : 'Återställ kategorier'}</span>
@@ -643,7 +643,7 @@ export function BudgetCategoriesView({
           showCloseButton={true}
           bodyClassName="p-5 space-y-4"
         >
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
+          <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
             {isEn
               ? `This category is used by ${deleteMigrationData.count} transactions. Choose which category to move them to.`
               : `Kategorin används av ${deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till.`}
@@ -652,7 +652,7 @@ export function BudgetCategoriesView({
             <select
               value={targetMigrationId}
               onChange={(e) => setTargetMigrationId(e.target.value)}
-              className="w-full h-11 bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[8px] px-3 text-sm font-medium text-[var(--text-primary)] outline-none"
+              className="w-full h-11 bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-input,14px)] px-3 text-body-medium text-[var(--text-primary)] outline-none"
             >
               {(deleteMigrationData.type === 'income'
                 ? config.incomeCategories || []

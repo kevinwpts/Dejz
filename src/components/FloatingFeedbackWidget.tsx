@@ -54,13 +54,13 @@ export function FloatingFeedbackWidget({ onOpenFeedback, language = 'sv' }: Floa
           <button
             type="button"
             onClick={handleOpen}
-            className="flex items-center gap-2 pl-3.5 pr-2 py-2 text-xs font-semibold tracking-tight cursor-pointer group"
+            className="flex items-center gap-2 pl-3.5 pr-2 py-2 text-label font-semibold tracking-tight cursor-pointer group"
           >
             <div className="relative flex items-center justify-center">
               <MessageSquareHeart size={15} strokeWidth={2.2} className="text-[var(--accent-color)] group-hover:scale-110 transition-transform" />
               <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             </div>
-            <span className="text-[12px] font-medium text-[var(--text-primary)]">
+            <span className="text-label font-medium text-[var(--text-primary)]">
               {getLabel()}
             </span>
           </button>

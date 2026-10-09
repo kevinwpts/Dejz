@@ -40,12 +40,12 @@ export const FilterSelectButton: React.FC<FilterSelectButtonProps> = ({
         {icon && <span className="text-[var(--text-secondary)] shrink-0">{icon}</span>}
         <div className="min-w-0 flex-1">
           {label && (
-            <span className="block text-[10px] font-semibold font-display tracking-wider text-[var(--text-secondary)] leading-tight truncate">
+            <span className="block text-micro-label leading-tight truncate">
               {label}
             </span>
           )}
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="block text-xs sm:text-[13px] font-semibold text-[var(--text-primary)] truncate leading-tight">
+            <span className="block text-secondary font-semibold text-[var(--text-primary)] truncate leading-tight">
               {value}
             </span>
             {badge && (

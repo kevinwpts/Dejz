@@ -85,7 +85,7 @@ export const ListRow: React.FC<ListRowProps> = ({
         <div className="min-w-0 flex flex-col justify-center flex-1">
           <div className="flex items-center gap-2">
             <span
-              className={`text-sm font-semibold tracking-tight ${multiline ? '' : 'truncate'} ${
+              className={`text-card-title ${multiline ? '' : 'truncate'} ${
                 destructive ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
               } ${titleClassName}`}
             >
@@ -95,7 +95,7 @@ export const ListRow: React.FC<ListRowProps> = ({
           </div>
           {subtitle && (
             <div
-              className={`text-xs font-normal text-[var(--text-secondary)] mt-0.5 ${
+              className={`text-secondary mt-0.5 ${
                 multiline ? 'leading-relaxed opacity-75' : 'truncate opacity-75'
               } ${subtitleClassName}`}
             >
@@ -107,7 +107,7 @@ export const ListRow: React.FC<ListRowProps> = ({
 
       <div className="flex items-center gap-2.5 shrink-0 ml-2">
         {value && (
-          <div className="text-sm font-medium font-amount tabular-nums text-[var(--text-primary)]">
+          <div className="text-body-medium tabular-nums text-[var(--text-primary)]">
             {value}
           </div>
         )}

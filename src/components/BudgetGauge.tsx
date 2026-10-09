@@ -197,7 +197,7 @@ export function BudgetGauge({
         {/* Top Header Row */}
         <div className="flex items-center justify-between mb-2 sm:mb-2.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs sm:text-[13px] font-semibold text-[var(--text-secondary)] tracking-tight">
+            <span className="text-secondary font-semibold">
               {label}
             </span>
             {onOpenInfo && (
@@ -225,13 +225,13 @@ export function BudgetGauge({
           <div className="flex items-baseline gap-1 sm:gap-1.5 shrink-0 min-w-0">
             <AnimatedNumber
               value={remainingCents}
-              className={`text-[28px] xs:text-[34px] sm:text-[40px] font-extrabold leading-none font-amount tabular-nums tracking-tight ${
+              className={`text-hero-amount leading-none ${
                 isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
               }`}
               formatter={(val) => formatAmount(val, language)}
             />
             <span
-              className={`text-sm sm:text-lg font-medium leading-none shrink-0 ${
+              className={`text-card-title leading-none shrink-0 ${
                 isNegative ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
               }`}
             >
@@ -244,13 +244,13 @@ export function BudgetGauge({
             {/* Header / Tooltip on hover */}
             <div className="h-4 flex items-center justify-end mb-1">
               {activePoint ? (
-                <span className="text-[10px] font-semibold text-[var(--text-primary)] tracking-tight tabular-nums animate-fade-in">
+                <span className="text-micro-label font-semibold text-[var(--text-primary)] tabular-nums animate-fade-in">
                   {activePoint.label}: {formatAmount(activePoint.value, language)} {currency}
                 </span>
               ) : (
                 <div className="flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: status.colorHex }} />
-                  <span className="text-[10px] font-medium text-[var(--text-secondary)] tracking-tight">
+                  <span className="text-micro-label font-medium text-[var(--text-secondary)]">
                     {isEn ? 'Day 1 → Today' : 'Dag 1 → Idag'}
                   </span>
                 </div>
@@ -352,10 +352,10 @@ export function BudgetGauge({
 
         {/* Bottom Time / Payday Countdown Info */}
         {timeText && (
-          <div className="pt-2.5 sm:pt-3 mt-2 border-t border-black/[0.03] dark:border-white/[0.04] flex items-center justify-between text-xs text-[var(--text-secondary)]">
+          <div className="pt-2.5 sm:pt-3 mt-2 border-t border-black/[0.03] dark:border-white/[0.04] flex items-center justify-between text-label text-[var(--text-secondary)]">
             <span className="font-medium tracking-tight">{timeText}</span>
             {remainingDays !== undefined && totalDays !== undefined && (
-              <span className="font-amount tabular-nums text-[11px] opacity-80">
+              <span className="font-amount tabular-nums text-micro-label opacity-80">
                 {isEn
                   ? `Day ${totalDays - remainingDays + 1} of ${totalDays}`
                   : `Dag ${totalDays - remainingDays + 1} av ${totalDays}`}

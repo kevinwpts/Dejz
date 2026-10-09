@@ -51,7 +51,7 @@ const ToastItem: React.FC<ToastProps> = ({ toast, onDismiss }) => {
       <div className={`w-8 h-8 rounded-[8px] ${current.bgIcon} flex items-center justify-center shrink-0`}>
         {current.icon}
       </div>
-      <p className="text-xs font-semibold tracking-tight flex-1 leading-snug">
+      <p className="text-label font-semibold tracking-tight flex-1 leading-snug">
         {toast.message}
       </p>
       <button

@@ -36,7 +36,7 @@ export function CategoryTile({
         size="sm"
         isActive={isActive}
       />
-      <span className="text-[11px] font-medium tracking-tight text-center line-clamp-1 leading-tight break-words opacity-90 w-full px-0.5">
+      <span className="text-micro-label text-center line-clamp-1 leading-tight break-words opacity-90 w-full px-0.5">
         {displayName}
       </span>
     </button>

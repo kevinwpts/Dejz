@@ -40,9 +40,9 @@ export const LanguageFlag: React.FC<LanguageFlagProps> = ({
           }
         }}
       />
-      <span className="hidden text-xs font-bold">{info.flag}</span>
+      <span className="hidden text-micro-label font-bold">{info.flag}</span>
       {showCode && (
-        <span className="text-xs font-bold tracking-wider opacity-90">{info.countryCode}</span>
+        <span className="text-micro-label font-bold tracking-wider opacity-90">{info.countryCode}</span>
       )}
     </span>
   );

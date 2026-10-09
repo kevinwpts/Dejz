@@ -132,7 +132,7 @@ function NavItem({
         weight={isActive ? "fill" : "regular"}
         className="transition-colors"
       />
-      <span className="text-[10.5px] leading-none tracking-tight mt-[3px]">
+      <span className="text-micro-label leading-none mt-[3px]">
         {label}
       </span>
     </button>

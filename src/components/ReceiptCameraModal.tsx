@@ -251,7 +251,7 @@ export function ReceiptCameraModal({
         </button>
 
         {/* Status / Title Pill */}
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 backdrop-blur-xl text-xs font-semibold tracking-wide shadow-md">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 backdrop-blur-xl text-label font-semibold tracking-wide shadow-md">
           <Camera size={14} className="text-white/80" />
           <span>{isEn ? 'Receipt Scanner' : 'Kvittoskanning'}</span>
         </div>
@@ -293,17 +293,17 @@ export function ReceiptCameraModal({
               <AlertCircle size={26} strokeWidth={2} />
             </div>
             <div className="space-y-1.5">
-              <h3 className="text-base font-bold text-white">
+              <h3 className="text-card-title font-bold text-white">
                 {isEn ? 'Camera unavailable' : 'Kameran är inte tillgänglig'}
               </h3>
-              <p className="text-xs text-[#A8A8A8] leading-relaxed">
+              <p className="text-secondary text-[#A8A8A8] leading-relaxed">
                 {cameraError}
               </p>
             </div>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full py-3 px-4 rounded-[8px] bg-white text-black font-bold text-xs hover:bg-neutral-200 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 rounded-[8px] bg-white text-black font-bold text-label hover:bg-neutral-200 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <ImageIcon size={16} />
               <span>{isEn ? 'Choose photo from library' : 'Välj bild från galleri'}</span>
@@ -344,7 +344,7 @@ export function ReceiptCameraModal({
               </div>
 
               {/* Guide hint */}
-              <p className="mt-4 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-[12px] font-medium text-white/90 text-center tracking-tight">
+              <p className="mt-4 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-label font-medium text-white/90 text-center tracking-tight">
                 {isEn ? 'Place receipt inside the frame' : 'Placera kvittot i rutan'}
               </p>
             </div>
@@ -357,10 +357,10 @@ export function ReceiptCameraModal({
             <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
               <Loader2 size={26} className="animate-spin text-white" />
             </div>
-            <p className="text-sm font-bold text-white tracking-wide">
+            <p className="text-body-medium font-bold text-white tracking-wide">
               {isEn ? 'Reading receipt details…' : 'Läser av kvittot…'}
             </p>
-            <p className="text-xs text-[#A8A8A8]">
+            <p className="text-secondary text-[#A8A8A8]">
               {isEn ? 'Extracting merchant & amount' : 'Analyserar butik, belopp och datum'}
             </p>
           </div>
@@ -391,7 +391,7 @@ export function ReceiptCameraModal({
               type="button"
               onClick={handleRetake}
               disabled={isProcessing}
-              className="flex-1 py-3.5 px-4 rounded-[8px] bg-white/10 hover:bg-white/20 active:scale-98 text-white font-bold text-xs tracking-wider flex items-center justify-center gap-2 backdrop-blur-md transition-all cursor-pointer"
+              className="flex-1 py-3.5 px-4 rounded-[8px] bg-white/10 hover:bg-white/20 active:scale-98 text-white font-bold text-label tracking-wider flex items-center justify-center gap-2 backdrop-blur-md transition-all cursor-pointer"
             >
               <RotateCcw size={17} strokeWidth={2} />
               <span>{isEn ? 'Retake' : 'Ta om'}</span>
@@ -402,7 +402,7 @@ export function ReceiptCameraModal({
               type="button"
               onClick={handleConfirmPhoto}
               disabled={isProcessing}
-              className="flex-1 py-3.5 px-4 rounded-[8px] bg-white hover:bg-white/90 active:scale-98 text-black font-bold text-xs tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="flex-1 py-3.5 px-4 rounded-[8px] bg-white hover:bg-white/90 active:scale-98 text-black font-bold text-label tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <Check size={18} strokeWidth={2} />
               <span>{isEn ? 'Use receipt' : 'Använd kvitto'}</span>

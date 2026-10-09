@@ -43,7 +43,7 @@ export const SmartInputLabel: React.FC<SmartInputLabelProps> = ({
       >
         <Icon name="sparkles" size={13} className="text-[#05B862]" />
       </motion.span>
-      <span className="text-xs font-medium text-[var(--text-secondary)] dark:text-[#A8A8A8] tracking-tight">
+      <span className="text-label font-medium text-[var(--text-secondary)] dark:text-[#A8A8A8]">
         {label}
       </span>
     </div>
@@ -72,7 +72,7 @@ export const SmartInputFeedback: React.FC<SmartInputFeedbackProps> = ({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -2 }}
         transition={{ duration: 0.15 }}
-        className={`flex items-center gap-1.5 text-[11px] sm:text-xs font-medium px-1 py-0.5 select-none ${
+        className={`flex items-center gap-1.5 text-micro-label font-medium px-1 py-0.5 select-none ${
           feedback.type === 'success'
             ? 'text-[var(--text-secondary)] dark:text-[#A8A8A8]'
             : 'text-rose-500 dark:text-rose-400'
@@ -191,7 +191,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             placeholder={placeholder}
             disabled={disabled || isProcessing}
             autoFocus={autoFocus}
-            className={`w-full bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[var(--radius-input,14px)] text-xs sm:text-sm font-normal text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] focus:border-[#05B862] dark:focus:border-[#05B862] focus:ring-2 focus:ring-[#05B862]/15 outline-none transition-all shadow-none ${
+            className={`w-full bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[var(--radius-input,14px)] text-body text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] focus:border-[#05B862] dark:focus:border-[#05B862] focus:ring-2 focus:ring-[#05B862]/15 outline-none transition-all shadow-none ${
               leftElement ? 'pl-13 sm:pl-15' : 'px-3.5'
             } ${
               hasInsideSubmit ? (value && !isProcessing ? 'pr-22 sm:pr-24' : 'pr-13 sm:pr-15') : (value && !isProcessing ? 'pr-9' : 'pr-3.5')
@@ -233,7 +233,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
           <button
             type="submit"
             disabled={!value.trim() || isProcessing || disabled}
-            className="h-[46px] px-4 rounded-[var(--radius-button,14px)] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-xs sm:text-sm flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
+            className="h-[46px] px-4 rounded-[var(--radius-button,14px)] bg-[var(--accent-color)] text-[var(--text-on-accent)] text-body-medium flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
           >
             {isProcessing ? (
               <Icon name="spinner" size={15} className="animate-spin" />

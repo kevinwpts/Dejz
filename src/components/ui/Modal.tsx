@@ -103,12 +103,12 @@ export const Modal: React.FC<ModalProps> = ({
               <div className={`flex items-center justify-between px-5 pt-4 pb-2 shrink-0 ${headerClassName}`}>
                 <div className="flex flex-col pr-4 min-w-0">
                   {title && (
-                    <h2 className="text-lg sm:text-xl font-semibold text-[var(--text-primary)] tracking-tight truncate">
+                    <h2 className="text-section-title truncate">
                       {title}
                     </h2>
                   )}
                   {subtitle && (
-                    <p className="text-xs text-[var(--text-secondary)] font-normal mt-0.5 truncate">
+                    <p className="text-secondary mt-0.5 truncate">
                       {subtitle}
                     </p>
                   )}

@@ -87,7 +87,7 @@ export function PeriodSelectorModal({
               if (typeof feedback?.light === 'function') feedback.light();
               setViewMode('calendar');
             }}
-            className="w-full h-11 px-4 rounded-[8px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] text-[var(--text-primary)] text-sm font-medium flex items-center justify-center gap-2 transition-all cursor-pointer border-none active:scale-[0.98] shadow-none"
+            className="w-full h-11 px-4 rounded-[8px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] text-[var(--text-primary)] text-body-medium flex items-center justify-center gap-2 transition-all cursor-pointer border-none active:scale-[0.98] shadow-none"
           >
             <CalendarIcon size={16} strokeWidth={2} />
             <span>{currentLang === 'en' ? 'Select day' : 'Välj dag'}</span>
@@ -125,7 +125,7 @@ export function PeriodSelectorModal({
                 subtitle={sub || undefined}
                 badge={
                   p.isCurrent ? (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] tracking-tight">
+                    <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
                       {currentLang === 'en' ? 'Current' : 'Nu'}
                     </span>
                   ) : undefined

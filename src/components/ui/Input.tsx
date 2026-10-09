@@ -48,15 +48,15 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       : 'border-transparent focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20';
 
     const typographyStyles = isAmount
-      ? 'font-amount tabular-nums text-lg sm:text-xl font-semibold text-[var(--text-primary)]'
-      : 'font-normal text-sm text-[var(--text-primary)]';
+      ? 'text-section-title tabular-nums'
+      : 'text-body';
 
     return (
       <div className={`w-full flex flex-col gap-1.5 ${wrapperClassName}`}>
         {label && (
           <label
             htmlFor={inputId}
-            className="text-xs font-medium text-[var(--text-secondary)] flex items-center justify-between"
+            className="text-label flex items-center justify-between"
           >
             <span>{label}</span>
           </label>
@@ -94,7 +94,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
 
           {isAmount && currency && (
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--text-tertiary)] pointer-events-none select-none font-display">
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-label font-semibold text-[var(--text-tertiary)] pointer-events-none select-none">
               {currency}
             </span>
           )}
@@ -107,13 +107,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {error && (
-          <p className="text-xs font-medium text-rose-600 dark:text-rose-400 mt-0.5">
+          <p className="text-label text-rose-600 dark:text-rose-400 mt-0.5">
             {error}
           </p>
         )}
 
         {helperText && !error && (
-          <p className="text-xs font-normal text-[var(--text-tertiary)] mt-0.5">
+          <p className="text-micro-label text-[var(--text-tertiary)] mt-0.5">
             {helperText}
           </p>
         )}

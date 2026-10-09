@@ -31,10 +31,10 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
           </div>
           
           <div className="space-y-3 max-w-sm">
-            <h2 className="text-xl sm:text-2xl font-semibold font-unbounded tracking-tight text-[var(--text-primary)] leading-normal">
+            <h2 className="text-page-title text-[var(--text-primary)]">
               Se exakt vad du kan spendera idag.
             </h2>
-            <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium leading-relaxed">
+            <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
               Låt oss räkna ut din personliga dagsbudget. Sluta gissa – vet exakt vad du har råd med, varje morgon.
             </p>
           </div>
@@ -50,13 +50,13 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
       >
         <button 
           onClick={() => onAction(false)}
-          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-13 rounded-[8px] font-semibold text-sm sm:text-base active:scale-[0.98] hover:opacity-95 transition-all flex items-center justify-center gap-2 group shadow-xs cursor-pointer"
+          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-13 rounded-[8px] text-body-medium active:scale-[0.98] hover:opacity-95 transition-all flex items-center justify-center gap-2 group shadow-xs cursor-pointer"
         >
           <span>Kom igång gratis</span>
           <ChevronRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
         </button>
 
-        <div className="flex items-center justify-center gap-4 text-xs font-semibold text-[var(--text-secondary)]">
+        <div className="flex items-center justify-center gap-4 text-label font-semibold text-[var(--text-secondary)]">
           <button 
             onClick={() => onLegalClick('terms')}
             className="hover:text-[var(--text-primary)] transition-colors cursor-pointer"

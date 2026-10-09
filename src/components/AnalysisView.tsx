@@ -440,7 +440,7 @@ export function AnalysisView({
       {categoryData.length > 0 && (
         <Card variant="default" padding="lg" className="space-y-6 border-none shadow-none">
           <div className="flex items-center justify-between px-0.5">
-            <h2 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
+            <h2 className="text-section-title">
               {isEn ? 'Distribution' : 'Fördelning'}
             </h2>
           </div>
@@ -487,10 +487,10 @@ export function AnalysisView({
 
               {/* Airy Center */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4">
-                <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                <span className="text-label font-semibold text-[var(--text-secondary)]">
                   {isEn ? 'Total' : 'Totalt'}
                 </span>
-                <span className="text-[16px] sm:text-[19px] font-bold text-[var(--text-primary)] tabular-nums tracking-tight">
+                <span className="text-card-title font-bold text-[var(--text-primary)] tabular-nums">
                   {formatAmount(Math.round(totalSpent), config.language)} {config.currency}
                 </span>
               </div>
@@ -503,7 +503,7 @@ export function AnalysisView({
       {categoryData.length > 0 ? (
         <div className="space-y-3 pb-8">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
+            <h3 className="text-section-title">
               {t('categories')}
             </h3>
           </div>
@@ -554,10 +554,10 @@ export function AnalysisView({
                         <CategoryIcon icon={item.icon} color={item.color || '#6366f1'} size="md" />
 
                         <div className="min-w-0 flex-1 flex flex-col justify-center">
-                          <p className="text-[14px] font-medium text-[var(--text-primary)] leading-tight truncate tracking-tight">
+                          <p className="text-body-medium leading-tight truncate">
                             {item.name}
                           </p>
-                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[12px] text-[var(--text-secondary)]">
+                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-secondary">
                             <span>
                               {totalItemCount} {isEn 
                                 ? (totalItemCount === 1 ? 'transaction' : 'transactions') 
@@ -569,11 +569,11 @@ export function AnalysisView({
 
                       <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
                         <div className="text-right flex flex-col items-end justify-center">
-                          <p className="text-[14px] font-medium font-amount tabular-nums text-[var(--text-primary)] leading-tight">
+                          <p className="text-body-medium tabular-nums text-[var(--text-primary)] leading-tight">
                             {formatAmount(Math.round(item.value), config.language)}
-                            <span className="text-[12px] font-normal text-[var(--text-secondary)] ml-[2.5px]">{config.currency}</span>
+                            <span className="text-secondary ml-[2.5px]">{config.currency}</span>
                           </p>
-                          <span className="text-[12px] font-normal font-amount tabular-nums text-[var(--text-secondary)] mt-0.5 leading-tight">
+                          <span className="text-secondary tabular-nums mt-0.5 leading-tight">
                             {categoryPct}%
                           </span>
                         </div>
@@ -640,7 +640,7 @@ export function AnalysisView({
                           )}
 
                           {totalItemCount === 0 && (
-                            <div className="py-4 text-center text-[13px] text-[#6D6962] dark:text-[#A8A8A8]">
+                            <div className="py-4 text-center text-secondary text-[#6D6962] dark:text-[#A8A8A8]">
                               {isEn ? 'No transactions in this category' : 'Inga transaktioner i denna kategori'}
                             </div>
                           )}

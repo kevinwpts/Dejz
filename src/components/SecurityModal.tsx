@@ -73,7 +73,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
           <Lock size={24} strokeWidth={2} />
         </div>
 
-        <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)] mb-5">
+        <h2 className="text-section-title font-bold text-[var(--text-primary)] mb-5">
           {t('security')}
         </h2>
 

@@ -110,7 +110,7 @@ export function SavingsGoalModal({
         e.stopPropagation();
         setShowIconSelector(true);
       }}
-      className="w-9 h-9 rounded-[8px] flex items-center justify-center text-xl transition-all active:scale-95 overflow-hidden bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 shrink-0 text-[var(--accent-color)] cursor-pointer"
+      className="w-9 h-9 rounded-[8px] flex items-center justify-center text-card-title transition-all active:scale-95 overflow-hidden bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 shrink-0 text-[var(--accent-color)] cursor-pointer"
     >
       {logo ? (
         <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -145,7 +145,7 @@ export function SavingsGoalModal({
               type="button"
               onClick={handleConfirm} 
               disabled={!title || !targetAmount}
-              className="w-full h-12 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              className="w-full h-12 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-body-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-xs"
             >
               <Check size={18} strokeWidth={2} />
               <span>{editingGoal ? t('saveChanges') : t('addSavingsGoal')}</span>
@@ -158,7 +158,7 @@ export function SavingsGoalModal({
                   onDelete(editingGoal.id);
                   onClose();
                 }}
-                className="w-full h-11 rounded-[8px] bg-rose-500/10 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 font-semibold text-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer hover:bg-rose-500/20"
+                className="w-full h-11 rounded-[8px] bg-rose-500/10 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 font-semibold text-body-medium transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer hover:bg-rose-500/20"
               >
                 <Trash2 size={16} strokeWidth={2} />
                 <span>{t('deleteSavingsGoal')}</span>
@@ -169,7 +169,7 @@ export function SavingsGoalModal({
       >
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
+            <label className="text-label font-semibold text-[var(--text-secondary)] ml-0.5">
               {t('whatAreYouSavingFor')}
             </label>
             <div className="relative group">
@@ -178,13 +178,13 @@ export function SavingsGoalModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t('savingGoalExample')}
-                className="w-full h-12 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-4 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
+                className="w-full h-12 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-4 text-body-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
+            <label className="text-label font-semibold text-[var(--text-secondary)] ml-0.5">
               {t('targetAmount')}
             </label>
             <div 
@@ -199,10 +199,10 @@ export function SavingsGoalModal({
                   value={targetAmount}
                   onChange={(e) => setTargetAmount(formatAmount(e.target.value))}
                   placeholder="0"
-                  className="w-full bg-transparent text-[var(--text-primary)] outline-none font-amount text-3xl sm:text-4xl font-bold text-center tabular-nums"
+                  className="w-full bg-transparent text-[var(--text-primary)] outline-none text-large-amount font-bold text-center tabular-nums"
                 />
               </div>
-              <span className="text-xs font-bold text-white bg-emerald-500 px-3 py-1 rounded-full shrink-0 ml-3 transition-colors">
+              <span className="text-micro-label font-bold text-white bg-emerald-500 px-3 py-1 rounded-full shrink-0 ml-3 transition-colors">
                 {currency}
               </span>
             </div>

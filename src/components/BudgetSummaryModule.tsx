@@ -127,14 +127,14 @@ export function BudgetSummaryModule({
         <div className="grid grid-cols-2 gap-4 items-start">
           {/* Spenderat */}
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-[var(--text-secondary)] block">
+            <span className="text-label font-semibold text-[var(--text-secondary)] block">
               {spentLabel}
             </span>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[26px] sm:text-[32px] font-bold font-amount tabular-nums text-[var(--text-primary)] tracking-tight">
+              <span className="text-large-amount text-[var(--text-primary)]">
                 {formatAmount(Math.round(totalSpent), config.language)}
               </span>
-              <span className="text-xs font-medium text-[var(--text-secondary)]">
+              <span className="text-label font-medium text-[var(--text-secondary)]">
                 {config.currency || "kr"}
               </span>
             </div>
@@ -143,7 +143,7 @@ export function BudgetSummaryModule({
           {/* Kvar att spendera */}
           <div className="space-y-1 text-right">
             <div className="flex items-center justify-end gap-1">
-              <span className="text-xs font-medium text-[var(--text-secondary)]">
+              <span className="text-label font-medium text-[var(--text-secondary)]">
                 {remainingLabel}
               </span>
               <button
@@ -157,13 +157,13 @@ export function BudgetSummaryModule({
               </button>
             </div>
             <div className="flex items-baseline justify-end gap-1.5">
-              <span className={`text-xl font-bold font-amount tabular-nums tracking-tight ${
+              <span className={`text-large-amount ${
                 isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
               }`}>
                 {isOverBudget ? '−' : ''}
                 {formatAmount(Math.round(Math.abs(remainingBudget)), config.language)}
               </span>
-              <span className="text-xs font-medium text-[var(--text-secondary)]">
+              <span className="text-label font-medium text-[var(--text-secondary)]">
                 {config.currency || "kr"}
               </span>
             </div>
@@ -181,7 +181,7 @@ export function BudgetSummaryModule({
             : (isEn ? 'Remaining to spend' : 'Kvar att spendera')}
           size="sm"
         >
-          <div className="space-y-3.5 text-[14px] text-[var(--text-secondary)]">
+          <div className="space-y-3.5 text-body text-[var(--text-secondary)]">
             <p>
               {isEn 
                 ? (isPastPeriod
