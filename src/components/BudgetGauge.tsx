@@ -3,6 +3,7 @@ import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
 import { getBudgetStatus } from '../utils/budgetStatus';
 import { Icon } from './ui/Icon';
+import { Card } from './ui/Card';
 import { feedback } from '../utils/feedback';
 
 interface BudgetGaugeProps {
@@ -86,7 +87,7 @@ export function BudgetGauge({
 
   return (
     <div className="w-full select-none">
-      <div className="bg-[var(--surface-color)] rounded-card card-p shadow-subtle relative overflow-hidden transition-all">
+      <Card variant="default" padding="md" className="border-none relative overflow-hidden transition-all">
         {/* Main Row: (Label + Hero Amount) on left, Semi-circle Gauge on right */}
         <div className="flex items-center justify-between gap-3 sm:gap-4">
           {/* Primary Amount for entire period (Left) */}
@@ -221,7 +222,7 @@ export function BudgetGauge({
             )}
           </div>
         ) : null}
-      </div>
+      </Card>
     </div>
   );
 }

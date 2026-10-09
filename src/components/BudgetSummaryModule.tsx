@@ -3,7 +3,7 @@ import { Icon } from './ui/Icon';
 import { Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
-import { Modal } from './ui';
+import { Modal, Card } from './ui';
 
 interface BudgetSummaryModuleProps {
   stats: any;
@@ -122,7 +122,7 @@ export function BudgetSummaryModule({
   return (
     <>
       {/* Clean Single Summary Card without progress bar */}
-      <div className="bg-[var(--surface-color)] rounded-card card-p border-none shadow-subtle select-none">
+      <Card variant="default" padding="md" className="border-none select-none">
         {/* Top Split: Spenderat (Large) vs Kvar att spendera (Slightly smaller) */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4 items-start">
           {/* Spenderat */}
@@ -169,7 +169,7 @@ export function BudgetSummaryModule({
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Info Modal för Kvar att spendera */}
       {isRemainingInfoOpen && (
