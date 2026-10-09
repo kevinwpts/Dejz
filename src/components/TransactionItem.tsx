@@ -92,9 +92,9 @@ export function TransactionItem({
 
   // Determine layout style classes with translucent glass surfaces
   let containerClasses = "";
-  let paddingClasses = "px-4 py-3 sm:py-3.5 min-h-[60px]";
+  let paddingClasses = "px-4 py-2.5 sm:py-3 min-h-[52px]";
   if (squared) {
-    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-3.5 px-2";
+    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-3 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
@@ -212,7 +212,7 @@ export function TransactionItem({
             <div className="min-w-0 flex-1 flex flex-col justify-center">
               {/* Primary Merchant Name + Fixed Icon Badge */}
               <div className="flex items-center min-w-0">
-                <p className="text-body-medium text-[var(--text-primary)] leading-snug break-words flex-1 min-w-0">
+                <p className="text-[13.5px] sm:text-[14px] font-medium text-[var(--text-primary)] leading-snug break-words flex-1 min-w-0">
                   <span>{merchantName}</span>
                   {isFixedItem && (
                     <span 
@@ -258,9 +258,9 @@ export function TransactionItem({
           
           {/* Primary Amount: matching title size and color */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-            <p className={`text-body-medium whitespace-nowrap ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+            <p className={`text-[13.5px] sm:text-[14px] font-normal whitespace-nowrap ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-75 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
-              <span className="tabular-nums font-normal">{formatAmount(finalAmount, config?.language || 'sv')}</span>
+              <span className="tabular-nums">{formatAmount(finalAmount, config?.language || 'sv')}</span>
               <span className="text-micro-label opacity-75 ml-[2px]">{config?.currency || 'kr'}</span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixedItem ? (

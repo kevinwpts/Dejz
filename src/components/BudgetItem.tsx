@@ -80,7 +80,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   return (
     <div 
       onClick={onClick}
-      className={`px-4 py-3 sm:py-3.5 min-h-[60px] relative z-10 flex items-center gap-3 group transition-colors duration-150 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] ${
+      className={`px-4 py-2.5 sm:py-3 min-h-[52px] relative z-10 flex items-center gap-3 group transition-colors duration-150 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] ${
         isGrouped ? 'rounded-none' : 'rounded-[var(--radius-card,12px)]'
       } shadow-none border-none cursor-pointer select-none`}
     >
@@ -101,7 +101,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
         {/* Row 1: Title & Price in line, title stretches all the way */}
         <div className="flex items-baseline justify-between gap-2.5 min-w-0">
           <p 
-            className="text-body-medium text-[var(--text-primary)] leading-snug break-words flex-1 min-w-0"
+            className="text-[13.5px] sm:text-[14px] font-medium text-[var(--text-primary)] leading-snug break-words flex-1 min-w-0"
             title={displayName}
           >
             {displayName}
@@ -122,9 +122,9 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                 }
               }
               return (
-                <p className={`text-body-medium whitespace-nowrap ${amountColor}`}>
+                <p className={`text-[13.5px] sm:text-[14px] font-normal whitespace-nowrap ${amountColor}`}>
                   <span className="opacity-75 mr-0.5">{type === 'income' ? '+' : '−'}</span>
-                  <span className="tabular-nums font-normal">{formatAmount(Math.round(displayAmount), language)}</span>
+                  <span className="tabular-nums">{formatAmount(Math.round(displayAmount), language)}</span>
                   <span className="text-micro-label opacity-75 ml-[2px]">{currency}{freqSuffix}</span>
                 </p>
               );
