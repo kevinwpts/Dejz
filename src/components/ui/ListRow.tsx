@@ -100,7 +100,7 @@ export const ListRow: React.FC<ListRowProps> = ({
         <div className="min-w-0 flex flex-col justify-center flex-1">
           <div className="flex items-center gap-2">
             <span
-              className={`${isCompact ? 'text-[14px] font-semibold leading-snug' : 'text-card-title'} ${
+              className={`${isCompact ? 'text-[14px] font-medium leading-snug' : 'text-card-title'} ${
                 multiline ? '' : 'truncate'
               } ${
                 destructive ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'

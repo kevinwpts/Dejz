@@ -122,7 +122,7 @@ export function SettingsView({
         </div>
 
         {/* Clean grouped list */}
-        <Card variant="default" padding="none" className="divide-y divide-subtle">
+        <Card variant="default" padding="none" className="divide-y divide-menu">
           {methodsList.map((method: any, index: number) => {
             const isDefault = DEFAULT_PAYMENT_METHODS.some(dm => dm.name.toLowerCase() === method.name.toLowerCase());
             const IconComp = isDefault ? getPaymentMethodIcon(method.name) : null;
@@ -178,7 +178,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2">
-        <Card variant="default" padding="none" className="divide-y divide-subtle">
+        <Card variant="default" padding="none" className="divide-y divide-menu">
           {languages.map((l) => {
             const isSelected = config.language === l.code;
             return (
@@ -189,7 +189,7 @@ export function SettingsView({
                 icon={<LanguageFlag code={l.code} size="md" />}
                 iconBg="bg-transparent"
                 title={l.label}
-                titleClassName={isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'}
+                titleClassName={isSelected ? 'font-medium text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'}
                 showCheck={isSelected}
                 onClick={() => {
                   setConfig({ ...config, language: l.code });
@@ -278,7 +278,7 @@ export function SettingsView({
                     {isSelected && <Icon name="check" size={15} weight="bold" />}
                   </div>
                   <span className={`text-[11px] font-medium tracking-tight truncate w-full text-center ${
-                    isSelected ? 'text-[var(--text-primary)] font-semibold' : 'text-[var(--text-secondary)]'
+                    isSelected ? 'text-[var(--text-primary)] font-medium' : 'text-[var(--text-secondary)]'
                   }`}>
                     {theme.name}
                   </span>
@@ -317,7 +317,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2">
-        <Card variant="default" padding="none" className="divide-y divide-subtle">
+        <Card variant="default" padding="none" className="divide-y divide-menu">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrencyCode === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
@@ -330,7 +330,7 @@ export function SettingsView({
                 iconBg="bg-transparent"
                 title={
                   <div className="flex items-center gap-2">
-                    <span className={`text-sm tracking-tight ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
+                    <span className={`text-sm tracking-tight ${isSelected ? 'font-medium text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
                       {c.code}
                     </span>
                     <span className="text-xs font-normal text-[var(--text-secondary)]">
@@ -365,7 +365,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2 space-y-4">
-        <Card variant="default" padding="none" className="divide-y divide-subtle">
+        <Card variant="default" padding="none" className="divide-y divide-menu">
           {/* 1. Variable Amounts / Rörliga belopp */}
           <ListRow
             variant="grouped"
@@ -459,7 +459,7 @@ export function SettingsView({
       <div>
         {activeSection === 'salary' && (
           <div className="w-full py-2 space-y-4">
-            <Card variant="default" padding="none" className="divide-y divide-subtle">
+            <Card variant="default" padding="none" className="divide-y divide-menu">
               {/* Payday Setting Row */}
               <ListRow
                 variant="grouped"

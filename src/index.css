@@ -507,6 +507,39 @@ h6 {
   }
 }
 
+@utility divide-menu {
+  & > :not(:last-child) {
+    position: relative;
+    border-bottom-width: 0 !important;
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 16px;
+      right: 16px;
+      height: 1px;
+      background-color: var(--border-menu-divider);
+      pointer-events: none;
+    }
+  }
+}
+
+.divide-menu > :not(:last-child),
+:where(.divide-menu > :not(:last-child)) {
+  position: relative;
+  border-bottom-width: 0 !important;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background-color: var(--border-menu-divider);
+    pointer-events: none;
+  }
+}
+
 @utility shadow-subtle {
   box-shadow: var(--shadow-subtle, none);
 }
@@ -588,6 +621,7 @@ h6 {
   --border-control: #D8D8D8;
   --border-strong: #B8B8B8;
   --border-divider: #F3F3F3;
+  --border-menu-divider: #F7F7F7;
   --inner-highlight: #FFFFFF;
 
   --chip-bg: #F0F0F0;
@@ -765,6 +799,7 @@ h6 {
   --border-control: #2A2A2A;
   --border-strong: #333333;
   --border-divider: #1E1E1E;
+  --border-menu-divider: #141414;
   --input-bg: #121212;
 }
 
@@ -806,6 +841,7 @@ h6 {
   --border-control: rgba(255, 255, 255, 0.18);
   --border-strong: rgba(255, 255, 255, 0.35);
   --border-divider: rgba(255, 255, 255, 0.06);
+  --border-menu-divider: rgba(255, 255, 255, 0.03);
   --inner-highlight: transparent;
   --input-bg: rgba(255, 255, 255, 0.05);
 

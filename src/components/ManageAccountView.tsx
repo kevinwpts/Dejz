@@ -205,7 +205,7 @@ export function ManageAccountView({
                 <span className="text-label font-semibold text-[var(--text-secondary)] px-1.5 block">
                   {t('connectedAccounts' as any) || 'Kopplade konton'}
                 </span>
-                <Card variant="default" padding="none" className="divide-y divide-subtle">
+                <Card variant="default" padding="none" className="divide-y divide-menu">
                   {identities.map((identity) => (
                     <ListRow
                       key={identity.id}

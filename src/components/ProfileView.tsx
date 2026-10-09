@@ -342,7 +342,7 @@ export function ProfileView({
               <Crown size={13} strokeWidth={2} />
               <span>{config.language === 'en' ? 'Administration' : 'Administration'}</span>
             </h4>
-            <Card variant="default" padding="none" className="divide-y divide-subtle border border-amber-500/25">
+            <Card variant="default" padding="none" className="divide-y divide-menu border border-amber-500/25">
               <ListRow
                 variant="grouped"
                 density="compact"
@@ -363,7 +363,7 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
             {t('economy')}
           </h4>
-          <Card variant="default" padding="none" className="divide-y divide-subtle">
+          <Card variant="default" padding="none" className="divide-y divide-menu">
             <ListRow
               variant="grouped"
               density="compact"
@@ -422,7 +422,7 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
             {config.language === 'en' ? 'Tools & Sharing' : 'Verktyg & Funktioner'}
           </h4>
-          <Card variant="default" padding="none" className="divide-y divide-subtle">
+          <Card variant="default" padding="none" className="divide-y divide-menu">
             <ListRow
               variant="grouped"
               density="compact"
@@ -467,7 +467,7 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
             {t('appSettings')}
           </h4>
-          <Card variant="default" padding="none" className="divide-y divide-subtle">
+          <Card variant="default" padding="none" className="divide-y divide-menu">
             <ListRow
               variant="grouped"
               density="compact"
@@ -594,7 +594,7 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
             {t('support')}
           </h4>
-          <Card variant="default" padding="none" className="divide-y divide-subtle">
+          <Card variant="default" padding="none" className="divide-y divide-menu">
             <ListRow
               variant="grouped"
               density="compact"
@@ -639,7 +639,7 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-rose-500 dark:text-rose-400 px-1.5">
             {t('dangerZone')}
           </h4>
-          <Card variant="default" padding="none" className="divide-y divide-subtle">
+          <Card variant="default" padding="none" className="divide-y divide-menu">
             {isDemoMode && (
               <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-2.5">
                 <div className="flex items-center justify-between">
