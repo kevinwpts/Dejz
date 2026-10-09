@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ToggleSwitch } from './ToggleSwitch';
+import { Switch } from './ui';
 import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, PieChart, Tag } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
@@ -490,9 +490,9 @@ export function ProfileView({
                   </div>
                   <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInCalendar')}</span>
                 </div>
-                <ToggleSwitch 
-                  isOn={config.showFixedExpensesInCalendar} 
-                  onToggle={() => {
+                <Switch 
+                  checked={Boolean(config.showFixedExpensesInCalendar)} 
+                  onChange={() => {
                     const next = !config.showFixedExpensesInCalendar;
                     setConfig({
                       ...config,
@@ -500,6 +500,7 @@ export function ProfileView({
                       showFixedExpensesInTodayView: next,
                     });
                   }} 
+                  aria-label={t('showFixedExpensesInCalendar')}
                 />
               </div>
               <p className="text-micro-label text-[var(--text-secondary)] opacity-70 leading-relaxed pl-13">
@@ -514,9 +515,9 @@ export function ProfileView({
                   </div>
                   <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInHistory')}</span>
                 </div>
-                <ToggleSwitch 
-                  isOn={Boolean(config.showFixedExpensesInHistory ?? (localStorage.getItem('dejz_show_fixed_in_history') === 'true'))} 
-                  onToggle={() => {
+                <Switch 
+                  checked={Boolean(config.showFixedExpensesInHistory ?? (localStorage.getItem('dejz_show_fixed_in_history') === 'true'))} 
+                  onChange={() => {
                     const currentVal = Boolean(config.showFixedExpensesInHistory ?? (localStorage.getItem('dejz_show_fixed_in_history') === 'true'));
                     const next = !currentVal;
                     try {
@@ -529,6 +530,7 @@ export function ProfileView({
                       showFixedExpensesInHistory: next,
                     });
                   }} 
+                  aria-label={t('showFixedExpensesInHistory')}
                 />
               </div>
               <p className="text-micro-label text-[var(--text-secondary)] opacity-70 leading-relaxed pl-13">
@@ -545,9 +547,9 @@ export function ProfileView({
                     {t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
                   </span>
                 </div>
-                <ToggleSwitch 
-                  isOn={Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'))} 
-                  onToggle={() => {
+                <Switch 
+                  checked={Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'))} 
+                  onChange={() => {
                     const currentVal = Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'));
                     const nextVal = !currentVal;
                     try {
@@ -557,6 +559,7 @@ export function ProfileView({
                     }
                     setConfig({ ...config, hideEmptyCategories: nextVal });
                   }} 
+                  aria-label={t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
                 />
               </div>
               <p className="text-micro-label text-[var(--text-secondary)] opacity-70 leading-relaxed pl-13">

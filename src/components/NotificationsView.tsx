@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, Edit3, X } from 'lucide-react';
-import { Button, IconButton } from './ui';
+import { Button, IconButton, Input } from './ui';
 import { AppNotification, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItemLogo } from './BudgetItem';
@@ -170,23 +170,19 @@ export function NotificationsView({
                   exit={{ opacity: 0, height: 0 }}
                   className="space-y-3 pt-1"
                 >
-                  <div className="relative flex items-center">
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={customAmount}
-                      onChange={(e) => setCustomAmount(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveCustom(n);
-                        if (e.key === 'Escape') setEditingId(null);
-                      }}
-                      placeholder={String(n.expectedAmount || 0)}
-                      className="w-full h-12 bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[8px] px-4 pr-14 text-section-title font-bold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)] transition-all"
-                    />
-                    <span className="absolute right-4 text-micro-label font-bold text-[var(--text-secondary)] pointer-events-none">
-                      {currency}
-                    </span>
-                  </div>
+                  <Input
+                    variant="amount"
+                    currency={currency}
+                    type="text"
+                    inputMode="decimal"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveCustom(n);
+                      if (e.key === 'Escape') setEditingId(null);
+                    }}
+                    placeholder={String(n.expectedAmount || 0)}
+                  />
 
                   <div className="grid grid-cols-2 gap-2">
                     <Button

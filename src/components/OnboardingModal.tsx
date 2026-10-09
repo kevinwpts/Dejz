@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, Search, X, PiggyBank, ArrowDownRight, ArrowUpRight, ShieldCheck, Receipt } from 'lucide-react';
+import { User, ArrowRight, Loader2, Plus, ChevronLeft, Check, X, PiggyBank, ArrowDownRight, ArrowUpRight, ShieldCheck, Receipt } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { supabase } from '../supabaseClient';
 import { Config, Frequency, Category, FixedExpense, Income, SavingsGoal, MonthlySaving, PaydayType, WeekendAdjustment } from '../types';
@@ -13,7 +13,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishExpensePresets';
 import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 import { parseIncomePrompt } from '../utils/incomeAiParser';
-import { SmartInput, Modal, Button } from './ui';
+import { SmartInput, Modal, Button, Input } from './ui';
 import { ToggleSwitch } from './ToggleSwitch';
 import { getLogoUrl, fetchLogoForName } from '../utils/logo';
 
@@ -711,23 +711,18 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         </div>
                       </div>
 
-                      <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none">
-                          <User size={18} />
-                        </div>
-                        <input
-                          type="text"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-input px-4 py-3.5 pl-11 text-base font-semibold text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20 shadow-xs outline-none transition-all placeholder-[var(--text-tertiary)]"
-                          placeholder={s.firstNamePlaceholder}
-                          autoComplete="given-name"
-                          autoCorrect="off"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && fullName.trim()) handleNext();
-                          }}
-                        />
-                      </div>
+                      <Input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder={s.firstNamePlaceholder}
+                        icon={<User size={18} />}
+                        autoComplete="given-name"
+                        autoCorrect="off"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && fullName.trim()) handleNext();
+                        }}
+                      />
 
                       <div className="pt-1">
                         <button 
@@ -955,27 +950,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       </div>
 
                       {/* Search Bar */}
-                      <div className="relative">
-                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none">
-                          <Search size={15} />
-                        </div>
-                        <input
-                          type="text"
-                          value={presetSearch}
-                          onChange={(e) => setPresetSearch(e.target.value)}
-                          placeholder={s.searchPresetsPlaceholder}
-                          className="w-full bg-[var(--surface-color)] border border-[var(--border-color)] rounded-input px-3.5 py-2 pl-9 pr-8 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:border-[var(--accent-color)] outline-none shadow-2xs transition-all"
-                        />
-                        {presetSearch && (
-                          <button
-                            type="button"
-                            onClick={() => setPresetSearch('')}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded-full cursor-pointer"
-                          >
-                            <X size={13} />
-                          </button>
-                        )}
-                      </div>
+                      <Input
+                        variant="search"
+                        type="text"
+                        value={presetSearch}
+                        onChange={(e) => setPresetSearch(e.target.value)}
+                        onClear={() => setPresetSearch('')}
+                        placeholder={s.searchPresetsPlaceholder}
+                      />
 
                       {/* Presets Grid: Scrollable box showing ~6 cards at a time, scrollable for all 30 */}
                       <div className="max-h-[196px] overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">

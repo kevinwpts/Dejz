@@ -6,7 +6,7 @@ import { IconSelector } from './IconSelector';
 import { fetchLogoForName } from '../utils/logo';
 import { suggestIcon, isEmojiString, ICON_MAP } from '../utils/icons';
 import { formatAmount, parseAmount } from '../utils/format';
-import { Modal, Button } from './ui';
+import { Modal, Button, Input } from './ui';
 
 interface SavingsGoalModalProps {
   isOpen: boolean;
@@ -172,20 +172,13 @@ export function SavingsGoalModal({
         }
       >
         <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-label font-semibold text-[var(--text-secondary)] ml-0.5">
-              {t('whatAreYouSavingFor')}
-            </label>
-            <div className="relative group">
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder={t('savingGoalExample')}
-                className="w-full h-12 bg-black/[0.04] dark:bg-white/[0.06] border border-subtle rounded-input px-4 text-body-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
-              />
-            </div>
-          </div>
+          <Input
+            label={t('whatAreYouSavingFor')}
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={t('savingGoalExample')}
+          />
 
           <div className="space-y-1.5">
             <label className="text-label font-semibold text-[var(--text-secondary)] ml-0.5">

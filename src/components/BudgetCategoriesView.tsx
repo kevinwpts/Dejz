@@ -6,7 +6,7 @@ import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
 import { CategoryModal } from './CategoryModal';
 import { ConfirmModal } from './ConfirmModal';
-import { Button, Modal } from './ui';
+import { Button, Modal, Select } from './ui';
 import { formatAmount } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
@@ -653,10 +653,10 @@ export function BudgetCategoriesView({
               : `Kategorin används av ${deleteMigrationData.count} transaktioner. Välj vilken kategori de ska flyttas till.`}
           </p>
           <div className="space-y-1.5">
-            <select
+            <Select
               value={targetMigrationId}
               onChange={(e) => setTargetMigrationId(e.target.value)}
-              className="w-full h-11 bg-[var(--surface-muted)] border border-subtle rounded-[var(--radius-input,14px)] px-3 text-body-medium text-[var(--text-primary)] outline-none"
+              className="h-11 text-body-medium text-[var(--text-primary)]"
             >
               {(deleteMigrationData.type === 'income'
                 ? config.incomeCategories || []
@@ -664,11 +664,11 @@ export function BudgetCategoriesView({
               )
                 .filter((c) => c.id !== deleteMigrationData.category.id)
                 .map((c) => (
-                  <option key={c.id} value={c.id}>
+                  <option key={c.id} value={c.id} className="bg-[var(--surface-color)] text-[var(--text-primary)]">
                     {c.name}
                   </option>
                 ))}
-            </select>
+            </Select>
           </div>
           <div className="flex flex-col gap-2 pt-1">
             <Button

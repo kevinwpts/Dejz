@@ -5,7 +5,7 @@ import { suggestIcon } from '../utils/icons';
 import { IconPickerModal } from './IconPickerModal';
 import { CategoryIcon } from './CategoryIcon';
 import { DEFAULT_CATEGORY_PALETTE } from '../utils/categoryColors';
-import { Modal, IconButton } from './ui';
+import { Modal, IconButton, Input } from './ui';
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -108,47 +108,34 @@ export function CategoryModal({
 
         {/* Form */}
         <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
-              {t('name')}
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => {
-                const val = e.target.value;
-                setName(val);
-                if (!isEdit) {
-                  const suggested = suggestIcon(val);
-                  if (suggested) setIcon(suggested);
-                }
-              }}
-              className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-subtle rounded-[8px] px-3.5 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
-              placeholder={t('name')}
-            />
-          </div>
+          <Input
+            label={t('name')}
+            type="text"
+            value={name}
+            onChange={(e) => {
+              const val = e.target.value;
+              setName(val);
+              if (!isEdit) {
+                const suggested = suggestIcon(val);
+                if (suggested) setIcon(suggested);
+              }
+            }}
+            placeholder={t('name')}
+          />
 
           {/* Budget Field (Only for expense categories when not hidden) */}
           {type !== 'income' && !hideBudget && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
-                {t('budget')}
-              </label>
-              <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] border border-subtle rounded-[8px] px-3.5 h-11 focus-within:border-[var(--accent-color)] transition-all">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={budget}
-                  onChange={(e) => setBudget(e.target.value.replace(/\D/g, ''))}
-                  className="w-full bg-transparent border-none text-sm font-bold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none font-amount tabular-nums"
-                  placeholder="0"
-                />
-                <span className="text-xs font-bold text-[var(--text-secondary)] pl-2 select-none">
-                  {currency}
-                </span>
-              </div>
-            </div>
+            <Input
+              label={t('budget')}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={budget}
+              onChange={(e) => setBudget(e.target.value.replace(/\D/g, ''))}
+              placeholder="0"
+              variant="amount"
+              currency={currency}
+            />
           )}
 
           {/* Color palette */}

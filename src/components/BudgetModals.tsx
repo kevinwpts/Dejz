@@ -16,7 +16,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { CategoryIcon } from './CategoryIcon';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { evaluateAndFormatAmount } from '../utils/mathUtils';
-import { Button, IconButton, Modal } from './ui';
+import { Button, IconButton, Modal, Input, Switch } from './ui';
 import { CancelSubscriptionModal } from './CancelSubscriptionModal';
 import { getTransactionDominantColor, extractDominantColorFromImage } from '../utils/brandColor';
 import { resolveEntityVisual } from '../utils/resolver';
@@ -642,15 +642,12 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 <span className="text-[14px] font-medium text-[var(--text-primary)]">
                   {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIsVariable(!isVariable)}
-                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-                >
-                  <div
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
-                  />
-                </button>
+                <Switch
+                  checked={isVariable}
+                  onChange={setIsVariable}
+                  size="sm"
+                  aria-label={t('type')}
+                />
               </div>
             </div>
 
@@ -1581,15 +1578,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <span className="text-[14px] font-medium text-[var(--text-primary)]">
                   {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIsVariable(!isVariable)}
-                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-                >
-                  <div
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
-                  />
-                </button>
+                <Switch
+                  checked={isVariable}
+                  onChange={setIsVariable}
+                  size="sm"
+                  aria-label={t('type')}
+                />
               </div>
             </div>
 
@@ -1602,15 +1596,12 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 <span className="text-[14px] font-medium text-[var(--text-primary)]">
                   {isCancelled ? (config?.language === 'en' ? 'Yes, cancelled' : 'Ja, sagt upp') : (config?.language === 'en' ? 'No, active' : 'Nej, aktivt')}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIsCancelled(!isCancelled)}
-                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isCancelled ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-                >
-                  <div
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isCancelled ? 'left-[18px]' : 'left-0.5'}`}
-                  />
-                </button>
+                <Switch
+                  checked={isCancelled}
+                  onChange={setIsCancelled}
+                  size="sm"
+                  aria-label={config?.language === 'en' ? 'Sagt upp abonnemang' : 'Sagt upp abonnemang'}
+                />
               </div>
             </div>
 
@@ -2443,15 +2434,12 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 <span className="text-[14px] font-medium text-[var(--text-primary)]">
                   {isVariable ? (config?.language === 'en' ? 'Variable' : 'Varierande') : (config?.language === 'en' ? 'Fixed' : 'Fast belopp')}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIsVariable(!isVariable)}
-                  className={`w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer ${isVariable ? 'bg-[var(--accent-color)]' : 'bg-black/20 dark:bg-white/20'}`}
-                >
-                  <div
-                    className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-xs ${isVariable ? 'left-[18px]' : 'left-0.5'}`}
-                  />
-                </button>
+                <Switch
+                  checked={isVariable}
+                  onChange={setIsVariable}
+                  size="sm"
+                  aria-label={t('type')}
+                />
               </div>
             </div>
           </div>
@@ -2633,12 +2621,11 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
         </div>
 
         <div className="space-y-4">
-          <input 
+          <Input 
             type="text" 
             placeholder="Namn på betalningsmetod"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-input px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs transition-all outline-none"
           />
 
           <Button

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { BottomSheet } from './ui';
-import { X, Search, Sparkles, Check, Clock } from 'lucide-react';
+import { BottomSheet, Input } from './ui';
+import { Search, Sparkles, Check, Clock } from 'lucide-react';
 
 import { 
   ICON_MAP, 
@@ -117,29 +117,14 @@ export function IconPickerModal({
 
           {/* Search & Categories Bar */}
           <div className="p-4 pb-2 shrink-0 space-y-3">
-            <div className="relative">
-              <Search 
-                size={16} 
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none" 
-              />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Sök bland över 1 000+ stilrena ikoner (t.ex. nässpray, bil, fika)..."
-                className="w-full h-[44px] bg-[var(--surface-muted)] border border-subtle rounded-[var(--radius-input,14px)] pl-9.5 pr-9 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent-color)] transition-all"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/10 dark:bg-white/15 hover:bg-black/15 dark:hover:bg-white/20 flex items-center justify-center text-xs text-[var(--text-secondary)] transition-colors cursor-pointer"
-                  aria-label="Rensa sökning"
-                >
-                  <X size={12} strokeWidth={2.5} />
-                </button>
-              )}
-            </div>
+            <Input
+              variant="search"
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onClear={() => setSearchQuery('')}
+              placeholder="Sök bland över 1 000+ stilrena ikoner (t.ex. nässpray, bil, fika)..."
+            />
 
             {/* Category Filter Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
