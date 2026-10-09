@@ -54,12 +54,12 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
-            className={`w-full h-[48px] bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] ${icon ? 'pl-10' : 'px-4'} pr-10 font-normal text-[14px] text-[var(--text-primary)] outline-none transition-all cursor-pointer appearance-none ${className}`}
+            className={`w-full h-[var(--height-input,48px)] bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-[var(--radius-input,14px)] ${icon ? 'pl-10' : 'px-4'} pr-10 font-normal text-[14px] text-[var(--text-primary)] outline-none transition-all cursor-pointer appearance-none ${className}`}
             {...props}
           >
             {options
               ? options.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                  <option key={opt.value} value={opt.value} className="bg-[var(--surface-color)] text-[var(--text-primary)]">
                     {opt.label}
                   </option>
                 ))

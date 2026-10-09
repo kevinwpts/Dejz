@@ -193,7 +193,7 @@ export function BudgetGauge({
 
   return (
     <div className="w-full select-none">
-      <div className="bg-[var(--surface-color)] rounded-[16px] p-4 sm:p-5 shadow-sm relative overflow-hidden transition-all">
+      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,16px)] p-4 sm:p-5 shadow-sm relative overflow-hidden transition-all">
         {/* Top Header Row */}
         <div className="flex items-center justify-between mb-2 sm:mb-2.5">
           <div className="flex items-center gap-1.5">

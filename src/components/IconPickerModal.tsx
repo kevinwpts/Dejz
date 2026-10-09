@@ -106,7 +106,7 @@ export function IconPickerModal({
       onClose={onClose}
       title="Välj ikon"
       headerLeading={
-        <div className="w-9 h-9 rounded-[12px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center shrink-0">
           <Sparkles size={18} />
         </div>
       }
@@ -127,7 +127,7 @@ export function IconPickerModal({
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Sök bland över 1 000+ stilrena ikoner (t.ex. nässpray, bil, fika)..."
-                className="w-full h-[44px] bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] pl-9.5 pr-9 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent-color)] transition-all"
+                className="w-full h-[44px] bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-input,14px)] pl-9.5 pr-9 text-xs font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent-color)] transition-all"
               />
               {searchQuery && (
                 <button
@@ -152,7 +152,7 @@ export function IconPickerModal({
                     key={cat.id}
                     type="button"
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`whitespace-nowrap px-3 py-1.5 rounded-[12px] text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+                    className={`whitespace-nowrap px-3 py-1.5 rounded-[var(--radius-button-sm,10px)] text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
                       isActive
                         ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold shadow-xs scale-[1.02]'
                         : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
@@ -197,7 +197,7 @@ export function IconPickerModal({
                       <button
                         key={`sugg-${item.key}`}
                         onClick={() => handleSelect(item.key)}
-                        className={`relative aspect-square rounded-[14px] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
+                        className={`relative aspect-square rounded-[var(--radius-button,14px)] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
                           isSelected
                             ? 'bg-accent/15 text-accent border border-accent ring-2 ring-accent/30 shadow-xs scale-[1.02]'
                             : 'bg-accent/5 text-[var(--text-primary)] hover:bg-accent/10 border border-accent/20'
@@ -231,7 +231,7 @@ export function IconPickerModal({
                       <button
                         key={`recent-${item.key}`}
                         onClick={() => handleSelect(item.key)}
-                        className={`relative aspect-square rounded-[14px] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
+                        className={`relative aspect-square rounded-[var(--radius-button,14px)] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
                           isSelected
                             ? 'bg-accent/15 text-accent border border-accent ring-2 ring-accent/30 shadow-xs scale-[1.02]'
                             : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
@@ -273,7 +273,7 @@ export function IconPickerModal({
                       <button
                         key={item.key}
                         onClick={() => handleSelect(item.key)}
-                        className={`relative aspect-square rounded-[14px] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
+                        className={`relative aspect-square rounded-[var(--radius-button,14px)] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
                           isSelected
                             ? 'bg-accent/15 text-accent border border-accent ring-2 ring-accent/30 shadow-xs scale-[1.02]'
                             : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] hover:border-accent/40'

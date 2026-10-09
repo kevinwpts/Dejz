@@ -20,5 +20,6 @@ export * from './Skeleton';
 export * from './FilterButtonGroup';
 export * from './BottomSheet';
 export * from './Icon';
+export * from './Switch';
 
 

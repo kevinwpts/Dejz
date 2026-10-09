@@ -89,9 +89,9 @@ export const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: center ? 20 : 30, scale: center ? 0.95 : 0.98 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] dark:bg-[#191919] ${
-              center ? 'rounded-[12px] border' : 'rounded-t-[12px] sm:rounded-[12px] border-t sm:border'
-            } border-black/[0.08] dark:border-white/[0.08] shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
+            className={`relative w-full ${sizeStyles} bg-[var(--modal-bg,var(--bg-color))] ${
+              center ? 'rounded-[var(--radius-modal,16px)] border' : 'rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-t sm:border'
+            } border-[var(--border-subtle)] shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Pill */}
             {!center && (
@@ -136,7 +136,7 @@ export const Modal: React.FC<ModalProps> = ({
 
             {/* Footer / Actions */}
             {footer && (
-              <div className="px-5 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] bg-[var(--bg-color)] dark:bg-[#191919] shrink-0">
+              <div className="px-5 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] bg-[var(--modal-bg,var(--bg-color))] shrink-0">
                 {footer}
               </div>
             )}

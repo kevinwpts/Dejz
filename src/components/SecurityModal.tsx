@@ -3,8 +3,7 @@ import { Lock, Smartphone, Fingerprint } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { hasPin, removePin, isBiometricsEnabled, setBiometricsEnabled } from '../utils/security';
 import { PinLockScreen } from './PinLockScreen';
-import { ToggleSwitch } from './ToggleSwitch';
-import { Modal } from './ui';
+import { Modal, Card, ListRow, Switch } from './ui';
 
 interface SecurityModalProps {
   isOpen: boolean;
@@ -70,7 +69,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
       bodyClassName="p-6 sm:p-7 text-center"
     >
       <div className="text-center">
-        <div className="w-12 h-12 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] rounded-[8px] flex items-center justify-center mx-auto mb-4 border border-black/5 dark:border-white/10">
+        <div className="w-12 h-12 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] rounded-[var(--radius-card-nested,10px)] flex items-center justify-center mx-auto mb-4 border border-black/5 dark:border-white/10">
           <Lock size={24} strokeWidth={2} />
         </div>
 
@@ -79,31 +78,39 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
         </h2>
 
         {view === 'menu' && (
-          <div className="space-y-2.5">
-            <div className="w-full flex items-center justify-between p-3.5 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px]">
-              <div className="flex items-center gap-3">
-                <Smartphone size={18} strokeWidth={2} className="text-[var(--text-secondary)]" />
-                <span className="text-sm font-semibold text-[var(--text-primary)]">{t('appLock')}</span>
-              </div>
-              <ToggleSwitch
-                isOn={pinEnabled}
-                onToggle={() => setView(pinEnabled ? 'pin-disable' : 'pin-setup')}
-              />
-            </div>
+          <Card variant="nested" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04] text-left">
+            <ListRow
+              variant="grouped"
+              icon={<Smartphone size={18} strokeWidth={2} />}
+              iconBg="bg-transparent"
+              iconColor="text-[var(--text-secondary)]"
+              title={t('appLock')}
+              control={
+                <Switch
+                  checked={pinEnabled}
+                  onChange={() => setView(pinEnabled ? 'pin-disable' : 'pin-setup')}
+                  aria-label={t('appLock')}
+                />
+              }
+            />
 
             {pinEnabled && (
-              <div className="w-full flex items-center justify-between p-3.5 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px]">
-                <div className="flex items-center gap-3">
-                  <Fingerprint size={18} strokeWidth={2} className="text-[var(--text-secondary)]" />
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">{t('biometrics')}</span>
-                </div>
-                <ToggleSwitch
-                  isOn={biometricsEnabled}
-                  onToggle={toggleBiometrics}
-                />
-              </div>
+              <ListRow
+                variant="grouped"
+                icon={<Fingerprint size={18} strokeWidth={2} />}
+                iconBg="bg-transparent"
+                iconColor="text-[var(--text-secondary)]"
+                title={t('biometrics')}
+                control={
+                  <Switch
+                    checked={biometricsEnabled}
+                    onChange={toggleBiometrics}
+                    aria-label={t('biometrics')}
+                  />
+                }
+              />
             )}
-          </div>
+          </Card>
         )}
       </div>
     </Modal>

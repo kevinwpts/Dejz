@@ -96,7 +96,7 @@ export function BottomSheet({
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className={`relative w-full ${sizeStyles} bg-[var(--bg-color)] dark:bg-[#191919] text-[var(--text-primary)] rounded-t-[12px] sm:rounded-[12px] border-none shadow-2xl ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
+            className={`relative w-full ${sizeStyles} bg-[var(--modal-bg,var(--bg-color))] text-[var(--text-primary)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-2xl ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Handle */}
             {showDragHandle && (
@@ -105,7 +105,7 @@ export function BottomSheet({
 
             {/* Header */}
             {hasHeader && (
-              <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-black/[0.06] dark:border-white/[0.08]">
+              <div className="px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-subtle)]">
                 <div className="flex items-center gap-3 min-w-0 pr-3 flex-1">
                   {headerLeading && (
                     <div className="shrink-0">
@@ -156,7 +156,7 @@ export function BottomSheet({
 
             {/* Footer */}
             {footer && (
-              <div className="px-5 sm:px-6 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] border-t border-black/[0.06] dark:border-white/[0.08] shrink-0 bg-[var(--bg-color)] dark:bg-[#191919]">
+              <div className="px-5 sm:px-6 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] border-t border-[var(--border-subtle)] shrink-0 bg-[var(--modal-bg,var(--bg-color))]">
                 {footer}
               </div>
             )}
@@ -215,11 +215,11 @@ export function BottomSheetOption<T = string>({
           onClick();
         }
       }}
-      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[8px] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none ${className}`}
+      className={`w-full flex items-center justify-between py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-[var(--radius-button-sm,8px)] transition-colors cursor-pointer text-left active:scale-[0.99] min-h-[48px] bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none ${className}`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {icon && (
-          <div className="w-8 h-8 rounded-[6px] bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+          <div className="w-8 h-8 rounded-[var(--radius-icon-button,6px)] bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0 text-[var(--text-primary)]">
             {icon}
           </div>
         )}

@@ -134,7 +134,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[12px] sm:rounded-[12px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -433,7 +433,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[12px] sm:rounded-[12px] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -461,7 +461,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[12px] bg-[var(--surface-color)] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
@@ -516,7 +516,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           </div>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[12px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
             {/* Row 1: Category */}
             <div 
               onClick={() => {
@@ -688,7 +688,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[12px] sm:rounded-[12px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -715,7 +715,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                             setIsCategorySelectorOpen(false);
                           }}
                           style={{ backgroundColor: cat.color || getCategoryColor(cat.name, categories) }}
-                          className={`h-28 sm:h-32 p-3.5 rounded-[12px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                          className={`h-28 sm:h-32 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
@@ -782,7 +782,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[12px] sm:rounded-[12px] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]">
                   <div>
@@ -935,7 +935,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[12px] sm:rounded-[12px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -1338,7 +1338,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[12px] sm:rounded-[12px] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -1366,7 +1366,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[12px] bg-[var(--surface-color)] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
@@ -1421,7 +1421,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[12px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
             {/* Row 1: Category */}
             <div 
               onClick={() => {
@@ -1623,7 +1623,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   type="date"
                   value={cancellationDate}
                   onChange={(e) => setCancellationDate(e.target.value)}
-                  className="text-[13px] font-semibold text-[var(--text-primary)] bg-transparent outline-none border border-black/10 dark:border-white/10 rounded-[10px] px-2 py-1"
+                  className="text-[13px] font-semibold text-[var(--text-primary)] bg-transparent outline-none border border-black/10 dark:border-white/10 rounded-[var(--radius-input,14px)] px-2 py-1"
                 />
               </div>
             )}
@@ -1662,7 +1662,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[12px] sm:rounded-[12px] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
@@ -1689,7 +1689,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                             setIsCategorySelectorOpen(false);
                           }}
                           style={{ backgroundColor: cat.color || getCategoryColor(cat.name, categories) }}
-                          className={`h-28 sm:h-32 p-3.5 rounded-[12px] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                          className={`h-28 sm:h-32 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
@@ -1776,7 +1776,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[12px] sm:rounded-[12px] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
                   <div>
@@ -1934,7 +1934,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[12px] sm:rounded-[12px] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -2224,7 +2224,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[12px] sm:rounded-[12px] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -2248,7 +2248,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[12px] bg-[var(--surface-color)] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
@@ -2310,7 +2310,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[12px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
             {/* Row 1: Deduction Day */}
             <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
               <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
@@ -2497,7 +2497,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[12px] sm:rounded-[12px] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]">
                   <div>

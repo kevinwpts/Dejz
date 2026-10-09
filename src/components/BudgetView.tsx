@@ -5,7 +5,7 @@ import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
-import { FilterSelectButton, FilterMenuModal, FilterButtonGroup } from './ui';
+import { FilterSelectButton, FilterMenuModal, FilterButtonGroup, Button } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
@@ -442,7 +442,7 @@ export function BudgetView({
                         else if (incomeSortBy === 'name') setIncomeSortBy('amount');
                         else setIncomeSortBy('day');
                       }}
-                      className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
@@ -458,14 +458,14 @@ export function BudgetView({
                         }
                       </span>
                     </button>
-                    <button 
-                      type="button"
-                      onClick={onAddIncome} 
-                      className="h-9 px-4 rounded-[14px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+                    <Button 
+                      variant="secondary"
+                      size="sm"
+                      icon={<Plus size={14} strokeWidth={2} />}
+                      onClick={onAddIncome}
                     >
-                      <Plus size={14} strokeWidth={2} />
-                      <span>{t('newIncome')}</span>
-                    </button>
+                      {t('newIncome')}
+                    </Button>
                   </div>
 
                   <div className="space-y-2.5 mt-3.5">
@@ -509,7 +509,7 @@ export function BudgetView({
                         else if (fixedSortBy === 'name') setFixedSortBy('amount');
                         else setFixedSortBy('day');
                       }}
-                      className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
@@ -525,14 +525,14 @@ export function BudgetView({
                         }
                       </span>
                     </button>
-                    <button 
-                      type="button"
-                      onClick={onAddFixedExpense} 
-                      className="h-9 px-4 rounded-[14px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+                    <Button 
+                      variant="secondary"
+                      size="sm"
+                      icon={<Plus size={14} strokeWidth={2} />}
+                      onClick={onAddFixedExpense}
                     >
-                      <Plus size={14} strokeWidth={2} />
-                      <span>{t('newFixedExpense')}</span>
-                    </button>
+                      {t('newFixedExpense')}
+                    </Button>
                   </div>
 
                   <div className="space-y-2.5 mt-3.5">
@@ -584,7 +584,7 @@ export function BudgetView({
                         else if (savingSortBy === 'name') setSavingSortBy('amount');
                         else setSavingSortBy('day');
                       }}
-                      className="flex items-center gap-2 h-9 px-3.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-black/[0.04] dark:border-white/[0.06] text-xs text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
@@ -600,14 +600,14 @@ export function BudgetView({
                       </span>
                     </button>
 
-                    <button 
-                      type="button"
-                      onClick={onAddMonthlySaving} 
-                      className="h-9 px-4 rounded-[14px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-xs font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+                    <Button 
+                      variant="secondary"
+                      size="sm"
+                      icon={<Plus size={14} strokeWidth={2} />}
+                      onClick={onAddMonthlySaving}
                     >
-                      <Plus size={14} strokeWidth={2} />
-                      <span>{t('newMonthlySaving')}</span>
-                    </button>
+                      {t('newMonthlySaving')}
+                    </Button>
                   </div>
 
                   <div className="space-y-2.5 mt-3.5">

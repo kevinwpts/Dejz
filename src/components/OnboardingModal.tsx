@@ -655,7 +655,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                   {step !== 'name' && (
                     <button 
                       onClick={handleBack} 
-                      className="w-8 h-8 flex items-center justify-center bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] rounded-[12px] transition-all text-[var(--text-secondary)] border border-[var(--border-color)] shadow-2xs cursor-pointer active:scale-95"
+                      className="w-8 h-8 flex items-center justify-center bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] rounded-[var(--radius-button-sm,10px)] transition-all text-[var(--text-secondary)] border border-[var(--border-color)] shadow-2xs cursor-pointer active:scale-95"
                       aria-label={s.back}
                     >
                       <ChevronLeft size={16} strokeWidth={2} />
@@ -1137,7 +1137,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                 key={amount}
                                 type="button"
                                 onClick={() => handleSavingsChange(amount.toString())}
-                                className={`py-2 rounded-[12px] text-xs font-bold font-amount tabular-nums transition-all border cursor-pointer active:scale-95 ${
+                                className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-bold font-amount tabular-nums transition-all border cursor-pointer active:scale-95 ${
                                   isSelected
                                     ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] border-[var(--accent-color)] shadow-2xs'
                                     : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/40'

@@ -153,7 +153,7 @@ export function CategoryModal({
 
           {/* Color palette */}
           <div className="space-y-2">
-            <div className="grid grid-cols-8 gap-2 bg-[var(--surface-muted)] p-2.5 rounded-[12px] border border-[var(--border-color)]">
+            <div className="grid grid-cols-8 gap-2 bg-[var(--surface-muted)] p-2.5 rounded-[var(--radius-card-nested,10px)] border border-[var(--border-color)]">
               {/* Custom hex color input picker */}
               <div 
                 className={`relative w-full aspect-square rounded-full border border-[var(--border-color)] cursor-pointer shadow-xs flex items-center justify-center group transition-all duration-200 active:scale-95 ${

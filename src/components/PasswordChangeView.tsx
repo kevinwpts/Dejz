@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, Lock } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { TranslationKey } from '../i18n';
-import { Button, Input } from './ui';
+import { Button, Input, IconButton } from './ui';
 
 interface PasswordChangeViewProps {
   onBack: () => void;
@@ -64,14 +64,13 @@ export function PasswordChangeView({ onBack, t, addToast, userEmail }: PasswordC
   return (
     <div className="space-y-6 w-full font-sans">
       <div className="flex items-center gap-3.5 py-1">
-        <button
-          type="button"
+        <IconButton
+          icon={<ChevronLeft size={20} strokeWidth={2} />}
           onClick={onBack}
-          className="w-9 h-9 rounded-full bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-95 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs shrink-0"
           aria-label={t('back') || 'Tillbaka'}
-        >
-          <ChevronLeft size={20} strokeWidth={2} />
-        </button>
+          variant="secondary"
+          size="sm"
+        />
         <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)] truncate">
             {t('changePassword' as any) || 'Ändra lösenord'}

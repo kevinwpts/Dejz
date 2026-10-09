@@ -25,13 +25,13 @@ export const Pill: React.FC<PillProps> = ({
 
   const activeStyles = active
     ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#141414] font-medium border border-transparent shadow-none'
-    : 'bg-black/5 dark:bg-white/5 text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 font-medium border border-transparent dark:border-white/5';
+    : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 font-medium border border-transparent';
 
   return (
     <button
       type={type}
       disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-full transition-all duration-150 active:scale-95 select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none ${sizeStyles} ${activeStyles} ${className}`}
+      className={`inline-flex items-center justify-center rounded-[var(--radius-pill,9999px)] transition-all duration-150 active:scale-95 select-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none ${sizeStyles} ${activeStyles} ${className}`}
       {...props}
     >
       {icon && <span className="shrink-0">{icon}</span>}
@@ -41,7 +41,7 @@ export const Pill: React.FC<PillProps> = ({
           className={`ml-1 text-[11px] font-medium px-1.5 py-0.2 rounded-full ${
             active
               ? 'bg-white/20 text-white dark:bg-black/20 dark:text-[#141414]'
-              : 'bg-black/5 dark:bg-white/5 text-[#6E6961] dark:text-[#B8B8B8]'
+              : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
           }`}
         >
           {count}

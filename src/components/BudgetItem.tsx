@@ -81,7 +81,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
     <div 
       onClick={onClick}
       className={`px-4 py-3.5 sm:py-4 min-h-[68px] relative z-10 flex items-center gap-3 group transition-colors duration-150 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] ${
-        isGrouped ? 'rounded-none' : 'rounded-[12px]'
+        isGrouped ? 'rounded-none' : 'rounded-[var(--radius-card,12px)]'
       } shadow-none border-none cursor-pointer select-none`}
     >
       {/* Logo */}
@@ -161,7 +161,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
             )}
 
             {item.isCancelled && (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-[var(--radius-badge,6px)] text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
                 {language === 'en' ? 'Cancelled' : 'Uppsagd'}
               </span>
             )}
@@ -170,7 +170,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
           {/* Right side: deduction day and payment method combined into a single pill */}
           {(dayString || paymentString) && (
             <div className="flex items-center shrink-0 justify-end max-w-[65%] overflow-hidden">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none truncate tabular-nums">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-badge,6px)] text-[10px] font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none truncate tabular-nums">
                 {paymentString ? (
                   <CategoryIcon icon={pmIconKey} variant="minimal" size="2xs" className="shrink-0" />
                 ) : (

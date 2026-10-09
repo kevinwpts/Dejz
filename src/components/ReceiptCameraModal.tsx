@@ -288,7 +288,7 @@ export function ReceiptCameraModal({
       <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-black">
         {/* Error Fallback */}
         {cameraError ? (
-          <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-[12px] bg-[#1C1C1C] border border-white/[0.08] space-y-4">
+          <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-[var(--radius-card,14px)] bg-[#1C1C1C] border border-white/[0.08] space-y-4">
             <div className="w-14 h-14 mx-auto rounded-full bg-white/10 border border-white/10 text-white flex items-center justify-center">
               <AlertCircle size={26} strokeWidth={2} />
             </div>
@@ -334,10 +334,10 @@ export function ReceiptCameraModal({
               {/* Receipt Target Box */}
               <div className="relative w-full max-w-[320px] aspect-[3/4.6] max-h-[65vh] rounded-[8px] border-2 border-white/30 shadow-[0_0_0_9999px_rgba(0,0,0,0.48)] overflow-hidden">
                 {/* 4 Corner Markers */}
-                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-[14px]" />
-                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr-[14px]" />
-                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl-[14px]" />
-                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-[14px]" />
+                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-[var(--radius-card,14px)]" />
+                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr-[var(--radius-card,14px)]" />
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl-[var(--radius-card,14px)]" />
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-[var(--radius-card,14px)]" />
 
                 {/* Subtle animated scan sweep line */}
                 <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-white/60 to-transparent animate-[bounce_2.5s_infinite]" />

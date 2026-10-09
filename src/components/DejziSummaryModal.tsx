@@ -211,7 +211,7 @@ export function DejziSummaryModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 12 }}
             transition={{ duration: 0.2 }}
-            className="bg-[var(--bg-color)] border-none rounded-[12px] p-6 sm:p-7 w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden font-sans"
+            className="bg-[var(--bg-color)] border-none rounded-[var(--radius-modal,16px)] p-6 sm:p-7 w-full max-w-md shadow-2xl space-y-5 relative overflow-hidden font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header with Close Button */}
@@ -311,7 +311,7 @@ export function DejziSummaryModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-full h-12 px-4 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-sm hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer text-center flex items-center justify-center"
+              className="w-full h-12 px-4 rounded-[var(--radius-button,14px)] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm shadow-sm hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer text-center flex items-center justify-center"
             >
               {isEn ? 'Got it, thanks!' : 'Tack Dejzi, jag har koll!'}
             </button>

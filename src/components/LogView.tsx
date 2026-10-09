@@ -581,7 +581,7 @@ export function LogView({
                 type="button"
                 onClick={handleModalPrev}
                 disabled={!canModalGoPrev}
-                className={`w-8 h-8 rounded-[14px] flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-8 h-8 rounded-[var(--radius-button-sm,10px)] flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoPrev
                     ? 'text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
                     : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
@@ -614,7 +614,7 @@ export function LogView({
                 type="button"
                 onClick={handleModalNext}
                 disabled={!canModalGoNext}
-                className={`w-8 h-8 rounded-[14px] flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-8 h-8 rounded-[var(--radius-button-sm,10px)] flex items-center justify-center transition-all cursor-pointer ${
                   canModalGoNext
                     ? 'text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 active:scale-90'
                     : 'text-[var(--text-tertiary)]/30 cursor-not-allowed'
@@ -683,7 +683,7 @@ export function LogView({
                         setSelectedPeriod(modalPeriod);
                         setIsPeriodPickerOpen(false);
                       }}
-                      className={`aspect-square w-full rounded-[14px] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
+                      className={`aspect-square w-full rounded-[var(--radius-button-sm,10px)] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-95 cursor-pointer text-center ${
                         isSelected 
                           ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-bold shadow-xs z-10' 
                           : isToday

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Check, ArrowDownLeft, ArrowUpRight, Trash2, Clock, CheckCircle2 } from 'lucide-react';
+import { Plus, Check, ArrowDownLeft, ArrowUpRight, Trash2, CheckCircle2 } from 'lucide-react';
 import { Config, Debt } from '../types';
 import { formatAmount } from '../utils/format';
-import { Modal } from './ui';
+import { Modal, Card, Button, Input, SegmentedControl, EmptyState } from './ui';
 
 interface DebtsViewProps {
   onBack: () => void;
@@ -116,7 +116,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       {/* 1. Header Summary Cards */}
       <div className="grid grid-cols-2 gap-4">
         {/* Att få (Skyldig mig) */}
-        <div className="p-5 rounded-[8px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs space-y-1">
+        <Card variant="default" padding="lg" className="space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
             <ArrowDownLeft size={14} strokeWidth={2.5} />
             <span>{isEn ? 'To receive' : 'Att få tillbaka'}</span>
@@ -124,10 +124,10 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           <div className="text-xl font-extrabold text-[var(--text-primary)] font-amount tabular-nums tracking-tight">
             +{formatAmount(totalOweMe, config.language)} {curr}
           </div>
-        </div>
+        </Card>
 
         {/* Att betala (Jag är skyldig) */}
-        <div className="p-5 rounded-[8px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs space-y-1">
+        <Card variant="default" padding="lg" className="space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-500 dark:text-rose-400">
             <ArrowUpRight size={14} strokeWidth={2.5} />
             <span>{isEn ? 'To pay' : 'Att betala'}</span>
@@ -135,55 +135,31 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           <div className="text-xl font-extrabold text-[var(--text-primary)] font-amount tabular-nums tracking-tight">
             -{formatAmount(totalIOwe, config.language)} {curr}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* 2. Filter tabs & Add Button */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1 bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[8px]">
-          <button
-            type="button"
-            onClick={() => setActiveTab('all')}
-            className={`px-3 py-1.5 rounded-[10px] text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'all'
-                ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-xs'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            {isEn ? 'All' : 'Alla'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('owe_me')}
-            className={`px-3 py-1.5 rounded-[10px] text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'owe_me'
-                ? 'bg-[var(--surface-color)] text-emerald-600 dark:text-emerald-400 shadow-xs'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            {isEn ? 'Owes me' : 'Skyldig mig'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('i_owe')}
-            className={`px-3 py-1.5 rounded-[10px] text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'i_owe'
-                ? 'bg-[var(--surface-color)] text-rose-500 dark:text-rose-400 shadow-xs'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            {isEn ? 'I owe' : 'Jag är skyldig'}
-          </button>
-        </div>
+        <SegmentedControl
+          size="sm"
+          fullWidth={false}
+          value={activeTab}
+          onChange={(val) => setActiveTab(val as any)}
+          options={[
+            { value: 'all', label: isEn ? 'All' : 'Alla' },
+            { value: 'owe_me', label: isEn ? 'Owes me' : 'Skyldig mig' },
+            { value: 'i_owe', label: isEn ? 'I owe' : 'Jag är skyldig' },
+          ]}
+        />
 
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => setIsAddModalOpen(true)}
-          className="h-9 px-4 rounded-[8px] bg-[var(--accent-color)] hover:brightness-105 text-[var(--text-on-accent)] text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-xs"
+          icon={<Plus size={14} strokeWidth={2.5} />}
         >
-          <Plus size={14} strokeWidth={2.5} />
-          <span>{isEn ? 'Add' : 'Lägg till'}</span>
-        </button>
+          {isEn ? 'Add' : 'Lägg till'}
+        </Button>
       </div>
 
       {/* 3. Debt List */}
@@ -200,103 +176,98 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className={`p-4 rounded-[8px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between gap-3 transition-all ${
-                    item.isSettled ? 'opacity-50' : ''
-                  }`}
+                  className={`transition-all ${item.isSettled ? 'opacity-50' : ''}`}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {/* Avatar initial */}
-                    <div
-                      className={`w-10 h-10 rounded-[8px] flex items-center justify-center font-bold text-sm shrink-0 ${
-                        item.isSettled
-                          ? 'bg-black/5 dark:bg-white/5 text-[var(--text-tertiary)]'
-                          : isOweMe
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                      }`}
-                    >
-                      {item.personName.charAt(0).toUpperCase()}
+                  <Card variant="default" padding="md" className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Avatar initial */}
+                      <div
+                        className={`w-10 h-10 rounded-[var(--radius-card-nested,8px)] flex items-center justify-center font-bold text-sm shrink-0 ${
+                          item.isSettled
+                            ? 'bg-black/5 dark:bg-white/5 text-[var(--text-tertiary)]'
+                            : isOweMe
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                        }`}
+                      >
+                        {item.personName.charAt(0).toUpperCase()}
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-bold text-[var(--text-primary)] truncate">
+                            {item.personName}
+                          </span>
+                          <span
+                            className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-[var(--radius-badge,9999px)] ${
+                              isOweMe
+                                ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
+                                : 'text-rose-500 dark:text-rose-400 bg-rose-500/10'
+                            }`}
+                          >
+                            {isOweMe ? (isEn ? 'Owes you' : 'Skyldig dig') : (isEn ? 'You owe' : 'Du är skyldig')}
+                          </span>
+                        </div>
+
+                        {item.description && (
+                          <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5 font-medium">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-bold text-[var(--text-primary)] truncate">
-                          {item.personName}
-                        </span>
+                    {/* Right: Amount & Settle Check button */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="text-right">
                         <span
-                          className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-full ${
-                            isOweMe
-                              ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
-                              : 'text-rose-500 dark:text-rose-400 bg-rose-500/10'
+                          className={`text-sm sm:text-base font-bold font-amount tabular-nums block ${
+                            item.isSettled
+                              ? 'line-through text-[var(--text-tertiary)]'
+                              : isOweMe
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-rose-600 dark:text-rose-400'
                           }`}
                         >
-                          {isOweMe ? (isEn ? 'Owes you' : 'Skyldig dig') : (isEn ? 'You owe' : 'Du är skyldig')}
+                          {isOweMe ? '+' : '-'}{formatAmount(item.amount, config.language)} {curr}
                         </span>
                       </div>
 
-                      {item.description && (
-                        <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5 font-medium">
-                          {item.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Right: Amount & Settle Check button */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="text-right">
-                      <span
-                        className={`text-sm sm:text-base font-bold font-amount tabular-nums block ${
+                      <button
+                        type="button"
+                        onClick={() => handleToggleSettle(item.id)}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-90 ${
                           item.isSettled
-                            ? 'line-through text-[var(--text-tertiary)]'
-                            : isOweMe
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-rose-600 dark:text-rose-400'
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-emerald-500/15 hover:text-emerald-600'
                         }`}
+                        title={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera / Fått betalt')}
                       >
-                        {isOweMe ? '+' : '-'}{formatAmount(item.amount, config.language)} {curr}
-                      </span>
+                        {item.isSettled ? <CheckCircle2 size={16} strokeWidth={2.5} /> : <Check size={14} strokeWidth={2.5} />}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteDebt(item.id)}
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                        title={isEn ? 'Delete' : 'Ta bort'}
+                      >
+                        <Trash2 size={13} strokeWidth={2} />
+                      </button>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleSettle(item.id)}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-90 ${
-                        item.isSettled
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-emerald-500/15 hover:text-emerald-600'
-                      }`}
-                      title={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera / Fått betalt')}
-                    >
-                      {item.isSettled ? <CheckCircle2 size={16} strokeWidth={2.5} /> : <Check size={14} strokeWidth={2.5} />}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteDebt(item.id)}
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                      title={isEn ? 'Delete' : 'Ta bort'}
-                    >
-                      <Trash2 size={13} strokeWidth={2} />
-                    </button>
-                  </div>
+                  </Card>
                 </motion.div>
               );
             })
           ) : (
-            <div className="p-8 text-center rounded-[8px] bg-[var(--surface-color)] space-y-2">
-              <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center mx-auto text-[var(--text-secondary)]">
-                <Clock size={18} strokeWidth={2} />
-              </div>
-              <p className="text-xs font-semibold text-[var(--text-secondary)]">
-                {isEn ? 'No debts registered yet' : 'Inga skulder eller utlägg registrerade'}
-              </p>
-              <p className="text-[11px] text-[var(--text-tertiary)] max-w-xs mx-auto">
-                {isEn
+            <EmptyState
+              title={isEn ? 'No debts registered yet' : 'Inga skulder eller utlägg registrerade'}
+              description={
+                isEn
                   ? 'Keep track of money you lent or borrowed from friends and family.'
-                  : 'Håll enkelt koll på pengar du lånat ut till vänner eller är skyldig andra.'}
-              </p>
-            </div>
+                  : 'Håll enkelt koll på pengar du lånat ut till vänner eller är skyldig andra.'
+              }
+            />
           )}
         </AnimatePresence>
       </div>
@@ -311,11 +282,11 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
         bodyClassName="p-5 space-y-4"
       >
         {/* Type toggle */}
-        <div className="grid grid-cols-2 gap-2 bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[8px]">
+        <div className="grid grid-cols-2 gap-2 bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[var(--radius-card-nested,10px)]">
           <button
             type="button"
             onClick={() => setDebtType('owe_me')}
-            className={`py-2 px-3 rounded-[10px] text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`py-2 px-3 rounded-[var(--radius-btn,8px)] text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               debtType === 'owe_me'
                 ? 'bg-emerald-500 text-white shadow-xs'
                 : 'text-[var(--text-secondary)]'
@@ -327,7 +298,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
           <button
             type="button"
             onClick={() => setDebtType('i_owe')}
-            className={`py-2 px-3 rounded-[10px] text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`py-2 px-3 rounded-[var(--radius-btn,8px)] text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               debtType === 'i_owe'
                 ? 'bg-rose-500 text-white shadow-xs'
                 : 'text-[var(--text-secondary)]'
@@ -339,63 +310,42 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
         </div>
 
         {/* Person name */}
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
-            {isEn ? 'Person name' : 'Personens namn'}
-          </label>
-          <input
-            type="text"
-            value={personName}
-            onChange={(e) => setPersonName(e.target.value)}
-            placeholder={isEn ? 'e.g. Rasmus' : 't.ex. Rasmus eller Pia'}
-            className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
-          />
-        </div>
+        <Input
+          label={isEn ? 'Person name' : 'Personens namn'}
+          value={personName}
+          onChange={(e) => setPersonName(e.target.value)}
+          placeholder={isEn ? 'e.g. Rasmus' : 't.ex. Rasmus eller Pia'}
+        />
 
         {/* Amount */}
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
-            {isEn ? 'Amount' : 'Belopp'}
-          </label>
-          <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 h-11 focus-within:border-[var(--accent-color)]">
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
-              placeholder="0"
-              className="w-full bg-transparent border-none text-sm font-bold text-[var(--text-primary)] outline-none font-amount tabular-nums"
-            />
-            <span className="text-xs font-bold text-[var(--text-secondary)] pl-2 select-none">
-              {curr}
-            </span>
-          </div>
-        </div>
+        <Input
+          label={isEn ? 'Amount' : 'Belopp'}
+          variant="amount"
+          currency={curr}
+          value={amount}
+          onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
+          placeholder="0"
+          inputMode="numeric"
+        />
 
         {/* Description / Note */}
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
-            {isEn ? 'What is it for? (optional)' : 'Vad gäller det? (valfritt)'}
-          </label>
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={isEn ? 'e.g. Dinner, concert ticket' : 't.ex. Middag, biobiljett, bensin'}
-            className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--accent-color)]"
-          />
-        </div>
+        <Input
+          label={isEn ? 'What is it for? (optional)' : 'Vad gäller det? (valfritt)'}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={isEn ? 'e.g. Dinner, concert ticket' : 't.ex. Middag, biobiljett, bensin'}
+        />
 
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          fullWidth
+          size="lg"
           onClick={handleSaveDebt}
           disabled={!personName.trim() || !amount}
-          className="w-full h-12 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-none"
+          icon={<Check size={18} strokeWidth={2} />}
         >
-          <Check size={18} strokeWidth={2} />
-          <span>{isEn ? 'Save' : 'Spara'}</span>
-        </button>
+          {isEn ? 'Save' : 'Spara'}
+        </Button>
       </Modal>
     </motion.div>
   );

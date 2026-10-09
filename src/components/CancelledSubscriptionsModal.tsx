@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BottomSheet } from './ui';
+import { BottomSheet, Card, Button, IconButton } from './ui';
 import { RotateCcw, Trash2, CheckCircle2, Clock, Sparkles, Pencil } from 'lucide-react';
 
 import { FixedExpense, Config } from '../types';
@@ -84,7 +84,7 @@ export function CancelledSubscriptionsModal({
           {/* Body */}
           <div className="p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
             {/* Total Savings Banner */}
-            <div className="p-4 rounded-[8px] bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 flex items-center justify-between gap-3">
+            <div className="p-4 rounded-[var(--radius-card,14px)] bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                   <Sparkles size={20} strokeWidth={2} />
@@ -123,9 +123,11 @@ export function CancelledSubscriptionsModal({
                   const isEditingThis = editingExpenseId === item.id;
 
                   return (
-                    <div
+                    <Card
                       key={item.id}
-                      className="p-4 rounded-[8px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] space-y-3"
+                      variant="outlined"
+                      padding="sm"
+                      className="space-y-3"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
@@ -155,7 +157,7 @@ export function CancelledSubscriptionsModal({
                       </div>
 
                       {/* Status pill & dates */}
-                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-black/[0.04] dark:border-white/[0.05]">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--border-subtle)]">
                         <div className="flex items-center gap-1.5 text-xs font-medium">
                           {isExpired ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold text-[11.5px]">
@@ -173,41 +175,40 @@ export function CancelledSubscriptionsModal({
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
+                          <Button
+                            variant="secondary"
+                            size="xs"
+                            icon={<Pencil size={12} />}
                             onClick={() => {
                               setEditingExpenseId(isEditingThis ? null : item.id);
                               setNewCancelDate(item.cancellationDate || new Date().toISOString().split('T')[0]);
                             }}
-                            className="p-1.5 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium flex items-center gap-1 cursor-pointer"
                           >
-                            <Pencil size={12} />
-                            <span>{isEn ? 'Date' : 'Datum'}</span>
-                          </button>
+                            {isEn ? 'Date' : 'Datum'}
+                          </Button>
 
-                          <button
-                            type="button"
+                          <Button
+                            variant="primary"
+                            size="xs"
+                            icon={<RotateCcw size={12} strokeWidth={2.5} />}
                             onClick={() => handleReactivate(item)}
-                            className="px-2.5 py-1.5 rounded-lg bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
                           >
-                            <RotateCcw size={12} strokeWidth={2.5} />
-                            <span>{isEn ? 'Reactivate' : 'Återaktivera'}</span>
-                          </button>
+                            {isEn ? 'Reactivate' : 'Återaktivera'}
+                          </Button>
 
-                          <button
-                            type="button"
+                          <IconButton
+                            variant="danger"
+                            size="xs"
+                            icon={<Trash2 size={13} />}
                             onClick={() => onDeleteExpense(item.id)}
-                            className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 text-xs font-medium cursor-pointer transition-colors"
-                            title={isEn ? 'Delete permanently' : 'Ta bort permanent'}
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                            aria-label={isEn ? 'Delete permanently' : 'Ta bort permanent'}
+                          />
                         </div>
                       </div>
 
                       {/* Inline Date Editor */}
                       {isEditingThis && (
-                        <div className="pt-2 space-y-2 bg-black/[0.02] dark:bg-white/[0.03] p-3 rounded-[8px]">
+                        <div className="pt-2 space-y-2 bg-[var(--surface-muted)] p-3 rounded-[var(--radius-card-nested,10px)]">
                           <label className="text-xs font-semibold text-[var(--text-secondary)] block">
                             {isEn ? 'Cancellation / End date' : 'Uppsägningsdatum / Sista giltighetsdag'}
                           </label>
@@ -216,19 +217,19 @@ export function CancelledSubscriptionsModal({
                               type="date"
                               value={newCancelDate}
                               onChange={(e) => setNewCancelDate(e.target.value)}
-                              className="flex-1 h-9 px-3 bg-[var(--bg-color)] border border-black/10 dark:border-white/10 rounded-[10px] text-xs font-semibold text-[var(--text-primary)] outline-none"
+                              className="flex-1 h-9 px-3 bg-[var(--bg-color)] border border-[var(--border-control)] rounded-[var(--radius-input,8px)] text-xs font-semibold text-[var(--text-primary)] outline-none"
                             />
-                            <button
-                              type="button"
+                            <Button
+                              variant="primary"
+                              size="xs"
                               onClick={() => handleSaveDate(item)}
-                              className="h-9 px-3 rounded-[10px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-xs cursor-pointer"
                             >
                               {isEn ? 'Save' : 'Spara'}
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       )}
-                    </div>
+                    </Card>
                   );
                 })}
               </div>

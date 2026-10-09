@@ -115,7 +115,7 @@ export function PublicLegalPage({
           <div className="flex items-center gap-1 p-1 bg-[var(--surface-color)] border-none rounded-[22px] shadow-none overflow-x-auto no-scrollbar w-full">
             <button
               onClick={() => handleSelectDoc('privacy')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[14px] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card,14px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 currentDoc === 'privacy'
                   ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
@@ -127,7 +127,7 @@ export function PublicLegalPage({
 
             <button
               onClick={() => handleSelectDoc('terms')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[14px] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card,14px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 currentDoc === 'terms'
                   ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
@@ -139,7 +139,7 @@ export function PublicLegalPage({
 
             <button
               onClick={() => handleSelectDoc('cookies')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[14px] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card,14px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 currentDoc === 'cookies'
                   ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)]'
@@ -153,7 +153,7 @@ export function PublicLegalPage({
           {/* Quick Action: Copy Public Link */}
           <button
             onClick={handleCopyLink}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border-none rounded-[14px] transition-all shadow-none cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border-none rounded-[var(--radius-card,14px)] transition-all shadow-none cursor-pointer"
             title="Kopiera länk till detta dokument"
           >
             {copied ? <Check size={14} className="text-neutral-800 dark:text-white" /> : <Copy size={14} />}
@@ -216,7 +216,7 @@ function SwedishPrivacyPolicy() {
       </header>
 
       {/* Summary highlight */}
-      <div className="p-4 rounded-[14px] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
+      <div className="p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
         <p className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
           <Shield size={15} className="text-[var(--accent-color)] shrink-0" />
           Kort sammanfattning av din integritet:
@@ -251,7 +251,7 @@ function SwedishPrivacyPolicy() {
         </div>
       </section>
 
-      <section className="space-y-2 p-4 rounded-[14px] bg-[var(--surface-muted)] border-none">
+      <section className="space-y-2 p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-muted)] border-none">
         <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-1.5">
           <Lock size={16} className="text-[var(--accent-color)] shrink-0" />
           3. Google API & Begränsad användning
@@ -288,7 +288,7 @@ function EnglishPrivacyPolicy() {
           Last updated: September 23, 2026
         </p>
       </header>
-      <div className="p-4 rounded-[14px] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
+      <div className="p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-muted)] border-none text-xs text-[var(--text-primary)] leading-relaxed space-y-2">
         <p className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
           <Shield size={15} className="text-[var(--accent-color)] shrink-0" />
           Summary:

@@ -74,6 +74,30 @@
   --radius-md: 10px;
   --radius-sm: 6px;
 
+  /* Central Semantic Radii */
+  --radius-card: var(--radius-card);
+  --radius-card-nested: var(--radius-card-nested);
+  --radius-btn: var(--radius-button);
+  --radius-button: var(--radius-button);
+  --radius-button-sm: var(--radius-button-sm);
+  --radius-button-lg: var(--radius-button-lg);
+  --radius-input: var(--radius-input);
+  --radius-modal: var(--radius-modal);
+  --radius-chip: var(--radius-chip);
+  --radius-badge: var(--radius-badge);
+  --radius-icon-button: var(--radius-icon-button);
+  --radius-pill: var(--radius-pill);
+  --radius-container: var(--radius-container);
+
+  /* Component Heights */
+  --height-input: var(--height-input);
+  --height-btn: var(--height-button);
+  --height-button: var(--height-button);
+  --height-btn-sm: var(--height-button-sm);
+  --height-btn-lg: var(--height-button-lg);
+  --height-header: var(--height-header);
+  --height-bottom-nav: var(--height-bottom-nav);
+
   --shadow-2xs: none;
   --shadow-xs: none;
   --shadow-sm: none;
@@ -184,6 +208,79 @@ h6 {
 
 .font-editorial {
   font-family: var(--font-editorial) !important;
+}
+
+/* Central Semantic Design Utilities */
+@utility rounded-card {
+  border-radius: var(--radius-card);
+}
+
+@utility rounded-card-nested {
+  border-radius: var(--radius-card-nested);
+}
+
+@utility rounded-btn {
+  border-radius: var(--radius-button);
+}
+
+@utility rounded-btn-sm {
+  border-radius: var(--radius-button-sm);
+}
+
+@utility rounded-btn-lg {
+  border-radius: var(--radius-button-lg);
+}
+
+@utility rounded-input {
+  border-radius: var(--radius-input);
+}
+
+@utility rounded-modal {
+  border-radius: var(--radius-modal);
+}
+
+@utility rounded-chip {
+  border-radius: var(--radius-chip);
+}
+
+@utility rounded-badge {
+  border-radius: var(--radius-badge);
+}
+
+@utility bg-surface {
+  background-color: var(--surface-color);
+}
+
+@utility bg-canvas {
+  background-color: var(--bg-color);
+}
+
+@utility bg-surface-muted {
+  background-color: var(--surface-muted);
+}
+
+@utility bg-card-nested {
+  background-color: var(--card-nested-bg);
+}
+
+@utility text-primary {
+  color: var(--text-primary);
+}
+
+@utility text-secondary {
+  color: var(--text-secondary);
+}
+
+@utility text-tertiary {
+  color: var(--text-tertiary);
+}
+
+@utility border-subtle {
+  border-color: var(--border-subtle);
+}
+
+@utility border-strong {
+  border-color: var(--border-strong);
 }
 
 :root {
@@ -320,6 +417,75 @@ h6 {
   --ambient-glow: none;
   --ambient-glow-strong: none;
   --backdrop-blur: 22px;
+
+  /* ==========================================================================
+     CENTRALIZED SEMANTIC DESIGN TOKENS - DEJZ PHASE 1
+     Single source of truth for component radii, dimensions, spacing & motion
+     ========================================================================== */
+  /* Corner Radii */
+  --radius-card: 14px;
+  --radius-card-nested: 10px;
+  --radius-button: 14px;
+  --radius-button-sm: 10px;
+  --radius-button-lg: 14px;
+  --radius-input: 14px;
+  --radius-modal: 16px;
+  --radius-chip: 9999px;
+  --radius-badge: 9999px;
+  --radius-icon-button: 8px;
+  --radius-pill: 9999px;
+  --radius-container: 16px;
+
+  /* Component Dimensions / Heights */
+  --height-input: 48px;
+  --height-button: 48px;
+  --height-button-sm: 32px;
+  --height-button-lg: 52px;
+  --height-search: 44px;
+  --height-header: 64px;
+  --height-bottom-nav: 64px;
+  --size-icon-button-xs: 24px;
+  --size-icon-button-sm: 28px;
+  --size-icon-button-md: 32px;
+  --size-icon-button-lg: 40px;
+
+  /* Spacing & Layout */
+  --space-page-px: 1rem;
+  --space-page-max: 36rem;
+  --space-card-p: 1rem;
+  --space-card-p-sm: 0.875rem;
+  --space-card-p-lg: 1.5rem;
+  --space-row-p: 0.875rem;
+  --space-element-gap: 0.75rem;
+  --space-section-gap: 1.5rem;
+
+  /* Borders & Dividers */
+  --border-width-default: 1px;
+  --border-width-thick: 2px;
+  --border-divider: var(--border-subtle);
+
+  /* Form & Input Field Defaults */
+  --input-bg: rgba(0, 0, 0, 0.05);
+
+  /* Z-Index Layer Hierarchy */
+  --z-base: 1;
+  --z-dropdown: 20;
+  --z-sticky: 30;
+  --z-header: 40;
+  --z-bottom-nav: 40;
+  --z-modal-backdrop: 90;
+  --z-modal: 100;
+  --z-sheet: 110;
+  --z-toast: 120;
+  --z-tooltip: 130;
+
+  /* Motion & Transitions */
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 250ms;
+  --ease-default: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: ease-out;
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .black-theme {
@@ -342,6 +508,12 @@ h6 {
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
   --chip-bg: #121212;
+  --border-subtle: #1E1E1E;
+  --border-color: #1E1E1E;
+  --border-control: #2A2A2A;
+  --border-strong: #333333;
+  --border-divider: #1E1E1E;
+  --input-bg: #121212;
 }
 
 .dark {
@@ -381,7 +553,9 @@ h6 {
   --border-color: rgba(255, 255, 255, 0.08);
   --border-control: #858585;
   --border-strong: #858585;
+  --border-divider: rgba(255, 255, 255, 0.08);
   --inner-highlight: transparent;
+  --input-bg: rgba(255, 255, 255, 0.05);
 
   --chip-bg: rgba(255, 255, 255, 0.05);
   --chip-text: #B8B8B8;
@@ -663,15 +837,29 @@ h6 {
 
 @layer components {
   .module-surface {
-    @apply rounded-[16px];
+    border-radius: var(--radius-card);
     background: var(--surface-gradient);
+    border: none;
+    box-shadow: none;
+  }
+
+  .card-surface {
+    border-radius: var(--radius-card);
+    background: var(--surface-color);
+    border: none;
+    box-shadow: none;
+  }
+
+  .card-surface-nested {
+    border-radius: var(--radius-card-nested);
+    background: var(--card-nested-bg);
     border: none;
     box-shadow: none;
   }
 
   .surface-card,
   .glass-card {
-    border-radius: 16px;
+    border-radius: var(--radius-card);
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
@@ -680,45 +868,47 @@ h6 {
   }
 
   .profile-card {
-    border-radius: 16px;
+    border-radius: var(--radius-card);
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
     position: relative;
     overflow: hidden;
-    transition: all 0.2s ease;
+    transition: all var(--duration-normal) var(--ease-default);
   }
 
   .flat-card {
-    border-radius: 16px;
+    border-radius: var(--radius-card);
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
   }
 
   .surface-elevated {
-    border-radius: 16px;
+    border-radius: var(--radius-card);
     background: var(--surface-elevated-gradient);
     border: none;
     box-shadow: none;
   }
 
   .surface-solid {
-    border-radius: 16px;
+    border-radius: var(--radius-card);
     background: var(--surface-gradient);
     border: none;
     box-shadow: none;
   }
 
   .surface-muted {
-    border-radius: 16px;
+    border-radius: var(--radius-card);
     background: var(--surface-muted);
     border: none;
     box-shadow: none;
   }
 
   .accent-button {
-    @apply inline-flex items-center justify-center font-semibold px-5 py-2.5 rounded-[12px] transition-all;
+    @apply inline-flex items-center justify-center font-semibold px-5 transition-all;
+    border-radius: var(--radius-button);
+    min-height: var(--height-button-sm);
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
     border: none;
@@ -727,7 +917,9 @@ h6 {
   }
 
   .accent-button-full {
-    @apply inline-flex items-center justify-center font-semibold px-5 py-3.5 rounded-[12px] transition-all w-full;
+    @apply inline-flex items-center justify-center font-semibold px-5 transition-all w-full;
+    border-radius: var(--radius-button);
+    min-height: var(--height-button);
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
     border: none;
@@ -748,7 +940,7 @@ h6 {
     background: var(--btn-primary-pressed);
     scale: 0.96;
     opacity: 0.95;
-    transition: all 0.1s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: all var(--duration-fast) var(--ease-spring);
   }
 
   .accent-button:disabled,
@@ -760,7 +952,9 @@ h6 {
   }
 
   .input-field {
-    @apply w-full font-medium px-4 py-3 rounded-[12px] border transition-all;
+    @apply w-full font-medium px-4 py-3 border transition-all;
+    border-radius: var(--radius-input);
+    min-height: var(--height-input);
     background: var(--surface-gradient);
     border-color: var(--border-color);
     color: var(--text-primary);
@@ -813,8 +1007,8 @@ h6 {
   }
 
   .modal-surface {
-    border-radius: var(--radius-4xl);
-    background: var(--bg-color);
+    border-radius: var(--radius-modal);
+    background: var(--modal-bg, var(--bg-color));
     box-shadow: none;
   }
 

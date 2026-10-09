@@ -6,7 +6,7 @@ import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
 import { BudgetSummaryModule } from './BudgetSummaryModule';
-import { FilterSelectButton, FilterButtonGroup } from './ui';
+import { FilterSelectButton, FilterButtonGroup, Card } from './ui';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { formatAmount } from '../utils/format';
 import { isFixedItemDueInPeriod } from '../utils/date';
@@ -438,7 +438,7 @@ export function AnalysisView({
 
       {/* DONUT DIAGRAM & FÖRDELNING */}
       {categoryData.length > 0 && (
-        <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border-none shadow-none space-y-6">
+        <Card variant="default" padding="lg" className="space-y-6 border-none shadow-none">
           <div className="flex items-center justify-between px-0.5">
             <h2 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">
               {isEn ? 'Distribution' : 'Fördelning'}
@@ -496,7 +496,7 @@ export function AnalysisView({
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* FULLSTÄNDIG KATEGORILISTA ELLER GEMENSAM TOMVY */}
@@ -508,7 +508,7 @@ export function AnalysisView({
             </h3>
           </div>
 
-          <div className="bg-[var(--surface-color)] rounded-[8px] border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+          <Card variant="default" padding="none" className="border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               
@@ -651,7 +651,7 @@ export function AnalysisView({
                 </div>
               );
             })}
-          </div>
+          </Card>
         </div>
       ) : (
         <div className="pb-8">

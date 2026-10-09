@@ -7,7 +7,6 @@ import {
   Calendar,
   Clock,
   Info,
-  X,
 } from "lucide-react";
 import {
   Transaction,
@@ -22,6 +21,7 @@ import { CategoryIcon } from "./CategoryIcon";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { PeriodTimeline } from "./PeriodTimeline";
+import { Card, Button, Modal } from "./ui";
 import { getCategoryIconName } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
@@ -385,7 +385,7 @@ export function TodayView({
       />
 
       {/* 2. Compact Period & Payday Status Module (Placed under kvar att spendera) */}
-      <div className="bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] rounded-[14px] p-3.5 sm:p-4 shadow-sm animate-fade-in">
+      <Card variant="default" padding="none" className="p-3.5 sm:p-4 shadow-2xs animate-fade-in">
         <button
           type="button"
           onClick={() => {
@@ -420,7 +420,7 @@ export function TodayView({
             </span>
           </div>
         </button>
-      </div>
+      </Card>
 
       {/* 3. Category Budgets (No module card wrapper) */}
       <div className="animate-fade-in">
@@ -428,10 +428,10 @@ export function TodayView({
           <button
             type="button"
             onClick={() => onNavigate("profile", "budget")}
-            className="w-full p-4 rounded-[14px] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/[0.08] dark:border-white/[0.1] text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
+            className="w-full p-4 rounded-[var(--radius-card)] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/[0.08] dark:border-white/[0.1] text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-[10px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-[var(--radius-btn,10px)] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
                 <SlidersHorizontal size={18} strokeWidth={2} />
               </div>
               <div>
@@ -474,7 +474,7 @@ export function TodayView({
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                     onClick={() => handleCategoryClick(cat.name)}
-                    className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[12px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
+                    className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[var(--radius-card,12px)] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
                   >
                     {/* Top: Icon + Name */}
                     <div className="flex items-center gap-2 min-w-0 w-full">
@@ -518,10 +518,10 @@ export function TodayView({
                   if (typeof feedback.light === 'function') feedback.light();
                   onNavigate("profile", "budget");
                 }}
-                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[12px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[var(--radius-card,12px)] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
                 aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
               >
-                <div className="w-7 h-7 rounded-[8px] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                <div className="w-7 h-7 rounded-[var(--radius-btn,8px)] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
                   <SlidersHorizontal size={14} strokeWidth={2} />
                 </div>
 
@@ -575,7 +575,7 @@ export function TodayView({
         {!isTodaySelected && (
           <button
             onClick={handleGoToToday}
-            className="flex items-center gap-1.5 px-2.5 h-6 rounded-[10px] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
+            className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-btn,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
           >
             <RotateCcw size={11} strokeWidth={2.5} />
             <span>{lang === "en" ? "Today" : "Idag"}</span>
@@ -654,73 +654,59 @@ export function TodayView({
       </div>
 
       {/* Period & Payday Info Modal */}
-      {isPeriodInfoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
-          <div 
-            className="fixed inset-0" 
-            onClick={() => setIsPeriodInfoOpen(false)} 
-          />
-          <div className="relative w-full max-w-[320px] bg-white dark:bg-[#1C1C1C] rounded-[12px] p-5 border border-black/[0.08] dark:border-white/[0.08] shadow-2xl space-y-4 z-10 text-left font-sans animate-fade-in">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-1">
-              <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold text-sm">
-                <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2} />
-                <span>{lang === 'en' ? 'Period & Payday' : 'Period & nästa lön'}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsPeriodInfoOpen(false)}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer border-none"
-                aria-label="Stäng"
-              >
-                <X size={17} strokeWidth={2} />
-              </button>
-            </div>
-
-            {/* Content items */}
-            <div className="space-y-2.5 pt-1">
-              {/* Period */}
-              <div className="flex items-center gap-3 p-3 rounded-[12px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-                <div className="w-8 h-8 rounded-[8px] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
-                  <Calendar size={16} strokeWidth={2} />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-medium text-[var(--text-secondary)]">
-                    {lang === 'en' ? 'Current period' : 'Aktuell period'}
-                  </span>
-                  <span className="text-sm font-semibold text-[var(--text-primary)] truncate mt-0.5">
-                    {periodIntervalText}
-                  </span>
-                </div>
-              </div>
-
-              {/* Payday / Next Salary */}
-              <div className="flex items-center gap-3 p-3 rounded-[12px] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-                <div className="w-8 h-8 rounded-[8px] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
-                  <Clock size={16} strokeWidth={2} />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-medium text-[var(--text-secondary)]">
-                    {lang === 'en' ? 'Next payday' : 'Nästa lön'}
-                  </span>
-                  <span className="text-sm font-semibold text-[var(--text-primary)] font-amount tabular-nums truncate mt-0.5">
-                    {daysValueText} {lang === 'en' ? 'until payday' : 'kvar till lön'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Close action */}
-            <button
-              type="button"
-              onClick={() => setIsPeriodInfoOpen(false)}
-              className="w-full h-11 rounded-[14px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] cursor-pointer shadow-xs flex items-center justify-center border-none mt-2"
-            >
-              {lang === 'en' ? 'Close' : 'Stäng'}
-            </button>
+      <Modal
+        isOpen={isPeriodInfoOpen}
+        onClose={() => setIsPeriodInfoOpen(false)}
+        size="xs"
+        title={
+          <div className="flex items-center gap-2">
+            <Info size={16} className="text-[var(--accent-color)]" strokeWidth={2} />
+            <span>{lang === 'en' ? 'Period & Payday' : 'Period & nästa lön'}</span>
           </div>
+        }
+      >
+        <div className="space-y-2.5 pt-1">
+          {/* Period */}
+          <div className="flex items-center gap-3 p-3 rounded-[var(--radius-card,12px)] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
+            <div className="w-8 h-8 rounded-[var(--radius-btn,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
+              <Calendar size={16} strokeWidth={2} />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
+                {lang === 'en' ? 'Current period' : 'Aktuell period'}
+              </span>
+              <span className="text-sm font-semibold text-[var(--text-primary)] truncate mt-0.5">
+                {periodIntervalText}
+              </span>
+            </div>
+          </div>
+
+          {/* Payday / Next Salary */}
+          <div className="flex items-center gap-3 p-3 rounded-[var(--radius-card,12px)] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
+            <div className="w-8 h-8 rounded-[var(--radius-btn,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
+              <Clock size={16} strokeWidth={2} />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">
+                {lang === 'en' ? 'Next payday' : 'Nästa lön'}
+              </span>
+              <span className="text-sm font-semibold text-[var(--text-primary)] font-amount tabular-nums truncate mt-0.5">
+                {daysValueText} {lang === 'en' ? 'until payday' : 'kvar till lön'}
+              </span>
+            </div>
+          </div>
+
+          {/* Close action */}
+          <Button
+            variant="primary"
+            fullWidth
+            onClick={() => setIsPeriodInfoOpen(false)}
+            className="mt-2"
+          >
+            {lang === 'en' ? 'Close' : 'Stäng'}
+          </Button>
         </div>
-      )}
+      </Modal>
 
       {/* Category Quick View Bottom Sheet Modal */}
       <CategoryBottomSheetModal

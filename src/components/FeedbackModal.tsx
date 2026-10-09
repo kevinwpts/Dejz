@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Send, MessageSquare, Bug, Lightbulb, HeartHandshake } from 'lucide-react';
 import { TranslationKey } from '../i18n';
-import { Modal } from './ui';
+import { Modal, Button } from './ui';
 
 interface FeedbackModalProps {
   isOpen?: boolean;
@@ -103,19 +103,20 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t }: FeedbackM
               ? 'Vad för funktion eller förbättring saknar du?'
               : t('feedbackPlaceholder')
           } 
-          className="w-full h-32 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] p-3.5 pl-10 text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all resize-none focus:border-[var(--accent-color)]" 
+          className="w-full h-32 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[var(--radius-input,10px)] p-3.5 pl-10 text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all resize-none focus:border-[var(--accent-color)]" 
         />
       </div>
 
-      <button 
-        type="button"
+      <Button
+        variant="primary"
+        fullWidth
+        size="lg"
         onClick={handleSubmit} 
         disabled={!message.trim() || isSubmitting}
-        className="w-full h-12 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+        icon={<Send size={16} strokeWidth={2} />}
       >
-        <Send size={16} strokeWidth={2} />
-        <span>{isSubmitting ? t('sending') : t('sendFeedback')}</span>
-      </button>
+        {isSubmitting ? t('sending') : t('sendFeedback')}
+      </Button>
     </Modal>
   );
 }

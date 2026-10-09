@@ -3,6 +3,7 @@ import { TranslationKey } from '../i18n';
 import { Transaction, Config, Income } from '../types';
 import { formatAmount } from '../utils/format';
 import { TransactionItem } from './TransactionItem';
+import { Card } from './ui';
 
 interface CompactOverviewProps {
   t: (key: TranslationKey) => string;
@@ -26,19 +27,19 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
   return (
     <div className="space-y-8 px-4">
       {/* Budget Status */}
-      <div className="p-5 rounded-[12px] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] shadow-none">
+      <Card variant="default" padding="lg">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xs font-semibold text-[var(--text-secondary)]">
             {t('budgetUsage')}
           </h3>
-          <span className="text-xs font-bold text-[#05B862] bg-[#05B862]/10 px-2.5 py-0.5 rounded-full">
+          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
             {budgetUsage.toFixed(0)}%
           </span>
         </div>
         
         <div className="relative h-2 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden mb-3.5">
           <div 
-            className="absolute top-0 left-0 h-full bg-[#05B862] transition-all duration-1000 ease-out rounded-full"
+            className="absolute top-0 left-0 h-full bg-emerald-500 transition-all duration-1000 ease-out rounded-full"
             style={{ width: `${Math.min(budgetUsage, 100)}%` }}
           />
         </div>
@@ -49,7 +50,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
           </span>
           {' '}{t('ofBudgetUsed')}
         </p>
-      </div>
+      </Card>
 
       {/* Category Totals */}
       <div className="space-y-3">
@@ -58,14 +59,14 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
         </h3>
         <div className="grid grid-cols-1 gap-2">
           {Object.entries(categoryTotals).slice(0, 4).map(([cat, amount]) => (
-            <div key={cat} className="flex items-center justify-between p-3.5 sm:p-4 rounded-[14px] bg-white dark:bg-[#1C1C1C] hover:bg-black/[0.02] dark:hover:bg-white/5 active:scale-[0.99] transition-all group border border-black/[0.06] dark:border-white/[0.08] shadow-none">
+            <Card key={cat} variant="default" padding="md" isInteractive className="flex items-center justify-between">
               <span className="text-sm font-medium text-[var(--text-primary)] leading-tight truncate tracking-tight">
                 {cat}
               </span>
               <span className="text-sm font-medium text-[var(--text-primary)] font-amount tabular-nums">
                 {formatAmount(amount, config.language)}
               </span>
-            </div>
+            </Card>
           ))}
         </div>
       </div>

@@ -25,20 +25,20 @@ export function SegmentedControl<T extends string = string>({
   className = '',
 }: SegmentedControlProps<T>) {
   const sizeStyles = {
-    sm: 'p-1 rounded-[6px] text-xs',
-    md: 'p-1 rounded-[8px] text-xs sm:text-sm',
-    lg: 'p-1.5 rounded-[8px] text-sm',
+    sm: 'p-1 rounded-[var(--radius-icon-button,6px)] text-xs',
+    md: 'p-1 rounded-[var(--radius-card-nested,10px)] text-xs sm:text-sm',
+    lg: 'p-1.5 rounded-[var(--radius-card-nested,10px)] text-sm',
   }[size];
 
   const itemSizeStyles = {
-    sm: 'py-1.5 px-3 rounded-[4px]',
-    md: 'py-2 px-4 rounded-[6px]',
-    lg: 'py-2.5 px-5 rounded-[6px]',
+    sm: 'py-1.5 px-3 rounded-[var(--radius-xs,4px)]',
+    md: 'py-2 px-4 rounded-[var(--radius-button-sm,8px)]',
+    lg: 'py-2.5 px-5 rounded-[var(--radius-button-sm,8px)]',
   }[size];
 
   return (
     <div
-      className={`bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 flex items-center relative ${sizeStyles} ${
+      className={`bg-[var(--surface-muted)] border border-transparent flex items-center relative ${sizeStyles} ${
         fullWidth ? 'w-full' : 'inline-flex'
       } ${className}`}
     >
@@ -55,7 +55,7 @@ export function SegmentedControl<T extends string = string>({
             } ${
               isSelected
                 ? 'bg-[#242321] text-white dark:bg-stone-100 dark:text-[#242321] shadow-none font-medium'
-                : 'text-[#6E6961] dark:text-[#B8B8B8] hover:text-[#1C1917] dark:hover:text-white font-medium'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
             }`}
           >
             {option.icon && <span className="shrink-0">{option.icon}</span>}
@@ -65,7 +65,7 @@ export function SegmentedControl<T extends string = string>({
                 className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full ${
                   isSelected
                     ? 'bg-white/20 dark:bg-black/15 text-white dark:text-[#242321]'
-                    : 'bg-black/5 dark:bg-white/5 text-[#6E6961] dark:text-[#B8B8B8]'
+                    : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
                 }`}
               >
                 {option.badge}

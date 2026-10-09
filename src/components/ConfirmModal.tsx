@@ -43,7 +43,7 @@ export function ConfirmModal({
       bodyClassName="p-6 sm:p-7 text-center"
     >
       <div className="relative z-10 text-center">
-        <div className={`w-14 h-14 ${iconBg} ${iconColor} rounded-[8px] flex items-center justify-center mx-auto mb-4 border shadow-xs`}>
+        <div className={`w-14 h-14 ${iconBg} ${iconColor} rounded-[var(--radius-card-nested,10px)] flex items-center justify-center mx-auto mb-4 border shadow-xs`}>
           <AlertCircle size={28} strokeWidth={2} />
         </div>
 

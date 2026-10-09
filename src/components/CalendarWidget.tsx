@@ -75,14 +75,14 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="w-7 h-7 rounded-[14px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <ChevronLeft size={15} strokeWidth={2.5} />
           </button>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="w-7 h-7 rounded-[14px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
             <ChevronRight size={15} strokeWidth={2.5} />
           </button>
@@ -121,7 +121,7 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
                 target.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
                 setSelectedDate(target);
               }}
-              className={`aspect-square w-full rounded-[14px] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-[0.94] cursor-pointer text-center ${
+              className={`aspect-square w-full rounded-[var(--radius-button-sm,10px)] flex flex-col items-center justify-center gap-0.5 transition-all relative active:scale-[0.94] cursor-pointer text-center ${
                 isSelected 
                   ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-xs z-10' 
                   : isToday

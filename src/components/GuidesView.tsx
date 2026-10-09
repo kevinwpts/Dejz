@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { BookOpen, Calendar, PieChart, Receipt, Sparkles, ChevronRight, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import { Config } from '../types';
+import { Card } from './ui';
 
 interface GuidesViewProps {
   onBack: () => void;
@@ -157,7 +158,7 @@ export function GuidesView({ config }: GuidesViewProps) {
           </button>
 
           {/* Guide Header */}
-          <div className="p-5 rounded-[16px] bg-[var(--surface-color)] space-y-2 border border-black/[0.04] dark:border-white/[0.04]">
+          <Card variant="default" padding="lg" className="space-y-2">
             <div className="flex items-center gap-2 text-xs font-bold text-[var(--accent-color)]">
               <selectedGuide.icon size={16} strokeWidth={2.5} />
               <span>{selectedGuide.readTime} {isEn ? 'read' : 'lästid'}</span>
@@ -168,14 +169,16 @@ export function GuidesView({ config }: GuidesViewProps) {
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
               {selectedGuide.subtitle}
             </p>
-          </div>
+          </Card>
 
           {/* Guide Steps */}
           <div className="space-y-4">
             {selectedGuide.steps.map((step, idx) => (
-              <div
+              <Card
                 key={idx}
-                className="p-5 rounded-[16px] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.04] space-y-3"
+                variant="default"
+                padding="lg"
+                className="space-y-3"
               >
                 <h3 className="text-sm font-bold text-[var(--text-primary)]">
                   {step.title}
@@ -187,7 +190,7 @@ export function GuidesView({ config }: GuidesViewProps) {
 
                 {/* Screenshot Placeholder */}
                 {step.imagePlaceholder && (
-                  <div className="rounded-[16px] bg-black/[0.02] dark:bg-white/[0.03] border-2 border-dashed border-black/10 dark:border-white/10 p-6 flex flex-col items-center justify-center gap-2 text-center text-[var(--text-tertiary)]">
+                  <div className="rounded-[var(--radius-card,16px)] bg-black/[0.02] dark:bg-white/[0.03] border-2 border-dashed border-black/10 dark:border-white/10 p-6 flex flex-col items-center justify-center gap-2 text-center text-[var(--text-tertiary)]">
                     <ImageIcon size={24} strokeWidth={1.5} className="opacity-50" />
                     <span className="text-[11px] font-medium">
                       {step.imagePlaceholder}
@@ -200,19 +203,19 @@ export function GuidesView({ config }: GuidesViewProps) {
 
                 {/* Tip box if any */}
                 {step.tip && (
-                  <div className="p-3 rounded-[16px] bg-[var(--accent-color)]/10 text-[var(--text-primary)] text-xs flex items-start gap-2">
+                  <div className="p-3 rounded-[var(--radius-card-nested,10px)] bg-[var(--accent-color)]/10 text-[var(--text-primary)] text-xs flex items-start gap-2">
                     <CheckCircle size={15} className="text-[var(--accent-color)] shrink-0 mt-0.5" />
                     <span className="leading-snug">{step.tip}</span>
                   </div>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
         </div>
       ) : (
         /* Guides Index List */
         <div className="space-y-4">
-          <div className="p-5 rounded-[16px] bg-[var(--surface-color)] text-center space-y-2 border border-black/[0.04] dark:border-white/[0.04]">
+          <Card variant="default" padding="lg" className="text-center space-y-2">
             <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center mx-auto">
               <BookOpen size={22} strokeWidth={2} />
             </div>
@@ -224,20 +227,22 @@ export function GuidesView({ config }: GuidesViewProps) {
                 ? 'Learn how to get the most out of Dejz with our step-by-step guides.'
                 : 'Lär dig hur du får ut det mesta av Dejz med våra enkla steg-för-steg-guider.'}
             </p>
-          </div>
+          </Card>
 
           <div className="space-y-2.5">
             {guides.map((g) => {
               const Icon = g.icon;
               return (
-                <button
+                <Card
                   key={g.id}
-                  type="button"
+                  variant="default"
+                  padding="md"
+                  isInteractive
                   onClick={() => setSelectedGuideId(g.id)}
-                  className="w-full p-4 rounded-[16px] bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border border-black/[0.04] dark:border-white/[0.04] transition-all flex items-center justify-between gap-3 text-left cursor-pointer active:scale-[0.99] group shadow-none"
+                  className="w-full flex items-center justify-between gap-3 text-left cursor-pointer"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-10 h-10 rounded-[16px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <Icon size={18} strokeWidth={2} />
                     </div>
                     <div className="min-w-0">
@@ -254,7 +259,7 @@ export function GuidesView({ config }: GuidesViewProps) {
                     <span className="text-[11px] opacity-75">{g.readTime}</span>
                     <ChevronRight size={16} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
                   </div>
-                </button>
+                </Card>
               );
             })}
           </div>

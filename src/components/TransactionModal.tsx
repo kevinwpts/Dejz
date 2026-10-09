@@ -605,7 +605,7 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[12px] sm:rounded-[12px] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -652,7 +652,7 @@ export function TransactionModal({
                   if (typeof feedback?.light === 'function') feedback.light();
                   _onChangeType('expense');
                 }}
-                className={`py-2 rounded-[12px] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'expense'
                     ? 'bg-white dark:bg-[#2A2A2A] text-[var(--text-primary)] shadow-xs'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -666,7 +666,7 @@ export function TransactionModal({
                   if (typeof feedback?.light === 'function') feedback.light();
                   _onChangeType('income');
                 }}
-                className={`py-2 rounded-[12px] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'income'
                     ? 'bg-white dark:bg-[#2A2A2A] text-emerald-600 dark:text-emerald-400 shadow-xs'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -738,7 +738,7 @@ export function TransactionModal({
                 <button
                   type="button"
                   onClick={() => {}}
-                  className="text-[10px] font-bold text-[var(--text-secondary)] whitespace-nowrap bg-black/[0.04] dark:bg-white/[0.06] px-2 py-1 rounded-[10px]"
+                  className="text-[10px] font-bold text-[var(--text-secondary)] whitespace-nowrap bg-black/[0.04] dark:bg-white/[0.06] px-2 py-1 rounded-[var(--radius-button-sm,10px)]"
                 >
                   {currentLang === 'en' ? 'Split' : 'Dela upp'}
                 </button>
@@ -869,7 +869,7 @@ export function TransactionModal({
                                 setSplits(newSplits);
                               }
                             }}
-                            className="w-20 bg-black/5 dark:bg-white/5 rounded-[10px] px-2 py-1 text-[13.5px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-right outline-none focus:ring-1 focus:ring-[var(--accent-color)]"
+                            className="w-20 bg-black/5 dark:bg-white/5 rounded-[var(--radius-input,14px)] px-2 py-1 text-[13.5px] font-bold font-amount tabular-nums text-[var(--text-primary)] text-right outline-none focus:ring-1 focus:ring-[var(--accent-color)]"
                             placeholder="0"
                           />
                           <span className="text-[11px] font-bold text-[var(--text-tertiary)] select-none font-amount">
@@ -926,7 +926,7 @@ export function TransactionModal({
                       updatedSplits.push({ id: Math.random().toString(), amount: perSplit + (rem > 0 ? 1 : 0), category: unusedCat, tags: [] });
                       setSplits(updatedSplits);
                     }}
-                    className="flex items-center gap-1.5 text-xs font-bold text-[var(--accent-color)] hover:opacity-80 cursor-pointer py-1 px-2.5 rounded-[10px] bg-[var(--accent-color)]/10"
+                    className="flex items-center gap-1.5 text-xs font-bold text-[var(--accent-color)] hover:opacity-80 cursor-pointer py-1 px-2.5 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-color)]/10"
                   >
                     <Plus size={14} strokeWidth={2.5} />
                     <span>{currentLang === 'en' ? 'Add category' : 'Kategori'}</span>
@@ -992,7 +992,7 @@ export function TransactionModal({
                           { id: Math.random().toString(), amount: totalVal - half, category: cat2, tags: [] }
                         ]);
                       }}
-                      className="h-8 px-2.5 rounded-[12px] bg-[var(--accent-color)]/10 hover:bg-[var(--accent-color)]/20 text-[var(--accent-color)] text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 active:scale-95"
+                      className="h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-color)]/10 hover:bg-[var(--accent-color)]/20 text-[var(--accent-color)] text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 active:scale-95"
                       title="Dela upp i flera kategorier"
                     >
                       <Plus size={13} strokeWidth={2.5} />
@@ -1015,7 +1015,7 @@ export function TransactionModal({
                     setSelectedDate(new Date());
                     setShowFullCalendar(false);
                   }}
-                  className={`h-[28px] px-2.5 rounded-[12px] text-[11px] font-bold tracking-tight transition-all cursor-pointer ${
+                  className={`h-[28px] px-2.5 rounded-[var(--radius-button-sm,10px)] text-[11px] font-bold tracking-tight transition-all cursor-pointer ${
                     !showFullCalendar && new Date(selectedDate).toDateString() === new Date().toDateString()
                       ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -1031,7 +1031,7 @@ export function TransactionModal({
                     setSelectedDate(yesterday);
                     setShowFullCalendar(false);
                   }}
-                  className={`h-[28px] px-2.5 rounded-[12px] text-[11px] font-bold tracking-tight transition-all cursor-pointer ${
+                  className={`h-[28px] px-2.5 rounded-[var(--radius-button-sm,10px)] text-[11px] font-bold tracking-tight transition-all cursor-pointer ${
                     !showFullCalendar && new Date(selectedDate).toDateString() === new Date(new Date().setDate(new Date().getDate() - 1)).toDateString()
                       ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -1042,7 +1042,7 @@ export function TransactionModal({
                 <button
                   type="button"
                   onClick={() => setShowFullCalendar(!showFullCalendar)}
-                  className={`h-[28px] px-2 rounded-[12px] transition-all flex items-center justify-center cursor-pointer gap-1 ${
+                  className={`h-[28px] px-2 rounded-[var(--radius-button-sm,10px)] transition-all flex items-center justify-center cursor-pointer gap-1 ${
                     showFullCalendar || (new Date(selectedDate).toDateString() !== new Date().toDateString() && new Date(selectedDate).toDateString() !== new Date(Date.now() - 86400000).toDateString())
                       ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs' 
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -1142,7 +1142,7 @@ export function TransactionModal({
                     type="button"
                     onClick={() => receiptInputRef.current?.click()}
                     disabled={isUploadingReceipt}
-                    className="h-[28px] px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-semibold rounded-[12px] transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1"
+                    className="h-[28px] px-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/20 text-[var(--text-primary)] text-[11px] font-semibold rounded-[var(--radius-button-sm,10px)] transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1"
                   >
                     <Paperclip size={11} strokeWidth={2} />
                     <span>{currentLang === 'en' ? 'File' : 'Fil'}</span>
@@ -1151,7 +1151,7 @@ export function TransactionModal({
                     type="button"
                     onClick={() => setIsCameraModalOpen(true)}
                     disabled={isUploadingReceipt}
-                    className="h-[28px] px-2.5 bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-90 text-[11px] font-semibold rounded-[12px] shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1"
+                    className="h-[28px] px-2.5 bg-[var(--accent-color)] text-[var(--text-on-accent)] hover:opacity-90 text-[11px] font-semibold rounded-[var(--radius-button-sm,10px)] shadow-xs active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1"
                   >
                     <Camera size={11} strokeWidth={2} />
                     <span>{currentLang === 'en' ? 'Camera' : 'Kamera'}</span>
@@ -1229,7 +1229,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[12px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
                   <div>
@@ -1296,7 +1296,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.94, opacity: 0, y: 16 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[12px] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
+                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
               >
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
                   <div>
@@ -1337,7 +1337,7 @@ export function TransactionModal({
                             }
                             setIsCategoryPickerOpen(false);
                           }}
-                          className={`h-24 sm:h-28 p-3.5 rounded-[14px] flex flex-col items-center justify-center gap-2 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-none relative overflow-hidden text-center ${
+                          className={`h-24 sm:h-28 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-none relative overflow-hidden text-center ${
                             isSelected ? 'ring-2 ring-[var(--accent-color)] ring-offset-2 ring-offset-white dark:ring-offset-[#1C1C1C]' : ''
                           }`}
                         >

@@ -14,7 +14,7 @@ export const Badge: React.FC<BadgeProps> = ({
   className = '',
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium tracking-wide select-none rounded-full';
+  const baseStyles = 'inline-flex items-center justify-center font-medium tracking-wide select-none rounded-[var(--radius-badge,9999px)]';
 
   const sizeStyles = {
     sm: 'text-[10px] py-0.5 px-2 gap-1',
@@ -22,12 +22,12 @@ export const Badge: React.FC<BadgeProps> = ({
   }[size];
 
   const variantStyles = {
-    default: 'bg-black/5 dark:bg-white/5 text-[#6E6961] dark:text-[#B8B8B8]',
-    accent: 'bg-[var(--accent-soft)] dark:bg-[var(--accent-soft)] text-[var(--accent-color)] dark:text-[#FFFFFF]',
-    success: 'bg-emerald-500/10 dark:bg-[#163025] text-emerald-600 dark:text-[#4ADE80]',
-    danger: 'bg-rose-500/10 dark:bg-[#381F26] text-rose-600 dark:text-[#FF808B]',
-    warning: 'bg-amber-500/10 dark:bg-[#342A16] text-amber-600 dark:text-[#FBBF24]',
-    muted: 'bg-black/5 dark:bg-white/5 text-[#6E6961] dark:text-[#B8B8B8]',
+    default: 'bg-[var(--surface-muted)] text-[var(--text-secondary)]',
+    accent: 'bg-[var(--accent-container)] text-[var(--on-accent-container)]',
+    success: 'bg-[var(--success-container)] text-[var(--success-color)]',
+    danger: 'bg-[var(--danger-container)] text-[var(--danger-color)]',
+    warning: 'bg-[var(--warning-container)] text-[var(--warning-color)]',
+    muted: 'bg-[var(--surface-muted)] text-[var(--text-secondary)]',
   }[variant];
 
   return (

@@ -206,21 +206,21 @@ export function NumberPad({
         <button
           type="button"
           onClick={() => handleDigit('1')}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           1
         </button>
         <button
           type="button"
           onClick={() => handleDigit('2')}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           2
         </button>
         <button
           type="button"
           onClick={() => handleDigit('3')}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           3
         </button>
@@ -229,21 +229,21 @@ export function NumberPad({
         <button
           type="button"
           onClick={() => handleDigit('4')}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           4
         </button>
         <button
           type="button"
           onClick={() => handleDigit('5')}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           5
         </button>
         <button
           type="button"
           onClick={() => handleDigit('6')}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           6
         </button>
@@ -252,21 +252,21 @@ export function NumberPad({
         <button
           type="button"
           onClick={() => handleDigit('7')}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           7
         </button>
         <button
           type="button"
           onClick={() => handleDigit('8')}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           8
         </button>
         <button
           type="button"
           onClick={() => handleDigit('9')}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           9
         </button>
@@ -275,21 +275,21 @@ export function NumberPad({
         <button
           type="button"
           onClick={handleComma}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           ,
         </button>
         <button
           type="button"
           onClick={() => handleDigit('0')}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-xl sm:text-2xl font-bold bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
         >
           0
         </button>
         <button
           type="button"
           onClick={handleBackspace}
-          className="h-[50px] sm:h-[54px] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] rounded-[14px] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
+          className="h-[50px] sm:h-[54px] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-white dark:bg-[#1C1C1C] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-button,14px)] hover:bg-black/5 dark:hover:bg-white/[0.08] shadow-2xs transition-all active:scale-95 cursor-pointer"
           title="Radera"
         >
           <Delete size={22} strokeWidth={2} />

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { Icon } from './ui/Icon';
 import { Config } from '../types';
 import { Language, TranslationKey } from '../i18n';
 import { LanguageFlag } from './LanguageFlag';
 import { DEFAULT_PAYMENT_METHODS } from '../constants';
 import { PaymentMethodModal } from './BudgetModals';
 import { ConfirmModal } from './ConfirmModal';
-import { Button, Modal } from './ui';
-import { ToggleSwitch } from './ToggleSwitch';
+import { Button, Modal, Card, ListRow, Switch, Icon } from './ui';
 import { formatPaydaySummary, formatOrdinalDay } from '../utils/format';
 import { getPaymentMethodIcon } from '../utils/icons';
 import { CategoryIcon } from './CategoryIcon';
@@ -124,50 +122,46 @@ export function SettingsView({
         </div>
 
         {/* Clean grouped list */}
-        <div className="bg-[var(--surface-color)] rounded-[16px] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {methodsList.map((method: any, index: number) => {
             const isDefault = DEFAULT_PAYMENT_METHODS.some(dm => dm.name.toLowerCase() === method.name.toLowerCase());
             const IconComp = isDefault ? getPaymentMethodIcon(method.name) : null;
             return (
-              <button
+              <ListRow
                 key={method.name || index}
-                type="button"
+                variant="grouped"
+                showChevron
+                icon={
+                  IconComp ? (
+                    <IconComp size={18} strokeWidth={2} />
+                  ) : (
+                    <CategoryIcon icon={method.icon || 'credit-card'} size="sm" noBackground />
+                  )
+                }
+                iconBg="bg-black/[0.04] dark:bg-white/[0.06] rounded-full"
+                iconColor="text-[var(--text-secondary)]"
+                title={method.name}
                 onClick={() => {
                   setPaymentMethodModalData({ index, name: method.name });
                   setIsPaymentMethodModalOpen(true);
                 }}
-                className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
-              >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center text-[var(--text-secondary)] shrink-0 group-hover:text-[var(--text-primary)] group-hover:bg-black/[0.07] dark:group-hover:bg-white/[0.1] transition-all">
-                    {IconComp ? (
-                      <IconComp size={18} strokeWidth={2} />
-                    ) : (
-                      <CategoryIcon icon={method.icon || 'credit-card'} size="sm" noBackground />
-                    )}
-                  </div>
-                  <span className="text-sm font-semibold text-[var(--text-primary)] tracking-tight truncate">
-                    {method.name}
-                  </span>
-                </div>
-                <div className="text-[var(--text-tertiary)] shrink-0 pl-2 group-hover:text-[var(--text-secondary)] transition-colors">
-                  <Icon name="caret-right" size={16} />
-                </div>
-              </button>
+              />
             );
           })}
-        </div>
+        </Card>
 
         {/* Reset button placed under everything */}
         <div className="pt-2 pb-1 flex justify-center">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
+            icon={<Icon name="arrow-counter-clockwise" size={13} />}
             onClick={() => setIsResetPaymentMethodsModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
+            className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
           >
-            <Icon name="arrow-counter-clockwise" size={13} />
-            <span>{config.language === 'en' ? 'Reset payment methods to default' : 'Återställ betalningsmetoder till standard'}</span>
-          </button>
+            {config.language === 'en' ? 'Reset payment methods to default' : 'Återställ betalningsmetoder till standard'}
+          </Button>
         </div>
       </div>
     );
@@ -183,33 +177,25 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2">
-        <div className="bg-[var(--surface-color)] rounded-[16px] shadow-none overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {languages.map((l) => {
             const isSelected = config.language === l.code;
             return (
-              <button
+              <ListRow
                 key={l.code}
-                type="button"
+                variant="grouped"
+                icon={<LanguageFlag code={l.code} size="md" />}
+                iconBg="bg-transparent"
+                title={l.label}
+                titleClassName={isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'}
+                showCheck={isSelected}
                 onClick={() => {
                   setConfig({ ...config, language: l.code });
                 }}
-                className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <LanguageFlag code={l.code} size="md" />
-                  <span className={`text-sm tracking-tight ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-secondary)]'}`}>
-                    {l.label}
-                  </span>
-                </div>
-                {isSelected && (
-                  <div className="text-[var(--accent-color)] shrink-0 pl-2">
-                    <Icon name="check" size={18} />
-                  </div>
-                )}
-              </button>
+              />
             );
           })}
-        </div>
+        </Card>
       </div>
     );
   };
@@ -246,7 +232,7 @@ export function SettingsView({
                     const isDark = mode.id === 'dark' || (mode.id === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                     setConfig({ ...config, themeMode: mode.id as any, darkMode: isDark });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[16px] transition-all cursor-pointer ${
+                  className={`flex flex-col items-center justify-center gap-2 p-3.5 sm:p-4 rounded-[var(--radius-card)] transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-none border-[var(--accent-color)]'
                       : 'bg-[var(--surface-color)] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
@@ -277,7 +263,7 @@ export function SettingsView({
                   onClick={() => {
                     setConfig({ ...config, themeColor: theme.hex });
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[16px] transition-all cursor-pointer active:scale-95 ${
+                  className={`flex flex-col items-center justify-center gap-2 p-2.5 sm:p-3 rounded-[var(--radius-card)] transition-all cursor-pointer active:scale-95 ${
                     isSelected
                       ? 'bg-[var(--surface-color)] ring-2 ring-[var(--accent-color)] shadow-none'
                       : 'bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
@@ -329,44 +315,34 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2">
-        <div className="bg-[var(--surface-color)] rounded-[16px] shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+        <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrencyCode === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
 
             return (
-              <button
+              <ListRow
                 key={`${c.code}-${c.symbol}`}
-                type="button"
-                onClick={() => handleSelectCurrency(c)}
-                className="w-full flex items-center justify-between p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-xl shrink-0 select-none">{c.flag}</span>
-                  <div className="min-w-0 flex flex-col justify-center">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[14px] tracking-tight ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
-                        {c.code}
-                      </span>
-                      <span className="text-[12px] font-normal text-[var(--text-secondary)]">
-                        ({c.symbol})
-                      </span>
-                    </div>
-                    <span className="text-[12px] font-normal text-[var(--text-secondary)] truncate mt-0.5">
-                      {nameText}
+                variant="grouped"
+                icon={<span className="text-xl shrink-0 select-none">{c.flag}</span>}
+                iconBg="bg-transparent"
+                title={
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm tracking-tight ${isSelected ? 'font-semibold text-[var(--text-primary)]' : 'font-medium text-[var(--text-primary)]'}`}>
+                      {c.code}
+                    </span>
+                    <span className="text-xs font-normal text-[var(--text-secondary)]">
+                      ({c.symbol})
                     </span>
                   </div>
-                </div>
-
-                {isSelected && (
-                  <div className="text-[var(--accent-color)] shrink-0 pl-2">
-                    <Icon name="check" size={18} />
-                  </div>
-                )}
-              </button>
+                }
+                subtitle={nameText}
+                showCheck={isSelected}
+                onClick={() => handleSelectCurrency(c)}
+              />
             );
           })}
-        </div>
+        </Card>
       </div>
     );
   };
@@ -387,99 +363,91 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2 space-y-4">
-        <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[16px] bg-[var(--surface-color)] backdrop-blur-xl shadow-none">
+        <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
           {/* 1. Variable Amounts / Rörliga belopp */}
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3.5 min-w-0 pr-4">
-              <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                <Icon name="receipt" size={18} />
-              </div>
-              <div className="min-w-0 flex flex-col justify-center">
-                <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-                  {isEn ? 'Variable amounts' : 'Rörliga belopp'}
-                </span>
-                <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
-                  {isEn
-                    ? 'Reminders when a new period starts to enter updated amounts for variable bills and income'
-                    : 'Påminnelse vid ny månad/period att fylla i belopp för rörliga räkningar och inkomster'}
-                </span>
-              </div>
-            </div>
-            <ToggleSwitch
-              isOn={notifs.variableAmountsReminder !== false}
-              onToggle={() => handleToggle('variableAmountsReminder')}
-            />
-          </div>
+          <ListRow
+            variant="grouped"
+            multiline
+            icon={<Icon name="receipt" size={18} />}
+            iconBg="bg-black/5 dark:bg-white/5"
+            title={isEn ? 'Variable amounts' : 'Rörliga belopp'}
+            subtitle={
+              isEn
+                ? 'Reminders when a new period starts to enter updated amounts for variable bills and income'
+                : 'Påminnelse vid ny månad/period att fylla i belopp för rörliga räkningar och inkomster'
+            }
+            control={
+              <Switch
+                checked={notifs.variableAmountsReminder !== false}
+                onChange={() => handleToggle('variableAmountsReminder')}
+                aria-label={isEn ? 'Variable amounts' : 'Rörliga belopp'}
+              />
+            }
+          />
 
           {/* 2. Salary / Lön & Utbetalningar */}
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3.5 min-w-0 pr-4">
-              <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                <Icon name="calendar" size={18} />
-              </div>
-              <div className="min-w-0 flex flex-col justify-center">
-                <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-                  {isEn ? 'Payday & income' : 'Lön & utbetalningar'}
-                </span>
-                <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
-                  {isEn
-                    ? 'Notification on payday when your new budget period starts'
-                    : 'Notis på lönedagen när den nya budgetperioden påbörjas'}
-                </span>
-              </div>
-            </div>
-            <ToggleSwitch
-              isOn={notifs.salaryDayReminder !== false}
-              onToggle={() => handleToggle('salaryDayReminder')}
-            />
-          </div>
+          <ListRow
+            variant="grouped"
+            multiline
+            icon={<Icon name="calendar" size={18} />}
+            iconBg="bg-black/5 dark:bg-white/5"
+            title={isEn ? 'Payday & income' : 'Lön & utbetalningar'}
+            subtitle={
+              isEn
+                ? 'Notification on payday when your new budget period starts'
+                : 'Notis på lönedagen när den nya budgetperioden påbörjas'
+            }
+            control={
+              <Switch
+                checked={notifs.salaryDayReminder !== false}
+                onChange={() => handleToggle('salaryDayReminder')}
+                aria-label={isEn ? 'Payday & income' : 'Lön & utbetalningar'}
+              />
+            }
+          />
 
           {/* 3. Fixed Expense Due Dates / Fasta utgifter & förfallodagar */}
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3.5 min-w-0 pr-4">
-              <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                <Icon name="clock" size={18} />
-              </div>
-              <div className="min-w-0 flex flex-col justify-center">
-                <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-                  {isEn ? 'Fixed expense due dates' : 'Fasta utgifter & förfallodagar'}
-                </span>
-                <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
-                  {isEn
-                    ? 'Reminders before fixed subscriptions or bills are due'
-                    : 'Påminnelse innan fasta abonnemang och räkningar dras'}
-                </span>
-              </div>
-            </div>
-            <ToggleSwitch
-              isOn={notifs.fixedExpenseDueReminder !== false}
-              onToggle={() => handleToggle('fixedExpenseDueReminder')}
-            />
-          </div>
+          <ListRow
+            variant="grouped"
+            multiline
+            icon={<Icon name="clock" size={18} />}
+            iconBg="bg-black/5 dark:bg-white/5"
+            title={isEn ? 'Fixed expense due dates' : 'Fasta utgifter & förfallodagar'}
+            subtitle={
+              isEn
+                ? 'Reminders before fixed subscriptions or bills are due'
+                : 'Påminnelse innan fasta abonnemang och räkningar dras'
+            }
+            control={
+              <Switch
+                checked={notifs.fixedExpenseDueReminder !== false}
+                onChange={() => handleToggle('fixedExpenseDueReminder')}
+                aria-label={isEn ? 'Fixed expense due dates' : 'Fasta utgifter & förfallodagar'}
+              />
+            }
+          />
 
           {/* 4. Weekly Summary & Budget Alerts / Veckoöversikt & budgetvarningar */}
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3.5 min-w-0 pr-4">
-              <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                <Icon name="bell" size={18} />
-              </div>
-              <div className="min-w-0 flex flex-col justify-center">
-                <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-                  {isEn ? 'Weekly summary & budget alerts' : 'Veckoöversikt & budgetvarningar'}
-                </span>
-                <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
-                  {isEn
-                    ? 'Weekly overview and warnings when nearing category budget limits'
-                    : 'Veckovis sammanfattning samt notis när du närmar dig en budgetgräns'}
-                </span>
-              </div>
-            </div>
-            <ToggleSwitch
-              isOn={notifs.weeklySummary !== false}
-              onToggle={() => handleToggle('weeklySummary')}
-            />
-          </div>
-        </div>
+          <ListRow
+            variant="grouped"
+            multiline
+            icon={<Icon name="bell" size={18} />}
+            iconBg="bg-black/5 dark:bg-white/5"
+            title={isEn ? 'Weekly summary & budget alerts' : 'Veckoöversikt & budgetvarningar'}
+            subtitle={
+              isEn
+                ? 'Weekly overview and warnings when nearing category budget limits'
+                : 'Veckovis sammanfattning samt notis när du närmar dig en budgetgräns'
+            }
+            control={
+              <Switch
+                checked={notifs.weeklySummary !== false}
+                onChange={() => handleToggle('weeklySummary')}
+                aria-label={isEn ? 'Weekly summary & budget alerts' : 'Veckoöversikt & budgetvarningar'}
+              />
+            }
+          />
+        </Card>
       </div>
     );
   };
@@ -489,62 +457,48 @@ export function SettingsView({
       <div>
         {activeSection === 'salary' && (
           <div className="w-full py-2 space-y-4">
-            <div className="overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.04] rounded-[16px] bg-[var(--surface-color)] backdrop-blur-xl shadow-none">
-              
+            <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
               {/* Payday Setting Row */}
-              <button
-                type="button"
-                onClick={() => setIsPaydayModalOpen(true)}
-                className="w-full flex items-center justify-between p-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer text-left group"
-              >
-                <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                  <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                    <Icon name="calendar" size={18} />
-                  </div>
-                  <div className="min-w-0 flex flex-col justify-center">
-                    <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-                      {config.language === 'en' ? 'Payday' : 'Lönedag'}
-                    </span>
-                    <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
-                      {formatPaydaySummary(config.payday || 25, config.language)}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
+              <ListRow
+                variant="grouped"
+                showChevron
+                icon={<Icon name="calendar" size={18} />}
+                iconBg="bg-black/5 dark:bg-white/5"
+                title={config.language === 'en' ? 'Payday' : 'Lönedag'}
+                subtitle={formatPaydaySummary(config.payday || 25, config.language)}
+                value={
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
                     {config.language === 'en' 
                       ? `The ${formatOrdinalDay(config.payday || 25, 'en')}` 
                       : `Den ${formatOrdinalDay(config.payday || 25, 'sv')}`}
                   </span>
-                  <Icon name="caret-right" size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </button>
+                }
+                onClick={() => setIsPaydayModalOpen(true)}
+              />
 
               {/* Weekend Handling Row */}
-              <div className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3.5 min-w-0 pr-4">
-                  <div className="w-9 h-9 rounded-[6px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                    <Icon name="clock" size={18} />
-                  </div>
-                  <div className="min-w-0 flex flex-col justify-center">
-                    <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
-                      {config.language === 'en' ? 'Pay early if weekend' : 'Helghantering'}
-                    </span>
-                    <span className="text-[12px] font-normal text-[var(--text-secondary)] opacity-70 mt-0.5">
-                      {config.language === 'en' 
-                        ? 'Get paid Friday before if payday is on a weekend' 
-                        : 'Få lön fredagen innan om lönedagen är en helg'}
-                    </span>
-                  </div>
-                </div>
-                <ToggleSwitch
-                  isOn={!!config.paydayBeforeWeekend}
-                  onToggle={() => {
-                    setConfig({ ...config, paydayBeforeWeekend: !config.paydayBeforeWeekend });
-                  }}
-                />
-              </div>
-            </div>
+              <ListRow
+                variant="grouped"
+                multiline
+                icon={<Icon name="clock" size={18} />}
+                iconBg="bg-black/5 dark:bg-white/5"
+                title={config.language === 'en' ? 'Pay early if weekend' : 'Helghantering'}
+                subtitle={
+                  config.language === 'en' 
+                    ? 'Get paid Friday before if payday is on a weekend' 
+                    : 'Få lön fredagen innan om lönedagen är en helg'
+                }
+                control={
+                  <Switch
+                    checked={!!config.paydayBeforeWeekend}
+                    onChange={() => {
+                      setConfig({ ...config, paydayBeforeWeekend: !config.paydayBeforeWeekend });
+                    }}
+                    aria-label={config.language === 'en' ? 'Pay early if weekend' : 'Helghantering'}
+                  />
+                }
+              />
+            </Card>
           </div>
         )}
 
@@ -731,7 +685,7 @@ export function SettingsView({
                   handleUpdatePayday(day);
                   setIsPaydayModalOpen(false);
                 }}
-                className={`py-3 rounded-[6px] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
+                className={`py-3 rounded-[var(--radius-card-nested,10px)] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
                   isSelected
                     ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-md scale-105'
                     : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/15'

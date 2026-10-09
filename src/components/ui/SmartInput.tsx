@@ -191,7 +191,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             placeholder={placeholder}
             disabled={disabled || isProcessing}
             autoFocus={autoFocus}
-            className={`w-full bg-white dark:bg-[#1C1C1C] border border-black/10 dark:border-white/10 rounded-[14px] text-xs sm:text-sm font-normal text-[var(--text-primary)] dark:text-white placeholder:font-normal placeholder-[var(--text-tertiary)] dark:placeholder-[#71717A] focus:border-[#05B862] dark:focus:border-[#05B862] focus:ring-2 focus:ring-[#05B862]/15 outline-none transition-all shadow-none ${
+            className={`w-full bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[var(--radius-input,14px)] text-xs sm:text-sm font-normal text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] focus:border-[#05B862] dark:focus:border-[#05B862] focus:ring-2 focus:ring-[#05B862]/15 outline-none transition-all shadow-none ${
               leftElement ? 'pl-13 sm:pl-15' : 'px-3.5'
             } ${
               hasInsideSubmit ? (value && !isProcessing ? 'pr-22 sm:pr-24' : 'pr-13 sm:pr-15') : (value && !isProcessing ? 'pr-9' : 'pr-3.5')
@@ -217,7 +217,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
             <button
               type="submit"
               disabled={!value.trim() || isProcessing || disabled}
-              className="absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[var(--accent-color)]"
+              className="absolute right-2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-button-sm,12px)] bg-[var(--accent-color)] text-[var(--on-accent)] hover:opacity-90 disabled:opacity-20 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:cursor-not-allowed border border-[var(--accent-color)]"
             >
               {isProcessing ? (
                 <Icon name="spinner" size={14} className="animate-spin" />
@@ -233,7 +233,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({
           <button
             type="submit"
             disabled={!value.trim() || isProcessing || disabled}
-            className="h-[46px] px-4 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-xs sm:text-sm flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
+            className="h-[46px] px-4 rounded-[var(--radius-button,14px)] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-bold text-xs sm:text-sm flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer shadow-xs active:scale-95 shrink-0"
           >
             {isProcessing ? (
               <Icon name="spinner" size={15} className="animate-spin" />

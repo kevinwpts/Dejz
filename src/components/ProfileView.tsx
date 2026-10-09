@@ -290,7 +290,7 @@ export function ProfileView({
       className={`w-full flex items-center justify-between py-3.5 px-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
     >
       <div className="flex items-center gap-3.5 min-w-0 pr-2">
-        <div className={`w-10 h-10 rounded-[6px] ${iconBgColor} ${iconTextColor} border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center relative shrink-0`}>
+        <div className={`w-10 h-10 rounded-[var(--radius-card-nested,10px)] ${iconBgColor} ${iconTextColor} border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center relative shrink-0`}>
           <Icon size={18} strokeWidth={2} />
         </div>
         <div className="min-w-0 flex flex-col justify-center text-left">
@@ -314,13 +314,13 @@ export function ProfileView({
       className="space-y-5 w-full pb-12 font-sans"
     >
       {/* User Header Module */}
-      <div className="bg-white dark:bg-[#1C1C1C] rounded-[6px] p-5 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs flex items-center gap-4">
+      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,14px)] p-5 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs flex items-center gap-4">
         <div 
           onClick={() => handleSectionClick('manageAccount')}
           className="relative shrink-0 cursor-pointer group"
           title={t('manageAccount')}
         >
-          <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[6px] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-none">
+          <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-[var(--radius-card-nested,10px)] flex items-center justify-center overflow-hidden relative bg-black/[0.04] dark:bg-white/5 border-none group-hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-none">
             {avatarUrl ? (
               <img src={avatarUrl} alt={t('profilePicture')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
             ) : (
@@ -363,7 +363,7 @@ export function ProfileView({
               <Crown size={13} strokeWidth={2} />
               <span>{config.language === 'en' ? 'Administration' : 'Administration'}</span>
             </h4>
-            <div className="overflow-hidden rounded-[6px] bg-white dark:bg-[#1C1C1C] border border-amber-500/25 shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+            <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-amber-500/25 shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
               <SettingsMenuItem 
                 icon={ShieldCheck} 
                 label={config.language === 'en' ? 'Admin Dashboard' : 'Adminpanel'} 
@@ -381,7 +381,7 @@ export function ProfileView({
           <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
             {t('economy')}
           </h4>
-          <div className="overflow-hidden rounded-[6px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem 
               icon={Calendar} 
               label={t('salary')} 
@@ -423,7 +423,7 @@ export function ProfileView({
           <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
             {config.language === 'en' ? 'Tools & Sharing' : 'Verktyg & Funktioner'}
           </h4>
-          <div className="overflow-hidden rounded-[6px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem 
               icon={HandCoins} 
               label={config.language === 'en' ? 'Debts & IOUs' : 'Skyldig (Skulder & utlägg)'} 
@@ -452,7 +452,7 @@ export function ProfileView({
           <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
             {t('appSettings')}
           </h4>
-          <div className="overflow-hidden rounded-[6px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem 
               icon={Bell} 
               label={config.language === 'en' ? 'Notifications' : 'Notiser'} 
@@ -485,7 +485,7 @@ export function ProfileView({
             <div className="py-3.5 px-4 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-[6px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
                     <Calendar size={18} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInCalendar')}</span>
@@ -509,7 +509,7 @@ export function ProfileView({
             <div className="py-3.5 px-4 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-[6px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
                     <History size={18} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInHistory')}</span>
@@ -538,7 +538,7 @@ export function ProfileView({
             <div className="py-3.5 px-4 space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-[6px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0">
                     <EyeOff size={18} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-semibold text-[var(--text-primary)] tracking-tight">
