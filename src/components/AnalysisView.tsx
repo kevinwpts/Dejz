@@ -438,14 +438,14 @@ export function AnalysisView({
 
       {/* DONUT DIAGRAM & FÖRDELNING */}
       {categoryData.length > 0 && (
-        <Card variant="default" padding="lg" className="space-y-6 border-none shadow-none">
+        <Card variant="default" padding="md" className="space-y-5 border-none">
           <div className="flex items-center justify-between px-0.5">
             <h2 className="text-section-title">
               {isEn ? 'Distribution' : 'Fördelning'}
             </h2>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Donut Chart */}
             <div className="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto flex items-center justify-center">
               <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
@@ -487,7 +487,7 @@ export function AnalysisView({
 
               {/* Airy Center */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4">
-                <span className="text-label font-semibold text-[var(--text-secondary)]">
+                <span className="text-label font-medium text-[var(--text-secondary)]">
                   {isEn ? 'Total' : 'Totalt'}
                 </span>
                 <span className="text-card-title font-bold text-[var(--text-primary)] tabular-nums">
@@ -501,14 +501,14 @@ export function AnalysisView({
 
       {/* FULLSTÄNDIG KATEGORILISTA ELLER GEMENSAM TOMVY */}
       {categoryData.length > 0 ? (
-        <div className="space-y-3 pb-8">
-          <div className="flex items-center justify-between px-1">
+        <div className="space-y-2.5 pb-8">
+          <div className="flex items-center justify-between px-0.5">
             <h3 className="text-section-title">
               {t('categories')}
             </h3>
           </div>
 
-          <Card variant="default" padding="none" className="border-none shadow-none divide-y divide-subtle overflow-hidden">
+          <Card variant="default" padding="none" className="border-none divide-y divide-subtle overflow-hidden">
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               

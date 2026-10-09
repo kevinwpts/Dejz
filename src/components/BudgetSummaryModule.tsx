@@ -120,14 +120,14 @@ export function BudgetSummaryModule({
   }, [isPastPeriod, isEn]);
 
   return (
-    <div className="space-y-3 font-sans">
+    <>
       {/* Clean Single Summary Card without progress bar */}
-      <div className="bg-[var(--surface-color)] rounded-card card-p border-none shadow-subtle">
+      <div className="bg-[var(--surface-color)] rounded-card card-p border-none shadow-subtle select-none">
         {/* Top Split: Spenderat (Large) vs Kvar att spendera (Slightly smaller) */}
         <div className="grid grid-cols-2 gap-4 items-start">
           {/* Spenderat */}
           <div className="space-y-1">
-            <span className="text-label font-semibold text-[var(--text-secondary)] block">
+            <span className="text-label font-medium text-[var(--text-secondary)] block">
               {spentLabel}
             </span>
             <div className="flex items-baseline gap-1.5">
@@ -194,6 +194,6 @@ export function BudgetSummaryModule({
           </div>
         </Modal>
       )}
-    </div>
+    </>
   );
 }

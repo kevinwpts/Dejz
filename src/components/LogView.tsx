@@ -417,7 +417,6 @@ export function LogView({
             setIsPeriodPickerOpen(true);
           }}
           className="w-full"
-          variant="cardDarker"
         />
 
         {/* Direct Type Filter Buttons */}
@@ -446,7 +445,7 @@ export function LogView({
       </div>
 
       {/* Transactions List */}
-      <div className="space-y-6">
+      <div className="space-y-5">
         <div className="space-y-5">
           {groupedExpenses.map(([date, dayTransactions], index) => (
             <motion.div 
@@ -457,10 +456,10 @@ export function LogView({
               className="space-y-2"
             >
               <div className="px-1 flex items-center justify-between">
-                <span className="text-xs font-medium text-[var(--text-secondary)] tracking-tight">
+                <span className="text-label font-medium text-[var(--text-secondary)]">
                   {formatFullDate(date, currentLang)}
                 </span>
-                <span className="text-[11px] font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
+                <span className="text-micro-label font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
                   {dayTransactions.length} {getL10n(
                     dayTransactions.length === 1 ? 'transaktion' : 'transaktioner',
                     dayTransactions.length === 1 ? 'transaction' : 'transactions',

@@ -5,7 +5,7 @@ import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
-import { FilterSelectButton, FilterMenuModal, FilterButtonGroup, Button } from './ui';
+import { FilterSelectButton, FilterMenuModal, FilterButtonGroup, Button, Card } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
@@ -373,50 +373,52 @@ export function BudgetView({
         )}
       </div>
 
-      {/* Overview Hero Section - Dynamic based on filter */}
-      <div className="text-center flex flex-col items-center gap-1 py-1 select-none">
-        <span className="text-secondary font-medium flex items-center justify-center gap-1 flex-wrap">
-          {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
-          {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
-          {budgetFilter === 'fixed' && (
-            freqFilter === 'all' ? (
-              <>
-                <span>{config?.language === 'en' ? 'Total fixed expenses' : 'Totala fasta utgifter'}</span>
-                <span className="text-micro-label text-[var(--text-tertiary)] font-normal">
-                  {config?.language === 'en' ? '(average/month)' : '(snitt/månad)'}
-                </span>
-              </>
-            ) :
-            freqFilter === 'monthly' ? (config?.language === 'en' ? 'Total monthly expenses' : 'Totala månadsutgifter') :
-            freqFilter === 'quarterly' ? (config?.language === 'en' ? 'Total quarterly expenses' : 'Totala kvartalsutgifter') :
-            freqFilter === 'semi-annually' ? (config?.language === 'en' ? 'Total semi-annual expenses' : 'Totala halvårsutgifter') :
-            (config?.language === 'en' ? 'Total annual expenses' : 'Totala årsutgifter')
-          )}
-        </span>
-        <div className="flex items-baseline justify-center gap-1.5">
-          <AnimatedNumber 
-            value={Math.round(
-              budgetFilter === 'income' ? totalIncomeSum :
-              budgetFilter === 'savings' ? totalSavingsSum :
-              (
-                freqFilter === 'all' ? totalMonthlyFixedAverage :
-                freqFilter === 'monthly' ? groupedFixedSums[Frequency.MONTHLY] :
-                freqFilter === 'quarterly' ? groupedFixedSums[Frequency.QUARTERLY] :
-                freqFilter === 'semi-annually' ? groupedFixedSums[Frequency.SEMI_ANNUALLY] :
-                groupedFixedSums[Frequency.ANNUALLY]
-              )
-            )} 
-            className="text-hero-amount leading-tight text-[var(--text-primary)]"
-            formatter={(val) => {
-              const prefix = budgetFilter === 'income' ? '+' : '−';
-              return `${prefix}${formatAmount(val, config?.language)}`;
-            }}
-          />
-          <span className="text-card-title text-[var(--text-secondary)] border-none">
-            {config?.currency || 'kr'}
-          </span>
+      {/* Overview Summary Card */}
+      <Card variant="default" padding="md" className="select-none">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-label font-medium text-[var(--text-secondary)]">
+              {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
+              {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
+              {budgetFilter === 'fixed' && (
+                freqFilter === 'all' ? (config?.language === 'en' ? 'Total fixed expenses' : 'Totala fasta utgifter') :
+                freqFilter === 'monthly' ? (config?.language === 'en' ? 'Total monthly expenses' : 'Totala månadsutgifter') :
+                freqFilter === 'quarterly' ? (config?.language === 'en' ? 'Total quarterly expenses' : 'Totala kvartalsutgifter') :
+                freqFilter === 'semi-annually' ? (config?.language === 'en' ? 'Total semi-annual expenses' : 'Totala halvårsutgifter') :
+                (config?.language === 'en' ? 'Total annual expenses' : 'Totala årsutgifter')
+              )}
+            </span>
+            {budgetFilter === 'fixed' && freqFilter === 'all' && (
+              <span className="text-micro-label text-[var(--text-tertiary)] font-normal">
+                {config?.language === 'en' ? 'Average / month' : 'Genomsnitt / månad'}
+              </span>
+            )}
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <AnimatedNumber 
+              value={Math.round(
+                budgetFilter === 'income' ? totalIncomeSum :
+                budgetFilter === 'savings' ? totalSavingsSum :
+                (
+                  freqFilter === 'all' ? totalMonthlyFixedAverage :
+                  freqFilter === 'monthly' ? groupedFixedSums[Frequency.MONTHLY] :
+                  freqFilter === 'quarterly' ? groupedFixedSums[Frequency.QUARTERLY] :
+                  freqFilter === 'semi-annually' ? groupedFixedSums[Frequency.SEMI_ANNUALLY] :
+                  groupedFixedSums[Frequency.ANNUALLY]
+                )
+              )} 
+              className="text-large-amount text-[var(--text-primary)]"
+              formatter={(val) => {
+                const prefix = budgetFilter === 'income' ? '+' : '−';
+                return `${prefix}${formatAmount(val, config?.language)}`;
+              }}
+            />
+            <span className="text-label font-medium text-[var(--text-secondary)]">
+              {config?.currency || 'kr'}
+            </span>
+          </div>
         </div>
-      </div>
+      </Card>
 
 
       <AnimatePresence mode="wait">
@@ -426,15 +428,14 @@ export function BudgetView({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.2 }}
-          className="space-y-6"
+          className="space-y-5"
         >
           {/* Incomes Section */}
           {budgetFilter === 'income' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {sortedIncomes.length > 0 ? (
                 <>
-                  <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-                    {/* Single compact sort toggle button */}
+                  <div className="flex items-center justify-between gap-2 px-0.5">
                     <button
                       type="button"
                       onClick={() => {
@@ -442,11 +443,11 @@ export function BudgetView({
                         else if (incomeSortBy === 'name') setIncomeSortBy('amount');
                         else setIncomeSortBy('day');
                       }}
-                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-subtle text-label text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] text-label text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer select-none active:scale-95"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                      <span className="text-[var(--text-secondary)] font-normal">
+                      <span className="font-normal">
                         {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                       </span>
                       <span className="font-medium text-[var(--text-primary)]">
@@ -459,16 +460,16 @@ export function BudgetView({
                       </span>
                     </button>
                     <Button 
-                      variant="secondary"
+                      variant="primary"
                       size="sm"
-                      icon={<Plus size={14} strokeWidth={2} />}
+                      icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddIncome}
                     >
                       {t('newIncome')}
                     </Button>
                   </div>
 
-                  <div className="space-y-2.5 mt-3.5">
+                  <div className="space-y-2.5">
                     {sortedIncomes.map((income) => (
                       <BudgetItem 
                         key={income.id}
@@ -497,11 +498,10 @@ export function BudgetView({
 
           {/* Fixed Expenses Section */}
           {budgetFilter === 'fixed' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {filteredActiveFixedExpenses.length > 0 ? (
                 <>
-                  <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-                    {/* Single compact sort toggle button */}
+                  <div className="flex items-center justify-between gap-2 px-0.5">
                     <button
                       type="button"
                       onClick={() => {
@@ -509,11 +509,11 @@ export function BudgetView({
                         else if (fixedSortBy === 'name') setFixedSortBy('amount');
                         else setFixedSortBy('day');
                       }}
-                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-subtle text-label text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] text-label text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer select-none active:scale-95"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                      <span className="text-[var(--text-secondary)] font-normal">
+                      <span className="font-normal">
                         {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                       </span>
                       <span className="font-medium text-[var(--text-primary)]">
@@ -526,16 +526,16 @@ export function BudgetView({
                       </span>
                     </button>
                     <Button 
-                      variant="secondary"
+                      variant="primary"
                       size="sm"
-                      icon={<Plus size={14} strokeWidth={2} />}
+                      icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddFixedExpense}
                     >
                       {t('newFixedExpense')}
                     </Button>
                   </div>
 
-                  <div className="space-y-2.5 mt-3.5">
+                  <div className="space-y-2.5">
                     {filteredActiveFixedExpenses.map((expense) => (
                       <BudgetItem 
                         key={expense.id}
@@ -572,11 +572,10 @@ export function BudgetView({
 
           {/* Monthly Savings Section */}
           {budgetFilter === 'savings' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {sortedSavings.length > 0 ? (
                 <>
-                  <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-                    {/* Single compact sort toggle button */}
+                  <div className="flex items-center justify-between gap-2 px-0.5">
                     <button
                       type="button"
                       onClick={() => {
@@ -584,11 +583,11 @@ export function BudgetView({
                         else if (savingSortBy === 'name') setSavingSortBy('amount');
                         else setSavingSortBy('day');
                       }}
-                      className="flex items-center gap-2 h-9 px-3.5 rounded-[var(--radius-btn,14px)] bg-[var(--surface-color)] hover:bg-black/5 dark:hover:bg-white/5 border border-subtle text-label text-[var(--text-primary)] transition-all cursor-pointer select-none active:scale-[0.98] shadow-none"
+                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] text-label text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer select-none active:scale-95"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                      <span className="text-[var(--text-secondary)] font-normal">
+                      <span className="font-normal">
                         {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                       </span>
                       <span className="font-medium text-[var(--text-primary)]">
@@ -601,16 +600,16 @@ export function BudgetView({
                     </button>
 
                     <Button 
-                      variant="secondary"
+                      variant="primary"
                       size="sm"
-                      icon={<Plus size={14} strokeWidth={2} />}
+                      icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddMonthlySaving}
                     >
                       {t('newMonthlySaving')}
                     </Button>
                   </div>
 
-                  <div className="space-y-2.5 mt-3.5">
+                  <div className="space-y-2.5">
                     {sortedSavings.map((saving) => (
                       <BudgetItem 
                         key={saving.id}
