@@ -170,7 +170,7 @@ export function CategoryIcon({
   return (
     <div
       className={`rounded-full flex items-center justify-center shrink-0 text-white select-none transition-transform ${primaryContainerSizes[size]} ${
-        isActive ? 'ring-2 ring-white shadow-sm scale-105' : ''
+        isActive ? 'ring-2 ring-white shadow-subtle scale-105' : ''
       } ${className}`}
       style={{ backgroundColor: richBgColor }}
       aria-hidden="true"

@@ -1077,14 +1077,14 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       <div className="h-28 sm:h-24 shrink-0" aria-hidden="true" />
 
                       {/* Fixed Next Button docked to the very bottom */}
-                      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[var(--bg-color)] border-t border-[var(--border-color)]/50 px-4 sm:px-6 pt-3 pb-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] shadow-[0_-4px_20px_rgba(0,0,0,0.15)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+                      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[var(--bg-color)] border-t border-[var(--border-color)]/50 px-4 sm:px-6 pt-3 pb-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] shadow-modal">
                         {/* Subtle upward gradient fade */}
                         <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-t from-[var(--bg-color)] to-transparent pointer-events-none" />
 
                         <div className="max-w-sm sm:max-w-md mx-auto w-full">
                           <button 
                             onClick={handleNext}
-                            className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:opacity-95"
+                            className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-subtle hover:opacity-95"
                           >
                             <span>{s.next}</span>
                             <ArrowRight size={16} strokeWidth={2.5} />
@@ -1303,7 +1303,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                       </div>
 
                       {error && (
-                        <div className="p-2.5 bg-[var(--surface-color)] border border-black/10 dark:border-white/10 rounded-card-nested text-[var(--text-secondary)] text-xs text-center font-medium">
+                        <div className="p-2.5 bg-[var(--surface-color)] border border-subtle rounded-card-nested text-[var(--text-secondary)] text-xs text-center font-medium">
                           {error}
                         </div>
                       )}
@@ -1312,7 +1312,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         <button 
                           onClick={() => handleSave()}
                           disabled={isUpdating}
-                          className="w-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-md cursor-pointer"
+                          className="w-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] py-3.5 rounded-btn font-bold text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-subtle cursor-pointer"
                         >
                           {isUpdating ? (
                             <Loader2 size={16} className="animate-spin" />

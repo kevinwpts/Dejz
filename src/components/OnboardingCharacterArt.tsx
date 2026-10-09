@@ -55,7 +55,7 @@ export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: Onboard
         <motion.div
           animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6], rotate: [0, 90, 0] }}
           transition={{ duration: 2.5, repeat: Infinity }}
-          className="absolute -top-1 -right-1 text-amber-400 drop-shadow-md"
+          className="absolute -top-1 -right-1 text-amber-400 drop-shadow-subtle"
         >
           <Sparkles size={18} />
         </motion.div>
@@ -63,7 +63,7 @@ export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: Onboard
         <motion.div
           animate={{ scale: [1.2, 0.8, 1.2], opacity: [0.5, 0.9, 0.5], rotate: [0, -60, 0] }}
           transition={{ duration: 3.2, repeat: Infinity, delay: 0.5 }}
-          className="absolute -bottom-1 -left-1 text-[var(--accent-color)] drop-shadow-md"
+          className="absolute -bottom-1 -left-1 text-[var(--accent-color)] drop-shadow-subtle"
         >
           <Star size={14} className="fill-current" />
         </motion.div>
@@ -75,7 +75,7 @@ export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: Onboard
 // 1. WELCOME STEP - DEJZY WAVING WITH A SMILE & GLOWING STAR
 function CharacterWelcome() {
   return (
-    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-xl overflow-visible">
+    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-subtle overflow-visible">
       <defs>
         {/* Skin gradients */}
         <radialGradient id="mascotBody" cx="40%" cy="35%" r="65%">
@@ -150,7 +150,7 @@ function CharacterWelcome() {
 // 2. PAYDAY STEP - DEJZY HOLDING 3D PAYDAY CALENDAR & BELL
 function CharacterPayday({ payday = 25 }: { payday?: number }) {
   return (
-    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-xl overflow-visible">
+    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-subtle overflow-visible">
       <defs>
         <radialGradient id="mascotBody2" cx="40%" cy="35%" r="65%">
           <stop offset="0%" stopColor="#FFFFFF" />
@@ -230,7 +230,7 @@ function CharacterPayday({ payday = 25 }: { payday?: number }) {
 // 3. INCOME STEP - DEJZY CELEBRATING WITH MONEY & GOLDEN VAULT
 function CharacterIncome() {
   return (
-    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-xl overflow-visible">
+    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-subtle overflow-visible">
       <defs>
         <radialGradient id="mascotBody3" cx="40%" cy="35%" r="65%">
           <stop offset="0%" stopColor="#FFFFFF" />
@@ -299,7 +299,7 @@ function CharacterIncome() {
 // 4. FIXED EXPENSES STEP - DEJZY MANAGING BILLS WITH SMART CARD & VERIFIED BADGE
 function CharacterExpenses() {
   return (
-    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-xl overflow-visible">
+    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-subtle overflow-visible">
       <defs>
         <radialGradient id="mascotBody4" cx="40%" cy="35%" r="65%">
           <stop offset="0%" stopColor="#FFFFFF" />
@@ -376,7 +376,7 @@ function CharacterExpenses() {
 // 5. SAVINGS GOALS STEP - DEJZY WITH GOLDEN KEY & FLOATING DIAMOND TREASURE
 function CharacterGoals() {
   return (
-    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-xl overflow-visible">
+    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-subtle overflow-visible">
       <defs>
         <radialGradient id="mascotBody5" cx="40%" cy="35%" r="65%">
           <stop offset="0%" stopColor="#FFFFFF" />
@@ -439,7 +439,7 @@ function CharacterGoals() {
 // 6. MID-MONTH STEP - DEJZY TIMELINE WITH HOURGLASS & DAYS COUNTDOWN
 function CharacterMidMonth({ days = 12 }: { days?: number }) {
   return (
-    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-xl overflow-visible">
+    <svg viewBox="0 0 140 140" className="w-full h-full drop-shadow-subtle overflow-visible">
       <defs>
         <radialGradient id="mascotBody6" cx="40%" cy="35%" r="65%">
           <stop offset="0%" stopColor="#FFFFFF" />
@@ -492,7 +492,7 @@ function CharacterMidMonth({ days = 12 }: { days?: number }) {
 
       {/* Floating Days Countdown Pill Badge */}
       <g transform="translate(24, 86)">
-        <rect x="0" y="0" width="58" height="24" rx="12" fill="#10B981" stroke="#FFFFFF" strokeWidth="2" className="drop-shadow-md" />
+        <rect x="0" y="0" width="58" height="24" rx="12" fill="#10B981" stroke="#FFFFFF" strokeWidth="2" className="drop-shadow-subtle" />
         <text x="29" y="16" fontSize="11" fontWeight="900" fill="#FFFFFF" textAnchor="middle" fontFamily="sans-serif">
           {days} {days === 1 ? 'dag' : 'dagar'}! 🗓️
         </text>
@@ -504,7 +504,7 @@ function CharacterMidMonth({ days = 12 }: { days?: number }) {
 // 7. SUMMARY STEP - DEJZY JUMPING FOR JOY WITH CHAMPION TROPHY & CONFETTI
 function CharacterCelebration() {
   return (
-    <svg viewBox="0 0 150 150" className="w-full h-full drop-shadow-2xl overflow-visible">
+    <svg viewBox="0 0 150 150" className="w-full h-full drop-shadow-subtle overflow-visible">
       <defs>
         <radialGradient id="mascotBody7" cx="40%" cy="35%" r="65%">
           <stop offset="0%" stopColor="#FFFFFF" />

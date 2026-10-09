@@ -46,7 +46,7 @@ const ToastItem: React.FC<ToastProps> = ({ toast, onDismiss }) => {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 12, scale: 0.95 }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className="flex items-center gap-3.5 py-3.5 px-4 rounded-card-nested bg-[var(--surface-color)]/95 backdrop-blur-xl border border-[var(--border-color)] shadow-[0_12px_40px_rgba(0,0,0,0.12)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.4)] text-[var(--text-primary)] max-w-sm w-full pointer-events-auto relative overflow-hidden group"
+      className="flex items-center gap-3.5 py-3.5 px-4 rounded-card-nested bg-[var(--surface-color)]/95 backdrop-blur-xl border border-[var(--border-color)] shadow-modal text-[var(--text-primary)] max-w-sm w-full pointer-events-auto relative overflow-hidden group"
     >
       <div className={`w-8 h-8 rounded-icon-button ${current.bgIcon} flex items-center justify-center shrink-0`}>
         {current.icon}

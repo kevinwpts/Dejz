@@ -120,7 +120,7 @@ export function ReceiptsView({
                               referrerPolicy="no-referrer"
                             />
                             <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                              <Receipt size={14} className="text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                              <Receipt size={14} className="text-white drop-shadow-subtle" />
                             </div>
                           </>
                         ) : (

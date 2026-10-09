@@ -107,7 +107,7 @@ export const AppSkeleton: React.FC<{ language?: string }> = ({ language: _langua
           </div>
 
           {/* Bottom stats row */}
-          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-black/[0.04] dark:border-white/[0.04]">
+          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-subtle">
             <div className="space-y-1">
               <Skeleton className="h-2.5 w-16" rounded="sm" />
               <Skeleton className="h-4 w-20" rounded="sm" />

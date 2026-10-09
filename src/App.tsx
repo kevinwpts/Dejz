@@ -4433,7 +4433,7 @@ export default function App() {
             <button
               type="button"
               onClick={handleExitDemo}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-btn-sm bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-btn-sm bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-subtle"
             >
               <span>{t('exitDemo')}</span>
               <LogOut size={12} strokeWidth={2} />
@@ -5659,7 +5659,7 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-[var(--bg-color)] dark:bg-[#191919] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
+              className="bg-[var(--bg-color)] dark:bg-[#191919] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-subtle font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle / Drag Pill */}
@@ -5679,7 +5679,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     <ArrowDownLeft size={24} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
@@ -5699,7 +5699,7 @@ export default function App() {
                   }}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     <ArrowUpRight size={24} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
                   <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
@@ -5714,7 +5714,7 @@ export default function App() {
                   disabled={isScanningReceipt}
                   className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/10 hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     {isScanningReceipt ? (
                       <Loader2 size={24} className="animate-spin text-[var(--text-primary)]" />
                     ) : (
@@ -5763,7 +5763,7 @@ export default function App() {
                           ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
                             ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/30"
-                            : "bg-white dark:bg-white/5 hover:bg-black/[0.03] dark:hover:bg-white/15 text-[var(--text-secondary)] border-black/[0.06] dark:border-white/10 active:scale-95 shadow-xs"
+                            : "bg-white dark:bg-white/5 hover:bg-black/[0.03] dark:hover:bg-white/15 text-[var(--text-secondary)] border-subtle active:scale-95 shadow-xs"
                       }`}
                     >
                       {isAudioTranscribing ? (
@@ -5785,7 +5785,7 @@ export default function App() {
                         : null
                   }
                   inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-white dark:bg-white/5 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
-                    isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-black/[0.06] dark:border-white/10"
+                    isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-subtle"
                   }`}
                 />
               </div>

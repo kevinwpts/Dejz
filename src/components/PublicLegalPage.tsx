@@ -56,7 +56,7 @@ export function PublicLegalPage({
   };
 
   return (
-    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] sm:max-w-[430px] sm:mx-auto sm:shadow-2xl sm:border sm:border-black/[0.08] sm:dark:border-white/[0.08] sm:relative sm:min-h-dvh sm:overflow-hidden">
+    <div className="min-h-dvh bg-[var(--bg-color)] text-[var(--text-primary)] font-sans selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] sm:max-w-[430px] sm:mx-auto sm:shadow-subtle sm:border sm:border-subtle sm:border-subtle sm:relative sm:min-h-dvh sm:overflow-hidden">
       {/* Sticky Public Header */}
       <header className="sticky top-0 z-50 bg-[var(--surface-color)]/90 backdrop-blur-md border-b border-[var(--border-color)] px-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 transition-colors">
         <div className="max-w-[430px] mx-auto flex items-center justify-between gap-2">

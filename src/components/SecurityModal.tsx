@@ -69,7 +69,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
       bodyClassName="p-6 sm:p-7 text-center"
     >
       <div className="text-center">
-        <div className="w-12 h-12 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] rounded-[var(--radius-card-nested,10px)] flex items-center justify-center mx-auto mb-4 border border-black/5 dark:border-white/10">
+        <div className="w-12 h-12 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] rounded-[var(--radius-card-nested,10px)] flex items-center justify-center mx-auto mb-4 border border-subtle">
           <Lock size={24} strokeWidth={2} />
         </div>
 
@@ -78,7 +78,7 @@ export function SecurityModal({ isOpen, onClose, t, addToast }: SecurityModalPro
         </h2>
 
         {view === 'menu' && (
-          <Card variant="nested" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04] text-left">
+          <Card variant="nested" padding="none" className="divide-y divide-subtle text-left">
             <ListRow
               variant="grouped"
               icon={<Smartphone size={18} strokeWidth={2} />}

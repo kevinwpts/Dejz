@@ -428,7 +428,7 @@ export function TodayView({
           <button
             type="button"
             onClick={() => onNavigate("profile", "budget")}
-            className="w-full p-4 rounded-[var(--radius-card)] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-black/[0.08] dark:border-white/[0.1] text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
+            className="w-full p-4 rounded-[var(--radius-card)] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-subtle text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
           >
             <div className="flex items-center gap-3.5">
               <div className="w-10 h-10 rounded-[var(--radius-btn,10px)] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
@@ -474,7 +474,7 @@ export function TodayView({
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                     onClick={() => handleCategoryClick(cat.name)}
-                    className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[var(--radius-card,12px)] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.06] flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
+                    className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[var(--radius-card,12px)] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] border border-subtle flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
                   >
                     {/* Top: Icon + Name */}
                     <div className="flex items-center gap-2 min-w-0 w-full">
@@ -518,7 +518,7 @@ export function TodayView({
                   if (typeof feedback.light === 'function') feedback.light();
                   onNavigate("profile", "budget");
                 }}
-                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[var(--radius-card,12px)] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-dashed border-black/[0.08] dark:border-white/[0.1] flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[var(--radius-card,12px)] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-dashed border-subtle flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
                 aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
               >
                 <div className="w-7 h-7 rounded-[var(--radius-btn,8px)] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
@@ -575,7 +575,7 @@ export function TodayView({
         {!isTodaySelected && (
           <button
             onClick={handleGoToToday}
-            className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-btn,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.06] dark:border-white/[0.08] text-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
+            className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-btn,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-subtle text-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
           >
             <RotateCcw size={11} strokeWidth={2.5} />
             <span>{lang === "en" ? "Today" : "Idag"}</span>
@@ -667,8 +667,8 @@ export function TodayView({
       >
         <div className="space-y-2.5 pt-1">
           {/* Period */}
-          <div className="flex items-center gap-3 p-3 rounded-[var(--radius-card,12px)] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-            <div className="w-8 h-8 rounded-[var(--radius-btn,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
+          <div className="flex items-center gap-3 p-3 rounded-[var(--radius-card,12px)] bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
+            <div className="w-8 h-8 rounded-[var(--radius-btn,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
               <Calendar size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">
@@ -682,8 +682,8 @@ export function TodayView({
           </div>
 
           {/* Payday / Next Salary */}
-          <div className="flex items-center gap-3 p-3 rounded-[var(--radius-card,12px)] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-            <div className="w-8 h-8 rounded-[var(--radius-btn,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-black/5 dark:border-white/5">
+          <div className="flex items-center gap-3 p-3 rounded-[var(--radius-card,12px)] bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
+            <div className="w-8 h-8 rounded-[var(--radius-btn,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
               <Clock size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">

@@ -342,7 +342,7 @@ export function BudgetCategoriesView({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="sticky top-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md rounded-[8px] p-4 shadow-sm border border-black/[0.04] dark:border-white/[0.04] space-y-2.5"
+              className="sticky top-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md rounded-[8px] p-4 shadow-subtle border border-subtle space-y-2.5"
             >
               <div className="flex items-baseline justify-between">
                 <div className="space-y-0.5">
@@ -393,7 +393,7 @@ export function BudgetCategoriesView({
                 <button
                   type="button"
                   onClick={() => handleAddCategory('expense')}
-                  className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-label font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+                  className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-subtle text-[var(--text-primary)] text-label font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
                 >
                   <Plus size={14} strokeWidth={2.5} />
                   <span>{t('newCategory')}</span>
@@ -494,7 +494,7 @@ export function BudgetCategoriesView({
                               setEditingCategoryName(cat.name);
                               setInlineInputValue(catBudget > 0 ? String(catBudget) : '');
                             }}
-                            className="px-3 py-1.5 rounded-[6px] bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] transition-colors border border-black/[0.04] dark:border-white/[0.06] cursor-pointer flex items-center gap-1 active:scale-95"
+                            className="px-3 py-1.5 rounded-[6px] bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] transition-colors border border-subtle cursor-pointer flex items-center gap-1 active:scale-95"
                           >
                             <span className="text-body-medium font-semibold font-amount tabular-nums text-[var(--text-primary)]">
                               {catBudget > 0 ? formatAmount(catBudget, config.language) : '0'}
@@ -526,7 +526,7 @@ export function BudgetCategoriesView({
             <button
               type="button"
               onClick={() => handleAddCategory('income')}
-              className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.04] dark:border-white/[0.06] text-[var(--text-primary)] text-label font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+              className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-subtle text-[var(--text-primary)] text-label font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
             >
               <Plus size={14} strokeWidth={2.5} />
               <span>{t('newCategory')}</span>
@@ -652,7 +652,7 @@ export function BudgetCategoriesView({
             <select
               value={targetMigrationId}
               onChange={(e) => setTargetMigrationId(e.target.value)}
-              className="w-full h-11 bg-[var(--surface-muted)] border border-black/[0.06] dark:border-white/[0.08] rounded-[var(--radius-input,14px)] px-3 text-body-medium text-[var(--text-primary)] outline-none"
+              className="w-full h-11 bg-[var(--surface-muted)] border border-subtle rounded-[var(--radius-input,14px)] px-3 text-body-medium text-[var(--text-primary)] outline-none"
             >
               {(deleteMigrationData.type === 'income'
                 ? config.incomeCategories || []

@@ -122,7 +122,7 @@ export function SettingsView({
         </div>
 
         {/* Clean grouped list */}
-        <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <Card variant="default" padding="none" className="divide-y divide-subtle">
           {methodsList.map((method: any, index: number) => {
             const isDefault = DEFAULT_PAYMENT_METHODS.some(dm => dm.name.toLowerCase() === method.name.toLowerCase());
             const IconComp = isDefault ? getPaymentMethodIcon(method.name) : null;
@@ -177,7 +177,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2">
-        <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <Card variant="default" padding="none" className="divide-y divide-subtle">
           {languages.map((l) => {
             const isSelected = config.language === l.code;
             return (
@@ -270,7 +270,7 @@ export function SettingsView({
                   }`}
                 >
                   <div
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white transition-transform border border-black/10 dark:border-white/20 shadow-2xs"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white transition-transform border border-subtle shadow-2xs"
                     style={{ backgroundColor: theme.hex }}
                   >
                     {isSelected && <Icon name="check" size={15} weight="bold" />}
@@ -315,7 +315,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2">
-        <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <Card variant="default" padding="none" className="divide-y divide-subtle">
           {PRESET_CURRENCIES.map((c) => {
             const isSelected = activeCurrencyCode === c.code;
             const nameText = isEn ? c.name.en : c.name.sv;
@@ -363,7 +363,7 @@ export function SettingsView({
 
     return (
       <div className="w-full py-2 space-y-4">
-        <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+        <Card variant="default" padding="none" className="divide-y divide-subtle">
           {/* 1. Variable Amounts / Rörliga belopp */}
           <ListRow
             variant="grouped"
@@ -457,7 +457,7 @@ export function SettingsView({
       <div>
         {activeSection === 'salary' && (
           <div className="w-full py-2 space-y-4">
-            <Card variant="default" padding="none" className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+            <Card variant="default" padding="none" className="divide-y divide-subtle">
               {/* Payday Setting Row */}
               <ListRow
                 variant="grouped"
@@ -687,7 +687,7 @@ export function SettingsView({
                 }}
                 className={`py-3 rounded-[var(--radius-card-nested,10px)] text-sm font-bold transition-all cursor-pointer flex flex-col items-center justify-center ${
                   isSelected
-                    ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-md scale-105'
+                    ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-subtle scale-105'
                     : 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/15'
                 }`}
               >

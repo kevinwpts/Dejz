@@ -190,7 +190,7 @@ export function GuidesView({ config }: GuidesViewProps) {
 
                 {/* Screenshot Placeholder */}
                 {step.imagePlaceholder && (
-                  <div className="rounded-[var(--radius-card,16px)] bg-black/[0.02] dark:bg-white/[0.03] border-2 border-dashed border-black/10 dark:border-white/10 p-6 flex flex-col items-center justify-center gap-2 text-center text-[var(--text-tertiary)]">
+                  <div className="rounded-[var(--radius-card,16px)] bg-black/[0.02] dark:bg-white/[0.03] border-2 border-dashed border-subtle p-6 flex flex-col items-center justify-center gap-2 text-center text-[var(--text-tertiary)]">
                     <ImageIcon size={24} strokeWidth={1.5} className="opacity-50" />
                     <span className="text-[11px] font-medium">
                       {step.imagePlaceholder}
@@ -216,7 +216,7 @@ export function GuidesView({ config }: GuidesViewProps) {
         /* Guides Index List */
         <div className="space-y-4">
           <Card variant="default" padding="lg" className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center mx-auto">
               <BookOpen size={22} strokeWidth={2} />
             </div>
             <h2 className="text-lg font-bold text-[var(--text-primary)]">
@@ -242,7 +242,7 @@ export function GuidesView({ config }: GuidesViewProps) {
                   className="w-full flex items-center justify-between gap-3 text-left cursor-pointer"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-black/[0.03] dark:border-white/[0.04] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                       <Icon size={18} strokeWidth={2} />
                     </div>
                     <div className="min-w-0">

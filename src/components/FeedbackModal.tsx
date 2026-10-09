@@ -55,7 +55,7 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t }: FeedbackM
           className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
             feedbackType === 'bug'
               ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
-              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-secondary)] border-black/5 dark:border-white/10 hover:bg-black/[0.06]'
+              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-secondary)] border-subtle hover:bg-black/[0.06]'
           }`}
         >
           <Bug size={13} strokeWidth={2.2} />
@@ -68,7 +68,7 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t }: FeedbackM
           className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
             feedbackType === 'idea'
               ? 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30'
-              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-secondary)] border-black/5 dark:border-white/10 hover:bg-black/[0.06]'
+              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-secondary)] border-subtle hover:bg-black/[0.06]'
           }`}
         >
           <Lightbulb size={13} strokeWidth={2.2} />
@@ -81,7 +81,7 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t }: FeedbackM
           className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
             feedbackType === 'other'
               ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-secondary)] border-black/5 dark:border-white/10 hover:bg-black/[0.06]'
+              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-secondary)] border-subtle hover:bg-black/[0.06]'
           }`}
         >
           <HeartHandshake size={13} strokeWidth={2.2} />
@@ -103,7 +103,7 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t }: FeedbackM
               ? 'Vad för funktion eller förbättring saknar du?'
               : t('feedbackPlaceholder')
           } 
-          className="w-full h-32 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[var(--radius-input,10px)] p-3.5 pl-10 text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all resize-none focus:border-[var(--accent-color)]" 
+          className="w-full h-32 bg-black/[0.04] dark:bg-white/[0.06] border border-subtle rounded-[var(--radius-input,10px)] p-3.5 pl-10 text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all resize-none focus:border-[var(--accent-color)]" 
         />
       </div>
 

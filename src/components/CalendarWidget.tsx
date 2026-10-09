@@ -125,7 +125,7 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
                 isSelected 
                   ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-xs z-10' 
                   : isToday
-                  ? 'bg-black/[0.06] dark:bg-white/[0.08] text-[var(--text-primary)] border border-black/5 dark:border-white/10'
+                  ? 'bg-black/[0.06] dark:bg-white/[0.08] text-[var(--text-primary)] border border-subtle'
                   : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
               }`}
             >

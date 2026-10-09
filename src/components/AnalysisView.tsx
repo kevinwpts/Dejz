@@ -508,7 +508,7 @@ export function AnalysisView({
             </h3>
           </div>
 
-          <Card variant="default" padding="none" className="border-none shadow-none divide-y divide-black/[0.04] dark:divide-white/[0.04] overflow-hidden">
+          <Card variant="default" padding="none" className="border-none shadow-none divide-y divide-subtle overflow-hidden">
             {categoryData.map((item) => {
               const isExpanded = expandedCategory === item.name;
               
@@ -591,7 +591,7 @@ export function AnalysisView({
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden bg-black/[0.02] dark:bg-white/[0.02] border-t border-black/[0.04] dark:divide-white/[0.04]"
+                        className="overflow-hidden bg-black/[0.02] dark:bg-white/[0.02] border-t border-subtle divide-subtle"
                       >
                         <div className="p-3 sm:p-4 space-y-2">
                           {categoryTransactions.length > 0 && (

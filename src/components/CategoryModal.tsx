@@ -94,7 +94,7 @@ export function CategoryModal({
           <button 
             type="button"
             onClick={() => setShowIconPicker(true)}
-            className="rounded-full transition-all active:scale-95 group cursor-pointer shadow-sm relative overflow-hidden"
+            className="rounded-full transition-all active:scale-95 group cursor-pointer shadow-subtle relative overflow-hidden"
             title="Välj ikon"
           >
             <CategoryIcon 
@@ -123,7 +123,7 @@ export function CategoryModal({
                   if (suggested) setIcon(suggested);
                 }
               }}
-              className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
+              className="w-full h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-subtle rounded-[8px] px-3.5 text-sm font-semibold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
               placeholder={t('name')}
             />
           </div>
@@ -134,7 +134,7 @@ export function CategoryModal({
               <label className="text-xs font-semibold text-[var(--text-secondary)] ml-0.5">
                 {t('budget')}
               </label>
-              <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-[8px] px-3.5 h-11 focus-within:border-[var(--accent-color)] transition-all">
+              <div className="flex items-center bg-black/[0.04] dark:bg-white/[0.06] border border-subtle rounded-[8px] px-3.5 h-11 focus-within:border-[var(--accent-color)] transition-all">
                 <input
                   type="text"
                   inputMode="numeric"
@@ -157,7 +157,7 @@ export function CategoryModal({
               {/* Custom hex color input picker */}
               <div 
                 className={`relative w-full aspect-square rounded-full border border-[var(--border-color)] cursor-pointer shadow-xs flex items-center justify-center group transition-all duration-200 active:scale-95 ${
-                  isCustomSelected ? 'scale-110 ring-2 ring-white dark:ring-surface shadow-md z-10' : 'hover:scale-105'
+                  isCustomSelected ? 'scale-110 ring-2 ring-white dark:ring-surface shadow-subtle z-10' : 'hover:scale-105'
                 }`}
                 style={{ background: 'conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)' }}
               >
@@ -169,13 +169,13 @@ export function CategoryModal({
                   title="Välj anpassad färg"
                 />
                 <div 
-                  className="w-6 h-6 rounded-full shadow-xs flex items-center justify-center z-10 transition-transform group-hover:scale-110 border border-black/5 dark:border-white/10"
+                  className="w-6 h-6 rounded-full shadow-xs flex items-center justify-center z-10 transition-transform group-hover:scale-110 border border-subtle"
                   style={{ 
                     backgroundColor: isCustomSelected ? color : 'var(--bg-card)',
                   }}
                 >
                   {isCustomSelected ? (
-                    <Check size={11} strokeWidth={3} className="text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]" />
+                    <Check size={11} strokeWidth={3} className="text-white drop-shadow-subtle" />
                   ) : (
                     <Palette size={12} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
                   )}
@@ -189,7 +189,7 @@ export function CategoryModal({
                     type="button"
                     onClick={() => setColor(c)}
                     className={`w-full aspect-square rounded-full transition-transform active:scale-90 relative cursor-pointer ${
-                      isSelected ? 'scale-110 shadow-sm ring-2 ring-white dark:ring-surface' : 'hover:scale-105'
+                      isSelected ? 'scale-110 shadow-subtle ring-2 ring-white dark:ring-surface' : 'hover:scale-105'
                     }`}
                     style={{ backgroundColor: c }}
                     aria-label={`Välj färg ${c}`}

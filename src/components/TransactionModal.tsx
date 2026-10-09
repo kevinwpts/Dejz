@@ -605,7 +605,7 @@ export function TransactionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -645,7 +645,7 @@ export function TransactionModal({
 
           {/* Type Segmented Grid (when creating new transaction) */}
           {_onChangeType && !transaction && (
-            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-white/5 rounded-card-nested border border-black/[0.04] dark:border-white/[0.06]">
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-white/5 rounded-card-nested border border-subtle">
               <button
                 type="button"
                 onClick={() => {
@@ -712,7 +712,7 @@ export function TransactionModal({
               </div>
             </div>
 
-            <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
+            <div className="pt-3 border-t border-subtle flex items-baseline justify-start gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
                 className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full"
@@ -767,7 +767,7 @@ export function TransactionModal({
           </AnimatePresence>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-card bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+          <div className="rounded-card bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
             {/* Row 1: Category or Split Categories */}
             {type === 'expense' && splits.length > 0 ? (
               /* Inline Split Category View */
@@ -809,7 +809,7 @@ export function TransactionModal({
                     const catData = categories.find(c => c.name === split.category);
 
                     return (
-                      <div key={split.id || index} className="flex items-center justify-between p-2 rounded-card-nested bg-[var(--surface-color)] border border-black/5 dark:border-white/5 gap-2">
+                      <div key={split.id || index} className="flex items-center justify-between p-2 rounded-card-nested bg-[var(--surface-color)] border border-subtle gap-2">
                         {/* Category Selector Button */}
                         <button
                           type="button"
@@ -1163,7 +1163,7 @@ export function TransactionModal({
         </div>
 
         {/* Register / Save Button & Delete Button */}
-          <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+          <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
             <button 
               type="button"
               disabled={!isSplitsValid}
@@ -1229,7 +1229,7 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-modal font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0">
                   <div>
@@ -1296,9 +1296,9 @@ export function TransactionModal({
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.94, opacity: 0, y: 16 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-2xl z-10"
+                className="bg-[var(--bg-color)] w-full max-w-sm rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col max-h-[80vh] shadow-modal z-10"
               >
-                <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
+                <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-subtle shrink-0">
                   <div>
                     <h3 className="text-[16px] font-semibold text-[var(--text-primary)] tracking-tight">
                       {t('category')}
@@ -1337,7 +1337,7 @@ export function TransactionModal({
                             }
                             setIsCategoryPickerOpen(false);
                           }}
-                          className={`h-24 sm:h-28 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-none relative overflow-hidden text-center ${
+                          className={`h-24 sm:h-28 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-subtle hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-none relative overflow-hidden text-center ${
                             isSelected ? 'ring-2 ring-[var(--accent-color)] ring-offset-2 ring-offset-white dark:ring-offset-[#1C1C1C]' : ''
                           }`}
                         >
@@ -1362,7 +1362,7 @@ export function TransactionModal({
                         setIsCategoryPickerOpen(false);
                         setIsAddingCategory(true);
                       }}
-                      className="w-full py-2.5 rounded-btn-sm border border-dashed border-black/15 dark:border-white/15 text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] hover:border-black/30 dark:hover:border-white/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 rounded-btn-sm border border-dashed border-subtle text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] hover:border-subtle dark:hover:border-subtle transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={15} strokeWidth={2.5} />
                       <span>{t('newCategory')}</span>

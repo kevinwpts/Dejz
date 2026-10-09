@@ -56,7 +56,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
     >
       {/* 1. Header Hero */}
       <Card variant="default" padding="lg" className="text-center space-y-3 relative overflow-hidden">
-        <div className="w-14 h-14 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-[var(--text-primary)] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-center mx-auto">
+        <div className="w-14 h-14 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-[var(--text-primary)] border border-subtle flex items-center justify-center mx-auto">
           <Users2 size={26} strokeWidth={2} />
         </div>
 
@@ -130,7 +130,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
               {isEn ? '1. Your invite code' : '1. Din inbjudningskod'}
             </span>
 
-            <div className="flex items-center justify-between p-3 rounded-[var(--radius-card-nested,10px)] bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/5">
+            <div className="flex items-center justify-between p-3 rounded-[var(--radius-card-nested,10px)] bg-black/[0.03] dark:bg-white/[0.04] border border-subtle">
               <span className="text-base font-bold font-mono tracking-widest text-[var(--text-primary)]">
                 {myInviteCode}
               </span>

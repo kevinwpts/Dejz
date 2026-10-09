@@ -47,6 +47,7 @@
   --color-border-subtle: var(--border-subtle);
   --color-border-control: var(--border-control);
   --color-border-strong: var(--border-strong);
+  --color-border-divider: var(--border-divider);
 
   --color-accent: var(--accent-color);
   --color-accent-hover: var(--accent-hover);
@@ -376,8 +377,51 @@ h6 {
   border-color: var(--border-subtle);
 }
 
+@utility border-control {
+  border-color: var(--border-control);
+}
+
 @utility border-strong {
   border-color: var(--border-strong);
+}
+
+@utility border-divider {
+  border-color: var(--border-divider);
+}
+
+@utility divide-subtle {
+  & > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--border-subtle);
+  }
+}
+
+@utility divide-divider {
+  & > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--border-divider);
+  }
+}
+
+@utility shadow-subtle {
+  box-shadow: none;
+}
+
+@utility shadow-modal {
+  box-shadow: var(--shadow-modal, none);
+}
+
+@utility ring-focus {
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent-color);
+  }
+}
+
+@utility ring-control {
+  border-color: var(--border-control);
+}
+
+@utility ring-accent {
+  --tw-ring-color: var(--accent-color);
 }
 
 :root {
@@ -433,10 +477,11 @@ h6 {
   --text-disabled: #A8A39D;
   --text-inactive: #A8A39D;
 
-  --border-subtle: #E2DDD4;
-  --border-color: #E2DDD4;
-  --border-control: #D5CFC4;
-  --border-strong: #D5CFC4;
+  --border-subtle: #E9E9E9;
+  --border-color: #E9E9E9;
+  --border-control: #D8D8D8;
+  --border-strong: #B8B8B8;
+  --border-divider: #EFEFEF;
   --inner-highlight: #FFFFFF;
 
   --chip-bg: #F0F0F0;
@@ -474,6 +519,8 @@ h6 {
   --btn-primary-pressed: #1D4ED8;
 
   --modal-bg: #FFFFFF;
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-subtle: none;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
   --bg-hover: #F0F0F0;
@@ -597,6 +644,8 @@ h6 {
   --surface-elevated: #121212;
   --surface-elevated-gradient: #121212;
   --modal-bg: #121212;
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  --shadow-subtle: none;
   --surface-high: #1A1A1A;
   --surface-muted: #1A1A1A;
   --bg-hover: #222222;
@@ -648,9 +697,9 @@ h6 {
   /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-color: rgba(255, 255, 255, 0.08);
-  --border-control: #858585;
-  --border-strong: #858585;
-  --border-divider: rgba(255, 255, 255, 0.08);
+  --border-control: rgba(255, 255, 255, 0.18);
+  --border-strong: rgba(255, 255, 255, 0.35);
+  --border-divider: rgba(255, 255, 255, 0.06);
   --inner-highlight: transparent;
   --input-bg: rgba(255, 255, 255, 0.05);
 
@@ -669,6 +718,8 @@ h6 {
   --shadow-level-1: none;
   --shadow-level-2: none;
   --shadow-level-3: none;
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --shadow-subtle: none;
 
   --logo-color: #FFFFFF;
 
@@ -1139,7 +1190,7 @@ html, body {
   --tw-drop-shadow: none !important;
 }
 
-[class*="shadow-"],
+[class*="shadow-"]:not(.shadow-modal):not(.shadow-subtle),
 [class*="drop-shadow-"],
 [class*="glow"] {
   box-shadow: none !important;

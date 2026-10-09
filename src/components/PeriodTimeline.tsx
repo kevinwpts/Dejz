@@ -277,7 +277,7 @@ export function PeriodTimeline({
                   : hasCategoryMatch
                   ? 'bg-black/5 text-[#242321] dark:bg-white/10 dark:text-white border-transparent hover:bg-black/10 dark:hover:bg-white/[0.15] scale-100 opacity-100'
                   : isRealToday
-                  ? 'bg-black/5 dark:bg-white/10 text-[#242321] dark:text-[#E2E8F0] border-black/10 dark:border-white/15 scale-100 font-semibold opacity-100'
+                  ? 'bg-black/5 dark:bg-white/10 text-[#242321] dark:text-[#E2E8F0] border-subtle scale-100 font-semibold opacity-100'
                   : categoryFilter
                   ? 'bg-white/40 text-[#716E68]/50 border-transparent hover:text-[#242321] dark:bg-white/[0.015] dark:text-[#9CA6BC]/40 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.04] scale-95 opacity-60'
                   : 'bg-white/60 text-[#716E68] border-transparent hover:text-[#242321] dark:bg-white/[0.02] dark:text-[#9CA6BC]/70 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.045] scale-95 opacity-85'

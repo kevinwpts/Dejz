@@ -18,10 +18,11 @@ export const DEJZ_COLORS = {
     textMuted: 'var(--text-muted, #777168)',
     textDisabled: 'var(--text-disabled, #A8A39D)',
     textInactive: 'var(--text-inactive, #A8A39D)',
-    borderSubtle: 'var(--border-subtle, #E2DDD4)',
-    border: 'var(--border-color, #E2DDD4)',
-    borderStrong: 'var(--border-strong, #D5CFC4)',
-    borderControl: 'var(--border-control, #D5CFC4)',
+    borderSubtle: 'var(--border-subtle, #E9E9E9)',
+    border: 'var(--border-color, #E9E9E9)',
+    borderStrong: 'var(--border-strong, #B8B8B8)',
+    borderControl: 'var(--border-control, #D8D8D8)',
+    borderDivider: 'var(--border-divider, #EFEFEF)',
     accent: 'var(--accent-color, #3B82F6)',
     accentHover: 'var(--accent-hover, #2563EB)',
     accentPressed: 'var(--accent-pressed, #1D4ED8)',
@@ -54,8 +55,9 @@ export const DEJZ_COLORS = {
     textInactive: 'var(--text-inactive, #707070)',
     borderSubtle: 'var(--border-subtle, rgba(255, 255, 255, 0.08))',
     border: 'var(--border-color, rgba(255, 255, 255, 0.08))',
-    borderStrong: 'var(--border-strong, #858585)',
-    borderControl: 'var(--border-control, #858585)',
+    borderStrong: 'var(--border-strong, rgba(255, 255, 255, 0.35))',
+    borderControl: 'var(--border-control, rgba(255, 255, 255, 0.18))',
+    borderDivider: 'var(--border-divider, rgba(255, 255, 255, 0.06))',
     accent: 'var(--accent-color, #3B82F6)',
     accentHover: 'var(--accent-hover, #2563EB)',
     accentPressed: 'var(--accent-pressed, #1D4ED8)',
@@ -90,6 +92,7 @@ export const DEJZ_COLORS = {
     border: 'var(--border-color, #1E1E1E)',
     borderStrong: 'var(--border-strong, #333333)',
     borderControl: 'var(--border-control, #2A2A2A)',
+    borderDivider: 'var(--border-divider, #1E1E1E)',
     accent: 'var(--accent-color, #3B82F6)',
     accentHover: 'var(--accent-hover, #2563EB)',
     accentPressed: 'var(--accent-pressed, #1D4ED8)',
@@ -176,6 +179,30 @@ export const DS = {
     ui: 'font-medium',
     emphasis: 'font-semibold',
     strong: 'font-semibold',
+  },
+
+  /**
+   * Border, Divide, Shadow & Ring Tokens
+   */
+  borders: {
+    subtle: 'border-subtle',
+    control: 'border-control',
+    strong: 'border-strong',
+    divider: 'border-divider',
+  },
+  shadows: {
+    none: 'shadow-none',
+    subtle: 'shadow-subtle',
+    modal: 'shadow-modal',
+  },
+  divides: {
+    subtle: 'divide-subtle',
+    divider: 'divide-divider',
+  },
+  rings: {
+    focus: 'ring-focus',
+    control: 'ring-control',
+    accent: 'ring-accent',
   },
 
   /**

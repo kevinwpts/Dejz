@@ -92,7 +92,7 @@ export function TransactionLogo({
     const IconComponent = visual.iconComponent || Receipt;
     return (
       <div
-        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs select-none`}
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-subtle shadow-2xs select-none`}
       >
         <IconComponent size={sizeConfig.icon} strokeWidth={2} />
       </div>
@@ -103,7 +103,7 @@ export function TransactionLogo({
   if (activeLogoUrl && !imgError) {
     return (
       <div
-        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/5 border border-black/[0.06] dark:border-white/[0.08] shadow-2xs select-none`}
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/5 border border-subtle shadow-2xs select-none`}
       >
         <img
           src={activeLogoUrl}

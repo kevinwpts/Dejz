@@ -205,7 +205,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 15 }}
             transition={{ type: 'spring', damping: 28, stiffness: 360 }}
-            className="bg-[var(--bg-color)] w-full sm:max-w-[420px] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] p-6 sm:p-7 border-none shadow-2xl relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7 font-sans"
+            className="bg-[var(--bg-color)] w-full sm:max-w-[420px] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] p-6 sm:p-7 border-none shadow-modal relative overflow-hidden pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-7 font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top Drag Handle for mobile */}
@@ -233,13 +233,13 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
 
             {/* Platform Switcher */}
             <div className="flex justify-center mb-5">
-              <div className="inline-flex p-1 bg-black/[0.04] dark:bg-white/[0.06] rounded-[var(--radius-card-nested,10px)] border border-black/5 dark:border-white/10">
+              <div className="inline-flex p-1 bg-black/[0.04] dark:bg-white/[0.06] rounded-[var(--radius-card-nested,10px)] border border-subtle">
                 <button
                   type="button"
                   onClick={() => setActivePlatform('ios')}
                   className={`py-1.5 px-4 rounded-[var(--radius-button-sm,10px)] transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer ${
                     activePlatform === 'ios'
-                      ? 'bg-white dark:bg-white/10 text-[var(--text-primary)] shadow-xs border border-black/5 dark:border-white/5'
+                      ? 'bg-white dark:bg-white/10 text-[var(--text-primary)] shadow-xs border border-subtle'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -253,7 +253,7 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                   onClick={() => setActivePlatform('android')}
                   className={`py-1.5 px-4 rounded-[var(--radius-button-sm,10px)] transition-all flex items-center gap-2 text-xs font-semibold cursor-pointer ${
                     activePlatform === 'android'
-                      ? 'bg-white dark:bg-white/10 text-[var(--text-primary)] shadow-xs border border-black/5 dark:border-white/5'
+                      ? 'bg-white dark:bg-white/10 text-[var(--text-primary)] shadow-xs border border-subtle'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -285,8 +285,8 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
               <div className="w-full space-y-4">
                 <div className="space-y-2.5">
                   {/* Step 1 */}
-                  <div className="flex items-center gap-3 group p-2.5 rounded-[var(--radius-card-nested,10px)] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-                    <div className="w-8 h-8 rounded-[var(--radius-card-nested,10px)] bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
+                  <div className="flex items-center gap-3 group p-2.5 rounded-[var(--radius-card-nested,10px)] bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
+                    <div className="w-8 h-8 rounded-[var(--radius-card-nested,10px)] bg-white dark:bg-white/10 border border-subtle flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
                       1
                     </div>
                     <div className="flex-1 min-w-0">
@@ -301,8 +301,8 @@ export function AddToHomeScreenModal({ language = 'sv' }: AddToHomeScreenModalPr
                   </div>
 
                   {/* Step 2 */}
-                  <div className="flex items-center gap-3 group p-2.5 rounded-[var(--radius-card-nested,10px)] bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10">
-                    <div className="w-8 h-8 rounded-[var(--radius-card-nested,10px)] bg-white dark:bg-white/10 border border-black/5 dark:border-white/10 flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
+                  <div className="flex items-center gap-3 group p-2.5 rounded-[var(--radius-card-nested,10px)] bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
+                    <div className="w-8 h-8 rounded-[var(--radius-card-nested,10px)] bg-white dark:bg-white/10 border border-subtle flex items-center justify-center text-[var(--text-primary)] font-bold text-xs shrink-0 shadow-xs">
                       2
                     </div>
                     <div className="flex-1 min-w-0">

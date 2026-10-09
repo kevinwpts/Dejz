@@ -94,7 +94,7 @@ export function TransactionItem({
   let containerClasses = "";
   let paddingClasses = "px-4 py-3.5 sm:py-4 min-h-[68px]";
   if (squared) {
-    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-black/5 dark:border-white/[0.06] last:border-none py-3.5 px-2";
+    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-3.5 px-2";
     paddingClasses = "";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
@@ -223,7 +223,7 @@ export function TransactionItem({
                         transaction.type === 'income' ? 'Fast indkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast opsparing' : 'Fast udgift',
                         transaction.type === 'income' ? 'Kiinteä tulo' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Kiinteä säästö' : 'Kiinteä kulu'
                       )}
-                      className="inline-flex items-center justify-center p-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-tertiary)] border border-black/5 dark:border-white/10 shrink-0 select-none align-middle ml-1.5 -translate-y-[1px]"
+                      className="inline-flex items-center justify-center p-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-[var(--text-tertiary)] border border-subtle shrink-0 select-none align-middle ml-1.5 -translate-y-[1px]"
                     >
                       <RotateCw size={9.5} strokeWidth={2.4} className="shrink-0" />
                     </span>

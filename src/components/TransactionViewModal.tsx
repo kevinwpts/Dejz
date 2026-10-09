@@ -200,7 +200,7 @@ export function TransactionViewModal({
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -251,7 +251,7 @@ export function TransactionViewModal({
           </div>
 
           {/* Details Section: Clean list with discrete subtle divider lines without background */}
-          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+          <div className="divide-y divide-subtle text-left">
             {/* Category */}
             <div className="py-3 flex items-center justify-between gap-4">
               <span className="text-secondary text-[var(--text-secondary)] shrink-0">
@@ -368,7 +368,7 @@ export function TransactionViewModal({
                   </div>
                   <div 
                     onClick={() => setShowReceiptLightbox(true)}
-                    className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-card overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 flex items-center justify-center cursor-pointer group shadow-sm hover:shadow-md transition-all"
+                    className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-card overflow-hidden bg-black/5 dark:bg-black/20 border border-subtle flex items-center justify-center cursor-pointer group shadow-subtle hover:shadow-subtle transition-all"
                   >
                     {transaction.receiptUrl.includes('.pdf') ? (
                       <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
@@ -384,7 +384,7 @@ export function TransactionViewModal({
                       />
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all">
-                      <span className="bg-white/95 dark:bg-zinc-900/95 text-black dark:text-white px-4 py-2.5 rounded-badge text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-xl">
+                      <span className="bg-white/95 dark:bg-zinc-900/95 text-black dark:text-white px-4 py-2.5 rounded-badge text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-modal">
                         {config.language === 'en' ? 'Click to zoom' : 'Klicka för att förstora'}
                       </span>
                     </div>
@@ -431,14 +431,14 @@ export function TransactionViewModal({
                       onClick={(e) => e.stopPropagation()}
                     >
                       {transaction.receiptUrl.includes('.pdf') ? (
-                        <div className="bg-white dark:bg-zinc-900 p-8 rounded-modal text-center space-y-4 shadow-2xl">
+                        <div className="bg-white dark:bg-zinc-900 p-8 rounded-modal text-center space-y-4 shadow-modal">
                           <FileText size={64} className="mx-auto text-violet-500" />
                           <p className="text-sm font-medium text-zinc-900 dark:text-white">PDF-dokument</p>
                           <a 
                             href={transaction.receiptUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-block bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-btn text-sm font-semibold transition-colors shadow-lg"
+                            className="inline-block bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-btn text-sm font-semibold transition-colors shadow-modal"
                           >
                             {config.language === 'en' ? 'Open PDF in new tab' : 'Öppna PDF i ny flik'}
                           </a>
@@ -447,7 +447,7 @@ export function TransactionViewModal({
                         <img 
                           src={transaction.receiptUrl} 
                           alt="Receipt Fullscreen" 
-                          className="max-h-[80vh] max-w-full object-contain rounded-card shadow-2xl"
+                          className="max-h-[80vh] max-w-full object-contain rounded-card shadow-modal"
                           referrerPolicy="no-referrer"
                         />
                       )}
@@ -467,7 +467,7 @@ export function TransactionViewModal({
                     if (typeof feedback?.light === 'function') feedback.light();
                     setShowSimilar(prev => !prev);
                   }}
-                  className="w-full py-3 px-4 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all flex items-center justify-between cursor-pointer border border-black/[0.04] dark:border-white/[0.06] shadow-2xs text-left active:scale-[0.99]"
+                  className="w-full py-3 px-4 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all flex items-center justify-between cursor-pointer border border-subtle shadow-2xs text-left active:scale-[0.99]"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -491,7 +491,7 @@ export function TransactionViewModal({
                 </button>
 
                 {showSimilar && (
-                  <div className="mt-2 space-y-1 bg-[var(--surface-muted)]/50 p-2 rounded-card-nested border border-black/[0.04] dark:border-white/[0.06]">
+                  <div className="mt-2 space-y-1 bg-[var(--surface-muted)]/50 p-2 rounded-card-nested border border-subtle">
                     {similarTransactions.map((similarTx) => (
                       <TransactionItem
                         key={similarTx.id}
@@ -515,7 +515,7 @@ export function TransactionViewModal({
         </div>
 
         {/* Action Buttons Footer: Bred Redigera-knapp, Duplicera och Radera */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
           <button 
             type="button"
             onClick={() => {

@@ -130,7 +130,7 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
         style={{ opacity, scale, y: pullDistance }}
         className="absolute top-0 left-0 right-0 flex justify-center items-center h-16 pointer-events-none z-50"
       >
-        <div className="w-8 h-8 rounded-full bg-[var(--surface-elevated)] text-[var(--text-secondary)] flex items-center justify-center border border-white/10">
+        <div className="w-8 h-8 rounded-full bg-[var(--surface-elevated)] text-[var(--text-secondary)] flex items-center justify-center border border-subtle">
           <motion.div style={{ rotate }}>
             <RefreshCw size={16} strokeWidth={2.5} />
           </motion.div>

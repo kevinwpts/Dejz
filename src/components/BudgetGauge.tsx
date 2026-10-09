@@ -193,7 +193,7 @@ export function BudgetGauge({
 
   return (
     <div className="w-full select-none">
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,16px)] p-4 sm:p-5 shadow-sm relative overflow-hidden transition-all">
+      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,16px)] p-4 sm:p-5 shadow-subtle relative overflow-hidden transition-all">
         {/* Top Header Row */}
         <div className="flex items-center justify-between mb-2 sm:mb-2.5">
           <div className="flex items-center gap-1.5">
@@ -352,7 +352,7 @@ export function BudgetGauge({
 
         {/* Bottom Time / Payday Countdown Info */}
         {timeText && (
-          <div className="pt-2.5 sm:pt-3 mt-2 border-t border-black/[0.03] dark:border-white/[0.04] flex items-center justify-between text-label text-[var(--text-secondary)]">
+          <div className="pt-2.5 sm:pt-3 mt-2 border-t border-subtle flex items-center justify-between text-label text-[var(--text-secondary)]">
             <span className="font-medium tracking-tight">{timeText}</span>
             {remainingDays !== undefined && totalDays !== undefined && (
               <span className="font-amount tabular-nums text-micro-label opacity-80">

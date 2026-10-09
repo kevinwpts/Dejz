@@ -134,7 +134,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -190,7 +190,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           </div>
 
           {/* Details Section: Clean list with discrete subtle divider lines */}
-          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+          <div className="divide-y divide-subtle text-left">
             {/* Category */}
             <div className="py-3 flex items-center justify-between gap-4">
               <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
@@ -250,7 +250,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
         </div>
 
         {/* Action Buttons Footer: Bred Redigera-knapp och Radera */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
           <button 
             type="button"
             onClick={() => {
@@ -433,7 +433,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -488,7 +488,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
               </div>
             </div>
 
-            <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
+            <div className="pt-3 border-t border-subtle flex items-baseline justify-start gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
                 className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
@@ -516,7 +516,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           </div>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
             {/* Row 1: Category */}
             <div 
               onClick={() => {
@@ -688,11 +688,11 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-modal max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
-                <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/5 dark:border-white/10 shrink-0">
+                <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-subtle shrink-0">
                   <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">{t('category')}</h3>
                   <button
                     type="button"
@@ -715,7 +715,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                             setIsCategorySelectorOpen(false);
                           }}
                           style={{ backgroundColor: cat.color || getCategoryColor(cat.name, categories) }}
-                          className={`h-28 sm:h-32 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                          className={`h-28 sm:h-32 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-subtle relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
@@ -740,7 +740,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
         </div>
 
         {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
           <button 
             type="button"
             onClick={handleSave} 
@@ -782,7 +782,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-modal font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]">
                   <div>
@@ -935,7 +935,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -1003,7 +1003,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           </div>
 
           {/* Details Section: Clean list with discrete subtle divider lines */}
-          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+          <div className="divide-y divide-subtle text-left">
             {/* Category */}
             <div className="py-3 flex items-center justify-between gap-4">
               <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
@@ -1110,7 +1110,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
         </div>
 
         {/* Action Buttons Footer: Bred Redigera-knapp och Radera-knapp */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
           <button 
             type="button"
             onClick={() => {
@@ -1338,7 +1338,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
 
@@ -1393,7 +1393,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               </div>
             </div>
 
-            <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
+            <div className="pt-3 border-t border-subtle flex items-baseline justify-start gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
                 className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
@@ -1421,7 +1421,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
             {/* Row 1: Category */}
             <div 
               onClick={() => {
@@ -1623,7 +1623,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                   type="date"
                   value={cancellationDate}
                   onChange={(e) => setCancellationDate(e.target.value)}
-                  className="text-[13px] font-semibold text-[var(--text-primary)] bg-transparent outline-none border border-black/10 dark:border-white/10 rounded-[var(--radius-input,14px)] px-2 py-1"
+                  className="text-[13px] font-semibold text-[var(--text-primary)] bg-transparent outline-none border border-subtle rounded-[var(--radius-input,14px)] px-2 py-1"
                 />
               </div>
             )}
@@ -1662,11 +1662,11 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 initial={{ y: '100%', opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
-                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-2xl max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
+                className="relative w-full sm:max-w-xl bg-[var(--bg-color)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-modal max-h-[85dvh] h-[78dvh] sm:h-auto flex flex-col z-10 overflow-hidden pb-[max(1rem,env(safe-area-inset-bottom,0px))] font-sans"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
-                <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-black/5 dark:border-white/10 shrink-0">
+                <div className="flex items-center justify-between px-5 pt-3 sm:pt-4 pb-3 border-b border-subtle shrink-0">
                   <h3 className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight">{t('category')}</h3>
                   <button
                     type="button"
@@ -1689,7 +1689,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                             setIsCategorySelectorOpen(false);
                           }}
                           style={{ backgroundColor: cat.color || getCategoryColor(cat.name, categories) }}
-                          className={`h-28 sm:h-32 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-sm relative overflow-hidden text-left ${
+                          className={`h-28 sm:h-32 p-3.5 rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-subtle relative overflow-hidden text-left ${
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
@@ -1717,7 +1717,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setIsCancelModalOpen(true)}
-                className="w-full p-3.5 rounded-card-nested bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
+                className="w-full p-3.5 rounded-card-nested bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-subtle flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
               >
                 <div>
                   <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -1734,7 +1734,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
         </div>
 
         {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
           <button 
             type="button"
             onClick={handleSave} 
@@ -1776,9 +1776,9 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-modal font-sans"
               >
-                <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-black/5 dark:border-white/10">
+                <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-subtle">
                   <div>
                     <h3 className="text-lg font-semibold text-[var(--text-primary)] tracking-tight">{t('chooseIcon')}</h3>
                     <p className="text-xs font-medium text-[var(--text-tertiary)] opacity-70 mt-0.5">Välj logotyp eller ikon</p>
@@ -1934,7 +1934,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -1985,7 +1985,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
           </div>
 
           {/* Details Section: Clean list with discrete subtle divider lines */}
-          <div className="divide-y divide-black/[0.06] dark:divide-white/[0.06] text-left">
+          <div className="divide-y divide-subtle text-left">
             {/* Type */}
             <div className="py-3 flex items-center justify-between gap-4">
               <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
@@ -2037,7 +2037,7 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
         </div>
 
         {/* Action Buttons Footer: Bred Redigera-knapp och Radera */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10">
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
           <button 
             type="button"
             onClick={() => {
@@ -2224,7 +2224,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-2xl h-auto font-sans"
+        className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative flex flex-col overflow-hidden max-h-[92dvh] sm:max-h-[85vh] shadow-modal h-auto font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -2282,7 +2282,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
               </div>
             </div>
 
-            <div className="pt-3 border-t border-black/[0.05] dark:border-white/[0.05] flex items-baseline justify-start gap-1">
+            <div className="pt-3 border-t border-subtle flex items-baseline justify-start gap-1">
               <div 
                 onClick={() => amountInputRef.current?.focus()}
                 className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
@@ -2310,7 +2310,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+          <div className="rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] divide-y divide-subtle overflow-hidden border-none shadow-none">
             {/* Row 1: Deduction Day */}
             <div className="p-4 flex items-center justify-between min-h-[58px] relative cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group">
               <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
@@ -2455,7 +2455,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
         </div>
 
         {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
-        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-black/[0.05] dark:border-white/[0.06] bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
+        <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
           <button 
             type="button"
             onClick={handleSave} 
@@ -2497,7 +2497,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: '100%', opacity: 0 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-2xl font-sans"
+                className="bg-[var(--bg-color)] w-full max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none relative overflow-hidden flex flex-col h-[90vh] sm:h-[88vh] shadow-modal font-sans"
               >
                 <div className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]">
                   <div>
@@ -2614,7 +2614,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
           <button 
             type="button"
             onClick={() => setShowIconPicker(true)}
-            className="w-16 h-16 rounded-icon-button bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center transition-all active:scale-95 group cursor-pointer border border-black/[0.06] dark:border-white/[0.08] relative overflow-hidden text-[var(--text-primary)]"
+            className="w-16 h-16 rounded-icon-button bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center transition-all active:scale-95 group cursor-pointer border border-subtle relative overflow-hidden text-[var(--text-primary)]"
             title="Välj ikon"
           >
             <CategoryIcon 

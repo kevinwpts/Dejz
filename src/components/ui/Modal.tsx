@@ -91,7 +91,7 @@ export const Modal: React.FC<ModalProps> = ({
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className={`relative w-full ${sizeStyles} bg-[var(--modal-bg,var(--bg-color))] ${
               center ? 'rounded-[var(--radius-modal,16px)] border' : 'rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-t sm:border'
-            } border-[var(--border-subtle)] shadow-2xl max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
+            } border-[var(--border-subtle)] shadow-modal max-h-[90dvh] flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Pill */}
             {!center && (

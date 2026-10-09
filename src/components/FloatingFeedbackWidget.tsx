@@ -50,7 +50,7 @@ export function FloatingFeedbackWidget({ onOpenFeedback, language = 'sv' }: Floa
         transition={{ type: 'spring', damping: 22, stiffness: 300 }}
         className="fixed bottom-[5.4rem] right-3.5 sm:right-5 z-40 select-none"
       >
-        <div className="flex items-center bg-[var(--surface-color)]/90 backdrop-blur-xl border border-[var(--border-color)] text-[var(--text-primary)] rounded-full shadow-lg shadow-black/10 dark:shadow-black/30 overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98]">
+        <div className="flex items-center bg-[var(--surface-color)]/90 backdrop-blur-xl border border-[var(--border-color)] text-[var(--text-primary)] rounded-full shadow-subtle shadow-black/10 dark:shadow-black/30 overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98]">
           <button
             type="button"
             onClick={handleOpen}

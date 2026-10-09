@@ -244,14 +244,14 @@ export function ReceiptCameraModal({
             onClose();
           }}
           disabled={isProcessing}
-          className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 border border-white/20 text-white flex items-center justify-center backdrop-blur-xl transition-all cursor-pointer shadow-md"
+          className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 border border-subtle text-white flex items-center justify-center backdrop-blur-xl transition-all cursor-pointer shadow-subtle"
           aria-label={isEn ? 'Close' : 'Stäng'}
         >
           <X size={20} strokeWidth={2} />
         </button>
 
         {/* Status / Title Pill */}
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 backdrop-blur-xl text-label font-semibold tracking-wide shadow-md">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 border border-subtle backdrop-blur-xl text-label font-semibold tracking-wide shadow-subtle">
           <Camera size={14} className="text-white/80" />
           <span>{isEn ? 'Receipt Scanner' : 'Kvittoskanning'}</span>
         </div>
@@ -262,7 +262,7 @@ export function ReceiptCameraModal({
             <button
               type="button"
               onClick={toggleTorch}
-              className={`w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-xl border border-white/20 transition-all cursor-pointer shadow-md ${
+              className={`w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-xl border border-subtle transition-all cursor-pointer shadow-subtle ${
                 torchOn ? 'bg-amber-400 text-black border-amber-300' : 'bg-black/40 hover:bg-black/60 text-white active:scale-95'
               }`}
               aria-label={isEn ? 'Flashlight' : 'Ficklampa'}
@@ -275,7 +275,7 @@ export function ReceiptCameraModal({
             <button
               type="button"
               onClick={toggleCamera}
-              className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 border border-white/20 text-white flex items-center justify-center backdrop-blur-xl transition-all cursor-pointer shadow-md"
+              className="w-11 h-11 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 border border-subtle text-white flex items-center justify-center backdrop-blur-xl transition-all cursor-pointer shadow-subtle"
               aria-label={isEn ? 'Flip camera' : 'Vänd kamera'}
             >
               <SwitchCamera size={19} strokeWidth={2} />
@@ -288,8 +288,8 @@ export function ReceiptCameraModal({
       <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-black">
         {/* Error Fallback */}
         {cameraError ? (
-          <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-[var(--radius-card,14px)] bg-surface border border-white/[0.08] space-y-4">
-            <div className="w-14 h-14 mx-auto rounded-full bg-white/10 border border-white/10 text-white flex items-center justify-center">
+          <div className="relative z-20 max-w-xs mx-auto text-center px-6 py-8 rounded-[var(--radius-card,14px)] bg-surface border border-subtle space-y-4">
+            <div className="w-14 h-14 mx-auto rounded-full bg-white/10 border border-subtle text-white flex items-center justify-center">
               <AlertCircle size={26} strokeWidth={2} />
             </div>
             <div className="space-y-1.5">
@@ -332,7 +332,7 @@ export function ReceiptCameraModal({
             {/* Viewfinder Frame overlay */}
             <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-6">
               {/* Receipt Target Box */}
-              <div className="relative w-full max-w-[320px] aspect-[3/4.6] max-h-[65vh] rounded-card border-2 border-white/30 shadow-[0_0_0_9999px_rgba(0,0,0,0.48)] overflow-hidden">
+              <div className="relative w-full max-w-[320px] aspect-[3/4.6] max-h-[65vh] rounded-card border-2 border-subtle shadow-[0_0_0_9999px_rgba(0,0,0,0.48)] overflow-hidden">
                 {/* 4 Corner Markers */}
                 <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-[var(--radius-card,14px)]" />
                 <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr-[var(--radius-card,14px)]" />
@@ -354,7 +354,7 @@ export function ReceiptCameraModal({
         {/* Processing Indicator Overlay */}
         {isProcessing && (
           <div className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-3">
-            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-white/10 border border-subtle flex items-center justify-center">
               <Loader2 size={26} className="animate-spin text-white" />
             </div>
             <p className="text-body-medium font-bold text-white tracking-wide">
@@ -426,7 +426,7 @@ export function ReceiptCameraModal({
               type="button"
               onClick={takePhoto}
               disabled={!isCameraReady || !!cameraError}
-              className="relative w-20 h-20 rounded-full border-[3.5px] border-white/80 p-1 flex items-center justify-center active:scale-90 transition-transform cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group"
+              className="relative w-20 h-20 rounded-full border-[3.5px] border-subtle p-1 flex items-center justify-center active:scale-90 transition-transform cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group"
               aria-label={isEn ? 'Take photo' : 'Ta bild'}
             >
               <div className="w-full h-full rounded-full bg-white group-hover:scale-95 transition-transform" />

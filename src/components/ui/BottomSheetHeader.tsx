@@ -21,7 +21,7 @@ export function BottomSheetHeader({
 }: BottomSheetHeaderProps) {
   if (variant === 'centered') {
     return (
-      <div className={`px-5 sm:px-6 pt-3 sm:pt-4 pb-3 grid grid-cols-[40px_1fr_40px] items-center shrink-0 border-b border-[var(--border-color)]/60 dark:border-white/[0.04] ${className}`}>
+      <div className={`px-5 sm:px-6 pt-3 sm:pt-4 pb-3 grid grid-cols-[40px_1fr_40px] items-center shrink-0 border-b border-[var(--border-color)]/60 border-subtle ${className}`}>
         <div className="flex justify-start">
           {leading}
         </div>
@@ -52,7 +52,7 @@ export function BottomSheetHeader({
 
   if (variant === 'actions') {
     return (
-      <div className={`px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]/60 dark:border-white/[0.04] ${className}`}>
+      <div className={`px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]/60 border-subtle ${className}`}>
         <div className="flex items-center gap-2.5 min-w-0">
           {leading}
         </div>
@@ -71,7 +71,7 @@ export function BottomSheetHeader({
 
   // Standard variant
   return (
-    <div className={`px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]/60 dark:border-white/[0.04] ${className}`}>
+    <div className={`px-5 sm:px-6 pt-3 sm:pt-4 pb-3 flex items-center justify-between shrink-0 border-b border-[var(--border-color)]/60 border-subtle ${className}`}>
       <div className="flex items-center gap-3 min-w-0 pr-2">
         {leading}
         <div className="flex flex-col min-w-0">

@@ -110,7 +110,7 @@ export function SavingsGoalModal({
         e.stopPropagation();
         setShowIconSelector(true);
       }}
-      className="w-9 h-9 rounded-icon-button flex items-center justify-center text-card-title transition-all active:scale-95 overflow-hidden bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 shrink-0 text-[var(--accent-color)] cursor-pointer"
+      className="w-9 h-9 rounded-icon-button flex items-center justify-center text-card-title transition-all active:scale-95 overflow-hidden bg-black/[0.04] dark:bg-white/[0.06] border border-subtle shrink-0 text-[var(--accent-color)] cursor-pointer"
     >
       {logo ? (
         <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -178,7 +178,7 @@ export function SavingsGoalModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t('savingGoalExample')}
-                className="w-full h-12 bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-input px-4 text-body-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
+                className="w-full h-12 bg-black/[0.04] dark:bg-white/[0.06] border border-subtle rounded-input px-4 text-body-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all focus:border-[var(--accent-color)]"
               />
             </div>
           </div>
@@ -189,7 +189,7 @@ export function SavingsGoalModal({
             </label>
             <div 
               onClick={() => amountInputRef.current?.focus()}
-              className="bg-black/[0.04] dark:bg-white/[0.06] border border-black/5 dark:border-white/10 rounded-input py-4 px-4 flex items-center justify-between transition-all cursor-pointer select-none group"
+              className="bg-black/[0.04] dark:bg-white/[0.06] border border-subtle rounded-input py-4 px-4 flex items-center justify-between transition-all cursor-pointer select-none group"
             >
               <div className="flex-1 flex justify-center translate-x-3">
                 <input

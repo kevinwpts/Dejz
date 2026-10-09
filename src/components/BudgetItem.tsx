@@ -170,7 +170,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
           {/* Right side: deduction day and payment method combined into a single pill */}
           {(dayString || paymentString) && (
             <div className="flex items-center shrink-0 justify-end max-w-[65%] overflow-hidden">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-badge,6px)] text-micro-label font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-black/5 dark:border-white/10 shrink-0 select-none truncate tabular-nums">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-badge,6px)] text-micro-label font-medium bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-subtle shrink-0 select-none truncate tabular-nums">
                 {paymentString ? (
                   <CategoryIcon icon={pmIconKey} variant="minimal" size="2xs" className="shrink-0" />
                 ) : (

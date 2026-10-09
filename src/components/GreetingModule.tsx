@@ -91,7 +91,7 @@ export function GreetingModule({
             className="fixed inset-0" 
             onClick={() => setIsCalculationInfoOpen(false)} 
           />
-          <div className="relative w-full max-w-[340px] bg-white dark:bg-surface rounded-card p-5 border border-black/[0.08] dark:border-white/[0.08] shadow-2xl space-y-4 z-10 text-left font-sans">
+          <div className="relative w-full max-w-[340px] bg-white dark:bg-surface rounded-card p-5 border border-subtle shadow-subtle space-y-4 z-10 text-left font-sans">
             {/* Header */}
             <div className="flex items-center justify-between pb-1">
               <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold text-sm">
@@ -116,7 +116,7 @@ export function GreetingModule({
             </p>
 
             {/* Status Explanation Card */}
-            <div className={`p-3 rounded-[6px] border flex items-start gap-2.5 ${status.badgeBgClass} border-black/5 dark:border-white/10`}>
+            <div className={`p-3 rounded-[6px] border flex items-start gap-2.5 ${status.badgeBgClass} border-subtle`}>
               <div className="w-2.5 h-2.5 rounded-full shrink-0 mt-1 shadow-xs" style={{ backgroundColor: status.colorHex }} />
               <div className="flex flex-col min-w-0 text-xs">
                 <span className={`font-bold ${status.badgeTextClass}`}>
@@ -131,7 +131,7 @@ export function GreetingModule({
             {/* Real-time Math Breakdown */}
             <div className="space-y-2 pt-1">
               {/* 1. Incomes */}
-              <div className="flex justify-between items-center text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+              <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
                 <span className="text-[var(--text-secondary)]">{isEn ? 'Total Income' : 'Totala inkomster'}</span>
                 <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-amount tabular-nums">
                   +{formatAmount(stats?.totalIncome || 0, language)} {currency}
@@ -139,7 +139,7 @@ export function GreetingModule({
               </div>
 
               {/* 2. Fixed Expenses */}
-              <div className="flex justify-between items-center text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+              <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
                 <span className="text-[var(--text-secondary)]">{isEn ? 'Fixed Expenses' : 'Fasta utgifter (verkliga)'}</span>
                 <span className="font-semibold text-rose-500 dark:text-rose-400 font-amount tabular-nums">
                   -{formatAmount(stats?.totalFixed || 0, language)} {currency}
@@ -147,7 +147,7 @@ export function GreetingModule({
               </div>
 
               {/* 3. Monthly Savings */}
-              <div className="flex justify-between items-center text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+              <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
                 <span className="text-[var(--text-secondary)]">{isEn ? 'Monthly Savings' : 'Månadssparande'}</span>
                 <span className="font-semibold text-amber-500 font-amount tabular-nums">
                   -{formatAmount(stats?.totalSavings || 0, language)} {currency}
@@ -163,7 +163,7 @@ export function GreetingModule({
               </div>
 
               {/* 5. Total Spent in Period */}
-              <div className="flex justify-between items-center text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+              <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
                 <span className="text-[var(--text-secondary)]">{isEn ? 'Variable Spent' : 'Spenderat hittills'}</span>
                 <span className="font-semibold text-rose-500 dark:text-rose-400 font-amount tabular-nums">
                   -{formatAmount(stats?.totalSpentInPeriod || 0, language)} {currency}
@@ -172,7 +172,7 @@ export function GreetingModule({
 
               {/* 6. Extra Income / Swish */}
               {stats?.totalExtraIncomeInPeriod > 0 && (
-                <div className="flex justify-between items-center text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.04]">
+                <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
                   <span className="text-[var(--text-secondary)]">{isEn ? 'Extra Income' : 'Extra inkomster'}</span>
                   <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-amount tabular-nums">
                     +{formatAmount(stats?.totalExtraIncomeInPeriod || 0, language)} {currency}
