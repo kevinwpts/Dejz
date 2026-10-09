@@ -390,32 +390,39 @@ export function TodayView({
       {/* 2. Category Budgets */}
       <div className="animate-fade-in space-y-2.5">
         {!hasSavedBudget ? (
-          <button
-            type="button"
-            onClick={() => onNavigate("profile", "budget")}
-            className="w-full p-4 rounded-card hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-subtle text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99] shadow-subtle bg-[var(--surface-color)]"
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
-                <SlidersHorizontal size={18} strokeWidth={2} />
-              </div>
-              <div>
-                <p className="text-card-title text-[var(--text-primary)] leading-snug">
-                  {lang === "en" ? "Set up your budget" : "Sätt upp din budget"}
-                </p>
-                <p className="text-micro-label text-[var(--text-secondary)] mt-0.5">
-                  {lang === "en" ? "Set limits per category to track spending" : "Fördela din budget på dina kategorier"}
-                </p>
-              </div>
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between px-0.5">
+              <h2 className="text-section-title">
+                {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
+              </h2>
             </div>
-            <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
-          </button>
+            <button
+              type="button"
+              onClick={() => onNavigate("profile", "budget")}
+              className="w-full p-4 rounded-card hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-subtle text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99] shadow-subtle bg-[var(--surface-color)]"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
+                  <SlidersHorizontal size={18} strokeWidth={2} />
+                </div>
+                <div>
+                  <p className="text-card-title text-[var(--text-primary)] leading-snug">
+                    {lang === "en" ? "Set up your budget" : "Sätt upp din budget"}
+                  </p>
+                  <p className="text-micro-label text-[var(--text-secondary)] mt-0.5">
+                    {lang === "en" ? "Set limits per category to track spending" : "Fördela din budget på dina kategorier"}
+                  </p>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+            </button>
+          </div>
         ) : categoryBudgetData.length > 0 ? (
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-label font-medium text-[var(--text-secondary)]">
+            <div className="flex items-center justify-between px-0.5">
+              <h2 className="text-section-title">
                 {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
-              </span>
+              </h2>
               <button
                 type="button"
                 onClick={() => {
@@ -445,14 +452,14 @@ export function TodayView({
                     {/* Top: Icon + Name */}
                     <div className="flex items-center gap-2 min-w-0 w-full">
                       <CategoryIcon icon={cat.iconName} color={catColor} size="xs" />
-                      <span className="text-label font-medium text-[var(--text-primary)] truncate flex-1 min-w-0">
+                      <span className="text-body-medium font-medium text-[var(--text-primary)] truncate flex-1 min-w-0">
                         {cat.name}
                       </span>
                     </div>
 
                     {/* Amount & Status */}
                     <div className="space-y-0.5 min-w-0 w-full">
-                      <p className={`text-body-medium font-semibold font-amount tabular-nums truncate leading-tight ${
+                      <p className={`text-card-title font-semibold font-amount tabular-nums truncate leading-tight ${
                         cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
                       }`}>
                         {(() => {
@@ -519,9 +526,9 @@ export function TodayView({
         )}
 
         {/* Date Header directly connected with timeline */}
-        <div className="flex items-center justify-between px-1 pt-0.5">
-          <div className="flex items-center gap-2">
-            <span className="text-label font-medium text-[var(--text-secondary)]">
+        <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
+          <div className="flex items-center gap-2 min-w-0">
+            <h2 className="text-section-title truncate">
               {stats.isPastPeriod
                 ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
                 : selectedDate.toDateString() === new Date().toDateString()
@@ -530,9 +537,9 @@ export function TodayView({
                       lang === "en" ? "en-US" : "sv-SE",
                       { day: "numeric", month: "long" },
                     )}
-            </span>
+            </h2>
             {(displayedVariableTransactions.length > 0 || displayedFixedTransactions.length > 0) && (
-              <span className="text-micro-label font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
+              <span className="text-micro-label font-medium text-[var(--text-tertiary)] tabular-nums font-amount shrink-0">
                 {(displayedVariableTransactions.length + displayedFixedTransactions.length)} {
                   (displayedVariableTransactions.length + displayedFixedTransactions.length) === 1
                     ? (lang === 'en' ? 'transaktion' : 'transaktion')
@@ -542,7 +549,7 @@ export function TodayView({
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {!isTodaySelected && (
               <button
                 type="button"

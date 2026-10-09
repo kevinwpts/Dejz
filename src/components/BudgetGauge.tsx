@@ -90,7 +90,7 @@ export function BudgetGauge({
         {/* Top Header Row */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
-            <span className="text-secondary font-medium text-[var(--text-secondary)]">
+            <span className="text-label font-medium text-[var(--text-secondary)]">
               {label}
             </span>
             {onOpenInfo && (
@@ -143,14 +143,14 @@ export function BudgetGauge({
             aria-label={isEn ? 'Budget status details' : 'Detaljer för budgetstatus'}
             title={circleTitle}
           >
-            <div className="relative w-[92px] sm:w-[102px] h-[50px] sm:h-[54px] flex items-end justify-center">
+            <div className="relative w-[96px] sm:w-[108px] h-[52px] sm:h-[58px] flex items-end justify-center">
               <svg viewBox="0 0 100 56" className="w-full h-full overflow-visible">
                 {/* Background track semi-circle */}
                 <path
                   d="M 10 50 A 40 40 0 0 1 90 50"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="6"
+                  strokeWidth="6.5"
                   strokeLinecap="round"
                   className="text-black/[0.06] dark:text-white/[0.08]"
                 />
@@ -160,7 +160,7 @@ export function BudgetGauge({
                     d="M 10 50 A 40 40 0 0 1 90 50"
                     fill="none"
                     stroke={status.colorHex}
-                    strokeWidth="6"
+                    strokeWidth="6.5"
                     strokeLinecap="round"
                     strokeDasharray={arcLength}
                     strokeDashoffset={strokeDashoffset}
@@ -171,7 +171,7 @@ export function BudgetGauge({
 
               {/* Inside semi-circle: percentage text */}
               <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end pointer-events-none pb-0.5">
-                <span className="font-amount font-semibold text-sm sm:text-[15px] tabular-nums text-[var(--text-primary)] leading-none">
+                <span className="font-amount font-semibold text-sm sm:text-base tabular-nums text-[var(--text-primary)] leading-none">
                   {percentage}%
                 </span>
               </div>
@@ -190,21 +190,24 @@ export function BudgetGauge({
             className="w-full pt-3 mt-3 border-t border-subtle flex items-center justify-between text-left cursor-pointer active:scale-[0.99] transition-all bg-transparent border-none p-0 group"
           >
             {/* Left: Aktuell period */}
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-micro-label text-[var(--text-secondary)] font-normal whitespace-nowrap">
-                {isEn ? 'Period:' : 'Aktuell period:'}
+            <div className="flex flex-col min-w-0">
+              <span className="text-label text-[var(--text-secondary)] font-normal leading-tight">
+                {isEn ? 'Current period' : 'Aktuell period'}
               </span>
-              <span className="text-micro-label text-[var(--text-primary)] font-medium truncate group-hover:text-[var(--accent-color)] transition-colors">
+              <span className="text-body-medium text-[var(--text-primary)] font-medium truncate mt-0.5 group-hover:text-[var(--accent-color)] transition-colors">
                 {periodIntervalText}
               </span>
             </div>
 
+            {/* Subtle Divider */}
+            <div className="h-6 w-[1px] bg-black/[0.06] dark:bg-white/[0.08] shrink-0 mx-3" />
+
             {/* Right: Nästa lön */}
-            <div className="flex items-center gap-1.5 shrink-0 text-right">
-              <span className="text-micro-label text-[var(--text-secondary)] font-normal whitespace-nowrap">
-                {isEn ? 'Payday:' : 'Nästa lön:'}
+            <div className="flex flex-col items-end shrink-0 text-right">
+              <span className="text-label text-[var(--text-secondary)] font-normal leading-tight">
+                {isEn ? 'Next payday' : 'Nästa lön'}
               </span>
-              <span className="text-micro-label text-[var(--text-primary)] font-medium font-amount tabular-nums group-hover:text-[var(--accent-color)] transition-colors">
+              <span className="text-body-medium text-[var(--text-primary)] font-medium font-amount tabular-nums truncate mt-0.5 group-hover:text-[var(--accent-color)] transition-colors">
                 {paydayText}
               </span>
             </div>
