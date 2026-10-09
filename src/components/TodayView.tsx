@@ -4,6 +4,7 @@ import {
   RotateCcw,
   SlidersHorizontal,
   ChevronRight,
+  ChevronDown,
   Calendar,
   Clock,
   Info,
@@ -21,7 +22,7 @@ import { CategoryIcon } from "./CategoryIcon";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { PeriodTimeline } from "./PeriodTimeline";
-import { Button, Modal } from "./ui";
+import { Button, Modal, Card } from "./ui";
 import { getCategoryIconName } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
@@ -97,6 +98,7 @@ export function TodayView({
 }: TodayViewProps) {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [selectedCategoryModalName, setSelectedCategoryModalName] = useState<string | null>(null);
+  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
 
   const handleCategoryClick = useCallback((catName: string) => {
     if (typeof feedback.light === 'function') feedback.light();
@@ -436,74 +438,91 @@ export function TodayView({
               </button>
             </div>
 
-            <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
-              {categoryBudgetData.map((cat, index) => {
+            {/* Sammanhängande enhetligt kort för kategoribudgetar */}
+            <Card variant="default" padding="none" className="border-none divide-y divide-subtle overflow-hidden">
+              {(isCategoriesExpanded ? categoryBudgetData : categoryBudgetData.slice(0, 4)).map((cat) => {
                 const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
+                const currency = config?.currency || 'kr';
 
                 return (
-                  <motion.button
+                  <div
                     key={cat.name}
-                    initial={{ opacity: 0, scale: 0.97, x: 6 }}
-                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                    transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                     onClick={() => handleCategoryClick(cat.name)}
-                    className="flex-shrink-0 w-[136px] sm:w-[144px] h-[82px] sm:h-[86px] p-2.5 sm:p-3 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-subtle flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
+                    className="p-3 sm:p-3.5 flex items-center justify-between gap-3 group hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer active:scale-[0.99] select-none"
                   >
-                    {/* Top: Icon + Name */}
-                    <div className="flex items-center gap-2 min-w-0 w-full">
-                      <CategoryIcon icon={cat.iconName} color={catColor} size="xs" />
-                      <span className="text-body-medium font-medium text-[var(--text-primary)] truncate flex-1 min-w-0">
-                        {cat.name}
-                      </span>
+                    {/* Left: Icon + Name + subtle mini-progress bar */}
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <CategoryIcon icon={cat.iconName} color={catColor} size="sm" />
+                      <div className="min-w-0 flex-1">
+                        <span className="text-body-medium font-medium text-[var(--text-primary)] truncate block">
+                          {cat.name}
+                        </span>
+                        {cat.hasBudget && (
+                          <div className="w-full max-w-[140px] sm:max-w-[180px] h-1 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden mt-1.5">
+                            <div
+                              className={`h-full rounded-full transition-all duration-300 ${
+                                cat.isOverBudget
+                                  ? 'bg-rose-500'
+                                  : 'bg-[var(--accent-color)]'
+                              }`}
+                              style={{ width: `${Math.min(100, cat.percentage)}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Amount & Status */}
-                    <div className="space-y-0.5 min-w-0 w-full">
-                      <p className={`text-card-title font-semibold font-amount tabular-nums truncate leading-tight ${
+                    {/* Right: Amount & Status */}
+                    <div className="text-right shrink-0 flex flex-col items-end">
+                      <span className={`text-body-medium font-semibold font-amount tabular-nums leading-tight ${
                         cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
                       }`}>
                         {(() => {
-                          const currency = config?.currency || 'kr';
                           if (!cat.hasBudget) {
                             return `${formatAmount(Math.round(cat.spent), lang)} ${currency}`;
                           }
                           const rem = Math.round(cat.remaining);
-                          return `${formatAmount(rem, lang)} ${currency}`;
+                          return `${rem < 0 ? '−' : ''}${formatAmount(Math.abs(rem), lang)} ${currency}`;
                         })()}
-                      </p>
-                      <p className={`text-micro-label leading-tight truncate ${
+                      </span>
+                      <span className={`text-micro-label mt-0.5 leading-tight ${
                         cat.isOverBudget ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
                       }`}>
-                        {cat.hasBudget 
-                          ? (cat.remaining < 0 ? (lang === 'en' ? 'over budget' : 'över budget') : (lang === 'en' ? 'left' : 'kvar'))
+                        {cat.hasBudget
+                          ? (cat.remaining < 0
+                              ? (lang === 'en' ? 'over budget' : 'över budget')
+                              : (lang === 'en' ? 'left' : 'kvar'))
                           : (lang === 'en' ? 'spent' : 'spenderat')}
-                      </p>
+                      </span>
                     </div>
-                  </motion.button>
+                  </div>
                 );
               })}
 
-              {/* Manage Card at the end */}
-              <motion.button
-                key="manage-categories"
-                initial={{ opacity: 0, scale: 0.97, x: 6 }}
-                animate={{ opacity: 1, scale: 1, x: 0 }}
-                transition={{ delay: 0.04 + categoryBudgetData.length * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
-                onClick={() => {
-                  if (typeof feedback.light === 'function') feedback.light();
-                  onNavigate("profile", "budget");
-                }}
-                className="flex-shrink-0 w-[88px] sm:w-[94px] h-[82px] sm:h-[86px] p-2.5 sm:p-3 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-dashed border-subtle flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
-                aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
-              >
-                <div className="w-7 h-7 rounded-[var(--radius-button-sm,8px)] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-                  <SlidersHorizontal size={14} strokeWidth={2} />
-                </div>
-                <span className="text-micro-label font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
-                  {lang === 'en' ? 'Manage' : 'Hantera'}
-                </span>
-              </motion.button>
-            </div>
+              {/* Expand/Collapse Button if more than 4 categories */}
+              {categoryBudgetData.length > 4 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback.light === 'function') feedback.light();
+                    setIsCategoriesExpanded(!isCategoriesExpanded);
+                  }}
+                  className="w-full py-2.5 px-3.5 text-center text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer flex items-center justify-center gap-1.5 border-none bg-transparent"
+                >
+                  <span>
+                    {isCategoriesExpanded
+                      ? (lang === 'en' ? 'Show less' : 'Visa färre')
+                      : (lang === 'en'
+                          ? `Show all (${categoryBudgetData.length})`
+                          : `Visa alla (${categoryBudgetData.length})`)}
+                  </span>
+                  <ChevronDown
+                    size={13}
+                    className={`transition-transform duration-200 ${isCategoriesExpanded ? 'rotate-180' : ''}`}
+                  />
+                </button>
+              )}
+            </Card>
           </div>
         ) : null}
       </div>

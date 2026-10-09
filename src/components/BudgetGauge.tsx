@@ -87,33 +87,30 @@ export function BudgetGauge({
   return (
     <div className="w-full select-none">
       <div className="bg-[var(--surface-color)] rounded-card card-p shadow-subtle relative overflow-hidden transition-all">
-        {/* Top Header Row */}
-        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-          <div className="flex items-center gap-1.5">
-            <span className="text-metric-label">
-              {label}
-            </span>
-            {onOpenInfo && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (typeof feedback?.tap === 'function') feedback.tap();
-                  onOpenInfo();
-                }}
-                className="p-1 -m-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
-                aria-label="Info"
-                title={isEn ? 'How is this calculated?' : 'Hur beräknas detta?'}
-              >
-                <Icon name="info" size={13} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Amount & Semi-circle Gauge Row */}
-        <div className="flex items-center justify-between gap-3 sm:gap-4 my-1">
+        {/* Main Row: (Label + Hero Amount) on left, Semi-circle Gauge on right */}
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
           {/* Primary Amount for entire period (Left) */}
-          <div className="flex flex-col min-w-0 flex-1">
+          <div className="space-y-1 min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-metric-label">
+                {label}
+              </span>
+              {onOpenInfo && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.tap === 'function') feedback.tap();
+                    onOpenInfo();
+                  }}
+                  className="p-1 -m-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
+                  aria-label="Info"
+                  title={isEn ? 'How is this calculated?' : 'Hur beräknas detta?'}
+                >
+                  <Icon name="info" size={13} />
+                </button>
+              )}
+            </div>
+
             <div className="flex items-baseline gap-1 sm:gap-1.5 min-w-0">
               <AnimatedNumber
                 value={remainingCents}
@@ -143,7 +140,7 @@ export function BudgetGauge({
             aria-label={isEn ? 'Budget status details' : 'Detaljer för budgetstatus'}
             title={circleTitle}
           >
-            <div className="relative w-[130px] sm:w-[148px] h-[70px] sm:h-[80px] flex items-end justify-center">
+            <div className="relative w-[124px] sm:w-[140px] h-[66px] sm:h-[74px] flex items-end justify-center">
               <svg viewBox="0 0 100 58" className="w-full h-full overflow-visible">
                 {/* Background track semi-circle */}
                 <path
