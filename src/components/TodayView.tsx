@@ -453,40 +453,28 @@ export function TodayView({
                         if (typeof feedback.light === 'function') feedback.light();
                         handleCategoryClick(cat.name);
                       }}
-                      className="flex flex-col items-center text-center shrink-0 w-[88px] sm:w-[96px] group cursor-pointer active:scale-[0.96] transition-transform select-none focus:outline-none"
+                      className="flex flex-col items-center text-center shrink-0 w-[82px] sm:w-[92px] group cursor-pointer active:scale-[0.96] transition-transform select-none focus:outline-none"
                     >
                       {/* 1. Kategoriikon */}
                       <CategoryIcon icon={cat.iconName} color={catColor} size="md" categoryName={cat.name} />
 
                       {/* 2. Kategorinamn */}
                       <span
-                        className="text-micro-label font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors mt-2 leading-tight line-clamp-2 h-[26px] flex items-center justify-center text-center w-full px-0.5"
+                        className="text-micro-label font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors mt-1.5 leading-tight line-clamp-2 h-[24px] flex items-center justify-center text-center w-full px-0.5"
                         title={cat.name}
                       >
                         {cat.name}
                       </span>
 
                       {/* 3. Kvarvarande eller överskridet belopp */}
-                      <span
-                        className={`text-body-small sm:text-body-medium font-semibold font-amount tabular-nums leading-tight mt-1 truncate max-w-full px-0.5 ${
-                          isOverBudget
-                            ? 'text-rose-600 dark:text-rose-400'
-                            : 'text-[var(--text-primary)]'
-                        }`}
-                      >
+                      <span className="text-label sm:text-body-medium font-semibold font-amount tabular-nums leading-tight mt-0.5 truncate max-w-full px-0.5 text-[var(--text-primary)]">
                         {!cat.hasBudget
                           ? `${formatAmount(Math.round(cat.spent), lang)} ${currency}`
                           : `${rem < 0 ? '−' : ''}${formatAmount(Math.abs(rem), lang)} ${currency}`}
                       </span>
 
                       {/* 4. Kort status */}
-                      <span
-                        className={`text-micro-label leading-tight mt-0.5 truncate max-w-full px-0.5 ${
-                          isOverBudget
-                            ? 'text-rose-600/80 dark:text-rose-400/80'
-                            : 'text-[var(--text-secondary)]'
-                        }`}
-                      >
+                      <span className="text-micro-label leading-tight mt-0.5 truncate max-w-full px-0.5 text-[var(--text-secondary)]">
                         {cat.hasBudget
                           ? (isOverBudget
                               ? (lang === 'en' ? 'Over budget' : 'Över budget')
