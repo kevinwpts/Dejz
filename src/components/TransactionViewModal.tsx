@@ -372,7 +372,7 @@ export function TransactionViewModal({
                   >
                     {transaction.receiptUrl.includes('.pdf') ? (
                       <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
-                        <FileText size={40} className="text-[#777168] dark:text-[#A8A8A8]" />
+                        <FileText size={40} className="text-[var(--text-secondary)]" />
                         <span className="text-[13px] font-medium text-[var(--text-primary)]">PDF-dokument (Klicka för att öppna)</span>
                       </div>
                     ) : (

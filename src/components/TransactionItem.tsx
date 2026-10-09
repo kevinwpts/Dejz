@@ -110,7 +110,7 @@ export function TransactionItem({
     const iconKey = getCategoryIconName(categoryName || '');
 
     return (
-      <div className="flex items-center gap-1 shrink-0 text-[#777168] dark:text-[#A8A8A8]">
+      <div className="flex items-center gap-1 shrink-0 text-[var(--text-secondary)]">
         {iconKey ? (
           <CategoryIcon 
             icon={iconKey} 
@@ -118,7 +118,7 @@ export function TransactionItem({
             size="2xs" 
           />
         ) : null}
-        <span className="text-micro-label text-[#777168] dark:text-[#A8A8A8] whitespace-nowrap">
+        <span className="text-micro-label text-[var(--text-secondary)] whitespace-nowrap">
           {capitalize(categoryName || '')}
           {amount !== undefined && <span className="ml-0.5 opacity-70">({formatAmount(amount, config?.language || 'sv')})</span>}
         </span>
@@ -270,7 +270,7 @@ export function TransactionItem({
                   : new Date(transaction.timestamp || transaction.date).toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' })}
               </p>
             ) : isFixedItem && (
-              <span className="text-micro-label text-[#777168] dark:text-[#71717A] mt-0.5 whitespace-nowrap tabular-nums">
+              <span className="text-micro-label text-[var(--text-tertiary)] mt-0.5 whitespace-nowrap tabular-nums">
                 {transaction.deductionDay 
                   ? `${transaction.deductionDay}${config?.language === 'en' ? 'th' : ':e'}`
                   : (transaction.timestamp || transaction.date) 

@@ -154,7 +154,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
                   }
                   return null;
                 })()}
-                <span className="text-micro-label text-[#777168] dark:text-[#A8A8A8] whitespace-nowrap truncate max-w-[140px] sm:max-w-[220px]">
+                <span className="text-micro-label text-[var(--text-secondary)] whitespace-nowrap truncate max-w-[140px] sm:max-w-[220px]">
                   {capitalize(item.category || '')}
                 </span>
               </div>

@@ -654,7 +654,7 @@ export function TransactionModal({
                 }}
                 className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'expense'
-                    ? 'bg-white dark:bg-[#2A2A2A] text-[var(--text-primary)] shadow-xs'
+                    ? 'bg-white dark:bg-[var(--surface-high)] text-[var(--text-primary)] shadow-xs'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
@@ -668,7 +668,7 @@ export function TransactionModal({
                 }}
                 className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'income'
-                    ? 'bg-white dark:bg-[#2A2A2A] text-emerald-600 dark:text-emerald-400 shadow-xs'
+                    ? 'bg-white dark:bg-[var(--surface-high)] text-emerald-600 dark:text-emerald-400 shadow-xs'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
@@ -1362,7 +1362,7 @@ export function TransactionModal({
                         setIsCategoryPickerOpen(false);
                         setIsAddingCategory(true);
                       }}
-                      className="w-full py-2.5 rounded-btn-sm border border-dashed border-subtle text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] hover:border-subtle dark:hover:border-subtle transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 rounded-btn-sm border border-dashed border-subtle text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-subtle dark:hover:border-subtle transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={15} strokeWidth={2.5} />
                       <span>{t('newCategory')}</span>

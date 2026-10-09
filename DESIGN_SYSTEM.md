@@ -126,4 +126,12 @@ Vissa delar av källkoden är undantagna från de automatiska kontrollerna av te
 1.  **`src/components/ui/`** – Innehåller de grundläggande primitiva komponenterna (såsom `Skeleton.tsx` och `Button.tsx`). Eftersom dessa filer är *definitionen* av systemet tillåts de ha interna fallback-värden för standardstorlekar.
 2.  **`src/utils/demoData.ts` och `src/constants.ts`** – Innehåller statisk testdata samt definitioner för transaktionskategorier. Databasen sparar fasta färg-hexar för användarens personliga kategorier, vilket representerar användardata och inte layout-styling.
 3.  **`src/components/AnalysisView.tsx`** – Innehåller diagram (Recharts) och visualiseringar där färgpaletter definieras i minnesarrayer för diagramceller.
-4.  **SVG-Ikoner** – SVG-kod tillåts innehålla specifika geometriska former och fasta färger eftersom de utgör grafiska resurser snarare än komponentlayouter.
+4.  **SVG-Ikoner & Logotyper** – SVG-kod och mikroradier (`rounded-[6px]`/`rounded-[8px]`) för små ikoner och logotyprelationer tillåts som kontrollerade undantag.
+
+---
+
+## 6. Slutstatus efter Steg 7B
+* **Kritiska fel:** 0
+* **Varningar:** 121 (reducerat från 137 efter centralisering av kvarvarande text- och ytfärger i `TransactionItem`, `TransactionModal`, `CategoryTile`, `BudgetItem` m.fl.).
+* **Central styrning:** Fullt implementerad för knappar, flikar, filter, modaler, listrader och semantiska färger/radier.
+
