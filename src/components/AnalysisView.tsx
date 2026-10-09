@@ -591,7 +591,7 @@ export function AnalysisView({
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden bg-black/[0.02] dark:bg-white/[0.02] border-t border-subtle divide-subtle"
+                        className="overflow-hidden bg-black/[0.02] dark:bg-white/[0.02] border-t border-subtle"
                       >
                         <div className="p-3 sm:p-4 space-y-2">
                           {categoryTransactions.length > 0 && (

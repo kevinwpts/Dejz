@@ -48,6 +48,8 @@
   --color-border-control: var(--border-control);
   --color-border-strong: var(--border-strong);
   --color-border-divider: var(--border-divider);
+  --color-subtle: var(--border-subtle);
+  --color-divider: var(--border-divider);
 
   --color-accent: var(--accent-color);
   --color-accent-hover: var(--accent-hover);
@@ -435,20 +437,49 @@ h6 {
   border-color: var(--border-divider);
 }
 
+/* Central Divide Utilities (Tailwind v4 compatible: :not(:last-child)) */
+:where(.divide-y > :not(:last-child)),
+.divide-y > :not(:last-child) {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-color: var(--border-subtle);
+}
+
+:where(.divide-y > *),
+.divide-y > *,
+.divide-subtle > *,
+.divide-divider > * {
+  border-top-width: 0 !important;
+}
+
 @utility divide-subtle {
-  & > :not([hidden]) ~ :not([hidden]) {
-    border-top-width: 1px;
-    border-style: solid;
-    border-color: var(--border-subtle);
+  & > :not(:last-child) {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-color: var(--border-subtle) !important;
   }
 }
 
+.divide-subtle > :not(:last-child),
+:where(.divide-subtle > :not(:last-child)) {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-color: var(--border-subtle) !important;
+}
+
 @utility divide-divider {
-  & > :not([hidden]) ~ :not([hidden]) {
-    border-top-width: 1px;
-    border-style: solid;
-    border-color: var(--border-divider);
+  & > :not(:last-child) {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-color: var(--border-divider) !important;
   }
+}
+
+.divide-divider > :not(:last-child),
+:where(.divide-divider > :not(:last-child)) {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-color: var(--border-divider) !important;
 }
 
 @utility shadow-subtle {

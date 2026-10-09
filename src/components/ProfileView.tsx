@@ -574,7 +574,7 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
             {t('support')}
           </h4>
-          <div className="overflow-hidden rounded-[6px] bg-white dark:bg-surface border border-subtle shadow-2xs divide-y divide-subtle">
+          <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle shadow-2xs divide-y divide-subtle">
             <SettingsMenuItem icon={Mail} label={t('feedback')} onClick={onFeedbackClick} />
             <SettingsMenuItem icon={Download} label={t('exportData')} onClick={onExportData} />
             <SettingsMenuItem icon={Shield} label={t('privacyPolicy')} onClick={() => onLegalClick('privacy')} />
@@ -587,7 +587,7 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-rose-500 dark:text-rose-400 px-1.5">
             {t('dangerZone')}
           </h4>
-          <div className="overflow-hidden rounded-[6px] bg-white dark:bg-surface border border-subtle shadow-2xs divide-y divide-subtle">
+          <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle shadow-2xs divide-y divide-subtle">
             {isDemoMode && (
               <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-2.5">
                 <div className="flex items-center justify-between">
@@ -604,7 +604,7 @@ export function ProfileView({
                 </p>
                 <button 
                   onClick={onExitDemo}
-                  className="w-full py-2.5 px-4 rounded-[6px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-label flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-none hover:opacity-90 active:scale-[0.98]"
+                  className="w-full py-2.5 px-4 rounded-btn bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-label flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-none hover:opacity-90 active:scale-[0.98]"
                 >
                   <LogOut size={13} strokeWidth={2} />
                   <span>{t('exitDemo')}</span>
@@ -615,7 +615,7 @@ export function ProfileView({
               onClick={onLogout}
               className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-10 h-10 rounded-[6px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center shrink-0">
                 <LogOut size={18} strokeWidth={2} />
               </div>
               <span className="text-body-medium font-semibold text-[var(--text-primary)]">{t('logout')}</span>
@@ -624,7 +624,7 @@ export function ProfileView({
               onClick={onDeleteAccount}
               className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-danger/5 transition-all cursor-pointer active:scale-[0.99]"
             >
-              <div className="w-10 h-10 rounded-[6px] bg-black/5 dark:bg-white/5 text-danger border border-subtle flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-danger border border-subtle flex items-center justify-center shrink-0">
                 <Trash2 size={18} strokeWidth={2} />
               </div>
               <span className="text-body-medium font-semibold text-danger">{t('deleteAccount')}</span>
