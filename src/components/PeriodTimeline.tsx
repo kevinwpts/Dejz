@@ -207,7 +207,7 @@ export function PeriodTimeline({
 
 
   return (
-    <div className="relative group/timeline w-full my-1 sm:my-1.5 font-sans overflow-visible" id="period_timeline_wrapper">
+    <div className="relative group/timeline w-full font-sans overflow-visible" id="period_timeline_wrapper">
       {/* Left Scroll Arrow Button */}
       {canScrollLeft && (
         <div className="hidden md:flex absolute -left-2.5 top-0 bottom-0 z-20 items-center pointer-events-none">
@@ -223,14 +223,14 @@ export function PeriodTimeline({
         </div>
       )}
 
-      {/* Horizontal Scrollable Day Strip - with generous vertical padding so shadows are never clipped */}
+      {/* Horizontal Scrollable Day Strip */}
       <div
         ref={scrollContainerRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
-        className="relative flex items-center gap-2.5 overflow-x-auto py-3 sm:py-3.5 px-1.5 no-scrollbar select-none -my-2 active:cursor-grabbing"
+        className="relative flex items-center gap-2 overflow-x-auto py-1.5 px-1 no-scrollbar select-none active:cursor-grabbing"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -271,20 +271,18 @@ export function PeriodTimeline({
               data-selected={isSelected}
               type="button"
               onClick={(e) => handleSelect(day.date, dayTime, e)}
-              className={`flex flex-col items-center justify-center gap-0.5 w-[48px] sm:w-[54px] h-[50px] sm:h-[56px] p-1.5 rounded-card-nested transition-all duration-200 cursor-pointer select-none shrink-0 relative border shadow-none ${
+              className={`flex flex-col items-center justify-center gap-0.5 w-[46px] sm:w-[50px] h-[48px] sm:h-[52px] p-1 rounded-card-nested transition-all duration-150 cursor-pointer select-none shrink-0 relative border shadow-none ${
                 isSelected
-                  ? 'bg-[var(--accent-color)]/15 dark:bg-[var(--accent-color)]/25 border-[var(--accent-color)]/60 text-[var(--text-primary)] scale-105 font-semibold z-10 opacity-100'
+                  ? 'bg-[var(--accent-color)]/15 dark:bg-[var(--accent-color)]/25 border-[var(--accent-color)]/60 text-[var(--text-primary)] scale-[1.03] font-semibold z-10 opacity-100 shadow-xs'
                   : hasCategoryMatch
-                  ? 'bg-black/5 text-[#242321] dark:bg-white/10 dark:text-white border-transparent hover:bg-black/10 dark:hover:bg-white/[0.15] scale-100 opacity-100'
+                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border-subtle opacity-100'
                   : isRealToday
-                  ? 'bg-black/5 dark:bg-white/10 text-[#242321] dark:text-[#E2E8F0] border-subtle scale-100 font-semibold opacity-100'
+                  ? 'bg-[var(--surface-color)] text-[var(--text-primary)] border-subtle font-semibold opacity-100'
                   : categoryFilter
-                  ? 'bg-white/40 text-[#716E68]/50 border-transparent hover:text-[#242321] dark:bg-white/[0.015] dark:text-[#9CA6BC]/40 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.04] scale-95 opacity-60'
-                  : 'bg-white/60 text-[#716E68] border-transparent hover:text-[#242321] dark:bg-white/[0.02] dark:text-[#9CA6BC]/70 dark:hover:text-[#C7CDDC] hover:bg-white dark:hover:bg-white/[0.045] scale-95 opacity-85'
+                  ? 'bg-[var(--surface-color)]/50 text-[var(--text-tertiary)] border-transparent hover:text-[var(--text-primary)] hover:bg-[var(--surface-color)] opacity-60'
+                  : 'bg-[var(--surface-color)]/70 hover:bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-transparent hover:border-subtle opacity-90'
               }`}
             >
-
-
               {/* Day of Week / Today */}
               <span
                 className={`text-micro-label leading-none font-medium ${
@@ -304,12 +302,10 @@ export function PeriodTimeline({
 
               {/* Day Number */}
               <span className={`text-card-title leading-none font-medium tabular-nums ${
-                isSelected ? 'text-[var(--text-primary)] font-bold' : ''
+                isSelected ? 'text-[var(--text-primary)] font-bold' : 'text-[var(--text-primary)]'
               }`}>
                 {dayNumber}
               </span>
-
-
             </button>
           );
         })}

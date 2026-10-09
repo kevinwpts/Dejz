@@ -74,16 +74,9 @@ export function BudgetGauge({
     return Math.max(0, Math.min(1, remainingCents / startPot));
   }, [remainingCents, startPot]);
 
-  // Circle geometry (viewBox 0 0 64 64)
-  const radius = 26;
-  const circumference = 2 * Math.PI * radius; // ≈ 163.363
-  const strokeDashoffset = circumference * (1 - clampedFraction);
-
-  const subLabel = useMemo(() => {
-    if (isNegative) return isEn ? 'exceeded' : 'slut';
-    if (percentage === 0) return isEn ? '0 left' : '0 kvar';
-    return isEn ? 'left' : 'kvar';
-  }, [isNegative, percentage, isEn]);
+  // Semi-circle arc geometry (viewBox 0 0 100 56, center at 50,50 with r=40)
+  const arcLength = Math.PI * 40; // ≈ 125.664
+  const strokeDashoffset = arcLength * (1 - clampedFraction);
 
   const circleTitle = useMemo(() => {
     return isEn
@@ -95,7 +88,7 @@ export function BudgetGauge({
     <div className="w-full select-none">
       <div className="bg-[var(--surface-color)] rounded-card card-p shadow-subtle relative overflow-hidden transition-all">
         {/* Top Header Row */}
-        <div className="flex items-center justify-between mb-2 sm:mb-2.5">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
             <span className="text-secondary font-medium text-[var(--text-secondary)]">
               {label}
@@ -117,9 +110,9 @@ export function BudgetGauge({
           </div>
         </div>
 
-        {/* Amount & Circular Gauge Row */}
-        <div className="flex items-center justify-between gap-3 sm:gap-4 my-1">
-          {/* Large Amount Display (Left) */}
+        {/* Amount & Semi-circle Gauge Row */}
+        <div className="flex items-center justify-between gap-3 sm:gap-4 my-0.5">
+          {/* Primary Amount for entire period (Left) */}
           <div className="flex flex-col min-w-0">
             <div className="flex items-baseline gap-1 sm:gap-1.5 min-w-0">
               <AnimatedNumber
@@ -137,20 +130,9 @@ export function BudgetGauge({
                 {currency || 'kr'}
               </span>
             </div>
-
-            {/* Status indicator badge under amount */}
-            <div className="flex items-center gap-1.5 mt-2">
-              <span
-                className="w-2 h-2 rounded-full shrink-0 shadow-xs"
-                style={{ backgroundColor: status.colorHex }}
-              />
-              <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
-                {isEn ? status.labelEn : status.labelSv}
-              </span>
-            </div>
           </div>
 
-          {/* Circular Progress Gauge (Right) */}
+          {/* Elegant Semi-Circle Progress Indicator (Right) */}
           <button
             type="button"
             onClick={() => {
@@ -161,53 +143,43 @@ export function BudgetGauge({
             aria-label={isEn ? 'Budget status details' : 'Detaljer för budgetstatus'}
             title={circleTitle}
           >
-            <div className="relative w-[58px] h-[58px] sm:w-[64px] sm:h-[64px] flex items-center justify-center">
-              <svg viewBox="0 0 64 64" className="w-full h-full transform -rotate-90">
-                {/* Background track circle */}
-                <circle
-                  cx="32"
-                  cy="32"
-                  r={radius}
+            <div className="relative w-[92px] sm:w-[102px] h-[50px] sm:h-[54px] flex items-end justify-center">
+              <svg viewBox="0 0 100 56" className="w-full h-full overflow-visible">
+                {/* Background track semi-circle */}
+                <path
+                  d="M 10 50 A 40 40 0 0 1 90 50"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="4.5"
+                  strokeWidth="6"
+                  strokeLinecap="round"
                   className="text-black/[0.06] dark:text-white/[0.08]"
                 />
-                {/* Animated active progress arc */}
+                {/* Active progress arc with semantic color */}
                 {clampedFraction > 0 && (
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r={radius}
+                  <path
+                    d="M 10 50 A 40 40 0 0 1 90 50"
                     fill="none"
                     stroke={status.colorHex}
-                    strokeWidth="4.5"
+                    strokeWidth="6"
                     strokeLinecap="round"
-                    strokeDasharray={circumference}
+                    strokeDasharray={arcLength}
                     strokeDashoffset={strokeDashoffset}
                     className="transition-[stroke-dashoffset,stroke] duration-700 ease-out"
                   />
                 )}
               </svg>
 
-              {/* Inside circle content: percentage & status */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
-                <span className="font-amount font-bold text-xs sm:text-[13px] tabular-nums text-[var(--text-primary)] leading-none">
+              {/* Inside semi-circle: percentage text */}
+              <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end pointer-events-none pb-0.5">
+                <span className="font-amount font-semibold text-sm sm:text-[15px] tabular-nums text-[var(--text-primary)] leading-none">
                   {percentage}%
-                </span>
-                <span className="text-[9px] text-[var(--text-secondary)] font-medium leading-none mt-0.5">
-                  {subLabel}
                 </span>
               </div>
             </div>
-
-            <span className="text-micro-label text-[var(--text-secondary)] font-medium mt-1 tabular-nums whitespace-nowrap">
-              {isEn ? 'of start' : 'av start'}
-            </span>
           </button>
         </div>
 
-        {/* Lower Section: Divider + Aktuell period & Nästa lön */}
+        {/* Bottom Section: Divider + Aktuell period & Nästa lön */}
         {periodIntervalText ? (
           <button
             type="button"
@@ -218,24 +190,21 @@ export function BudgetGauge({
             className="w-full pt-3 mt-3 border-t border-subtle flex items-center justify-between text-left cursor-pointer active:scale-[0.99] transition-all bg-transparent border-none p-0 group"
           >
             {/* Left: Aktuell period */}
-            <div className="flex flex-col min-w-0">
-              <span className="text-micro-label text-[var(--text-secondary)] font-medium leading-tight">
-                {isEn ? 'Current period' : 'Aktuell period'}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-micro-label text-[var(--text-secondary)] font-normal whitespace-nowrap">
+                {isEn ? 'Period:' : 'Aktuell period:'}
               </span>
-              <span className="text-label text-[var(--text-primary)] font-medium truncate mt-0.5 group-hover:text-[var(--accent-color)] transition-colors">
+              <span className="text-micro-label text-[var(--text-primary)] font-medium truncate group-hover:text-[var(--accent-color)] transition-colors">
                 {periodIntervalText}
               </span>
             </div>
 
-            {/* Subtle Divider */}
-            <div className="h-6 w-[1px] bg-black/[0.06] dark:bg-white/[0.08] shrink-0 mx-2" />
-
             {/* Right: Nästa lön */}
-            <div className="flex flex-col items-end shrink-0 text-right">
-              <span className="text-micro-label text-[var(--text-secondary)] font-medium leading-tight">
-                {isEn ? 'Next payday' : 'Nästa lön'}
+            <div className="flex items-center gap-1.5 shrink-0 text-right">
+              <span className="text-micro-label text-[var(--text-secondary)] font-normal whitespace-nowrap">
+                {isEn ? 'Payday:' : 'Nästa lön:'}
               </span>
-              <span className="text-label text-[var(--text-primary)] font-medium font-amount tabular-nums truncate mt-0.5 group-hover:text-[var(--accent-color)] transition-colors">
+              <span className="text-micro-label text-[var(--text-primary)] font-medium font-amount tabular-nums group-hover:text-[var(--accent-color)] transition-colors">
                 {paydayText}
               </span>
             </div>

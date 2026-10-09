@@ -440,7 +440,7 @@ export function TodayView({
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                     onClick={() => handleCategoryClick(cat.name)}
-                    className="flex-shrink-0 w-[140px] sm:w-[152px] h-[92px] sm:h-[96px] p-3 sm:p-3.5 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-subtle flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
+                    className="flex-shrink-0 w-[136px] sm:w-[144px] h-[82px] sm:h-[86px] p-2.5 sm:p-3 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-subtle flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
                   >
                     {/* Top: Icon + Name */}
                     <div className="flex items-center gap-2 min-w-0 w-full">
@@ -452,7 +452,7 @@ export function TodayView({
 
                     {/* Amount & Status */}
                     <div className="space-y-0.5 min-w-0 w-full">
-                      <p className={`text-body-medium font-semibold font-amount tabular-nums truncate ${
+                      <p className={`text-body-medium font-semibold font-amount tabular-nums truncate leading-tight ${
                         cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
                       }`}>
                         {(() => {
@@ -468,7 +468,7 @@ export function TodayView({
                         cat.isOverBudget ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
                       }`}>
                         {cat.hasBudget 
-                          ? (cat.remaining < 0 ? (lang === 'en' ? 'over budget' : 'över budget') : (lang === 'en' ? 'left to spend' : 'kvar att spendera'))
+                          ? (cat.remaining < 0 ? (lang === 'en' ? 'over budget' : 'över budget') : (lang === 'en' ? 'left' : 'kvar'))
                           : (lang === 'en' ? 'spent' : 'spenderat')}
                       </p>
                     </div>
@@ -486,7 +486,7 @@ export function TodayView({
                   if (typeof feedback.light === 'function') feedback.light();
                   onNavigate("profile", "budget");
                 }}
-                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[92px] sm:h-[96px] p-3 sm:p-3.5 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-dashed border-subtle flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                className="flex-shrink-0 w-[88px] sm:w-[94px] h-[82px] sm:h-[86px] p-2.5 sm:p-3 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-dashed border-subtle flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
                 aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
               >
                 <div className="w-7 h-7 rounded-[var(--radius-button-sm,8px)] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
@@ -501,139 +501,143 @@ export function TodayView({
         ) : null}
       </div>
 
-      {/* 3. Period Timeline */}
-      {calendarDays && calendarDays.length > 0 && (
-        <div className="animate-fade-in -mx-1 px-1">
-          <PeriodTimeline
-            calendarDays={calendarDays}
-            selectedDate={normalizedSelectedDate}
-            onSelectDate={setSelectedDate}
-            stats={stats}
-            language={lang}
-            isCurrentPeriod={isCurrentPeriod}
-            showFixedInCalendar={config?.showFixedExpensesInCalendar}
-          />
-        </div>
-      )}
-
-      {/* 4. Date Header directly under the timeline */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-2">
-          <span className="text-label font-medium text-[var(--text-secondary)]">
-            {stats.isPastPeriod
-              ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
-              : selectedDate.toDateString() === new Date().toDateString()
-                ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
-                : selectedDate.toLocaleDateString(
-                    lang === "en" ? "en-US" : "sv-SE",
-                    { day: "numeric", month: "long" },
-                  )}
-          </span>
-          {(displayedVariableTransactions.length > 0 || displayedFixedTransactions.length > 0) && (
-            <span className="text-micro-label font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
-              {(displayedVariableTransactions.length + displayedFixedTransactions.length)} {
-                (displayedVariableTransactions.length + displayedFixedTransactions.length) === 1
-                  ? (lang === 'en' ? 'transaktion' : 'transaktion')
-                  : (lang === 'en' ? 'transaktioner' : 'transaktioner')
-              }
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {!isTodaySelected && (
-            <button
-              type="button"
-              onClick={handleGoToToday}
-              className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-button-sm,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-subtle text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none"
-            >
-              <RotateCcw size={11} strokeWidth={2.5} />
-              <span>{lang === "en" ? "Today" : "Idag"}</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof feedback.light === 'function') feedback.light();
-              onNavigate("log");
-            }}
-            className="text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-0.5"
-          >
-            <span>{lang === "en" ? "View all" : "Visa alla"}</span>
-            <ChevronRight size={12} strokeWidth={2} />
-          </button>
-        </div>
-      </div>
-
-      {/* Selected Day's Transactions - Separate White Cards */}
-      <div className="space-y-2.5">
-        <AnimatePresence mode="popLayout">
-          {displayedVariableTransactions.length > 0 ? (
-            <motion.div className="space-y-2.5" key="transactions">
-              {displayedVariableTransactions.map((transaction: Transaction, index: number) => (
-                <motion.div
-                  key={transaction.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: index * 0.02 }}
-                >
-                  <TransactionItem
-                    transaction={transaction}
-                    onView={onViewTransaction}
-                    onDelete={onDeleteTransaction}
-                    language={lang}
-                    currency={config?.currency || 'kr'}
-                    config={config}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          ) : displayedFixedTransactions.length === 0 ? (
-            <EmptyState
-              title={isTodaySelected ? (lang === "en" ? "No transactions recorded yet" : "Inga transaktioner registrerade än") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
-              description={isTodaySelected ? (lang === "en" ? "Add an expense or income to track today's spending." : "Lägg till en utgift eller inkomst för att hålla koll på dagsbudgeten.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
-              onAction={() => onAddTransaction(selectedDate)}
-              actionLabel={`+ ${t("addExpense")}`}
+      {/* 3. Unified Timeline & Transactions Section */}
+      <div className="space-y-2.5 sm:space-y-3">
+        {/* Timeline */}
+        {calendarDays && calendarDays.length > 0 && (
+          <div className="animate-fade-in -mx-1 px-1">
+            <PeriodTimeline
+              calendarDays={calendarDays}
+              selectedDate={normalizedSelectedDate}
+              onSelectDate={setSelectedDate}
+              stats={stats}
+              language={lang}
+              isCurrentPeriod={isCurrentPeriod}
+              showFixedInCalendar={config?.showFixedExpensesInCalendar}
             />
-          ) : null}
-        </AnimatePresence>
-
-        {/* Fixed transactions for the day in separate white cards */}
-        {displayedFixedTransactions.length > 0 && (
-          <div className="space-y-2.5">
-            {displayedFixedTransactions.map((item) => {
-              const tx: Transaction = {
-                id: item.id,
-                merchant: item.merchant,
-                category: item.category,
-                amount: item.amount,
-                type: item.type as any,
-                date: selectedDate.toISOString(),
-              };
-
-              return (
-                <div key={item.id}>
-                  <TransactionItem
-                    transaction={tx}
-                    isFixed={true}
-                    config={config}
-                    onClick={() => {
-                      if (item.type === "income" && onViewIncome) {
-                        onViewIncome(item.originalItem);
-                      } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
-                        onViewMonthlySaving(item.originalItem);
-                      } else if (onViewFixedExpense) {
-                        onViewFixedExpense(item.originalItem);
-                      }
-                    }}
-                  />
-                </div>
-              );
-            })}
           </div>
         )}
+
+        {/* Date Header directly connected with timeline */}
+        <div className="flex items-center justify-between px-1 pt-0.5">
+          <div className="flex items-center gap-2">
+            <span className="text-label font-medium text-[var(--text-secondary)]">
+              {stats.isPastPeriod
+                ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
+                : selectedDate.toDateString() === new Date().toDateString()
+                  ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
+                  : selectedDate.toLocaleDateString(
+                      lang === "en" ? "en-US" : "sv-SE",
+                      { day: "numeric", month: "long" },
+                    )}
+            </span>
+            {(displayedVariableTransactions.length > 0 || displayedFixedTransactions.length > 0) && (
+              <span className="text-micro-label font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
+                {(displayedVariableTransactions.length + displayedFixedTransactions.length)} {
+                  (displayedVariableTransactions.length + displayedFixedTransactions.length) === 1
+                    ? (lang === 'en' ? 'transaktion' : 'transaktion')
+                    : (lang === 'en' ? 'transaktioner' : 'transaktioner')
+                }
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {!isTodaySelected && (
+              <button
+                type="button"
+                onClick={handleGoToToday}
+                className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-button-sm,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-subtle text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none"
+              >
+                <RotateCcw size={11} strokeWidth={2.5} />
+                <span>{lang === "en" ? "Today" : "Idag"}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback.light === 'function') feedback.light();
+                onNavigate("log");
+              }}
+              className="text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-0.5"
+            >
+              <span>{lang === "en" ? "View all" : "Visa alla"}</span>
+              <ChevronRight size={12} strokeWidth={2} />
+            </button>
+          </div>
+        </div>
+
+        {/* Selected Day's Transactions List */}
+        <div className="space-y-2">
+          <AnimatePresence mode="popLayout">
+            {displayedVariableTransactions.length > 0 ? (
+              <motion.div className="space-y-2" key="transactions">
+                {displayedVariableTransactions.map((transaction: Transaction, index: number) => (
+                  <motion.div
+                    key={transaction.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: index * 0.02 }}
+                  >
+                    <TransactionItem
+                      transaction={transaction}
+                      onView={onViewTransaction}
+                      onDelete={onDeleteTransaction}
+                      config={config}
+                      onClick={() => {
+                        if (onViewTransaction) onViewTransaction(transaction);
+                      }}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : displayedFixedTransactions.length === 0 ? (
+              <EmptyState
+                title={isTodaySelected ? (lang === "en" ? "No transactions recorded yet" : "Inga transaktioner registrerade än") : (lang === "en" ? "No transactions on this date" : "Inga transaktioner detta datum")}
+                description={isTodaySelected ? (lang === "en" ? "Add an expense or income to track today's spending." : "Lägg till en utgift eller inkomst för att hålla koll på dagsbudgeten.") : (lang === "en" ? "Click below to add a transaction for this date" : "Klicka nedan för att registrera en transaktion på detta datum")}
+                onAction={() => onAddTransaction(selectedDate)}
+                actionLabel={`+ ${t("addExpense")}`}
+              />
+            ) : null}
+          </AnimatePresence>
+
+          {/* Fixed transactions for the day */}
+          {displayedFixedTransactions.length > 0 && (
+            <div className="space-y-2">
+              {displayedFixedTransactions.map((item) => {
+                const tx: Transaction = {
+                  id: item.id,
+                  merchant: item.merchant,
+                  category: item.category,
+                  amount: item.amount,
+                  type: item.type as any,
+                  date: selectedDate.toISOString(),
+                };
+
+                return (
+                  <div key={item.id}>
+                    <TransactionItem
+                      transaction={tx}
+                      isFixed={true}
+                      config={config}
+                      onClick={() => {
+                        if (item.type === "income" && onViewIncome) {
+                          onViewIncome(item.originalItem);
+                        } else if ((item.id?.startsWith('saving-') || item.category === (lang === "en" ? "Monthly Saving" : "Månadssparande") || item.originalItem?.targetAmount) && onViewMonthlySaving) {
+                          onViewMonthlySaving(item.originalItem);
+                        } else if (onViewFixedExpense) {
+                          onViewFixedExpense(item.originalItem);
+                        }
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Period & Payday Info Modal */}
