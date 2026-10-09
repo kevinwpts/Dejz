@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Check, ArrowDownLeft, ArrowUpRight, Trash2, CheckCircle2 } from 'lucide-react';
 import { Config, Debt } from '../types';
 import { formatAmount } from '../utils/format';
-import { Modal, Card, Button, Input, SegmentedControl, EmptyState } from './ui';
+import { Modal, Card, Button, IconButton, Input, SegmentedControl, EmptyState } from './ui';
 
 interface DebtsViewProps {
   onBack: () => void;
@@ -233,27 +233,25 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                         </span>
                       </div>
 
-                      <button
-                        type="button"
+                      <IconButton
+                        icon={item.isSettled ? <CheckCircle2 size={16} strokeWidth={2.5} /> : <Check size={14} strokeWidth={2.5} />}
                         onClick={() => handleToggleSettle(item.id)}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-90 ${
-                          item.isSettled
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:bg-emerald-500/15 hover:text-emerald-600'
-                        }`}
+                        size="md"
+                        variant={item.isSettled ? 'primary' : 'muted'}
+                        className={item.isSettled ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'hover:bg-emerald-500/15 hover:text-emerald-600'}
                         title={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera / Fått betalt')}
-                      >
-                        {item.isSettled ? <CheckCircle2 size={16} strokeWidth={2.5} /> : <Check size={14} strokeWidth={2.5} />}
-                      </button>
+                        aria-label={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera')}
+                      />
 
-                      <button
-                        type="button"
+                      <IconButton
+                        icon={<Trash2 size={13} strokeWidth={2} />}
                         onClick={() => handleDeleteDebt(item.id)}
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                        size="sm"
+                        variant="ghost"
+                        className="text-[var(--text-tertiary)] hover:text-rose-500 hover:bg-rose-500/10"
                         title={isEn ? 'Delete' : 'Ta bort'}
-                      >
-                        <Trash2 size={13} strokeWidth={2} />
-                      </button>
+                        aria-label={isEn ? 'Delete' : 'Ta bort'}
+                      />
                     </div>
                   </Card>
                 </motion.div>

@@ -5,7 +5,7 @@ import { formatAmount } from '../utils/format';
 import { feedback } from '../utils/feedback';
 import { TransactionItem } from './TransactionItem';
 import { BudgetItem } from './BudgetItem';
-import { BottomSheet } from './ui';
+import { BottomSheet, EmptyState } from './ui';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
 

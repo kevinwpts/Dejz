@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
 import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2, ChevronDown } from 'lucide-react';
+import { Button, IconButton } from './ui';
 import { Transaction, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { formatAmount } from '../utils/format';
@@ -218,18 +219,17 @@ export function TransactionViewModal({
           <div className="relative flex flex-col items-center text-center pt-6 sm:pt-8 pb-4">
             {/* Close Button top-right */}
             <div className="absolute top-0 right-0 z-10">
-              <button 
-                type="button"
+              <IconButton 
+                icon={<X size={15} strokeWidth={2.5} />}
                 onClick={() => {
                   if (typeof feedback?.light === 'function') feedback.light();
                   onClose();
                 }} 
-                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+                variant="muted"
+                size="md"
                 title={t('close')}
                 aria-label={t('close')}
-              >
-                <X size={15} strokeWidth={2.5} />
-              </button>
+              />
             </div>
 
             {/* Centered Logo */}
@@ -516,44 +516,44 @@ export function TransactionViewModal({
 
         {/* Action Buttons Footer: Bred Redigera-knapp, Duplicera och Radera */}
         <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
-          <button 
+          <Button 
             type="button"
+            variant="secondary"
+            size="md"
+            className="flex-1 rounded-full text-[13.5px] font-medium"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(transaction);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
+            icon={<Pencil size={14.5} strokeWidth={2} className="dark:text-white" />}
           >
-            <Pencil size={14.5} strokeWidth={2} className="dark:text-white" />
-            <span>{t('edit')}</span>
-          </button>
+            {t('edit')}
+          </Button>
 
-          <button 
-            type="button"
+          <IconButton 
+            icon={<Repeat size={16} strokeWidth={2} className="dark:text-white" />}
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onDuplicate(transaction);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+            variant="default"
+            size="md"
             title={t('duplicate')}
             aria-label={t('duplicate')}
-          >
-            <Repeat size={16} strokeWidth={2} className="dark:text-white" />
-          </button>
+          />
 
           {onDelete && (
-            <button 
-              type="button"
+            <IconButton 
+              icon={<Trash2 size={16} strokeWidth={2} className="dark:text-white" />}
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }} 
-              className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+              variant="default"
+              size="md"
               title={config.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
-            >
-              <Trash2 size={16} strokeWidth={2} className="dark:text-white" />
-            </button>
+            />
           )}
         </div>
 

@@ -152,18 +152,17 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           <div className="relative flex flex-col items-center text-center pt-6 sm:pt-8 pb-4">
             {/* Close Button top-right */}
             <div className="absolute top-0 right-0 z-10">
-              <button 
-                type="button"
+              <IconButton 
+                icon={<X size={15} strokeWidth={2.5} />}
                 onClick={() => {
                   if (typeof feedback?.light === 'function') feedback.light();
                   onClose();
                 }} 
-                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+                variant="muted"
+                size="md"
                 title={t('close')}
                 aria-label={t('close')}
-              >
-                <X size={15} strokeWidth={2.5} />
-              </button>
+              />
             </div>
 
             {/* Centered Logo */}
@@ -251,30 +250,31 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
 
         {/* Action Buttons Footer: Bred Redigera-knapp och Radera */}
         <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
-          <button 
+          <Button 
             type="button"
+            variant="secondary"
+            size="md"
+            className="flex-1 rounded-full text-[13.5px] font-medium"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(income);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
+            icon={<Pencil size={14.5} strokeWidth={2} className="dark:text-white" />}
           >
-            <Pencil size={14.5} strokeWidth={2} className="dark:text-white" />
-            <span>{t('edit')}</span>
-          </button>
+            {t('edit')}
+          </Button>
 
-          <button 
-            type="button"
+          <IconButton 
+            icon={<Trash2 size={16} strokeWidth={2} />}
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               setShowDeleteConfirm(true);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+            variant="default"
+            size="md"
             title={config.language === 'en' ? 'Delete' : 'Ta bort'}
             aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
-          >
-            <Trash2 size={16} strokeWidth={2} />
-          </button>
+          />
         </div>
 
         {showDeleteConfirm && (
@@ -741,28 +741,29 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
 
         {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
         <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
-          <button 
+          <Button 
             type="button"
+            variant="accent"
+            size="md"
+            className="flex-1 rounded-full text-[13.5px] font-medium"
             onClick={handleSave} 
-            className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
+            icon={<Check size={15} strokeWidth={2.5} />}
           >
-            <Check size={15} strokeWidth={2.5} />
-            <span>{income ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add income' : 'Lägg till inkomst')}</span>
-          </button>
+            {income ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add income' : 'Lägg till inkomst')}
+          </Button>
 
           {income && onDelete && (
-            <button
-              type="button"
+            <IconButton
+              icon={<Trash2 size={16} strokeWidth={2} />}
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+              variant="default"
+              size="md"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
-            >
-              <Trash2 size={16} strokeWidth={2} />
-            </button>
+            />
           )}
         </div>
 
@@ -953,18 +954,17 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           <div className="relative flex flex-col items-center text-center pt-6 sm:pt-8 pb-4">
             {/* Close Button top-right */}
             <div className="absolute top-0 right-0 z-10">
-              <button 
-                type="button"
+              <IconButton 
+                icon={<X size={15} strokeWidth={2.5} />}
                 onClick={() => {
                   if (typeof feedback?.light === 'function') feedback.light();
                   onClose();
                 }} 
-                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+                variant="muted"
+                size="md"
                 title={t('close')}
                 aria-label={t('close')}
-              >
-                <X size={15} strokeWidth={2.5} />
-              </button>
+              />
             </div>
 
             {/* Centered Logo */}
@@ -1111,30 +1111,31 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
         {/* Action Buttons Footer: Bred Redigera-knapp och Radera-knapp */}
         <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
-          <button 
+          <Button 
             type="button"
+            variant="secondary"
+            size="md"
+            className="flex-1 rounded-full text-[13.5px] font-medium"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(expense);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
+            icon={<Pencil size={14.5} strokeWidth={2} className="dark:text-white" />}
           >
-            <Pencil size={14.5} strokeWidth={2} className="dark:text-white" />
-            <span>{t('edit')}</span>
-          </button>
+            {t('edit')}
+          </Button>
 
-          <button 
-            type="button"
+          <IconButton 
+            icon={<Trash2 size={16} strokeWidth={2} />}
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               setShowDeleteConfirm(true);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+            variant="default"
+            size="md"
             title={config.language === 'en' ? 'Delete' : 'Ta bort'}
             aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
-          >
-            <Trash2 size={16} strokeWidth={2} />
-          </button>
+          />
         </div>
 
         {showDeleteConfirm && (
@@ -1735,28 +1736,29 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
 
         {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
         <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
-          <button 
+          <Button 
             type="button"
+            variant="accent"
+            size="md"
+            className="flex-1 rounded-full text-[13.5px] font-medium"
             onClick={handleSave} 
-            className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
+            icon={<Check size={15} strokeWidth={2.5} />}
           >
-            <Check size={15} strokeWidth={2.5} />
-            <span>{expense ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add fixed expense' : 'Lägg till fast kostnad')}</span>
-          </button>
+            {expense ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add fixed expense' : 'Lägg till fast kostnad')}
+          </Button>
 
           {expense && onDelete && (
-            <button
-              type="button"
+            <IconButton
+              icon={<Trash2 size={16} strokeWidth={2} />}
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+              variant="default"
+              size="md"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
-            >
-              <Trash2 size={16} strokeWidth={2} />
-            </button>
+            />
           )}
         </div>
 
@@ -1952,18 +1954,17 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
           <div className="relative flex flex-col items-center text-center pt-6 sm:pt-8 pb-4">
             {/* Close Button top-right */}
             <div className="absolute top-0 right-0 z-10">
-              <button 
-                type="button"
+              <IconButton 
+                icon={<X size={15} strokeWidth={2.5} />}
                 onClick={() => {
                   if (typeof feedback?.light === 'function') feedback.light();
                   onClose();
                 }} 
-                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+                variant="muted"
+                size="md"
                 title={t('close')}
                 aria-label={t('close')}
-              >
-                <X size={15} strokeWidth={2.5} />
-              </button>
+              />
             </div>
 
             {/* Centered Logo */}
@@ -2038,29 +2039,31 @@ export function MonthlySavingViewModal({ saving, onClose, onEdit, onDelete, t, c
 
         {/* Action Buttons Footer: Bred Redigera-knapp och Radera */}
         <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
-          <button 
+          <Button 
             type="button"
+            variant="secondary"
+            size="md"
+            className="flex-1 rounded-full text-[13.5px] font-medium"
             onClick={() => {
               if (typeof feedback?.tap === 'function') feedback.tap();
               onEdit(saving);
             }} 
-            className="flex-1 h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-primary)] dark:text-white font-medium text-[13.5px] flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] border-none shadow-none"
+            icon={<Pencil size={14.5} strokeWidth={2} className="dark:text-white" />}
           >
-            <Pencil size={14.5} strokeWidth={2} className="dark:text-white" />
-            <span>{t('edit')}</span>
-          </button>
-          <button 
-            type="button"
+            {t('edit')}
+          </Button>
+
+          <IconButton 
+            icon={<Trash2 size={16} strokeWidth={2} />}
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               setShowDeleteConfirm(true);
             }} 
-            className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+            variant="default"
+            size="md"
             title={t('delete')}
             aria-label={t('delete')}
-          >
-            <Trash2 size={16} strokeWidth={2} />
-          </button>
+          />
         </div>
       </motion.div>
 
@@ -2456,28 +2459,29 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
 
         {/* Action Button Footer: Bred Spara-knapp och Radera-knapp */}
         <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
-          <button 
+          <Button 
             type="button"
+            variant="accent"
+            size="md"
+            className="flex-1 rounded-full text-[13.5px] font-medium"
             onClick={handleSave} 
-            className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-none"
+            icon={<Check size={15} strokeWidth={2.5} />}
           >
-            <Check size={15} strokeWidth={2.5} />
-            <span>{saving ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add saving' : 'Lägg till månadssparande')}</span>
-          </button>
+            {saving ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add saving' : 'Lägg till månadssparande')}
+          </Button>
 
           {saving && onDelete && (
-            <button
-              type="button"
+            <IconButton
+              icon={<Trash2 size={16} strokeWidth={2} />}
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              className="w-[42px] h-[42px] rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 border-none shadow-none"
+              variant="default"
+              size="md"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
-            >
-              <Trash2 size={16} strokeWidth={2} />
-            </button>
+            />
           )}
         </div>
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, Edit3, X } from 'lucide-react';
+import { Button, IconButton } from './ui';
 import { AppNotification, Config } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItemLogo } from './BudgetItem';
@@ -147,15 +148,15 @@ export function NotificationsView({
                   {statusBadgeText}
                 </span>
 
-                <button
-                  type="button"
+                <IconButton
+                  icon={<X size={15} />}
                   onClick={() => onDismiss(n.id)}
-                  className="w-7 h-7 rounded-full text-[var(--text-secondary)]/50 hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] transition-all flex items-center justify-center cursor-pointer"
+                  size="sm"
+                  variant="ghost"
                   title={config.language === 'en' ? 'Dismiss for this period' : 'Avfärda för denna månad'}
-                  aria-label="Avfärda"
-                >
-                  <X size={15} />
-                </button>
+                  aria-label={config.language === 'en' ? 'Dismiss for this period' : 'Avfärda'}
+                  className="text-[var(--text-secondary)]/50 hover:text-[var(--text-primary)]"
+                />
               </div>
             </div>
 
@@ -188,22 +189,26 @@ export function NotificationsView({
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    <button
+                    <Button
                       type="button"
+                      variant="accent"
+                      size="md"
                       onClick={() => handleSaveCustom(n)}
-                      className="h-11 rounded-[8px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-label flex items-center justify-center gap-1.5 hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+                      icon={<Check size={16} strokeWidth={2.5} />}
+                      fullWidth
                     >
-                      <Check size={16} strokeWidth={2.5} />
-                      <span>{t('save')}</span>
-                    </button>
+                      {t('save')}
+                    </Button>
 
-                    <button
+                    <Button
                       type="button"
+                      variant="secondary"
+                      size="md"
                       onClick={() => setEditingId(null)}
-                      className="h-11 rounded-[8px] bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold text-label flex items-center justify-center transition-all cursor-pointer active:scale-[0.98]"
+                      fullWidth
                     >
-                      <span>{t('cancel')}</span>
-                    </button>
+                      {t('cancel')}
+                    </Button>
                   </div>
                 </motion.div>
               ) : (
@@ -214,8 +219,12 @@ export function NotificationsView({
                   exit={{ opacity: 0 }}
                   className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1"
                 >
-                  <button
+                  <Button
                     type="button"
+                    variant="accent"
+                    size="md"
+                    fullWidth
+                    icon={<Edit3 size={15} strokeWidth={2} />}
                     onClick={() => {
                       if (typeof feedback?.light === 'function') feedback.light();
                       if (onOpenItem) {
@@ -224,27 +233,25 @@ export function NotificationsView({
                         handleStartEdit(n);
                       }
                     }}
-                    className="w-full py-3 px-4 rounded-[8px] bg-[var(--accent-color)] text-[var(--text-on-accent)] font-semibold text-label flex items-center justify-center gap-2 hover:opacity-95 active:scale-[0.98] transition-all shadow-xs cursor-pointer"
                   >
-                    <Edit3 size={15} strokeWidth={2} />
-                    <span>{config.language === 'en' ? 'Set amount' : 'Ange belopp'}</span>
-                  </button>
+                    {config.language === 'en' ? 'Set amount' : 'Ange belopp'}
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
+                    size="md"
+                    fullWidth
+                    icon={<Check size={15} className="text-neutral-800 dark:text-white" strokeWidth={2.5} />}
                     onClick={() => {
                       if (typeof feedback?.success === 'function') feedback.success();
                       onConfirmStandard(n.item);
                     }}
-                    className="w-full py-3 px-4 rounded-[8px] bg-[var(--surface-muted)] text-[var(--text-primary)] font-semibold text-label flex items-center justify-center gap-1.5 hover:bg-[var(--surface-color)] active:scale-[0.98] transition-all cursor-pointer"
                   >
-                    <Check size={15} className="text-neutral-800 dark:text-white" strokeWidth={2.5} />
-                    <span>
-                      {config.language === 'en'
-                        ? `Keep (${formatAmount(n.expectedAmount)} ${currency})`
-                        : `Behåll (${formatAmount(n.expectedAmount)} ${currency})`}
-                    </span>
-                  </button>
+                    {config.language === 'en'
+                      ? `Keep (${formatAmount(n.expectedAmount)} ${currency})`
+                      : `Behåll (${formatAmount(n.expectedAmount)} ${currency})`}
+                  </Button>
                 </motion.div>
               )}
             </AnimatePresence>

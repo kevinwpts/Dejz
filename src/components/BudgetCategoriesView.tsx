@@ -390,14 +390,15 @@ export function BudgetCategoriesView({
                 {categoriesList.length} {isEn ? 'categories' : 'kategorier'}
               </span>
               {effectiveMode !== 'budget' && (
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   onClick={() => handleAddCategory('expense')}
-                  className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-subtle text-[var(--text-primary)] text-label font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+                  icon={<Plus size={14} strokeWidth={2.5} />}
                 >
-                  <Plus size={14} strokeWidth={2.5} />
-                  <span>{t('newCategory')}</span>
-                </button>
+                  {t('newCategory')}
+                </Button>
               )}
             </div>
 
@@ -523,14 +524,15 @@ export function BudgetCategoriesView({
             <span className="text-label font-semibold text-[var(--text-secondary)]">
               {incomeCategoriesList.length} {isEn ? 'categories' : 'kategorier'}
             </span>
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={() => handleAddCategory('income')}
-              className="h-9 px-4 rounded-[8px] bg-[var(--surface-color)] dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-subtle text-[var(--text-primary)] text-label font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.98] shadow-none"
+              icon={<Plus size={14} strokeWidth={2.5} />}
             >
-              <Plus size={14} strokeWidth={2.5} />
-              <span>{t('newCategory')}</span>
-            </button>
+              {t('newCategory')}
+            </Button>
           </div>
 
           <div className="space-y-2.5">
@@ -561,14 +563,16 @@ export function BudgetCategoriesView({
 
       {/* 3. Minimal footer */}
       <div className="pt-2 space-y-3">
-        <button
+        <Button
           type="button"
+          variant="accent"
+          size="md"
+          fullWidth
           onClick={handleSaveBudgetDone}
-          className="w-full h-11 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] text-body-medium font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] shadow-none"
+          icon={<Check size={16} strokeWidth={2.5} />}
         >
-          <Check size={16} strokeWidth={2.5} />
           {isEn ? 'Done' : 'Klar'}
-        </button>
+        </Button>
 
         {/* Återställ-knapp i samma stil som betalningsmetoder */}
         <div className="flex flex-col items-center gap-2 pt-1">

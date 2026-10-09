@@ -21,7 +21,7 @@ import { Config, Transaction, Income, FixedExpense } from '../types';
 import { dataService } from '../services/dataService';
 import { createFreshTestAccount, seedDemoData } from '../utils/demoData';
 import { feedback } from '../utils/feedback';
-import { Modal } from './ui';
+import { Modal, Button } from './ui';
 
 interface AdminDashboardViewProps {
   onBack: () => void;
@@ -150,7 +150,7 @@ export function AdminDashboardView({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -14 }}
       transition={{ duration: 0.25 }}
-      className="space-y-6 pb-16 font-sans"
+      className="space-y-5 pb-16 font-sans"
     >
       {/* Header & Back Button */}
       <div className="flex items-center justify-between pt-1">
@@ -506,20 +506,24 @@ export function AdminDashboardView({
               : 'Är du säker på att du vill ta bort detta feedback-meddelande?'}
           </p>
           <div className="flex flex-col gap-2 pt-2">
-            <button
+            <Button
               type="button"
+              variant="danger"
+              size="md"
+              fullWidth
               onClick={() => handleDeleteFeedback(deleteConfirmId)}
-              className="w-full h-11 rounded-[8px] bg-rose-600 text-white font-semibold text-xs transition-all active:scale-[0.98] cursor-pointer"
             >
               {isEn ? 'Delete' : 'Ta bort'}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="secondary"
+              size="md"
+              fullWidth
               onClick={() => setDeleteConfirmId(null)}
-              className="w-full h-11 rounded-[8px] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] font-semibold text-xs transition-all active:scale-[0.98] cursor-pointer"
             >
               {isEn ? 'Cancel' : 'Avbryt'}
-            </button>
+            </Button>
           </div>
         </Modal>
       )}

@@ -6,7 +6,7 @@ import { IconSelector } from './IconSelector';
 import { fetchLogoForName } from '../utils/logo';
 import { suggestIcon, isEmojiString, ICON_MAP } from '../utils/icons';
 import { formatAmount, parseAmount } from '../utils/format';
-import { Modal } from './ui';
+import { Modal, Button } from './ui';
 
 interface SavingsGoalModalProps {
   isOpen: boolean;
@@ -141,28 +141,32 @@ export function SavingsGoalModal({
         bodyClassName="p-5 sm:p-6 space-y-4"
         footer={
           <div className="space-y-2.5 w-full">
-            <button 
+            <Button
               type="button"
-              onClick={handleConfirm} 
+              variant="accent"
+              size="md"
+              fullWidth
+              onClick={handleConfirm}
               disabled={!title || !targetAmount}
-              className="w-full h-12 rounded-btn bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-body-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              icon={<Check size={18} strokeWidth={2} />}
             >
-              <Check size={18} strokeWidth={2} />
-              <span>{editingGoal ? t('saveChanges') : t('addSavingsGoal')}</span>
-            </button>
+              {editingGoal ? t('saveChanges') : t('addSavingsGoal')}
+            </Button>
 
             {editingGoal && onDelete && (
-              <button
+              <Button
                 type="button"
+                variant="danger"
+                size="md"
+                fullWidth
                 onClick={() => {
                   onDelete(editingGoal.id);
                   onClose();
                 }}
-                className="w-full h-11 rounded-btn bg-rose-500/10 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 font-semibold text-body-medium transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer hover:bg-rose-500/20"
+                icon={<Trash2 size={16} strokeWidth={2} />}
               >
-                <Trash2 size={16} strokeWidth={2} />
-                <span>{t('deleteSavingsGoal')}</span>
-              </button>
+                {t('deleteSavingsGoal')}
+              </Button>
             )}
           </div>
         }

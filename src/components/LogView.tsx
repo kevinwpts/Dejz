@@ -397,7 +397,7 @@ export function LogView({
   if (!transactions && (!fixedExpenses || fixedExpenses.length === 0)) return null;
 
   return (
-    <div className="space-y-6 font-sans">
+    <div className="space-y-5 font-sans">
       {/* Top Controls: Period Dropdown (Main) & Direct Type Filter Buttons */}
       <div className="space-y-2.5">
         {/* Main Period Selector Dropdown */}
