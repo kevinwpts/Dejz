@@ -971,6 +971,7 @@ export function TransactionModal({
                       icon={currentCatData?.icon || 'tag'} 
                       color={currentCatData?.color || 'var(--accent-color)'}
                       size="xs" 
+                      categoryName={category}
                     />
                     <span className="text-[13.5px] font-bold text-[var(--text-primary)] truncate max-w-[120px] sm:max-w-[160px]">
                       {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
@@ -1341,7 +1342,7 @@ export function TransactionModal({
                             isSelected ? 'ring-2 ring-[var(--accent-color)] ring-offset-2 ring-offset-white dark:ring-offset-[#1C1C1C]' : ''
                           }`}
                         >
-                          <CategoryIcon icon={cat.icon} color={cat.color} size="lg" />
+                          <CategoryIcon icon={cat.icon} color={cat.color} size="lg" categoryName={cat.name} />
                           <span className="text-[13px] font-semibold text-[var(--text-primary)] text-center truncate w-full px-1">
                             {cat.name}
                           </span>

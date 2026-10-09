@@ -551,7 +551,7 @@ export function AnalysisView({
                   >
                     <div className="flex items-center justify-between gap-3 w-full">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <CategoryIcon icon={item.icon} color={item.color || '#6366f1'} size="md" />
+                        <CategoryIcon icon={item.icon} color={item.color || '#6366f1'} size="md" categoryName={item.name} />
 
                         <div className="min-w-0 flex-1 flex flex-col justify-center">
                           <p className="text-body-medium leading-tight truncate">

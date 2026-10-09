@@ -425,9 +425,9 @@ export function BudgetCategoriesView({
                     }}
                     className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
                   >
-                    {/* Vänster: Tydlig rund ikon med hel färg & kategorinamn */}
+                    {/* Vänster: Tydlig rund ikon & kategorinamn */}
                     <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                      <CategoryIcon icon={cat.icon} color={catColor} size="md" />
+                      <CategoryIcon icon={cat.icon} color={catColor} size="md" categoryName={cat.name} />
                       <div className="min-w-0 flex flex-col justify-center">
                         <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate">
                           {cat.name}
@@ -546,7 +546,7 @@ export function BudgetCategoriesView({
                   className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
                 >
                   <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                    <CategoryIcon icon={cat.icon} color={catColor} size="md" />
+                    <CategoryIcon icon={cat.icon} color={catColor} size="md" categoryName={cat.name} />
                     <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate">
                       {cat.name}
                     </span>

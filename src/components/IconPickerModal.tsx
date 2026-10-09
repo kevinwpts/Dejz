@@ -1,16 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { BottomSheet, Input } from './ui';
-import { Search, Sparkles, Check, Clock } from 'lucide-react';
-
+import { Search, Sparkles, Check } from 'lucide-react';
 import { 
-  ICON_MAP, 
-  ICON_CATEGORIES, 
-  ALL_ICONS_LIST,
-  resolveLucideIcon,
-  getSuggestedIconsForQuery,
-  calculateRelevanceScore,
-  IconItem
-} from '../utils/icons';
+  ICONS8_CATEGORY_ICONS, 
+  ICONS8_CATEGORY_GROUPS, 
+  resolveIcons8Key, 
+  getIcons8Url,
+  CategoryColorIcon 
+} from '../constants/icons8Categories';
 import { EmptyState } from './EmptyState';
 
 interface IconPickerModalProps {
@@ -22,23 +19,6 @@ interface IconPickerModalProps {
   t?: (key: any) => string;
 }
 
-const getRecentIcons = (): string[] => {
-  try {
-    const stored = localStorage.getItem('dejz_recent_icons');
-    return stored ? JSON.parse(stored) : ['shoppingcart', 'utensils', 'car', 'home', 'coffee', 'pill', 'gift', 'tag'];
-  } catch {
-    return ['shoppingcart', 'utensils', 'car', 'home', 'coffee', 'pill', 'gift', 'tag'];
-  }
-};
-
-const addRecentIcon = (key: string) => {
-  try {
-    const recent = getRecentIcons();
-    const updated = [key, ...recent.filter(k => k !== key)].slice(0, 8);
-    localStorage.setItem('dejz_recent_icons', JSON.stringify(updated));
-  } catch (err) { void err; }
-};
-
 export function IconPickerModal({
   isOpen,
   onClose,
@@ -48,31 +28,16 @@ export function IconPickerModal({
 }: IconPickerModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [recentIcons, setRecentIcons] = useState<string[]>(getRecentIcons());
 
   const resolvedSelectedKey = useMemo(() => {
-    return resolveLucideIcon(selectedIcon);
-  }, [selectedIcon]);
+    return resolveIcons8Key(selectedIcon, categoryName);
+  }, [selectedIcon, categoryName]);
 
-  // Smart suggestions based on searchQuery or categoryName
-  const suggestions = useMemo(() => {
-    const query = searchQuery.trim() || categoryName || '';
-    if (!query) return [];
-    return getSuggestedIconsForQuery(query, 6);
-  }, [searchQuery, categoryName]);
-
-  // Recent icon items
-  const recentIconItems = useMemo(() => {
-    return recentIcons
-      .map(key => ALL_ICONS_LIST.find(item => item.key === key))
-      .filter(Boolean) as IconItem[];
-  }, [recentIcons]);
-
-  // Filtered icons based on active category and search query
+  // Filtered icons
   const filteredIcons = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
 
-    const matched = ALL_ICONS_LIST.filter(item => {
+    return ICONS8_CATEGORY_ICONS.filter(item => {
       // Category filter
       if (activeCategory !== 'all' && item.category !== activeCategory) {
         return false;
@@ -81,21 +46,17 @@ export function IconPickerModal({
       // Search query filter
       if (!q) return true;
 
-      return calculateRelevanceScore(item, q) > 0;
+      const nameMatch = item.name.toLowerCase().includes(q);
+      const keyMatch = item.key.toLowerCase().includes(q);
+      const keywordMatch = item.keywords.some(kw => kw.toLowerCase().includes(q));
+
+      return nameMatch || keyMatch || keywordMatch;
     });
-
-    if (q) {
-      matched.sort((a, b) => calculateRelevanceScore(b, q) - calculateRelevanceScore(a, q));
-    }
-
-    return matched;
   }, [searchQuery, activeCategory]);
 
   if (!isOpen) return null;
 
   const handleSelect = (iconKey: string) => {
-    addRecentIcon(iconKey);
-    setRecentIcons(getRecentIcons());
     onSelectIcon(iconKey);
     onClose();
   };
@@ -104,7 +65,7 @@ export function IconPickerModal({
     <BottomSheet
       isOpen={isOpen}
       onClose={onClose}
-      title="Välj ikon"
+      title="Välj kategoriikon"
       headerLeading={
         <div className="w-9 h-9 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] flex items-center justify-center shrink-0">
           <Sparkles size={18} />
@@ -113,178 +74,101 @@ export function IconPickerModal({
       size="xl"
       zIndex={150}
     >
+      {/* Search & Categories Bar */}
+      <div className="p-4 pb-2 shrink-0 space-y-3">
+        <Input
+          variant="search"
+          type="text"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          onClear={() => setSearchQuery('')}
+          placeholder="Sök ikon (t.ex. matkasse, bil, gym, hus, nöje)..."
+        />
 
+        {/* Category Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
+          {ICONS8_CATEGORY_GROUPS.map(cat => {
+            const isActive = activeCategory === cat.id;
 
-          {/* Search & Categories Bar */}
-          <div className="p-4 pb-2 shrink-0 space-y-3">
-            <Input
-              variant="search"
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              onClear={() => setSearchQuery('')}
-              placeholder="Sök bland över 1 000+ stilrena ikoner (t.ex. nässpray, bil, fika)..."
-            />
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setActiveCategory(cat.id)}
+                className={`whitespace-nowrap px-3 py-1.5 rounded-[var(--radius-button-sm,10px)] text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+                  isActive
+                    ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold shadow-xs scale-[1.02]'
+                    : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
+                }`}
+              >
+                <span>{cat.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-            {/* Category Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
-              {ICON_CATEGORIES.map(cat => {
-                const isActive = activeCategory === cat.id;
-                const CatIcon = ICON_MAP[cat.icon];
+      {/* Subheader info */}
+      <div className="px-5 py-1.5 flex items-center justify-between text-[11px] text-[var(--text-secondary)] font-medium shrink-0">
+        <span>
+          {activeCategory === 'all' 
+            ? (searchQuery ? `Sökresultat för "${searchQuery}"` : 'Alla ikoner (Icons8 Color)') 
+            : (ICONS8_CATEGORY_GROUPS.find(c => c.id === activeCategory)?.label || 'Kategori')}
+        </span>
+        <span className="opacity-75">
+          {filteredIcons.length} ikoner
+        </span>
+      </div>
 
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setActiveCategory(cat.id)}
-                    className={`whitespace-nowrap px-3 py-1.5 rounded-[var(--radius-button-sm,10px)] text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                      isActive
-                        ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold shadow-xs scale-[1.02]'
-                        : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:bg-[var(--surface-color)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
-                    }`}
-                  >
-                    {CatIcon && <CatIcon size={13} strokeWidth={2} />}
-                    <span>{cat.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+      {/* Icons Grid */}
+      <div className="flex-1 overflow-y-auto px-4 py-2 custom-scrollbar space-y-4">
+        {filteredIcons.length === 0 ? (
+          <EmptyState
+            icon={Search}
+            title="Inga ikoner hittades"
+            description='Prova söka på något annat, t.ex. "mat", "bil", "gym", "fika"'
+            className="my-4"
+          />
+        ) : (
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 sm:gap-2.5 pb-6">
+            {filteredIcons.map((item: CategoryColorIcon) => {
+              const isSelected = resolvedSelectedKey === item.key;
+              const iconUrl = getIcons8Url(item.key);
+
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => handleSelect(item.key)}
+                  className={`relative aspect-square rounded-[var(--radius-card,14px)] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
+                    isSelected
+                      ? 'bg-[var(--accent-color)]/10 border-2 border-[var(--accent-color)] ring-2 ring-[var(--accent-color)]/20 shadow-xs scale-[1.02]'
+                      : 'bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-[var(--border-color)] hover:border-[var(--accent-color)]/40'
+                  }`}
+                >
+                  <div className="w-10 h-10 flex items-center justify-center p-1 rounded-full bg-black/[0.02] dark:bg-white/[0.04]">
+                    <img 
+                      src={iconUrl} 
+                      alt={item.name} 
+                      width={34} 
+                      height={34} 
+                      className="w-full h-full object-contain pointer-events-none drop-shadow-2xs transition-transform group-hover:scale-110" 
+                      loading="lazy" 
+                    />
+                  </div>
+                  <span className="text-[10px] text-center truncate w-full px-0.5 opacity-90 group-hover:opacity-100 font-medium leading-tight text-[var(--text-primary)]">
+                    {item.name.split('/')[0].trim()}
+                  </span>
+                  {isSelected && (
+                    <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-full flex items-center justify-center shadow-xs">
+                      <Check size={10} strokeWidth={2.5} />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
-
-          {/* Subheader info */}
-          <div className="px-5 py-1.5 flex items-center justify-between text-[11px] text-[var(--text-secondary)] font-medium shrink-0">
-            <span>
-              {activeCategory === 'all' 
-                ? (searchQuery ? `Sökresultat för "${searchQuery}"` : (categoryName ? `Förslag för "${categoryName}"` : 'Alla ikoner')) 
-                : (ICON_CATEGORIES.find(c => c.id === activeCategory)?.label || 'Kategori')}
-            </span>
-            <span className="opacity-75">
-              {filteredIcons.length} ikoner
-            </span>
-          </div>
-
-          {/* Icons Grid & Suggestions */}
-          <div className="flex-1 overflow-y-auto px-4 py-2 custom-scrollbar space-y-4">
-            {/* Suggestions Section (if activeCategory === 'all' and suggestions exist) */}
-            {activeCategory === 'all' && suggestions.length > 0 && !searchQuery && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-accent px-1">
-                  <Sparkles size={13} />
-                  <span>Förslag baserat på &quot;{categoryName}&quot;</span>
-                </div>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                  {suggestions.map(item => {
-                    const IconComponent = ICON_MAP[item.key];
-                    if (!IconComponent) return null;
-                    const isSelected = resolvedSelectedKey === item.key;
-
-                    return (
-                      <button
-                        key={`sugg-${item.key}`}
-                        onClick={() => handleSelect(item.key)}
-                        className={`relative aspect-square rounded-[var(--radius-button,14px)] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
-                          isSelected
-                            ? 'bg-accent/15 text-accent border border-accent ring-2 ring-accent/30 shadow-xs scale-[1.02]'
-                            : 'bg-accent/5 text-[var(--text-primary)] hover:bg-accent/10 border border-accent/20'
-                        }`}
-                      >
-                        <IconComponent size={22} strokeWidth={2} className="transition-transform group-hover:scale-110" />
-                        <span className="text-[10px] text-center truncate w-full px-0.5 font-medium leading-tight">
-                          {item.name.split('/')[0].trim()}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Recently Used Section (if activeCategory === 'all' and no search query) */}
-            {activeCategory === 'all' && !searchQuery && recentIconItems.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)] px-1">
-                  <Clock size={13} />
-                  <span>Senast använda</span>
-                </div>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                  {recentIconItems.slice(0, 6).map(item => {
-                    const IconComponent = ICON_MAP[item.key];
-                    if (!IconComponent) return null;
-                    const isSelected = resolvedSelectedKey === item.key;
-
-                    return (
-                      <button
-                        key={`recent-${item.key}`}
-                        onClick={() => handleSelect(item.key)}
-                        className={`relative aspect-square rounded-[var(--radius-button,14px)] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
-                          isSelected
-                            ? 'bg-accent/15 text-accent border border-accent ring-2 ring-accent/30 shadow-xs scale-[1.02]'
-                            : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)]'
-                        }`}
-                      >
-                        <IconComponent size={22} strokeWidth={2} className="transition-transform group-hover:scale-110" />
-                        <span className="text-[10px] text-center truncate w-full px-0.5 opacity-80 group-hover:opacity-100 font-medium leading-tight">
-                          {item.name.split('/')[0].trim()}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Main Icons Grid */}
-            <div className="space-y-2">
-              {activeCategory === 'all' && !searchQuery && (
-                <div className="text-xs font-bold text-[var(--text-secondary)] px-1">
-                  Alla ikoner
-                </div>
-              )}
-              {filteredIcons.length === 0 ? (
-                <EmptyState
-                  icon={Search}
-                  title="Inga ikoner hittades"
-                  description='Prova söka på något annat, t.ex. "nässpray", "fika", "bil", "gym"'
-                  className="my-4"
-                />
-              ) : (
-                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 sm:gap-2.5 pb-6">
-                  {filteredIcons.map(item => {
-                    const IconComponent = ICON_MAP[item.key];
-                    if (!IconComponent) return null;
-                    const isSelected = resolvedSelectedKey === item.key;
-
-                    return (
-                      <button
-                        key={item.key}
-                        onClick={() => handleSelect(item.key)}
-                        className={`relative aspect-square rounded-[var(--radius-button,14px)] flex flex-col items-center justify-center gap-1.5 p-2 transition-all group cursor-pointer select-none ${
-                          isSelected
-                            ? 'bg-accent/15 text-accent border border-accent ring-2 ring-accent/30 shadow-xs scale-[1.02]'
-                            : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-muted)] border border-[var(--border-color)] hover:border-accent/40'
-                        }`}
-                      >
-                        <IconComponent 
-                          size={22} 
-                          strokeWidth={2} 
-                          className="transition-transform group-hover:scale-110"
-                        />
-                        <span className="text-[10px] text-center truncate w-full px-0.5 opacity-80 group-hover:opacity-100 font-medium leading-tight">
-                          {item.name.split('/')[0].trim()}
-                        </span>
-                        {isSelected && (
-                          <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-accent rounded-full flex items-center justify-center text-[var(--text-on-accent)] shadow-xs">
-                            <Check size={10} strokeWidth={2.5} />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
+        )}
+      </div>
     </BottomSheet>
   );
 }
-

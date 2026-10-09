@@ -94,15 +94,24 @@ export function CategoryModal({
           <button 
             type="button"
             onClick={() => setShowIconPicker(true)}
-            className="rounded-full transition-all active:scale-95 group cursor-pointer shadow-subtle relative overflow-hidden"
-            title="Välj ikon"
+            className="flex flex-col items-center gap-1.5 p-2 rounded-[var(--radius-card,14px)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all active:scale-95 group cursor-pointer relative"
+            title="Tryck för att byta ikon"
           >
-            <CategoryIcon 
-              icon={icon} 
-              color={color}
-              size="xl" 
-              variant="primary" 
-            />
+            <div className="relative">
+              <CategoryIcon 
+                icon={icon} 
+                color={color}
+                size="xl" 
+                variant="primary"
+                categoryName={name}
+              />
+              <div className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full bg-[var(--surface-color)] border border-subtle text-[10px] font-semibold text-[var(--text-secondary)] shadow-2xs group-hover:text-[var(--text-primary)]">
+                Byt
+              </div>
+            </div>
+            <span className="text-[11px] font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+              Tryck för att välja ikon
+            </span>
           </button>
         </div>
 

@@ -456,7 +456,7 @@ export function TodayView({
                       className="flex flex-col items-center text-center shrink-0 w-[88px] sm:w-[96px] group cursor-pointer active:scale-[0.96] transition-transform select-none focus:outline-none"
                     >
                       {/* 1. Kategoriikon */}
-                      <CategoryIcon icon={cat.iconName} color={catColor} size="md" />
+                      <CategoryIcon icon={cat.iconName} color={catColor} size="md" categoryName={cat.name} />
 
                       {/* 2. Kategorinamn */}
                       <span
