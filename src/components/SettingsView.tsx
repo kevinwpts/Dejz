@@ -453,7 +453,7 @@ export function SettingsView({
   };
 
   return (
-    <div className="space-y-6 font-sans pb-12 max-w-2xl mx-auto w-full">
+    <div className="space-y-5 font-sans pb-12 page-max mx-auto w-full">
       <div>
         {activeSection === 'salary' && (
           <div className="w-full py-2 space-y-4">

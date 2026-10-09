@@ -353,7 +353,7 @@ export function AnalysisView({
   if (!stats) return null;
 
   return (
-    <div className="space-y-6 font-sans">
+    <div className="space-y-5 font-sans">
       {/* Top Controls: Period Dropdown (Main) & Direct Spending Filter Buttons */}
       <div className="space-y-2.5">
         {/* Main Period Selector Dropdown */}

@@ -305,7 +305,7 @@ export function BudgetCategoriesView({
   const incomeCategoriesList = (config.incomeCategories as Category[]) || DEFAULT_INCOME_CATEGORIES;
 
   return (
-    <div className="space-y-5 font-sans pb-10 max-w-2xl mx-auto w-full">
+    <div className="space-y-5 font-sans pb-10 page-max mx-auto w-full">
       {/* 0. Flikväljare: Utgifter / Inkomster (döljs i rent budgetläge) */}
       {effectiveMode !== 'budget' && (
         <div className="flex bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[8px] gap-1">

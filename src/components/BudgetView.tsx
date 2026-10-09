@@ -293,7 +293,7 @@ export function BudgetView({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="space-y-6 font-sans"
+      className="space-y-5 font-sans"
     >
       {/* Top Controls: Main Dropdown (Fasta utgifter / Inkomster / Månadssparande) & Direct Interval Filter Buttons */}
       <div className="space-y-2.5">

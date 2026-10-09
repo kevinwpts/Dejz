@@ -351,7 +351,7 @@ export function TodayView({
   if (!stats) return null;
 
   return (
-    <div className="space-y-6 font-sans">
+    <div className="space-y-5 font-sans">
       {/* 1. Free-floating Hero Gauge & Kvar att Spendera */}
       <GreetingModule
         userName={userName}
