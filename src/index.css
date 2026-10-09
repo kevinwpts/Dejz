@@ -437,12 +437,16 @@ h6 {
 
 @utility divide-subtle {
   & > :not([hidden]) ~ :not([hidden]) {
+    border-top-width: 1px;
+    border-style: solid;
     border-color: var(--border-subtle);
   }
 }
 
 @utility divide-divider {
   & > :not([hidden]) ~ :not([hidden]) {
+    border-top-width: 1px;
+    border-style: solid;
     border-color: var(--border-divider);
   }
 }
