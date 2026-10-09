@@ -368,6 +368,7 @@ export function AnalysisView({
               {isEn ? 'Current' : 'Nu'}
             </span>
           )}
+
           <ChevronDown size={12} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
         </button>
         <FilterButtonGroup
@@ -437,7 +438,8 @@ export function AnalysisView({
 
       {/* DONUT DIAGRAM & FÖRDELNING */}
       {categoryData.length > 0 && (
-        <Card variant="default" padding="md" className="space-y-[var(--card-gap)] border-none">
+          
+        
           <div className="flex items-center justify-between px-0.5">
             <h2 className="text-section-title">
               {isEn ? 'Distribution' : 'Fördelning'}
@@ -495,7 +497,7 @@ export function AnalysisView({
               </div>
             </div>
           </div>
-        </Card>
+        
       )}
 
       {/* FULLSTÄNDIG KATEGORILISTA ELLER GEMENSAM TOMVY */}
