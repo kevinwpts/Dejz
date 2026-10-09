@@ -130,6 +130,7 @@ export function SettingsView({
               <ListRow
                 key={method.name || index}
                 variant="grouped"
+                density="compact"
                 showChevron
                 icon={
                   IconComp ? (
@@ -138,7 +139,7 @@ export function SettingsView({
                     <CategoryIcon icon={method.icon || 'credit-card'} size="sm" noBackground />
                   )
                 }
-                iconBg="bg-black/[0.04] dark:bg-white/[0.06] rounded-full"
+                iconBg="bg-black/5 dark:bg-white/5"
                 iconColor="text-[var(--text-secondary)]"
                 title={method.name}
                 onClick={() => {
@@ -184,6 +185,7 @@ export function SettingsView({
               <ListRow
                 key={l.code}
                 variant="grouped"
+                density="compact"
                 icon={<LanguageFlag code={l.code} size="md" />}
                 iconBg="bg-transparent"
                 title={l.label}

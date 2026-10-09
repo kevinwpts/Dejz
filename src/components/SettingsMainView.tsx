@@ -133,6 +133,7 @@ export function SettingsMainView({
       <Card variant="default" padding="none" className="divide-y divide-subtle">
         <ListRow
           variant="grouped"
+          density="compact"
           showChevron
           icon={<Icon name="calendar" size={18} />}
           iconBg="bg-black/5 dark:bg-white/5"
@@ -147,6 +148,7 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
+          density="compact"
           showChevron
           icon={<Icon name="chart-pie" size={18} />}
           iconBg="bg-black/5 dark:bg-white/5"
@@ -157,6 +159,7 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
+          density="compact"
           showChevron
           icon={<Icon name="tag" size={18} />}
           iconBg="bg-black/5 dark:bg-white/5"
@@ -167,6 +170,7 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
+          density="compact"
           showChevron
           icon={<Icon name="credit-card" size={18} />}
           iconBg="bg-black/5 dark:bg-white/5"
@@ -177,6 +181,7 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
+          density="compact"
           showChevron
           icon={<Icon name="coins" size={18} />}
           iconBg="bg-black/5 dark:bg-white/5"
@@ -187,6 +192,7 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
+          density="compact"
           showChevron
           icon={<Icon name="globe" size={18} />}
           iconBg="bg-black/5 dark:bg-white/5"
@@ -197,6 +203,7 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
+          density="compact"
           showChevron
           icon={<Icon name="palette" size={18} />}
           iconBg="bg-black/5 dark:bg-white/5"
@@ -207,6 +214,7 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
+          density="compact"
           showChevron
           icon={<Icon name="bell" size={18} />}
           iconBg="bg-black/5 dark:bg-white/5"
@@ -217,6 +225,7 @@ export function SettingsMainView({
 
         <ListRow
           variant="grouped"
+          density="compact"
           showChevron
           icon={<Icon name="ban" size={18} className="text-rose-500" />}
           iconBg="bg-black/5 dark:bg-white/5"

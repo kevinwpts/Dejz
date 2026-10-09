@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Switch } from './ui';
+import { Switch, Card, ListRow } from './ui';
 import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, PieChart, Tag } from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
@@ -284,27 +284,6 @@ export function ProfileView({
     onNavigate('profile', section);
   };
 
-  const SettingsMenuItem = ({ icon: Icon, label, subtitle, onClick, rightNode, iconBgColor = "bg-black/5 dark:bg-white/5", iconTextColor = "text-[var(--text-primary)]" }: { icon: any, label: string, subtitle?: string, onClick?: () => void, rightNode?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) => (
-    <button 
-      onClick={onClick}
-      className={`w-full flex items-center justify-between py-3.5 px-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group ${!onClick ? 'cursor-default hover:bg-transparent' : 'cursor-pointer active:scale-[0.99]'}`}
-    >
-      <div className="flex items-center gap-3.5 min-w-0 pr-2">
-        <div className={`w-10 h-10 rounded-[var(--radius-card-nested,10px)] ${iconBgColor} ${iconTextColor} border border-subtle flex items-center justify-center relative shrink-0`}>
-          <Icon size={18} strokeWidth={2} />
-        </div>
-        <div className="min-w-0 flex flex-col justify-center text-left">
-          <span className="text-body-medium font-semibold text-[var(--text-primary)] truncate">{label}</span>
-          {subtitle && (
-            <span className="text-secondary opacity-75 truncate mt-0.5">
-              {subtitle}
-            </span>
-          )}
-        </div>
-      </div>
-      {rightNode || (onClick && <ChevronRight size={16} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:translate-x-0.5 transition-transform shrink-0 opacity-50 group-hover:opacity-100" />)}
-    </button>
-  );
 
   return (
     <motion.div 
@@ -363,16 +342,19 @@ export function ProfileView({
               <Crown size={13} strokeWidth={2} />
               <span>{config.language === 'en' ? 'Administration' : 'Administration'}</span>
             </h4>
-            <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-amber-500/25 shadow-2xs divide-y divide-subtle">
-              <SettingsMenuItem 
-                icon={ShieldCheck} 
-                label={config.language === 'en' ? 'Admin Dashboard' : 'Adminpanel'} 
+            <Card variant="default" padding="none" className="divide-y divide-subtle border border-amber-500/25">
+              <ListRow
+                variant="grouped"
+                density="compact"
+                showChevron
+                icon={<ShieldCheck size={18} strokeWidth={2} />}
+                iconBg="bg-amber-500/10"
+                iconColor="text-amber-600 dark:text-amber-400"
+                title={config.language === 'en' ? 'Admin Dashboard' : 'Adminpanel'}
                 subtitle={config.language === 'en' ? 'Owner tools, subscription simulator & feedback' : 'Ägarverktyg, prenumerationssimulator & feedback'}
                 onClick={() => handleSectionClick('admin')}
-                iconBgColor="bg-amber-500/10"
-                iconTextColor="text-amber-600 dark:text-amber-400"
               />
-            </div>
+            </Card>
           </div>
         )}
 
@@ -381,41 +363,58 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
             {t('economy')}
           </h4>
-          <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle shadow-2xs divide-y divide-subtle">
-            <SettingsMenuItem 
-              icon={Calendar} 
-              label={t('salary')} 
-              onClick={() => handleSectionClick('salary')} 
+          <Card variant="default" padding="none" className="divide-y divide-subtle">
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Calendar size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('salary')}
+              onClick={() => handleSectionClick('salary')}
             />
-            <SettingsMenuItem 
-              icon={PieChart} 
-              label={config.language === 'en' ? 'Budget' : 'Budget'} 
-              onClick={() => handleSectionClick('budget')} 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<PieChart size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={config.language === 'en' ? 'Budget' : 'Budget'}
+              onClick={() => handleSectionClick('budget')}
             />
-            <SettingsMenuItem 
-              icon={Tag} 
-              label={config.language === 'en' ? 'Categories' : 'Kategorier'} 
-              onClick={() => handleSectionClick('categories')} 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Tag size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={config.language === 'en' ? 'Categories' : 'Kategorier'}
+              onClick={() => handleSectionClick('categories')}
             />
-            <SettingsMenuItem 
-              icon={CreditCard} 
-              label={t('paymentMethod')} 
-              onClick={() => handleSectionClick('paymentMethods')} 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<CreditCard size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('paymentMethod')}
+              onClick={() => handleSectionClick('paymentMethods')}
             />
-            <SettingsMenuItem 
-              icon={Coins} 
-              label={config.language === 'en' ? 'Currency' : 'Valuta'} 
-              onClick={() => handleSectionClick('currency')} 
-              rightNode={(
-                <div className="flex items-center gap-1 text-[var(--text-secondary)]">
-                  <span className="text-label font-semibold">
-                    {config.currency || 'kr'}
-                  </span>
-                  <ChevronRight size={14} strokeWidth={2.5} className="opacity-60 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              )}
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Coins size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={config.language === 'en' ? 'Currency' : 'Valuta'}
+              value={
+                <span className="text-label font-semibold text-[var(--text-secondary)]">
+                  {config.currency || 'kr'}
+                </span>
+              }
+              onClick={() => handleSectionClick('currency')}
             />
-          </div>
+          </Card>
         </div>
 
         {/* Verktyg & Delning */}
@@ -423,28 +422,44 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
             {config.language === 'en' ? 'Tools & Sharing' : 'Verktyg & Funktioner'}
           </h4>
-          <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle shadow-2xs divide-y divide-subtle">
-            <SettingsMenuItem 
-              icon={HandCoins} 
-              label={config.language === 'en' ? 'Debts & IOUs' : 'Skyldig (Skulder & utlägg)'} 
-              onClick={() => handleSectionClick('debts')} 
+          <Card variant="default" padding="none" className="divide-y divide-subtle">
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<HandCoins size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={config.language === 'en' ? 'Debts & IOUs' : 'Skyldig (Skulder & utlägg)'}
+              onClick={() => handleSectionClick('debts')}
             />
-            <SettingsMenuItem 
-              icon={Receipt} 
-              label={config.language === 'en' ? 'Receipts' : 'Kvitton'} 
-              onClick={() => handleSectionClick('receipts')} 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Receipt size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={config.language === 'en' ? 'Receipts' : 'Kvitton'}
+              onClick={() => handleSectionClick('receipts')}
             />
-            <SettingsMenuItem 
-              icon={Users2} 
-              label={config.language === 'en' ? 'Shared budget' : 'Delad budget (Par-läge)'} 
-              onClick={() => handleSectionClick('sharedBudget')} 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Users2 size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={config.language === 'en' ? 'Shared budget' : 'Delad budget (Par-läge)'}
+              onClick={() => handleSectionClick('sharedBudget')}
             />
-            <SettingsMenuItem 
-              icon={BookOpen} 
-              label={config.language === 'en' ? 'Guides & instructions' : 'Guider & Instruktioner'} 
-              onClick={() => handleSectionClick('guides')} 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<BookOpen size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={config.language === 'en' ? 'Guides & instructions' : 'Guider & Instruktioner'}
+              onClick={() => handleSectionClick('guides')}
             />
-          </div>
+          </Card>
         </div>
 
         {/* App Settings */}
@@ -452,46 +467,60 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
             {t('appSettings')}
           </h4>
-          <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle shadow-2xs divide-y divide-subtle">
-            <SettingsMenuItem 
-              icon={Bell} 
-              label={config.language === 'en' ? 'Notifications' : 'Notiser'} 
-              onClick={() => handleSectionClick('notifications')} 
+          <Card variant="default" padding="none" className="divide-y divide-subtle">
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Bell size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={config.language === 'en' ? 'Notifications' : 'Notiser'}
+              onClick={() => handleSectionClick('notifications')}
             />
 
-            <SettingsMenuItem 
-              icon={Palette} 
-              label={t('appearance' as any) || 'Utseende'} 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Palette size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('appearance' as any) || 'Utseende'}
+              value={
+                <span className="text-label font-semibold text-[var(--text-secondary)]">
+                  {config.themeMode === 'light' ? 'Ljust' : config.themeMode === 'dark' ? 'Mörkt' : 'System'}
+                </span>
+              }
               onClick={() => handleSectionClick('appearance')}
-              rightNode={(
-                <div className="flex items-center gap-1 text-[var(--text-secondary)]">
-                  <span className="text-label font-semibold">
-                    {config.themeMode === 'light' ? 'Ljust' : config.themeMode === 'dark' ? 'Mörkt' : 'System'}
-                  </span>
-                  <ChevronRight size={14} strokeWidth={2.5} className="opacity-60 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              )}
             />
-            <SettingsMenuItem 
-              icon={Globe} 
-              label={t('language')} 
-              onClick={() => handleSectionClick('language')} 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Globe size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('language')}
+              onClick={() => handleSectionClick('language')}
             />
-            <SettingsMenuItem 
-              icon={Lock} 
-              label={t('pinLock')} 
-              onClick={onSecurityClick} 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Lock size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('pinLock')}
+              onClick={onSecurityClick}
             />
-            <div className="py-3.5 px-4 space-y-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center shrink-0">
-                    <Calendar size={18} strokeWidth={2} />
-                  </div>
-                  <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInCalendar')}</span>
-                </div>
-                <Switch 
-                  checked={Boolean(config.showFixedExpensesInCalendar)} 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              multiline
+              icon={<Calendar size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('showFixedExpensesInCalendar')}
+              subtitle={t('showFixedExpensesInCalendarDesc')}
+              control={
+                <Switch
+                  checked={Boolean(config.showFixedExpensesInCalendar)}
                   onChange={() => {
                     const next = !config.showFixedExpensesInCalendar;
                     setConfig({
@@ -499,24 +528,22 @@ export function ProfileView({
                       showFixedExpensesInCalendar: next,
                       showFixedExpensesInTodayView: next,
                     });
-                  }} 
+                  }}
                   aria-label={t('showFixedExpensesInCalendar')}
                 />
-              </div>
-              <p className="text-micro-label text-[var(--text-secondary)] opacity-70 leading-relaxed pl-13">
-                {t('showFixedExpensesInCalendarDesc')}
-              </p>
-            </div>
-            <div className="py-3.5 px-4 space-y-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center shrink-0">
-                    <History size={18} strokeWidth={2} />
-                  </div>
-                  <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight">{t('showFixedExpensesInHistory')}</span>
-                </div>
-                <Switch 
-                  checked={Boolean(config.showFixedExpensesInHistory ?? (localStorage.getItem('dejz_show_fixed_in_history') === 'true'))} 
+              }
+            />
+            <ListRow
+              variant="grouped"
+              density="compact"
+              multiline
+              icon={<History size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('showFixedExpensesInHistory')}
+              subtitle={t('showFixedExpensesInHistoryDesc')}
+              control={
+                <Switch
+                  checked={Boolean(config.showFixedExpensesInHistory ?? (localStorage.getItem('dejz_show_fixed_in_history') === 'true'))}
                   onChange={() => {
                     const currentVal = Boolean(config.showFixedExpensesInHistory ?? (localStorage.getItem('dejz_show_fixed_in_history') === 'true'));
                     const next = !currentVal;
@@ -529,26 +556,22 @@ export function ProfileView({
                       ...config,
                       showFixedExpensesInHistory: next,
                     });
-                  }} 
+                  }}
                   aria-label={t('showFixedExpensesInHistory')}
                 />
-              </div>
-              <p className="text-micro-label text-[var(--text-secondary)] opacity-70 leading-relaxed pl-13">
-                {t('showFixedExpensesInHistoryDesc')}
-              </p>
-            </div>
-            <div className="py-3.5 px-4 space-y-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center shrink-0">
-                    <EyeOff size={18} strokeWidth={2} />
-                  </div>
-                  <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight">
-                    {t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
-                  </span>
-                </div>
-                <Switch 
-                  checked={Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'))} 
+              }
+            />
+            <ListRow
+              variant="grouped"
+              density="compact"
+              multiline
+              icon={<EyeOff size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
+              subtitle={t('hideEmptyCategoriesDesc' as any) || 'Dölj kategorier som inte har några utgifter eller aktiv budget under perioden.'}
+              control={
+                <Switch
+                  checked={Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'))}
                   onChange={() => {
                     const currentVal = Boolean(config.hideEmptyCategories ?? (localStorage.getItem('dejz_hide_empty_categories') === 'true'));
                     const nextVal = !currentVal;
@@ -558,15 +581,12 @@ export function ProfileView({
                       void err;
                     }
                     setConfig({ ...config, hideEmptyCategories: nextVal });
-                  }} 
+                  }}
                   aria-label={t('hideEmptyCategories' as any) || 'Dölj inaktiva kategorier'}
                 />
-              </div>
-              <p className="text-micro-label text-[var(--text-secondary)] opacity-70 leading-relaxed pl-13">
-                {t('hideEmptyCategoriesDesc' as any) || 'Dölj kategorier som inte har några utgifter eller aktiv budget under perioden.'}
-              </p>
-            </div>
-          </div>
+              }
+            />
+          </Card>
         </div>
 
         {/* Support & Legal */}
@@ -574,12 +594,44 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
             {t('support')}
           </h4>
-          <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle shadow-2xs divide-y divide-subtle">
-            <SettingsMenuItem icon={Mail} label={t('feedback')} onClick={onFeedbackClick} />
-            <SettingsMenuItem icon={Download} label={t('exportData')} onClick={onExportData} />
-            <SettingsMenuItem icon={Shield} label={t('privacyPolicy')} onClick={() => onLegalClick('privacy')} />
-            <SettingsMenuItem icon={FileText} label={t('termsOfService')} onClick={() => onLegalClick('terms')} />
-          </div>
+          <Card variant="default" padding="none" className="divide-y divide-subtle">
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Mail size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('feedback')}
+              onClick={onFeedbackClick}
+            />
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Download size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('exportData')}
+              onClick={onExportData}
+            />
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<Shield size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('privacyPolicy')}
+              onClick={() => onLegalClick('privacy')}
+            />
+            <ListRow
+              variant="grouped"
+              density="compact"
+              showChevron
+              icon={<FileText size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('termsOfService')}
+              onClick={() => onLegalClick('terms')}
+            />
+          </Card>
         </div>
 
         {/* Account Actions */}
@@ -587,7 +639,7 @@ export function ProfileView({
           <h4 className="text-label font-semibold text-rose-500 dark:text-rose-400 px-1.5">
             {t('dangerZone')}
           </h4>
-          <div className="overflow-hidden rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle shadow-2xs divide-y divide-subtle">
+          <Card variant="default" padding="none" className="divide-y divide-subtle">
             {isDemoMode && (
               <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-2.5">
                 <div className="flex items-center justify-between">
@@ -611,25 +663,26 @@ export function ProfileView({
                 </button>
               </div>
             )}
-            <button 
+            <ListRow
+              variant="grouped"
+              density="compact"
+              icon={<LogOut size={18} strokeWidth={2} />}
+              iconBg="bg-black/5 dark:bg-white/5"
+              title={t('logout')}
               onClick={onLogout}
-              className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-all cursor-pointer active:scale-[0.99]"
-            >
-              <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center shrink-0">
-                <LogOut size={18} strokeWidth={2} />
-              </div>
-              <span className="text-body-medium font-semibold text-[var(--text-primary)]">{t('logout')}</span>
-            </button>
-            <button 
+            />
+            <ListRow
+              variant="grouped"
+              density="compact"
+              destructive
+              icon={<Trash2 size={18} strokeWidth={2} />}
+              iconBg="bg-rose-500/10"
+              iconColor="text-rose-600 dark:text-rose-400"
+              title={t('deleteAccount')}
+              titleClassName="text-rose-600 dark:text-rose-400"
               onClick={onDeleteAccount}
-              className="w-full flex items-center gap-3.5 py-3.5 px-4 hover:bg-danger/5 transition-all cursor-pointer active:scale-[0.99]"
-            >
-              <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-black/5 dark:bg-white/5 text-danger border border-subtle flex items-center justify-center shrink-0">
-                <Trash2 size={18} strokeWidth={2} />
-              </div>
-              <span className="text-body-medium font-semibold text-danger">{t('deleteAccount')}</span>
-            </button>
-          </div>
+            />
+          </Card>
         </div>
 
         <div className="flex flex-col items-center justify-center pt-5 pb-2 opacity-50">
