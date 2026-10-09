@@ -130,7 +130,7 @@ export function SettingsMainView({
       exit={{ opacity: 0, y: -10 }}
       className="space-y-4 max-w-md mx-auto"
     >
-      <Card variant="default" padding="none" className="divide-y divide-subtle shadow-2xs">
+      <Card variant="default" padding="none" className="divide-y divide-subtle">
         <ListRow
           variant="grouped"
           showChevron

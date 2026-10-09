@@ -25,19 +25,19 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const baseStyles = 'overflow-hidden transition-all duration-[var(--duration-normal,150ms)] ease-out';
 
     const variantStyles = {
-      default: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,14px)] shadow-none',
-      hero: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,14px)] shadow-none',
-      nested: 'bg-[var(--card-nested-bg)] border-none rounded-[var(--radius-card-nested,10px)]',
-      flat: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,14px)]',
-      elevated: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,14px)] shadow-none',
-      outlined: 'bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[var(--radius-card,14px)] shadow-none',
-      muted: 'bg-[var(--surface-muted)] border-none rounded-[var(--radius-card-nested,10px)] shadow-none',
+      default: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
+      hero: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
+      nested: 'bg-[var(--card-nested-bg)] border-none rounded-[var(--radius-card-nested,14px)] shadow-none',
+      flat: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-none',
+      elevated: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
+      outlined: 'bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[var(--radius-card,20px)] shadow-none',
+      muted: 'bg-[var(--surface-muted)] border-none rounded-[var(--radius-card-nested,14px)] shadow-none',
     }[variant];
 
     const paddingStyles = {
       none: 'p-0',
-      sm: 'p-3 sm:p-3.5',
-      md: 'p-4 sm:p-5',
+      sm: 'card-p-sm',
+      md: 'card-p',
       lg: 'p-5 sm:p-6',
     }[padding];
 

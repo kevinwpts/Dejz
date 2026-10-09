@@ -1,8 +1,9 @@
-import React, { useMemo, useState, useRef, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
 import { getBudgetStatus } from '../utils/budgetStatus';
 import { Icon } from './ui/Icon';
+import { feedback } from '../utils/feedback';
 
 interface BudgetGaugeProps {
   remainingCents: number;
@@ -29,12 +30,10 @@ export function BudgetGauge({
   timeRatio,
   remainingDays,
   totalDays,
-  calendarDays = [],
+  _calendarDays,
 }: BudgetGaugeProps) {
   const isEn = language === 'en';
   const isNegative = remainingCents < 0;
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   // Derive status from economic state and remaining time
   const status = useMemo(() => {
@@ -48,152 +47,47 @@ export function BudgetGauge({
     });
   }, [remainingCents, disposablePotCents, remainingDays, totalDays, timeRatio]);
 
-  // Compute points from Day 1 in the period to today
-  const trendPoints = useMemo(() => {
-    interface PointItem {
-      day: number;
-      value: number;
-      label: string;
-      dateStr?: string;
-      isToday: boolean;
-    }
+  // Initial disposable budget from the start of the period (100% baseline)
+  const startPot = useMemo(() => {
+    if (disposablePotCents > 0) return disposablePotCents;
+    if (remainingCents > 0) return remainingCents;
+    return 0;
+  }, [disposablePotCents, remainingCents]);
 
-    const points: PointItem[] = [];
+  // Percentage representing where the user is now compared to the beginning of the period
+  const percentage = useMemo(() => {
+    if (startPot <= 0) return 0;
+    if (remainingCents <= 0) return 0;
+    return Math.round((remainingCents / startPot) * 100);
+  }, [remainingCents, startPot]);
 
-    if (calendarDays && calendarDays.length > 0) {
-      // Find today's index in the period
-      const todayIdx = calendarDays.findIndex((d: any) => d.isToday);
-      const endIndex = todayIdx !== -1 ? todayIdx : Math.max(0, calendarDays.length - 1);
-      const slice = calendarDays.slice(0, endIndex + 1);
+  // Clamped fraction (0 to 1) for the SVG progress ring
+  const clampedFraction = useMemo(() => {
+    if (startPot <= 0) return 0;
+    if (remainingCents <= 0) return 0;
+    return Math.max(0, Math.min(1, remainingCents / startPot));
+  }, [remainingCents, startPot]);
 
-      // Start from the initial disposable pot
-      let currentBal = disposablePotCents > 0 ? disposablePotCents : remainingCents;
+  // Circle geometry (viewBox 0 0 64 64)
+  const radius = 26;
+  const circumference = 2 * Math.PI * radius; // ≈ 163.363
+  const strokeDashoffset = circumference * (1 - clampedFraction);
 
-      // First point: Period Start (Day 1 start)
-      points.push({
-        day: 1,
-        value: currentBal,
-        label: isEn ? 'Day 1 Start' : 'Dag 1 Start',
-        isToday: slice.length === 1 && todayIdx === 0,
-      });
+  const subLabel = useMemo(() => {
+    if (isNegative) return isEn ? 'exceeded' : 'slut';
+    if (percentage === 0) return isEn ? '0 left' : '0 kvar';
+    return isEn ? 'left' : 'kvar';
+  }, [isNegative, percentage, isEn]);
 
-      // Walk through passed days and compute remaining balance after each day's activity
-      slice.forEach((d: any, idx: number) => {
-        const spent = Number(d.daySpent) || 0;
-        const inc = Number(d.dayIncome) || 0;
-        currentBal = currentBal - spent + inc;
-
-        const isLastDay = idx === slice.length - 1;
-        const formattedDate = d.date
-          ? new Date(d.date).toLocaleDateString(isEn ? 'en-US' : 'sv-SE', {
-              day: 'numeric',
-              month: 'short',
-            })
-          : undefined;
-
-        points.push({
-          day: idx + 1,
-          value: isLastDay ? remainingCents : currentBal,
-          label: isEn ? `Day ${idx + 1}` : `Dag ${idx + 1}`,
-          dateStr: formattedDate,
-          isToday: isLastDay,
-        });
-      });
-    }
-
-    // Safety fallback: Ensure we always have at least 2 points to draw a clean line
-    if (points.length < 2) {
-      const startPot = disposablePotCents > 0 ? disposablePotCents : remainingCents + 100000;
-      return [
-        { day: 1, value: startPot, label: isEn ? 'Day 1' : 'Dag 1', isToday: false },
-        { day: 2, value: remainingCents, label: isEn ? 'Today' : 'Idag', isToday: true },
-      ];
-    }
-
-    return points;
-  }, [calendarDays, disposablePotCents, remainingCents, isEn]);
-
-  // Dimensions of SVG sparkline
-  const svgWidth = 126;
-  const svgHeight = 44;
-  const padX = 6;
-  const padY = 6;
-
-  const { pathD, areaD, screenPoints } = useMemo(() => {
-    if (trendPoints.length < 2) {
-      return { pathD: '', areaD: '', screenPoints: [] };
-    }
-
-    const values = trendPoints.map((p) => p.value);
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const range = max - min || 1;
-
-    const usableWidth = svgWidth - padX * 2;
-    const usableHeight = svgHeight - padY * 2;
-
-    const pts = trendPoints.map((p, i) => {
-      const x = padX + (i / (trendPoints.length - 1)) * usableWidth;
-      const y = svgHeight - padY - ((p.value - min) / range) * usableHeight;
-      return { ...p, x, y };
-    });
-
-    // Build smooth cubic Bezier path
-    let pD = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[Math.max(0, i - 1)];
-      const p1 = pts[i];
-      const p2 = pts[i + 1];
-      const p3 = pts[Math.min(pts.length - 1, i + 2)];
-
-      const cp1x = p1.x + (p2.x - p0.x) / 6;
-      const cp1y = p1.y + (p2.y - p0.y) / 6;
-      const cp2x = p2.x - (p3.x - p1.x) / 6;
-      const cp2y = p2.y - (p3.y - p1.y) / 6;
-
-      pD += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
-    }
-
-    const lastPt = pts[pts.length - 1];
-    const firstPt = pts[0];
-    const aD = `${pD} L ${lastPt.x.toFixed(1)} ${svgHeight} L ${firstPt.x.toFixed(1)} ${svgHeight} Z`;
-
-    return { pathD: pD, areaD: aD, screenPoints: pts };
-  }, [trendPoints]);
-
-  const lastPoint = screenPoints[screenPoints.length - 1];
-  const activePoint = hoveredIndex !== null && screenPoints[hoveredIndex] ? screenPoints[hoveredIndex] : null;
-
-  // Handle pointer interactions on the SVG chart
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent<SVGSVGElement>) => {
-      if (!svgRef.current || screenPoints.length === 0) return;
-      const rect = svgRef.current.getBoundingClientRect();
-      const clientX = e.clientX - rect.left;
-      const svgX = (clientX / rect.width) * svgWidth;
-
-      // Find closest point by x coordinate
-      let closestIdx = 0;
-      let minDiff = Infinity;
-      screenPoints.forEach((pt, idx) => {
-        const diff = Math.abs(pt.x - svgX);
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIdx = idx;
-        }
-      });
-      setHoveredIndex(closestIdx);
-    },
-    [screenPoints]
-  );
-
-  const handlePointerLeave = useCallback(() => {
-    setHoveredIndex(null);
-  }, []);
+  const circleTitle = useMemo(() => {
+    return isEn
+      ? `Start: ${formatAmount(startPot, language)} ${currency} · Left: ${formatAmount(remainingCents, language)} ${currency} (${percentage}%)`
+      : `Start: ${formatAmount(startPot, language)} ${currency} · Kvar: ${formatAmount(remainingCents, language)} ${currency} (${percentage}%)`;
+  }, [startPot, remainingCents, percentage, language, currency, isEn]);
 
   return (
     <div className="w-full select-none">
-      <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,16px)] p-4 sm:p-5 shadow-subtle relative overflow-hidden transition-all">
+      <div className="bg-[var(--surface-color)] rounded-card card-p shadow-subtle relative overflow-hidden transition-all">
         {/* Top Header Row */}
         <div className="flex items-center justify-between mb-2 sm:mb-2.5">
           <div className="flex items-center gap-1.5">
@@ -203,7 +97,10 @@ export function BudgetGauge({
             {onOpenInfo && (
               <button
                 type="button"
-                onClick={onOpenInfo}
+                onClick={() => {
+                  if (typeof feedback?.tap === 'function') feedback.tap();
+                  onOpenInfo();
+                }}
                 className="p-1 -m-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
                 aria-label="Info"
                 title={isEn ? 'How is this calculated?' : 'Hur beräknas detta?'}
@@ -212,142 +109,96 @@ export function BudgetGauge({
               </button>
             )}
           </div>
-
-          {/* Status Indicator (round dot) */}
-          <div className="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/[0.03] dark:bg-white/[0.05]">
-            <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shrink-0 shadow-xs" style={{ backgroundColor: status.colorHex }} />
-          </div>
         </div>
 
-        {/* Amount & Trend Line Chart Row */}
+        {/* Amount & Circular Gauge Row */}
         <div className="flex items-center justify-between gap-3 sm:gap-4 my-1">
-          {/* Large Amount Display */}
-          <div className="flex items-baseline gap-1 sm:gap-1.5 shrink-0 min-w-0">
-            <AnimatedNumber
-              value={remainingCents}
-              className={`text-hero-amount leading-none ${
-                isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
-              }`}
-              formatter={(val) => formatAmount(val, language)}
-            />
-            <span
-              className={`text-card-title leading-none shrink-0 ${
-                isNegative ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
-              }`}
-            >
-              {currency || 'kr'}
-            </span>
-          </div>
-
-          {/* Trend Line Chart (Always visible on all screen sizes, Day 1 -> Today) */}
-          <div className="flex flex-col items-end shrink-0">
-            {/* Header / Tooltip on hover */}
-            <div className="h-4 flex items-center justify-end mb-1">
-              {activePoint ? (
-                <span className="text-micro-label font-semibold text-[var(--text-primary)] tabular-nums animate-fade-in">
-                  {activePoint.label}: {formatAmount(activePoint.value, language)} {currency}
-                </span>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: status.colorHex }} />
-                  <span className="text-micro-label font-medium text-[var(--text-secondary)]">
-                    {isEn ? 'Day 1 → Today' : 'Dag 1 → Idag'}
-                  </span>
-                </div>
-              )}
+          {/* Large Amount Display (Left) */}
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-baseline gap-1 sm:gap-1.5 min-w-0">
+              <AnimatedNumber
+                value={remainingCents}
+                className={`text-hero-amount leading-none ${
+                  isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
+                }`}
+                formatter={(val) => formatAmount(val, language)}
+              />
+              <span
+                className={`text-card-title leading-none shrink-0 ${
+                  isNegative ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
+                }`}
+              >
+                {currency || 'kr'}
+              </span>
             </div>
 
-            {/* SVG Sparkline Container */}
-            <div className="relative w-[114px] xs:w-[126px] sm:w-[136px] h-[40px] sm:h-[44px]">
-              <svg
-                ref={svgRef}
-                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-                className="w-full h-full overflow-visible cursor-crosshair touch-none"
-                onPointerMove={handlePointerMove}
-                onPointerLeave={handlePointerLeave}
-              >
-                <defs>
-                  <linearGradient id="budgetTrendGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={status.colorHex} stopOpacity="0.25" />
-                    <stop offset="100%" stopColor={status.colorHex} stopOpacity="0.01" />
-                  </linearGradient>
-                </defs>
+            {/* Status indicator badge under amount */}
+            <div className="flex items-center gap-1.5 mt-2">
+              <span
+                className="w-2 h-2 rounded-full shrink-0 shadow-xs"
+                style={{ backgroundColor: status.colorHex }}
+              />
+              <span className="text-micro-label font-medium text-[var(--text-secondary)] truncate">
+                {isEn ? status.labelEn : status.labelSv}
+              </span>
+            </div>
+          </div>
 
-                {/* Subtle baseline */}
-                <line
-                  x1={padX}
-                  y1={svgHeight - padY}
-                  x2={svgWidth - padX}
-                  y2={svgHeight - padY}
+          {/* Circular Progress Gauge (Right) */}
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.tap === 'function') feedback.tap();
+              onOpenInfo?.();
+            }}
+            className="flex flex-col items-center shrink-0 p-1 -m-1 rounded-[var(--radius-card-nested,10px)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-all cursor-pointer border-none bg-transparent active:scale-95 text-left group"
+            aria-label={isEn ? 'Budget status details' : 'Detaljer för budgetstatus'}
+            title={circleTitle}
+          >
+            <div className="relative w-[60px] h-[60px] sm:w-[66px] sm:h-[66px] flex items-center justify-center">
+              <svg viewBox="0 0 64 64" className="w-full h-full transform -rotate-90">
+                {/* Background track circle */}
+                <circle
+                  cx="32"
+                  cy="32"
+                  r={radius}
+                  fill="none"
                   stroke="currentColor"
-                  strokeOpacity="0.08"
-                  strokeDasharray="2 2"
-                  strokeWidth="1"
+                  strokeWidth="4.5"
+                  className="text-black/[0.06] dark:text-white/[0.08]"
                 />
-
-                {/* Area under curve */}
-                {areaD && <path d={areaD} fill="url(#budgetTrendGradient)" />}
-
-                {/* Line Path */}
-                {pathD && (
-                  <path
-                    d={pathD}
+                {/* Animated active progress arc */}
+                {clampedFraction > 0 && (
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r={radius}
                     fill="none"
                     stroke={status.colorHex}
-                    strokeWidth="2.5"
+                    strokeWidth="4.5"
                     strokeLinecap="round"
-                    strokeLinejoin="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    className="transition-[stroke-dashoffset,stroke] duration-700 ease-out"
                   />
                 )}
-
-                {/* Active Hover Point Marker */}
-                {activePoint && (
-                  <g>
-                    <line
-                      x1={activePoint.x}
-                      y1={padY}
-                      x2={activePoint.x}
-                      y2={svgHeight - padY}
-                      stroke={status.colorHex}
-                      strokeWidth="1"
-                      strokeDasharray="2 2"
-                      strokeOpacity="0.5"
-                    />
-                    <circle
-                      cx={activePoint.x}
-                      cy={activePoint.y}
-                      r="4.5"
-                      fill={status.colorHex}
-                      stroke="var(--surface-color)"
-                      strokeWidth="2"
-                    />
-                  </g>
-                )}
-
-                {/* End Point (Today) with glowing pulse */}
-                {!activePoint && lastPoint && (
-                  <g>
-                    <circle
-                      cx={lastPoint.x}
-                      cy={lastPoint.y}
-                      r="6.5"
-                      fill={status.colorHex}
-                      fillOpacity="0.2"
-                      className="animate-pulse"
-                    />
-                    <circle
-                      cx={lastPoint.x}
-                      cy={lastPoint.y}
-                      r="3.5"
-                      fill={status.colorHex}
-                      stroke="var(--surface-color)"
-                      strokeWidth="1.5"
-                    />
-                  </g>
-                )}
               </svg>
+
+              {/* Inside circle content: percentage & status */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+                <span className="font-amount font-bold text-xs sm:text-[13px] tabular-nums text-[var(--text-primary)] leading-none">
+                  {percentage}%
+                </span>
+                <span className="text-[9px] text-[var(--text-secondary)] font-medium leading-none mt-0.5">
+                  {subLabel}
+                </span>
+              </div>
             </div>
-          </div>
+
+            <span className="text-micro-label text-[var(--text-secondary)] font-medium mt-1 tabular-nums whitespace-nowrap">
+              {isEn ? 'of start' : 'av start'}
+            </span>
+          </button>
         </div>
 
         {/* Bottom Time / Payday Countdown Info */}

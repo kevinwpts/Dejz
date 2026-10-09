@@ -385,7 +385,7 @@ export function TodayView({
       />
 
       {/* 2. Compact Period & Payday Status Module (Placed under kvar att spendera) */}
-      <Card variant="default" padding="none" className="p-3.5 sm:p-4 shadow-2xs animate-fade-in">
+      <Card variant="default" padding="md" className="animate-fade-in">
         <button
           type="button"
           onClick={() => {

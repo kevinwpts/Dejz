@@ -96,7 +96,7 @@ export function BottomSheet({
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className={`relative w-full ${sizeStyles} bg-[var(--modal-bg,var(--bg-color))] text-[var(--text-primary)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none shadow-modal ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
+            className={`relative w-full ${sizeStyles} bg-[var(--modal-bg,var(--bg-color))] text-[var(--text-primary)] rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] border-none shadow-modal ${maxHeight} flex flex-col z-10 overflow-hidden font-sans ${className}`}
           >
             {/* Mobile Drag Handle */}
             {showDragHandle && (

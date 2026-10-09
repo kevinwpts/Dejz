@@ -297,7 +297,10 @@ h6 {
 }
 
 @utility card-p {
-  padding: var(--space-card-p, 1rem);
+  padding: 18px;
+  @media (min-width: 640px) {
+    padding: 20px;
+  }
 }
 
 @utility card-p-sm {
@@ -483,7 +486,7 @@ h6 {
 }
 
 @utility shadow-subtle {
-  box-shadow: none;
+  box-shadow: var(--shadow-subtle, none);
 }
 
 @utility shadow-modal {
@@ -601,12 +604,12 @@ h6 {
 
   --modal-bg: #FFFFFF;
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  --shadow-subtle: none;
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.03);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
   --bg-hover: #F0F0F0;
 
-  --card-shadow: none;
+  --card-shadow: var(--shadow-subtle);
   --card-inner-stroke: none;
 
   --success-color: #05B862;
@@ -648,18 +651,18 @@ h6 {
      Single source of truth for component radii, dimensions, spacing & motion
      ========================================================================== */
   /* Corner Radii */
-  --radius-card: 16px;
-  --radius-card-nested: 12px;
+  --radius-card: 20px;
+  --radius-card-nested: 14px;
   --radius-button: 12px;
   --radius-button-sm: 10px;
   --radius-button-lg: 12px;
   --radius-input: 12px;
-  --radius-modal: 20px;
+  --radius-modal: 24px;
   --radius-chip: 9999px;
   --radius-badge: 9999px;
   --radius-icon-button: 10px;
   --radius-pill: 9999px;
-  --radius-container: 16px;
+  --radius-container: 20px;
 
   /* Component Dimensions / Heights */
   --height-input: 48px;
@@ -677,7 +680,7 @@ h6 {
   /* Spacing & Layout */
   --space-page-px: 1rem;
   --space-page-max: 42rem;
-  --space-card-p: 1rem;
+  --space-card-p: 1.125rem;
   --space-card-p-sm: 0.875rem;
   --space-card-p-lg: 1.5rem;
   --space-row-p: 0.875rem;

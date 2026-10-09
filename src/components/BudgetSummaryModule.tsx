@@ -122,7 +122,7 @@ export function BudgetSummaryModule({
   return (
     <div className="space-y-3 font-sans">
       {/* Clean Single Summary Card without progress bar */}
-      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border-none shadow-none">
+      <div className="bg-[var(--surface-color)] rounded-card card-p border-none shadow-subtle">
         {/* Top Split: Spenderat (Large) vs Kvar att spendera (Slightly smaller) */}
         <div className="grid grid-cols-2 gap-4 items-start">
           {/* Spenderat */}

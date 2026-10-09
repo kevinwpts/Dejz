@@ -120,20 +120,20 @@ export const DS = {
    * Any change in index.css CSS variables will automatically propagate.
    */
   radius: {
-    card: 'rounded-[var(--radius-card,16px)]',
-    cardNested: 'rounded-[var(--radius-card-nested,12px)]',
+    card: 'rounded-[var(--radius-card,20px)]',
+    cardNested: 'rounded-[var(--radius-card-nested,14px)]',
     button: 'rounded-[var(--radius-button,12px)]',
     buttonSm: 'rounded-[var(--radius-button-sm,10px)]',
     buttonLg: 'rounded-[var(--radius-button-lg,12px)]',
     input: 'rounded-[var(--radius-input,12px)]',
-    modal: 'rounded-[var(--radius-modal,20px)]',
-    modalSheet: 'rounded-t-[var(--radius-modal,20px)] sm:rounded-[var(--radius-modal,20px)]',
+    modal: 'rounded-[var(--radius-modal,24px)]',
+    modalSheet: 'rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)]',
     chip: 'rounded-[var(--radius-chip,9999px)]',
     badge: 'rounded-[var(--radius-badge,9999px)]',
     icon: 'rounded-[var(--radius-icon-button,10px)]',
     pill: 'rounded-[var(--radius-pill,9999px)]',
-    bottomNav: 'rounded-[var(--radius-modal,20px)]',
-    container: 'rounded-[var(--radius-container,16px)]',
+    bottomNav: 'rounded-[var(--radius-modal,24px)]',
+    container: 'rounded-[var(--radius-container,20px)]',
   },
 
   /**
