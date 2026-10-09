@@ -209,11 +209,16 @@ export const DS = {
    * Spacing & Layout Tokens
    */
   spacing: {
-    pageContainer: 'px-4 max-w-xl mx-auto',
-    cardPadding: 'p-4',
-    rowPadding: 'p-3.5 sm:p-4',
-    elementGap: 'gap-2 sm:gap-3',
-    sectionGap: 'space-y-6',
+    pageContainer: 'page-container',
+    pagePx: 'page-px',
+    pageMax: 'page-max',
+    cardPadding: 'card-p',
+    cardPaddingSm: 'card-p-sm',
+    cardPaddingLg: 'card-p-lg',
+    rowPadding: 'row-p',
+    elementGap: 'gap-element',
+    sectionGap: 'gap-section',
+    modalPadding: 'modal-p',
   },
 
   /**

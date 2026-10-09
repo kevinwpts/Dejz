@@ -148,7 +148,7 @@ export function BottomSheet({
             {/* Scrollable Body */}
             <div
               className={`flex-1 overflow-y-auto ${
-                bodyClassName ?? 'px-5 sm:px-6 py-4 space-y-3.5 custom-scrollbar'
+                bodyClassName ?? 'page-px py-4 space-y-3.5 custom-scrollbar'
               } min-h-0`}
             >
               {children}
@@ -156,7 +156,7 @@ export function BottomSheet({
 
             {/* Footer */}
             {footer && (
-              <div className="px-5 sm:px-6 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] border-t border-[var(--border-subtle)] shrink-0 bg-[var(--modal-bg,var(--bg-color))]">
+              <div className="page-px pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] border-t border-[var(--border-subtle)] shrink-0 bg-[var(--modal-bg,var(--bg-color))]">
                 {footer}
               </div>
             )}

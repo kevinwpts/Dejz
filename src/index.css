@@ -276,6 +276,52 @@ h6 {
   background-color: var(--card-nested-bg);
 }
 
+/* Central Semantic Spacing & Layout Utilities */
+@utility page-container {
+  max-width: var(--space-page-max, 42rem);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-page-px, 1rem);
+  padding-right: var(--space-page-px, 1rem);
+}
+
+@utility page-px {
+  padding-left: var(--space-page-px, 1rem);
+  padding-right: var(--space-page-px, 1rem);
+}
+
+@utility page-max {
+  max-width: var(--space-page-max, 42rem);
+}
+
+@utility card-p {
+  padding: var(--space-card-p, 1rem);
+}
+
+@utility card-p-sm {
+  padding: var(--space-card-p-sm, 0.875rem);
+}
+
+@utility card-p-lg {
+  padding: var(--space-card-p-lg, 1.5rem);
+}
+
+@utility row-p {
+  padding: var(--space-row-p, 0.875rem);
+}
+
+@utility gap-element {
+  gap: var(--space-element-gap, 0.75rem);
+}
+
+@utility gap-section {
+  gap: var(--space-section-gap, 1.5rem);
+}
+
+@utility modal-p {
+  padding: var(--space-card-p, 1rem);
+}
+
 /* Central Semantic Typography Utilities */
 @utility text-hero-amount {
   font-size: 32px;
@@ -595,7 +641,7 @@ h6 {
 
   /* Spacing & Layout */
   --space-page-px: 1rem;
-  --space-page-max: 36rem;
+  --space-page-max: 42rem;
   --space-card-p: 1rem;
   --space-card-p-sm: 0.875rem;
   --space-card-p-lg: 1.5rem;

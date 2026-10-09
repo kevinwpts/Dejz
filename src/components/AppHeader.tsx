@@ -84,7 +84,7 @@ export function AppHeader({
         isScrolled ? 'app-header-scrolled' : 'app-header-top'
       }`}
     >
-      <div className="max-w-2xl mx-auto px-4 h-14 sm:h-16 flex justify-between items-center w-full gap-2 relative">
+      <div className="page-max mx-auto page-px h-14 sm:h-16 flex justify-between items-center w-full gap-2 relative">
         {/* Left: Back button with title for subpages OR Dejz brand logo for main tabs */}
         <div className="flex items-center gap-2.5 shrink-0 z-10 min-w-0">
           {onBack ? (

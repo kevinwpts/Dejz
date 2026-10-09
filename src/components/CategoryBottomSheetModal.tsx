@@ -5,9 +5,9 @@ import { formatAmount } from '../utils/format';
 import { feedback } from '../utils/feedback';
 import { TransactionItem } from './TransactionItem';
 import { BudgetItem } from './BudgetItem';
-import { EmptyState } from './EmptyState';
 import { BottomSheet } from './ui';
 import { CategoryIcon } from './CategoryIcon';
+import { getCategoryIconName } from '../utils/icons';
 
 interface CategoryBottomSheetModalProps {
   isOpen: boolean;
@@ -68,6 +68,7 @@ export function CategoryBottomSheetModal({
   }, [targetCategoryName, config?.categories]);
 
   const categoryColor = categoryData?.color || matchedCategory?.color || '#6E6961';
+  const iconKey = categoryData?.iconName || matchedCategory?.icon || getCategoryIconName(targetCategoryName || '');
 
   // Filter transactions for this category strictly within the current period
   const periodTransactions = useMemo(() => {

@@ -100,7 +100,7 @@ export const Modal: React.FC<ModalProps> = ({
 
             {/* Header */}
             {(title || showCloseButton || headerRight) && (
-              <div className={`flex items-center justify-between px-5 pt-4 pb-2 shrink-0 ${headerClassName}`}>
+              <div className={`flex items-center justify-between page-px pt-4 pb-2 shrink-0 ${headerClassName}`}>
                 <div className="flex flex-col pr-4 min-w-0">
                   {title && (
                     <h2 className="text-section-title truncate">
@@ -130,13 +130,13 @@ export const Modal: React.FC<ModalProps> = ({
             )}
 
             {/* Content Body */}
-            <div className={`flex-1 overflow-y-auto ${bodyClassName ?? 'px-5 py-4 space-y-4'} text-[var(--text-primary)]`}>
+            <div className={`flex-1 overflow-y-auto ${bodyClassName ?? 'page-px py-4 space-y-4'} text-[var(--text-primary)]`}>
               {children}
             </div>
 
             {/* Footer / Actions */}
             {footer && (
-              <div className="px-5 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] bg-[var(--modal-bg,var(--bg-color))] shrink-0">
+              <div className="page-px pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] bg-[var(--modal-bg,var(--bg-color))] shrink-0">
                 {footer}
               </div>
             )}
