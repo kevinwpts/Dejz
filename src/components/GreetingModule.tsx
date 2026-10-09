@@ -15,6 +15,9 @@ interface GreetingModuleProps {
   calendarDays: any[];
   periodStart: Date;
   periodEnd: Date;
+  periodIntervalText?: string;
+  paydayText?: string;
+  onOpenPeriodInfo?: () => void;
 }
 
 export function GreetingModule({
@@ -25,6 +28,9 @@ export function GreetingModule({
   calendarDays,
   periodStart,
   periodEnd,
+  periodIntervalText,
+  paydayText,
+  onOpenPeriodInfo,
 }: GreetingModuleProps) {
   const isEn = language === 'en';
   const [isCalculationInfoOpen, setIsCalculationInfoOpen] = useState(false);
@@ -63,14 +69,14 @@ export function GreetingModule({
 
   return (
     <div className="flex flex-col font-sans relative">
-      {/* TOP HERO SUMMARY SECTION (Sits directly on app background) */}
+      {/* Unified Summary Main Module Card */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full -mt-2 sm:-mt-3 pt-0 mb-4 sm:mb-5 select-none px-1"
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full select-none"
       >
-        {/* Budget Gauge with Status-based Color */}
+        {/* Budget Gauge with Status-based Color & Integrated Period/Payday */}
         <BudgetGauge
           remainingCents={stats?.remainingPeriodCents || 0}
           disposablePotCents={stats?.disposablePot || 0}
@@ -81,6 +87,9 @@ export function GreetingModule({
           remainingDays={effectiveRemainingDays}
           totalDays={totalDaysInPeriod}
           calendarDays={calendarDays}
+          periodIntervalText={periodIntervalText}
+          paydayText={paydayText}
+          onOpenPeriodInfo={onOpenPeriodInfo}
         />
       </motion.div>
 
@@ -91,7 +100,7 @@ export function GreetingModule({
             className="fixed inset-0" 
             onClick={() => setIsCalculationInfoOpen(false)} 
           />
-          <div className="relative w-full max-w-[340px] bg-white dark:bg-surface rounded-card p-5 border border-subtle shadow-subtle space-y-4 z-10 text-left font-sans">
+          <div className="relative w-full max-w-[340px] bg-[var(--surface-color)] rounded-card p-5 border border-subtle shadow-subtle space-y-4 z-10 text-left font-sans">
             {/* Header */}
             <div className="flex items-center justify-between pb-1">
               <div className="flex items-center gap-2 text-[var(--text-primary)] font-semibold text-sm">

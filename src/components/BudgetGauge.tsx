@@ -17,6 +17,9 @@ interface BudgetGaugeProps {
   remainingDays?: number;
   totalDays?: number;
   calendarDays?: any[];
+  periodIntervalText?: string;
+  paydayText?: string;
+  onOpenPeriodInfo?: () => void;
 }
 
 export function BudgetGauge({
@@ -31,6 +34,9 @@ export function BudgetGauge({
   remainingDays,
   totalDays,
   _calendarDays,
+  periodIntervalText,
+  paydayText,
+  onOpenPeriodInfo,
 }: BudgetGaugeProps) {
   const isEn = language === 'en';
   const isNegative = remainingCents < 0;
@@ -91,7 +97,7 @@ export function BudgetGauge({
         {/* Top Header Row */}
         <div className="flex items-center justify-between mb-2 sm:mb-2.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-secondary font-semibold">
+            <span className="text-secondary font-medium text-[var(--text-secondary)]">
               {label}
             </span>
             {onOpenInfo && (
@@ -118,13 +124,13 @@ export function BudgetGauge({
             <div className="flex items-baseline gap-1 sm:gap-1.5 min-w-0">
               <AnimatedNumber
                 value={remainingCents}
-                className={`text-hero-amount leading-none ${
+                className={`text-hero-amount leading-none font-semibold ${
                   isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
                 }`}
                 formatter={(val) => formatAmount(val, language)}
               />
               <span
-                className={`text-card-title leading-none shrink-0 ${
+                className={`text-card-title leading-none shrink-0 font-medium ${
                   isNegative ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
                 }`}
               >
@@ -155,7 +161,7 @@ export function BudgetGauge({
             aria-label={isEn ? 'Budget status details' : 'Detaljer för budgetstatus'}
             title={circleTitle}
           >
-            <div className="relative w-[60px] h-[60px] sm:w-[66px] sm:h-[66px] flex items-center justify-center">
+            <div className="relative w-[58px] h-[58px] sm:w-[64px] sm:h-[64px] flex items-center justify-center">
               <svg viewBox="0 0 64 64" className="w-full h-full transform -rotate-90">
                 {/* Background track circle */}
                 <circle
@@ -201,8 +207,40 @@ export function BudgetGauge({
           </button>
         </div>
 
-        {/* Bottom Time / Payday Countdown Info */}
-        {timeText && (
+        {/* Lower Section: Divider + Aktuell period & Nästa lön */}
+        {periodIntervalText ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.tap === 'function') feedback.tap();
+              onOpenPeriodInfo?.();
+            }}
+            className="w-full pt-3 mt-3 border-t border-subtle flex items-center justify-between text-left cursor-pointer active:scale-[0.99] transition-all bg-transparent border-none p-0 group"
+          >
+            {/* Left: Aktuell period */}
+            <div className="flex flex-col min-w-0">
+              <span className="text-micro-label text-[var(--text-secondary)] font-medium leading-tight">
+                {isEn ? 'Current period' : 'Aktuell period'}
+              </span>
+              <span className="text-label text-[var(--text-primary)] font-medium truncate mt-0.5 group-hover:text-[var(--accent-color)] transition-colors">
+                {periodIntervalText}
+              </span>
+            </div>
+
+            {/* Subtle Divider */}
+            <div className="h-6 w-[1px] bg-black/[0.06] dark:bg-white/[0.08] shrink-0 mx-2" />
+
+            {/* Right: Nästa lön */}
+            <div className="flex flex-col items-end shrink-0 text-right">
+              <span className="text-micro-label text-[var(--text-secondary)] font-medium leading-tight">
+                {isEn ? 'Next payday' : 'Nästa lön'}
+              </span>
+              <span className="text-label text-[var(--text-primary)] font-medium font-amount tabular-nums truncate mt-0.5 group-hover:text-[var(--accent-color)] transition-colors">
+                {paydayText}
+              </span>
+            </div>
+          </button>
+        ) : timeText ? (
           <div className="pt-2.5 sm:pt-3 mt-2 border-t border-subtle flex items-center justify-between text-label text-[var(--text-secondary)]">
             <span className="font-medium tracking-tight">{timeText}</span>
             {remainingDays !== undefined && totalDays !== undefined && (
@@ -213,7 +251,7 @@ export function BudgetGauge({
               </span>
             )}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

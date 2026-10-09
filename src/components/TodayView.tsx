@@ -21,7 +21,7 @@ import { CategoryIcon } from "./CategoryIcon";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { PeriodTimeline } from "./PeriodTimeline";
-import { Card, Button, Modal } from "./ui";
+import { Button, Modal } from "./ui";
 import { getCategoryIconName } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
@@ -352,7 +352,7 @@ export function TodayView({
 
   return (
     <div className="space-y-5 font-sans">
-      {/* 1. Free-floating Hero Gauge & Kvar att Spendera */}
+      {/* 1. Unified Main Summary Module (Kvar att spendera + Period & Payday) */}
       <GreetingModule
         userName={userName}
         availableForD={todayData?.availableForD || stats?.availableForD || 0}
@@ -367,6 +367,9 @@ export function TodayView({
         setCurrentPeriodDate={setCurrentPeriodDate}
         periodStart={stats.periodStart}
         periodEnd={stats.periodEnd}
+        periodIntervalText={periodIntervalText}
+        paydayText={daysValueText}
+        onOpenPeriodInfo={() => setIsPeriodInfoOpen(true)}
         isFuturePeriod={stats.isFuturePeriod}
         isPastPeriod={stats.isPastPeriod}
         periods={periods}
@@ -384,54 +387,16 @@ export function TodayView({
         allTransactions={allTransactions}
       />
 
-      {/* 2. Compact Period & Payday Status Module (Placed under kvar att spendera) */}
-      <Card variant="default" padding="md" className="animate-fade-in">
-        <button
-          type="button"
-          onClick={() => {
-            if (typeof feedback?.tap === 'function') feedback.tap();
-            setIsPeriodInfoOpen(true);
-          }}
-          className="w-full flex items-center justify-between gap-3 text-left cursor-pointer active:scale-[0.99] transition-all bg-transparent border-none p-0"
-        >
-          {/* Left: Current Period */}
-          <div className="flex flex-col min-w-0">
-            <span className="text-label text-[var(--text-secondary)] leading-tight">
-              {lang === 'en' ? 'Current period' : 'Aktuell period'}
-            </span>
-            <span className="text-card-title text-[var(--text-primary)] truncate mt-1">
-              {periodIntervalText}
-            </span>
-          </div>
-
-          <div className="h-7 w-[1px] bg-black/[0.06] dark:bg-white/[0.08] shrink-0" />
-
-          {/* Right: Days Remaining */}
-          <div className="flex flex-col items-end shrink-0 text-right">
-            <span className="text-label text-[var(--text-secondary)] leading-tight">
-              {lang === 'en' ? 'Next payday' : 'Nästa lön'}
-            </span>
-            <span className="text-card-title text-[var(--text-primary)] font-amount tabular-nums truncate mt-1">
-              {stats?.isPastPeriod
-                ? (lang === 'en' ? 'Ended' : 'Avslutad')
-                : (lang === 'en'
-                    ? `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'day left' : 'days left'}`
-                    : `${effectiveRemainingDays} ${effectiveRemainingDays === 1 ? 'dag kvar' : 'dagar kvar'}`)}
-            </span>
-          </div>
-        </button>
-      </Card>
-
-      {/* 3. Category Budgets (No module card wrapper) */}
-      <div className="animate-fade-in">
+      {/* 2. Category Budgets */}
+      <div className="animate-fade-in space-y-2.5">
         {!hasSavedBudget ? (
           <button
             type="button"
             onClick={() => onNavigate("profile", "budget")}
-            className="w-full p-4 rounded-[var(--radius-card)] hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-subtle text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99]"
+            className="w-full p-4 rounded-card hover:bg-black/[0.02] dark:hover:bg-white/5 border border-dashed border-subtle text-[var(--text-primary)] transition-all flex items-center justify-between text-left group cursor-pointer active:scale-[0.99] shadow-subtle bg-[var(--surface-color)]"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-[var(--radius-btn,10px)] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-[var(--radius-button-sm,10px)] bg-[var(--accent-color)]/10 text-[var(--accent-color)] flex items-center justify-center shrink-0">
                 <SlidersHorizontal size={18} strokeWidth={2} />
               </div>
               <div>
@@ -446,9 +411,9 @@ export function TodayView({
             <ChevronRight size={16} className="text-[var(--text-secondary)] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
           </button>
         ) : categoryBudgetData.length > 0 ? (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-0.5">
-              <span className="text-label font-semibold text-[var(--text-secondary)]">
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-label font-medium text-[var(--text-secondary)]">
                 {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
               </span>
               <button
@@ -457,9 +422,10 @@ export function TodayView({
                   if (typeof feedback.light === 'function') feedback.light();
                   onNavigate("profile", "budget");
                 }}
-                className="text-label text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+                className="text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-0.5"
               >
-                {lang === "en" ? "Manage" : "Hantera"}
+                <span>{lang === "en" ? "Manage" : "Hantera"}</span>
+                <ChevronRight size={12} strokeWidth={2} />
               </button>
             </div>
 
@@ -474,19 +440,19 @@ export function TodayView({
                     animate={{ opacity: 1, scale: 1, x: 0 }}
                     transition={{ delay: 0.04 + index * 0.015, type: 'spring', stiffness: 400, damping: 30 }}
                     onClick={() => handleCategoryClick(cat.name)}
-                    className="flex-shrink-0 w-[138px] sm:w-[148px] h-[88px] sm:h-[92px] p-3 rounded-[var(--radius-card,12px)] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] border border-subtle flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
+                    className="flex-shrink-0 w-[140px] sm:w-[152px] h-[92px] sm:h-[96px] p-3 sm:p-3.5 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-subtle flex flex-col justify-between text-left group cursor-pointer shadow-none transition-all active:scale-95"
                   >
                     {/* Top: Icon + Name */}
                     <div className="flex items-center gap-2 min-w-0 w-full">
                       <CategoryIcon icon={cat.iconName} color={catColor} size="xs" />
-                      <span className="text-label text-[var(--text-primary)] truncate flex-1 min-w-0">
+                      <span className="text-label font-medium text-[var(--text-primary)] truncate flex-1 min-w-0">
                         {cat.name}
                       </span>
                     </div>
 
-                    {/* Amount */}
-                    <div className="space-y-0.5">
-                      <p className={`text-secondary font-semibold font-amount tabular-nums truncate ${
+                    {/* Amount & Status */}
+                    <div className="space-y-0.5 min-w-0 w-full">
+                      <p className={`text-body-medium font-semibold font-amount tabular-nums truncate ${
                         cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
                       }`}>
                         {(() => {
@@ -498,7 +464,9 @@ export function TodayView({
                           return `${formatAmount(rem, lang)} ${currency}`;
                         })()}
                       </p>
-                      <p className="text-micro-label text-[var(--text-secondary)] leading-none">
+                      <p className={`text-micro-label leading-tight truncate ${
+                        cat.isOverBudget ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
+                      }`}>
                         {cat.hasBudget 
                           ? (cat.remaining < 0 ? (lang === 'en' ? 'over budget' : 'över budget') : (lang === 'en' ? 'left to spend' : 'kvar att spendera'))
                           : (lang === 'en' ? 'spent' : 'spenderat')}
@@ -508,7 +476,7 @@ export function TodayView({
                 );
               })}
 
-              {/* Manage Button at the end of the category carousel */}
+              {/* Manage Card at the end */}
               <motion.button
                 key="manage-categories"
                 initial={{ opacity: 0, scale: 0.97, x: 6 }}
@@ -518,14 +486,13 @@ export function TodayView({
                   if (typeof feedback.light === 'function') feedback.light();
                   onNavigate("profile", "budget");
                 }}
-                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[88px] sm:h-[92px] p-3 rounded-[var(--radius-card,12px)] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] border border-dashed border-subtle flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
+                className="flex-shrink-0 w-[96px] sm:w-[104px] h-[92px] sm:h-[96px] p-3 sm:p-3.5 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] border border-dashed border-subtle flex flex-col items-center justify-center gap-1.5 text-center group cursor-pointer transition-all active:scale-95 shadow-none"
                 aria-label={lang === 'en' ? 'Manage budget & categories' : 'Hantera budget & kategorier'}
               >
-                <div className="w-7 h-7 rounded-[var(--radius-btn,8px)] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                <div className="w-7 h-7 rounded-[var(--radius-button-sm,8px)] bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
                   <SlidersHorizontal size={14} strokeWidth={2} />
                 </div>
-
-                <span className="text-label text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+                <span className="text-micro-label font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
                   {lang === 'en' ? 'Manage' : 'Hantera'}
                 </span>
               </motion.button>
@@ -534,7 +501,7 @@ export function TodayView({
         ) : null}
       </div>
 
-      {/* Period Timeline directly on beige background (no wrapping card or dividing lines) */}
+      {/* 3. Period Timeline */}
       {calendarDays && calendarDays.length > 0 && (
         <div className="animate-fade-in -mx-1 px-1">
           <PeriodTimeline
@@ -549,8 +516,8 @@ export function TodayView({
         </div>
       )}
 
-      {/* Date Header directly under the timeline */}
-      <div className="flex items-center justify-between px-1 pt-1">
+      {/* 4. Date Header directly under the timeline */}
+      <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <span className="text-label font-medium text-[var(--text-secondary)]">
             {stats.isPastPeriod
@@ -572,15 +539,31 @@ export function TodayView({
             </span>
           )}
         </div>
-        {!isTodaySelected && (
+
+        <div className="flex items-center gap-2">
+          {!isTodaySelected && (
+            <button
+              type="button"
+              onClick={handleGoToToday}
+              className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-button-sm,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-subtle text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none"
+            >
+              <RotateCcw size={11} strokeWidth={2.5} />
+              <span>{lang === "en" ? "Today" : "Idag"}</span>
+            </button>
+          )}
+
           <button
-            onClick={handleGoToToday}
-            className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-btn,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-subtle text-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none ml-auto"
+            type="button"
+            onClick={() => {
+              if (typeof feedback.light === 'function') feedback.light();
+              onNavigate("log");
+            }}
+            className="text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-0.5"
           >
-            <RotateCcw size={11} strokeWidth={2.5} />
-            <span>{lang === "en" ? "Today" : "Idag"}</span>
+            <span>{lang === "en" ? "View all" : "Visa alla"}</span>
+            <ChevronRight size={12} strokeWidth={2} />
           </button>
-        )}
+        </div>
       </div>
 
       {/* Selected Day's Transactions - Separate White Cards */}
@@ -667,8 +650,8 @@ export function TodayView({
       >
         <div className="space-y-2.5 pt-1">
           {/* Period */}
-          <div className="flex items-center gap-3 p-3 rounded-[var(--radius-card,12px)] bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
-            <div className="w-8 h-8 rounded-[var(--radius-btn,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
+          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
+            <div className="w-8 h-8 rounded-[var(--radius-button-sm,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
               <Calendar size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">
@@ -682,8 +665,8 @@ export function TodayView({
           </div>
 
           {/* Payday / Next Salary */}
-          <div className="flex items-center gap-3 p-3 rounded-[var(--radius-card,12px)] bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
-            <div className="w-8 h-8 rounded-[var(--radius-btn,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
+          <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
+            <div className="w-8 h-8 rounded-[var(--radius-button-sm,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">
               <Clock size={16} strokeWidth={2} />
             </div>
             <div className="flex flex-col min-w-0">
