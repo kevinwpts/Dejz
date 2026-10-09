@@ -182,6 +182,8 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     return {
       type: 'category',
       iconKey: resolvedKey,
+      categoryIcon: categoryIconName,
+      categoryName: category?.name || categoryText,
       iconComponent: ICON_MAP[resolvedKey] || Receipt,
       backgroundColor: category?.color || getEmojiSolidColor(categoryIconName),
       textColor: '#ffffff',
@@ -196,6 +198,8 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     return {
       type: 'category',
       iconKey: resolvedKey,
+      categoryIcon: suggested,
+      categoryName: category?.name || categoryText || merchantText,
       iconComponent: ICON_MAP[resolvedKey] || Receipt,
       backgroundColor: category?.color || getEmojiSolidColor(suggested),
       textColor: '#ffffff',

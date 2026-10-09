@@ -3,6 +3,7 @@ import { Transaction, Config } from '../types';
 import { resolveEntityVisual } from '../utils/resolver';
 import { fetchLogoForName } from '../utils/logo';
 import { Receipt } from 'lucide-react';
+import { CategoryIcon } from './CategoryIcon';
 
 export function TransactionLogo({
   transaction,
@@ -117,7 +118,21 @@ export function TransactionLogo({
     );
   }
 
-  // Fallback Category / Default Icon (same uniform squircle shape)
+  // Fallback Category / Default Icon (with Icons8 Color support)
+  const categoryIconKey = (visual as any).categoryIcon || (visual as any).iconKey;
+  const categoryName = (visual as any).categoryName || transaction.category;
+
+  if (categoryIconKey || categoryName) {
+    return (
+      <CategoryIcon
+        icon={categoryIconKey}
+        color={visual.backgroundColor}
+        categoryName={categoryName}
+        size={size}
+      />
+    );
+  }
+
   const IconComponent = visual.iconComponent || Receipt;
   const bgColor = visual.backgroundColor || '#6E6961';
   const textColor = visual.textColor || '#ffffff';

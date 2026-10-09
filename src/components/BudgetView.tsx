@@ -509,14 +509,14 @@ export function BudgetView({
                         else if (fixedSortBy === 'name') setFixedSortBy('amount');
                         else setFixedSortBy('day');
                       }}
-                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] text-label text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer select-none active:scale-95"
+                      className="inline-flex items-center gap-1.5 h-[36px] sm:h-[38px] px-2.5 sm:px-3 rounded-full text-[12.5px] sm:text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all cursor-pointer select-none active:scale-95 min-w-0"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                      <span className="font-normal">
+                      <span className="font-normal truncate">
                         {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                       </span>
-                      <span className="font-medium text-[var(--text-primary)]">
+                      <span className="font-medium text-[var(--text-primary)] truncate">
                         {fixedSortBy === 'day' 
                           ? (config.language === 'en' ? 'Day' : 'Dragningsdag')
                           : fixedSortBy === 'name'
@@ -525,14 +525,14 @@ export function BudgetView({
                         }
                       </span>
                     </button>
-                    <Button 
-                      variant="primary"
-                      size="sm"
-                      icon={<Plus size={13} strokeWidth={2.5} />}
+                    <button
+                      type="button"
                       onClick={onAddFixedExpense}
+                      className="inline-flex items-center gap-1.5 h-[36px] sm:h-[38px] px-3 sm:px-3.5 rounded-full bg-[var(--surface-color)] dark:bg-white/[0.04] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.08] border border-[var(--border-subtle)] text-[13px] sm:text-[13.5px] font-medium transition-all cursor-pointer active:scale-95 shadow-none shrink-0"
                     >
-                      {t('newFixedExpense')}
-                    </Button>
+                      <Plus size={13} strokeWidth={2.5} className="text-[var(--text-secondary)]" />
+                      <span>{t('newFixedExpense')}</span>
+                    </button>
                   </div>
 
                   <div className="space-y-2.5">
@@ -583,14 +583,14 @@ export function BudgetView({
                         else if (savingSortBy === 'name') setSavingSortBy('amount');
                         else setSavingSortBy('day');
                       }}
-                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] text-label text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer select-none active:scale-95"
+                      className="inline-flex items-center gap-1.5 h-[36px] sm:h-[38px] px-2.5 sm:px-3 rounded-full text-[12.5px] sm:text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all cursor-pointer select-none active:scale-95 min-w-0"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
-                      <span className="font-normal">
+                      <span className="font-normal truncate">
                         {config.language === 'en' ? 'Sort:' : 'Sortera:'}
                       </span>
-                      <span className="font-medium text-[var(--text-primary)]">
+                      <span className="font-medium text-[var(--text-primary)] truncate">
                         {savingSortBy === 'day' 
                           ? (config.language === 'en' ? 'Day' : 'Dragningsdag') 
                           : savingSortBy === 'name' 
@@ -599,14 +599,14 @@ export function BudgetView({
                       </span>
                     </button>
 
-                    <Button 
-                      variant="primary"
-                      size="sm"
-                      icon={<Plus size={13} strokeWidth={2.5} />}
+                    <button
+                      type="button"
                       onClick={onAddMonthlySaving}
+                      className="inline-flex items-center gap-1.5 h-[36px] sm:h-[38px] px-3 sm:px-3.5 rounded-full bg-[var(--surface-color)] dark:bg-white/[0.04] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.08] border border-[var(--border-subtle)] text-[13px] sm:text-[13.5px] font-medium transition-all cursor-pointer active:scale-95 shadow-none shrink-0"
                     >
-                      {t('newMonthlySaving')}
-                    </Button>
+                      <Plus size={13} strokeWidth={2.5} className="text-[var(--text-secondary)]" />
+                      <span>{t('newMonthlySaving')}</span>
+                    </button>
                   </div>
 
                   <div className="space-y-2.5">
