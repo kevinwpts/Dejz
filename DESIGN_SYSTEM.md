@@ -62,6 +62,7 @@ Dejz använder **DM Sans** genomgående som enda UI-typsnitt för alla rubriker,
 | **Page Title** | `.text-page-title` | 24px | 600 | 1.25 | -0.025em | Sidrubriker, huvudvyer |
 | **Section Title** | `.text-section-title` | 18px | 600 | 1.3 | -0.015em | Sektionsrubriker, modaltitlar |
 | **Card Title** | `.text-card-title` | 16px | 600 | 1.35 | 0em | Korttitlar, listrubriker, dialog-delrubriker |
+| **Metric Label** | `.text-metric-label` | 14px | 500 | 1.35 | 0em | Nyckeltalsetiketter ovanför ekonomiska belopp (Hem, Analys, Ekonomi) |
 | **Body** | `.text-body` | 15px | 400 | 1.5 | 0em | Standard brödtext, inmatningsfält |
 | **Body Medium** | `.text-body-medium` | 15px | 500 | 1.5 | 0em | Transaktionsrader, knappar, viktad brödtext |
 | **Secondary** | `.text-secondary` | 13px | 400 | 1.45 | 0em | Sekundärtext, förklarande text |

@@ -124,10 +124,10 @@ export function BudgetSummaryModule({
       {/* Clean Single Summary Card without progress bar */}
       <div className="bg-[var(--surface-color)] rounded-card card-p border-none shadow-subtle select-none">
         {/* Top Split: Spenderat (Large) vs Kvar att spendera (Slightly smaller) */}
-        <div className="grid grid-cols-2 gap-4 items-start">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 items-start">
           {/* Spenderat */}
-          <div className="space-y-1">
-            <span className="text-label font-medium text-[var(--text-secondary)] block">
+          <div className="space-y-1 min-w-0">
+            <span className="text-metric-label block truncate">
               {spentLabel}
             </span>
             <div className="flex items-baseline gap-1.5">
@@ -141,15 +141,15 @@ export function BudgetSummaryModule({
           </div>
 
           {/* Kvar att spendera */}
-          <div className="space-y-1 text-right">
-            <div className="flex items-center justify-end gap-1">
-              <span className="text-label font-medium text-[var(--text-secondary)]">
+          <div className="space-y-1 text-right min-w-0">
+            <div className="flex items-center justify-end gap-1.5 min-w-0">
+              <span className="text-metric-label truncate">
                 {remainingLabel}
               </span>
               <button
                 type="button"
                 onClick={() => setIsRemainingInfoOpen(true)}
-                className="w-4 h-4 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center justify-center transition-colors cursor-pointer"
+                className="w-4 h-4 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center justify-center transition-colors cursor-pointer shrink-0"
                 title="Förklaring"
                 aria-label="Förklaring"
               >

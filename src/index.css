@@ -40,6 +40,7 @@
   --color-surface-hover: var(--bg-hover);
 
   --color-text-primary: var(--text-primary);
+  --color-text-metric-label: var(--text-metric-label);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
   --color-text-disabled: var(--text-disabled);
@@ -407,6 +408,15 @@ h6 {
   color: var(--text-secondary);
 }
 
+@utility text-metric-label {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: normal;
+  font-family: var(--font-sans);
+  color: var(--text-metric-label);
+}
+
 @utility text-micro-label {
   font-size: 10px;
   font-weight: 300;
@@ -610,6 +620,7 @@ h6 {
   --surface-tint: rgba(0, 0, 0, 0.01);
 
   --text-primary: #211F1C;
+  --text-metric-label: #4A463F;
   --text-secondary: #6D6962;
   --text-tertiary: #777168;
   --text-muted: #777168;
@@ -794,6 +805,7 @@ h6 {
   --card-bg: var(--surface-color);
   --bg-primary: var(--bg-color);
   --chip-bg: #121212;
+  --text-metric-label: #D6D6D6;
   --border-subtle: #1E1E1E;
   --border-color: #1E1E1E;
   --border-control: #2A2A2A;
@@ -829,6 +841,7 @@ h6 {
 
   /* Typography */
   --text-primary: #FFFFFF;
+  --text-metric-label: #D6D6D6;
   --text-secondary: #B8B8B8;
   --text-tertiary: #999999;
   --text-muted: #999999;

@@ -377,7 +377,7 @@ export function BudgetView({
       <Card variant="default" padding="md" className="select-none">
         <div className="space-y-1">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-label font-medium text-[var(--text-secondary)]">
+            <span className="text-metric-label">
               {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
               {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
               {budgetFilter === 'fixed' && (
@@ -389,7 +389,7 @@ export function BudgetView({
               )}
             </span>
             {budgetFilter === 'fixed' && freqFilter === 'all' && (
-              <span className="text-micro-label text-[var(--text-tertiary)] font-normal">
+              <span className="text-micro-label text-[var(--text-tertiary)] font-normal shrink-0">
                 {config?.language === 'en' ? 'Average / month' : 'Genomsnitt / månad'}
               </span>
             )}

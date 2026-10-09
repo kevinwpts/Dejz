@@ -88,9 +88,9 @@ export function BudgetGauge({
     <div className="w-full select-none">
       <div className="bg-[var(--surface-color)] rounded-card card-p shadow-subtle relative overflow-hidden transition-all">
         {/* Top Header Row */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
           <div className="flex items-center gap-1.5">
-            <span className="text-label font-medium text-[var(--text-secondary)]">
+            <span className="text-metric-label">
               {label}
             </span>
             {onOpenInfo && (
@@ -111,9 +111,9 @@ export function BudgetGauge({
         </div>
 
         {/* Amount & Semi-circle Gauge Row */}
-        <div className="flex items-center justify-between gap-3 sm:gap-4 my-0.5">
+        <div className="flex items-center justify-between gap-3 sm:gap-4 my-1">
           {/* Primary Amount for entire period (Left) */}
-          <div className="flex flex-col min-w-0">
+          <div className="flex flex-col min-w-0 flex-1">
             <div className="flex items-baseline gap-1 sm:gap-1.5 min-w-0">
               <AnimatedNumber
                 value={remainingCents}
@@ -132,7 +132,7 @@ export function BudgetGauge({
             </div>
           </div>
 
-          {/* Elegant Semi-Circle Progress Indicator (Right) */}
+          {/* Elegant Enlarged Semi-Circle Progress Indicator (Right) */}
           <button
             type="button"
             onClick={() => {
@@ -143,14 +143,14 @@ export function BudgetGauge({
             aria-label={isEn ? 'Budget status details' : 'Detaljer för budgetstatus'}
             title={circleTitle}
           >
-            <div className="relative w-[96px] sm:w-[108px] h-[52px] sm:h-[58px] flex items-end justify-center">
-              <svg viewBox="0 0 100 56" className="w-full h-full overflow-visible">
+            <div className="relative w-[130px] sm:w-[148px] h-[70px] sm:h-[80px] flex items-end justify-center">
+              <svg viewBox="0 0 100 58" className="w-full h-full overflow-visible">
                 {/* Background track semi-circle */}
                 <path
                   d="M 10 50 A 40 40 0 0 1 90 50"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="6.5"
+                  strokeWidth="7"
                   strokeLinecap="round"
                   className="text-black/[0.06] dark:text-white/[0.08]"
                 />
@@ -160,7 +160,7 @@ export function BudgetGauge({
                     d="M 10 50 A 40 40 0 0 1 90 50"
                     fill="none"
                     stroke={status.colorHex}
-                    strokeWidth="6.5"
+                    strokeWidth="7"
                     strokeLinecap="round"
                     strokeDasharray={arcLength}
                     strokeDashoffset={strokeDashoffset}
@@ -169,9 +169,9 @@ export function BudgetGauge({
                 )}
               </svg>
 
-              {/* Inside semi-circle: percentage text */}
-              <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end pointer-events-none pb-0.5">
-                <span className="font-amount font-semibold text-sm sm:text-base tabular-nums text-[var(--text-primary)] leading-none">
+              {/* Inside semi-circle: visually centered percentage text */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pt-2.5 sm:pt-3 pointer-events-none">
+                <span className="font-amount font-bold text-base sm:text-lg tabular-nums text-[var(--text-primary)] leading-none tracking-tight">
                   {percentage}%
                 </span>
               </div>
