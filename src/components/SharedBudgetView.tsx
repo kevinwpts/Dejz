@@ -52,10 +52,10 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 pb-20 page-max mx-auto w-full font-sans"
+      className="space-y-[var(--card-gap)] pb-20 page-max mx-auto w-full font-sans"
     >
       {/* 1. Header Hero */}
-      <Card variant="default" padding="lg" className="text-center space-y-3 relative overflow-hidden">
+      <Card variant="default" padding="lg" className="text-center space-y-[var(--card-gap)] relative overflow-hidden">
         <div className="w-14 h-14 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-[var(--text-primary)] border border-subtle flex items-center justify-center mx-auto">
           <Users2 size={26} strokeWidth={2} />
         </div>
@@ -74,9 +74,9 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
 
       {/* 2. Connection Status */}
       {isConnected ? (
-        <div className="space-y-4">
+        <div className="space-y-[var(--card-gap)]">
           {/* Connected Card */}
-          <Card variant="default" padding="lg" className="bg-emerald-500/10 border border-emerald-500/20 space-y-4">
+          <Card variant="default" padding="lg" className="bg-emerald-500/10 border border-emerald-500/20 space-y-[var(--card-gap)]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-xs">
@@ -123,9 +123,9 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
           </Button>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-[var(--card-gap)]">
           {/* Step 1: My Invite Code */}
-          <Card variant="default" padding="lg" className="space-y-3">
+          <Card variant="default" padding="lg" className="space-y-[var(--card-gap)]">
             <span className="text-xs font-semibold text-[var(--text-secondary)] block">
               {isEn ? '1. Your invite code' : '1. Din inbjudningskod'}
             </span>
@@ -153,7 +153,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
           </Card>
 
           {/* Step 2: Enter Partner's Code */}
-          <Card variant="default" padding="lg" className="space-y-3.5">
+          <Card variant="default" padding="lg" className="space-y-[var(--card-gap)]">
             <span className="text-xs font-semibold text-[var(--text-secondary)] block">
               {isEn ? '2. Or join your partner’s budget' : '2. Eller anslut med partnerns kod'}
             </span>

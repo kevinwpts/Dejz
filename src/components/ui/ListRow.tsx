@@ -100,7 +100,7 @@ export const ListRow: React.FC<ListRowProps> = ({
         <div className="min-w-0 flex flex-col justify-center flex-1">
           <div className="flex items-center gap-2">
             <span
-              className={`${isCompact ? 'text-[12px] font-medium leading-snug' : 'text-card-title'} ${
+              className={`${isCompact ? 'text-[13px] font-medium leading-snug' : 'text-card-title'} ${
                 multiline ? '' : 'truncate'
               } ${
                 destructive ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
@@ -112,7 +112,7 @@ export const ListRow: React.FC<ListRowProps> = ({
           </div>
           {subtitle && (
             <div
-              className={`${isCompact ? 'text-[10px] leading-relaxed text-[var(--text-secondary)] mt-0.5' : 'text-secondary mt-0.5'} ${
+              className={`${isCompact ? 'text-[11px] leading-relaxed text-[var(--text-secondary)] mt-0.5' : 'text-secondary mt-0.5'} ${
                 multiline ? (isCompact ? 'leading-relaxed' : 'leading-relaxed opacity-75') : (isCompact ? 'truncate' : 'truncate opacity-75')
               } ${subtitleClassName}`}
             >

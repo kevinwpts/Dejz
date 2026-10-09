@@ -76,7 +76,7 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
         <h3 className="text-label opacity-70 ml-1">
           {t('recentTransactions')}
         </h3>
-        <div className="space-y-1">
+        <div className="space-y-3">
           {recentTransactions.map(t => (
             <TransactionItem 
               key={t.id}

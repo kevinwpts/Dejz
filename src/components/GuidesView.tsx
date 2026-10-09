@@ -143,11 +143,11 @@ export function GuidesView({ config }: GuidesViewProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 pb-20 page-max mx-auto w-full font-sans"
+      className="space-y-[var(--card-gap)] pb-20 page-max mx-auto w-full font-sans"
     >
       {/* If a specific guide is opened */}
       {selectedGuide ? (
-        <div className="space-y-5">
+        <div className="space-y-[var(--card-gap)]">
           {/* Top Back / Breadcrumb */}
           <button
             type="button"
@@ -172,13 +172,13 @@ export function GuidesView({ config }: GuidesViewProps) {
           </Card>
 
           {/* Guide Steps */}
-          <div className="space-y-4">
+          <div className="space-y-[var(--card-gap)]">
             {selectedGuide.steps.map((step, idx) => (
               <Card
                 key={idx}
                 variant="default"
                 padding="lg"
-                className="space-y-3"
+                className="space-y-[var(--card-gap)]"
               >
                 <h3 className="text-sm font-bold text-[var(--text-primary)]">
                   {step.title}
@@ -214,7 +214,7 @@ export function GuidesView({ config }: GuidesViewProps) {
         </div>
       ) : (
         /* Guides Index List */
-        <div className="space-y-4">
+        <div className="space-y-[var(--card-gap)]">
           <Card variant="default" padding="lg" className="text-center space-y-2">
             <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border border-subtle flex items-center justify-center mx-auto">
               <BookOpen size={22} strokeWidth={2} />
@@ -229,7 +229,7 @@ export function GuidesView({ config }: GuidesViewProps) {
             </p>
           </Card>
 
-          <div className="space-y-2.5">
+          <div className="space-y-[var(--card-gap)]">
             {guides.map((g) => {
               const Icon = g.icon;
               return (

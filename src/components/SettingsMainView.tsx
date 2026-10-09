@@ -84,7 +84,7 @@ export function SettingsMainView({
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
-        className="space-y-5"
+        className="space-y-[var(--card-gap)]"
       >
         <SettingsView
           activeSection={activeSection as any}
@@ -128,7 +128,7 @@ export function SettingsMainView({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="space-y-4 max-w-md mx-auto"
+      className="space-y-[var(--card-gap)] max-w-md mx-auto"
     >
       <Card variant="default" padding="none" className="divide-y divide-menu">
         <ListRow

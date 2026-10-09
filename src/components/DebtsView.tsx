@@ -111,7 +111,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 pb-20 page-max mx-auto w-full font-sans"
+      className="space-y-[var(--card-gap)] pb-20 page-max mx-auto w-full font-sans"
     >
       {/* 1. Header Summary Cards */}
       <div className="grid grid-cols-2 gap-4">
@@ -163,7 +163,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       </div>
 
       {/* 3. Debt List */}
-      <div className="space-y-2.5">
+      <div className="space-y-[var(--card-gap)]">
         <AnimatePresence mode="popLayout">
           {filteredDebts.length > 0 ? (
             filteredDebts.map((item) => {
@@ -277,7 +277,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
         title={isEn ? 'New debt / expense' : 'Ny skuld / utlägg'}
         size="xs"
         showCloseButton={true}
-        bodyClassName="p-5 space-y-4"
+        bodyClassName="p-5 space-y-[var(--card-gap)]"
       >
         {/* Type toggle */}
         <div className="grid grid-cols-2 gap-2 bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[var(--radius-card-nested,10px)]">

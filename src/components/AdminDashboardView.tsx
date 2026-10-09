@@ -150,7 +150,7 @@ export function AdminDashboardView({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -14 }}
       transition={{ duration: 0.25 }}
-      className="space-y-5 pb-16 font-sans"
+      className="space-y-[var(--card-gap)] pb-16 font-sans"
     >
       {/* Header & Back Button */}
       <div className="flex items-center justify-between pt-1">
@@ -172,7 +172,7 @@ export function AdminDashboardView({
       </div>
 
       {/* Admin Hero Card */}
-      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-subtle shadow-none space-y-4">
+      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-[8px] bg-gradient-to-tr from-amber-500 to-orange-400 text-white flex items-center justify-center shadow-subtle shadow-amber-500/20">
@@ -252,7 +252,7 @@ export function AdminDashboardView({
       </div>
 
       {/* Subscription Simulator */}
-      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-subtle shadow-none space-y-3.5">
+      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
         <div className="flex items-center gap-2">
           <Sparkles size={18} strokeWidth={2} className="text-[var(--accent-color)]" />
           <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
@@ -308,7 +308,7 @@ export function AdminDashboardView({
       </div>
 
       {/* Quick Test Account Tools (Admin Only) */}
-      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-subtle shadow-none space-y-4">
+      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
         <div className="flex items-center gap-2">
           <Sparkles size={18} strokeWidth={2} className="text-amber-500" />
           <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
@@ -386,7 +386,7 @@ export function AdminDashboardView({
       </div>
 
       {/* User Feedback Module */}
-      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-subtle shadow-none space-y-4">
+      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MessageSquare size={18} strokeWidth={2} className="text-indigo-500" />
@@ -404,7 +404,7 @@ export function AdminDashboardView({
             {isEn ? 'Loading feedback...' : 'Hämtar feedback...'}
           </div>
         ) : feedbackList.length > 0 ? (
-          <div className="space-y-2.5 max-h-[360px] overflow-y-auto custom-scrollbar pr-1">
+          <div className="space-y-[var(--card-gap)] max-h-[360px] overflow-y-auto custom-scrollbar pr-1">
             {feedbackList.map((item) => (
               <div
                 key={item.id}
@@ -442,7 +442,7 @@ export function AdminDashboardView({
       </div>
 
       {/* Developer & Diagnostic Tools */}
-      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-subtle shadow-none space-y-4">
+      <div className="bg-[var(--surface-color)] rounded-[8px] p-5 sm:p-6 border border-subtle shadow-none space-y-[var(--card-gap)]">
         <div className="flex items-center gap-2">
           <Database size={18} strokeWidth={2} className="text-emerald-500" />
           <h3 className="text-base font-bold text-[var(--text-primary)] tracking-tight">
@@ -450,7 +450,7 @@ export function AdminDashboardView({
           </h3>
         </div>
 
-        <div className="space-y-2.5">
+        <div className="space-y-[var(--card-gap)]">
           <button
             type="button"
             onClick={handleCopyDiagnostics}
@@ -498,7 +498,7 @@ export function AdminDashboardView({
           size="sm"
           title={isEn ? 'Delete feedback?' : 'Ta bort feedback?'}
           showCloseButton={true}
-          bodyClassName="p-6 space-y-4"
+          bodyClassName="p-6 space-y-[var(--card-gap)]"
         >
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
             {isEn

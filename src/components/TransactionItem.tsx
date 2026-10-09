@@ -92,13 +92,13 @@ export function TransactionItem({
 
   // Determine layout style classes with translucent glass surfaces
   let containerClasses = "";
-  let paddingClasses = "px-4 py-2.5 sm:py-3 min-h-[52px]";
+  let paddingClasses = "px-4 py-3 sm:py-3.5 min-h-[56px]";
   if (squared) {
-    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-3 px-2";
+    containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-4 px-3";
     paddingClasses = "";
   } else if (variant === 'transparent') {
     containerClasses = "bg-transparent hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-none shadow-none border-none transition-colors";
-    paddingClasses = "px-4 py-2.5 sm:py-3 min-h-[52px]";
+    paddingClasses = "px-4 py-3.5 sm:py-4 min-h-[60px]";
   } else if (variant === 'nested') {
     containerClasses = "bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] shadow-none border-none rounded-[var(--radius-card,12px)]";
   } else {
@@ -110,7 +110,7 @@ export function TransactionItem({
     const iconKey = getCategoryIconName(categoryName || '');
 
     return (
-      <div className="flex items-center gap-1 shrink-0 text-[var(--text-secondary)]">
+      <div className="flex items-end gap-1 shrink-0 text-[var(--text-secondary)]">
         {iconKey ? (
           <CategoryIcon 
             icon={iconKey} 
@@ -212,7 +212,7 @@ export function TransactionItem({
             <div className="min-w-0 flex-1 flex flex-col justify-center">
               {/* Primary Merchant Name + Fixed Icon Badge */}
               <div className="flex items-center min-w-0">
-                <p className="text-[13.5px] sm:text-[14px] font-medium text-[var(--text-primary)] leading-snug break-words flex-1 min-w-0">
+                <p className="text-[12.5px] sm:text-[13px] font-medium text-[var(--text-primary)] leading-snug break-words flex-1 min-w-0">
                   <span>{merchantName}</span>
                   {isFixedItem && (
                     <span 
@@ -261,7 +261,14 @@ export function TransactionItem({
             <p className={`text-[13.5px] sm:text-[14px] font-normal whitespace-nowrap ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-75 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
               <span className="tabular-nums">{formatAmount(finalAmount, config?.language || 'sv')}</span>
-              <span className="text-micro-label opacity-75 ml-[2px]">{config?.currency || 'kr'}</span>
+              <span className="text-micro-label opacity-75 ml-[2px]">
+                {config?.currency || 'kr'}{transaction.frequency ? (
+                  transaction.frequency === 'Månadsvis' || transaction.frequency === 'MONTHLY' ? (config?.language === 'en' ? '/mo' : '/mån') :
+                  transaction.frequency === 'Kvartalsvis' || transaction.frequency === 'QUARTERLY' ? (config?.language === 'en' ? '/quarter' : '/kvartal') :
+                  transaction.frequency === 'Halvårsvis' || transaction.frequency === 'SEMI_ANNUALLY' ? (config?.language === 'en' ? '/half-year' : '/halvår') :
+                  transaction.frequency === 'Årsvis' || transaction.frequency === 'ANNUALLY' ? (config?.language === 'en' ? '/yr' : '/år') : ''
+                ) : ''}
+              </span>
             </p>
             {(transaction.timestamp || transaction.date) && !isFixedItem ? (
               <p className="text-micro-label text-[var(--text-tertiary)] mt-0.5 tabular-nums">

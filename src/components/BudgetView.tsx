@@ -1,11 +1,12 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, LayoutGrid, PieChart, CircleHalf, CalendarCheck } from 'lucide-react';
+import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, LayoutGrid, PieChart, CircleHalf, CalendarCheck, ChevronDown } from 'lucide-react';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
+import { TransactionLogo } from './TransactionLogo';
 import { EmptyState } from './EmptyState';
-import { FilterSelectButton, FilterMenuModal, FilterButtonGroup, Button, Card } from './ui';
+import { FilterMenuModal, FilterButtonGroup, Button } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
@@ -174,6 +175,18 @@ export function BudgetView({
     });
   }, [sortedFixedExpenses, freqFilter]);
 
+  const filteredActiveIncomes = React.useMemo(() => {
+    if (freqFilter === 'all') return sortedIncomes;
+    return sortedIncomes.filter(i => {
+      const freq = i.frequency || Frequency.MONTHLY;
+      if (freqFilter === 'monthly') return freq === Frequency.MONTHLY;
+      if (freqFilter === 'quarterly') return freq === Frequency.QUARTERLY;
+      if (freqFilter === 'semi-annually') return freq === Frequency.SEMI_ANNUALLY;
+      if (freqFilter === 'annually') return freq === Frequency.ANNUALLY;
+      return true;
+    });
+  }, [sortedIncomes, freqFilter]);
+
   const totalMonthlyFixedAverage = React.useMemo(() => {
     return (sortedFixedExpenses || []).reduce((sum, e) => {
       const freq = e.frequency || Frequency.MONTHLY;
@@ -212,7 +225,7 @@ export function BudgetView({
 
 
   // --- Category Budget Allocation Logic & Calculations ---
-  const totalIncomeSum = (incomes || []).reduce((sum, i) => {
+  const _totalIncomeSum = (incomes || []).reduce((sum, i) => {
     const amount = (i.isVariable && i.periodOverrides && i.periodOverrides[currentPeriodId] !== undefined)
       ? i.periodOverrides[currentPeriodId]
       : (Number(i.amount) || 0);
@@ -293,25 +306,25 @@ export function BudgetView({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="space-y-5 font-sans"
+      className="space-y-[var(--menu-content-gap)] font-sans"
     >
-      {/* Top Controls: Main Dropdown (Fasta utgifter / Inkomster / Månadssparande) & Direct Interval Filter Buttons */}
-      <div className="space-y-2.5">
-        <FilterSelectButton
-          icon={
-            budgetFilter === 'fixed' ? <Calendar size={15} strokeWidth={2} /> :
-            budgetFilter === 'income' ? <ArrowDownLeft size={15} strokeWidth={2.5} /> :
-            <PiggyBank size={15} strokeWidth={2} />
-          }
-          value={
-            budgetFilter === 'fixed' ? (t('fixedExpenses' as TranslationKey) || (config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter')) :
-            budgetFilter === 'income' ? (t('incomes' as TranslationKey) || (config?.language === 'en' ? 'Income' : 'Inkomster')) :
-            (t('monthlySavings' as TranslationKey) || (config?.language === 'en' ? 'Monthly savings' : 'Månadssparande'))
-          }
+      {/* Top Controls: Compact Inline Row (Section button + Interval pills) */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
+        <button
+          type="button"
           onClick={() => setIsBudgetFilterModalOpen(true)}
-          className="w-full"
-        />
-
+          className="flex-shrink-0 h-[34px] sm:h-[36px] px-3 rounded-full inline-flex items-center gap-1.5 text-[11.5px] sm:text-[12px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] sticky left-0 z-10 shadow-xs"
+        >
+          {budgetFilter === 'fixed' ? <Calendar size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" /> :
+           budgetFilter === 'income' ? <ArrowDownLeft size={13} strokeWidth={2.5} className="text-[var(--text-secondary)] shrink-0" /> :
+           <PiggyBank size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />}
+          <span className="truncate">
+            {budgetFilter === 'fixed' ? (t('fixedExpenses' as TranslationKey) || (config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter')) :
+             budgetFilter === 'income' ? (t('incomes' as TranslationKey) || (config?.language === 'en' ? 'Income' : 'Inkomster')) :
+             (t('monthlySavings' as TranslationKey) || (config?.language === 'en' ? 'Monthly savings' : 'Månadssparande'))}
+          </span>
+          <ChevronDown size={12} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
+        </button>
         <FilterMenuModal
           isOpen={isBudgetFilterModalOpen}
           onClose={() => setIsBudgetFilterModalOpen(false)}
@@ -336,49 +349,55 @@ export function BudgetView({
             },
           ]}
         />
-
-        {budgetFilter === 'fixed' && (
+        {(budgetFilter === 'fixed' || budgetFilter === 'income') && (
           <FilterButtonGroup
             options={[
               {
                 id: 'all',
                 label: config?.language === 'en' ? 'All' : 'Alla',
-                icon: <LayoutGrid size={14} strokeWidth={2} />,
+                icon: <LayoutGrid size={13} strokeWidth={2} />,
               },
               {
                 id: 'monthly',
                 label: config?.language === 'en' ? 'Monthly' : 'Månad',
-                icon: <Calendar size={14} strokeWidth={2} />,
+                icon: <Calendar size={13} strokeWidth={2} />,
               },
               {
                 id: 'quarterly',
                 label: config?.language === 'en' ? 'Quarterly' : 'Kvartal',
-                icon: <PieChart size={14} strokeWidth={2} />,
+                icon: <PieChart size={13} strokeWidth={2} />,
               },
               {
                 id: 'semi-annually',
                 label: config?.language === 'en' ? 'Semi-annually' : 'Halvår',
-                icon: <CircleHalf size={14} strokeWidth={2} />,
+                icon: <CircleHalf size={13} strokeWidth={2} />,
               },
               {
                 id: 'annually',
                 label: config?.language === 'en' ? 'Annually' : 'År',
-                icon: <CalendarCheck size={14} strokeWidth={2} />,
+                icon: <CalendarCheck size={13} strokeWidth={2} />,
               },
             ]}
             selectedId={freqFilter}
             onSelect={(id) => setFreqFilter(id as 'all' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually')}
             ariaLabel={config?.language === 'en' ? 'Payment interval' : 'Betalningsintervall'}
+            className="flex-shrink-0 w-auto"
           />
         )}
       </div>
 
-      {/* Overview Summary Card */}
-      <Card variant="default" padding="md" className="select-none">
+      {/* Overview Summary flat on background */}
+      <div className="px-1 py-1 select-none">
         <div className="space-y-1">
           <div className="flex items-center justify-between gap-2">
             <span className="text-metric-label">
-              {budgetFilter === 'income' && (config?.language === 'en' ? 'Total income' : 'Totala inkomster')}
+              {budgetFilter === 'income' && (
+                freqFilter === 'all' ? (config?.language === 'en' ? 'Total income' : 'Totala inkomster') :
+                freqFilter === 'monthly' ? (config?.language === 'en' ? 'Total monthly income' : 'Totala månadsinkomster') :
+                freqFilter === 'quarterly' ? (config?.language === 'en' ? 'Total quarterly income' : 'Totala kvartalsinkomster') :
+                freqFilter === 'semi-annually' ? (config?.language === 'en' ? 'Total semi-annual income' : 'Totala halvårsinkomster') :
+                (config?.language === 'en' ? 'Total annual income' : 'Totala årsinkomster')
+              )}
               {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
               {budgetFilter === 'fixed' && (
                 freqFilter === 'all' ? (config?.language === 'en' ? 'Total fixed expenses' : 'Totala fasta utgifter') :
@@ -388,7 +407,7 @@ export function BudgetView({
                 (config?.language === 'en' ? 'Total annual expenses' : 'Totala årsutgifter')
               )}
             </span>
-            {budgetFilter === 'fixed' && freqFilter === 'all' && (
+            {(budgetFilter === 'fixed' || budgetFilter === 'income') && freqFilter === 'all' && (
               <span className="text-micro-label text-[var(--text-tertiary)] font-normal shrink-0">
                 {config?.language === 'en' ? 'Average / month' : 'Genomsnitt / månad'}
               </span>
@@ -397,7 +416,13 @@ export function BudgetView({
           <div className="flex items-baseline gap-1.5">
             <AnimatedNumber 
               value={Math.round(
-                budgetFilter === 'income' ? totalIncomeSum :
+                budgetFilter === 'income' ? (
+                  freqFilter === 'all' ? totalMonthlyIncomeAverage :
+                  freqFilter === 'monthly' ? groupedIncomeSums[Frequency.MONTHLY] :
+                  freqFilter === 'quarterly' ? groupedIncomeSums[Frequency.QUARTERLY] :
+                  freqFilter === 'semi-annually' ? groupedIncomeSums[Frequency.SEMI_ANNUALLY] :
+                  groupedIncomeSums[Frequency.ANNUALLY]
+                ) :
                 budgetFilter === 'savings' ? totalSavingsSum :
                 (
                   freqFilter === 'all' ? totalMonthlyFixedAverage :
@@ -418,7 +443,7 @@ export function BudgetView({
             </span>
           </div>
         </div>
-      </Card>
+      </div>
 
 
       <AnimatePresence mode="wait">
@@ -428,11 +453,11 @@ export function BudgetView({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.2 }}
-          className="space-y-5"
+          className="space-y-[var(--card-gap)]"
         >
           {/* Incomes Section */}
           {budgetFilter === 'income' && (
-            <div className="space-y-3">
+            <div className="space-y-[var(--card-gap)]">
               {sortedIncomes.length > 0 ? (
                 <>
                   <div className="flex items-center justify-between gap-2 px-0.5">
@@ -469,8 +494,8 @@ export function BudgetView({
                     </Button>
                   </div>
 
-                  <div className="space-y-2.5">
-                    {sortedIncomes.map((income) => (
+                  <div className="space-y-[var(--card-gap)]">
+                    {filteredActiveIncomes.map((income) => (
                       <BudgetItem 
                         key={income.id}
                         item={income} 
@@ -487,7 +512,11 @@ export function BudgetView({
                 </>
               ) : (
                 <EmptyState 
-                  title={config.language === 'en' ? 'No income added yet' : 'Ingen inkomst inlagd än'} 
+                  title={
+                    freqFilter === 'all'
+                      ? (config.language === 'en' ? 'No income added yet' : 'Ingen inkomst inlagd än')
+                      : (config.language === 'en' ? 'No income matching this period' : 'Ingen inkomst för denna period')
+                  } 
                   description={config.language === 'en' ? 'Add your salary or other regular income to calculate your daily budget.' : 'Lägg in din lön eller andra inkomster för att räkna ut din dagsbudget.'}
                   actionLabel={`+ ${t('newIncome')}`}
                   onAction={onAddIncome}
@@ -498,9 +527,154 @@ export function BudgetView({
 
           {/* Fixed Expenses Section */}
           {budgetFilter === 'fixed' && (
-            <div className="space-y-3">
+            <div className="space-y-[var(--card-gap)]">
               {filteredActiveFixedExpenses.length > 0 ? (
                 <>
+                                    {/* Timeline matching image reference */}
+                  <div
+                    className="w-full border rounded-card p-4 sm:p-5 select-none relative overflow-hidden shadow-xs"
+                    style={{
+                      backgroundColor: 'var(--surface-color)',
+                      borderColor: 'var(--border-subtle)',
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-micro-label font-medium uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
+                        {config?.language === 'en' ? 'Deduction Timeline' : 'Dra-tidslinje'}
+                      </span>
+                      <span className="text-micro-label font-medium tabular-nums" style={{ color: 'var(--text-secondary)' }}>
+                        1 {config?.language === 'en' ? 'to' : 'till'} 31
+                      </span>
+                    </div>
+                    <div className="relative h-[110px] sm:h-[120px] w-full mt-2 mb-2">
+                      <div className="absolute inset-0 top-6 pointer-events-none">
+                        <svg className="w-full h-12 overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 30">
+                          <path
+                            d="M 0 15 Q 25 28, 50 15 T 100 15"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            style={{ color: 'var(--border-subtle)' }}
+                            className="opacity-70"
+                          />
+                        </svg>
+                      </div>
+                      {(() => {
+                        const today = new Date();
+                        const currentDay = today.getDate();
+                        const getPos = (d: number) => ((Math.max(1, Math.min(31, d)) - 1) / 30) * 100;
+                        const validExps = (filteredActiveFixedExpenses || []).filter(e => !e.isCancelled);
+                        return (
+                          <>
+                            {currentDay >= 1 && currentDay <= 31 && (
+                              <div
+                                className="absolute top-2 bottom-6 z-10 flex flex-col items-center pointer-events-none transform -translate-x-1/2"
+                                style={{ left: `${getPos(currentDay)}%` }}
+                              >
+                                <span
+                                  className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full mb-1 whitespace-nowrap"
+                                  style={{
+                                    color: 'var(--accent-color)',
+                                    backgroundColor: 'color-mix(in srgb, var(--accent-color) 10%, transparent)',
+                                  }}
+                                >
+                                  {config?.language === 'en' ? 'Today' : 'Idag'}
+                                </span>
+                                <div
+                                  className="w-2 h-2 rounded-full shadow-xs"
+                                  style={{
+                                    backgroundColor: 'var(--accent-color)',
+                                    boxShadow: '0 0 0 4px color-mix(in srgb, var(--accent-color) 20%, transparent)',
+                                  }}
+                                />
+                                <div
+                                  className="w-[1.5px] flex-1 opacity-60"
+                                  style={{
+                                    background: 'linear-gradient(to bottom, var(--accent-color), transparent)',
+                                  }}
+                                />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 pt-1 pointer-events-auto">
+                              {validExps.map((expense, idx) => {
+                                const day = typeof expense.deductionDay === 'number' && expense.deductionDay >= 1 ? expense.deductionDay : 1;
+                                const leftPct = getPos(day);
+                                const isEven = idx % 2 === 0;
+                                const tx = {
+                                  id: expense.id,
+                                  amount: expense.amount,
+                                  category: expense.category,
+                                  merchant: expense.name,
+                                  type: 'expense',
+                                  timestamp: Date.now(),
+                                  logo: expense.logo,
+                                  icon: expense.icon,
+                                  paymentMethod: expense.paymentMethod,
+                                  deductionDay: day,
+                                  frequency: expense.frequency,
+                                };
+                                return (
+                                  <div
+                                    key={expense.id || idx}
+                                    className="absolute flex flex-col items-center transform -translate-x-1/2 transition-transform hover:scale-110 cursor-pointer group/pin"
+                                    style={{
+                                      left: `${leftPct}%`,
+                                      top: isEven ? '2px' : '18px',
+                                    }}
+                                    onClick={() => onViewFixedExpense(expense)}
+                                    title={`${expense.name} (Dag ${day}) - ${expense.amount} kr`}
+                                  >
+
+                                    <div className="relative flex flex-col items-center">
+                                      <div
+                                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden shadow-sm border flex items-center justify-center transition-shadow group-hover/pin:shadow-md"
+                                        style={{
+                                          backgroundColor: 'var(--surface-color)',
+                                          borderColor: 'var(--border-subtle)',
+                                        }}
+                                      >
+                                        <TransactionLogo transaction={tx} config={config} size="sm" />
+                                      </div>
+                                      <div className="w-[1.5px] h-3 transition-colors" style={{ backgroundColor: 'var(--border-subtle)' }} />
+                                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--text-tertiary)' }} />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                    <div
+                      className="relative pt-3 border-t flex items-center justify-between text-[11px] font-medium tabular-nums"
+                      style={{
+                        borderColor: 'var(--border-subtle)',
+                        color: 'var(--text-tertiary)',
+                      }}
+                    >
+                      <div className="flex flex-col items-center">
+                        <div className="w-[1px] h-2 mb-1" style={{ backgroundColor: 'var(--border-subtle)' }} />
+                        <span>1</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="w-[1px] h-2 mb-1" style={{ backgroundColor: 'var(--border-subtle)' }} />
+                        <span>8</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="w-[1px] h-2 mb-1" style={{ backgroundColor: 'var(--border-subtle)' }} />
+                        <span>15</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="w-[1px] h-2 mb-1" style={{ backgroundColor: 'var(--border-subtle)' }} />
+                        <span>22</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="w-[1px] h-2 mb-1" style={{ backgroundColor: 'var(--border-subtle)' }} />
+                        <span>31</span>
+                      </div>
+                    </div>
+                  </div>
                   <div className="flex items-center justify-between gap-2 px-0.5">
                     <button
                       type="button"
@@ -509,7 +683,7 @@ export function BudgetView({
                         else if (fixedSortBy === 'name') setFixedSortBy('amount');
                         else setFixedSortBy('day');
                       }}
-                      className="inline-flex items-center gap-1.5 h-[36px] sm:h-[38px] px-2.5 sm:px-3 rounded-full text-[12.5px] sm:text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all cursor-pointer select-none active:scale-95 min-w-0"
+                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] text-label text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer select-none active:scale-95 min-w-0"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
@@ -525,17 +699,17 @@ export function BudgetView({
                         }
                       </span>
                     </button>
-                    <button
-                      type="button"
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={<Plus size={12} strokeWidth={2.5} />}
                       onClick={onAddFixedExpense}
-                      className="inline-flex items-center gap-1.5 h-[36px] sm:h-[38px] px-3 sm:px-3.5 rounded-full bg-[var(--surface-color)] dark:bg-white/[0.04] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.08] border border-[var(--border-subtle)] text-[13px] sm:text-[13.5px] font-medium transition-all cursor-pointer active:scale-95 shadow-none shrink-0"
                     >
-                      <Plus size={13} strokeWidth={2.5} className="text-[var(--text-secondary)]" />
-                      <span>{t('newFixedExpense')}</span>
-                    </button>
+                      {t('newFixedExpense')}
+                    </Button>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-[var(--card-gap)]">
                     {filteredActiveFixedExpenses.map((expense) => (
                       <BudgetItem 
                         key={expense.id}
@@ -572,7 +746,7 @@ export function BudgetView({
 
           {/* Monthly Savings Section */}
           {budgetFilter === 'savings' && (
-            <div className="space-y-3">
+            <div className="space-y-[var(--card-gap)]">
               {sortedSavings.length > 0 ? (
                 <>
                   <div className="flex items-center justify-between gap-2 px-0.5">
@@ -583,7 +757,7 @@ export function BudgetView({
                         else if (savingSortBy === 'name') setSavingSortBy('amount');
                         else setSavingSortBy('day');
                       }}
-                      className="inline-flex items-center gap-1.5 h-[36px] sm:h-[38px] px-2.5 sm:px-3 rounded-full text-[12.5px] sm:text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all cursor-pointer select-none active:scale-95 min-w-0"
+                      className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] text-label text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer select-none active:scale-95 min-w-0"
                       title={config.language === 'en' ? 'Click to change sort order' : 'Klicka för att ändra sortering'}
                     >
                       <ArrowUpDown size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />
@@ -599,17 +773,17 @@ export function BudgetView({
                       </span>
                     </button>
 
-                    <button
-                      type="button"
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={<Plus size={12} strokeWidth={2.5} />}
                       onClick={onAddMonthlySaving}
-                      className="inline-flex items-center gap-1.5 h-[36px] sm:h-[38px] px-3 sm:px-3.5 rounded-full bg-[var(--surface-color)] dark:bg-white/[0.04] text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.08] border border-[var(--border-subtle)] text-[13px] sm:text-[13.5px] font-medium transition-all cursor-pointer active:scale-95 shadow-none shrink-0"
                     >
-                      <Plus size={13} strokeWidth={2.5} className="text-[var(--text-secondary)]" />
-                      <span>{t('newMonthlySaving')}</span>
-                    </button>
+                      {t('newMonthlySaving')}
+                    </Button>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-[var(--card-gap)]">
                     {sortedSavings.map((saving) => (
                       <BudgetItem 
                         key={saving.id}

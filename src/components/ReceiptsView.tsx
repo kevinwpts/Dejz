@@ -51,7 +51,7 @@ export function ReceiptsView({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-5 pb-24 page-max mx-auto w-full"
+      className="space-y-[var(--card-gap)] pb-24 page-max mx-auto w-full"
     >
       {/* Stats Summary Panel */}
       {receiptTransactions.length > 0 && (
@@ -88,7 +88,7 @@ export function ReceiptsView({
       )}
 
       {/* Receipt Grid/List */}
-      <div className="space-y-3">
+      <div className="space-y-[var(--card-gap)]">
         {filteredTransactions.length > 0 ? (
           <div className="grid gap-3">
             <AnimatePresence mode="popLayout">

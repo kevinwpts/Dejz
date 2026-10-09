@@ -14,7 +14,7 @@ import { Transaction, Config, FixedExpense, Income, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
-import { FilterSelectButton, FilterButtonGroup } from './ui';
+import { FilterButtonGroup } from './ui';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { formatFullDate } from '../utils/date';
@@ -397,63 +397,62 @@ export function LogView({
   if (!transactions && (!fixedExpenses || fixedExpenses.length === 0)) return null;
 
   return (
-    <div className="space-y-5 font-sans">
-      {/* Top Controls: Period Dropdown (Main) & Direct Type Filter Buttons */}
-      <div className="space-y-2.5">
-        {/* Main Period Selector Dropdown */}
-        <FilterSelectButton
-          icon={<CalendarIcon size={15} strokeWidth={2} />}
-          value={activeFilterLabel || getL10n('Alla perioder', 'All periods')}
-          badge={
-            selectedPeriod?.isCurrent ? (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
-                {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
-              </span>
-            ) : undefined
-          }
+    <div className="space-y-[var(--menu-content-gap)] font-sans">
+      {/* Top Controls: Compact Inline Row (Period button + Filter pills) */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
+        <button
+          type="button"
           onClick={() => {
             const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
             setModalPeriod(initial);
             setIsPeriodPickerOpen(true);
           }}
-          className="w-full"
-        />
-
-        {/* Direct Type Filter Buttons */}
+          className="flex-shrink-0 h-[32px] sm:h-[34px] px-3 rounded-full inline-flex items-center gap-1.5 text-[11px] sm:text-[11.5px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98]"
+        >
+          <CalendarIcon size={13} className="text-[var(--text-secondary)] shrink-0" />
+          <span className="truncate">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
+          {selectedPeriod?.isCurrent && (
+            <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+              {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
+            </span>
+          )}
+          <ChevronLeft size={11} className="text-[var(--text-secondary)] shrink-0 ml-0.5 rotate-[-90deg]" />
+        </button>
         <FilterButtonGroup
           options={[
             {
               id: 'all',
               label: t('all' as TranslationKey) || (config.language === 'en' ? 'All' : 'Alla'),
-              icon: <LayoutGrid size={14} strokeWidth={2} />,
+              icon: <LayoutGrid size={13} strokeWidth={2} />,
             },
             {
               id: 'expense',
               label: t('expense' as TranslationKey) || (config.language === 'en' ? 'Expenses' : 'Utgifter'),
-              icon: <ArrowDownLeft size={14} strokeWidth={2.5} />,
+              icon: <ArrowDownLeft size={13} strokeWidth={2.5} />,
             },
             {
               id: 'income',
               label: t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster'),
-              icon: <ArrowUpRight size={14} strokeWidth={2.5} />,
+              icon: <ArrowUpRight size={13} strokeWidth={2.5} />,
             },
           ]}
           selectedId={typeFilter}
           onSelect={(id) => setTypeFilter(id as 'all' | 'expense' | 'income')}
           ariaLabel={getL10n('Filtrera transaktioner', 'Filter transactions')}
+          className="flex-shrink-0 w-auto"
         />
       </div>
 
       {/* Transactions List */}
-      <div className="space-y-5">
-        <div className="space-y-5">
+      <div className="space-y-[var(--card-gap)]">
+        <div className="space-y-7">
           {groupedExpenses.map(([date, dayTransactions], index) => (
             <motion.div 
               key={date} 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.04 }}
-              className="space-y-2"
+              className="space-y-[var(--card-gap)]"
             >
               <div className="px-1 flex items-center justify-between">
                 <span className="text-label font-medium text-[var(--text-secondary)]">
@@ -469,7 +468,7 @@ export function LogView({
                   )}
                 </span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-[var(--card-gap)]">
                 {dayTransactions.map((transaction: any) => (
                   <TransactionItem 
                     key={transaction.id}
@@ -573,7 +572,7 @@ export function LogView({
         showCalendarOption={true}
         currentLang={currentLang}
         calendarContent={
-          <div className="space-y-2.5">
+          <div className="space-y-[var(--card-gap)]">
             {/* Period Stepper (Left / Right) */}
             <div className="flex items-center justify-between bg-[var(--surface-color)] border-none shadow-none rounded-card p-1.5">
               <button

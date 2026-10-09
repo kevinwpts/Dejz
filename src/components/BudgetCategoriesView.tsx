@@ -305,7 +305,7 @@ export function BudgetCategoriesView({
   const incomeCategoriesList = (config.incomeCategories as Category[]) || DEFAULT_INCOME_CATEGORIES;
 
   return (
-    <div className="space-y-5 font-sans pb-10 page-max mx-auto w-full">
+    <div className="space-y-[var(--card-gap)] font-sans pb-10 page-max mx-auto w-full">
       {/* 0. Flikväljare: Utgifter / Inkomster (döljs i rent budgetläge) */}
       {effectiveMode !== 'budget' && (
         <div className="flex bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[8px] gap-1">
@@ -342,7 +342,7 @@ export function BudgetCategoriesView({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="sticky top-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md rounded-[8px] p-4 shadow-subtle border border-subtle space-y-2.5"
+              className="sticky top-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md rounded-[8px] p-4 shadow-subtle border border-subtle space-y-[var(--card-gap)]"
             >
               <div className="flex items-baseline justify-between">
                 <div className="space-y-0.5">
@@ -384,7 +384,7 @@ export function BudgetCategoriesView({
           )}
 
           {/* 2. Utgiftskategorier */}
-          <div className="space-y-3">
+          <div className="space-y-[var(--card-gap)]">
             <div className="flex items-center justify-between px-1">
               <span className="text-label font-semibold text-[var(--text-secondary)]">
                 {categoriesList.length} {isEn ? 'categories' : 'kategorier'}
@@ -403,7 +403,7 @@ export function BudgetCategoriesView({
             </div>
 
             {/* Separata kort med mellanrum, precis som transaktionskort */}
-            <div className="space-y-2.5">
+            <div className="space-y-[var(--card-gap)]">
               {categoriesList.map((cat, index) => {
                 const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
                 const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
@@ -519,7 +519,7 @@ export function BudgetCategoriesView({
         </>
       ) : (
         /* Inkomstkategorier i samma layout som Betalningsmetoder */
-        <div className="space-y-3">
+        <div className="space-y-[var(--card-gap)]">
           <div className="flex items-center justify-between px-1">
             <span className="text-label font-semibold text-[var(--text-secondary)]">
               {incomeCategoriesList.length} {isEn ? 'categories' : 'kategorier'}
@@ -535,7 +535,7 @@ export function BudgetCategoriesView({
             </Button>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-[var(--card-gap)]">
             {incomeCategoriesList.map((cat, index) => {
               const catColor = cat.color || getCategoryColor(cat.name, config?.incomeCategories);
               return (
@@ -562,7 +562,7 @@ export function BudgetCategoriesView({
       )}
 
       {/* 3. Minimal footer */}
-      <div className="pt-2 space-y-3">
+      <div className="pt-2 space-y-[var(--card-gap)]">
         <Button
           type="button"
           variant="accent"
@@ -645,7 +645,7 @@ export function BudgetCategoriesView({
               : `Ta bort ${deleteMigrationData.category.name}?`
           }
           showCloseButton={true}
-          bodyClassName="p-5 space-y-4"
+          bodyClassName="p-5 space-y-[var(--card-gap)]"
         >
           <p className="text-secondary text-[var(--text-secondary)] leading-relaxed">
             {isEn

@@ -52,12 +52,12 @@ export function CustomBottomNavigation({
           aria-label={isEn ? "Add transaction" : "Lägg till transaktion"}
           title={isEn ? "Add transaction" : "Lägg till transaktion"}
         >
-          <Icon name="plus" size={28} weight="bold" className="text-[var(--on-accent)]" />
+          <Icon name="plus" size={26} weight="bold" className="text-[var(--on-accent)]" />
         </button>
       </div>
 
       {/* 5 lika breda kolumner indragna från sidokanterna med ca 2 mm mer luft i botten */}
-      <nav className="relative z-10 w-full page-max mx-auto h-[62px] grid grid-cols-5 items-end pb-3.5 px-3.5 sm:px-6">
+      <nav className="relative z-10 w-full max-w-[440px] mx-auto h-[62px] grid grid-cols-5 items-end pb-3.5 px-6 sm:px-8">
         {/* 1. Hem */}
         <NavItem
           iconName="house"

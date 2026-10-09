@@ -79,21 +79,21 @@ export function FilterButtonGroup<T extends string = string>({
                 }
                 onSelect(option.id);
               }}
-              className={`flex-shrink-0 whitespace-nowrap h-[36px] sm:h-[38px] px-3 sm:px-3.5 rounded-full inline-flex items-center justify-center gap-1.5 text-[13px] sm:text-[13.5px] font-medium transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 ${
+              className={`flex-shrink-0 whitespace-nowrap h-[35px] sm:h-[37px] px-3 sm:px-3.5 rounded-full inline-flex items-center justify-center gap-1.5 text-[12px] sm:text-[12.5px] font-medium transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]/30 ${
                 isSelected
                   ? 'bg-[#242321] text-white dark:bg-stone-100 dark:text-[#242321] border border-transparent shadow-none'
                   : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] border border-[var(--border-subtle)] shadow-none'
               }`}
             >
               {option.icon && (
-                <span className={`shrink-0 flex items-center justify-center [&>svg]:w-3.5 [&>svg]:h-3.5 transition-colors ${isSelected ? 'text-white dark:text-[#242321]' : 'text-[var(--text-secondary)]'}`}>
+                <span className={`shrink-0 flex items-center justify-center [&>svg]:w-3 [&>svg]:h-3 transition-colors ${isSelected ? 'text-white dark:text-[#242321]' : 'text-[var(--text-secondary)]'}`}>
                   {option.icon}
                 </span>
               )}
               <span>{option.label}</span>
               {option.badge !== undefined && (
                 <span
-                  className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full shrink-0 ${
+                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full shrink-0 ${
                     isSelected
                       ? 'bg-white/20 dark:bg-black/15 text-white dark:text-[#242321]'
                       : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'

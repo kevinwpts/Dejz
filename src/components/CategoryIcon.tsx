@@ -138,7 +138,7 @@ export function CategoryIcon({
 
     return (
       <div
-        className={`rounded-full flex items-center justify-center shrink-0 select-none transition-transform bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.04] dark:border-white/[0.06] ${containerSizes[size]} ${
+        className={`rounded-full flex items-center justify-center shrink-0 select-none transition-transform bg-black/[0.04] dark:bg-white/[0.06] ${containerSizes[size]} ${
           isActive ? 'ring-2 ring-[var(--accent-color)] shadow-subtle scale-105' : ''
         } ${className}`}
         aria-hidden="true"
@@ -178,7 +178,7 @@ export function CategoryIcon({
 
   return (
     <div
-      className={`rounded-full flex items-center justify-center shrink-0 text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.04] dark:border-white/[0.06] select-none transition-transform ${containerSizes[size]} ${
+      className={`rounded-full flex items-center justify-center shrink-0 text-[var(--text-primary)] bg-black/[0.04] dark:bg-white/[0.06] select-none transition-transform ${containerSizes[size]} ${
         isActive ? 'ring-2 ring-[var(--accent-color)] shadow-subtle scale-105' : ''
       } ${className}`}
       aria-hidden="true"

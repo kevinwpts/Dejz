@@ -6,7 +6,7 @@ import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
 import { BudgetSummaryModule } from './BudgetSummaryModule';
-import { FilterSelectButton, FilterButtonGroup, Card } from './ui';
+import { FilterButtonGroup, Card } from './ui';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { formatAmount } from '../utils/format';
 import { isFixedItemDueInPeriod } from '../utils/date';
@@ -353,41 +353,39 @@ export function AnalysisView({
   if (!stats) return null;
 
   return (
-    <div className="space-y-5 font-sans">
-      {/* Top Controls: Period Dropdown (Main) & Direct Spending Filter Buttons */}
-      <div className="space-y-2.5">
-        {/* Main Period Selector Dropdown */}
-        <FilterSelectButton
-          icon={<Calendar size={15} strokeWidth={2} />}
-          value={periodIntervalText || effectiveStats?.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}
-          badge={
-            currentPeriod?.isCurrent ? (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)] tracking-tight">
-                {isEn ? 'Current' : 'Nu'}
-              </span>
-            ) : undefined
-          }
+    <div className="space-y-[var(--menu-content-gap)] font-sans">
+      {/* Top Controls: Compact Inline Row (Period button + Filter pills) */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
+        <button
+          type="button"
           onClick={() => setIsPeriodModalOpen(true)}
-          className="w-full"
-        />
-
-        {/* Direct Spending Filter Buttons */}
+          className="flex-shrink-0 h-[32px] sm:h-[34px] px-3 rounded-full inline-flex items-center gap-1.5 text-[11px] sm:text-[11.5px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98]"
+        >
+          <Calendar size={13} className="text-[var(--text-secondary)] shrink-0" />
+          <span className="truncate">{periodIntervalText || effectiveStats?.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}</span>
+          {currentPeriod?.isCurrent && (
+            <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+              {isEn ? 'Current' : 'Nu'}
+            </span>
+          )}
+          <ChevronDown size={12} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
+        </button>
         <FilterButtonGroup
           options={[
             {
               id: 'all',
               label: t('all' as TranslationKey) || (isEn ? 'All' : 'Alla'),
-              icon: <LayoutGrid size={14} strokeWidth={2} />,
+              icon: <LayoutGrid size={13} strokeWidth={2} />,
             },
             {
               id: 'variable',
               label: isEn ? 'Variable' : 'Rörliga',
-              icon: <TrendingUp size={14} strokeWidth={2} />,
+              icon: <TrendingUp size={13} strokeWidth={2} />,
             },
             {
               id: 'fixed',
               label: isEn ? 'Fixed' : 'Fasta',
-              icon: <Calendar size={14} strokeWidth={2} />,
+              icon: <Calendar size={13} strokeWidth={2} />,
             },
           ]}
           selectedId={analysisFilter}
@@ -396,6 +394,7 @@ export function AnalysisView({
             setExpandedCategory(null);
           }}
           ariaLabel={isEn ? 'Filter spending' : 'Filtrera utgifter'}
+          className="flex-shrink-0 w-auto"
         />
       </div>
 
@@ -438,14 +437,14 @@ export function AnalysisView({
 
       {/* DONUT DIAGRAM & FÖRDELNING */}
       {categoryData.length > 0 && (
-        <Card variant="default" padding="md" className="space-y-5 border-none">
+        <Card variant="default" padding="md" className="space-y-[var(--card-gap)] border-none">
           <div className="flex items-center justify-between px-0.5">
             <h2 className="text-section-title">
               {isEn ? 'Distribution' : 'Fördelning'}
             </h2>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-[var(--card-gap)]">
             {/* Donut Chart */}
             <div className="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto flex items-center justify-center">
               <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
@@ -501,7 +500,7 @@ export function AnalysisView({
 
       {/* FULLSTÄNDIG KATEGORILISTA ELLER GEMENSAM TOMVY */}
       {categoryData.length > 0 ? (
-        <div className="space-y-2.5 pb-8">
+        <div className="space-y-[var(--card-gap)] pb-8">
           <div className="flex items-center justify-between px-0.5">
             <h3 className="text-section-title">
               {t('categories')}

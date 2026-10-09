@@ -144,7 +144,7 @@ export function SearchModal({
             </div>
 
             {/* Results Scroll Container */}
-            <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-6 custom-scrollbar touch-pan-y overscroll-contain bg-canvas">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-[var(--card-gap)] custom-scrollbar touch-pan-y overscroll-contain bg-canvas">
               {!trimmedQuery ? (
                 <div className="text-center py-16 px-4">
                   <div className="w-12 h-12 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] opacity-60 flex items-center justify-center mx-auto mb-3">
@@ -170,7 +170,7 @@ export function SearchModal({
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2.5">
+                <div className="space-y-[var(--card-gap)]">
                   <div className="flex items-center justify-between px-1">
                     <span className="text-micro-label font-bold tracking-wider text-[var(--text-secondary)] opacity-70">
                       {getL10n("Transaktioner", "Transactions", "Transaksjoner", "Transaktioner", "Tapahtumat")} ({matchingTransactions.length})
@@ -178,7 +178,7 @@ export function SearchModal({
                   </div>
 
                   {matchingTransactions.length > 0 ? (
-                    <div className="space-y-2.5">
+                    <div className="space-y-[var(--card-gap)]">
                       {matchingTransactions.map(t => (
                         <TransactionItem 
                           key={t.id} 

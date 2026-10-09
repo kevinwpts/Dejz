@@ -209,7 +209,7 @@ export function ProfileView({
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
-        className="space-y-6"
+        className="space-y-[var(--card-gap)]"
       >
         <SettingsView 
           activeSection={activePage as any}
@@ -290,7 +290,7 @@ export function ProfileView({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
-      className="space-y-5 w-full pb-12 font-sans"
+      className="space-y-[var(--card-gap)] w-full pb-12 font-sans"
     >
       {/* User Header Module */}
       <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,14px)] p-5 border border-subtle shadow-2xs flex items-center gap-4">
@@ -334,7 +334,7 @@ export function ProfileView({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-[var(--card-gap)]">
         {/* Admin Tools for App Owner */}
         {isAdmin && (
           <div className="space-y-2">
@@ -641,7 +641,7 @@ export function ProfileView({
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
             {isDemoMode && (
-              <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-2.5">
+              <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-[var(--card-gap)]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="relative flex h-2 w-2">

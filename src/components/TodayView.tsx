@@ -351,7 +351,7 @@ export function TodayView({
   if (!stats) return null;
 
   return (
-    <div className="space-y-5 font-sans">
+    <div className="space-y-[var(--menu-content-gap)] font-sans">
       {/* 1. Unified Main Summary Module (Kvar att spendera + Period & Payday) */}
       <GreetingModule
         userName={userName}
@@ -388,9 +388,9 @@ export function TodayView({
       />
 
       {/* 2. Category Budgets */}
-      <div className="animate-fade-in space-y-2.5">
+      <div className="animate-fade-in space-y-[var(--card-gap)]">
         {!hasSavedBudget ? (
-          <div className="space-y-2.5">
+          <div className="space-y-[var(--card-gap)]">
             <div className="flex items-center justify-between px-0.5">
               <h2 className="text-section-title">
                 {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
@@ -418,7 +418,7 @@ export function TodayView({
             </button>
           </div>
         ) : categoryBudgetData.length > 0 ? (
-          <div className="space-y-2.5">
+          <div className="space-y-[var(--card-gap)]">
             <div className="flex items-center justify-between px-0.5">
               <h2 className="text-section-title">
                 {lang === "en" ? "Category budgets" : "Kategoribudgetar"}
@@ -438,7 +438,7 @@ export function TodayView({
 
             {/* En gemensam sammanhängande Card-modul för alla kategorier med horisontell scroll */}
             <Card variant="default" padding="none" className="border-none">
-              <div className="overflow-x-auto scrollbar-hide py-4 px-3.5 sm:py-4 sm:px-4 flex items-start gap-3 sm:gap-4">
+              <div className="overflow-x-auto scrollbar-hide py-5 sm:py-6 px-3.5 sm:px-4 flex items-start gap-3 sm:gap-4">
                 {categoryBudgetData.map((cat) => {
                   const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
                   const currency = config?.currency || 'kr';
@@ -456,12 +456,12 @@ export function TodayView({
                       className="flex flex-col items-center text-center shrink-0 w-[96px] sm:w-[104px] group cursor-pointer active:scale-[0.96] transition-transform select-none focus:outline-none"
                     >
                       {/* 1. Kategoriikon */}
-                      <CategoryIcon icon={cat.iconName} color={catColor} size="md" categoryName={cat.name} />
+                      <CategoryIcon icon={cat.iconName} color={catColor} size="xl" categoryName={cat.name} />
 
                       {/* 2. Kategorinamn (reservera fast höjd för upp till 2 rader så beloppen hamnar på exakt samma horisontella nivå) */}
-                      <div className="h-[28px] sm:h-[32px] flex items-center justify-center w-full px-0.5 mt-1.5">
+                      <div className="h-[24px] sm:h-[26px] flex items-center justify-center w-full px-0.5 mt-1.5">
                         <span
-                          className="text-[11.5px] sm:text-[12px] font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors leading-tight line-clamp-2 w-full text-center"
+                          className="text-[9px] sm:text-[9.5px] font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors leading-tight line-clamp-2 w-full text-center"
                           title={cat.name}
                         >
                           {cat.name}
@@ -493,7 +493,7 @@ export function TodayView({
       </div>
 
       {/* 3. Unified Timeline & Transactions Section */}
-      <div className="space-y-2.5 sm:space-y-3">
+      <div className="space-y-[var(--card-gap)] sm:space-y-[var(--card-gap)]">
         {/* Timeline */}
         {calendarDays && calendarDays.length > 0 && (
           <div className="animate-fade-in -mx-1 px-1">
@@ -522,15 +522,6 @@ export function TodayView({
                       { day: "numeric", month: "long" },
                     )}
             </h2>
-            {(displayedVariableTransactions.length > 0 || displayedFixedTransactions.length > 0) && (
-              <span className="text-micro-label font-medium text-[var(--text-tertiary)] tabular-nums font-amount shrink-0">
-                {(displayedVariableTransactions.length + displayedFixedTransactions.length)} {
-                  (displayedVariableTransactions.length + displayedFixedTransactions.length) === 1
-                    ? (lang === 'en' ? 'transaktion' : 'transaktion')
-                    : (lang === 'en' ? 'transaktioner' : 'transaktioner')
-                }
-              </span>
-            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -544,26 +535,14 @@ export function TodayView({
                 <span>{lang === "en" ? "Today" : "Idag"}</span>
               </button>
             )}
-
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof feedback.light === 'function') feedback.light();
-                onNavigate("log");
-              }}
-              className="text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer flex items-center gap-0.5"
-            >
-              <span>{lang === "en" ? "View all" : "Visa alla"}</span>
-              <ChevronRight size={12} strokeWidth={2} />
-            </button>
           </div>
         </div>
 
         {/* Selected Day's Transactions List */}
-        <div className="space-y-2">
+        <div className="space-y-[var(--card-gap)]">
           <AnimatePresence mode="popLayout">
             {displayedVariableTransactions.length > 0 ? (
-              <motion.div className="space-y-2" key="transactions">
+              <motion.div className="space-y-[var(--card-gap)]" key="transactions">
                 {displayedVariableTransactions.map((transaction: Transaction, index: number) => (
                   <motion.div
                     key={transaction.id}
@@ -596,7 +575,7 @@ export function TodayView({
 
           {/* Fixed transactions for the day */}
           {displayedFixedTransactions.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-[var(--card-gap)]">
               {displayedFixedTransactions.map((item) => {
                 const tx: Transaction = {
                   id: item.id,
@@ -643,7 +622,7 @@ export function TodayView({
           </div>
         }
       >
-        <div className="space-y-2.5 pt-1">
+        <div className="space-y-[var(--card-gap)] pt-1">
           {/* Period */}
           <div className="flex items-center gap-3 p-3 rounded-card-nested bg-black/[0.04] dark:bg-white/[0.06] border border-subtle">
             <div className="w-8 h-8 rounded-[var(--radius-button-sm,8px)] bg-white dark:bg-white/10 flex items-center justify-center text-[var(--text-primary)] shrink-0 shadow-xs border border-subtle">

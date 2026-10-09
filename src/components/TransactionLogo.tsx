@@ -68,23 +68,23 @@ export function TransactionLogo({
 
   const sizeConfig = {
     xl: {
-      container: 'w-16 h-16 rounded-[8px]',
+      container: 'w-16 h-16 rounded-full',
       icon: 30,
     },
     lg: {
-      container: 'w-14 h-14 rounded-[8px]',
+      container: 'w-14 h-14 rounded-full',
       icon: 26,
     },
     md: {
-      container: 'w-[42px] h-[42px] rounded-[8px]',
+      container: 'w-[42px] h-[42px] rounded-full',
       icon: 20,
     },
     sm: {
-      container: 'w-8 h-8 rounded-[6px]',
+      container: 'w-8 h-8 rounded-full',
       icon: 15,
     },
   }[size] || {
-    container: 'w-[42px] h-[42px] rounded-[8px]',
+    container: 'w-[42px] h-[42px] rounded-full',
     icon: 20,
   };
 
@@ -93,7 +93,7 @@ export function TransactionLogo({
     const IconComponent = visual.iconComponent || Receipt;
     return (
       <div
-        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border border-subtle shadow-2xs select-none`}
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] shadow-2xs select-none`}
       >
         <IconComponent size={sizeConfig.icon} strokeWidth={2} />
       </div>
@@ -104,7 +104,7 @@ export function TransactionLogo({
   if (activeLogoUrl && !imgError) {
     return (
       <div
-        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/5 border border-subtle shadow-2xs select-none`}
+        className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 bg-white dark:bg-white/5 shadow-2xs select-none`}
       >
         <img
           src={activeLogoUrl}
