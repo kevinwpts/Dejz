@@ -132,14 +132,14 @@ export function LandingPage({
             {onLogin && (
               <button
                 onClick={onLogin}
-                className="inline-flex items-center justify-center px-4 py-2 rounded-[12px] text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer active:scale-95"
+                className="inline-flex items-center justify-center px-4 py-2 rounded-btn text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer active:scale-95"
               >
                 Logga in
               </button>
             )}
             <button
               onClick={onGetStarted}
-              className="inline-flex items-center justify-center px-4.5 py-2 rounded-[12px] text-sm font-semibold text-[var(--text-on-accent)] bg-[var(--accent-color)] hover:opacity-95 transition-all cursor-pointer shadow-sm active:scale-95"
+              className="inline-flex items-center justify-center px-4.5 py-2 rounded-btn text-sm font-semibold text-[var(--text-on-accent)] bg-[var(--accent-color)] hover:opacity-95 transition-all cursor-pointer shadow-sm active:scale-95"
             >
               Kom igång gratis
             </button>
@@ -170,14 +170,14 @@ export function LandingPage({
                 <div className="flex items-stretch gap-3">
                   <button
                     onClick={onGetStarted}
-                    className="flex-1 inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-base font-semibold text-[var(--text-on-accent)] bg-[var(--accent-color)] hover:opacity-95 transition-all cursor-pointer shadow-md shadow-[var(--accent-color)]/20 active:scale-95"
+                    className="flex-1 inline-flex items-center justify-center px-6 py-3.5 rounded-btn text-base font-semibold text-[var(--text-on-accent)] bg-[var(--accent-color)] hover:opacity-95 transition-all cursor-pointer shadow-md shadow-[var(--accent-color)]/20 active:scale-95"
                   >
                     Kom igång gratis
                   </button>
                   {onStartDemo && (
                     <button
                       onClick={onStartDemo}
-                      className="inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-base font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer active:scale-95"
+                      className="inline-flex items-center justify-center px-6 py-3.5 rounded-btn text-base font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer active:scale-95"
                     >
                       Testa demo direkt
                     </button>
@@ -187,7 +187,7 @@ export function LandingPage({
                 {onGoogleLogin && (
                   <button
                     onClick={onGoogleLogin}
-                    className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-[14px] text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-all cursor-pointer shadow-xs active:scale-95"
+                    className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-btn text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-all cursor-pointer shadow-xs active:scale-95"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -255,14 +255,14 @@ export function LandingPage({
               <div className="flex flex-col sm:flex-row items-stretch gap-3">
                 <button
                   onClick={onGetStarted}
-                  className="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-base font-semibold text-[var(--text-on-accent)] bg-[var(--accent-color)] hover:opacity-95 transition-all cursor-pointer shadow-md shadow-[var(--accent-color)]/20 active:scale-95"
+                  className="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-btn text-base font-semibold text-[var(--text-on-accent)] bg-[var(--accent-color)] hover:opacity-95 transition-all cursor-pointer shadow-md shadow-[var(--accent-color)]/20 active:scale-95"
                 >
                   Kom igång gratis
                 </button>
                 {onStartDemo && (
                   <button
                     onClick={onStartDemo}
-                    className="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-base font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer active:scale-95"
+                    className="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-btn text-base font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer active:scale-95"
                   >
                     Testa demo direkt
                   </button>
@@ -272,7 +272,7 @@ export function LandingPage({
               {onGoogleLogin && (
                 <button
                   onClick={onGoogleLogin}
-                  className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-[14px] text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-all cursor-pointer shadow-xs active:scale-95"
+                  className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-btn text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-all cursor-pointer shadow-xs active:scale-95"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -357,7 +357,7 @@ export function LandingPage({
                 </p>
               </div>
 
-              <div className="bg-slate-50 rounded-[14px] p-4 border border-slate-200/60 space-y-2 text-xs sm:text-sm">
+              <div className="bg-slate-50 rounded-card p-4 border border-slate-200/60 space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between text-slate-600">
                   <span>Inkomst</span>
                   <span className="font-semibold text-slate-900">25 000 kr</span>
@@ -389,7 +389,7 @@ export function LandingPage({
                 </p>
               </div>
 
-              <div className="bg-slate-50 rounded-[14px] p-4 border border-slate-200/60 space-y-3">
+              <div className="bg-slate-50 rounded-card p-4 border border-slate-200/60 space-y-3">
                 <div className="flex items-center justify-between bg-white p-3 rounded-[10px] border border-slate-200/60 shadow-xs">
                   <span className="text-sm font-semibold text-slate-800">Lunch</span>
                   <span className="text-sm font-bold text-rose-600">−120 kr</span>
@@ -413,7 +413,7 @@ export function LandingPage({
                 </p>
               </div>
 
-              <div className="bg-slate-50 rounded-[14px] p-4 border border-slate-200/60 space-y-1.5 text-center">
+              <div className="bg-slate-50 rounded-card p-4 border border-slate-200/60 space-y-1.5 text-center">
                 <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">Kvar att spendera</span>
                 <div className="text-2xl font-black text-emerald-600 tracking-tight">
                   10 000 kr
@@ -519,7 +519,7 @@ export function LandingPage({
                 <div>
                   <button
                     onClick={onGetStarted}
-                    className="inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-all cursor-pointer shadow-sm active:scale-95"
+                    className="inline-flex items-center justify-center px-6 py-3.5 rounded-btn text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-all cursor-pointer shadow-sm active:scale-95"
                   >
                     Kom igång gratis
                   </button>
@@ -609,7 +609,7 @@ export function LandingPage({
             {onGoogleLogin && (
               <button
                 onClick={onGoogleLogin}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-[14px] text-sm font-bold text-slate-900 bg-white hover:bg-slate-100 transition-all cursor-pointer shadow-md active:scale-95"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-btn text-sm font-bold text-slate-900 bg-white hover:bg-slate-100 transition-all cursor-pointer shadow-md active:scale-95"
               >
                 <svg className="w-4.5 h-4.5" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -622,7 +622,7 @@ export function LandingPage({
             )}
             <button
               onClick={onGetStarted}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-[14px] text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-all cursor-pointer shadow-md active:scale-95"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-btn text-sm font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-all cursor-pointer shadow-md active:scale-95"
             >
               Kom igång gratis
             </button>

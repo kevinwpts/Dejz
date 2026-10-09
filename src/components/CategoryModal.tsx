@@ -157,7 +157,7 @@ export function CategoryModal({
               {/* Custom hex color input picker */}
               <div 
                 className={`relative w-full aspect-square rounded-full border border-[var(--border-color)] cursor-pointer shadow-xs flex items-center justify-center group transition-all duration-200 active:scale-95 ${
-                  isCustomSelected ? 'scale-110 ring-2 ring-white dark:ring-[#1C1C1C] shadow-md z-10' : 'hover:scale-105'
+                  isCustomSelected ? 'scale-110 ring-2 ring-white dark:ring-surface shadow-md z-10' : 'hover:scale-105'
                 }`}
                 style={{ background: 'conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)' }}
               >
@@ -189,7 +189,7 @@ export function CategoryModal({
                     type="button"
                     onClick={() => setColor(c)}
                     className={`w-full aspect-square rounded-full transition-transform active:scale-90 relative cursor-pointer ${
-                      isSelected ? 'scale-110 shadow-sm ring-2 ring-white dark:ring-[#1C1C1C]' : 'hover:scale-105'
+                      isSelected ? 'scale-110 shadow-sm ring-2 ring-white dark:ring-surface' : 'hover:scale-105'
                     }`}
                     style={{ backgroundColor: c }}
                     aria-label={`Välj färg ${c}`}

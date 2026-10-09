@@ -194,7 +194,7 @@ export function CancelSubscriptionModal({
 
                 {/* Notice Period & Tips Box (clean neutral surface) */}
                 {(details.noticePeriod || details.tips) && (
-                  <div className="p-3.5 rounded-[12px] bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] text-xs text-[var(--text-secondary)] space-y-2">
+                  <div className="p-3.5 rounded-card-nested bg-[var(--surface-color)] border border-black/[0.06] dark:border-white/[0.08] text-xs text-[var(--text-secondary)] space-y-2">
                     {details.noticePeriod && (
                       <div className="flex items-start gap-2">
                         <Clock size={14} className="text-[var(--text-secondary)] shrink-0 mt-0.5" />
@@ -258,14 +258,14 @@ export function CancelSubscriptionModal({
                         type="date"
                         value={cancelDate}
                         onChange={(e) => setCancelDate(e.target.value)}
-                        className="w-full h-10 px-3 bg-[var(--bg-color)] border border-black/10 dark:border-white/10 rounded-[12px] text-xs font-semibold text-[var(--text-primary)] outline-none"
+                        className="w-full h-10 px-3 bg-[var(--bg-color)] border border-black/10 dark:border-white/10 rounded-input text-xs font-semibold text-[var(--text-primary)] outline-none"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-2 pt-1">
                       <button
                         type="button"
                         onClick={() => setShowMarkCancelled(false)}
-                        className="py-2.5 px-3 rounded-[12px] bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/10 text-[var(--text-primary)] text-xs font-semibold cursor-pointer active:scale-[0.98]"
+                        className="py-2.5 px-3 rounded-btn bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/10 text-[var(--text-primary)] text-xs font-semibold cursor-pointer active:scale-[0.98]"
                       >
                         {isEn ? 'Cancel' : 'Avbryt'}
                       </button>
@@ -282,7 +282,7 @@ export function CancelSubscriptionModal({
                           setShowMarkCancelled(false);
                           onClose();
                         }}
-                        className="py-2.5 px-3 rounded-[12px] bg-[var(--accent-color)] text-[var(--on-accent)] text-xs font-semibold cursor-pointer active:scale-[0.98]"
+                        className="py-2.5 px-3 rounded-btn bg-[var(--accent-color)] text-[var(--on-accent)] text-xs font-semibold cursor-pointer active:scale-[0.98]"
                       >
                         {isEn ? 'Save status' : 'Spara status'}
                       </button>

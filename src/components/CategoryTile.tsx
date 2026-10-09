@@ -24,7 +24,7 @@ export function CategoryTile({
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-[14px] transition-all relative group cursor-pointer select-none ${
+      className={`flex flex-col items-center justify-center gap-1.5 p-2 min-h-[70px] sm:min-h-[74px] rounded-card transition-all relative group cursor-pointer select-none ${
         isActive
           ? 'bg-[var(--accent-color)]/15 text-[var(--text-primary)] border-2 border-[var(--accent-color)] shadow-xs scale-[1.02]'
           : 'bg-black/[0.03] dark:bg-white/[0.04] text-[#777168] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.08] hover:text-[var(--text-primary)] dark:hover:text-white border border-black/5 dark:border-white/[0.06]'

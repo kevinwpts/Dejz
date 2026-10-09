@@ -598,7 +598,7 @@ export function LogView({
                     {modalPeriod?.name?.split('(')[0]?.trim() || modalPeriodDate.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' })}
                   </span>
                   {modalPeriod?.isCurrent && (
-                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-[#1C1C1C] text-[var(--text-secondary)] border-none">
+                    <span className="text-[9.5px] font-medium px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] border-none">
                       {getL10n('Nu', 'Now', 'Nå', 'Nu', 'Nyt')}
                     </span>
                   )}

@@ -108,7 +108,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
             onMouseDown={preventBlur}
             onClick={() => handleQuickDivide(2)}
             disabled={!isValueValid}
-            className="px-2.5 py-1.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-xs font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
+            className="px-2.5 py-1.5 rounded-btn bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-xs font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
             title="Dela på 2"
           >
             <span className="text-[var(--accent-color)]">÷</span>2
@@ -118,7 +118,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
             onMouseDown={preventBlur}
             onClick={() => handleQuickDivide(3)}
             disabled={!isValueValid}
-            className="px-2.5 py-1.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-xs font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
+            className="px-2.5 py-1.5 rounded-btn bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-xs font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
             title="Dela på 3"
           >
             <span className="text-[var(--accent-color)]">÷</span>3
@@ -128,7 +128,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
             onMouseDown={preventBlur}
             onClick={() => handleQuickDivide(4)}
             disabled={!isValueValid}
-            className="px-2.5 py-1.5 rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-xs font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
+            className="px-2.5 py-1.5 rounded-btn bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-xs font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
             title="Dela på 4"
           >
             <span className="text-[var(--accent-color)]">÷</span>4
@@ -142,7 +142,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
             onMouseDown={preventBlur}
             onClick={() => handleAppendOperator('+')}
             disabled={!isValueValid}
-            className="w-9 h-9 flex items-center justify-center rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-base font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-btn bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-base font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
             title="Plus (+)"
           >
             +
@@ -152,7 +152,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
             onMouseDown={preventBlur}
             onClick={() => handleAppendOperator('-')}
             disabled={!isValueValid}
-            className="w-9 h-9 flex items-center justify-center rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-base font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-btn bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-base font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
             title="Minus (-)"
           >
             −
@@ -162,7 +162,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
             onMouseDown={preventBlur}
             onClick={() => handleAppendOperator('×')}
             disabled={!isValueValid}
-            className="w-9 h-9 flex items-center justify-center rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-base font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-btn bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-base font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
             title="Gånger (×)"
           >
             ×
@@ -172,7 +172,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
             onMouseDown={preventBlur}
             onClick={() => handleAppendOperator('÷')}
             disabled={!isValueValid}
-            className="w-9 h-9 flex items-center justify-center rounded-[14px] bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-base font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-btn bg-[var(--surface-color)] hover:bg-[var(--bg-hover)] text-base font-bold text-[var(--text-primary)] border border-[var(--border-strong)] transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none shrink-0 shadow-sm cursor-pointer"
             title="Delat med (÷)"
           >
             ÷
@@ -184,7 +184,7 @@ export const QuickMathToolbar: React.FC<QuickMathToolbarProps> = ({
               type="button"
               onMouseDown={preventBlur}
               onClick={handleEvaluate}
-              className="px-3.5 py-1.5 rounded-[14px] bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-extrabold transition-all active:scale-95 shrink-0 shadow-md cursor-pointer ml-1"
+              className="px-3.5 py-1.5 rounded-btn bg-[var(--accent-color)] text-[var(--text-on-accent)] text-xs font-extrabold transition-all active:scale-95 shrink-0 shadow-md cursor-pointer ml-1"
               title="Verkställ beräkning"
             >
               =

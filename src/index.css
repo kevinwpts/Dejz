@@ -313,21 +313,21 @@ h6 {
   /* Dejz Official Brand Logo Color */
   --logo-color: #211F1C;
 
-  /* Seamless Light Theme Background - Signature Dejz Warm Beige */
-  --bg-top-color: #EFECE6;
-  --bg-color: #EFECE6;
-  --bg-secondary: #EFECE6;
-  --bg-gradient: #EFECE6;
+  /* Seamless Light Theme Background - New Neutral Minimalist Palette */
+  --bg-top-color: #F7F7F7;
+  --bg-color: #F7F7F7;
+  --bg-secondary: #F7F7F7;
+  --bg-gradient: #F7F7F7;
  
-  --surface-color: #FAF8F5;
-  --surface-gradient: #FAF8F5;
-  --surface-raised: #FAF8F5;
-  --surface-high: #EAE6DE;
-  --surface-elevated: #FAF8F5;
-  --surface-elevated-gradient: #FAF8F5;
-  --surface-solid: #FAF8F5;
-  --surface-muted: #EAE6DE;
-  --surface-tint: rgba(33, 31, 28, 0.02);
+  --surface-color: #FFFFFF;
+  --surface-gradient: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --surface-high: #F5F5F5;
+  --surface-elevated: #FFFFFF;
+  --surface-elevated-gradient: #FFFFFF;
+  --surface-solid: #FFFFFF;
+  --surface-muted: #F0F0F0;
+  --surface-tint: rgba(0, 0, 0, 0.01);
 
   --text-primary: #211F1C;
   --text-secondary: #6D6962;
@@ -342,13 +342,13 @@ h6 {
   --border-strong: #D5CFC4;
   --inner-highlight: #FFFFFF;
 
-  --chip-bg: #EAE6DE;
+  --chip-bg: #F0F0F0;
   --chip-text: #6D6962;
   --chip-active-bg: #1C1917;
   --chip-active-text: #FFFFFF;
-  --transaction-bg: #FAF8F5;
-  --card-nested-bg: #EAE6DE;
-  --remaining-today-gradient: #FAF8F5;
+  --transaction-bg: #FFFFFF;
+  --card-nested-bg: #F5F5F5;
+  --remaining-today-gradient: #FFFFFF;
 
   /* Custom Elevation Levels - Light Mode */
   --shadow-level-1: none;
@@ -379,7 +379,7 @@ h6 {
   --modal-bg: #FFFFFF;
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #DFD9CF;
+  --bg-hover: #F0F0F0;
 
   --card-shadow: none;
   --card-inner-stroke: none;
@@ -407,7 +407,7 @@ h6 {
   --savings-card-bg: var(--surface-color);
   --savings-card-text: var(--text-primary);
 
-  --date-active-bg: #EAE6DE;
+  --date-active-bg: #F0F0F0;
   --date-active-color: #1C1917;
   --date-active-shadow: none;
   --date-inactive-bg: #FFFFFF;

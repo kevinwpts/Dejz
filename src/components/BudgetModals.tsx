@@ -563,7 +563,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 title={t('arrivalDay')}
               >
                 {getDeductionDayOptions(config?.language).map(opt => (
-                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-medium">
+                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-surface text-[var(--text-primary)] font-medium">
                     {opt.label}
                   </option>
                 ))}
@@ -591,7 +591,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 title={t('frequency')}
               >
                 {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-surface text-[var(--text-primary)]">
                     {t(`freq_${key.toLowerCase()}` as TranslationKey)}
                   </option>
                 ))}
@@ -624,7 +624,7 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                     const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                     return (
-                      <option key={i} value={i} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                      <option key={i} value={i} className="bg-white dark:bg-surface text-[var(--text-primary)]">
                         {capitalizedMonth}
                       </option>
                     );
@@ -1470,7 +1470,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 title={paymentMethod === 'autogiro' ? (config?.language === 'en' ? 'Deduction day' : 'Dragningsdag') : (config?.language === 'en' ? 'Payment day' : 'Betaldag')}
               >
                 {getDeductionDayOptions(config?.language).map(opt => (
-                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-medium">
+                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-surface text-[var(--text-primary)] font-medium">
                     {opt.label}
                   </option>
                 ))}
@@ -1498,7 +1498,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 title={t('frequency')}
               >
                 {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-surface text-[var(--text-primary)]">
                     {t(`freq_${key.toLowerCase()}` as TranslationKey)}
                   </option>
                 ))}
@@ -1531,7 +1531,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                     const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                     return (
-                      <option key={i} value={i} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                      <option key={i} value={i} className="bg-white dark:bg-surface text-[var(--text-primary)]">
                         {capitalizedMonth}
                       </option>
                     );
@@ -1563,7 +1563,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 {(paymentMethods || []).map((method, idx) => {
                   const methodName = typeof method === 'string' ? method : method?.name || '';
                   return (
-                    <option key={methodName || idx} value={methodName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                    <option key={methodName || idx} value={methodName} className="bg-white dark:bg-surface text-[var(--text-primary)]">
                       {methodName}
                     </option>
                   );
@@ -2332,7 +2332,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 title={t('deductionDay') || 'Dragningsdag'}
               >
                 {getDeductionDayOptions(config?.language).map(opt => (
-                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)] font-medium">
+                  <option key={opt.value} value={opt.value} className="bg-white dark:bg-surface text-[var(--text-primary)] font-medium">
                     {opt.label}
                   </option>
                 ))}
@@ -2360,7 +2360,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 title={t('frequency')}
               >
                 {(Object.keys(Frequency) as Array<keyof typeof Frequency>).map(key => (
-                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                  <option key={key} value={Frequency[key]} className="bg-white dark:bg-surface text-[var(--text-primary)]">
                     {t(`freq_${key.toLowerCase()}` as TranslationKey)}
                   </option>
                 ))}
@@ -2393,7 +2393,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                     const monthName = date.toLocaleString(config?.language || 'sv-SE', { month: 'long' });
                     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                     return (
-                      <option key={i} value={i} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">
+                      <option key={i} value={i} className="bg-white dark:bg-surface text-[var(--text-primary)]">
                         {capitalizedMonth}
                       </option>
                     );
@@ -2425,7 +2425,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 >
                   {paymentMethods.map((pm: any) => {
                     const pmName = typeof pm === 'string' ? pm : pm.name;
-                    return <option key={pmName} value={pmName} className="bg-white dark:bg-[#1C1C1C] text-[var(--text-primary)]">{pmName}</option>;
+                    return <option key={pmName} value={pmName} className="bg-white dark:bg-surface text-[var(--text-primary)]">{pmName}</option>;
                   })}
                 </select>
               </div>

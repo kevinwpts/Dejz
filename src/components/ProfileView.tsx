@@ -571,7 +571,7 @@ export function ProfileView({
           <h4 className="text-[12px] font-semibold text-[var(--text-secondary)] px-1.5">
             {t('support')}
           </h4>
-          <div className="overflow-hidden rounded-[6px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[6px] bg-white dark:bg-surface border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             <SettingsMenuItem icon={Mail} label={t('feedback')} onClick={onFeedbackClick} />
             <SettingsMenuItem icon={Download} label={t('exportData')} onClick={onExportData} />
             <SettingsMenuItem icon={Shield} label={t('privacyPolicy')} onClick={() => onLegalClick('privacy')} />
@@ -584,7 +584,7 @@ export function ProfileView({
           <h4 className="text-[12px] font-semibold text-rose-500 dark:text-rose-400 px-1.5">
             {t('dangerZone')}
           </h4>
-          <div className="overflow-hidden rounded-[6px] bg-white dark:bg-[#1C1C1C] border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+          <div className="overflow-hidden rounded-[6px] bg-white dark:bg-surface border border-black/[0.04] dark:border-white/[0.06] shadow-2xs divide-y divide-black/[0.04] dark:divide-white/[0.04]">
             {isDemoMode && (
               <div className="p-4 bg-black/[0.02] dark:bg-white/[0.03] space-y-2.5">
                 <div className="flex items-center justify-between">

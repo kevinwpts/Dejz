@@ -133,7 +133,7 @@ export function AppHeader({
           {onOpenNotifications && (
             <button
               onClick={onOpenNotifications}
-              className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-[#EAE6DE]/60 dark:hover:bg-white/[0.08]"
+              className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all relative cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-surface-muted/60 dark:hover:bg-white/[0.08]"
               aria-label="Notiser"
               title="Notiser"
             >
@@ -156,7 +156,7 @@ export function AppHeader({
                 onNavigate("search");
               }
             }}
-            className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-[#EAE6DE]/60 dark:hover:bg-white/[0.08]"
+            className="min-w-[40px] min-h-[40px] w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer active:scale-95 text-[#211F1C] dark:text-white hover:bg-surface-muted/60 dark:hover:bg-white/[0.08]"
             aria-label={language === 'en' ? 'Search' : 'Sök'}
             title={language === 'en' ? 'Search' : 'Sök'}
           >

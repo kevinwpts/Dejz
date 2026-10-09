@@ -6,12 +6,12 @@
 
 export const DEJZ_COLORS = {
   light: {
-    canvas: 'var(--bg-color, #EFECE6)',
-    surface: 'var(--surface-color, #FAF8F5)',
-    surfaceRaised: 'var(--surface-raised, #FAF8F5)',
-    surfaceHigh: 'var(--surface-high, #EAE6DE)',
-    surfaceMuted: 'var(--surface-muted, #EAE6DE)',
-    surfaceHover: 'var(--bg-hover, #DFD9CF)',
+    canvas: 'var(--bg-color, #F7F7F7)',
+    surface: 'var(--surface-color, #FFFFFF)',
+    surfaceRaised: 'var(--surface-raised, #FFFFFF)',
+    surfaceHigh: 'var(--surface-high, #F5F5F5)',
+    surfaceMuted: 'var(--surface-muted, #F0F0F0)',
+    surfaceHover: 'var(--bg-hover, #F0F0F0)',
     textPrimary: 'var(--text-primary, #211F1C)',
     textSecondary: 'var(--text-secondary, #6D6962)',
     textTertiary: 'var(--text-tertiary, #777168)',

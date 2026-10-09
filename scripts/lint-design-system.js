@@ -217,9 +217,7 @@ scanDirectory(SRC_DIR);
 
 console.log(`📊 Scan summary: ${totalErrors} Critical Errors, ${totalWarnings} Warnings.`);
 
-const failOnErrors = process.argv.includes('--fail-on-errors');
-
-if (totalErrors > 0 && failOnErrors) {
+if (totalErrors > 0) {
   console.log(`\x1b[31m❌ Design system check failed with ${totalErrors} critical violations.\x1b[0m`);
   console.log('Please migrate the above hardcoded layout values to the central Design System tokens.');
   process.exit(1);

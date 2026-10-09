@@ -138,7 +138,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
             key={num}
             type="button"
             onClick={() => handleNumberClick(num)}
-            className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.92] transition-all flex items-center justify-center border border-black/5 dark:border-white/10 shadow-xs cursor-pointer"
+            className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-surface hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.92] transition-all flex items-center justify-center border border-black/5 dark:border-white/10 shadow-xs cursor-pointer"
           >
             {num}
           </button>
@@ -156,7 +156,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
         <button
           type="button"
           onClick={() => handleNumberClick(0)}
-          className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-[#1C1C1C] hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.92] transition-all flex items-center justify-center border border-black/5 dark:border-white/10 shadow-xs cursor-pointer"
+          className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-surface hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.92] transition-all flex items-center justify-center border border-black/5 dark:border-white/10 shadow-xs cursor-pointer"
         >
           0
         </button>
