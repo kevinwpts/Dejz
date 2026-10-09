@@ -4,7 +4,6 @@ import {
   RotateCcw,
   SlidersHorizontal,
   ChevronRight,
-  ChevronDown,
   Calendar,
   Clock,
   Info,
@@ -98,7 +97,6 @@ export function TodayView({
 }: TodayViewProps) {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [selectedCategoryModalName, setSelectedCategoryModalName] = useState<string | null>(null);
-  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
 
   const handleCategoryClick = useCallback((catName: string) => {
     if (typeof feedback.light === 'function') feedback.light();
@@ -438,90 +436,67 @@ export function TodayView({
               </button>
             </div>
 
-            {/* Sammanhängande enhetligt kort för kategoribudgetar */}
-            <Card variant="default" padding="none" className="border-none divide-y divide-subtle overflow-hidden">
-              {(isCategoriesExpanded ? categoryBudgetData : categoryBudgetData.slice(0, 4)).map((cat) => {
-                const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
-                const currency = config?.currency || 'kr';
+            {/* En gemensam sammanhängande Card-modul för alla kategorier med horisontell scroll */}
+            <Card variant="default" padding="none" className="border-none">
+              <div className="overflow-x-auto scrollbar-hide py-3.5 px-3.5 sm:py-4 sm:px-4 flex items-start gap-3 sm:gap-4">
+                {categoryBudgetData.map((cat) => {
+                  const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
+                  const currency = config?.currency || 'kr';
+                  const isOverBudget = cat.hasBudget && (cat.isOverBudget || cat.remaining < 0);
+                  const rem = Math.round(cat.remaining);
 
-                return (
-                  <div
-                    key={cat.name}
-                    onClick={() => handleCategoryClick(cat.name)}
-                    className="p-3 sm:p-3.5 flex items-center justify-between gap-3 group hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer active:scale-[0.99] select-none"
-                  >
-                    {/* Left: Icon + Name + subtle mini-progress bar */}
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <CategoryIcon icon={cat.iconName} color={catColor} size="sm" />
-                      <div className="min-w-0 flex-1">
-                        <span className="text-body-medium font-medium text-[var(--text-primary)] truncate block">
-                          {cat.name}
-                        </span>
-                        {cat.hasBudget && (
-                          <div className="w-full max-w-[140px] sm:max-w-[180px] h-1 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden mt-1.5">
-                            <div
-                              className={`h-full rounded-full transition-all duration-300 ${
-                                cat.isOverBudget
-                                  ? 'bg-rose-500'
-                                  : 'bg-[var(--accent-color)]'
-                              }`}
-                              style={{ width: `${Math.min(100, cat.percentage)}%` }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                  return (
+                    <button
+                      key={cat.name}
+                      type="button"
+                      onClick={() => {
+                        if (typeof feedback.light === 'function') feedback.light();
+                        handleCategoryClick(cat.name);
+                      }}
+                      className="flex flex-col items-center text-center shrink-0 w-[88px] sm:w-[96px] group cursor-pointer active:scale-[0.96] transition-transform select-none focus:outline-none"
+                    >
+                      {/* 1. Kategoriikon */}
+                      <CategoryIcon icon={cat.iconName} color={catColor} size="md" />
 
-                    {/* Right: Amount & Status */}
-                    <div className="text-right shrink-0 flex flex-col items-end">
-                      <span className={`text-body-medium font-semibold font-amount tabular-nums leading-tight ${
-                        cat.isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
-                      }`}>
-                        {(() => {
-                          if (!cat.hasBudget) {
-                            return `${formatAmount(Math.round(cat.spent), lang)} ${currency}`;
-                          }
-                          const rem = Math.round(cat.remaining);
-                          return `${rem < 0 ? '−' : ''}${formatAmount(Math.abs(rem), lang)} ${currency}`;
-                        })()}
+                      {/* 2. Kategorinamn */}
+                      <span
+                        className="text-micro-label font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors mt-2 leading-tight line-clamp-2 h-[26px] flex items-center justify-center text-center w-full px-0.5"
+                        title={cat.name}
+                      >
+                        {cat.name}
                       </span>
-                      <span className={`text-micro-label mt-0.5 leading-tight ${
-                        cat.isOverBudget ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
-                      }`}>
+
+                      {/* 3. Kvarvarande eller överskridet belopp */}
+                      <span
+                        className={`text-body-small sm:text-body-medium font-semibold font-amount tabular-nums leading-tight mt-1 truncate max-w-full px-0.5 ${
+                          isOverBudget
+                            ? 'text-rose-600 dark:text-rose-400'
+                            : 'text-[var(--text-primary)]'
+                        }`}
+                      >
+                        {!cat.hasBudget
+                          ? `${formatAmount(Math.round(cat.spent), lang)} ${currency}`
+                          : `${rem < 0 ? '−' : ''}${formatAmount(Math.abs(rem), lang)} ${currency}`}
+                      </span>
+
+                      {/* 4. Kort status */}
+                      <span
+                        className={`text-micro-label leading-tight mt-0.5 truncate max-w-full px-0.5 ${
+                          isOverBudget
+                            ? 'text-rose-600/80 dark:text-rose-400/80'
+                            : 'text-[var(--text-secondary)]'
+                        }`}
+                      >
                         {cat.hasBudget
-                          ? (cat.remaining < 0
-                              ? (lang === 'en' ? 'over budget' : 'över budget')
-                              : (lang === 'en' ? 'left' : 'kvar'))
-                          : (lang === 'en' ? 'spent' : 'spenderat')}
+                          ? (isOverBudget
+                              ? (lang === 'en' ? 'Over budget' : 'Över budget')
+                              : (lang === 'en' ? 'Left' : 'Kvar'))
+                          : (lang === 'en' ? 'Spent' : 'Spenderat')}
                       </span>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Expand/Collapse Button if more than 4 categories */}
-              {categoryBudgetData.length > 4 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof feedback.light === 'function') feedback.light();
-                    setIsCategoriesExpanded(!isCategoriesExpanded);
-                  }}
-                  className="w-full py-2.5 px-3.5 text-center text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer flex items-center justify-center gap-1.5 border-none bg-transparent"
-                >
-                  <span>
-                    {isCategoriesExpanded
-                      ? (lang === 'en' ? 'Show less' : 'Visa färre')
-                      : (lang === 'en'
-                          ? `Show all (${categoryBudgetData.length})`
-                          : `Visa alla (${categoryBudgetData.length})`)}
-                  </span>
-                  <ChevronDown
-                    size={13}
-                    className={`transition-transform duration-200 ${isCategoriesExpanded ? 'rotate-180' : ''}`}
-                  />
-                </button>
-              )}
+                    </button>
+                  );
+                })}
+              </div>
             </Card>
           </div>
         ) : null}
