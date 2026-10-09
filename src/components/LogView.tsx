@@ -469,7 +469,7 @@ export function LogView({
                   )}
                 </span>
               </div>
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {dayTransactions.map((transaction: any) => (
                   <TransactionItem 
                     key={transaction.id}

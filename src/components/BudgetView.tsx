@@ -535,7 +535,7 @@ export function BudgetView({
                     </button>
                   </div>
 
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     {filteredActiveFixedExpenses.map((expense) => (
                       <BudgetItem 
                         key={expense.id}
@@ -609,7 +609,7 @@ export function BudgetView({
                     </button>
                   </div>
 
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     {sortedSavings.map((saving) => (
                       <BudgetItem 
                         key={saving.id}

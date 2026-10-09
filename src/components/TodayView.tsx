@@ -438,7 +438,7 @@ export function TodayView({
 
             {/* En gemensam sammanhängande Card-modul för alla kategorier med horisontell scroll */}
             <Card variant="default" padding="none" className="border-none">
-              <div className="overflow-x-auto scrollbar-hide py-3.5 px-3.5 sm:py-4 sm:px-4 flex items-start gap-3 sm:gap-4">
+              <div className="overflow-x-auto scrollbar-hide py-4 px-3.5 sm:py-4 sm:px-4 flex items-start gap-3 sm:gap-4">
                 {categoryBudgetData.map((cat) => {
                   const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
                   const currency = config?.currency || 'kr';
@@ -453,28 +453,30 @@ export function TodayView({
                         if (typeof feedback.light === 'function') feedback.light();
                         handleCategoryClick(cat.name);
                       }}
-                      className="flex flex-col items-center text-center shrink-0 w-[78px] sm:w-[88px] group cursor-pointer active:scale-[0.96] transition-transform select-none focus:outline-none"
+                      className="flex flex-col items-center text-center shrink-0 w-[96px] sm:w-[104px] group cursor-pointer active:scale-[0.96] transition-transform select-none focus:outline-none"
                     >
                       {/* 1. Kategoriikon */}
                       <CategoryIcon icon={cat.iconName} color={catColor} size="md" categoryName={cat.name} />
 
-                      {/* 2. Kategorinamn */}
-                      <span
-                        className="text-[11px] font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors mt-1.5 leading-tight line-clamp-2 h-[24px] flex items-center justify-center text-center w-full px-0.5"
-                        title={cat.name}
-                      >
-                        {cat.name}
-                      </span>
+                      {/* 2. Kategorinamn (reservera fast höjd för upp till 2 rader så beloppen hamnar på exakt samma horisontella nivå) */}
+                      <div className="h-[28px] sm:h-[32px] flex items-center justify-center w-full px-0.5 mt-1.5">
+                        <span
+                          className="text-[11.5px] sm:text-[12px] font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors leading-tight line-clamp-2 w-full text-center"
+                          title={cat.name}
+                        >
+                          {cat.name}
+                        </span>
+                      </div>
 
                       {/* 3. Kvarvarande eller överskridet belopp */}
-                      <span className="text-[12px] sm:text-[13px] font-semibold font-amount tabular-nums leading-tight mt-0.5 truncate max-w-full px-0.5 text-[var(--text-primary)]">
+                      <span className="text-[13px] sm:text-[14px] font-semibold font-amount tabular-nums leading-tight mt-1 truncate max-w-full px-0.5 text-[var(--text-primary)]">
                         {!cat.hasBudget
                           ? `${formatAmount(Math.round(cat.spent), lang)} ${currency}`
                           : `${rem < 0 ? '−' : ''}${formatAmount(Math.abs(rem), lang)} ${currency}`}
                       </span>
 
                       {/* 4. Kort status */}
-                      <span className="text-[10px] leading-tight mt-0.5 truncate max-w-full px-0.5 text-[var(--text-secondary)]">
+                      <span className="text-[10.5px] leading-tight mt-0.5 truncate max-w-full px-0.5 text-[var(--text-secondary)]">
                         {cat.hasBudget
                           ? (isOverBudget
                               ? (lang === 'en' ? 'Over budget' : 'Över budget')

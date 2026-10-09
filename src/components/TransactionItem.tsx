@@ -92,7 +92,7 @@ export function TransactionItem({
 
   // Determine layout style classes with translucent glass surfaces
   let containerClasses = "";
-  let paddingClasses = "px-4 py-3.5 sm:py-4 min-h-[68px]";
+  let paddingClasses = "px-4 py-3 sm:py-3.5 min-h-[60px]";
   if (squared) {
     containerClasses = "bg-[var(--surface-color)] rounded-none shadow-none border-b border-subtle last:border-none py-3.5 px-2";
     paddingClasses = "";

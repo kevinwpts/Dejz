@@ -80,7 +80,7 @@ export function BudgetItem({ item, onClick, currency, type = 'expense', language
   return (
     <div 
       onClick={onClick}
-      className={`px-4 py-3.5 sm:py-4 min-h-[68px] relative z-10 flex items-center gap-3 group transition-colors duration-150 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] ${
+      className={`px-4 py-3 sm:py-3.5 min-h-[60px] relative z-10 flex items-center gap-3 group transition-colors duration-150 bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] ${
         isGrouped ? 'rounded-none' : 'rounded-[var(--radius-card,12px)]'
       } shadow-none border-none cursor-pointer select-none`}
     >
