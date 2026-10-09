@@ -576,7 +576,7 @@ export function LogView({
         calendarContent={
           <div className="space-y-2.5">
             {/* Period Stepper (Left / Right) */}
-            <div className="flex items-center justify-between bg-[var(--surface-color)] border-none shadow-none rounded-[22px] p-1.5">
+            <div className="flex items-center justify-between bg-[var(--surface-color)] border-none shadow-none rounded-card p-1.5">
               <button
                 type="button"
                 onClick={handleModalPrev}

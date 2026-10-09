@@ -368,7 +368,7 @@ export function TransactionViewModal({
                   </div>
                   <div 
                     onClick={() => setShowReceiptLightbox(true)}
-                    className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-[8px] overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 flex items-center justify-center cursor-pointer group shadow-sm hover:shadow-md transition-all"
+                    className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-card overflow-hidden bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/10 flex items-center justify-center cursor-pointer group shadow-sm hover:shadow-md transition-all"
                   >
                     {transaction.receiptUrl.includes('.pdf') ? (
                       <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
@@ -384,7 +384,7 @@ export function TransactionViewModal({
                       />
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all">
-                      <span className="bg-white/95 dark:bg-zinc-900/95 text-black dark:text-white px-4 py-2.5 rounded-[8px] text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-xl">
+                      <span className="bg-white/95 dark:bg-zinc-900/95 text-black dark:text-white px-4 py-2.5 rounded-badge text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-xl">
                         {config.language === 'en' ? 'Click to zoom' : 'Klicka för att förstora'}
                       </span>
                     </div>
@@ -412,7 +412,7 @@ export function TransactionViewModal({
                           href={transaction.receiptUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-[8px] text-xs font-medium transition-colors"
+                          className="bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-btn-sm text-xs font-medium transition-colors"
                         >
                           {config.language === 'en' ? 'Open original' : 'Öppna original'}
                         </a>
@@ -431,14 +431,14 @@ export function TransactionViewModal({
                       onClick={(e) => e.stopPropagation()}
                     >
                       {transaction.receiptUrl.includes('.pdf') ? (
-                        <div className="bg-white dark:bg-zinc-900 p-8 rounded-[8px] text-center space-y-4 shadow-2xl">
+                        <div className="bg-white dark:bg-zinc-900 p-8 rounded-modal text-center space-y-4 shadow-2xl">
                           <FileText size={64} className="mx-auto text-violet-500" />
                           <p className="text-sm font-medium text-zinc-900 dark:text-white">PDF-dokument</p>
                           <a 
                             href={transaction.receiptUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-block bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-[8px] text-sm font-semibold transition-colors shadow-lg"
+                            className="inline-block bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-btn text-sm font-semibold transition-colors shadow-lg"
                           >
                             {config.language === 'en' ? 'Open PDF in new tab' : 'Öppna PDF i ny flik'}
                           </a>
@@ -447,7 +447,7 @@ export function TransactionViewModal({
                         <img 
                           src={transaction.receiptUrl} 
                           alt="Receipt Fullscreen" 
-                          className="max-h-[80vh] max-w-full object-contain rounded-[8px] shadow-2xl"
+                          className="max-h-[80vh] max-w-full object-contain rounded-card shadow-2xl"
                           referrerPolicy="no-referrer"
                         />
                       )}
@@ -467,7 +467,7 @@ export function TransactionViewModal({
                     if (typeof feedback?.light === 'function') feedback.light();
                     setShowSimilar(prev => !prev);
                   }}
-                  className="w-full py-3 px-4 rounded-[8px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all flex items-center justify-between cursor-pointer border border-black/[0.04] dark:border-white/[0.06] shadow-2xs text-left active:scale-[0.99]"
+                  className="w-full py-3 px-4 rounded-card-nested bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] transition-all flex items-center justify-between cursor-pointer border border-black/[0.04] dark:border-white/[0.06] shadow-2xs text-left active:scale-[0.99]"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -481,7 +481,7 @@ export function TransactionViewModal({
                     <span className="text-[11px] text-[var(--text-secondary)] opacity-75 block truncate mt-0.5">
                       {config.language === 'en' 
                         ? `${similarTransactions.length} other ${similarTransactions.length === 1 ? 'transaction' : 'transactions'} with similar name`
-                        : `${similarTransactions.length} ${similarTransactions.length === 1 ? 'annan transaktion' : 'andra transaktioner'} med liknande namn`}
+                        : `${similarTransactions.length} ${similarTransactions.length === 1 ? 'andra transaktioner' : 'andra transaktioner'} med liknande namn`}
                     </span>
                   </div>
                   <ChevronDown 
@@ -491,7 +491,7 @@ export function TransactionViewModal({
                 </button>
 
                 {showSimilar && (
-                  <div className="mt-2 space-y-1 bg-[var(--surface-muted)]/50 p-2 rounded-[8px] border border-black/[0.04] dark:border-white/[0.06]">
+                  <div className="mt-2 space-y-1 bg-[var(--surface-muted)]/50 p-2 rounded-card-nested border border-black/[0.04] dark:border-white/[0.06]">
                     {similarTransactions.map((similarTx) => (
                       <TransactionItem
                         key={similarTx.id}

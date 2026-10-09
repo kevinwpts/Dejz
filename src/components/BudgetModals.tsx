@@ -1717,7 +1717,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
               <button
                 type="button"
                 onClick={() => setIsCancelModalOpen(true)}
-                className="w-full p-3.5 rounded-[8px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
+                className="w-full p-3.5 rounded-card-nested bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 flex items-center justify-between group transition-all cursor-pointer active:scale-[0.99] text-left"
               >
                 <div>
                   <p className="text-[13px] font-medium text-[var(--text-primary)]">
@@ -2317,7 +2317,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 {t('deductionDay') || 'Dragningsdag'}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Calendar size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors tabular-nums">
@@ -2345,7 +2345,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 {t('frequency')}
               </span>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                   <Repeat size={14} strokeWidth={2} />
                 </div>
                 <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
@@ -2374,7 +2374,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   {t('startMonthLabel')}
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     <Calendar size={14} strokeWidth={2} />
                   </div>
                   <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
@@ -2409,7 +2409,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   {t('paymentMethod') || 'Betalmetod'}
                 </span>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-[8px] flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
+                  <div className="w-7 h-7 rounded-icon-button flex items-center justify-center shrink-0 bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] transition-colors">
                     {pmIcon}
                   </div>
                   <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[140px] sm:max-w-[180px]">
@@ -2614,7 +2614,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
           <button 
             type="button"
             onClick={() => setShowIconPicker(true)}
-            className="w-16 h-16 rounded-[8px] bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center transition-all active:scale-95 group cursor-pointer border border-black/[0.06] dark:border-white/[0.08] relative overflow-hidden text-[var(--text-primary)]"
+            className="w-16 h-16 rounded-icon-button bg-black/[0.04] dark:bg-white/[0.06] flex items-center justify-center transition-all active:scale-95 group cursor-pointer border border-black/[0.06] dark:border-white/[0.08] relative overflow-hidden text-[var(--text-primary)]"
             title="Välj ikon"
           >
             <CategoryIcon 
@@ -2634,7 +2634,7 @@ export function PaymentMethodModal({ isOpen, onClose, initialName, initialIcon, 
             placeholder="Namn på betalningsmetod"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-[8px] px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs transition-all outline-none"
+            className="w-full bg-[var(--surface-muted)] border border-[var(--border-color)] rounded-input px-4 py-3.5 text-[15px] font-semibold text-[var(--text-primary)] focus:bg-[var(--surface-color)] focus:border-accent/30 shadow-xs transition-all outline-none"
           />
 
           <Button

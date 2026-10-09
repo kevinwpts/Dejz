@@ -247,6 +247,18 @@ h6 {
   border-radius: var(--radius-badge);
 }
 
+@utility rounded-icon-button {
+  border-radius: var(--radius-icon-button);
+}
+
+@utility rounded-pill {
+  border-radius: var(--radius-pill);
+}
+
+@utility rounded-container {
+  border-radius: var(--radius-container);
+}
+
 @utility bg-surface {
   background-color: var(--surface-color);
 }
@@ -508,16 +520,16 @@ h6 {
      Single source of truth for component radii, dimensions, spacing & motion
      ========================================================================== */
   /* Corner Radii */
-  --radius-card: 14px;
-  --radius-card-nested: 10px;
-  --radius-button: 14px;
+  --radius-card: 16px;
+  --radius-card-nested: 12px;
+  --radius-button: 12px;
   --radius-button-sm: 10px;
-  --radius-button-lg: 14px;
-  --radius-input: 14px;
-  --radius-modal: 16px;
+  --radius-button-lg: 12px;
+  --radius-input: 12px;
+  --radius-modal: 20px;
   --radius-chip: 9999px;
   --radius-badge: 9999px;
-  --radius-icon-button: 8px;
+  --radius-icon-button: 10px;
   --radius-pill: 9999px;
   --radius-container: 16px;
 

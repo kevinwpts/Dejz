@@ -645,7 +645,7 @@ export function TransactionModal({
 
           {/* Type Segmented Grid (when creating new transaction) */}
           {_onChangeType && !transaction && (
-            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-white/5 rounded-[8px] border border-black/[0.04] dark:border-white/[0.06]">
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-black/[0.04] dark:bg-white/5 rounded-card-nested border border-black/[0.04] dark:border-white/[0.06]">
               <button
                 type="button"
                 onClick={() => {
@@ -678,12 +678,12 @@ export function TransactionModal({
           )}
 
           {/* 1. Main Hero Card: Icon + Merchant & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[8px] bg-[var(--surface-color)] border-none shadow-none space-y-4">
+          <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] border-none shadow-none space-y-4">
             <div className="flex items-center gap-3.5">
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
-                className="relative rounded-[8px] overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
+                className="relative rounded-icon-button overflow-hidden transition-all duration-300 active:scale-95 cursor-pointer shrink-0 hover:ring-2 hover:ring-[var(--accent-color)]/30 group"
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
@@ -753,7 +753,7 @@ export function TransactionModal({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden rounded-[8px] bg-[var(--surface-color)] p-2 mb-4"
+                className="overflow-hidden rounded-card bg-[var(--surface-color)] p-2 mb-4"
               >
                 <CalendarWidget 
                   calendarDays={calendarDays}
@@ -767,7 +767,7 @@ export function TransactionModal({
           </AnimatePresence>
 
           {/* 2. Grouped Details Module with Dividers */}
-          <div className="rounded-[8px] bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
+          <div className="rounded-card bg-[var(--surface-color)] divide-y divide-black/[0.04] dark:divide-white/[0.05] overflow-hidden border-none shadow-none">
             {/* Row 1: Category or Split Categories */}
             {type === 'expense' && splits.length > 0 ? (
               /* Inline Split Category View */
@@ -809,7 +809,7 @@ export function TransactionModal({
                     const catData = categories.find(c => c.name === split.category);
 
                     return (
-                      <div key={split.id || index} className="flex items-center justify-between p-2 rounded-[8px] bg-[var(--surface-color)] border border-black/5 dark:border-white/5 gap-2">
+                      <div key={split.id || index} className="flex items-center justify-between p-2 rounded-card-nested bg-[var(--surface-color)] border border-black/5 dark:border-white/5 gap-2">
                         {/* Category Selector Button */}
                         <button
                           type="button"
@@ -965,7 +965,7 @@ export function TransactionModal({
                       setActiveSplitIndex(null);
                       setIsCategoryPickerOpen(true);
                     }}
-                    className="flex items-center gap-2 p-1.5 px-2.5 rounded-[8px] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer group"
+                    className="flex items-center gap-2 p-1.5 px-2.5 rounded-btn-sm bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer group"
                   >
                     <CategoryIcon 
                       icon={currentCatData?.icon || 'tag'} 
@@ -1108,7 +1108,7 @@ export function TransactionModal({
                 </div>
               ) : receiptUrl ? (
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-[8px] overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0">
+                  <div className="w-6 h-6 rounded-icon-button overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center shrink-0">
                     {receiptUrl.includes('.pdf') ? (
                       <FileText size={13} className="text-[var(--text-secondary)]" />
                     ) : (
@@ -1362,7 +1362,7 @@ export function TransactionModal({
                         setIsCategoryPickerOpen(false);
                         setIsAddingCategory(true);
                       }}
-                      className="w-full py-2.5 rounded-[8px] border border-dashed border-black/15 dark:border-white/15 text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] hover:border-black/30 dark:hover:border-white/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 rounded-btn-sm border border-dashed border-black/15 dark:border-white/15 text-[13px] font-medium text-[#777168] dark:text-[#A8A8A8] hover:text-[var(--text-primary)] hover:border-black/30 dark:hover:border-white/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={15} strokeWidth={2.5} />
                       <span>{t('newCategory')}</span>

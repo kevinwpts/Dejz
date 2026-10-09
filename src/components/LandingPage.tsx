@@ -37,7 +37,7 @@ const PlaceholderBox = ({
   return (
     <div 
       data-mockup-id={id}
-      className={`relative w-full ${className} rounded-[20px] bg-slate-100/80 border border-dashed border-slate-300 flex flex-col items-center justify-center p-6 select-none transition-all hover:bg-slate-100`}
+      className={`relative w-full ${className} rounded-card bg-slate-100/80 border border-dashed border-slate-300 flex flex-col items-center justify-center p-6 select-none transition-all hover:bg-slate-100`}
     >
       <span className={`font-mono font-semibold tracking-wider text-slate-400 uppercase text-center ${labelClass}`}>
         {id}
@@ -203,21 +203,21 @@ export function LandingPage({
               {/* Trust points */}
               <div className="grid grid-cols-3 gap-3 pt-4">
                 <div className="space-y-1">
-                  <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
+                  <div className="w-7 h-7 rounded-icon-button bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
                     <Shield size={14} strokeWidth={2} />
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 leading-tight">Ingen bankkoppling</h4>
                   <p className="text-[11px] text-slate-500 leading-snug">Full kontroll över din data.</p>
                 </div>
                 <div className="space-y-1">
-                  <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
+                  <div className="w-7 h-7 rounded-icon-button bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
                     <Lock size={14} strokeWidth={2} />
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 leading-tight">Säker och privat</h4>
                   <p className="text-[11px] text-slate-500 leading-snug">Din information är din.</p>
                 </div>
                 <div className="space-y-1">
-                  <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
+                  <div className="w-7 h-7 rounded-icon-button bg-slate-100 flex items-center justify-center text-slate-700 mb-1">
                     <Sparkles size={14} strokeWidth={2} />
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 leading-tight">Byggd för enkelhet</h4>
@@ -228,7 +228,7 @@ export function LandingPage({
 
             {/* RIGHT COLUMN: Image */}
             <div className="lg:col-span-6 flex justify-center">
-              <div className="w-full relative rounded-[24px] overflow-hidden shadow-xl border border-slate-200/80 bg-slate-900">
+              <div className="w-full relative rounded-container overflow-hidden shadow-xl border border-slate-200/80 bg-slate-900">
                 <img 
                   src="/hero.png" 
                   alt="Dejz App" 
@@ -286,7 +286,7 @@ export function LandingPage({
             </div>
 
             {/* Hero Image (Separate visual block, responsive crop/position for mobile so phones are main motif) */}
-            <div className="w-full relative rounded-[20px] overflow-hidden shadow-lg border border-slate-200/80 bg-slate-900 aspect-[16/11] sm:aspect-[16/10]">
+            <div className="w-full relative rounded-card overflow-hidden shadow-lg border border-slate-200/80 bg-slate-900 aspect-[16/11] sm:aspect-[16/10]">
               <img 
                 src="/hero.png" 
                 alt="Dejz App" 
@@ -296,8 +296,8 @@ export function LandingPage({
 
             {/* Trust points (Compact 3 columns or rows) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-              <div className="flex items-center sm:flex-col sm:items-start gap-3 sm:gap-1 bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-xl border sm:border-0 border-slate-200/60">
-                <div className="w-7 h-7 rounded-lg bg-white sm:bg-slate-100 border sm:border-0 border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
+              <div className="flex items-center sm:flex-col sm:items-start gap-3 sm:gap-1 bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-card-nested border sm:border-0 border-slate-200/60">
+                <div className="w-7 h-7 rounded-icon-button bg-white sm:bg-slate-100 border sm:border-0 border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
                   <Shield size={14} strokeWidth={2} />
                 </div>
                 <div>
@@ -306,8 +306,8 @@ export function LandingPage({
                 </div>
               </div>
 
-              <div className="flex items-center sm:flex-col sm:items-start gap-3 sm:gap-1 bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-xl border sm:border-0 border-slate-200/60">
-                <div className="w-7 h-7 rounded-lg bg-white sm:bg-slate-100 border sm:border-0 border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
+              <div className="flex items-center sm:flex-col sm:items-start gap-3 sm:gap-1 bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-card-nested border sm:border-0 border-slate-200/60">
+                <div className="w-7 h-7 rounded-icon-button bg-white sm:bg-slate-100 border sm:border-0 border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
                   <Lock size={14} strokeWidth={2} />
                 </div>
                 <div>
@@ -316,8 +316,8 @@ export function LandingPage({
                 </div>
               </div>
 
-              <div className="flex items-center sm:flex-col sm:items-start gap-3 sm:gap-1 bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-xl border sm:border-0 border-slate-200/60">
-                <div className="w-7 h-7 rounded-lg bg-white sm:bg-slate-100 border sm:border-0 border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
+              <div className="flex items-center sm:flex-col sm:items-start gap-3 sm:gap-1 bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-card-nested border sm:border-0 border-slate-200/60">
+                <div className="w-7 h-7 rounded-icon-button bg-white sm:bg-slate-100 border sm:border-0 border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
                   <Sparkles size={14} strokeWidth={2} />
                 </div>
                 <div>
@@ -346,7 +346,7 @@ export function LandingPage({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             {/* Block 1 */}
-            <div className="bg-white rounded-[22px] p-8 border border-slate-200/80 shadow-xs space-y-6 flex flex-col justify-between">
+            <div className="bg-white rounded-card p-8 border border-slate-200/80 shadow-xs space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="w-9 h-9 rounded-full bg-slate-900 text-white font-bold text-sm flex items-center justify-center">
                   1
@@ -378,7 +378,7 @@ export function LandingPage({
             </div>
 
             {/* Block 2 */}
-            <div className="bg-white rounded-[22px] p-8 border border-slate-200/80 shadow-xs space-y-6 flex flex-col justify-between">
+            <div className="bg-white rounded-card p-8 border border-slate-200/80 shadow-xs space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="w-9 h-9 rounded-full bg-slate-900 text-white font-bold text-sm flex items-center justify-center">
                   2
@@ -390,7 +390,7 @@ export function LandingPage({
               </div>
 
               <div className="bg-slate-50 rounded-card p-4 border border-slate-200/60 space-y-3">
-                <div className="flex items-center justify-between bg-white p-3 rounded-[10px] border border-slate-200/60 shadow-xs">
+                <div className="flex items-center justify-between bg-white p-3 rounded-card-nested border border-slate-200/60 shadow-xs">
                   <span className="text-sm font-semibold text-slate-800">Lunch</span>
                   <span className="text-sm font-bold text-rose-600">−120 kr</span>
                 </div>
@@ -402,7 +402,7 @@ export function LandingPage({
             </div>
 
             {/* Block 3 */}
-            <div className="bg-white rounded-[22px] p-8 border border-slate-200/80 shadow-xs space-y-6 flex flex-col justify-between">
+            <div className="bg-white rounded-card p-8 border border-slate-200/80 shadow-xs space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="w-9 h-9 rounded-full bg-slate-900 text-white font-bold text-sm flex items-center justify-center">
                   3
@@ -431,7 +431,7 @@ export function LandingPage({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
             {/* Left Image (~45% / col-span-5) using IMG_3049.PNG with controlled width */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-[340px] sm:max-w-[380px] relative rounded-[24px] overflow-hidden shadow-xl border border-slate-200/85 bg-slate-100">
+              <div className="w-full max-w-[340px] sm:max-w-[380px] relative rounded-container overflow-hidden shadow-xl border border-slate-200/85 bg-slate-100">
                 <img 
                   src="/IMG_3049.PNG" 
                   alt="Din ekonomi, på dina villkor" 
@@ -502,7 +502,7 @@ export function LandingPage({
       {/* 5. ALLT DU BEHÖVER – SAMLAT PÅ ETT STÄLLE */}
       <section className="py-24 bg-slate-50 border-y border-slate-200/80">
         <div className="max-w-[1240px] mx-auto px-6 sm:px-8">
-          <div className="bg-white rounded-[28px] p-8 sm:p-12 border border-slate-200/80 shadow-xs">
+          <div className="bg-white rounded-container p-8 sm:p-12 border border-slate-200/80 shadow-xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
               {/* Left Content (wider left column) */}
               <div className="lg:col-span-5 space-y-6">
@@ -595,7 +595,7 @@ export function LandingPage({
 
       {/* 10. SLUTLIG CTA (Mörk avslutande CTA med hög kontrast) */}
       <section className="py-12 px-6 sm:px-8 max-w-[1240px] mx-auto">
-        <div className="bg-slate-900 text-white rounded-[28px] p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-xl border border-slate-800">
+        <div className="bg-slate-900 text-white rounded-container p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-xl border border-slate-800">
           <div className="space-y-2 text-center lg:text-left">
             <h2 className="text-xl sm:text-3xl font-semibold font-unbounded tracking-tight text-white leading-snug">
               Redo att få koll på ekonomin?

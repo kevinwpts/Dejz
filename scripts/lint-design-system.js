@@ -111,13 +111,13 @@ function checkFile(filePath) {
     let match;
     while ((match = PATTERNS.radius.exec(line)) !== null) {
       const radiusValue = parseInt(match[1], 10);
-      const isCritical = [12, 14, 16].includes(radiusValue); // standard card and modal radius values
+      const isCritical = radiusValue >= 12; // any arbitrary layout radius (>=12px) should be a central token
       
       const log = {
         line: index + 1,
         match: match[0],
         message: isCritical 
-          ? `CRITICAL ERROR: Hardcoded layout corner radius '${match[0]}'. Use semantic DS tokens (e.g., DS.radius.card, DS.radius.button, DS.radius.modal) instead.`
+          ? `CRITICAL ERROR: Hardcoded layout corner radius '${match[0]}'. Use semantic DS tokens (e.g., rounded-card, rounded-btn, rounded-modal) instead.`
           : `Warning: Hardcoded micro corner radius '${match[0]}' (fine for small icons/badges, but consider DS tokens where possible).`
       };
 
@@ -151,7 +151,7 @@ function checkFile(filePath) {
     // 3. Check Inline Style Radius
     while ((match = PATTERNS.inlineStyleRadius.exec(line)) !== null) {
       const radiusValue = parseInt(match[1], 10);
-      const isCritical = [12, 14, 16].includes(radiusValue);
+      const isCritical = radiusValue >= 12;
       
       const log = {
         line: index + 1,

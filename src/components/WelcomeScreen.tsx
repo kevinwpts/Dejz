@@ -26,7 +26,7 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="flex flex-col items-center space-y-6"
         >
-          <div className="p-4 px-6 rounded-[8px] bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs flex items-center justify-center">
+          <div className="p-4 px-6 rounded-card-nested bg-[var(--surface-color)] border border-[var(--border-color)] shadow-xs flex items-center justify-center">
             <DejzLogo className="text-3xl sm:text-4xl font-black" textColor="var(--logo-color)" />
           </div>
           
@@ -50,7 +50,7 @@ export function WelcomeScreen({ onAction, onLegalClick, t }: WelcomeScreenProps)
       >
         <button 
           onClick={() => onAction(false)}
-          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-13 rounded-[8px] text-body-medium active:scale-[0.98] hover:opacity-95 transition-all flex items-center justify-center gap-2 group shadow-xs cursor-pointer"
+          className="w-full bg-[var(--accent-color)] text-[var(--text-on-accent)] h-13 rounded-btn text-body-medium active:scale-[0.98] hover:opacity-95 transition-all flex items-center justify-center gap-2 group shadow-xs cursor-pointer"
         >
           <span>Kom igång gratis</span>
           <ChevronRight size={18} className="group-hover:translate-x-0.5 transition-transform" />

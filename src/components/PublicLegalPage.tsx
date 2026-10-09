@@ -112,7 +112,7 @@ export function PublicLegalPage({
       <main className="max-w-[430px] mx-auto px-4 py-6">
         {/* Navigation Tabs between Legal Docs */}
         <div className="flex flex-col gap-3 mb-6 pb-4 border-none">
-          <div className="flex items-center gap-1 p-1 bg-[var(--surface-color)] border-none rounded-[22px] shadow-none overflow-x-auto no-scrollbar w-full">
+          <div className="flex items-center gap-1 p-1 bg-[var(--surface-color)] border-none rounded-card shadow-none overflow-x-auto no-scrollbar w-full">
             <button
               onClick={() => handleSelectDoc('privacy')}
               className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-[var(--radius-card,14px)] text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
@@ -166,7 +166,7 @@ export function PublicLegalPage({
         </div>
 
         {/* Document Card Container */}
-        <div className="bg-[var(--surface-color)] border-none rounded-[28px] p-5 shadow-none space-y-6">
+        <div className="bg-[var(--surface-color)] border-none rounded-container p-5 shadow-none space-y-6">
           {currentDoc === 'privacy' && (
             language === 'sv' ? <SwedishPrivacyPolicy /> : <EnglishPrivacyPolicy />
           )}

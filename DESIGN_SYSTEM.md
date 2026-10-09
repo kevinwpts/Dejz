@@ -18,17 +18,20 @@ Designsystemet i Dejz styrs från två samverkande källor:
 ## 2. Centrala Design Tokens
 
 ### 2.1 Hörnradier (Border Radii)
-Använd alltid de semantiska hörnradie-token som styrs centralt. Hårdkoda **aldrig** pixlar (t.ex. `rounded-[14px]`) i vyer eller kort!
+Använd alltid de semantiska hörnradie-token som styrs centralt. Hårdkoda **aldrig** pixlar (t.ex. `rounded-[16px]`) i vyer eller kort!
 
-| Token | CSS-variabel | Tailwind-motsvarighet | Användningsområde |
+| Token / Utility | CSS-variabel | Target-värde | Användningsområde |
 | :--- | :--- | :--- | :--- |
-| `DS.radius.card` | `--radius-card` (14px) | `rounded-[var(--radius-card)]` | Standardkort, rader och containrar |
-| `DS.radius.cardNested`| `--radius-card-nested` (10px)| `rounded-[var(--radius-card-nested)]` | Mindre kort/element inuti andra kort |
-| `DS.radius.button` | `--radius-button` (14px) | `rounded-[var(--radius-button)]` | Standardknappar och stora knappar |
-| `DS.radius.buttonSm` | `--radius-button-sm` (10px) | `rounded-[var(--radius-button-sm)]` | Små sekundära knappar |
-| `DS.radius.input` | `--radius-input` (14px) | `rounded-[var(--radius-input)]` | Inmatningsfält (Inputs, Selects) |
-| `DS.radius.modal` | `--radius-modal` (16px) | `rounded-[var(--radius-modal)]` | Modaler och paneler |
-| `DS.radius.modalSheet`| `--radius-modal` (16px) | `rounded-t-[var(--radius-modal)]` | Bottom sheets (överkant på mobil, hel på desktop) |
+| `rounded-card` / `DS.radius.card` | `--radius-card` | **16px** | Standardkort, rader och huvudsakliga moduler |
+| `rounded-card-nested` / `DS.radius.cardNested` | `--radius-card-nested` | **12px** | Nästlade kort, rader och element inuti andra kort |
+| `rounded-btn` / `DS.radius.button` | `--radius-button` | **12px** | Primära och sekundära standardknappar |
+| `rounded-btn-sm` / `DS.radius.buttonSm` | `--radius-button-sm` | **10px** | Små knappar, pills och filterknappar |
+| `rounded-btn-lg` / `DS.radius.buttonLg` | `--radius-button-lg` | **12px** | Stora primära aktiveringsknappar |
+| `rounded-input` / `DS.radius.input` | `--radius-input` | **12px** | Inmatningsfält (Inputs, Selects, Sökfält) |
+| `rounded-modal` / `DS.radius.modal` | `--radius-modal` | **20px** | Modaler, dialoger och överlagrade paneler |
+| `rounded-icon-button` / `DS.radius.icon` | `--radius-icon-button` | **10px** | Ikonknappar, logotypcontainrar och verktygsknappar |
+| `rounded-container` / `DS.radius.container` | `--radius-container` | **16px** | Sektionscontainrar och stora produktblock |
+| `rounded-chip` / `rounded-badge` / `rounded-pill` | `--radius-chip` | **9999px** | Cirkulära badges, pills, avatarer och statuspiller |
 
 ---
 

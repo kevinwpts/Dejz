@@ -87,7 +87,7 @@ export function PeriodSelectorModal({
               if (typeof feedback?.light === 'function') feedback.light();
               setViewMode('calendar');
             }}
-            className="w-full h-11 px-4 rounded-[8px] bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] text-[var(--text-primary)] text-body-medium flex items-center justify-center gap-2 transition-all cursor-pointer border-none active:scale-[0.98] shadow-none"
+            className="w-full h-11 px-4 rounded-btn bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] text-[var(--text-primary)] text-body-medium flex items-center justify-center gap-2 transition-all cursor-pointer border-none active:scale-[0.98] shadow-none"
           >
             <CalendarIcon size={16} strokeWidth={2} />
             <span>{currentLang === 'en' ? 'Select day' : 'Välj dag'}</span>

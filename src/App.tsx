@@ -4164,8 +4164,8 @@ export default function App() {
     return (
       <div className="min-h-dvh font-sans text-[var(--text-primary)] relative bg-[var(--bg-color)]">
         <div className="min-h-dvh flex items-center justify-center p-6 relative z-10">
-          <div className="max-w-md w-full bg-[var(--surface-color)] p-10 rounded-[12px] text-center space-y-6">
-            <div className="w-16 h-16 bg-danger/10 text-danger rounded-[8px] flex items-center justify-center mx-auto">
+          <div className="max-w-md w-full bg-[var(--surface-color)] p-10 rounded-card text-center space-y-6">
+            <div className="w-16 h-16 bg-danger/10 text-danger rounded-icon-button flex items-center justify-center mx-auto">
               <AlertCircle size={32} />
             </div>
             <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
@@ -4173,7 +4173,7 @@ export default function App() {
             </h1>
 
             {!isSupabaseUrlValid && (
-              <div className="bg-danger/10 p-4 rounded-[8px] text-left">
+              <div className="bg-danger/10 p-4 rounded-card-nested text-left">
                 <p className="text-xs font-semibold text-danger mb-1">
                   Felaktig URL
                 </p>
@@ -4184,7 +4184,7 @@ export default function App() {
             )}
 
             {!isSupabaseKeyValid && (
-              <div className="bg-danger/10 p-4 rounded-[8px] text-left">
+              <div className="bg-danger/10 p-4 rounded-card-nested text-left">
                 <p className="text-xs font-semibold text-danger mb-1">
                   Felaktig Nyckel
                 </p>
@@ -4433,7 +4433,7 @@ export default function App() {
             <button
               type="button"
               onClick={handleExitDemo}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-btn-sm bg-accent text-[var(--text-on-accent)] hover:opacity-90 active:scale-95 transition-all text-xs font-semibold shrink-0 cursor-pointer shadow-sm"
             >
               <span>{t('exitDemo')}</span>
               <LogOut size={12} strokeWidth={2} />
@@ -5659,7 +5659,7 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-[var(--bg-color)] dark:bg-[#191919] w-full sm:max-w-xl rounded-t-[12px] sm:rounded-[12px] relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
+              className="bg-[var(--bg-color)] dark:bg-[#191919] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-2xl font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle / Drag Pill */}
@@ -5758,7 +5758,7 @@ export default function App() {
                       type="button"
                       onClick={handlePlusMicClick}
                       disabled={isSubmittingQuick || isAudioTranscribing}
-                      className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-[8px] flex items-center justify-center transition-all cursor-pointer border select-none ${
+                      className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-icon-button flex items-center justify-center transition-all cursor-pointer border select-none ${
                         isRecording
                           ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
@@ -5784,7 +5784,7 @@ export default function App() {
                         ? { type: 'error', message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-[8px] bg-white dark:bg-white/5 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
+                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-white dark:bg-white/5 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
                     isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-black/[0.06] dark:border-white/10"
                   }`}
                 />
