@@ -440,49 +440,71 @@ h6 {
   border-color: var(--border-divider);
 }
 
-/* Central Divide Utilities (Tailwind v4 compatible: :not(:last-child)) */
-:where(.divide-y > :not(:last-child)),
-.divide-y > :not(:last-child) {
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  border-color: var(--border-subtle);
-}
-
-:where(.divide-y > *),
-.divide-y > *,
-.divide-subtle > *,
-.divide-divider > * {
-  border-top-width: 0 !important;
-}
-
+/* Central Divide Utilities (16px inset pseudo-element dividers) */
 @utility divide-subtle {
   & > :not(:last-child) {
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-color: var(--border-subtle) !important;
+    position: relative;
+    border-bottom-width: 0 !important;
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 16px;
+      right: 16px;
+      height: 1px;
+      background-color: var(--border-divider);
+      pointer-events: none;
+    }
   }
 }
 
 .divide-subtle > :not(:last-child),
 :where(.divide-subtle > :not(:last-child)) {
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  border-color: var(--border-subtle) !important;
+  position: relative;
+  border-bottom-width: 0 !important;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background-color: var(--border-divider);
+    pointer-events: none;
+  }
 }
 
 @utility divide-divider {
   & > :not(:last-child) {
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-color: var(--border-divider) !important;
+    position: relative;
+    border-bottom-width: 0 !important;
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 16px;
+      right: 16px;
+      height: 1px;
+      background-color: var(--border-divider);
+      pointer-events: none;
+    }
   }
 }
 
 .divide-divider > :not(:last-child),
 :where(.divide-divider > :not(:last-child)) {
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  border-color: var(--border-divider) !important;
+  position: relative;
+  border-bottom-width: 0 !important;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background-color: var(--border-divider);
+    pointer-events: none;
+  }
 }
 
 @utility shadow-subtle {
@@ -565,7 +587,7 @@ h6 {
   --border-color: #E9E9E9;
   --border-control: #D8D8D8;
   --border-strong: #B8B8B8;
-  --border-divider: #EFEFEF;
+  --border-divider: #F3F3F3;
   --inner-highlight: #FFFFFF;
 
   --chip-bg: #F0F0F0;
