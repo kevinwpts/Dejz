@@ -603,20 +603,21 @@ h6 {
   /* Dejz Official Brand Logo Color */
   --logo-color: #211F1C;
 
-  /* Seamless Light Theme Background - New Neutral Minimalist Palette */
-  --bg-top-color: #F7F7F7;
-  --bg-color: #F7F7F7;
-  --bg-secondary: #F7F7F7;
-  --bg-gradient: #F7F7F7;
+  /* Seamless Light Theme Background - Soft, harmonious, tinted ambient design */
+  --bg-top-color: #F8F9FA;
+  --bg-color: #F8F9FA;
+  --bg-secondary: #F8F9FA;
+  --bg-gradient: var(--app-bg-gradient, linear-gradient(180deg, rgba(59, 130, 246, 0.075) 0%, rgba(59, 130, 246, 0.035) 420px, rgba(59, 130, 246, 0.015) 100%));
  
+  /* Pure White Elevated Modules & Surfaces */
   --surface-color: #FFFFFF;
   --surface-gradient: #FFFFFF;
   --surface-raised: #FFFFFF;
-  --surface-high: #F5F5F5;
+  --surface-high: #F6F7F9;
   --surface-elevated: #FFFFFF;
   --surface-elevated-gradient: #FFFFFF;
   --surface-solid: #FFFFFF;
-  --surface-muted: #F0F0F0;
+  --surface-muted: #F2F4F7;
   --surface-tint: rgba(0, 0, 0, 0.01);
 
   --text-primary: #211F1C;
@@ -671,10 +672,10 @@ h6 {
 
   --modal-bg: #FFFFFF;
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.025), 0 4px 14px rgba(0, 0, 0, 0.035);
   --bg-primary: var(--bg-color);
   --card-bg: var(--surface-color);
-  --bg-hover: #F0F0F0;
+  --bg-hover: #F2F4F7;
 
   --card-shadow: var(--shadow-subtle);
   --card-inner-stroke: none;

@@ -25,13 +25,26 @@ export function applyThemeColor(themeColorHex: string = '#3B82F6', isDark: boole
   targets.forEach((target) => {
     target.style.setProperty('--user-accent-hex', hex);
     target.style.setProperty('--user-accent-rgb', `${r}, ${g}, ${b}`);
+
+    // Soft, premium, tinted ambient background for Light Mode
+    // Starts with a subtle top accent tint (0.075), gently transitions through a faint mist (0.035),
+    // and settles into a serene, airy tinted off-white (0.015).
+    const lightBgTop = `rgba(${r}, ${g}, ${b}, 0.075)`;
+    const lightBgMid = `rgba(${r}, ${g}, ${b}, 0.035)`;
+    const lightBgBottom = `rgba(${r}, ${g}, ${b}, 0.015)`;
+    const lightBgGradient = `linear-gradient(180deg, ${lightBgTop} 0%, ${lightBgMid} 420px, ${lightBgBottom} 100%)`;
+
+    target.style.setProperty('--app-bg-gradient', isDark ? 'none' : lightBgGradient);
+    target.style.setProperty('--app-bg-top-tint', isDark ? 'transparent' : lightBgTop);
+    target.style.setProperty('--app-bg-bottom-tint', isDark ? 'transparent' : lightBgBottom);
+
     target.style.setProperty('--user-home-bg-from', 'transparent');
     target.style.setProperty('--user-home-bg-to', 'transparent');
-    target.style.setProperty('--app-bg-tint', 'transparent');
+    target.style.setProperty('--app-bg-tint', isDark ? 'transparent' : lightBgTop);
 
     target.style.setProperty('--user-accent', hex);
-    target.style.setProperty('--user-accent-soft', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.12)`);
-    target.style.setProperty('--user-accent-surface', isDark ? `rgba(${r}, ${g}, ${b}, 0.08)` : `rgba(${r}, ${g}, ${b}, 0.05)`);
+    target.style.setProperty('--user-accent-soft', isDark ? `rgba(${r}, ${g}, ${b}, 0.18)` : `rgba(${r}, ${g}, ${b}, 0.10)`);
+    target.style.setProperty('--user-accent-surface', isDark ? `rgba(${r}, ${g}, ${b}, 0.08)` : `rgba(${r}, ${g}, ${b}, 0.04)`);
 
     target.style.setProperty('--accent-color', hex);
     target.style.setProperty('--accent-hover', hex);

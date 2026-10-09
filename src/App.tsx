@@ -4350,9 +4350,12 @@ export default function App() {
         aria-hidden="true" 
       />
 
-      {/* Subtle top ambient gradient in accent color */}
+      {/* Shared Fixed Light Mode Ambient Tint Layer */}
       <div 
-        className="absolute inset-x-0 top-0 h-[320px] pointer-events-none z-0 bg-gradient-to-b from-[rgba(var(--user-accent-rgb),0.18)] via-[rgba(var(--user-accent-rgb),0.06)] to-transparent transition-all duration-500"
+        className="fixed inset-0 pointer-events-none z-0 dark:hidden transition-all duration-500"
+        style={{
+          background: 'var(--bg-gradient)'
+        }}
         aria-hidden="true"
       />
 
