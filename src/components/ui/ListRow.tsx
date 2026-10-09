@@ -50,7 +50,7 @@ export const ListRow: React.FC<ListRowProps> = ({
   multiline = false,
 }) => {
   const isClickable = Boolean(onClick && !disabled);
-  const isCompact = density === 'compact';
+  const isCompact = density === 'compact' || (density !== 'default' && variant === 'grouped');
 
   const containerStyles = {
     card: isCompact
