@@ -23,6 +23,7 @@ interface TransactionItemProps {
   isGrouped?: boolean;
   variant?: 'default' | 'nested' | 'transparent';
   hideCategoryBadge?: boolean;
+  hideFixedBadge?: boolean;
   showDate?: boolean;
 }
 
@@ -39,6 +40,7 @@ export function TransactionItem({
   isGrouped: _isGrouped,
   variant,
   hideCategoryBadge,
+  hideFixedBadge,
   showDate
 }: TransactionItemProps) {
   const transaction = originalTransaction as any;
@@ -107,13 +109,18 @@ export function TransactionItem({
 
   // Neutral discreet category display
   const renderCategoryBadge = (categoryName: string, amount?: number) => {
-    const iconKey = getCategoryIconName(categoryName || '');
+    const searchCat = (categoryName || '').trim().toLowerCase();
+    const matchedCategory = (config?.categories || []).concat(config?.incomeCategories || []).find(
+      (c) => (c?.name || '').trim().toLowerCase() === searchCat || c?.id === categoryName || (c?.id || '').toLowerCase() === searchCat
+    );
+    const iconKey = matchedCategory?.icon || getCategoryIconName(categoryName || '');
 
     return (
       <div className="flex items-end gap-1 shrink-0 text-[var(--text-secondary)]">
         {iconKey ? (
           <CategoryIcon 
             icon={iconKey} 
+            categoryName={categoryName}
             variant="minimal" 
             size="2xs" 
           />
@@ -212,9 +219,9 @@ export function TransactionItem({
             <div className="min-w-0 flex-1 flex flex-col justify-center">
               {/* Primary Merchant Name + Fixed Icon Badge */}
               <div className="flex items-center min-w-0">
-                <p className="text-[12.5px] sm:text-[13px] font-medium text-[var(--text-primary)] leading-snug break-words flex-1 min-w-0">
+                <p className="text-[13.5px] sm:text-[14px] font-medium text-[var(--text-primary)] leading-snug break-words flex-1 min-w-0">
                   <span>{merchantName}</span>
-                  {isFixedItem && (
+                  {isFixedItem && !hideFixedBadge && (
                     <span 
                       title={getL10n(
                         transaction.type === 'income' ? 'Fast inkomst' : (transaction.type === 'saving' || transaction.type === 'savings') ? 'Fast sparande' : 'Fast utgift',
@@ -258,11 +265,12 @@ export function TransactionItem({
           
           {/* Primary Amount: matching title size and color */}
           <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
-            <p className={`text-[13.5px] sm:text-[14px] font-normal whitespace-nowrap ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
-              <span className="opacity-75 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
+            <p className={`text-[13.5px] sm:text-[14px] font-semibold font-amount whitespace-nowrap ${transaction.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+              <span className="opacity-80 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
               <span className="tabular-nums">{formatAmount(finalAmount, config?.language || 'sv')}</span>
               <span className="text-micro-label opacity-75 ml-[2px]">
                 {config?.currency || 'kr'}{transaction.frequency ? (
+                  transaction.originalAmount ? (config?.language === 'en' ? '/mo' : '/mån') :
                   transaction.frequency === 'Månadsvis' || transaction.frequency === 'MONTHLY' ? (config?.language === 'en' ? '/mo' : '/mån') :
                   transaction.frequency === 'Kvartalsvis' || transaction.frequency === 'QUARTERLY' ? (config?.language === 'en' ? '/quarter' : '/kvartal') :
                   transaction.frequency === 'Halvårsvis' || transaction.frequency === 'SEMI_ANNUALLY' ? (config?.language === 'en' ? '/half-year' : '/halvår') :
@@ -278,8 +286,17 @@ export function TransactionItem({
               </p>
             ) : isFixedItem && (
               <span className="text-micro-label text-[var(--text-tertiary)] mt-0.5 whitespace-nowrap tabular-nums">
+                {transaction.originalAmount ? (
+                  <span className="opacity-80 mr-1 font-normal">
+                    {formatAmount(transaction.originalAmount, config?.language || "sv")} {config?.currency || "kr"}
+                    {transaction.frequency === "Kvartalsvis" || transaction.frequency === "QUARTERLY" ? (config?.language === "en" ? "/qtr" : "/kvartal") :
+                     transaction.frequency === "Halvårsvis" || transaction.frequency === "SEMI_ANNUALLY" ? (config?.language === "en" ? "/half-yr" : "/halvår") :
+                     (config?.language === "en" ? "/yr" : "/år")}
+                    {transaction.deductionDay ? " • " : ""}
+                  </span>
+                ) : null}
                 {transaction.deductionDay 
-                  ? `${transaction.deductionDay}${config?.language === 'en' ? 'th' : ':e'}`
+                  ? `${transaction.deductionDay}${config?.language === "en" ? "th" : ":e"}`
                   : (transaction.timestamp || transaction.date) 
                     ? new Date(transaction.timestamp || transaction.date).toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' })
                     : ''}

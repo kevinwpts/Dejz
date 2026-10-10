@@ -618,6 +618,16 @@ export function buildDomainLogoUrls(domain: string): string[] {
     return urls;
 }
 
+const GENERIC_NON_BRAND_WORDS = new Set([
+    'mat', 'hyra', 'el', 'vatten', 'sopavgift', 'lunch', 'middag', 'fika', 'kaffe', 'bil', 'buss', 'tag', 'tåg', 'gym',
+    'träning', 'traning', 'shopping', 'kläder', 'klader', 'skor', 'hem', 'boende', 'hushåll', 'hushall', 'hälsa', 'halsa',
+    'tandvård', 'tandvard', 'medicin', 'apotek', 'abonnemang', 'räkningar', 'rakningar', 'faktura', 'fasta', 'fasta utgifter',
+    'fastautgifter', 'utgift', 'utgifter', 'inkomst', 'lön', 'lon', 'sparande', 'spara', 'buffert', 'resor', 'resa', 'semester', 'flyg',
+    'nöje', 'noje', 'fritid', 'bio', 'present', 'gåva', 'gava', 'övrigt', 'ovrigt', 'blandat', 'annat', 'swish', 'kontanter',
+    'bensin', 'diesel', 'drivmedel', 'parkering', 'tvätt', 'tvatt', 'städ', 'stad', 'städning', 'stadning', 'hund', 'katt',
+    'djur', 'husdjur', 'barn', 'dagis', 'skola', 'studier', 'kurs', 'böcker', 'bocker', 'mobil', 'telefon', 'bredband', 'internet'
+]);
+
 /**
  * Synchronous resolver for a logo URL given a name, merchant or category.
  */
@@ -666,15 +676,12 @@ export const getLogoUrl = (title: string, category?: string): string | undefined
     
     if (!cleanName && !firstWord) return undefined;
 
-    // Fallback domain guess: default to .se or .com
-    const domainPart = cleanName.length >= 3 ? cleanName : firstWord;
-    const domain = `${domainPart}.se`;
-
-    const apiKey = import.meta.env.VITE_LOGODEV_API_KEY;
-    if (apiKey) {
-        return `https://img.logo.dev/${domain}?token=${apiKey}`;
+    // Do NOT fabricate domains for generic non-brand Swedish words
+    if (GENERIC_NON_BRAND_WORDS.has(cleanName) || GENERIC_NON_BRAND_WORDS.has(firstWord)) {
+        return undefined;
     }
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+
+    return undefined;
 };
 
 /**
@@ -691,8 +698,6 @@ export const fetchLogoForName = async (name: string, category?: string): Promise
         const ok = await checkImage(name);
         return ok ? name : undefined;
     }
-
-
 
     // 1. Check known brands first (Tinder, SkyShowtime, Max, Spotify, SATS, Coop, etc.)
     const knownDomain = findKnownBrandDomain(name, category);
@@ -719,28 +724,10 @@ export const fetchLogoForName = async (name: string, category?: string): Promise
 
     const cleanName = normalized.replace(/[^a-z0-9]/g, '');
     const firstWord = normalized.split(' ')[0]?.replace(/[^a-z0-9]/g, '') || '';
-    
-    const extensions = ['.se', '.com', '.nu', '.net', '.org', '.io', '.co', '.app', '.eu'];
-    const domainCandidates: string[] = [];
 
-    if (cleanName.length >= 3) {
-        for (const ext of extensions) {
-            domainCandidates.push(`${cleanName}${ext}`);
-        }
-    }
-    if (firstWord.length >= 3 && firstWord !== cleanName) {
-        for (const ext of extensions) {
-            domainCandidates.push(`${firstWord}${ext}`);
-        }
-    }
-
-    for (const domain of domainCandidates) {
-        const urls = buildDomainLogoUrls(domain);
-        for (const url of urls) {
-            if (await checkImage(url)) {
-                return url;
-            }
-        }
+    // Do NOT probe random domains for common generic words (e.g. hyra, mat, el, gym, etc.)
+    if (GENERIC_NON_BRAND_WORDS.has(cleanName) || GENERIC_NON_BRAND_WORDS.has(firstWord)) {
+        return undefined;
     }
 
     return undefined;

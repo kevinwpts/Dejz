@@ -21,6 +21,7 @@ import { CategoryIcon } from "./CategoryIcon";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { PeriodTimeline } from "./PeriodTimeline";
+import { FixedExpenseScrollTimeline } from "./FixedExpenseScrollTimeline";
 import { Button, Modal, Card } from "./ui";
 import { getCategoryIconName } from "../utils/icons";
 import { formatAmount } from "../utils/format";
@@ -491,6 +492,17 @@ export function TodayView({
           </div>
         ) : null}
       </div>
+
+      {/* Monthly Deductions Timeline */}
+      {fixedExpenses && fixedExpenses.length > 0 && (
+        <div className="animate-fade-in -mx-0.5">
+          <FixedExpenseScrollTimeline
+            expenses={fixedExpenses}
+            config={config}
+            onSelectExpense={(expense) => onViewFixedExpense?.(expense)}
+          />
+        </div>
+      )}
 
       {/* 3. Unified Timeline & Transactions Section */}
       <div className="space-y-[var(--card-gap)] sm:space-y-[var(--card-gap)]">

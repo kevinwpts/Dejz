@@ -35,6 +35,7 @@ export function CategoryTile({
         color={color}
         size="sm"
         isActive={isActive}
+        categoryName={displayName}
       />
       <span className="text-micro-label text-center line-clamp-1 leading-tight break-words opacity-90 w-full px-0.5">
         {displayName}

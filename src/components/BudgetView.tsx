@@ -1,16 +1,16 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown, LayoutGrid, PieChart, CircleHalf, CalendarCheck, ChevronDown } from 'lucide-react';
+import { Plus, Calendar, ArrowDownLeft, PiggyBank, ArrowUpDown,  } from 'lucide-react';
 import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
-import { TransactionLogo } from './TransactionLogo';
 import { EmptyState } from './EmptyState';
-import { FilterMenuModal, FilterButtonGroup, Button } from './ui';
+import { Button, Card } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
 import { getActiveFixedExpenses } from '../utils/cancellation';
+import { FixedExpenseScrollTimeline } from './FixedExpenseScrollTimeline';
 
 interface BudgetViewProps {
   allTransactions?: any[];
@@ -57,8 +57,7 @@ export function BudgetView({
   onClearSection
 }: BudgetViewProps) {
   const [budgetFilter, setBudgetFilter] = React.useState<'fixed' | 'income' | 'savings'>('fixed');
-  const [isBudgetFilterModalOpen, setIsBudgetFilterModalOpen] = React.useState(false);
-  const [freqFilter, setFreqFilter] = React.useState<'all' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually'>('all');
+
   const [showCategoryBudgets, setShowCategoryBudgets] = React.useState(() => {
     return initialSection === 'category-budgets' || initialSection === 'allocate';
   });
@@ -163,29 +162,24 @@ export function BudgetView({
     }
   }, [activeFixedExpenses, fixedSortBy]);
 
-  const filteredActiveFixedExpenses = React.useMemo(() => {
-    if (freqFilter === 'all') return sortedFixedExpenses;
-    return sortedFixedExpenses.filter(e => {
-      const freq = e.frequency || Frequency.MONTHLY;
-      if (freqFilter === 'monthly') return freq === Frequency.MONTHLY;
-      if (freqFilter === 'quarterly') return freq === Frequency.QUARTERLY;
-      if (freqFilter === 'semi-annually') return freq === Frequency.SEMI_ANNUALLY;
-      if (freqFilter === 'annually') return freq === Frequency.ANNUALLY;
-      return true;
-    });
-  }, [sortedFixedExpenses, freqFilter]);
+  const filteredActiveFixedExpenses = sortedFixedExpenses;
+  const filteredActiveIncomes = sortedIncomes;
 
-  const filteredActiveIncomes = React.useMemo(() => {
-    if (freqFilter === 'all') return sortedIncomes;
-    return sortedIncomes.filter(i => {
+  const totalMonthlyIncomeAverage = React.useMemo(() => {
+    return (sortedIncomes || []).reduce((sum, i) => {
       const freq = i.frequency || Frequency.MONTHLY;
-      if (freqFilter === 'monthly') return freq === Frequency.MONTHLY;
-      if (freqFilter === 'quarterly') return freq === Frequency.QUARTERLY;
-      if (freqFilter === 'semi-annually') return freq === Frequency.SEMI_ANNUALLY;
-      if (freqFilter === 'annually') return freq === Frequency.ANNUALLY;
-      return true;
-    });
-  }, [sortedIncomes, freqFilter]);
+      const amount = (i.isVariable && i.periodOverrides && i.periodOverrides[currentPeriodId] !== undefined)
+        ? i.periodOverrides[currentPeriodId]
+        : (Number(i.amount) || 0);
+
+      let monthlyAmount = amount;
+      if (freq === Frequency.QUARTERLY) monthlyAmount = amount / 3;
+      else if (freq === Frequency.SEMI_ANNUALLY) monthlyAmount = amount / 6;
+      else if (freq === Frequency.ANNUALLY) monthlyAmount = amount / 12;
+
+      return sum + monthlyAmount;
+    }, 0);
+  }, [sortedIncomes, currentPeriodId]);
 
   const totalMonthlyFixedAverage = React.useMemo(() => {
     return (sortedFixedExpenses || []).reduce((sum, e) => {
@@ -249,7 +243,7 @@ export function BudgetView({
     return groups;
   }, [sortedFixedExpenses]);
 
-  const groupedFixedSums = React.useMemo(() => {
+  const _groupedFixedSums = React.useMemo(() => {
     const sums: Record<Frequency, number> = {
       [Frequency.MONTHLY]: 0,
       [Frequency.QUARTERLY]: 0,
@@ -308,143 +302,78 @@ export function BudgetView({
       transition={{ duration: 0.35 }}
       className="space-y-[var(--menu-content-gap)] font-sans"
     >
-      {/* Top Controls: Compact Inline Row (Section button + Interval pills) */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
-        <button
-          type="button"
-          onClick={() => setIsBudgetFilterModalOpen(true)}
-          className="flex-shrink-0 h-[34px] sm:h-[36px] px-3 rounded-full inline-flex items-center gap-1.5 text-[11.5px] sm:text-[12px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] sticky left-0 z-10 shadow-xs"
-        >
-          {budgetFilter === 'fixed' ? <Calendar size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" /> :
-           budgetFilter === 'income' ? <ArrowDownLeft size={13} strokeWidth={2.5} className="text-[var(--text-secondary)] shrink-0" /> :
-           <PiggyBank size={13} strokeWidth={2} className="text-[var(--text-secondary)] shrink-0" />}
-          <span className="truncate">
-            {budgetFilter === 'fixed' ? (t('fixedExpenses' as TranslationKey) || (config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter')) :
-             budgetFilter === 'income' ? (t('incomes' as TranslationKey) || (config?.language === 'en' ? 'Income' : 'Inkomster')) :
-             (t('monthlySavings' as TranslationKey) || (config?.language === 'en' ? 'Monthly savings' : 'Månadssparande'))}
-          </span>
-          <ChevronDown size={12} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
-        </button>
-        <FilterMenuModal
-          isOpen={isBudgetFilterModalOpen}
-          onClose={() => setIsBudgetFilterModalOpen(false)}
-          title={config?.language === 'en' ? 'Select section' : 'Välj budgetkategori'}
-          selectedId={budgetFilter}
-          onSelect={(id) => setBudgetFilter(id as 'fixed' | 'income' | 'savings')}
-          options={[
-            {
-              id: 'fixed',
-              label: config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter',
-              icon: <Calendar size={16} strokeWidth={2} />,
-            },
-            {
-              id: 'income',
-              label: config?.language === 'en' ? 'Income' : 'Inkomster',
-              icon: <ArrowDownLeft size={16} strokeWidth={2.5} />,
-            },
-            {
-              id: 'savings',
-              label: config?.language === 'en' ? 'Monthly savings' : 'Månadssparande',
-              icon: <PiggyBank size={16} strokeWidth={2} />,
-            },
-          ]}
-        />
-        {(budgetFilter === 'fixed' || budgetFilter === 'income') && (
-          <FilterButtonGroup
-            options={[
-              {
-                id: 'all',
-                label: config?.language === 'en' ? 'All' : 'Alla',
-                icon: <LayoutGrid size={13} strokeWidth={2} />,
-              },
-              {
-                id: 'monthly',
-                label: config?.language === 'en' ? 'Monthly' : 'Månad',
-                icon: <Calendar size={13} strokeWidth={2} />,
-              },
-              {
-                id: 'quarterly',
-                label: config?.language === 'en' ? 'Quarterly' : 'Kvartal',
-                icon: <PieChart size={13} strokeWidth={2} />,
-              },
-              {
-                id: 'semi-annually',
-                label: config?.language === 'en' ? 'Semi-annually' : 'Halvår',
-                icon: <CircleHalf size={13} strokeWidth={2} />,
-              },
-              {
-                id: 'annually',
-                label: config?.language === 'en' ? 'Annually' : 'År',
-                icon: <CalendarCheck size={13} strokeWidth={2} />,
-              },
-            ]}
-            selectedId={freqFilter}
-            onSelect={(id) => setFreqFilter(id as 'all' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually')}
-            ariaLabel={config?.language === 'en' ? 'Payment interval' : 'Betalningsintervall'}
-            className="flex-shrink-0 w-auto"
-          />
-        )}
-      </div>
-
-      {/* Overview Summary flat on background */}
-      <div className="px-1 py-1 select-none">
-        <div className="space-y-1">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-metric-label">
-              {budgetFilter === 'income' && (
-                freqFilter === 'all' ? (config?.language === 'en' ? 'Total income' : 'Totala inkomster') :
-                freqFilter === 'monthly' ? (config?.language === 'en' ? 'Total monthly income' : 'Totala månadsinkomster') :
-                freqFilter === 'quarterly' ? (config?.language === 'en' ? 'Total quarterly income' : 'Totala kvartalsinkomster') :
-                freqFilter === 'semi-annually' ? (config?.language === 'en' ? 'Total semi-annual income' : 'Totala halvårsinkomster') :
-                (config?.language === 'en' ? 'Total annual income' : 'Totala årsinkomster')
-              )}
-              {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total savings' : 'Totalt sparande')}
-              {budgetFilter === 'fixed' && (
-                freqFilter === 'all' ? (config?.language === 'en' ? 'Total fixed expenses' : 'Totala fasta utgifter') :
-                freqFilter === 'monthly' ? (config?.language === 'en' ? 'Total monthly expenses' : 'Totala månadsutgifter') :
-                freqFilter === 'quarterly' ? (config?.language === 'en' ? 'Total quarterly expenses' : 'Totala kvartalsutgifter') :
-                freqFilter === 'semi-annually' ? (config?.language === 'en' ? 'Total semi-annual expenses' : 'Totala halvårsutgifter') :
-                (config?.language === 'en' ? 'Total annual expenses' : 'Totala årsutgifter')
-              )}
-            </span>
-            {(budgetFilter === 'fixed' || budgetFilter === 'income') && freqFilter === 'all' && (
-              <span className="text-micro-label text-[var(--text-tertiary)] font-normal shrink-0">
-                {config?.language === 'en' ? 'Average / month' : 'Genomsnitt / månad'}
+      {/* Top Controls: Clean Segmented Pill Group */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
+        {[
+          {
+            id: 'fixed',
+            label: config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter',
+            icon: <Calendar size={15} strokeWidth={2} />,
+          },
+          {
+            id: 'income',
+            label: config?.language === 'en' ? 'Income' : 'Inkomster',
+            icon: <ArrowDownLeft size={15} strokeWidth={2.5} />,
+          },
+          {
+            id: 'savings',
+            label: config?.language === 'en' ? 'Monthly savings' : 'Månadssparande',
+            icon: <PiggyBank size={15} strokeWidth={2} />,
+          },
+        ].map((tab) => {
+          const isActive = budgetFilter === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setBudgetFilter(tab.id as 'fixed' | 'income' | 'savings')}
+              className={`flex-shrink-0 whitespace-nowrap h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-[13px] font-medium transition-all cursor-pointer select-none active:scale-95 ${
+                isActive
+                  ? 'bg-[var(--text-primary)] text-[var(--surface-color)] shadow-xs font-semibold'
+                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+              }`}
+            >
+              <span className={`shrink-0 flex items-center justify-center [&>svg]:w-[15px] [&>svg]:h-[15px] ${isActive ? 'text-[var(--surface-color)]' : 'text-[var(--text-secondary)]'}`}>
+                {tab.icon}
               </span>
-            )}
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <AnimatedNumber 
-              value={Math.round(
-                budgetFilter === 'income' ? (
-                  freqFilter === 'all' ? totalMonthlyIncomeAverage :
-                  freqFilter === 'monthly' ? groupedIncomeSums[Frequency.MONTHLY] :
-                  freqFilter === 'quarterly' ? groupedIncomeSums[Frequency.QUARTERLY] :
-                  freqFilter === 'semi-annually' ? groupedIncomeSums[Frequency.SEMI_ANNUALLY] :
-                  groupedIncomeSums[Frequency.ANNUALLY]
-                ) :
-                budgetFilter === 'savings' ? totalSavingsSum :
-                (
-                  freqFilter === 'all' ? totalMonthlyFixedAverage :
-                  freqFilter === 'monthly' ? groupedFixedSums[Frequency.MONTHLY] :
-                  freqFilter === 'quarterly' ? groupedFixedSums[Frequency.QUARTERLY] :
-                  freqFilter === 'semi-annually' ? groupedFixedSums[Frequency.SEMI_ANNUALLY] :
-                  groupedFixedSums[Frequency.ANNUALLY]
-                )
-              )} 
-              className="text-large-amount text-[var(--text-primary)]"
-              formatter={(val) => {
-                const prefix = budgetFilter === 'income' ? '+' : '−';
-                return `${prefix}${formatAmount(val, config?.language)}`;
-              }}
-            />
-            <span className="text-label font-medium text-[var(--text-secondary)]">
-              {config?.currency || 'kr'}
-            </span>
-          </div>
-        </div>
+              <span className="whitespace-nowrap">{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
+      {/* Overview Summary Card */}
+      <Card variant="default" padding="md" className="select-none space-y-1">
+        <div>
+          <span className="text-metric-label font-medium text-[var(--text-secondary)]">
+            {budgetFilter === 'income' && (config?.language === 'en' ? 'Total monthly income' : 'Totala månadsinkomster')}
+            {budgetFilter === 'savings' && (config?.language === 'en' ? 'Total monthly savings' : 'Totalt månadssparande')}
+            {budgetFilter === 'fixed' && (config?.language === 'en' ? 'Total monthly fixed expenses' : 'Totala fasta utgifter')}
+          </span>
+        </div>
+        <div className="flex items-baseline gap-1.5 pt-1">
+          <AnimatedNumber
+            value={Math.round(
+              budgetFilter === 'income'
+                ? totalMonthlyIncomeAverage
+                : budgetFilter === 'savings'
+                ? totalSavingsSum
+                : totalMonthlyFixedAverage
+            )}
+            className="text-large-amount text-[var(--text-primary)] font-bold tabular-nums"
+            formatter={(val) => {
+              const prefix = budgetFilter === 'income' ? '+' : '−';
+              return `${prefix}${formatAmount(val, config?.language)}`;
+            }}
+          />
+          <span className="text-label font-medium text-[var(--text-secondary)]">
+            {config?.currency || 'kr'}
+            <span className="text-micro-label opacity-75 ml-1">
+              {config?.language === 'en' ? '/mo' : '/mån'}
+            </span>
+          </span>
+        </div>
+      </Card>
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -513,9 +442,7 @@ export function BudgetView({
               ) : (
                 <EmptyState 
                   title={
-                    freqFilter === 'all'
-                      ? (config.language === 'en' ? 'No income added yet' : 'Ingen inkomst inlagd än')
-                      : (config.language === 'en' ? 'No income matching this period' : 'Ingen inkomst för denna period')
+                    config.language === 'en' ? 'No income added yet' : 'Ingen inkomst inlagd än'
                   } 
                   description={config.language === 'en' ? 'Add your salary or other regular income to calculate your daily budget.' : 'Lägg in din lön eller andra inkomster för att räkna ut din dagsbudget.'}
                   actionLabel={`+ ${t('newIncome')}`}
@@ -530,151 +457,13 @@ export function BudgetView({
             <div className="space-y-[var(--card-gap)]">
               {filteredActiveFixedExpenses.length > 0 ? (
                 <>
-                                    {/* Timeline matching image reference */}
-                  <div
-                    className="w-full border rounded-card p-4 sm:p-5 select-none relative overflow-hidden shadow-xs"
-                    style={{
-                      backgroundColor: 'var(--surface-color)',
-                      borderColor: 'var(--border-subtle)',
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-micro-label font-medium uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
-                        {config?.language === 'en' ? 'Deduction Timeline' : 'Dra-tidslinje'}
-                      </span>
-                      <span className="text-micro-label font-medium tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-                        1 {config?.language === 'en' ? 'to' : 'till'} 31
-                      </span>
-                    </div>
-                    <div className="relative h-[110px] sm:h-[120px] w-full mt-2 mb-2">
-                      <div className="absolute inset-0 top-6 pointer-events-none">
-                        <svg className="w-full h-12 overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 30">
-                          <path
-                            d="M 0 15 Q 25 28, 50 15 T 100 15"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            style={{ color: 'var(--border-subtle)' }}
-                            className="opacity-70"
-                          />
-                        </svg>
-                      </div>
-                      {(() => {
-                        const today = new Date();
-                        const currentDay = today.getDate();
-                        const getPos = (d: number) => ((Math.max(1, Math.min(31, d)) - 1) / 30) * 100;
-                        const validExps = (filteredActiveFixedExpenses || []).filter(e => !e.isCancelled);
-                        return (
-                          <>
-                            {currentDay >= 1 && currentDay <= 31 && (
-                              <div
-                                className="absolute top-2 bottom-6 z-10 flex flex-col items-center pointer-events-none transform -translate-x-1/2"
-                                style={{ left: `${getPos(currentDay)}%` }}
-                              >
-                                <span
-                                  className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full mb-1 whitespace-nowrap"
-                                  style={{
-                                    color: 'var(--accent-color)',
-                                    backgroundColor: 'color-mix(in srgb, var(--accent-color) 10%, transparent)',
-                                  }}
-                                >
-                                  {config?.language === 'en' ? 'Today' : 'Idag'}
-                                </span>
-                                <div
-                                  className="w-2 h-2 rounded-full shadow-xs"
-                                  style={{
-                                    backgroundColor: 'var(--accent-color)',
-                                    boxShadow: '0 0 0 4px color-mix(in srgb, var(--accent-color) 20%, transparent)',
-                                  }}
-                                />
-                                <div
-                                  className="w-[1.5px] flex-1 opacity-60"
-                                  style={{
-                                    background: 'linear-gradient(to bottom, var(--accent-color), transparent)',
-                                  }}
-                                />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 pt-1 pointer-events-auto">
-                              {validExps.map((expense, idx) => {
-                                const day = typeof expense.deductionDay === 'number' && expense.deductionDay >= 1 ? expense.deductionDay : 1;
-                                const leftPct = getPos(day);
-                                const isEven = idx % 2 === 0;
-                                const tx = {
-                                  id: expense.id,
-                                  amount: expense.amount,
-                                  category: expense.category,
-                                  merchant: expense.name,
-                                  type: 'expense',
-                                  timestamp: Date.now(),
-                                  logo: expense.logo,
-                                  icon: expense.icon,
-                                  paymentMethod: expense.paymentMethod,
-                                  deductionDay: day,
-                                  frequency: expense.frequency,
-                                };
-                                return (
-                                  <div
-                                    key={expense.id || idx}
-                                    className="absolute flex flex-col items-center transform -translate-x-1/2 transition-transform hover:scale-110 cursor-pointer group/pin"
-                                    style={{
-                                      left: `${leftPct}%`,
-                                      top: isEven ? '2px' : '18px',
-                                    }}
-                                    onClick={() => onViewFixedExpense(expense)}
-                                    title={`${expense.name} (Dag ${day}) - ${expense.amount} kr`}
-                                  >
+                  {/* Horisontell tidslinje för fasta utgifter direkt mot bakgrunden */}
+                  <FixedExpenseScrollTimeline
+                    expenses={filteredActiveFixedExpenses}
+                    config={config}
+                    onSelectExpense={onViewFixedExpense}
+                  />
 
-                                    <div className="relative flex flex-col items-center">
-                                      <div
-                                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden shadow-sm border flex items-center justify-center transition-shadow group-hover/pin:shadow-md"
-                                        style={{
-                                          backgroundColor: 'var(--surface-color)',
-                                          borderColor: 'var(--border-subtle)',
-                                        }}
-                                      >
-                                        <TransactionLogo transaction={tx} config={config} size="sm" />
-                                      </div>
-                                      <div className="w-[1.5px] h-3 transition-colors" style={{ backgroundColor: 'var(--border-subtle)' }} />
-                                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--text-tertiary)' }} />
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-                    <div
-                      className="relative pt-3 border-t flex items-center justify-between text-[11px] font-medium tabular-nums"
-                      style={{
-                        borderColor: 'var(--border-subtle)',
-                        color: 'var(--text-tertiary)',
-                      }}
-                    >
-                      <div className="flex flex-col items-center">
-                        <div className="w-[1px] h-2 mb-1" style={{ backgroundColor: 'var(--border-subtle)' }} />
-                        <span>1</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="w-[1px] h-2 mb-1" style={{ backgroundColor: 'var(--border-subtle)' }} />
-                        <span>8</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="w-[1px] h-2 mb-1" style={{ backgroundColor: 'var(--border-subtle)' }} />
-                        <span>15</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="w-[1px] h-2 mb-1" style={{ backgroundColor: 'var(--border-subtle)' }} />
-                        <span>22</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="w-[1px] h-2 mb-1" style={{ backgroundColor: 'var(--border-subtle)' }} />
-                        <span>31</span>
-                      </div>
-                    </div>
-                  </div>
                   <div className="flex items-center justify-between gap-2 px-0.5">
                     <button
                       type="button"

@@ -37,7 +37,10 @@ export function TransactionLogo({
       return;
     }
 
-    if (!directLogoUrl && merchantName && merchantName.trim().length >= 2) {
+    const hasExplicitIcon = Boolean(transaction.icon && transaction.icon !== 'none' && transaction.icon !== 'receipt' && transaction.icon !== '🧾');
+    const isBrand = Boolean(findKnownBrandDomain(merchantName));
+
+    if (!directLogoUrl && !hasExplicitIcon && isBrand && merchantName && merchantName.trim().length >= 2) {
       fetchLogoForName(merchantName).then(url => {
         if (active && url) {
           setAsyncLogoUrl(url);
@@ -48,7 +51,7 @@ export function TransactionLogo({
     }
 
     return () => { active = false; };
-  }, [directLogoUrl, merchantName, transaction.id]);
+  }, [directLogoUrl, merchantName, transaction.id, transaction.icon]);
 
   const activeLogoUrl = directLogoUrl || asyncLogoUrl;
 
@@ -120,7 +123,8 @@ export function TransactionLogo({
 
   // Fallback Category / Default Icon (with Icons8 Color support)
   const categoryIconKey = (visual as any).categoryIcon || (visual as any).iconKey;
-  const categoryName = (visual as any).categoryName || transaction.category;
+  const rawCatName = (visual as any).categoryName || transaction.category;
+  const categoryName = typeof rawCatName === 'object' ? (rawCatName as any)?.name : (rawCatName || '');
 
   if (categoryIconKey || categoryName) {
     return (

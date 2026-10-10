@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Trash2, Palette } from 'lucide-react';
+import { Check, Trash2 } from 'lucide-react';
 import { TranslationKey } from '../i18n';
-import { suggestIcon } from '../utils/icons';
-import { IconPickerModal } from './IconPickerModal';
 import { CategoryIcon } from './CategoryIcon';
-import { DEFAULT_CATEGORY_PALETTE } from '../utils/categoryColors';
-import { Modal, IconButton, Input } from './ui';
+import { IconPickerModal } from './IconPickerModal';
+import { suggestIcon } from '../utils/icons';
+import { Modal, IconButton, Input, Button } from './ui';
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -18,8 +17,6 @@ interface CategoryModalProps {
   t: (key: TranslationKey) => string;
   hideBudget?: boolean;
 }
-
-const PRESET_COLORS = [...DEFAULT_CATEGORY_PALETTE];
 
 export function CategoryModal({ 
   isOpen, 
@@ -34,7 +31,6 @@ export function CategoryModal({
 }: CategoryModalProps) {
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('receipt');
-  const [color, setColor] = useState('#6658E8');
   const [budget, setBudget] = useState('');
   const [showIconPicker, setShowIconPicker] = useState(false);
 
@@ -42,21 +38,19 @@ export function CategoryModal({
     if (isOpen) {
       setName(initialData?.name || '');
       setIcon(initialData?.icon || 'receipt');
-      setColor(initialData?.color || '#6658E8');
       setBudget(initialData?.budget !== undefined && initialData?.budget !== null ? String(initialData.budget) : '');
       setShowIconPicker(false);
     }
   }, [isOpen, initialData]);
 
   const isEdit = initialData?.index !== undefined;
-  const isCustomSelected = !PRESET_COLORS.some((c) => c.toLowerCase() === color.toLowerCase());
 
   const handleSave = () => {
     if (!name.trim()) return;
     onSave({ 
       name: name.trim(), 
       icon, 
-      color, 
+      color: initialData?.color || '#6658E8', 
       budget: type === 'expense' 
         ? (hideBudget ? (initialData?.budget ?? null) : (budget ? Number(budget) : null))
         : undefined,
@@ -100,7 +94,6 @@ export function CategoryModal({
             <div className="relative">
               <CategoryIcon 
                 icon={icon} 
-                color={color}
                 size="xl" 
                 variant="primary"
                 categoryName={name}
@@ -147,69 +140,16 @@ export function CategoryModal({
             />
           )}
 
-          {/* Color palette */}
-          <div className="space-y-2">
-            <div className="grid grid-cols-8 gap-2 bg-[var(--surface-muted)] p-2.5 rounded-[var(--radius-card-nested,10px)] border border-[var(--border-color)]">
-              {/* Custom hex color input picker */}
-              <div 
-                className={`relative w-full aspect-square rounded-full border border-[var(--border-color)] cursor-pointer shadow-xs flex items-center justify-center group transition-all duration-200 active:scale-95 ${
-                  isCustomSelected ? 'scale-110 ring-2 ring-white dark:ring-surface shadow-subtle z-10' : 'hover:scale-105'
-                }`}
-                style={{ background: 'conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)' }}
-              >
-                <input
-                  type="color"
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                  className="absolute inset-0 w-full h-full cursor-pointer opacity-0 z-20"
-                  title="Välj anpassad färg"
-                />
-                <div 
-                  className="w-6 h-6 rounded-full shadow-xs flex items-center justify-center z-10 transition-transform group-hover:scale-110 border border-subtle"
-                  style={{ 
-                    backgroundColor: isCustomSelected ? color : 'var(--bg-card)',
-                  }}
-                >
-                  {isCustomSelected ? (
-                    <Check size={11} strokeWidth={3} className="text-white drop-shadow-subtle" />
-                  ) : (
-                    <Palette size={12} strokeWidth={2.5} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
-                  )}
-                </div>
-              </div>
-              {PRESET_COLORS.map((c) => {
-                const isSelected = color.toLowerCase() === c.toLowerCase();
-                return (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
-                    className={`w-full aspect-square rounded-full transition-transform active:scale-90 relative cursor-pointer ${
-                      isSelected ? 'scale-110 shadow-subtle ring-2 ring-white dark:ring-surface' : 'hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: c }}
-                    aria-label={`Välj färg ${c}`}
-                  >
-                    {isSelected && (
-                      <span className="absolute inset-0 flex items-center justify-center text-white">
-                        <Check size={12} strokeWidth={3} />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <button
+          <Button
             type="button"
             onClick={handleSave}
             disabled={!name.trim()}
-            className="w-full h-12 rounded-[8px] bg-[var(--accent-color)] text-[var(--on-accent)] font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            variant="primary"
+            fullWidth
+            icon={<Check size={18} strokeWidth={2} />}
           >
-            <Check size={18} strokeWidth={2} />
-            <span>{t('save')}</span>
-          </button>
+            {t('save')}
+          </Button>
         </div>
       </Modal>
 

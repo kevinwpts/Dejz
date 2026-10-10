@@ -209,8 +209,10 @@ export const LEGACY_ICON_TO_ICONS8_MAP: Record<string, string> = {
   'wifi': 'wifi',
   'bus': 'bus',
   'train': 'train',
+  'zap': 'electricity',
+  'flame': 'electricity',
   'receipt': 'bank-cards',
-  'tag': 'ingredients-list'
+  'tag': 'box'
 };
 
 /**
@@ -292,8 +294,13 @@ export function resolveIcons8Key(iconKey?: string, categoryName?: string): strin
     return LEGACY_ICON_TO_ICONS8_MAP[cleanKey];
   }
 
-  // 3. Fallback to category name matching
-  return getIcons8ForCategoryName(categoryName || cleanKey);
+  // 3. If it's a generic placeholder ('tag', 'receipt', 'none', 'box'), try category name matching
+  if (cleanKey === 'tag' || cleanKey === 'receipt' || cleanKey === 'none' || cleanKey === 'box' || !cleanKey) {
+    return getIcons8ForCategoryName(categoryName || cleanKey);
+  }
+
+  // 4. Return empty string if not found in Icons8 so CategoryIcon renders the exact Lucide vector icon
+  return '';
 }
 
 /**

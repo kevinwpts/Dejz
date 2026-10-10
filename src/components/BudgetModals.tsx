@@ -200,13 +200,13 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
                   const catName = typeof income.category === 'object' ? (income.category as any)?.name : (income.category || t('income'));
                   const searchCat = (catName || '').trim().toLowerCase();
                   const cat = [...(config.incomeCategories || []), ...(config.categories || [])].find(
-                    c => (c?.name || '').trim().toLowerCase() === searchCat
+                    c => (c?.name || '').trim().toLowerCase() === searchCat || c?.id === searchCat
                   );
                   const iconKey = cat?.icon || getCategoryIconName(catName);
                   const _catColor = cat?.color || getCategoryColor(catName, config.incomeCategories);
                   return (
                     <>
-                      {iconKey && <CategoryIcon icon={iconKey} variant="minimal" size="xs" />}
+                      {iconKey && <CategoryIcon icon={iconKey} categoryName={catName} variant="minimal" size="xs" />}
                       <span className="text-[14px] font-medium text-[var(--text-primary)]">{catName}</span>
                     </>
                   );
@@ -529,12 +529,18 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
-                <CategoryIcon 
-                  icon={(categories || []).find(c => c.name === category)?.icon || 'tag'} 
-                  color={(categories || []).find(c => c.name === category)?.color || 'var(--accent-color)'}
-                  size="xs" 
-                  variant="primary" 
-                />
+                {(() => {
+                  const matched = (categories || []).find(c => (c.name || '').trim().toLowerCase() === (category || '').trim().toLowerCase() || c.id === category);
+                  return (
+                    <CategoryIcon 
+                      icon={matched?.icon || 'tag'} 
+                      color={matched?.color || 'var(--accent-color)'}
+                      size="xs" 
+                      variant="primary" 
+                      categoryName={category}
+                    />
+                  );
+                })()}
                 <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || t('income')}
                 </span>
@@ -1011,13 +1017,13 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                   const catName = typeof expense.category === 'object' ? (expense.category as any)?.name : (expense.category || '');
                   const searchCat = (catName || '').trim().toLowerCase();
                   const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
-                    c => (c?.name || '').trim().toLowerCase() === searchCat
+                    c => (c?.name || '').trim().toLowerCase() === searchCat || c?.id === searchCat
                   );
                   const iconKey = cat?.icon || getCategoryIconName(catName);
                   const _catColor = cat?.color || getCategoryColor(catName, config.categories);
                   return (
                     <>
-                      {iconKey && <CategoryIcon icon={iconKey} variant="minimal" size="xs" />}
+                      {iconKey && <CategoryIcon icon={iconKey} categoryName={catName} variant="minimal" size="xs" />}
                       <span className="text-[14px] font-medium text-[var(--text-primary)]">{catName}</span>
                     </>
                   );
@@ -1256,28 +1262,36 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
     if (manualSelectionThisSession) return;
 
     const trimmedName = name.trim();
-    const instantLogo = getLogoUrl(trimmedName, category);
+    const isBrand = Boolean(findKnownBrandDomain(trimmedName, category));
 
-    if (instantLogo) {
-      setLogo(instantLogo);
-      setIcon('none');
-      setAutoLogo(instantLogo);
-      if (!instantLogo.includes('google.com/s2/favicons')) {
-        return;
+    if (isBrand) {
+      const instantLogo = getLogoUrl(trimmedName, category);
+      if (instantLogo) {
+        setLogo(instantLogo);
+        setIcon('none');
+        setAutoLogo(instantLogo);
+        if (!instantLogo.includes('google.com/s2/favicons')) {
+          return;
+        }
+      }
+
+      const timer = setTimeout(async () => {
+        const url = await fetchLogoForName(trimmedName, category);
+        setAutoLogo(url);
+        
+        if (url && !manualSelectionThisSession) {
+          setLogo(url);
+          setIcon('none');
+        }
+      }, 200);
+      return () => clearTimeout(timer);
+    } else {
+      setAutoLogo(undefined);
+      if (!expense?.logo && !manualSelectionThisSession) {
+        setLogo(undefined);
       }
     }
-
-    const timer = setTimeout(async () => {
-      const url = await fetchLogoForName(trimmedName);
-      setAutoLogo(url);
-      
-      if (url && !manualSelectionThisSession) {
-        setLogo(url);
-        setIcon('none');
-      }
-    }, 200);
-    return () => clearTimeout(timer);
-  }, [name, manualSelectionThisSession]);
+  }, [name, category, manualSelectionThisSession, expense?.logo]);
 
   const handleSave = () => {
     const parsedAmount = parseAmount(amount);
@@ -1432,12 +1446,18 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 {t('category')}
               </span>
               <div className="flex items-center gap-2 min-w-0">
-                <CategoryIcon 
-                  icon={categories.find(c => c.name === category)?.icon || 'receipt'} 
-                  color={categories.find(c => c.name === category)?.color || 'var(--accent-color)'}
-                  size="xs" 
-                  variant="primary" 
-                />
+                {(() => {
+                  const matched = (categories || []).find(c => (c.name || '').trim().toLowerCase() === (category || '').trim().toLowerCase() || c.id === category);
+                  return (
+                    <CategoryIcon 
+                      icon={matched?.icon || 'receipt'} 
+                      color={matched?.color || 'var(--accent-color)'}
+                      size="xs" 
+                      variant="primary" 
+                      categoryName={category}
+                    />
+                  );
+                })()}
                 <span className="text-[14px] font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors truncate max-w-[150px] sm:max-w-[200px]">
                   {category || (config?.language === 'en' ? 'Select category' : 'Välj kategori')}
                 </span>
@@ -1678,6 +1698,9 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                           type="button"
                           onClick={() => {
                             setCategory(cat.name);
+                            if (!manualSelectionThisSession && (!expense?.logo || !findKnownBrandDomain(name, cat.name))) {
+                              setLogo(undefined);
+                            }
                             setIsCategorySelectorOpen(false);
                           }}
                           style={{ backgroundColor: cat.color || getCategoryColor(cat.name, categories) }}
@@ -1685,7 +1708,7 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                             isSelected ? 'ring-3 ring-white ring-offset-2 ring-offset-black/50' : ''
                           }`}
                         >
-                          <CategoryIcon icon={cat.icon} size="lg" noBackground whiteIcon />
+                          <CategoryIcon icon={cat.icon} categoryName={cat.name} size="lg" noBackground whiteIcon />
                           <span className="text-[13.5px] sm:text-[14px] font-bold text-white text-center truncate w-full px-1 drop-shadow-xs">
                             {cat.name}
                           </span>

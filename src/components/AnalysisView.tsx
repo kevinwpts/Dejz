@@ -1,15 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, LayoutGrid, TrendingUp, Calendar } from 'lucide-react';
+import { ChevronDown, LayoutGrid, TrendingUp, Calendar, Info } from 'lucide-react';
 import { Transaction, FixedExpense, Config } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
-import { BudgetSummaryModule } from './BudgetSummaryModule';
-import { FilterButtonGroup, Card } from './ui';
+import { FilterButtonGroup, Card, Modal } from './ui';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { formatAmount } from '../utils/format';
-import { isFixedItemDueInPeriod } from '../utils/date';
+import { isFixedItemDueInPeriod, getPeriodBoundaries } from '../utils/date';
 import { getCategoryIconName } from '../utils/icons';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryColor } from '../utils/categoryColors';
@@ -62,32 +61,49 @@ export function AnalysisView({
   }, [periods]);
 
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
-  const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('all');
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [analysisFilter, setAnalysisFilter] = useState<'all' | 'variable' | 'fixed'>('variable');
+  const [showAllCategories, setShowAllCategories] = useState(false);
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
+  const [isRemainingInfoOpen, setIsRemainingInfoOpen] = useState(false);
 
   const isEn = config.language === 'en';
-
-  // Format date interval like Hem e.g. "24 sep – 22 okt"
-  const periodIntervalText = useMemo(() => {
-    const start = stats?.periodStart || currentPeriod?.start;
-    const end = stats?.periodEnd || currentPeriod?.end;
-    if (!start || !end) return null;
-    const startDate = typeof start === 'string' ? new Date(start) : start;
-    const endDate = typeof end === 'string' ? new Date(end) : end;
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return null;
-
-    const formatDate = (d: Date) => {
-      const formatted = d.toLocaleDateString(isEn ? 'en-US' : 'sv-SE', {
-        day: 'numeric',
-        month: 'short',
-      });
-      return formatted.replace(/\.$/, '');
-    };
-
-    return `${formatDate(startDate)} \u2013 ${formatDate(endDate)}`;
-  }, [stats?.periodStart, stats?.periodEnd, currentPeriod?.start, currentPeriod?.end, isEn]);
-
   const effectiveStats = stats;
+
+  // Display period name (e.g. "Augusti") instead of date interval
+  const periodDisplayName = useMemo(() => {
+    const rawName = effectiveStats?.periodName || currentPeriod?.name;
+    if (rawName) {
+      const cleanName = rawName.includes('(') ? rawName.split('(')[0].trim() : rawName.trim();
+      if (cleanName) return cleanName;
+    }
+    // Fallback if no periodName: format month name from period start/end date
+    const targetDate = stats?.periodEnd || stats?.periodStart || currentPeriod?.end || currentPeriod?.start;
+    if (targetDate) {
+      const d = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
+      if (!isNaN(d.getTime())) {
+        const monthName = d.toLocaleDateString(isEn ? 'en-US' : 'sv-SE', { month: 'long' });
+        return monthName.charAt(0).toUpperCase() + monthName.slice(1);
+      }
+    }
+    return isEn ? 'Period' : 'Period';
+  }, [effectiveStats?.periodName, currentPeriod?.name, stats?.periodEnd, stats?.periodStart, currentPeriod?.end, currentPeriod?.start, isEn]);
+
+  const isPastPeriod = useMemo(() => {
+    if (!stats) return false;
+    if (stats.isPastPeriod) return true;
+    if (stats.periodEnd) {
+      const now = new Date();
+      const endMidnight = new Date(
+        stats.periodEnd.getFullYear(),
+        stats.periodEnd.getMonth(),
+        stats.periodEnd.getDate(),
+        23, 59, 59, 999
+      ).getTime();
+      return now.getTime() > endMidnight;
+    }
+    return false;
+  }, [stats]);
 
   const filteredExpenses = useMemo(() => {
     if (!transactions || !stats) return [];
@@ -164,7 +180,7 @@ export function AnalysisView({
       .map(([name, value], index) => {
         const searchName = (name || '').trim().toLowerCase();
         const cat = allCats.find(
-          c => (c?.name || '').trim().toLowerCase() === searchName
+          c => (c?.name || '').trim().toLowerCase() === searchName || c?.id === searchName || (c?.id || '').toLowerCase() === searchName
         );
         
         const icon = cat?.icon || getCategoryIconName(name);
@@ -178,7 +194,7 @@ export function AnalysisView({
       })
       .filter(item => item.value > 0)
       .sort((a, b) => b.value - a.value);
-      
+    
     return { 
       categoryData: data, 
       totalFixed: fixedSum, 
@@ -186,10 +202,7 @@ export function AnalysisView({
     };
   }, [filteredExpenses, fixedExpenses, t, analysisFilter, config.categories, config.incomeCategories, stats?.periodStart, stats?.periodEnd, stats?.periodId]);
 
-  // 1. Spenderat-belopp baserat på valt filter:
-  // Alla -> Totala utgifter (rörliga + fasta i perioden)
-  // Rörliga -> Rörliga utgifter
-  // Fasta -> Fasta utgifter i perioden
+  // Total spent based on filter
   const totalSpent = useMemo(() => {
     if (analysisFilter === 'variable') {
       return totalSpentInPeriod;
@@ -200,8 +213,7 @@ export function AnalysisView({
     return totalSpentInPeriod + totalFixed;
   }, [analysisFilter, totalSpentInPeriod, totalFixed]);
 
-  // 2. Gemensam disponibel budget för perioden:
-  // Inkomster − fasta utgifter som hör till perioden − planerat sparande (+ extra inkomster till idag)
+  // Disposable budget
   const disposableBudget = useMemo(() => {
     if (!stats) return 0;
     const basePot = stats.disposablePot || 0;
@@ -211,10 +223,7 @@ export function AnalysisView({
     return basePot + extraInc;
   }, [stats]);
 
-  // 3. Kvar att spendera (eller Kvar vid periodens slut för avslutade perioder)
-  // ALLTID samma belopp oavsett om filtret är Alla, Rörliga eller Fasta:
-  // Kvar att spendera = Inkomster − fasta utgifter som hör till perioden − planerat sparande − rörliga utgifter
-  // Överensstämmer 100% med Hemfliken för aktuell period.
+  // Remaining budget
   const remainingBudget = useMemo(() => {
     if (!stats) return 0;
     if (stats.remainingPeriodCents !== undefined) {
@@ -223,9 +232,7 @@ export function AnalysisView({
     return Math.round(disposableBudget - totalSpentInPeriod);
   }, [stats, disposableBudget, totalSpentInPeriod]);
 
-  // 4. Budgetprocenten:
-  // Progressbaren ska ALLTID visa hur stor del av den disponibla budgeten som förbrukats av rörliga utgifter.
-  // Procenten ändras INTE när användaren växlar mellan Alla, Rörliga och Fasta.
+  // Budget percentage used
   const budgetUsedPct = useMemo(() => {
     if (disposableBudget <= 0) {
       return totalSpentInPeriod > 0 ? 100 : 0;
@@ -239,23 +246,48 @@ export function AnalysisView({
     return { name: first.name, amount: first.value };
   }, [categoryData]);
 
-  // Previous Period Comparison Logic
+  // Previous Period Comparison Logic with reliable fallback
   const previousPeriod = useMemo(() => {
-    if (!periods || periods.length === 0 || !stats?.periodStart) return null;
+    if (!stats?.periodStart) return null;
     const currentStartMs = new Date(stats.periodStart).getTime();
-    const sorted = [...periods]
-      .filter(p => p.start && new Date(p.start).getTime() < currentStartMs)
-      .sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
-    return sorted[0] || null;
-  }, [periods, stats?.periodStart]);
+    if (periods && periods.length > 0) {
+      const sorted = [...periods]
+        .filter(p => p.start && new Date(p.start).getTime() < currentStartMs)
+        .sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
+      if (sorted.length > 0 && sorted[0]) {
+        return sorted[0];
+      }
+    }
+    // Calculate previous period mathematically using user's payday configuration
+    const oneDayPrior = new Date(currentStartMs - 86400000);
+    const bounds = getPeriodBoundaries(
+      oneDayPrior,
+      config.paydayType,
+      config.payday,
+      config.paydayBeforeWeekend
+    );
+    return {
+      periodId: `prev-${bounds.start.getTime()}`,
+      start: bounds.start,
+      end: bounds.end,
+      name: isEn ? 'Previous period' : 'Föregående period',
+    };
+  }, [periods, stats?.periodStart, config.paydayType, config.payday, config.paydayBeforeWeekend, isEn]);
+
+  // Precise previous period timestamp boundaries (never bleeds into current period)
+  const previousPeriodBounds = useMemo(() => {
+    if (!previousPeriod || !stats?.periodStart) return null;
+    const pStartMs = new Date(previousPeriod.start).getTime();
+    const pEndDate = new Date(previousPeriod.end);
+    const curStartMs = new Date(stats.periodStart).getTime();
+    const rawEndMs = pEndDate.getHours() === 23 ? pEndDate.getTime() : pEndDate.getTime() + 86399999;
+    const pEndMs = Math.min(curStartMs - 1, rawEndMs);
+    return { pStartMs, pEndMs };
+  }, [previousPeriod, stats?.periodStart]);
 
   const previousPeriodSpent = useMemo(() => {
-    if (!previousPeriod || !transactions) return null;
-    const pStart = new Date(previousPeriod.start);
-    const pEnd = new Date(previousPeriod.end);
-    const pStartMs = pStart.getTime();
-    const pEndMs = pEnd.getTime() + 86399999;
-
+    if (!previousPeriodBounds || !transactions) return null;
+    const { pStartMs, pEndMs } = previousPeriodBounds;
     const includeVariable = analysisFilter === 'all' || analysisFilter === 'variable';
     const includeFixed = analysisFilter === 'all' || analysisFilter === 'fixed';
 
@@ -273,10 +305,12 @@ export function AnalysisView({
       });
     }
 
-    if (includeFixed && fixedExpenses) {
+    if (includeFixed && fixedExpenses && previousPeriod) {
+      const pStartDate = new Date(previousPeriod.start);
+      const pEndDate = new Date(previousPeriod.end);
       const activeFixed = (fixedExpenses || []).filter((e: any) => !e.isArchived && !e.archived);
       activeFixed.forEach((e: FixedExpense) => {
-        const isDue = isFixedItemDueInPeriod(e, pStart, pEnd);
+        const isDue = isFixedItemDueInPeriod(e, pStartDate, pEndDate);
         if (!isDue) return;
 
         let amount = Number(e.amount) || 0;
@@ -288,32 +322,104 @@ export function AnalysisView({
     }
 
     return prevSpent;
-  }, [previousPeriod, transactions, fixedExpenses, analysisFilter]);
+  }, [previousPeriodBounds, previousPeriod, transactions, fixedExpenses, analysisFilter]);
 
-  const previousPeriodComparisonText = useMemo(() => {
-    if (previousPeriodSpent === null) return null;
+  // Previous period spending map per category
+  const previousPeriodCategorySpending = useMemo(() => {
+    if (!previousPeriodBounds || !transactions) return {};
+    const { pStartMs, pEndMs } = previousPeriodBounds;
+    const map: Record<string, number> = {};
 
-    const currentSpentRound = Math.round(totalSpent);
-    const prevSpentRound = Math.round(previousPeriodSpent);
-    const diff = currentSpentRound - prevSpentRound;
+    const includeVariable = analysisFilter === "all" || analysisFilter === "variable";
+    const includeFixed = analysisFilter === "all" || analysisFilter === "fixed";
 
-    if (diff < 0) {
-      const absDiff = Math.abs(diff);
-      return isEn 
-        ? `${formatAmount(absDiff, config.language)} ${config.currency || 'kr'} less than previous period`
-        : `${formatAmount(absDiff, config.language)} ${config.currency || 'kr'} mindre än föregående period`;
+    if (includeVariable) {
+      transactions.forEach(e => {
+        if (e.timestamp >= pStartMs && e.timestamp <= pEndMs && e.type !== "income") {
+          const splits = (e as any).splits;
+          if (splits && splits.length > 0) {
+            splits.forEach((s: any) => {
+              const cat = (s.category || "").trim().toLowerCase();
+              map[cat] = (map[cat] || 0) + (Number(s.amount) || 0);
+            });
+          } else {
+            const cat = (e.category || "").trim().toLowerCase();
+            map[cat] = (map[cat] || 0) + (Number(e.amount) || 0);
+          }
+        }
+      });
     }
 
+    if (includeFixed && fixedExpenses && previousPeriod) {
+      const pStartDate = new Date(previousPeriod.start);
+      const pEndDate = new Date(previousPeriod.end);
+      fixedExpenses.forEach(fe => {
+        if (fe.isArchived || fe.archived) return;
+        const isDue = isFixedItemDueInPeriod(fe, pStartDate, pEndDate);
+        if (!isDue) return;
+
+        const cat = (fe.category || t("fixedExpenses")).trim().toLowerCase();
+        let amount = Number(fe.amount) || 0;
+        if (fe.isVariable && fe.periodOverrides && previousPeriod.periodId && fe.periodOverrides[previousPeriod.periodId] !== undefined) {
+          amount = Number(fe.periodOverrides[previousPeriod.periodId]) || 0;
+        }
+        map[cat] = (map[cat] || 0) + amount;
+      });
+    }
+
+    return map;
+  }, [previousPeriodBounds, previousPeriod, transactions, fixedExpenses, analysisFilter, t]);
+
+  const hasPreviousPeriodData = useMemo(() => {
+    return previousPeriodSpent !== null && previousPeriodSpent > 0;
+  }, [previousPeriodSpent]);
+
+  // Helper to get historical trend for a category
+  const getCategoryTrend = useCallback((categoryName: string, currentValue: number) => {
+    if (!previousPeriodBounds) return null;
+    const key = (categoryName || '').trim().toLowerCase();
+    const prevValue = previousPeriodCategorySpending[key];
+
+    // If there is no previous period transaction data at all
+    if (!hasPreviousPeriodData) {
+      return { type: 'new' as const, label: isEn ? 'New' : 'Ny' };
+    }
+
+    if (prevValue === undefined || prevValue === null || prevValue === 0) {
+      if (currentValue > 0) {
+        return { type: 'new' as const, label: isEn ? 'New' : 'Ny' };
+      }
+      return null;
+    }
+
+    const diff = currentValue - prevValue;
+    const pct = Math.round((diff / prevValue) * 100);
+    if (diff === 0) {
+      return { type: 'same' as const, label: '0%', diff: 0, pct: 0 };
+    }
     if (diff > 0) {
-      return isEn
-        ? `${formatAmount(diff, config.language)} ${config.currency || 'kr'} more than previous period`
-        : `${formatAmount(diff, config.language)} ${config.currency || 'kr'} mer än föregående period`;
+      return { type: 'up' as const, label: `+${pct}%`, diff, pct };
     }
+    return { type: 'down' as const, label: `${pct}%`, diff, pct };
+  }, [previousPeriodBounds, previousPeriodCategorySpending, hasPreviousPeriodData, isEn]);
 
-    return isEn ? 'Same as previous period' : 'Samma som föregående period';
-  }, [previousPeriodSpent, totalSpent, isEn, config.language, config.currency]);
+  const spentLabel = useMemo(() => {
+    if (analysisFilter === 'variable') {
+      return isEn ? 'Variable expenses' : 'Rörliga utgifter';
+    }
+    if (analysisFilter === 'fixed') {
+      return isEn ? 'Fixed expenses' : 'Fasta utgifter';
+    }
+    return isEn ? 'Total expenses' : 'Totala utgifter';
+  }, [analysisFilter, isEn]);
 
-  // Donut chart / list items data: Top 5 categories + "Övriga kategorier"
+  const remainingLabel = useMemo(() => {
+    return isPastPeriod
+      ? (isEn ? 'Left at period end' : 'Kvar vid periodens slut')
+      : (isEn ? 'Remaining to spend' : 'Kvar att spendera');
+  }, [isPastPeriod, isEn]);
+
+  // Donut chart items: Top 5 categories + "Övriga kategorier"
   const chartItems = useMemo(() => {
     if (categoryData.length <= 5) {
       return categoryData.map(c => ({
@@ -350,38 +456,40 @@ export function AnalysisView({
     return top5;
   }, [categoryData, totalSpent, isEn]);
 
+  const hoveredItem = useMemo(() => chartItems.find(i => i.name === hoveredCategory) || null, [chartItems, hoveredCategory]);
+
   if (!stats) return null;
 
   return (
     <div className="space-y-[var(--menu-content-gap)] font-sans">
-      {/* Top Controls: Compact Inline Row (Period button + Filter pills) */}
+      {/* 1. Top Controls: Compact Inline Row (Period button + Filter pills med Rörliga i fokus) */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
         <button
           type="button"
           onClick={() => setIsPeriodModalOpen(true)}
-          className="flex-shrink-0 h-[32px] sm:h-[34px] px-3 rounded-full inline-flex items-center gap-1.5 text-[11px] sm:text-[11.5px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98]"
+          className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
         >
-          <Calendar size={13} className="text-[var(--text-secondary)] shrink-0" />
-          <span className="truncate">{periodIntervalText || effectiveStats?.periodName?.split('(')[0]?.trim() || (isEn ? 'Period' : 'Period')}</span>
+          <Calendar size={15} className="text-[var(--text-secondary)] shrink-0" />
+          <span className="truncate max-w-[140px] sm:max-w-none">{periodDisplayName}</span>
           {currentPeriod?.isCurrent && (
-            <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
               {isEn ? 'Current' : 'Nu'}
             </span>
           )}
-
-          <ChevronDown size={12} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
+          <ChevronDown size={14} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
         </button>
+
         <FilterButtonGroup
           options={[
-            {
-              id: 'all',
-              label: t('all' as TranslationKey) || (isEn ? 'All' : 'Alla'),
-              icon: <LayoutGrid size={13} strokeWidth={2} />,
-            },
             {
               id: 'variable',
               label: isEn ? 'Variable' : 'Rörliga',
               icon: <TrendingUp size={13} strokeWidth={2} />,
+            },
+            {
+              id: 'all',
+              label: t('all' as TranslationKey) || (isEn ? 'All' : 'Alla'),
+              icon: <LayoutGrid size={13} strokeWidth={2} />,
             },
             {
               id: 'fixed',
@@ -420,47 +528,156 @@ export function AnalysisView({
         currentLang={config.language}
       />
 
-      {/* Unified Budget Summary Card */}
-      <BudgetSummaryModule
-        stats={effectiveStats}
-        config={config}
-        transactions={transactions}
-        fixedExpenses={fixedExpenses}
-        t={t}
-        totalSpentOverride={totalSpent}
-        largestCategoryOverride={largestCategory}
-        budgetUsedPctOverride={budgetUsedPct}
-        remainingBudgetOverride={remainingBudget}
-        effectiveBudgetOverride={disposableBudget}
-        previousPeriodComparisonText={previousPeriodComparisonText}
-        filterMode={analysisFilter}
-      />
+      {/* 2. Sammanfattningskort med samma stil och proportioner som övriga appen */}
+      <div className="grid grid-cols-2 gap-2.5 select-none">
+        {/* Kvar att spendera / Kvar vid periodens slut */}
+        <Card variant="default" padding="sm" className="select-none flex flex-col justify-between">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+              {remainingLabel}
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsRemainingInfoOpen(true)}
+              className="w-4 h-4 rounded-full text-[var(--text-tertiary)] hover:text-[var(--text-primary)] inline-flex items-center justify-center transition-colors cursor-pointer shrink-0"
+              title={isEn ? 'Explanation' : 'Förklaring'}
+              aria-label={isEn ? 'Explanation' : 'Förklaring'}
+            >
+              <Info size={13} />
+            </button>
+          </div>
+          <div className="flex items-baseline gap-1 pt-1.5">
+            <span
+              className={`text-large-amount font-bold tabular-nums tracking-tight ${
+                remainingBudget < 0
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-[var(--text-primary)]'
+              }`}
+            >
+              {remainingBudget < 0 ? '−' : ''}
+              {formatAmount(Math.abs(remainingBudget), config.language)}
+            </span>
+            <span className="text-label font-medium text-[var(--text-secondary)]">
+              {config.currency || 'kr'}
+            </span>
+          </div>
+        </Card>
 
-      {/* DONUT DIAGRAM & FÖRDELNING */}
-      {categoryData.length > 0 && (
-          
-        
-          <div className="flex items-center justify-between px-0.5">
+        {/* Mot föregående period / Budgetförbrukning */}
+        <Card variant="default" padding="sm" className="select-none flex flex-col justify-between">
+          <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+            {hasPreviousPeriodData && previousPeriodSpent !== null
+              ? (isEn ? 'vs previous period' : 'Mot förra perioden')
+              : (isEn ? 'Budget used' : 'Budget förbrukad')}
+          </span>
+          <div className="flex items-baseline gap-1 pt-1.5">
+            {hasPreviousPeriodData && previousPeriodSpent !== null ? (
+              (() => {
+                const diff = Math.round(totalSpent) - Math.round(previousPeriodSpent);
+                const isLess = diff < 0;
+                const isMore = diff > 0;
+                return (
+                  <div className="flex items-baseline gap-1">
+                    <span
+                      className={`text-large-amount font-bold tabular-nums tracking-tight ${
+                        isLess
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : isMore
+                          ? 'text-[var(--text-primary)]'
+                          : 'text-[var(--text-secondary)]'
+                      }`}
+                    >
+                      {isLess ? '−' : isMore ? '+' : ''}
+                      {formatAmount(Math.abs(diff), config.language)}
+                    </span>
+                    <span className="text-label font-medium text-[var(--text-secondary)]">
+                      {config.currency || 'kr'}
+                    </span>
+                  </div>
+                );
+              })()
+            ) : (
+              <div className="flex items-baseline gap-1">
+                <span className="text-large-amount font-bold text-[var(--text-primary)] tabular-nums tracking-tight">
+                  {budgetUsedPct}%
+                </span>
+                <span className="text-label font-medium text-[var(--text-secondary)]">
+                  {isEn ? 'used' : 'använt'}
+                </span>
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Info Modal för Kvar att spendera */}
+      {isRemainingInfoOpen && (
+        <Modal
+          isOpen={true}
+          onClose={() => setIsRemainingInfoOpen(false)}
+          title={isPastPeriod 
+            ? (isEn ? 'Left at period end' : 'Kvar vid periodens slut')
+            : (isEn ? 'Remaining to spend' : 'Kvar att spendera')}
+          size="sm"
+        >
+          <div className="space-y-3.5 text-body text-[var(--text-secondary)]">
+            <p>
+              {isEn 
+                ? (isPastPeriod
+                    ? 'Remaining at period end reflects the financial result for the entire period (income minus fixed expenses due in the period, planned savings, and variable expenses). This amount applies to your overall finances for the period, regardless of which expense filter is selected in the analysis.'
+                    : 'Remaining to spend reflects how much money is available for your entire finances until next payday (income minus fixed expenses due in the period, planned savings, and variable expenses spent so far). This amount applies to your overall finances for the period, regardless of which expense filter is selected in the analysis.')
+                : (isPastPeriod
+                    ? 'Kvar vid periodens slut visar det faktiska kvarvarande beloppet för hela periodens ekonomi (inkomster minus fasta utgifter som hör till perioden, planerat sparande och rörliga utgifter). Beloppet gäller hela din ekonomi för perioden, oavsett vilket utgiftsfilter du har valt i analysen.'
+                    : 'Kvar att spendera visar hur mycket pengar som finns kvar för hela din ekonomi fram till nästa lön (inkomster minus fasta utgifter som hör till perioden, planerat sparande och rörliga utgifter som redan spenderats). Beloppet gäller hela din ekonomi för perioden, oavsett vilket utgiftsfilter du har valt i analysen.')}
+            </p>
+          </div>
+        </Modal>
+      )}
+
+      {/* 3. CIRKELDIAGRAM & FÖRDELNING - Sammanhängande kortmodul */}
+      {categoryData.length > 0 && totalSpent > 0 && (
+        <Card variant="default" padding="md" className="space-y-4 select-none">
+          {/* Header */}
+          <div className="flex items-center justify-between pb-1 border-b border-subtle/50">
             <h2 className="text-section-title">
-              {isEn ? 'Distribution' : 'Fördelning'}
+              {isEn ? "Distribution" : "Fördelning"}
             </h2>
+            <span className="text-micro-label text-[var(--text-tertiary)] font-medium">
+              {chartItems.length} {isEn ? (chartItems.length === 1 ? "category" : "categories") : (chartItems.length === 1 ? "kategori" : "kategorier")}
+            </span>
           </div>
 
-          <div className="space-y-[var(--card-gap)]">
-            {/* Donut Chart */}
-            <div className="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto flex items-center justify-center">
+          {/* Donut Chart Visual & Center Display */}
+          <div className="flex flex-col items-center justify-center pt-1 pb-1">
+            <div className="relative w-[236px] h-[236px] sm:w-[264px] sm:h-[264px] flex items-center justify-center">
               <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+                {/* Background track ring */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r={41}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="9.5"
+                  className="text-black/[0.04] dark:text-white/[0.06]"
+                />
                 {(() => {
-                  const radius = 38;
+                  const radius = 41;
                   const circumference = 2 * Math.PI * radius;
                   let accumulatedPercent = 0;
+                  const validItems = chartItems.filter(i => i.value > 0);
+                  const hasMultiple = validItems.length > 1;
 
-                  return chartItems.map((item) => {
-                    const fraction = totalSpent > 0 ? item.value / totalSpent : 0;
+                  return validItems.map((item) => {
+                    const fraction = item.value / totalSpent;
                     const strokeLength = fraction * circumference;
-                    const dashArray = `${Math.max(0, strokeLength - 2.5)} ${circumference}`;
+                    const gap = hasMultiple ? 2.5 : 0;
+                    const visibleLength = Math.max(1, strokeLength - gap);
+                    const dashArray = `${visibleLength} ${circumference - visibleLength}`;
                     const dashOffset = -accumulatedPercent * circumference;
                     accumulatedPercent += fraction;
+
+                    const isHovered = hoveredCategory === item.name;
 
                     return (
                       <circle
@@ -470,12 +687,19 @@ export function AnalysisView({
                         r={radius}
                         fill="none"
                         stroke={item.color}
-                        strokeWidth="13"
+                        strokeWidth={isHovered ? 11.5 : 9.5}
                         strokeDasharray={dashArray}
                         strokeDashoffset={dashOffset}
-                        strokeLinecap="round"
-                        className="transition-all duration-300 hover:opacity-85 cursor-pointer"
+                        strokeLinecap={hasMultiple ? "round" : "butt"}
+                        className="transition-all duration-200 cursor-pointer"
+                        style={{
+                          opacity: hoveredCategory && !isHovered ? 0.45 : 1,
+                          filter: isHovered ? "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" : "none",
+                        }}
+                        onMouseEnter={() => setHoveredCategory(item.name)}
+                        onMouseLeave={() => setHoveredCategory(null)}
                         onClick={() => {
+                          setHoveredCategory(hoveredCategory === item.name ? null : item.name);
                           if (!item.isOther) {
                             setExpandedCategory(expandedCategory === item.name ? null : item.name);
                           }
@@ -486,31 +710,106 @@ export function AnalysisView({
                 })()}
               </svg>
 
-              {/* Airy Center */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4">
-                <span className="text-label font-medium text-[var(--text-secondary)]">
-                  {isEn ? 'Total' : 'Totalt'}
-                </span>
-                <span className="text-card-title font-bold text-[var(--text-primary)] tabular-nums">
-                  {formatAmount(Math.round(totalSpent), config.language)} {config.currency}
-                </span>
+              {/* Airy Center: Shows Total or Active Category on Hover/Tap */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-2">
+                {hoveredItem ? (
+                  (() => {
+                    const hoveredTrend = getCategoryTrend(hoveredItem.name, hoveredItem.value);
+                    return (
+                      <div className="flex flex-col items-center max-w-[160px] sm:max-w-[185px]">
+                        <span className="text-[12px] font-medium text-[var(--text-secondary)] truncate max-w-full">
+                          {hoveredItem.name}
+                        </span>
+                        <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
+                          {formatAmount(Math.round(hoveredItem.value), config.language)}
+                          <span className="text-xs font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
+                        </span>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="text-[11px] font-semibold text-[var(--accent-color)] tabular-nums">
+                            {hoveredItem.pct}%
+                          </span>
+                          {hoveredTrend && (
+                            <span
+                              className={`px-1.5 py-0.2 rounded-full text-[10px] font-semibold tabular-nums inline-flex items-center gap-0.5 ${
+                                hoveredTrend.type === 'down'
+                                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25'
+                                  : hoveredTrend.type === 'up'
+                                  ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25'
+                                  : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'
+                              }`}
+                            >
+                              {hoveredTrend.type === 'down'
+                                ? `↓ ${Math.abs(hoveredTrend.pct)}%`
+                                : hoveredTrend.type === 'up'
+                                ? `↑ ${hoveredTrend.pct}%`
+                                : hoveredTrend.label}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()
+                ) : (
+                  <div className="flex flex-col items-center max-w-[160px] sm:max-w-[185px]">
+                    <span className="text-micro-label font-medium uppercase tracking-wider text-[var(--text-tertiary)]">
+                      {spentLabel}
+                    </span>
+                    <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
+                      {formatAmount(Math.round(totalSpent), config.language)}
+                      <span className="text-xs font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
+                    </span>
+                    {hasPreviousPeriodData && previousPeriodSpent !== null ? (
+                      (() => {
+                        const diff = Math.round(totalSpent) - Math.round(previousPeriodSpent);
+                        const isLess = diff < 0;
+                        const isMore = diff > 0;
+                        return (
+                          <div className="flex items-center gap-1 mt-1">
+                            <span
+                              className={`text-[10.5px] font-semibold tabular-nums ${
+                                isLess
+                                  ? 'text-emerald-600 dark:text-emerald-400'
+                                  : isMore
+                                  ? 'text-amber-600 dark:text-amber-400'
+                                  : 'text-[var(--text-secondary)]'
+                              }`}
+                            >
+                              {isLess ? `↓ ${formatAmount(Math.abs(diff), config.language)} kr` : isMore ? `↑ ${formatAmount(diff, config.language)} kr` : '±0 kr'}
+                            </span>
+                            <span className="text-[10px] text-[var(--text-tertiary)]">
+                              {isEn ? 'vs last' : 'mot förra'}
+                            </span>
+                          </div>
+                        );
+                      })()
+                    ) : largestCategory?.name && largestCategory?.amount > 0 ? (
+                      <span className="text-[10.5px] text-[var(--text-tertiary)] mt-0.5 truncate max-w-full">
+                        {isEn ? "Top:" : "Mest:"} {largestCategory.name}
+                      </span>
+                    ) : null}
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        
+        </Card>
       )}
 
-      {/* FULLSTÄNDIG KATEGORILISTA ELLER GEMENSAM TOMVY */}
+      {/* 4. KATEGORILISTA MED PRIORITERING, HISTORISK TREND & BUDGETSPÅRNING */}
       {categoryData.length > 0 ? (
-        <div className="space-y-[var(--card-gap)] pb-8">
+        <div className="space-y-[var(--card-gap)] pb-8 select-none">
           <div className="flex items-center justify-between px-0.5">
             <h3 className="text-section-title">
               {t('categories')}
             </h3>
+            <span className="text-micro-label text-[var(--text-tertiary)] font-medium">
+              {categoryData.length} {isEn ? (categoryData.length === 1 ? 'category' : 'categories') : (categoryData.length === 1 ? 'kategori' : 'kategorier')}
+            </span>
           </div>
 
-          <Card variant="default" padding="none" className="border-none divide-y divide-subtle overflow-hidden">
-            {categoryData.map((item) => {
+          <Card variant="default" padding="none" className="divide-y divide-subtle overflow-hidden">
+            {/* Visar topp 5 som standard eller alla om användaren klickar på "Visa alla" */}
+            {(showAllCategories ? categoryData : categoryData.slice(0, 5)).map((item) => {
               const isExpanded = expandedCategory === item.name;
               
               const catNameTrimmed = (item.name || '').trim().toLowerCase();
@@ -529,7 +828,7 @@ export function AnalysisView({
                   return (t.category || '').trim().toLowerCase() === catNameTrimmed;
                 })
                 .sort((a, b) => b.timestamp - a.timestamp);
-                
+              
               const categoryFixedExpenses = analysisFilter === 'variable' || !stats?.periodStart || !stats?.periodEnd 
                 ? [] 
                 : (fixedExpenses || [])
@@ -543,38 +842,79 @@ export function AnalysisView({
 
               const totalItemCount = categoryTransactions.length + categoryFixedExpenses.length;
               const categoryPct = totalSpent > 0 ? Math.round((item.value / totalSpent) * 100) : 0;
+              const catTrend = getCategoryTrend(item.name, item.value);
+
+              // Budgetspårning per kategori
+              const budget = item.budgetInKronor;
+              const hasBudget = budget > 0;
+              const spentRound = Math.round(item.value);
+              const isOverBudget = hasBudget && spentRound > budget;
+              const budgetUsedPercent = hasBudget ? Math.round((spentRound / budget) * 100) : 0;
 
               return (
                 <div key={item.name} className="transition-colors">
                   <div 
-                    className="p-4 flex flex-col justify-center group hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
+                    className="p-3.5 sm:p-4 flex flex-col justify-center group hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
                     onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
                   >
-                    <div className="flex items-center justify-between gap-3 w-full">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2.5 sm:gap-3 w-full">
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                         <CategoryIcon icon={item.icon} color={item.color || '#6366f1'} size="md" categoryName={item.name} />
-
                         <div className="min-w-0 flex-1 flex flex-col justify-center">
-                          <p className="text-body-medium leading-tight truncate">
-                            {item.name}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-secondary">
-                            <span>
+                          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                            <p className="text-body-medium leading-tight truncate font-medium text-[var(--text-primary)]">
+                              {item.name}
+                            </p>
+                            {catTrend && (
+                              <span
+                                className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold tabular-nums shrink-0 inline-flex items-center gap-0.5 ${
+                                  catTrend.type === 'down'
+                                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                    : catTrend.type === 'up'
+                                    ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20'
+                                    : catTrend.type === 'new'
+                                    ? 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] border border-subtle'
+                                    : 'bg-black/5 dark:bg-white/10 text-[var(--text-tertiary)]'
+                                }`}
+                              >
+                                {catTrend.type === 'down'
+                                  ? `↓ ${Math.abs(catTrend.pct)}%`
+                                  : catTrend.type === 'up'
+                                  ? `↑ ${catTrend.pct}%`
+                                  : catTrend.type === 'new'
+                                  ? (isEn ? 'Ny' : 'Ny')
+                                  : '±0%'}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[var(--text-tertiary)] text-[11px] leading-tight truncate">
+                            <span className="shrink-0">
                               {totalItemCount} {isEn 
                                 ? (totalItemCount === 1 ? 'transaction' : 'transactions') 
                                 : (totalItemCount === 1 ? 'transaktion' : 'transaktioner')}
                             </span>
+                            {catTrend && (
+                              <span className="truncate">
+                                • {catTrend.type === 'down' 
+                                  ? (isEn ? `${Math.abs(catTrend.pct)}% less` : `${Math.abs(catTrend.pct)}% mindre än förra`)
+                                  : catTrend.type === 'up'
+                                  ? (isEn ? `${catTrend.pct}% more` : `${catTrend.pct}% mer än förra`)
+                                  : catTrend.type === 'new'
+                                  ? (isEn ? 'New' : 'Ny denna period')
+                                  : (isEn ? 'Same' : 'Samma som förra')}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2.5 flex-shrink-0 whitespace-nowrap pl-2">
-                        <div className="text-right flex flex-col items-end justify-center">
-                          <p className="text-body-medium tabular-nums text-[var(--text-primary)] leading-tight">
-                            {formatAmount(Math.round(item.value), config.language)}
-                            <span className="text-secondary ml-[2.5px]">{config.currency}</span>
+                      <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 whitespace-nowrap pl-1 sm:pl-2">
+                        <div className="text-right flex flex-col items-end justify-center min-w-0">
+                          <p className="text-body-medium tabular-nums text-[var(--text-primary)] font-semibold leading-tight">
+                            {formatAmount(spentRound, config.language)}
+                            <span className="text-[var(--text-tertiary)] font-normal text-xs ml-0.5 sm:ml-1 select-none">{config.currency || 'kr'}</span>
                           </p>
-                          <span className="text-secondary tabular-nums mt-0.5 leading-tight">
+                          <span className="text-[var(--text-tertiary)] text-[11px] sm:text-xs tabular-nums mt-0.5 leading-tight font-medium">
                             {categoryPct}%
                           </span>
                         </div>
@@ -583,6 +923,34 @@ export function AnalysisView({
                         </div>
                       </div>
                     </div>
+
+                    {/* Progressbar för kategoribudget (om budget har satts) */}
+                    {hasBudget && (
+                      <div className="w-full mt-2.5 pt-2 border-t border-subtle/40 flex flex-col gap-1">
+                        <div className="flex items-center justify-between text-[11px] leading-tight">
+                          <span className="text-[var(--text-tertiary)]">
+                            {isOverBudget
+                              ? (isEn 
+                                  ? `Over budget by ${formatAmount(spentRound - budget, config.language)} ${config.currency || 'kr'}` 
+                                  : `Över budget med ${formatAmount(spentRound - budget, config.language)} ${config.currency || 'kr'}`)
+                              : (isEn 
+                                  ? `${formatAmount(budget - spentRound, config.language)} ${config.currency || 'kr'} left of budget` 
+                                  : `${formatAmount(budget - spentRound, config.language)} ${config.currency || 'kr'} kvar av budget`)}
+                          </span>
+                          <span className={`font-semibold tabular-nums ${isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-secondary)]'}`}>
+                            {budgetUsedPercent}%
+                          </span>
+                        </div>
+                        <div className="h-[3px] w-full bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              isOverBudget ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
+                            }`}
+                            style={{ width: `${Math.min(100, budgetUsedPercent)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   <AnimatePresence>
@@ -653,6 +1021,25 @@ export function AnalysisView({
               );
             })}
           </Card>
+
+          {/* Knapp för att visa fler än 5 kategorier */}
+          {categoryData.length > 5 && (
+            <button
+              type="button"
+              onClick={() => setShowAllCategories(!showAllCategories)}
+              className="w-full py-2.5 px-4 rounded-[var(--radius-button-sm,10px)] bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary hover:text-primary text-[12px] font-medium transition-all active:scale-[0.99] flex items-center justify-center gap-1.5 cursor-pointer select-none"
+            >
+              <span>
+                {showAllCategories
+                  ? (isEn ? "Show top 5" : "Visa topp 5")
+                  : (isEn ? `Show all (${categoryData.length}) categories` : `Visa alla (${categoryData.length}) kategorier`)}
+              </span>
+              <ChevronDown
+                size={14}
+                className={`transition-transform duration-200 ${showAllCategories ? "rotate-180" : ""}`}
+              />
+            </button>
+          )}
         </div>
       ) : (
         <div className="pb-8">

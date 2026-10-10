@@ -171,6 +171,7 @@ export function CategoryBottomSheetModal({
           color={categoryColor} 
           size="md" 
           variant="primary" 
+          categoryName={targetCategoryName}
         />
       }
       title={targetCategoryName}

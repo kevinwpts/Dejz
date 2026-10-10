@@ -72,7 +72,10 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
   // Find category in config for color/icon source of truth
   const searchCategory = (categoryText || '').trim().toLowerCase();
   const category = config ? [...(config.categories || []), ...(config.incomeCategories || [])].find(
-    c => (c?.name || '').trim().toLowerCase() === searchCategory
+    c => c?.id === (transaction as any).categoryId ||
+         c?.id === transaction.category ||
+         (c?.name || '').trim().toLowerCase() === searchCategory ||
+         (c?.id || '').trim().toLowerCase() === searchCategory
   ) : null;
 
   // Special savings pot case
@@ -114,7 +117,8 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
       const resolvedKey = resolveLucideIcon(explicitLogo);
       return {
         type: 'custom',
-        iconKey: resolvedKey,
+        iconKey: explicitLogo,
+        categoryIcon: explicitLogo,
         iconComponent: ICON_MAP[resolvedKey] || Receipt,
         backgroundColor: category?.color || getEmojiSolidColor(explicitLogo),
         textColor: '#ffffff',
@@ -127,7 +131,9 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     const resolvedKey = resolveLucideIcon(explicitIcon);
     return {
       type: 'custom',
-      iconKey: resolvedKey,
+      iconKey: explicitIcon,
+      categoryIcon: explicitIcon,
+      categoryName: category?.name || categoryText,
       iconComponent: ICON_MAP[resolvedKey] || Receipt,
       backgroundColor: category?.color || getEmojiSolidColor(explicitIcon),
       textColor: '#ffffff',
@@ -147,31 +153,17 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     };
   }
 
-  // 2. Secure automated company logo (High-confidence brand lookup via Clearbit/Logo.dev/Google)
+  // 2. Secure automated company logo (Verified high-confidence brand lookup via curated dictionary)
   if (merchantText && merchantText.length >= 2) {
-    const brandDomain = findKnownBrandDomain(merchantText) || findKnownBrandDomain(transaction.merchant || '');
+    const brandDomain = findKnownBrandDomain(merchantText, categoryText) || findKnownBrandDomain(transaction.merchant || '', categoryText);
     if (brandDomain) {
-      const brandLogoUrl = getLogoUrl(merchantText) || `https://logo.clearbit.com/${brandDomain}`;
+      const brandLogoUrl = getLogoUrl(merchantText, categoryText) || `https://logo.clearbit.com/${brandDomain}`;
       return {
         type: 'merchant',
         logoUrl: brandLogoUrl,
         source: 'brand_auto',
         merchantNormalized: normalizeMerchant(merchantText)
       };
-    }
-
-    const fuzzyLogo = getLogoUrl(merchantText);
-    // Only use fuzzy auto logo if it's high confidence (e.g. recognized domain)
-    if (fuzzyLogo && !fuzzyLogo.includes('default')) {
-      const norm = normalizeMerchant(merchantText);
-      if (norm.length > 2) {
-        return {
-          type: 'merchant',
-          logoUrl: fuzzyLogo,
-          source: 'brand_auto',
-          merchantNormalized: norm
-        };
-      }
     }
   }
 
@@ -181,8 +173,8 @@ export function resolveEntityVisual(transaction: Transaction, config?: Config): 
     const resolvedKey = resolveLucideIcon(categoryIconName);
     return {
       type: 'category',
-      iconKey: resolvedKey,
-      categoryIcon: categoryIconName,
+      iconKey: category?.icon || resolvedKey,
+      categoryIcon: category?.icon || categoryIconName,
       categoryName: category?.name || categoryText,
       iconComponent: ICON_MAP[resolvedKey] || Receipt,
       backgroundColor: category?.color || getEmojiSolidColor(categoryIconName),

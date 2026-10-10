@@ -6,18 +6,22 @@ import {
   ArrowDownLeft, 
   LayoutGrid, 
   Calendar as CalendarIcon, 
-  ChevronLeft,
-  ChevronRight,
-  Layers
+  ChevronLeft, 
+  ChevronRight, 
+  Layers, 
+  RotateCcw
 } from 'lucide-react';
 import { Transaction, Config, FixedExpense, Income, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
-import { FilterButtonGroup } from './ui';
+import { FilterButtonGroup, Card, Input } from './ui';
+import { CategoryIcon } from './CategoryIcon';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { formatFullDate } from '../utils/date';
+import { formatAmount } from '../utils/format';
+import { getCategoryIconName } from '../utils/icons';
 import { feedback } from '../utils/feedback';
 
 interface LogViewProps {
@@ -40,24 +44,26 @@ interface LogViewProps {
 
 export function LogView({ 
   transactions, 
-  fixedExpenses = [],
-  incomes = [],
-  stats,
+  fixedExpenses = [], 
+  incomes = [], 
+  stats, 
   config, 
   onAddTransaction, 
   _onAddIncome, 
   onViewTransaction, 
-  onViewFixedExpense,
-  onViewIncome,
-  onViewMonthlySaving,
+  onViewFixedExpense, 
+  onViewIncome, 
+  onViewMonthlySaving, 
   onDeleteTransaction, 
   t, 
-  currentLang,
-  periods
+  currentLang, 
+  periods 
 }: LogViewProps) {
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [isPeriodPickerOpen, setIsPeriodPickerOpen] = useState(false);
   const [modalPeriod, setModalPeriod] = useState<any | null>(null);
 
@@ -272,12 +278,64 @@ export function LogView({
     return getL10n('Alla perioder', 'All periods', 'Alle perioder', 'Alle perioder', 'Kaikki jaksot');
   }, [selectedDate, selectedPeriod, selectedMonthName, currentLang]);
 
-  // Filter transactions by date / period / type
+  // Available categories in the current filtered period / data set for quick pills
+  const availableCategories = useMemo(() => {
+    if (!allCombinedTransactions) return [];
+    const catMap = new Map<string, number>();
+
+    allCombinedTransactions.forEach((tx: any) => {
+      // Respect period / date bounds for category counts
+      if (selectedDate) {
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        if (tx.timestamp < startOfDay.getTime() || tx.timestamp > endOfDay.getTime()) return;
+      } else if (selectedPeriod?.start && selectedPeriod?.end) {
+        const startTime = new Date(selectedPeriod.start).getTime();
+        const endTime = new Date(selectedPeriod.end).getTime() + 86399999;
+        if (tx.timestamp < startTime || tx.timestamp > endTime) return;
+      }
+
+      if (typeFilter !== 'all' && tx.type !== typeFilter) return;
+
+      const catName = tx.category?.trim();
+      if (catName) {
+        catMap.set(catName, (catMap.get(catName) || 0) + 1);
+      }
+    });
+
+    return Array.from(catMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [allCombinedTransactions, selectedPeriod, selectedDate, typeFilter]);
+
+  // Filter transactions by search query / category / date / period / type
   const filteredExpenses = useMemo(() => {
     if (!allCombinedTransactions) return [];
+    const q = searchQuery.trim().toLowerCase();
+
     return allCombinedTransactions
       .filter((e: any) => {
-        // 1. Day filter has top priority if user chose a specific day
+        // 1. Text Search Filter
+        if (q) {
+          const matchMerchant = e.merchant?.toLowerCase().includes(q);
+          const matchCategory = e.category?.toLowerCase().includes(q);
+          const matchNote = e.note?.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q);
+          const matchAmount = String(e.amount).includes(q);
+          if (!matchMerchant && !matchCategory && !matchNote && !matchAmount) {
+            return false;
+          }
+        }
+
+        // 2. Category Filter
+        if (categoryFilter) {
+          if (e.category?.trim().toLowerCase() !== categoryFilter.toLowerCase()) {
+            return false;
+          }
+        }
+
+        // 3. Day filter has top priority if user chose a specific day
         if (selectedDate) {
           const startOfDay = new Date(selectedDate);
           startOfDay.setHours(0, 0, 0, 0);
@@ -287,7 +345,7 @@ export function LogView({
             return false;
           }
         } 
-        // 2. Period filter if selected
+        // 4. Period filter if selected
         else if (selectedPeriod?.start && selectedPeriod?.end) {
           const startTime = new Date(selectedPeriod.start).getTime();
           const endTime = new Date(selectedPeriod.end).getTime() + 86399999;
@@ -296,25 +354,74 @@ export function LogView({
           }
         }
 
-        // 3. Type filter
-        let matchesType = false;
-        if (typeFilter === 'all') matchesType = true;
-        else matchesType = e.type === typeFilter;
+        // 5. Type filter
+        if (typeFilter !== 'all') {
+          if (e.type !== typeFilter) return false;
+        }
         
-        return matchesType;
+        return true;
       })
       .sort((a, b) => b.timestamp - a.timestamp);
-  }, [allCombinedTransactions, typeFilter, selectedPeriod, selectedDate]);
+  }, [allCombinedTransactions, searchQuery, categoryFilter, selectedDate, selectedPeriod, typeFilter]);
 
+  // Aggregate stats for currently filtered view (expenses, income, net, count)
+  const summaryStats = useMemo(() => {
+    let totalExpenses = 0;
+    let totalIncome = 0;
+
+    filteredExpenses.forEach((tx: any) => {
+      const amt = Number(tx.amount) || 0;
+      if (tx.type === 'expense') {
+        totalExpenses += amt;
+      } else if (tx.type === 'income') {
+        totalIncome += amt;
+      }
+    });
+
+    const net = totalIncome - totalExpenses;
+    return {
+      totalExpenses,
+      totalIncome,
+      net,
+      count: filteredExpenses.length,
+    };
+  }, [filteredExpenses]);
+
+  // Group transactions by day and calculate each day's net sum
   const groupedExpenses = useMemo(() => {
-    const groups: Record<string, (Transaction & { isFixed?: boolean; originalItem?: any })[]> = {};
+    const groups: Record<string, { items: (Transaction & { isFixed?: boolean; originalItem?: any })[]; dayNet: number }> = {};
     filteredExpenses.forEach((e: any) => {
       const dateKey = new Date(e.timestamp).toDateString();
-      if (!groups[dateKey]) groups[dateKey] = [];
-      groups[dateKey].push(e);
+      if (!groups[dateKey]) {
+        groups[dateKey] = { items: [], dayNet: 0 };
+      }
+      groups[dateKey].items.push(e);
+      const amt = Number(e.amount) || 0;
+      if (e.type === 'income') {
+        groups[dateKey].dayNet += amt;
+      } else {
+        groups[dateKey].dayNet -= amt;
+      }
     });
     return Object.entries(groups).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime());
   }, [filteredExpenses]);
+
+  const hasActiveFilters = Boolean(
+    searchQuery.trim() ||
+    selectedPeriod ||
+    selectedDate ||
+    categoryFilter ||
+    typeFilter !== 'all'
+  );
+
+  const handleResetFilters = () => {
+    if (typeof feedback?.tap === 'function') feedback.tap();
+    setSearchQuery('');
+    setTypeFilter('all');
+    setSelectedPeriod(null);
+    setSelectedDate(null);
+    setCategoryFilter(null);
+  };
 
   // Modal Calendar logic
   const modalIndex = useMemo(() => {
@@ -398,7 +505,25 @@ export function LogView({
 
   return (
     <div className="space-y-[var(--menu-content-gap)] font-sans">
-      {/* Top Controls: Compact Inline Row (Period button + Filter pills) */}
+      {/* 1. Real-time Search Input */}
+      <div className="w-full">
+        <Input
+          variant="search"
+          placeholder={getL10n(
+            'Sök butik, kategori, anteckning...',
+            'Search merchant, category, note...',
+            'Søk butikk, kategori, notat...',
+            'Søg butik, kategori, note...',
+            'Etsi kauppaa, kategoriaa, muistiinpanoa...'
+          )}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onClear={() => setSearchQuery('')}
+          className="h-[42px] sm:h-[44px] text-xs sm:text-sm bg-[var(--surface-color)] shadow-subtle border-none"
+        />
+      </div>
+
+      {/* 2. Top Controls: Compact Inline Row (Period button + Type filter) */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
         <button
           type="button"
@@ -407,33 +532,34 @@ export function LogView({
             setModalPeriod(initial);
             setIsPeriodPickerOpen(true);
           }}
-          className="flex-shrink-0 h-[32px] sm:h-[34px] px-3 rounded-full inline-flex items-center gap-1.5 text-[11px] sm:text-[11.5px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98]"
+          className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
         >
-          <CalendarIcon size={13} className="text-[var(--text-secondary)] shrink-0" />
-          <span className="truncate">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
+          <CalendarIcon size={15} className="text-[var(--text-secondary)] shrink-0" />
+          <span className="truncate max-w-[140px] sm:max-w-none">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
           {selectedPeriod?.isCurrent && (
-            <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
               {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
             </span>
           )}
-          <ChevronLeft size={11} className="text-[var(--text-secondary)] shrink-0 ml-0.5 rotate-[-90deg]" />
+          <ChevronLeft size={14} className="text-[var(--text-secondary)] shrink-0 ml-0.5 rotate-[-90deg]" />
         </button>
+
         <FilterButtonGroup
           options={[
             {
               id: 'all',
               label: t('all' as TranslationKey) || (config.language === 'en' ? 'All' : 'Alla'),
-              icon: <LayoutGrid size={13} strokeWidth={2} />,
+              icon: <LayoutGrid size={15} strokeWidth={2} />,
             },
             {
               id: 'expense',
               label: t('expense' as TranslationKey) || (config.language === 'en' ? 'Expenses' : 'Utgifter'),
-              icon: <ArrowDownLeft size={13} strokeWidth={2.5} />,
+              icon: <ArrowDownLeft size={15} strokeWidth={2.5} />,
             },
             {
               id: 'income',
               label: t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster'),
-              icon: <ArrowUpRight size={13} strokeWidth={2.5} />,
+              icon: <ArrowUpRight size={15} strokeWidth={2.5} />,
             },
           ]}
           selectedId={typeFilter}
@@ -443,33 +569,229 @@ export function LogView({
         />
       </div>
 
-      {/* Transactions List */}
+      {/* 3. Category Horizontal Pills (visible if 2 or more categories are present) */}
+      {availableCategories.length > 1 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof feedback?.selection === 'function') feedback.selection();
+              setCategoryFilter(null);
+            }}
+            className={`flex-shrink-0 whitespace-nowrap h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium transition-all cursor-pointer ${
+              !categoryFilter
+                ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-semibold shadow-xs'
+                : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
+            }`}
+          >
+            <span>{getL10n('Alla kategorier', 'All categories', 'Alle kategorier', 'Alle kategorier', 'Kaikki')}</span>
+          </button>
+          {availableCategories.map((cat) => {
+            const isCatSelected = categoryFilter?.toLowerCase() === cat.name.toLowerCase();
+            return (
+              <button
+                key={cat.name}
+                type="button"
+                onClick={() => {
+                  if (typeof feedback?.selection === 'function') feedback.selection();
+                  setCategoryFilter(isCatSelected ? null : cat.name);
+                }}
+                className={`flex-shrink-0 whitespace-nowrap h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium transition-all cursor-pointer ${
+                  isCatSelected
+                    ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-semibold shadow-xs'
+                    : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
+                }`}
+              >
+                {(() => {
+                  const matchedCat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+                    c => (c.name || '').trim().toLowerCase() === cat.name.toLowerCase() || c.id === cat.name
+                  );
+                  const iconKey = matchedCat?.icon || getCategoryIconName(cat.name);
+                  return (
+                    <CategoryIcon
+                      icon={iconKey}
+                      categoryName={cat.name}
+                      variant="minimal"
+                      size="2xs"
+                      className="w-4 h-4"
+                    />
+                  );
+                })()}
+                <span className="truncate max-w-[110px]">{cat.name}</span>
+                <span className={`text-[10px] tabular-nums font-amount ${
+                  isCatSelected ? 'text-[var(--surface-color)]/85' : 'text-[var(--text-tertiary)]'
+                }`}>
+                  {cat.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 4. Active Filters Reset Banner */}
+      {hasActiveFilters && (
+        <div className="flex items-center justify-between px-1 py-0.5 text-xs">
+          <div className="flex items-center gap-1.5 text-[var(--text-secondary)] overflow-hidden">
+            <span className="text-[11px] truncate">
+              {getL10n('Filtrerat resultat', 'Filtered results')}: <strong className="font-amount font-bold text-[var(--text-primary)]">{filteredExpenses.length}</strong> {getL10n('transaktioner', 'transactions')}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--accent-color)] hover:underline cursor-pointer shrink-0"
+          >
+            <RotateCcw size={11} />
+            <span>{getL10n('Rensa filter', 'Clear filters', 'Nullstill filtre', 'Ryd filtre', 'Tyhjennä')}</span>
+          </button>
+        </div>
+      )}
+
+      {/* 5. Sammanfattningsmodul: Alla 3 värden (Utgifter, Inkomster, Netto) vid filter 'all', annars 2 kort */}
+      {typeFilter === 'all' ? (
+        <Card variant="default" padding="sm" className="select-none overflow-hidden">
+          <div className="grid grid-cols-3 divide-x divide-subtle/70">
+            {/* Utgifter */}
+            <div className="flex flex-col justify-between pr-1 sm:pr-2.5">
+              <span className="text-[11px] sm:text-metric-label font-medium text-[var(--text-secondary)] truncate">
+                {getL10n('Utgifter', 'Expenses')}
+              </span>
+              <div className="flex items-baseline gap-0.5 sm:gap-1 pt-1 min-w-0">
+                <span className="text-[13px] xs:text-[14.5px] sm:text-[16px] md:text-large-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] whitespace-nowrap">
+                  {summaryStats.totalExpenses > 0 ? `−${formatAmount(summaryStats.totalExpenses, getLocale())}` : '0'}
+                </span>
+                <span className="text-[9.5px] sm:text-xs font-normal text-[var(--text-tertiary)] shrink-0 select-none">
+                  {config.currency || 'kr'}
+                </span>
+              </div>
+            </div>
+
+            {/* Inkomster */}
+            <div className="flex flex-col justify-between px-1 sm:px-2.5">
+              <span className="text-[11px] sm:text-metric-label font-medium text-[var(--text-secondary)] truncate">
+                {getL10n('Inkomster', 'Income')}
+              </span>
+              <div className="flex items-baseline gap-0.5 sm:gap-1 pt-1 min-w-0">
+                <span className="text-[13px] xs:text-[14.5px] sm:text-[16px] md:text-large-amount font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                  {summaryStats.totalIncome > 0 ? `+${formatAmount(summaryStats.totalIncome, getLocale())}` : '0'}
+                </span>
+                <span className="text-[9.5px] sm:text-xs font-normal text-[var(--text-tertiary)] shrink-0 select-none">
+                  {config.currency || 'kr'}
+                </span>
+              </div>
+            </div>
+
+            {/* Netto */}
+            <div className="flex flex-col justify-between pl-1 sm:pl-2.5">
+              <span className="text-[11px] sm:text-metric-label font-medium text-[var(--text-secondary)] truncate">
+                {getL10n('Netto', 'Net')}
+              </span>
+              <div className="flex items-baseline gap-0.5 sm:gap-1 pt-1 min-w-0">
+                <span
+                  className={`text-[13px] xs:text-[14.5px] sm:text-[16px] md:text-large-amount font-bold tabular-nums tracking-tight whitespace-nowrap ${
+                    summaryStats.net > 0 
+                      ? 'text-emerald-600 dark:text-emerald-400' 
+                      : summaryStats.net < 0
+                      ? 'text-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)]'
+                  }`}
+                >
+                  {summaryStats.net > 0 
+                    ? `+${formatAmount(summaryStats.net, getLocale())}` 
+                    : summaryStats.net < 0
+                    ? `−${formatAmount(Math.abs(summaryStats.net), getLocale())}`
+                    : '0'}
+                </span>
+                <span className="text-[9.5px] sm:text-xs font-normal text-[var(--text-tertiary)] shrink-0 select-none">
+                  {config.currency || 'kr'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-2 gap-2.5 select-none">
+          {/* Kort 1: Utgifter eller Inkomster */}
+          <Card variant="default" padding="sm" className="select-none flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+                {typeFilter === 'income' 
+                  ? getL10n('Total inkomst', 'Total income') 
+                  : getL10n('Totala utgifter', 'Total expenses')}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1 pt-1.5">
+              <span className={`text-large-amount font-bold tabular-nums tracking-tight ${typeFilter === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+                {typeFilter === 'income'
+                  ? (summaryStats.totalIncome > 0 ? `+${formatAmount(summaryStats.totalIncome, getLocale())}` : '0')
+                  : (summaryStats.totalExpenses > 0 ? `−${formatAmount(summaryStats.totalExpenses, getLocale())}` : '0')}
+              </span>
+              <span className="text-label font-medium text-[var(--text-secondary)]">
+                {config.currency || 'kr'}
+              </span>
+            </div>
+          </Card>
+
+          {/* Kort 2: Transaktioner vid filtrerat läge */}
+          <Card variant="default" padding="sm" className="select-none flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+                {getL10n('Transaktioner', 'Transactions')}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1 pt-1.5">
+              <span className="text-large-amount font-bold text-[var(--text-primary)] tabular-nums tracking-tight">
+                {summaryStats.count}
+              </span>
+              <span className="text-label font-medium text-[var(--text-secondary)]">
+                {getL10n('st', 'txs')}
+              </span>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 6. Transactions List Grouped by Day */}
       <div className="space-y-[var(--card-gap)]">
-        <div className="space-y-7">
-          {groupedExpenses.map(([date, dayTransactions], index) => (
+        <div className="space-y-4 sm:space-y-4.5">
+          {groupedExpenses.map(([date, dayData], index) => (
             <motion.div 
               key={date} 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.04 }}
-              className="space-y-[var(--card-gap)]"
+              transition={{ delay: index * 0.03 }}
+              className="space-y-1.5"
             >
-              <div className="px-1 flex items-center justify-between">
+              {/* Day Header with Date and Day Total Net */}
+              <div className="px-1 flex items-center justify-between pb-0.5">
                 <span className="text-label font-medium text-[var(--text-secondary)]">
                   {formatFullDate(date, currentLang)}
                 </span>
-                <span className="text-micro-label font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
-                  {dayTransactions.length} {getL10n(
-                    dayTransactions.length === 1 ? 'transaktion' : 'transaktioner',
-                    dayTransactions.length === 1 ? 'transaction' : 'transactions',
-                    dayTransactions.length === 1 ? 'transaksjon' : 'transaksjoner',
-                    dayTransactions.length === 1 ? 'transaktion' : 'transaktioner',
-                    dayTransactions.length === 1 ? 'tapahtuma' : 'tapahtumaa'
-                  )}
-                </span>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="text-micro-label font-medium text-[var(--text-tertiary)] tabular-nums font-amount">
+                    {dayData.items.length} {getL10n(
+                      dayData.items.length === 1 ? 'transaktion' : 'transaktioner',
+                      dayData.items.length === 1 ? 'tx' : 'txs',
+                      dayData.items.length === 1 ? 'transaksjon' : 'transaksjoner',
+                      dayData.items.length === 1 ? 'transaktion' : 'transaktioner',
+                      dayData.items.length === 1 ? 'tapahtuma' : 'tapahtumaa'
+                    )}
+                  </span>
+                  <span className="text-[var(--text-tertiary)]/40 text-[10px]">·</span>
+                  <span className={`text-micro-label font-semibold tabular-nums font-amount ${
+                    dayData.dayNet > 0 
+                      ? 'text-emerald-600 dark:text-emerald-400' 
+                      : 'text-[var(--text-primary)]'
+                  }`}>
+                    {dayData.dayNet > 0 ? `+${formatAmount(dayData.dayNet, getLocale())}` : formatAmount(dayData.dayNet, getLocale())} {config.currency || 'kr'}
+                  </span>
+                </div>
               </div>
-              <div className="space-y-[var(--card-gap)]">
-                {dayTransactions.map((transaction: any) => (
+
+              {/* Transactions for this Day */}
+              <div className="space-y-1.5">
+                {dayData.items.map((transaction: any) => (
                   <TransactionItem 
                     key={transaction.id}
                     transaction={transaction}
@@ -507,7 +829,23 @@ export function LogView({
             <EmptyState
               icon={Wallet}
               title={
-                selectedDate 
+                searchQuery.trim()
+                  ? getL10n(
+                      `Inga träffar för "${searchQuery}"`,
+                      `No matches for "${searchQuery}"`,
+                      `Ingen treff for "${searchQuery}"`,
+                      `Ingen fundet for "${searchQuery}"`,
+                      `Ei tuloksia haulle "${searchQuery}"`
+                    )
+                  : categoryFilter
+                  ? getL10n(
+                      `Inga transaktioner i kategorin "${categoryFilter}"`,
+                      `No transactions in "${categoryFilter}"`,
+                      `Ingen transaksjoner i "${categoryFilter}"`,
+                      `Ingen transaktioner i "${categoryFilter}"`,
+                      `Ei tapahtumia kategoriassa "${categoryFilter}"`
+                    )
+                  : selectedDate 
                   ? getL10n(
                       `Inga transaktioner för ${activeFilterLabel}`, 
                       `No transactions for ${activeFilterLabel}`,
@@ -526,16 +864,19 @@ export function LogView({
                   : (transactions?.length || 0) === 0 ? t('noTransactions') : t('noTransactionsSubtle')
               }
               description={
-                selectedDate || selectedPeriod ? (
+                hasActiveFilters ? (
                   <button
                     type="button"
-                    onClick={() => {
-                      setSelectedDate(null);
-                      setSelectedPeriod(null);
-                    }}
-                    className="text-xs font-medium text-[#1C1917] dark:text-white hover:underline cursor-pointer mt-1"
+                    onClick={handleResetFilters}
+                    className="text-xs font-semibold text-[var(--accent-color)] hover:underline cursor-pointer mt-1"
                   >
-                    {getL10n('Visa alla transaktioner istället', 'Show all transactions instead', 'Vis alle transaksjoner i stedet', 'Vis alle transaktioner i stedet', 'Näytä kaikki tapahtumat sen sijaan')}
+                    {getL10n(
+                      'Återställ filter och visa alla', 
+                      'Reset filters and show all', 
+                      'Nullstill filtre og vis alle', 
+                      'Nulstil filtre og vis alle', 
+                      'Tyhjennä suodattimet ja näytä kaikki'
+                    )}
                   </button>
                 ) : (transactions?.length || 0) > 0 && typeFilter !== 'all' ? (
                   getL10n(
@@ -637,7 +978,7 @@ export function LogView({
                 }}
                 className={`inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-semibold transition-all cursor-pointer border-none active:scale-95 ${
                   selectedPeriod?.name === modalPeriod?.name && !selectedDate
-                    ? 'bg-[var(--accent-color)] text-[var(--text-on-accent)] shadow-xs'
+                    ? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-xs'
                     : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/10'
                 }`}
               >
@@ -651,7 +992,7 @@ export function LogView({
               {/* Weekday headers */}
               <div className="grid grid-cols-7 gap-1 mb-1 text-center">
                 {weekdayNames.map((d, i) => (
-                  <div key={i} className="text-center text-[10px] font-semibold text-[#8C867C] dark:text-[#71717A] tracking-wider py-0.5">
+                  <div key={i} className="text-center text-[10px] font-semibold text-[var(--text-tertiary)] tracking-wider py-0.5">
                     {d}
                   </div>
                 ))}
@@ -685,12 +1026,12 @@ export function LogView({
                         isSelected 
                           ? 'bg-[var(--accent-color)] text-[var(--on-accent)] font-bold shadow-xs z-10' 
                           : isToday
-                          ? 'bg-black/5 dark:bg-white/5 text-[#1C1917] dark:text-white border-none font-bold'
-                          : 'bg-transparent text-[#1C1917] dark:text-[#A8A8A8] hover:bg-black/5 dark:hover:bg-white/[0.06] hover:text-[#1C1917] dark:hover:text-white font-medium'
+                          ? 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)] border-none font-bold'
+                          : 'bg-transparent text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/[0.06] font-medium'
                       }`}
                     >
                       <span className={`text-xs sm:text-[13px] leading-none tabular-nums ${
-                        isSelected ? 'text-[var(--on-accent)]' : isToday ? 'text-[#1C1917] dark:text-white font-bold' : 'text-[#1C1917] dark:text-white'
+                        isSelected ? 'text-[var(--on-accent)]' : 'text-[var(--text-primary)]'
                       }`}>
                         {dayNum}
                       </span>

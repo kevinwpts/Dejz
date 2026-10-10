@@ -264,12 +264,12 @@ export function TransactionViewModal({
                       const splitCatName = typeof split.category === 'object' ? (split.category as any)?.name : (split.category || '');
                       const searchCat = splitCatName.trim().toLowerCase();
                       const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
-                        c => c.name.trim().toLowerCase() === searchCat
+                        c => c.name.trim().toLowerCase() === searchCat || c.id === searchCat
                       );
                       const iconKey = cat?.icon || getCategoryIconName(splitCatName);
                       return (
                         <div key={split.id || idx} className="flex items-center justify-end gap-2">
-                          {iconKey && <CategoryIcon icon={iconKey} variant="minimal" size="sm" />}
+                          {iconKey && <CategoryIcon icon={iconKey} categoryName={splitCatName} variant="minimal" size="sm" />}
                           <span className="text-body-medium font-medium text-[var(--text-primary)]">{splitCatName}</span>
                           <span className="text-label text-[var(--text-secondary)]">({formatAmount(split.amount, config.language)} {config.currency})</span>
                         </div>
@@ -282,11 +282,11 @@ export function TransactionViewModal({
                       const catName = typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '');
                       const searchCat = catName.trim().toLowerCase();
                       const cat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
-                        c => c.name.trim().toLowerCase() === searchCat
+                        c => c.name.trim().toLowerCase() === searchCat || c.id === searchCat
                       );
                       const iconKey = cat?.icon || getCategoryIconName(catName);
                       if (!iconKey) return null;
-                      return <CategoryIcon icon={iconKey} variant="minimal" size="sm" />;
+                      return <CategoryIcon icon={iconKey} categoryName={catName} variant="minimal" size="sm" />;
                     })()}
                     <span className="text-body-medium font-medium text-[var(--text-primary)]">
                       {typeof transaction.category === 'object' ? (transaction.category as any)?.name : (transaction.category || '')}
