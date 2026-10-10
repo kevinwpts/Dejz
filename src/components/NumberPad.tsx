@@ -193,7 +193,7 @@ export function NumberPad({
           type="button"
           onClick={handleClear}
           disabled={!value || value === '0'}
-          className="h-9 flex items-center justify-center rounded-btn-sm bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-rose-500 text-xs font-medium border border-subtle transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+          className="h-9 flex items-center justify-center rounded-btn-sm bg-black/5 dark:bg-white/[0.04] hover:bg-black/10 dark:hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--danger-color)] text-xs font-medium border border-subtle transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
           title="Rensa belopp"
         >
           <RotateCcw size={13} strokeWidth={2.5} />

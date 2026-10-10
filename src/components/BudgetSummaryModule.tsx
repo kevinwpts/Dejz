@@ -158,7 +158,7 @@ export function BudgetSummaryModule({
             </div>
             <div className="flex items-baseline justify-end gap-1.5">
               <span className={`text-large-amount ${
-                isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
+                isOverBudget ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
               }`}>
                 {isOverBudget ? '−' : ''}
                 {formatAmount(Math.round(Math.abs(remainingBudget)), config.language)}

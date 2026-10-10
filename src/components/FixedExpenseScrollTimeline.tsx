@@ -44,9 +44,9 @@ export function FixedExpenseScrollTimeline({
   }, [activeExpenses]);
 
   // Total width of the timeline track in pixels
-  // 1400px gives ~44px per day, ensuring ample breathing room between consecutive days
-  const TRACK_WIDTH = 1400;
-  const PADDING_X = 40;
+  // 1500px gives 46px per day, ensuring ample breathing room between consecutive days
+  const TRACK_WIDTH = 1500;
+  const PADDING_X = 42;
   const USABLE_WIDTH = TRACK_WIDTH - PADDING_X * 2;
 
   // Calculate pixel X for a given day (1..31)
@@ -114,13 +114,13 @@ export function FixedExpenseScrollTimeline({
         const prevElevated = prevDay !== null && layout[prevDay]?.isElevated;
         const isElevated = !prevElevated;
         layout[day] = {
-          bottomPx: isElevated ? 26 : 10,
+          bottomPx: isElevated ? 30 : 8,
           isElevated,
         };
       } else {
         // Standard baseline: aligned right over timeline axis
         layout[day] = {
-          bottomPx: 10,
+          bottomPx: 8,
           isElevated: false,
         };
       }

@@ -330,7 +330,7 @@ h6 {
 
 /* Central Semantic Typography Utilities */
 @utility text-hero-amount {
-  font-size: 31px;
+  font-size: 30px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -338,15 +338,25 @@ h6 {
 }
 
 @utility text-large-amount {
-  font-size: 25px;
+  font-size: 24px;
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.03em;
   font-family: var(--font-amount);
 }
 
+@utility text-list-amount {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-family: var(--font-amount);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
 @utility text-page-title {
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.025em;
@@ -355,7 +365,7 @@ h6 {
 }
 
 @utility text-section-title {
-  font-size: 16.5px;
+  font-size: 15.5px;
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.015em;
@@ -364,7 +374,7 @@ h6 {
 }
 
 @utility text-card-title {
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 600;
   line-height: 1.35;
   letter-spacing: 0em;
@@ -373,7 +383,7 @@ h6 {
 }
 
 @utility text-body {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: 0em;
@@ -382,7 +392,7 @@ h6 {
 }
 
 @utility text-body-medium {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1.45;
   letter-spacing: -0.01em;
@@ -391,7 +401,7 @@ h6 {
 }
 
 @utility text-secondary {
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: 400;
   line-height: 1.45;
   letter-spacing: 0em;
@@ -400,7 +410,7 @@ h6 {
 }
 
 @utility text-label {
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 500;
   line-height: 1.35;
   letter-spacing: 0.01em;
@@ -409,7 +419,7 @@ h6 {
 }
 
 @utility text-metric-label {
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 500;
   line-height: 1.35;
   letter-spacing: normal;
@@ -418,7 +428,7 @@ h6 {
 }
 
 @utility text-micro-label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 400;
   line-height: 1.3;
   letter-spacing: 0.01em;
@@ -724,7 +734,7 @@ h6 {
      ========================================================================== */
   /* Corner Radii */
   --radius-card: 20px;
-  --radius-card-nested: 14px;
+  --radius-card-nested: 12px;
   --radius-button: 12px;
   --radius-button-sm: 10px;
   --radius-button-lg: 12px;
@@ -737,10 +747,10 @@ h6 {
   --radius-container: 20px;
 
   /* Component Dimensions / Heights */
-  --height-input: 48px;
-  --height-button: 48px;
+  --height-input: 44px;
+  --height-button: 44px;
   --height-button-sm: 32px;
-  --height-button-lg: 52px;
+  --height-button-lg: 48px;
   --height-search: 44px;
   --height-header: 64px;
   --height-bottom-nav: 64px;
@@ -752,7 +762,7 @@ h6 {
   /* Spacing & Layout */
   --space-page-px: 1rem;
   --space-page-max: 42rem;
-  --space-card-p: 1.125rem;
+  --space-card-p: 1rem;
   --space-card-p-sm: 0.875rem;
   --space-card-p-lg: 1.5rem;
   --space-row-p: 0.875rem;

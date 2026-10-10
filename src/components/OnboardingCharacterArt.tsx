@@ -55,7 +55,7 @@ export function OnboardingCharacterArt({ step, days = 12, payday = 25 }: Onboard
         <motion.div
           animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6], rotate: [0, 90, 0] }}
           transition={{ duration: 2.5, repeat: Infinity }}
-          className="absolute -top-1 -right-1 text-amber-400 drop-shadow-subtle"
+          className="absolute -top-1 -right-1 text-[var(--warning-color)] drop-shadow-subtle"
         >
           <Sparkles size={18} />
         </motion.div>

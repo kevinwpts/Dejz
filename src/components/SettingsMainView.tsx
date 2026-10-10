@@ -227,7 +227,7 @@ export function SettingsMainView({
           variant="grouped"
           density="compact"
           showChevron
-          icon={<Icon name="ban" size={18} className="text-rose-500" />}
+          icon={<Icon name="ban" size={18} className="text-[var(--danger-color)]" />}
           iconBg="bg-black/5 dark:bg-white/5"
           title={config?.language === 'en' ? 'Cancelled Subscriptions' : 'Uppsagda abonnemang'}
           subtitle={config?.language === 'en' ? 'History and reactivate subscriptions' : 'Visa historik och återaktivera tjänster'}

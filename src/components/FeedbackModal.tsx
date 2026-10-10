@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Send, MessageSquare, Bug, Lightbulb, HeartHandshake } from 'lucide-react';
 import { TranslationKey } from '../i18n';
-import { Modal, Button } from './ui';
+import { Modal, Button, Pill } from './ui';
 
 interface FeedbackModalProps {
   isOpen?: boolean;
@@ -40,7 +40,7 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t }: FeedbackM
       title={t('sendFeedback')}
       subtitle={
         <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)] animate-pulse"></span>
           <span>Dejz Beta · Hjälp oss göra appen ännu bättre!</span>
         </span>
       }
@@ -49,44 +49,29 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t }: FeedbackM
     >
       {/* Category selector pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 select-none">
-        <button
-          type="button"
+        <Pill
+          active={feedbackType === 'bug'}
           onClick={() => setFeedbackType('bug')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
-            feedbackType === 'bug'
-              ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
-              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-secondary)] border-subtle hover:bg-black/[0.06]'
-          }`}
+          icon={<Bug size={13} strokeWidth={2.2} />}
         >
-          <Bug size={13} strokeWidth={2.2} />
-          <span>Rapportera fel</span>
-        </button>
+          Rapportera fel
+        </Pill>
 
-        <button
-          type="button"
+        <Pill
+          active={feedbackType === 'idea'}
           onClick={() => setFeedbackType('idea')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
-            feedbackType === 'idea'
-              ? 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30'
-              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-secondary)] border-subtle hover:bg-black/[0.06]'
-          }`}
+          icon={<Lightbulb size={13} strokeWidth={2.2} />}
         >
-          <Lightbulb size={13} strokeWidth={2.2} />
-          <span>Idé / Förslag</span>
-        </button>
+          Idé / Förslag
+        </Pill>
 
-        <button
-          type="button"
+        <Pill
+          active={feedbackType === 'other'}
           onClick={() => setFeedbackType('other')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
-            feedbackType === 'other'
-              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-              : 'bg-black/[0.03] dark:bg-white/[0.04] text-[var(--text-secondary)] border-subtle hover:bg-black/[0.06]'
-          }`}
+          icon={<HeartHandshake size={13} strokeWidth={2.2} />}
         >
-          <HeartHandshake size={13} strokeWidth={2.2} />
-          <span>Övrigt</span>
-        </button>
+          Övrigt
+        </Pill>
       </div>
 
       <div className="relative">
@@ -103,7 +88,7 @@ export function FeedbackModal({ isOpen = true, onClose, onSubmit, t }: FeedbackM
               ? 'Vad för funktion eller förbättring saknar du?'
               : t('feedbackPlaceholder')
           } 
-          className="w-full h-32 bg-black/[0.04] dark:bg-white/[0.06] border border-subtle rounded-[var(--radius-input,10px)] p-3.5 pl-10 text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all resize-none focus:border-[var(--accent-color)]" 
+          className="w-full h-32 bg-[var(--surface-muted)] border border-[var(--border-subtle)] rounded-[var(--radius-input,12px)] p-3.5 pl-10 text-sm font-medium text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none transition-all resize-none focus:border-[var(--accent-color)]" 
         />
       </div>
 

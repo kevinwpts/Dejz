@@ -45,7 +45,7 @@ export function DeleteAccountModal({ isOpen, onClose, onConfirm, t }: DeleteAcco
       bodyClassName="p-6 sm:p-7 text-center"
     >
       <div className="text-center">
-        <div className="w-12 h-12 bg-red-500/10 text-red-500 rounded-[var(--radius-card-nested,10px)] flex items-center justify-center mx-auto mb-4 border border-red-500/20 shadow-none">
+        <div className="w-12 h-12 bg-[var(--danger-container)] text-[var(--danger-color)] rounded-[var(--radius-card-nested,12px)] flex items-center justify-center mx-auto mb-4 border border-[var(--danger-color)]/20 shadow-none">
           <AlertCircle size={22} strokeWidth={2} />
         </div>
 

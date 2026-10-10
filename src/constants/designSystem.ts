@@ -123,7 +123,7 @@ export const DS = {
    */
   radius: {
     card: 'rounded-[var(--radius-card,20px)]',
-    cardNested: 'rounded-[var(--radius-card-nested,14px)]',
+    cardNested: 'rounded-[var(--radius-card-nested,12px)]',
     button: 'rounded-[var(--radius-button,12px)]',
     buttonSm: 'rounded-[var(--radius-button-sm,10px)]',
     buttonLg: 'rounded-[var(--radius-button-lg,12px)]',
@@ -142,10 +142,10 @@ export const DS = {
    * Component Dimensions / Heights
    */
   heights: {
-    input: 'h-[var(--height-input,48px)]',
-    button: 'h-[var(--height-button,48px)]',
+    input: 'h-[var(--height-input,44px)]',
+    button: 'h-[var(--height-button,44px)]',
     buttonSm: 'h-[var(--height-button-sm,32px)]',
-    buttonLg: 'h-[var(--height-button-lg,52px)]',
+    buttonLg: 'h-[var(--height-button-lg,48px)]',
     buttonPill: 'h-8',
     search: 'h-[var(--height-search,44px)]',
     iconButtonSm: 'w-7 h-7',
@@ -161,6 +161,7 @@ export const DS = {
   typography: {
     heroAmount: 'text-hero-amount',
     largeAmount: 'text-large-amount',
+    listAmount: 'text-list-amount',
     pageTitle: 'text-page-title',
     sectionTitle: 'text-section-title',
     cardTitle: 'text-card-title',
@@ -171,7 +172,7 @@ export const DS = {
     label: 'text-label',
     micro: 'text-micro-label',
     // Keep existing utility roles mapped to new scale as needed
-    amount: 'text-body-medium tabular-nums',
+    amount: 'text-list-amount tabular-nums',
     metadata: 'text-micro-label',
     button: 'text-body-medium',
     input: 'text-body',

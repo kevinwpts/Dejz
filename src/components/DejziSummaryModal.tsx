@@ -48,7 +48,7 @@ export function DejziAvatar({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
           <path d="M 45 58 Q 50 63 55 58" fill="none" stroke="#0F172A" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
         {size !== 'sm' && (
-          <div className="absolute -top-0.5 -right-0.5 text-amber-400 drop-shadow-xs">
+          <div className="absolute -top-0.5 -right-0.5 text-[var(--warning-color)] drop-shadow-xs">
             <Sparkles size={size === 'lg' ? 14 : 9} />
           </div>
         )}
@@ -222,7 +222,7 @@ export function DejziSummaryModal({
                   <h3 className="text-base sm:text-[17px] font-semibold font-unbounded tracking-tight text-[var(--text-primary)]">
                     {userName ? `${isEn ? 'Hi' : 'Hej'} ${userName}!` : 'Dejzi'}
                   </h3>
-                  <p className="text-xs font-semibold text-amber-500 dark:text-amber-400 mt-0.5">
+                  <p className="text-xs font-semibold text-[var(--warning-color)] dark:text-[var(--warning-color)] mt-0.5">
                     {isEn ? 'Your personal budget coach' : 'Din personliga ekonomicoach'}
                   </p>
                 </div>
@@ -240,7 +240,7 @@ export function DejziSummaryModal({
 
             {/* Status & Key Takeaway */}
             {dejziInfo && (
-              <div className="p-4 rounded-[8px] bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 space-y-1.5">
+              <div className="p-4 rounded-[8px] bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-[var(--warning-color)] space-y-1.5">
                 <p className="text-sm font-bold text-[var(--text-primary)] leading-snug">
                   {dejziInfo.message}
                 </p>
@@ -257,10 +257,10 @@ export function DejziSummaryModal({
               {/* Dagsbudget kvar */}
               <div className="p-3.5 rounded-[8px] bg-[var(--surface-color)] border-none shadow-none flex flex-col gap-1">
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
-                  <Coins size={13} className="text-amber-500" />
+                  <Coins size={13} className="text-[var(--warning-color)]" />
                   <span>{isEn ? "Today's balance" : 'Dagens saldo'}</span>
                 </div>
-                <span className={`text-base font-extrabold font-amount tabular-nums ${availableForToday < 0 ? 'text-rose-500' : 'text-[var(--text-primary)]'}`}>
+                <span className={`text-base font-extrabold font-amount tabular-nums ${availableForToday < 0 ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'}`}>
                   {formatAmount(Math.round(availableForToday), language)} {currency}
                 </span>
               </div>
@@ -282,7 +282,7 @@ export function DejziSummaryModal({
                   <Wallet size={13} className="text-[var(--text-secondary)]" />
                   <span>{isEn ? 'Total left' : 'Totalt kvar'}</span>
                 </div>
-                <span className={`text-base font-extrabold font-amount tabular-nums ${(stats?.remainingPeriodCents || 0) < 0 ? 'text-rose-500' : 'text-[var(--text-primary)]'}`}>
+                <span className={`text-base font-extrabold font-amount tabular-nums ${(stats?.remainingPeriodCents || 0) < 0 ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'}`}>
                   {formatAmount(Math.round(stats?.remainingPeriodCents || 0), language)} {currency}
                 </span>
               </div>
@@ -302,7 +302,7 @@ export function DejziSummaryModal({
             {/* Dejzi Proactive Tip */}
             {dejziInfo?.actionTip && (
               <div className="flex items-start gap-2.5 px-3.5 py-2.5 rounded-[8px] bg-[var(--surface-color)] text-[var(--text-primary)] text-xs font-medium border-none shadow-none">
-                <Zap size={14} className="shrink-0 text-amber-500 mt-0.5" />
+                <Zap size={14} className="shrink-0 text-[var(--warning-color)] mt-0.5" />
                 <span>{dejziInfo.actionTip}</span>
               </div>
             )}

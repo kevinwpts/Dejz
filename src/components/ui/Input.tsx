@@ -44,7 +44,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       'w-full h-[var(--height-input,48px)] bg-[var(--input-bg,rgba(0,0,0,0.05))] rounded-[var(--radius-input,14px)] border transition-all caret-[var(--accent-color)] outline-none placeholder:text-[var(--text-inactive)] disabled:opacity-50 disabled:cursor-not-allowed';
 
     const borderAndFocusStyles = error
-      ? 'border-rose-500 dark:border-rose-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20'
+      ? 'border-[var(--danger-color)] focus:border-[var(--danger-color)] focus:ring-2 focus:ring-[var(--danger-color)]/20'
       : 'border-transparent focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-color)]/20';
 
     const typographyStyles = isAmount
@@ -107,7 +107,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {error && (
-          <p className="text-label text-rose-600 dark:text-rose-400 mt-0.5">
+          <p className="text-label text-[var(--danger-color)] mt-0.5">
             {error}
           </p>
         )}

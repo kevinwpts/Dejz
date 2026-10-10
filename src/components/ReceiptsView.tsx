@@ -48,34 +48,34 @@ export function ReceiptsView({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="space-y-[var(--card-gap)] pb-24 page-max mx-auto w-full"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="space-y-[var(--card-gap)] pb-24 page-max mx-auto w-full min-w-0 overflow-x-hidden"
     >
       {/* Stats Summary Panel */}
       {receiptTransactions.length > 0 && (
-        <Card variant="default" padding="lg" className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-micro-label font-bold tracking-wider text-[var(--text-tertiary)]">
+        <Card variant="default" padding="lg" className="space-y-2 min-w-0 w-full overflow-hidden">
+          <div className="flex items-center justify-between gap-2 min-w-0 w-full">
+            <span className="text-micro-label font-bold tracking-wider text-[var(--text-tertiary)] uppercase truncate min-w-0">
               {config.language === 'sv' ? 'Sammanställning' : 'Summary'}
             </span>
-            <span className="text-micro-label font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-[var(--radius-badge,9999px)]">
-              {filteredTransactions.length} {config.language === 'sv' ? 'stycken' : 'items'}
+            <span className="text-micro-label font-bold text-[var(--success-color)] bg-[var(--success-container)] px-2.5 py-0.5 rounded-full shrink-0">
+              {filteredTransactions.length} {config.language === 'sv' ? 'kvitton' : 'receipts'}
             </span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-large-amount font-extrabold text-[var(--text-primary)] tracking-tight tabular-nums">
+          <div className="flex items-baseline justify-between gap-2 pt-1 min-w-0 w-full">
+            <span className="text-large-amount font-extrabold text-[var(--text-primary)] tracking-tight tabular-nums truncate min-w-0">
               {formatDisplayAmount(totalAmount)}
             </span>
-            <span className="text-secondary font-medium text-[var(--text-secondary)]">
+            <span className="text-xs font-medium text-[var(--text-tertiary)] shrink-0">
               {config.language === 'sv' ? 'totalt belopp' : 'total amount'}
             </span>
           </div>
         </Card>
       )}
 
-      {/* Search Input */}
+      {/* Search Input matching History search bar style */}
       {receiptTransactions.length > 0 && (
         <Input
           variant="search"
@@ -84,13 +84,14 @@ export function ReceiptsView({
           placeholder={config.language === 'sv' ? 'Sök köpställe, kategori eller belopp...' : 'Search merchant, category, or amount...'}
           onClear={() => setSearchQuery('')}
           id="receipts_search_input"
+          className="h-[42px] sm:h-[44px] text-xs sm:text-sm bg-[var(--surface-color)] shadow-subtle border-none min-w-0 w-full"
         />
       )}
 
       {/* Receipt Grid/List */}
-      <div className="space-y-[var(--card-gap)]">
+      <div className="space-y-[var(--card-gap)] min-w-0 w-full">
         {filteredTransactions.length > 0 ? (
-          <div className="grid gap-3">
+          <div className="flex flex-col gap-3 min-w-0 w-full">
             <AnimatePresence mode="popLayout">
               {filteredTransactions.map((item) => (
                 <motion.div
@@ -100,17 +101,18 @@ export function ReceiptsView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   id={`receipt_item_${item.id}`}
+                  className="min-w-0 w-full overflow-hidden"
                 >
                   <Card
                     variant="default"
                     padding="md"
                     isInteractive
                     onClick={() => onViewTransaction(item)}
-                    className="group flex items-center justify-between"
+                    className="group flex items-center justify-between gap-2 sm:gap-3 min-w-0 w-full max-w-full overflow-hidden"
                   >
-                    <div className="flex items-center gap-4 min-w-0">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 overflow-hidden">
                       {/* Receipt thumbnail / Icon wrapper */}
-                      <div className="w-12 h-12 rounded-[var(--radius-card-nested,8px)] border-none overflow-hidden relative shrink-0 bg-black/[0.04] dark:bg-white/5 flex items-center justify-center">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[var(--radius-card-nested,10px)] border-none overflow-hidden relative shrink-0 bg-black/[0.04] dark:bg-white/5 flex items-center justify-center">
                         {item.receiptUrl ? (
                           <>
                             <img
@@ -119,57 +121,57 @@ export function ReceiptsView({
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                               referrerPolicy="no-referrer"
                             />
-                            <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                               <Receipt size={14} className="text-white drop-shadow-subtle" />
                             </div>
                           </>
                         ) : (
-                          <Receipt size={20} className="text-[var(--text-secondary)]" strokeWidth={2} />
+                          <Receipt size={18} className="text-[var(--text-secondary)]" strokeWidth={2} />
                         )}
                       </div>
 
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="text-body-medium font-bold text-[var(--text-primary)] truncate">
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <div className="flex items-center gap-1.5 min-w-0 w-full">
+                          <span className="text-body-medium font-bold text-[var(--text-primary)] truncate min-w-0 flex-1 block">
                             {item.merchant || item.category}
                           </span>
                           {item.type === 'income' ? (
-                            <span className="p-0.5 rounded-full bg-emerald-500/10 text-emerald-600 shrink-0">
+                            <span className="p-0.5 rounded-full bg-[var(--success-container)] text-[var(--success-color)] shrink-0">
                               <ArrowDownRight size={10} strokeWidth={2.5} />
                             </span>
                           ) : (
-                            <span className="p-0.5 rounded-full bg-rose-500/10 text-rose-600 shrink-0">
+                            <span className="p-0.5 rounded-full bg-[var(--danger-container)] text-[var(--danger-color)] shrink-0">
                               <ArrowUpRight size={10} strokeWidth={2.5} />
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-micro-label font-semibold text-[var(--text-secondary)] opacity-60">
-                          <span className="flex items-center gap-1">
-                            <Calendar size={11} strokeWidth={2} />
+                        <div className="flex items-center gap-1.5 text-micro-label font-medium text-[var(--text-secondary)] opacity-70 min-w-0 w-full mt-0.5">
+                          <span className="inline-flex items-center gap-1 shrink-0">
+                            <Calendar size={11} strokeWidth={2} className="shrink-0" />
                             {formatDate(item.timestamp)}
                           </span>
-                          <span>•</span>
-                          <span className="flex items-center gap-1 text-micro-label">
-                            <Tag size={10} strokeWidth={2} />
-                            {item.category}
+                          <span className="shrink-0">•</span>
+                          <span className="inline-flex items-center gap-1 min-w-0 flex-1 overflow-hidden">
+                            <Tag size={10} strokeWidth={2} className="shrink-0" />
+                            <span className="truncate min-w-0 flex-1">{item.category}</span>
                           </span>
                         </div>
                         {item.note && (
-                          <p className="text-micro-label text-[var(--text-secondary)] opacity-80 mt-1 truncate max-w-[180px]">
+                          <p className="text-micro-label text-[var(--text-secondary)] opacity-70 mt-0.5 truncate min-w-0 w-full">
                             {item.note}
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <span className="text-body-medium font-extrabold text-[var(--text-primary)] tabular-nums">
+                    <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 text-right ml-auto">
+                      <div>
+                        <span className="text-body-medium font-bold text-[var(--text-primary)] tabular-nums whitespace-nowrap shrink-0 block">
                           {formatDisplayAmount(item.amount)}
                         </span>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)]/50 text-[var(--text-secondary)] group-hover:bg-accent/10 group-hover:text-accent flex items-center justify-center transition-all">
-                        <Eye size={14} strokeWidth={2} />
+                      <div className="w-7 h-7 rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] group-hover:bg-accent/10 group-hover:text-accent flex items-center justify-center transition-all shrink-0">
+                        <Eye size={13} strokeWidth={2} />
                       </div>
                     </div>
                   </Card>

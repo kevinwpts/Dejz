@@ -32,13 +32,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const sizeStyles = {
       sm: 'h-[var(--height-button-sm,32px)] px-3.5 rounded-[var(--radius-button-sm,10px)] text-label gap-1.5 active:scale-95',
-      md: 'h-[var(--height-button,48px)] px-5 rounded-[var(--radius-button,14px)] text-body-medium gap-2 active:scale-[0.98]',
-      lg: 'h-[var(--height-button-lg,52px)] px-6 rounded-[var(--radius-button-lg,14px)] text-card-title gap-2.5 active:scale-[0.98]',
+      md: 'h-[var(--height-button,44px)] px-5 rounded-[var(--radius-button,12px)] text-body-medium gap-2 active:scale-[0.98]',
+      lg: 'h-[var(--height-button-lg,48px)] px-6 rounded-[var(--radius-button-lg,12px)] text-body-medium font-semibold gap-2.5 active:scale-[0.98]',
     }[size];
 
     const variantStyles = {
       primary:
-        'bg-[#242321] text-white dark:bg-stone-100 dark:text-[#242321] font-semibold hover:opacity-90 active:opacity-80 shadow-none border-none',
+        'bg-[var(--text-primary)] text-[var(--surface-color)] dark:bg-[var(--text-primary)] dark:text-[var(--bg-color)] font-semibold hover:opacity-90 active:opacity-80 shadow-none border-none',
       secondary:
         'bg-[var(--surface-muted)] text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 active:bg-black/15 dark:active:bg-white/15 border-none',
       pill:

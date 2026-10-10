@@ -54,11 +54,11 @@ export const ListRow: React.FC<ListRowProps> = ({
 
   const containerStyles = {
     card: isCompact
-      ? 'bg-[var(--surface-color)] border border-[var(--border-subtle)] px-4 py-2.5 min-h-[58px] rounded-[var(--radius-card,20px)]'
-      : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] p-3.5 sm:p-4 rounded-[var(--radius-card,20px)]',
+      ? 'bg-[var(--surface-color)] border border-[var(--border-subtle)] px-4 py-3 min-h-[58px] rounded-[var(--radius-card,20px)]'
+      : 'bg-[var(--surface-color)] border border-[var(--border-subtle)] p-4 min-h-[62px] rounded-[var(--radius-card,20px)]',
     grouped: isCompact
-      ? 'bg-transparent px-4 py-2.5 min-h-[58px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
-      : 'bg-transparent p-3.5 sm:p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.03]',
+      ? 'bg-transparent px-4 py-3 min-h-[58px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
+      : 'bg-transparent px-4 py-3.5 min-h-[62px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03]',
     plain: isCompact ? 'bg-transparent px-3 py-2 min-h-[48px]' : 'bg-transparent p-2 sm:p-3',
   }[variant];
 
@@ -74,10 +74,10 @@ export const ListRow: React.FC<ListRowProps> = ({
   };
 
   const iconContainerSize = isCompact
-    ? 'w-[34px] h-[34px] rounded-[10px]'
-    : 'w-10 h-10 rounded-[var(--radius-card-nested,14px)]';
+    ? 'w-[38px] h-[38px] rounded-[var(--radius-button-sm,10px)]'
+    : 'w-10 h-10 rounded-[var(--radius-button-sm,10px)]';
 
-  const gapSize = isCompact ? 'gap-3' : 'gap-3.5';
+  const gapSize = 'gap-3.5';
 
   return (
     <div
@@ -100,10 +100,10 @@ export const ListRow: React.FC<ListRowProps> = ({
         <div className="min-w-0 flex flex-col justify-center flex-1">
           <div className="flex items-center gap-2">
             <span
-              className={`${isCompact ? 'text-[13px] font-medium leading-snug' : 'text-card-title'} ${
+              className={`text-body-medium font-medium leading-snug ${
                 multiline ? '' : 'truncate'
               } ${
-                destructive ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
+                destructive ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
               } ${titleClassName}`}
             >
               {title}
@@ -112,8 +112,8 @@ export const ListRow: React.FC<ListRowProps> = ({
           </div>
           {subtitle && (
             <div
-              className={`${isCompact ? 'text-[11px] leading-relaxed text-[var(--text-secondary)] mt-0.5' : 'text-secondary mt-0.5'} ${
-                multiline ? (isCompact ? 'leading-relaxed' : 'leading-relaxed opacity-75') : (isCompact ? 'truncate' : 'truncate opacity-75')
+              className={`text-secondary leading-relaxed text-[var(--text-secondary)] mt-0.5 ${
+                multiline ? 'leading-relaxed' : 'truncate'
               } ${subtitleClassName}`}
             >
               {subtitle}
@@ -138,8 +138,8 @@ export const ListRow: React.FC<ListRowProps> = ({
         {showChevron && (
           <Icon
             name="caret-right"
-            size={16}
-            className="text-[var(--text-tertiary)] shrink-0 opacity-60"
+            size={18}
+            className="text-[var(--text-secondary)] shrink-0 opacity-60"
           />
         )}
       </div>

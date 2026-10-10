@@ -199,7 +199,7 @@ export function SavingsGoalModal({
                   className="w-full bg-transparent text-[var(--text-primary)] outline-none text-large-amount font-bold text-center tabular-nums"
                 />
               </div>
-              <span className="text-micro-label font-bold text-white bg-emerald-500 px-3 py-1 rounded-full shrink-0 ml-3 transition-colors">
+              <span className="text-micro-label font-bold text-white bg-[var(--success-color)] px-3 py-1 rounded-full shrink-0 ml-3 transition-colors">
                 {currency}
               </span>
             </div>

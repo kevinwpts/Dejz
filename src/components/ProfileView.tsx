@@ -315,7 +315,7 @@ export function ProfileView({
               {user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('user')}
             </h3>
             {isAdmin && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-micro-label font-bold border border-amber-500/20 shrink-0">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] text-micro-label font-bold border border-[var(--warning-color)]/20 shrink-0">
                 <Crown size={11} strokeWidth={2} />
                 Admin
               </span>
@@ -338,18 +338,18 @@ export function ProfileView({
         {/* Admin Tools for App Owner */}
         {isAdmin && (
           <div className="space-y-2">
-            <h4 className="text-label font-semibold text-amber-600 dark:text-amber-400 px-1.5 flex items-center gap-1.5">
-              <Crown size={13} strokeWidth={2} />
+            <h4 className="text-section-title px-1.5 flex items-center gap-1.5">
               <span>{config.language === 'en' ? 'Administration' : 'Administration'}</span>
+              <Crown size={14} strokeWidth={2} className="text-[var(--warning-color)] shrink-0" />
             </h4>
-            <Card variant="default" padding="none" className="divide-y divide-menu border border-amber-500/25">
+            <Card variant="default" padding="none" className="divide-y divide-menu border border-[var(--warning-color)]/25">
               <ListRow
                 variant="grouped"
                 density="compact"
                 showChevron
                 icon={<ShieldCheck size={18} strokeWidth={2} />}
-                iconBg="bg-amber-500/10"
-                iconColor="text-amber-600 dark:text-amber-400"
+                iconBg="bg-[var(--warning-container)]"
+                iconColor="text-[var(--warning-color)]"
                 title={config.language === 'en' ? 'Admin Dashboard' : 'Adminpanel'}
                 subtitle={config.language === 'en' ? 'Owner tools, subscription simulator & feedback' : 'Ägarverktyg, prenumerationssimulator & feedback'}
                 onClick={() => handleSectionClick('admin')}
@@ -360,7 +360,7 @@ export function ProfileView({
 
         {/* Ekonomi & Budget */}
         <div className="space-y-2">
-          <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
+          <h4 className="text-section-title px-1.5">
             {t('economy')}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
@@ -419,7 +419,7 @@ export function ProfileView({
 
         {/* Verktyg & Delning */}
         <div className="space-y-2">
-          <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
+          <h4 className="text-section-title px-1.5">
             {config.language === 'en' ? 'Tools & Sharing' : 'Verktyg & Funktioner'}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
@@ -464,7 +464,7 @@ export function ProfileView({
 
         {/* App Settings */}
         <div className="space-y-2">
-          <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
+          <h4 className="text-section-title px-1.5">
             {t('appSettings')}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
@@ -636,7 +636,7 @@ export function ProfileView({
 
         {/* Account Actions */}
         <div className="space-y-2">
-          <h4 className="text-label font-semibold text-rose-500 dark:text-rose-400 px-1.5">
+          <h4 className="text-label font-semibold text-[var(--danger-color)] px-1.5">
             {t('dangerZone')}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
@@ -676,10 +676,10 @@ export function ProfileView({
               density="compact"
               destructive
               icon={<Trash2 size={18} strokeWidth={2} />}
-              iconBg="bg-rose-500/10"
-              iconColor="text-rose-600 dark:text-rose-400"
+              iconBg="bg-[var(--danger-container)]"
+              iconColor="text-[var(--danger-color)]"
               title={t('deleteAccount')}
-              titleClassName="text-rose-600 dark:text-rose-400"
+              titleClassName="text-[var(--danger-color)]"
               onClick={onDeleteAccount}
             />
           </Card>

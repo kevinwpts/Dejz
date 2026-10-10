@@ -75,7 +75,7 @@ export const SmartInputFeedback: React.FC<SmartInputFeedbackProps> = ({
         className={`flex items-center gap-1.5 text-micro-label font-medium px-1 py-0.5 select-none ${
           feedback.type === 'success'
             ? 'text-[var(--text-secondary)] dark:text-[#A8A8A8]'
-            : 'text-rose-500 dark:text-rose-400'
+            : 'text-[var(--danger-color)]'
         } ${className}`}
       >
         {feedback.type === 'success' && (

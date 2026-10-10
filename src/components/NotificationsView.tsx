@@ -92,7 +92,7 @@ export function NotificationsView({
             statusBadgeStyle = 'bg-black/5 dark:bg-white/5 text-[var(--text-primary)]';
           } else if (isPast) {
             statusBadgeText = config.language === 'en' ? `Arrived on the ${n.deductionDay}th` : `Kom den ${n.deductionDay}:e`;
-            statusBadgeStyle = 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+            statusBadgeStyle = 'bg-[var(--warning-container)] text-[var(--warning-color)]';
           } else {
             statusBadgeText = config.language === 'en' ? `Arrives on the ${n.deductionDay}th` : `Kommer den ${n.deductionDay}:e`;
             statusBadgeStyle = 'bg-[var(--surface-muted)] text-[var(--text-secondary)]';
@@ -100,10 +100,10 @@ export function NotificationsView({
         } else {
           if (isToday) {
             statusBadgeText = config.language === 'en' ? 'Due today' : 'Dras idag';
-            statusBadgeStyle = 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+            statusBadgeStyle = 'bg-[var(--warning-container)] text-[var(--warning-color)]';
           } else if (isPast) {
             statusBadgeText = config.language === 'en' ? `Due on the ${n.deductionDay}th` : `Dras den ${n.deductionDay}:e`;
-            statusBadgeStyle = 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+            statusBadgeStyle = 'bg-[var(--danger-container)] text-[var(--danger-color)]';
           } else {
             statusBadgeText = config.language === 'en' ? `Due on the ${n.deductionDay}th` : `Dras den ${n.deductionDay}:e`;
             statusBadgeStyle = 'bg-[var(--surface-muted)] text-[var(--text-secondary)]';
@@ -117,7 +117,7 @@ export function NotificationsView({
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="p-5 sm:p-6 rounded-[8px] bg-[var(--surface-color)] transition-all flex flex-col gap-4 relative shadow-xs"
+            className="p-5 sm:p-6 rounded-[var(--radius-card,16px)] bg-[var(--surface-color)] transition-all flex flex-col gap-4 relative shadow-xs"
           >
             {/* Top status bar */}
             <div className="flex items-center justify-between gap-3">

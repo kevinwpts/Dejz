@@ -1,9 +1,7 @@
 import React from 'react';
-import { motion } from 'motion/react';
-
-import { X, Shield, FileText, Mail, Info } from 'lucide-react';
+import { Shield, FileText, Mail, Info } from 'lucide-react';
 import { TranslationKey } from '../i18n';
-import { useScrollLock } from '../hooks/useScrollLock';
+import { Modal } from './ui';
 
 interface LegalModalProps {
   isOpen: boolean;
@@ -13,7 +11,6 @@ interface LegalModalProps {
 }
 
 export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
-  useScrollLock(isOpen);
   const getContent = () => {
     switch (type) {
       case 'privacy':
@@ -146,53 +143,26 @@ export function LegalModal({ isOpen, onClose, type, t }: LegalModalProps) {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="md"
+      title={
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-[var(--surface-color)] flex items-center justify-center border-none shrink-0">
+            {getIcon()}
+          </div>
+          <div>
+            <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">{getTitle()}</h2>
+            <p className="text-xs font-medium text-[var(--text-secondary)]">Juridisk information</p>
+          </div>
+        </div>
+      }
     >
-      <div
-        onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-      />
-      <motion.div
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="relative w-full sm:max-w-lg bg-[var(--bg-color)] max-h-[85vh] sm:max-h-[90vh] mt-[env(safe-area-inset-top,0px)] rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] border-none overflow-hidden flex flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-0 shadow-modal font-sans"
-      >
-            {/* Header */}
-            <div className="p-5 sm:p-6 border-b border-subtle flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[var(--radius-card-nested,10px)] bg-[var(--surface-color)] flex items-center justify-center border-none">
-                  {getIcon()}
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-[var(--text-primary)]">{getTitle()}</h2>
-                  <p className="text-xs font-medium text-[var(--text-secondary)]">Juridisk information</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-8 h-8 rounded-full bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer border-none shadow-none"
-                aria-label="Stäng"
-              >
-                <X size={16} strokeWidth={2.5} />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 overflow-y-auto custom-scrollbar">
-              {getContent()}
-            </div>
-
-          </motion.div>
-    </motion.div>
+      <div className="p-2 sm:p-4">
+        {getContent()}
+      </div>
+    </Modal>
   );
 }

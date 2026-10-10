@@ -32,14 +32,14 @@ export function CompactOverview({ t, transactions, config, incomes }: CompactOve
           <h3 className="text-label font-semibold text-[var(--text-secondary)]">
             {t('budgetUsage')}
           </h3>
-          <span className="text-label font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+          <span className="text-label font-bold text-[var(--success-color)] bg-[var(--success-container)] px-2.5 py-0.5 rounded-full">
             {budgetUsage.toFixed(0)}%
           </span>
         </div>
         
         <div className="relative h-2 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden mb-3.5">
           <div 
-            className="absolute top-0 left-0 h-full bg-emerald-500 transition-all duration-1000 ease-out rounded-full"
+            className="absolute top-0 left-0 h-full bg-[var(--success-color)] transition-all duration-1000 ease-out rounded-full"
             style={{ width: `${Math.min(budgetUsage, 100)}%` }}
           />
         </div>

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-
 import { Lock, Delete, Fingerprint, X } from 'lucide-react';
 import { TranslationKey } from '../i18n';
 import { verifyPin, setPin as savePin, isBiometricsEnabled } from '../utils/security';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { IconButton } from './ui';
 
 interface PinLockScreenProps {
   mode: 'unlock' | 'setup' | 'disable';
@@ -30,8 +30,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
 
   useEffect(() => {
     if (mode === 'unlock' && isBiometricsEnabled()) {
-      // In a real app, we would trigger biometric prompt here
-      // For now, we just show the icon
+      // Biometric prompt hook
     }
   }, [mode]);
 
@@ -97,24 +96,25 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
       className="fixed inset-0 z-[100] bg-[var(--bg-color)] flex flex-col items-center justify-center p-4 font-sans select-none"
     >
       {onCancel && (
-        <button 
-          type="button"
-          onClick={onCancel}
-          className="absolute top-6 right-6 w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors cursor-pointer"
-          aria-label="Stäng"
-        >
-          <X size={17} strokeWidth={2} />
-        </button>
+        <div className="absolute top-6 right-6">
+          <IconButton 
+            icon={<X size={18} strokeWidth={2} />} 
+            onClick={onCancel}
+            aria-label="Stäng"
+            variant="muted"
+            size="md"
+          />
+        </div>
       )}
 
       <div className="mb-8 flex flex-col items-center">
-        <div className="w-14 h-14 bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-primary)] border border-subtle rounded-[var(--radius-card,14px)] flex items-center justify-center mb-5 shadow-xs">
+        <div className="w-14 h-14 bg-[var(--surface-muted)] text-[var(--text-primary)] border border-[var(--border-subtle)] rounded-[var(--radius-card-nested,14px)] flex items-center justify-center mb-5 shadow-xs">
           <Lock size={26} />
         </div>
-        <h2 className="text-lg sm:text-xl font-bold font-display tracking-tight text-[var(--text-primary)] mb-1 text-center">
+        <h2 className="text-section-title font-bold tracking-tight text-[var(--text-primary)] mb-1 text-center">
           {getTitle()}
         </h2>
-        <p className="text-[var(--text-secondary)] h-5 text-xs font-medium">
+        <p className="text-[var(--text-secondary)] h-5 text-label font-medium">
           {error || (step === 'confirm' ? t('confirmPin') : '')}
         </p>
       </div>
@@ -126,8 +126,8 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
             className={`w-3.5 h-3.5 rounded-full transition-all duration-200 ${
               i < pin.length 
                 ? 'bg-[var(--text-primary)] scale-110' 
-                : 'bg-black/15 dark:bg-white/20'
-            } ${error ? 'bg-rose-500' : ''}`}
+                : 'bg-[var(--surface-muted)] border border-[var(--border-subtle)]'
+            } ${error ? 'bg-[var(--danger-color)]' : ''}`}
           />
         ))}
       </div>
@@ -138,7 +138,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
             key={num}
             type="button"
             onClick={() => handleNumberClick(num)}
-            className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-surface hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.92] transition-all flex items-center justify-center border border-subtle shadow-xs cursor-pointer"
+            className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] active:scale-[0.92] transition-all flex items-center justify-center border border-[var(--border-subtle)] shadow-xs cursor-pointer"
           >
             {num}
           </button>
@@ -156,7 +156,7 @@ export function PinLockScreen({ mode, onSuccess, onCancel, t }: PinLockScreenPro
         <button
           type="button"
           onClick={() => handleNumberClick(0)}
-          className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-white dark:bg-surface hover:bg-black/5 dark:hover:bg-white/10 active:scale-[0.92] transition-all flex items-center justify-center border border-subtle shadow-xs cursor-pointer"
+          className="w-16 h-16 rounded-full text-2xl font-bold font-amount tabular-nums text-[var(--text-primary)] bg-[var(--surface-color)] hover:bg-[var(--surface-hover)] active:scale-[0.92] transition-all flex items-center justify-center border border-[var(--border-subtle)] shadow-xs cursor-pointer"
         >
           0
         </button>

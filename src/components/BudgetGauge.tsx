@@ -115,14 +115,14 @@ export function BudgetGauge({
             <div className="flex items-baseline gap-1 sm:gap-1.5 min-w-0">
               <AnimatedNumber
                 value={remainingCents}
-                className={`text-hero-amount leading-none font-semibold ${
-                  isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-primary)]'
+                className={`text-hero-amount leading-none font-bold ${
+                  isNegative ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
                 }`}
                 formatter={(val) => formatAmount(val, language)}
               />
               <span
-                className={`text-card-title leading-none shrink-0 font-medium ${
-                  isNegative ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-[var(--text-secondary)]'
+                className={`text-secondary leading-none shrink-0 font-medium ${
+                  isNegative ? 'text-[var(--danger-color)]/80 dark:text-[var(--danger-color)]/80' : 'text-[var(--text-secondary)]'
                 }`}
               >
                 {currency || 'kr'}
@@ -137,7 +137,7 @@ export function BudgetGauge({
               if (typeof feedback?.tap === 'function') feedback.tap();
               onOpenInfo?.();
             }}
-            className="flex flex-col items-center shrink-0 p-1 -m-1 rounded-[var(--radius-card-nested,10px)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-all cursor-pointer border-none bg-transparent active:scale-95 text-left group"
+            className="flex flex-col items-center shrink-0 p-1 -m-1 rounded-[var(--radius-card-nested,12px)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-all cursor-pointer border-none bg-transparent active:scale-95 text-left group"
             aria-label={isEn ? 'Budget status details' : 'Detaljer för budgetstatus'}
             title={circleTitle}
           >
@@ -189,7 +189,7 @@ export function BudgetGauge({
           >
             {/* Left: Aktuell period */}
             <div className="flex flex-col min-w-0">
-              <span className="text-label text-[var(--text-secondary)] font-normal leading-tight">
+              <span className="text-metric-label text-[var(--text-secondary)] font-medium leading-tight">
                 {isEn ? 'Current period' : 'Aktuell period'}
               </span>
               <span className="text-body-medium text-[var(--text-primary)] font-medium truncate mt-0.5 group-hover:text-[var(--accent-color)] transition-colors">
@@ -202,7 +202,7 @@ export function BudgetGauge({
 
             {/* Right: Nästa lön */}
             <div className="flex flex-col items-end shrink-0 text-right">
-              <span className="text-label text-[var(--text-secondary)] font-normal leading-tight">
+              <span className="text-metric-label text-[var(--text-secondary)] font-medium leading-tight">
                 {isEn ? 'Next payday' : 'Nästa lön'}
               </span>
               <span className="text-body-medium text-[var(--text-primary)] font-medium font-amount tabular-nums truncate mt-0.5 group-hover:text-[var(--accent-color)] transition-colors">

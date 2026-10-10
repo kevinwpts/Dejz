@@ -24,7 +24,7 @@ export const Pill: React.FC<PillProps> = ({
   }[size];
 
   const activeStyles = active
-    ? 'bg-[#1C1917] dark:bg-white text-white dark:text-[#141414] font-medium border border-transparent shadow-none'
+    ? 'bg-[var(--text-primary)] text-[var(--surface-color)] dark:text-[var(--bg-color)] font-medium border border-transparent shadow-none'
     : 'bg-[var(--surface-muted)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/10 dark:hover:bg-white/10 font-medium border border-transparent';
 
   return (
@@ -40,7 +40,7 @@ export const Pill: React.FC<PillProps> = ({
         <span
           className={`ml-1 text-micro-label font-medium px-1.5 py-0.2 rounded-full ${
             active
-              ? 'bg-white/20 text-white dark:bg-black/20 dark:text-[#141414]'
+              ? 'bg-white/20 text-current'
               : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
           }`}
         >

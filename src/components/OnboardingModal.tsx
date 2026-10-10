@@ -14,7 +14,7 @@ import { SWEDISH_EXPENSE_PRESETS, SwedishExpensePreset } from '../data/swedishEx
 import { OnboardingCharacterArt } from './OnboardingCharacterArt';
 import { parseIncomePrompt } from '../utils/incomeAiParser';
 import { SmartInput, Modal, Button, Input } from './ui';
-import { ToggleSwitch } from './ToggleSwitch';
+import { Switch } from './ui/Switch';
 import { getLogoUrl, fetchLogoForName } from '../utils/logo';
 
 export type Step = 'name' | 'payday' | 'income' | 'expenses' | 'goals' | 'midMonth' | 'summary';
@@ -829,9 +829,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                 {s.paydayBeforeWeekendDesc}
                               </span>
                             </div>
-                            <ToggleSwitch
-                              isOn={paydayBeforeWeekend}
-                              onToggle={() => setPaydayBeforeWeekend((prev) => !prev)}
+                            <Switch
+                              checked={paydayBeforeWeekend}
+                              onChange={() => setPaydayBeforeWeekend((prev) => !prev)}
                             />
                           </div>
                         </div>
@@ -990,7 +990,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                   onClick={() => handleTogglePreset(preset)}
                                   className={`p-2.5 rounded-card-nested flex items-center justify-between gap-2 text-left transition-all cursor-pointer border relative min-h-[54px] ${
                                     isAdded 
-                                      ? 'bg-[#E8F8F0] dark:bg-[#E8F8F0] border-[#05B862] shadow-2xs' 
+                                      ? 'bg-[var(--success-container)] border-[var(--success-color)] shadow-2xs' 
                                       : 'bg-[var(--surface-color)] hover:bg-[var(--surface-muted)] border-[var(--border-color)] shadow-2xs'
                                   }`}
                                 >
@@ -1008,9 +1008,9 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                                     </div>
                                   </div>
                                   <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                                    isAdded ? 'bg-white text-[#05B862] border border-[#05B862]/30 shadow-2xs' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
+                                    isAdded ? 'bg-white text-[var(--success-color)] border border-[var(--success-color)]/30 shadow-2xs' : 'bg-[var(--surface-muted)] text-[var(--text-secondary)]'
                                   }`}>
-                                    {isAdded ? <Check size={11} strokeWidth={2.5} className="text-[#05B862]" /> : <Plus size={11} />}
+                                    {isAdded ? <Check size={11} strokeWidth={2.5} className="text-[var(--success-color)]" /> : <Plus size={11} />}
                                   </div>
                                 </button>
                               );
@@ -1228,7 +1228,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         {/* Income */}
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                            <ArrowUpRight size={14} className="text-emerald-500" />
+                            <ArrowUpRight size={14} className="text-[var(--success-color)]" />
                             {s.incomeLabel}
                           </span>
                           <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
@@ -1239,7 +1239,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         {/* Fixed Expenses */}
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                            <ArrowDownRight size={14} className="text-rose-500" />
+                            <ArrowDownRight size={14} className="text-[var(--danger-color)]" />
                             {s.fixedCostsLabel}
                           </span>
                           <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
@@ -1250,7 +1250,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         {/* Monthly Savings */}
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                            <PiggyBank size={14} className="text-amber-500" />
+                            <PiggyBank size={14} className="text-[var(--warning-color)]" />
                             {s.savingsLabel}
                           </span>
                           <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">
@@ -1262,7 +1262,7 @@ export function OnboardingModal({ isOpen, config, userId, isPro, onComplete, onC
                         {initialSpentAmount > 0 && (
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5">
-                              <Receipt size={14} className="text-orange-500" />
+                              <Receipt size={14} className="text-[var(--warning-color)]" />
                               {s.spentSoFarLabel}
                             </span>
                             <span className="text-sm font-bold font-amount text-[var(--text-primary)] tabular-nums">

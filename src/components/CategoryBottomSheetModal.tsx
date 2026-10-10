@@ -187,7 +187,7 @@ export function CategoryBottomSheetModal({
                         <span
                           className={`text-xl sm:text-2xl font-bold font-amount tabular-nums tracking-tight ${
                             remaining < 0
-                              ? 'text-rose-600 dark:text-rose-500'
+                              ? 'text-[var(--danger-color)] dark:text-[var(--danger-color)]'
                               : 'text-[var(--text-primary)]'
                           }`}
                         >
@@ -222,12 +222,12 @@ export function CategoryBottomSheetModal({
                     <span
                       className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border tabular-nums shrink-0 whitespace-nowrap mt-0.5 ${
                         remaining < 0
-                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                          ? 'bg-[var(--danger-container)] text-[var(--danger-color)] border-[var(--danger-color)]'
                           : remaining === 0
                           ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-subtle'
                           : actualTotalSpent === 0
                           ? 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-subtle'
-                          : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                          : 'bg-[var(--success-container)] text-[var(--success-color)] border-[var(--success-color)]'
                       }`}
                     >
                       {usedPercentage} % {isEn ? 'used' : 'använt'}
@@ -240,17 +240,17 @@ export function CategoryBottomSheetModal({
                   <div
                     className={`w-full h-2 rounded-full overflow-hidden transition-colors ${
                       remaining < 0
-                        ? 'bg-rose-500/15 dark:bg-rose-500/20'
+                        ? 'bg-[var(--danger-container)] dark:bg-[var(--danger-container)]'
                         : 'bg-black/[0.05] dark:bg-white/[0.08]'
                     }`}
                   >
                     <div
                       className={`h-full rounded-full transition-all duration-300 ${
                         remaining < 0
-                          ? 'bg-rose-500 dark:bg-rose-500'
+                          ? 'bg-[var(--danger-color)] dark:bg-[var(--danger-color)]'
                           : remaining === 0
                           ? 'bg-neutral-400 dark:bg-neutral-500'
-                          : 'bg-emerald-500 dark:bg-emerald-400'
+                          : 'bg-[var(--success-color)] dark:bg-[var(--success-color)]'
                       }`}
                       style={{
                         width: `${remaining < 0 ? 100 : Math.min(100, Math.max(0, usedPercentage))}%`,

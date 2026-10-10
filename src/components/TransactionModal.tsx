@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { X, ChevronRight, Calendar, Plus, Camera, Trash2, Check, Loader2, Paperclip, FileText } from 'lucide-react';
+import { IconButton } from './ui';
 import { Transaction, Category, TransactionSplit } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
@@ -668,7 +669,7 @@ export function TransactionModal({
                 }}
                 className={`py-2 rounded-[var(--radius-button-sm,10px)] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   type === 'income'
-                    ? 'bg-white dark:bg-[var(--surface-high)] text-emerald-600 dark:text-emerald-400 shadow-xs'
+                    ? 'bg-white dark:bg-[var(--surface-high)] text-[var(--success-color)] shadow-xs'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
@@ -784,7 +785,7 @@ export function TransactionModal({
                       const diff = totalVal - currentSum;
                       if (Math.abs(diff) < 0.5) return null;
                       return (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-amount tabular-nums">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] font-amount tabular-nums">
                           {formatAmount(Math.max(0, diff).toString())} {currency} {currentLang === 'en' ? 'left' : 'kvar'}
                         </span>
                       );
@@ -797,7 +798,7 @@ export function TransactionModal({
                       if (typeof feedback?.light === 'function') feedback.light();
                       setSplits([]);
                     }}
-                    className="text-xs font-semibold text-rose-500 hover:text-rose-600 p-1 cursor-pointer"
+                    className="text-xs font-semibold text-[var(--danger-color)] hover:text-[var(--danger-color)] p-1 cursor-pointer"
                   >
                     {currentLang === 'en' ? 'Cancel split' : 'Ta bort uppdelning'}
                   </button>
@@ -895,7 +896,7 @@ export function TransactionModal({
                                 }));
                               }
                             }}
-                            className="w-6 h-6 flex items-center justify-center text-[var(--text-tertiary)] hover:text-rose-500 rounded-full transition-all cursor-pointer"
+                            className="w-6 h-6 flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--danger-color)] rounded-full transition-all cursor-pointer"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -1079,7 +1080,7 @@ export function TransactionModal({
                   }}
                   placeholder={type === 'income' ? t('incomeNotePlaceholder') : (currentLang === 'en' ? 'Add note...' : 'Skriv notering...')}
                   className={`text-[14px] font-medium text-[var(--text-primary)] text-right bg-transparent outline-none w-full max-w-[220px] placeholder:text-[var(--text-tertiary)] placeholder:font-normal ${
-                    validationError === 'note' ? 'text-rose-500' : ''
+                    validationError === 'note' ? 'text-[var(--danger-color)]' : ''
                   }`}
                 />
                 {note && (
@@ -1131,7 +1132,7 @@ export function TransactionModal({
                       setReceiptFileName(undefined);
                       setScanFeedback(null);
                     }}
-                    className="text-rose-500 hover:text-rose-600 p-1 cursor-pointer"
+                    className="text-[var(--danger-color)] hover:text-[var(--danger-color)] p-1 cursor-pointer"
                     title={currentLang === 'en' ? 'Remove' : 'Ta bort'}
                   >
                     <Trash2 size={13} />
@@ -1187,9 +1188,9 @@ export function TransactionModal({
                 });
                 onClose();
               }}
-              className="flex-1 h-[42px] rounded-full bg-[var(--accent-color)] hover:opacity-95 text-[var(--text-on-accent)] text-[13.5px] font-medium tracking-tight flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-none"
+              className="flex-1 h-12 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] text-[var(--on-accent)] text-body-medium font-semibold tracking-tight flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-none border-none"
             >
-              <Check size={15} strokeWidth={2.5} />
+              <Check size={16} strokeWidth={2.5} />
               <span>
                 {transaction 
                   ? (currentLang === 'en' ? 'Save changes' : 'Spara ändringar')
@@ -1198,18 +1199,18 @@ export function TransactionModal({
             </button>
 
             {transaction && transaction.id && onDelete && (
-              <button
-                type="button"
+              <IconButton
+                icon={<Trash2 size={16} strokeWidth={2} />}
                 onClick={() => {
                   if (typeof feedback?.light === 'function') feedback.light();
                   setShowDeleteConfirm(true);
                 }}
-                className="w-[42px] h-[42px] rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/15 text-[var(--text-secondary)] hover:text-[var(--text-primary)] dark:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0"
+                variant="danger"
+                size="xl"
+                shape="button"
                 title={currentLang === 'en' ? 'Delete' : 'Ta bort'}
                 aria-label={currentLang === 'en' ? 'Delete' : 'Ta bort'}
-              >
-                <Trash2 size={16} strokeWidth={2} />
-              </button>
+              />
             )}
           </div>
 

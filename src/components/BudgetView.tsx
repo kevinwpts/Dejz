@@ -10,7 +10,6 @@ import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
 import { getActiveFixedExpenses } from '../utils/cancellation';
-import { FixedExpenseScrollTimeline } from './FixedExpenseScrollTimeline';
 
 interface BudgetViewProps {
   allTransactions?: any[];
@@ -327,13 +326,13 @@ export function BudgetView({
               key={tab.id}
               type="button"
               onClick={() => setBudgetFilter(tab.id as 'fixed' | 'income' | 'savings')}
-              className={`flex-shrink-0 whitespace-nowrap h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-[13px] font-medium transition-all cursor-pointer select-none active:scale-95 ${
+              className={`flex-shrink-0 whitespace-nowrap h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium transition-all cursor-pointer select-none active:scale-95 ${
                 isActive
                   ? 'bg-[var(--text-primary)] text-[var(--surface-color)] shadow-xs font-semibold'
                   : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
               }`}
             >
-              <span className={`shrink-0 flex items-center justify-center [&>svg]:w-[15px] [&>svg]:h-[15px] ${isActive ? 'text-[var(--surface-color)]' : 'text-[var(--text-secondary)]'}`}>
+              <span className={`shrink-0 flex items-center justify-center [&>svg]:w-[14px] [&>svg]:h-[14px] ${isActive ? 'text-[var(--surface-color)]' : 'text-[var(--text-secondary)]'}`}>
                 {tab.icon}
               </span>
               <span className="whitespace-nowrap">{tab.label}</span>
@@ -366,9 +365,9 @@ export function BudgetView({
               return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
-          <span className="text-label font-medium text-[var(--text-secondary)]">
+          <span className="text-secondary font-medium text-[var(--text-secondary)]">
             {config?.currency || 'kr'}
-            <span className="text-micro-label opacity-75 ml-1">
+            <span className="text-[10px] opacity-70 ml-1">
               {config?.language === 'en' ? '/mo' : '/mån'}
             </span>
           </span>
@@ -457,13 +456,6 @@ export function BudgetView({
             <div className="space-y-[var(--card-gap)]">
               {filteredActiveFixedExpenses.length > 0 ? (
                 <>
-                  {/* Horisontell tidslinje för fasta utgifter direkt mot bakgrunden */}
-                  <FixedExpenseScrollTimeline
-                    expenses={filteredActiveFixedExpenses}
-                    config={config}
-                    onSelectExpense={onViewFixedExpense}
-                  />
-
                   <div className="flex items-center justify-between gap-2 px-0.5">
                     <button
                       type="button"
@@ -489,9 +481,9 @@ export function BudgetView({
                       </span>
                     </button>
                     <Button
-                      variant="outline"
+                      variant="primary"
                       size="sm"
-                      icon={<Plus size={12} strokeWidth={2.5} />}
+                      icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddFixedExpense}
                     >
                       {t('newFixedExpense')}
@@ -517,14 +509,10 @@ export function BudgetView({
               ) : (
                 <EmptyState 
                   title={
-                    freqFilter === 'all'
-                      ? (config.language === 'en' ? 'No fixed expenses added yet' : 'Inga fasta utgifter inlagda än')
-                      : (config.language === 'en' ? 'No expenses matching this period' : 'Inga utgifter för denna period')
+                    config.language === 'en' ? 'No fixed expenses added yet' : 'Inga fasta utgifter inlagda än'
                   } 
                   description={
-                    freqFilter === 'all'
-                      ? (config.language === 'en' ? 'Add subscriptions or bills to track upcoming payments.' : 'Lägg in abonnemang eller räkningar för att få full koll.')
-                      : (config.language === 'en' ? 'Add a fixed expense with this period to see it here.' : 'Lägg till en fast utgift med denna period för att se den här.')
+                    config.language === 'en' ? 'Add subscriptions or bills to track upcoming payments.' : 'Lägg in abonnemang eller räkningar för att få full koll.'
                   }
                   actionLabel={`+ ${t('newFixedExpense')}`}
                   onAction={onAddFixedExpense}
@@ -563,9 +551,9 @@ export function BudgetView({
                     </button>
 
                     <Button
-                      variant="outline"
+                      variant="primary"
                       size="sm"
-                      icon={<Plus size={12} strokeWidth={2.5} />}
+                      icon={<Plus size={13} strokeWidth={2.5} />}
                       onClick={onAddMonthlySaving}
                     >
                       {t('newMonthlySaving')}

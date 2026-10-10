@@ -4879,7 +4879,7 @@ export default function App() {
       </PullToRefresh>
 
       {/* Floating Feedback Widget */}
-      {!isAddTransactionOpen && !isFeedbackModalOpen && (
+      {!(isAddTransactionOpen || isFeedbackModalOpen || isSearchModalOpen || isAddIncomeOpen || editingTransaction || viewingTransaction || isCalculatorOpen || isDeleteAccountModalOpen || isSecurityModalOpen || isManageAccountModalOpen || isVariableUpdateModalOpen || legalModal.isOpen || isFixedExpenseModalOpen || isMonthlySavingModalOpen || viewingFixedExpense || viewingMonthlySaving || editingMonthlySaving || isPlusMenuOpen || isReceiptCameraOpen) && (
         <FloatingFeedbackWidget 
           onOpenFeedback={() => setIsFeedbackModalOpen(true)}
           language={config?.language || 'sv'}
@@ -5669,7 +5669,7 @@ export default function App() {
               <div className="w-10 h-1 bg-black/20 dark:bg-white/20 rounded-full mx-auto mt-1 mb-2 shrink-0 cursor-grab active:cursor-grabbing" />
 
               {/* The 3 Action Buttons */}
-              <div className="grid grid-cols-3 gap-3 justify-items-center py-2">
+              <div className="grid grid-cols-3 gap-2.5 justify-items-center py-1">
                 {/* Utgift */}
                 <button
                   type="button"
@@ -5680,12 +5680,12 @@ export default function App() {
                     setTargetDate(new Date());
                     setIsAddTransactionOpen(true);
                   }}
-                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
-                    <ArrowDownLeft size={24} strokeWidth={2} className="text-[var(--text-primary)]" />
+                  <div className="w-[52px] h-[52px] rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                    <ArrowDownLeft size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
-                  <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
+                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
                     {config?.language === "en" ? "Expense" : "Utgift"}
                   </span>
                 </button>
@@ -5700,12 +5700,12 @@ export default function App() {
                     setTargetDate(new Date());
                     setIsAddTransactionOpen(true);
                   }}
-                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
-                    <ArrowUpRight size={24} strokeWidth={2} className="text-[var(--text-primary)]" />
+                  <div className="w-[52px] h-[52px] rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                    <ArrowUpRight size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                   </div>
-                  <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
+                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
                     {config?.language === "en" ? "Income" : "Inkomst"}
                   </span>
                 </button>
@@ -5715,16 +5715,16 @@ export default function App() {
                   type="button"
                   onClick={handlePlusKvittoClick}
                   disabled={isScanningReceipt}
-                  className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform w-full"
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer active:scale-95 transition-transform w-full"
                 >
-                  <div className="w-16 h-16 rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
+                  <div className="w-[52px] h-[52px] rounded-full bg-white dark:bg-white/5 border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/15 flex items-center justify-center transition-colors shadow-xs">
                     {isScanningReceipt ? (
-                      <Loader2 size={24} className="animate-spin text-[var(--text-primary)]" />
+                      <Loader2 size={20} className="animate-spin text-[var(--text-primary)]" />
                     ) : (
-                      <Camera size={24} strokeWidth={2} className="text-[var(--text-primary)]" />
+                      <Camera size={20} strokeWidth={2} className="text-[var(--text-primary)]" />
                     )}
                   </div>
-                  <span className="text-xs font-semibold text-[var(--text-primary)] text-center">
+                  <span className="text-secondary font-medium text-[var(--text-primary)] text-center">
                     {isScanningReceipt ? (config?.language === "en" ? "Scanning..." : "Scannar...") : (config?.language === "en" ? "Receipt" : "Kvitto")}
                   </span>
                 </button>
@@ -5763,14 +5763,14 @@ export default function App() {
                       disabled={isSubmittingQuick || isAudioTranscribing}
                       className={`w-9.5 h-9.5 sm:w-11 sm:h-11 rounded-icon-button flex items-center justify-center transition-all cursor-pointer border select-none ${
                         isRecording
-                          ? "bg-rose-500 text-white border-rose-400 animate-pulse scale-105"
+                          ? "bg-[var(--danger-color)] text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
-                            ? "bg-rose-500/20 text-rose-500 dark:text-rose-400 border-rose-500/30"
+                            ? "bg-[var(--danger-container)] text-[var(--danger-color)] border-[var(--danger-color)]"
                             : "bg-white dark:bg-white/5 hover:bg-black/[0.03] dark:hover:bg-white/15 text-[var(--text-secondary)] border-subtle active:scale-95 shadow-xs"
                       }`}
                     >
                       {isAudioTranscribing ? (
-                        <Loader2 size={15} className="animate-spin text-rose-500 dark:text-rose-400" />
+                        <Loader2 size={15} className="animate-spin text-[var(--danger-color)]" />
                       ) : isRecording ? (
                         <Square size={13} className="fill-current" />
                       ) : (
@@ -5788,7 +5788,7 @@ export default function App() {
                         : null
                   }
                   inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-white dark:bg-white/5 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
-                    isRecording ? "border-rose-500/80 ring-2 ring-rose-500/30" : "border-subtle"
+                    isRecording ? "border-[var(--danger-color)]/80 ring-2 ring-rose-500/30" : "border-subtle"
                   }`}
                 />
               </div>

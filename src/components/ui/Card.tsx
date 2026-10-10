@@ -27,11 +27,11 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const variantStyles = {
       default: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
       hero: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
-      nested: 'bg-[var(--card-nested-bg)] border-none rounded-[var(--radius-card-nested,14px)] shadow-none',
+      nested: 'bg-[var(--card-nested-bg)] border-none rounded-[var(--radius-card-nested,12px)] shadow-none',
       flat: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-none',
       elevated: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
       outlined: 'bg-[var(--surface-color)] border border-[var(--border-subtle)] rounded-[var(--radius-card,20px)] shadow-none',
-      muted: 'bg-[var(--surface-muted)] border-none rounded-[var(--radius-card-nested,14px)] shadow-none',
+      muted: 'bg-[var(--surface-muted)] border-none rounded-[var(--radius-card-nested,12px)] shadow-none',
     }[variant];
 
     const paddingStyles = {

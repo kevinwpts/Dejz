@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, LayoutGrid, TrendingUp, Calendar, Info } from 'lucide-react';
 import { Transaction, FixedExpense, Config } from '../types';
@@ -66,6 +66,41 @@ export function AnalysisView({
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
   const [isRemainingInfoOpen, setIsRemainingInfoOpen] = useState(false);
+  const expandedCardRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (expandedCategory && expandedCardRef.current) {
+      const timer = setTimeout(() => {
+        expandedCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [expandedCategory]);
+
+  // Robust category matching for strings, objects, category IDs, and Swedish renames
+  const isCategoryMatch = useCallback((rawCat: any, catId?: string, targetName?: string) => {
+    const target = (targetName || '').trim().toLowerCase();
+    if (!target) return false;
+    
+    const catStr = typeof rawCat === 'object' && rawCat !== null 
+      ? (rawCat.name || rawCat.id || '') 
+      : (typeof rawCat === 'string' ? rawCat : '');
+    const catTrimmed = catStr.trim().toLowerCase();
+    
+    if (catTrimmed === target) return true;
+    
+    const allCats = [...(config.categories || []), ...(config.incomeCategories || [])];
+    const matched = allCats.find(c => 
+      (c?.name || '').trim().toLowerCase() === target || 
+      (c?.id && (c.id.toLowerCase() === target || c.id === targetName))
+    );
+    if (matched) {
+      if (matched.name && catTrimmed === matched.name.trim().toLowerCase()) return true;
+      if (matched.id && (catTrimmed === matched.id.toLowerCase() || (catId && catId === matched.id))) return true;
+    }
+    if (catId && (catId.toLowerCase() === target || (matched?.id && catId === matched.id))) return true;
+    return false;
+  }, [config.categories, config.incomeCategories]);
 
   const isEn = config.language === 'en';
   const effectiveStats = stats;
@@ -550,7 +585,7 @@ export function AnalysisView({
             <span
               className={`text-large-amount font-bold tabular-nums tracking-tight ${
                 remainingBudget < 0
-                  ? 'text-rose-600 dark:text-rose-400'
+                  ? 'text-[var(--danger-color)]'
                   : 'text-[var(--text-primary)]'
               }`}
             >
@@ -581,7 +616,7 @@ export function AnalysisView({
                     <span
                       className={`text-large-amount font-bold tabular-nums tracking-tight ${
                         isLess
-                          ? 'text-emerald-600 dark:text-emerald-400'
+                          ? 'text-[var(--success-color)]'
                           : isMore
                           ? 'text-[var(--text-primary)]'
                           : 'text-[var(--text-secondary)]'
@@ -701,6 +736,7 @@ export function AnalysisView({
                         onClick={() => {
                           setHoveredCategory(hoveredCategory === item.name ? null : item.name);
                           if (!item.isOther) {
+                            setShowAllCategories(true);
                             setExpandedCategory(expandedCategory === item.name ? null : item.name);
                           }
                         }}
@@ -732,9 +768,9 @@ export function AnalysisView({
                             <span
                               className={`px-1.5 py-0.2 rounded-full text-[10px] font-semibold tabular-nums inline-flex items-center gap-0.5 ${
                                 hoveredTrend.type === 'down'
-                                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25'
+                                  ? 'bg-[var(--success-container)] text-[var(--success-color)] border border-[var(--success-color)]/25'
                                   : hoveredTrend.type === 'up'
-                                  ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/25'
+                                  ? 'bg-[var(--warning-container)] text-[var(--warning-color)] dark:text-[var(--warning-color)] border border-[var(--warning-color)]/25'
                                   : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'
                               }`}
                             >
@@ -751,12 +787,12 @@ export function AnalysisView({
                   })()
                 ) : (
                   <div className="flex flex-col items-center max-w-[160px] sm:max-w-[185px]">
-                    <span className="text-micro-label font-medium uppercase tracking-wider text-[var(--text-tertiary)]">
+                    <span className="text-metric-label font-medium uppercase tracking-wider text-[var(--text-tertiary)]">
                       {spentLabel}
                     </span>
-                    <span className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tabular-nums tracking-tight mt-0.5">
+                    <span className="text-large-amount font-bold text-[var(--text-primary)] font-amount tabular-nums tracking-tight mt-0.5">
                       {formatAmount(Math.round(totalSpent), config.language)}
-                      <span className="text-xs font-normal text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
+                      <span className="text-secondary font-medium text-[var(--text-secondary)] ml-1">{config.currency || "kr"}</span>
                     </span>
                     {hasPreviousPeriodData && previousPeriodSpent !== null ? (
                       (() => {
@@ -768,9 +804,9 @@ export function AnalysisView({
                             <span
                               className={`text-[10.5px] font-semibold tabular-nums ${
                                 isLess
-                                  ? 'text-emerald-600 dark:text-emerald-400'
+                                  ? 'text-[var(--success-color)]'
                                   : isMore
-                                  ? 'text-amber-600 dark:text-amber-400'
+                                  ? 'text-[var(--warning-color)]'
                                   : 'text-[var(--text-secondary)]'
                               }`}
                             >
@@ -813,34 +849,44 @@ export function AnalysisView({
               const isExpanded = expandedCategory === item.name;
               
               const catNameTrimmed = (item.name || '').trim().toLowerCase();
-              const categoryTransactions = analysisFilter === 'fixed' ? [] : filteredExpenses
+              
+              const categoryTransactions = filteredExpenses
                 .filter(t => {
                   if (t.type === 'income') {
-                    if (t.category === 'Budgetökning' && catNameTrimmed === 'spargris') return true;
+                    if (t.category === 'Budgetökning' && (catNameTrimmed === 'spargris' || catNameTrimmed === 'sparande')) return true;
                     return false;
                   }
                   
                   const transactionSplits = (t as any).splits;
                   if (transactionSplits && transactionSplits.length > 0) {
-                    return transactionSplits.some((s: any) => (s.category || '').trim().toLowerCase() === catNameTrimmed);
+                    return transactionSplits.some((s: any) => isCategoryMatch(s.category, s.categoryId, item.name));
                   }
                   
-                  return (t.category || '').trim().toLowerCase() === catNameTrimmed;
+                  return isCategoryMatch(t.category, (t as any).categoryId, item.name);
                 })
-                .sort((a, b) => b.timestamp - a.timestamp);
+                .sort((a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0));
               
-              const categoryFixedExpenses = analysisFilter === 'variable' || !stats?.periodStart || !stats?.periodEnd 
-                ? [] 
-                : (fixedExpenses || [])
-                  .filter(e => {
-                    if (e.isArchived || e.archived) return false;
-                    const isDue = isFixedItemDueInPeriod(e, stats.periodStart, stats.periodEnd);
-                    if (!isDue) return false;
-                    const catName = (e.category || t('fixedExpenses')).trim().toLowerCase();
-                    return catName === catNameTrimmed;
-                  });
+              const pStart = stats?.periodStart ? new Date(stats.periodStart) : null;
+              const pEnd = stats?.periodEnd ? new Date(stats.periodEnd) : null;
 
-              const totalItemCount = categoryTransactions.length + categoryFixedExpenses.length;
+              const categoryFixedExpenses = (fixedExpenses || [])
+                .filter(e => {
+                  if (e.isArchived || e.archived) return false;
+                  if (pStart && pEnd && !isFixedItemDueInPeriod(e, pStart, pEnd)) return false;
+                  const catName = e.category || t('fixedExpenses');
+                  return isCategoryMatch(catName, (e as any).categoryId, item.name);
+                });
+
+              // Visning: prioritera matchade poster så användaren alltid ser transaktionerna
+              const displayTransactions = analysisFilter === 'fixed' 
+                ? (categoryFixedExpenses.length > 0 ? [] : categoryTransactions)
+                : categoryTransactions;
+                
+              const displayFixedExpenses = analysisFilter === 'variable'
+                ? (categoryTransactions.length > 0 ? [] : categoryFixedExpenses)
+                : categoryFixedExpenses;
+
+              const totalItemCount = displayTransactions.length + displayFixedExpenses.length;
               const categoryPct = totalSpent > 0 ? Math.round((item.value / totalSpent) * 100) : 0;
               const catTrend = getCategoryTrend(item.name, item.value);
 
@@ -851,108 +897,62 @@ export function AnalysisView({
               const isOverBudget = hasBudget && spentRound > budget;
               const budgetUsedPercent = hasBudget ? Math.round((spentRound / budget) * 100) : 0;
 
+              // Föregående period spenderande
+              const prevSpent = previousPeriodCategorySpending[catNameTrimmed];
+              const hasPrevSpent = previousPeriodBounds && hasPreviousPeriodData && prevSpent !== undefined && prevSpent !== null && prevSpent > 0;
+
               return (
-                <div key={item.name} className="transition-colors">
+                <div key={item.name} ref={isExpanded ? expandedCardRef : null} className="transition-colors">
+                  {/* Kompakt standardläge (hopfällt) */}
                   <div 
-                    className="p-3.5 sm:p-4 flex flex-col justify-center group hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer"
+                    className="p-3.5 sm:p-4 flex items-center justify-between gap-3 group hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors cursor-pointer select-none"
                     onClick={() => setExpandedCategory(isExpanded ? null : item.name)}
                   >
-                    <div className="flex items-center justify-between gap-2.5 sm:gap-3 w-full">
-                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                        <CategoryIcon icon={item.icon} color={item.color || '#6366f1'} size="md" categoryName={item.name} />
-                        <div className="min-w-0 flex-1 flex flex-col justify-center">
-                          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                            <p className="text-body-medium leading-tight truncate font-medium text-[var(--text-primary)]">
-                              {item.name}
-                            </p>
-                            {catTrend && (
-                              <span
-                                className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold tabular-nums shrink-0 inline-flex items-center gap-0.5 ${
-                                  catTrend.type === 'down'
-                                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                                    : catTrend.type === 'up'
-                                    ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20'
-                                    : catTrend.type === 'new'
-                                    ? 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] border border-subtle'
-                                    : 'bg-black/5 dark:bg-white/10 text-[var(--text-tertiary)]'
-                                }`}
-                              >
-                                {catTrend.type === 'down'
-                                  ? `↓ ${Math.abs(catTrend.pct)}%`
-                                  : catTrend.type === 'up'
-                                  ? `↑ ${catTrend.pct}%`
-                                  : catTrend.type === 'new'
-                                  ? (isEn ? 'Ny' : 'Ny')
-                                  : '±0%'}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-0.5 min-w-0 text-[var(--text-tertiary)] text-[11px] leading-tight truncate">
-                            <span className="shrink-0">
-                              {totalItemCount} {isEn 
-                                ? (totalItemCount === 1 ? 'transaction' : 'transactions') 
-                                : (totalItemCount === 1 ? 'transaktion' : 'transaktioner')}
-                            </span>
-                            {catTrend && (
-                              <span className="truncate">
-                                • {catTrend.type === 'down' 
-                                  ? (isEn ? `${Math.abs(catTrend.pct)}% less` : `${Math.abs(catTrend.pct)}% mindre än förra`)
-                                  : catTrend.type === 'up'
-                                  ? (isEn ? `${catTrend.pct}% more` : `${catTrend.pct}% mer än förra`)
-                                  : catTrend.type === 'new'
-                                  ? (isEn ? 'New' : 'Ny denna period')
-                                  : (isEn ? 'Same' : 'Samma som förra')}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 whitespace-nowrap pl-1 sm:pl-2">
-                        <div className="text-right flex flex-col items-end justify-center min-w-0">
-                          <p className="text-body-medium tabular-nums text-[var(--text-primary)] font-semibold leading-tight">
-                            {formatAmount(spentRound, config.language)}
-                            <span className="text-[var(--text-tertiary)] font-normal text-xs ml-0.5 sm:ml-1 select-none">{config.currency || 'kr'}</span>
-                          </p>
-                          <span className="text-[var(--text-tertiary)] text-[11px] sm:text-xs tabular-nums mt-0.5 leading-tight font-medium">
-                            {categoryPct}%
-                          </span>
-                        </div>
-                        <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
-                          <ChevronDown size={18} strokeWidth={2} />
-                        </div>
+                    {/* Vänster: Ikon, Kategorinamn, Diskret budgetstatus */}
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <CategoryIcon icon={item.icon} color={item.color || '#6366f1'} size="md" categoryName={item.name} />
+                      <div className="min-w-0 flex-1 flex flex-col justify-center">
+                        <p className="text-body-medium font-medium leading-tight truncate text-[var(--text-primary)]">
+                          {item.name}
+                        </p>
+                        <p className={`text-secondary leading-tight mt-1 truncate ${
+                          hasBudget && isOverBudget
+                            ? 'text-[var(--danger-color)] font-medium'
+                            : 'text-[var(--text-tertiary)]'
+                        }`}>
+                          {hasBudget ? (
+                            isOverBudget
+                              ? (isEn 
+                                  ? `${formatAmount(spentRound - budget, config.language)} ${config.currency || 'kr'} over budget` 
+                                  : `${formatAmount(spentRound - budget, config.language)} ${config.currency || 'kr'} över budget`)
+                              : (isEn 
+                                  ? `${formatAmount(budget - spentRound, config.language)} ${config.currency || 'kr'} left of budget` 
+                                  : `${formatAmount(budget - spentRound, config.language)} ${config.currency || 'kr'} kvar av budget`)
+                          ) : (
+                            isEn ? 'No budget set' : 'Ingen budget satt'
+                          )}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Progressbar för kategoribudget (om budget har satts) */}
-                    {hasBudget && (
-                      <div className="w-full mt-2.5 pt-2 border-t border-subtle/40 flex flex-col gap-1">
-                        <div className="flex items-center justify-between text-[11px] leading-tight">
-                          <span className="text-[var(--text-tertiary)]">
-                            {isOverBudget
-                              ? (isEn 
-                                  ? `Over budget by ${formatAmount(spentRound - budget, config.language)} ${config.currency || 'kr'}` 
-                                  : `Över budget med ${formatAmount(spentRound - budget, config.language)} ${config.currency || 'kr'}`)
-                              : (isEn 
-                                  ? `${formatAmount(budget - spentRound, config.language)} ${config.currency || 'kr'} left of budget` 
-                                  : `${formatAmount(budget - spentRound, config.language)} ${config.currency || 'kr'} kvar av budget`)}
-                          </span>
-                          <span className={`font-semibold tabular-nums ${isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--text-secondary)]'}`}>
-                            {budgetUsedPercent}%
-                          </span>
-                        </div>
-                        <div className="h-[3px] w-full bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              isOverBudget ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
-                            }`}
-                            style={{ width: `${Math.min(100, budgetUsedPercent)}%` }}
-                          />
-                        </div>
+                    {/* Höger: Spenderat belopp, Andel av utgifterna, Chevron */}
+                    <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 whitespace-nowrap pl-2">
+                      <div className="text-right flex flex-col items-end justify-center min-w-0">
+                        <p className="text-list-amount text-[var(--text-primary)] font-semibold leading-tight">
+                          {formatAmount(spentRound, config.language)}
+                          <span className="text-secondary font-normal opacity-80 ml-1 select-none">{config.currency || 'kr'}</span>
+                        </p>
+                        <span className="text-secondary text-[var(--text-tertiary)] tabular-nums mt-1 leading-tight font-normal">
+                          {isEn ? `${categoryPct}% of expenses` : `${categoryPct}% av utgifterna`}
+                        </span>
                       </div>
-                    )}
+                      <div className={`transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
+                        <ChevronDown size={18} strokeWidth={2} />
+                      </div>
+                    </div>
                   </div>
                   
+                  {/* Expanderat detaljläge */}
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
@@ -960,59 +960,160 @@ export function AnalysisView({
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden bg-black/[0.02] dark:bg-white/[0.02] border-t border-subtle"
+                        className="overflow-hidden bg-black/[0.015] dark:bg-white/[0.02] border-t border-subtle"
                       >
-                        <div className="p-3 sm:p-4 space-y-2">
-                          {categoryTransactions.length > 0 && (
-                            <div className="space-y-1.5">
-                              {categoryTransactions.map((t) => (
-                                <TransactionItem 
-                                  key={t.id}
-                                  transaction={t}
-                                  config={config}
-                                  onView={onViewTransaction}
-                                  onDelete={onDeleteTransaction}
-                                  variant="nested"
-                                  showDate
-                                />
-                              ))}
-                            </div>
-                          )}
-
-                          {categoryFixedExpenses.length > 0 && (
-                            <div className="space-y-1.5">
-                              {categoryFixedExpenses.map((fe) => {
-                                const feTransaction: Transaction = {
-                                  id: fe.id,
-                                  merchant: fe.name,
-                                  category: fe.category,
-                                  amount: fe.amount,
-                                  type: 'expense',
-                                  date: new Date().toISOString(),
-                                };
-                                return (
-                                  <div key={fe.id}>
-                                    <TransactionItem
-                                      transaction={feTransaction}
-                                      isFixed={true}
-                                      config={config}
-                                      language={config.language}
-                                      currency={config.currency || 'kr'}
-                                      onClick={() => onViewFixedExpense?.(fe)}
-                                      onView={() => onViewFixedExpense?.(fe)}
-                                      variant="nested"
-                                    />
+                        <div className="p-3.5 sm:p-4 space-y-3.5">
+                          {/* Sektion 1 & 2: Budget & Jämförelse */}
+                          <div className="space-y-2 pb-2.5 border-b border-subtle/60">
+                            {hasBudget ? (
+                              <div className="space-y-1.5">
+                                <div className="grid grid-cols-3 divide-x divide-subtle/60 py-0.5 text-center">
+                                  <div className="pr-1.5 text-left sm:text-center">
+                                    <p className="text-label uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+                                      {isEn ? 'Budgeted' : 'Budgeterat'}
+                                    </p>
+                                    <p className="text-body-medium font-semibold text-[var(--text-primary)] tabular-nums mt-0.5">
+                                      {formatAmount(budget, config.language)} <span className="text-secondary font-normal text-[var(--text-secondary)]">{config.currency || 'kr'}</span>
+                                    </p>
                                   </div>
-                                );
-                              })}
-                            </div>
-                          )}
+                                  <div className="px-1.5 text-center">
+                                    <p className="text-label uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+                                      {isEn ? 'Spent' : 'Spenderat'}
+                                    </p>
+                                    <p className="text-body-medium font-semibold text-[var(--text-primary)] tabular-nums mt-0.5">
+                                      {formatAmount(spentRound, config.language)} <span className="text-secondary font-normal text-[var(--text-secondary)]">{config.currency || 'kr'}</span>
+                                    </p>
+                                  </div>
+                                  <div className="pl-1.5 text-right sm:text-center">
+                                    <p className="text-label uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+                                      {isOverBudget ? (isEn ? 'Over budget' : 'Över budget') : (isEn ? 'Remaining' : 'Kvar')}
+                                    </p>
+                                    <p className={`text-body-medium font-semibold tabular-nums mt-0.5 ${
+                                      isOverBudget ? 'text-[var(--danger-color)]' : 'text-[var(--success-color)]'
+                                    }`}>
+                                      {formatAmount(Math.abs(budget - spentRound), config.language)} <span className="text-secondary font-normal opacity-75">{config.currency || 'kr'}</span>
+                                    </p>
+                                  </div>
+                                </div>
 
-                          {totalItemCount === 0 && (
-                            <div className="py-4 text-center text-secondary text-[#6D6962] dark:text-[#A8A8A8]">
-                              {isEn ? 'No transactions in this category' : 'Inga transaktioner i denna kategori'}
+                                <div className="h-[3px] w-full bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-300 ${
+                                      isOverBudget ? 'bg-[var(--danger-color)]' : 'bg-[var(--accent-color)]'
+                                    }`}
+                                    style={{ width: `${Math.min(100, budgetUsedPercent)}%` }}
+                                  />
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {/* Jämförelse & historik rad */}
+                            <div className="flex items-center justify-between gap-2 text-secondary pt-0.5 text-[var(--text-secondary)]">
+                              <div className="flex items-center gap-1.5 truncate">
+                                {catTrend && (
+                                  <span
+                                    className={`px-1.5 py-0.2 rounded-full text-micro-label font-semibold tabular-nums shrink-0 inline-flex items-center gap-0.5 ${
+                                      catTrend.type === 'down'
+                                        ? 'bg-[var(--success-container)] text-[var(--success-color)] border border-[var(--success-color)]'
+                                        : catTrend.type === 'up'
+                                        ? 'bg-[var(--warning-container)] text-[var(--warning-color)] dark:text-[var(--warning-color)] border border-[var(--warning-color)]'
+                                        : catTrend.type === 'new'
+                                        ? 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] border border-subtle'
+                                        : 'bg-black/5 dark:bg-white/10 text-[var(--text-tertiary)]'
+                                    }`}
+                                  >
+                                    {catTrend.type === 'down'
+                                      ? `↓ ${Math.abs(catTrend.pct || 0)}%`
+                                      : catTrend.type === 'up'
+                                      ? `↑ ${catTrend.pct}%`
+                                      : catTrend.type === 'new'
+                                      ? (isEn ? 'New' : 'Ny')
+                                      : '±0%'}
+                                  </span>
+                                )}
+                                <span className="text-[var(--text-secondary)] truncate text-secondary">
+                                  {catTrend?.type === 'down' 
+                                    ? (isEn ? `${Math.abs(catTrend.pct || 0)}% less than previous period` : `${Math.abs(catTrend.pct || 0)}% mindre än föregående period`)
+                                    : catTrend?.type === 'up'
+                                    ? (isEn ? `${catTrend.pct}% more than previous period` : `${catTrend.pct}% mer än föregående period`)
+                                    : catTrend?.type === 'new'
+                                    ? (isEn ? 'New category this period' : 'Ny kategori denna period')
+                                    : catTrend?.type === 'same'
+                                    ? (isEn ? 'Same spending as previous period' : 'Samma som föregående period')
+                                    : (isEn ? 'No previous data' : 'Ingen tidigare data')}
+                                </span>
+                              </div>
+
+                              {hasPrevSpent ? (
+                                <span className="text-[var(--text-secondary)] text-secondary tabular-nums shrink-0">
+                                  {isEn ? 'Prev:' : 'Förra:'} {formatAmount(Math.round(prevSpent), config.language)} {config.currency || 'kr'}
+                                </span>
+                              ) : null}
                             </div>
-                          )}
+                          </div>
+
+                          {/* Sektion 3: Transaktioner */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between pb-0.5">
+                              <span className="text-label font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+                                {isEn ? 'Transactions' : 'Transaktioner'}
+                              </span>
+                              <span className="text-label font-medium tabular-nums text-[var(--text-secondary)]">
+                                {totalItemCount} {isEn 
+                                  ? (totalItemCount === 1 ? 'item' : 'items') 
+                                  : (totalItemCount === 1 ? 'st' : 'st')}
+                              </span>
+                            </div>
+
+                            {displayTransactions.length > 0 && (
+                              <div className="space-y-1.5">
+                                {displayTransactions.map((t) => (
+                                  <TransactionItem 
+                                    key={t.id}
+                                    transaction={t}
+                                    config={config}
+                                    onView={onViewTransaction}
+                                    onDelete={onDeleteTransaction}
+                                    variant="nested"
+                                    showDate
+                                  />
+                                ))}
+                              </div>
+                            )}
+
+                            {displayFixedExpenses.length > 0 && (
+                              <div className="space-y-1.5">
+                                {displayFixedExpenses.map((fe) => {
+                                  const feTransaction: Transaction = {
+                                    id: fe.id,
+                                    merchant: fe.name,
+                                    category: fe.category,
+                                    amount: fe.amount,
+                                    type: 'expense',
+                                    date: new Date().toISOString(),
+                                  };
+                                  return (
+                                    <div key={fe.id}>
+                                      <TransactionItem
+                                        transaction={feTransaction}
+                                        isFixed={true}
+                                        config={config}
+                                        onClick={() => onViewFixedExpense?.(fe)}
+                                        onView={() => onViewFixedExpense?.(fe)}
+                                        variant="nested"
+                                      />
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {totalItemCount === 0 && (
+                              <div className="py-3 text-center text-[var(--text-tertiary)] text-[12px]">
+                                {isEn ? 'No transactions in this category' : 'Inga transaktioner i denna kategori'}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </motion.div>
                     )}

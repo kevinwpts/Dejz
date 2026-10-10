@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, Config } from '../types';
 import { resolveEntityVisual } from '../utils/resolver';
-import { fetchLogoForName } from '../utils/logo';
+import { fetchLogoForName, findKnownBrandDomain } from '../utils/logo';
 import { Receipt } from 'lucide-react';
 import { CategoryIcon } from './CategoryIcon';
 
@@ -138,13 +138,13 @@ export function TransactionLogo({
   }
 
   const IconComponent = visual.iconComponent || Receipt;
-  const bgColor = visual.backgroundColor || '#6E6961';
-  const textColor = visual.textColor || '#ffffff';
+  const bgColor = visual.backgroundColor;
+  const textColor = visual.textColor;
 
   return (
     <div
-      className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs select-none`}
-      style={{ backgroundColor: bgColor, color: textColor }}
+      className={`${sizeConfig.container} flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xs select-none ${!bgColor ? "bg-[var(--surface-muted)] text-[var(--text-primary)]" : ""}`}
+      style={bgColor ? { backgroundColor: bgColor, color: textColor } : undefined}
     >
       <IconComponent size={sizeConfig.icon} strokeWidth={2} />
     </div>

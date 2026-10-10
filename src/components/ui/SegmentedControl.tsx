@@ -54,7 +54,7 @@ export function SegmentedControl<T extends string = string>({
               fullWidth ? 'flex-1' : ''
             } ${
               isSelected
-                ? 'bg-[#242321] text-white dark:bg-stone-100 dark:text-[#242321] shadow-none font-medium'
+                ? 'bg-[var(--text-primary)] text-[var(--surface-color)] dark:bg-[var(--text-primary)] dark:text-[var(--bg-color)] shadow-none font-medium'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium'
             }`}
           >
@@ -64,7 +64,7 @@ export function SegmentedControl<T extends string = string>({
               <span
                 className={`text-micro-label font-medium px-1.5 py-0.5 rounded-full ${
                   isSelected
-                    ? 'bg-white/20 dark:bg-black/15 text-white dark:text-[#242321]'
+                    ? 'bg-white/20 dark:bg-black/15 text-[var(--surface-color)] dark:text-[var(--bg-color)]'
                     : 'bg-black/5 dark:bg-white/5 text-[var(--text-secondary)]'
                 }`}
               >

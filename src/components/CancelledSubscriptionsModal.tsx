@@ -84,16 +84,16 @@ export function CancelledSubscriptionsModal({
           {/* Body */}
           <div className="p-5 overflow-y-auto space-y-4 flex-1 custom-scrollbar">
             {/* Total Savings Banner */}
-            <div className="p-4 rounded-[var(--radius-card,14px)] bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20 flex items-center justify-between gap-3">
+            <div className="p-4 rounded-[var(--radius-card,14px)] bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-[var(--success-color)] flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[var(--success-container)] text-[var(--success-color)] flex items-center justify-center shrink-0">
                   <Sparkles size={20} strokeWidth={2} />
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-[var(--text-secondary)]">
                     {isEn ? 'Total monthly savings' : 'Total besparing per månad'}
                   </p>
-                  <p className="text-xl font-bold font-amount tabular-nums text-emerald-600 dark:text-emerald-400">
+                  <p className="text-xl font-bold font-amount tabular-nums text-[var(--success-color)]">
                     +{formatAmount(totalMonthlySavings, config.language)} {config.currency || 'kr'}
                     <span className="text-xs font-normal text-[var(--text-secondary)] ml-1 font-sans">
                       /{isEn ? 'mo' : 'mån'}
@@ -160,12 +160,12 @@ export function CancelledSubscriptionsModal({
                       <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--border-subtle)]">
                         <div className="flex items-center gap-1.5 text-xs font-medium">
                           {isExpired ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold text-[11.5px]">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--success-container)] text-[var(--success-color)] font-semibold text-[11.5px]">
                               <CheckCircle2 size={12} />
                               {isEn ? 'Ended (not counted in budget)' : 'Avslutat (räknas ej längre)'}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold text-[11.5px]">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] font-semibold text-[11.5px]">
                               <Clock size={12} />
                               {isEn
                                 ? `Active until ${item.cancellationDate || 'date'}`

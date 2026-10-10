@@ -138,13 +138,13 @@ export function CalendarWidget({ calendarDays, normalizedSelectedDate, setSelect
               {/* Activity Indicators */}
               <div className="flex items-center justify-center gap-0.5 pointer-events-none h-1 w-full">
                 {hasIncome && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
+                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-[var(--success-color)]'}`} />
                 )}
                 {hasSpend && (
                   <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/90' : 'bg-[var(--accent-color)]'}`} />
                 )}
                 {hasFixed && !hasIncome && !hasSpend && (
-                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/90' : 'bg-amber-500'}`} />
+                  <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-white/90' : 'bg-[var(--warning-color)]'}`} />
                 )}
               </div>
             </button>

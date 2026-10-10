@@ -176,7 +176,7 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
             </h2>
 
             {/* Price */}
-            <p className="text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center text-emerald-600 dark:text-emerald-400">
+            <p className="text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center text-[var(--success-color)]">
               <span className="opacity-80 mr-1">+</span>
               <span>{formatAmount(displayAmount, config.language)}</span>
               <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
@@ -747,10 +747,10 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           <Button 
             type="button"
             variant="accent"
-            size="md"
-            className="flex-1 rounded-full text-[13.5px] font-medium"
+            size="lg"
+            className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             onClick={handleSave} 
-            icon={<Check size={15} strokeWidth={2.5} />}
+            icon={<Check size={16} strokeWidth={2.5} />}
           >
             {income ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add income' : 'Lägg till inkomst')}
           </Button>
@@ -762,8 +762,9 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              variant="default"
-              size="md"
+              variant="danger"
+              size="xl"
+              shape="button"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             />
@@ -939,7 +940,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             onClose();
           }
         }}
-        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,16px)] sm:rounded-[var(--radius-modal,16px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
+        className="bg-[var(--bg-color)] w-full sm:max-w-lg rounded-t-[var(--radius-modal,24px)] sm:rounded-[var(--radius-modal,24px)] relative max-h-[90dvh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-modal font-sans border-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Handle on Mobile */}
@@ -952,9 +953,9 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-5 pb-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
           {/* Hero Section: Centered Logo, Title below, Price below title */}
-          <div className="relative flex flex-col items-center text-center pt-6 sm:pt-8 pb-4">
+          <div className="relative flex flex-col items-center text-center pt-2 sm:pt-4 pb-3">
             {/* Close Button top-right */}
             <div className="absolute top-0 right-0 z-10">
               <IconButton 
@@ -970,30 +971,30 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
               />
             </div>
 
-            {/* Centered Logo */}
-            <div className="scale-135 sm:scale-150 mb-7 pt-3">
-              <TransactionLogo transaction={expenseCompatible as any} config={config} size="xl" />
+            {/* Centered Logo (56px) */}
+            <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center shrink-0 mb-2.5 mt-1">
+              <TransactionLogo transaction={expenseCompatible as any} config={config} size="lg" />
             </div>
 
-            {/* Title */}
-            <h2 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-[var(--text-primary)] leading-tight max-w-[90%] truncate px-2">
+            {/* Title: Page title Outfit 19px 600 */}
+            <h2 className="text-page-title max-w-[90%] truncate px-2">
               {expense.name}
             </h2>
 
-            {/* Price */}
-            <p className="text-[28px] sm:text-[34px] font-semibold font-amount tabular-nums tracking-tight mt-1.5 flex items-baseline justify-center text-[var(--text-primary)]">
+            {/* Price: Large amount Outfit 25px 600 */}
+            <p className="text-large-amount font-amount tabular-nums tracking-tight mt-1 flex items-baseline justify-center text-[var(--text-primary)]">
               <span className="opacity-80 mr-1">−</span>
               <span>{formatAmount(displayAmount, config.language)}</span>
-              <span className="text-[14px] font-medium text-[var(--text-secondary)] ml-1.5 font-sans self-end pb-1">{currency}</span>
+              <span className="text-secondary font-medium text-[var(--text-secondary)] ml-1.5 self-end pb-0.5">{currency}</span>
             </p>
             {hasAdjustment && (
-              <p className="text-[12px] font-normal text-[var(--text-secondary)] mt-1 tabular-nums">
+              <p className="text-secondary text-[var(--text-secondary)] mt-1 tabular-nums">
                 {t('adjustmentFor')} {currentPeriodId} ({t('plannedAmount')}: {formatAmount(expense.amount, config.language)} {currency})
               </p>
             )}
             {expense.isCancelled && (
               <div className="mt-2.5">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold text-xs border border-amber-500/20">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--warning-container)] text-[var(--warning-color)] font-semibold text-xs border border-[var(--warning-color)]">
                   <Clock size={13} />
                   <span>
                     {isExpenseCancelledAndExpired(expense)
@@ -1009,7 +1010,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           <div className="divide-y divide-subtle text-left">
             {/* Category */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                 {t('category')}
               </span>
               <div className="flex items-center justify-end gap-2">
@@ -1024,7 +1025,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
                   return (
                     <>
                       {iconKey && <CategoryIcon icon={iconKey} categoryName={catName} variant="minimal" size="xs" />}
-                      <span className="text-[14px] font-medium text-[var(--text-primary)]">{catName}</span>
+                      <span className="text-body-medium text-[var(--text-primary)] font-medium">{catName}</span>
                     </>
                   );
                 })()}
@@ -1033,35 +1034,35 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
             {/* Type */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                 {t('type')}
               </span>
-              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right">
+              <span className="text-body-medium text-[var(--text-primary)] font-medium text-right">
                 {expense.isVariable ? (config.language === 'en' ? 'Variable' : 'Varierande') : (config.language === 'en' ? 'Fixed amount' : 'Fast belopp')}
               </span>
             </div>
 
             {/* Frequency */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                 {t('frequency')}
               </span>
-              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right">
+              <span className="text-body-medium text-[var(--text-primary)] font-medium text-right">
                 {freqText}
               </span>
             </div>
 
             {/* Deduction Day / Payment Day */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                 {expense.paymentMethod === 'autogiro' || (typeof expense.paymentMethod === 'string' && (expense.paymentMethod.toLowerCase().includes('autogiro') || expense.paymentMethod.toLowerCase().includes('kort')))
                   ? (config.language === 'en' ? 'Deduction day' : 'Dragningsdag')
                   : (config.language === 'en' ? 'Payment day' : 'Betaldag')}
               </span>
-              <span className="text-[14px] font-medium text-[var(--text-primary)] text-right tabular-nums">
+              <span className="text-body-medium text-[var(--text-primary)] font-medium text-right tabular-nums">
                 {formatDeductionDayDisplay(expense.deductionDay, config.language, true)}
                 {expense.frequency !== Frequency.MONTHLY && expense.startMonth !== undefined && (
-                  <span className="text-[13px] font-normal text-[var(--text-secondary)] ml-1">
+                  <span className="text-secondary text-[var(--text-secondary)] ml-1">
                     ({new Date(2024, expense.startMonth, 1).toLocaleString(config.language === 'en' ? 'en-US' : 'sv-SE', { month: 'short' })})
                   </span>
                 )}
@@ -1070,12 +1071,12 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
 
             {/* Payment Method */}
             <div className="py-3 flex items-center justify-between gap-4">
-              <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0">
+              <span className="text-secondary text-[var(--text-secondary)] shrink-0">
                 {t('paymentMethod')}
               </span>
               <div className="flex items-center justify-end gap-2">
                 {methodStr && <PaymentIcon size={14} className="text-[var(--text-secondary)]" />}
-                <span className="text-[14px] font-medium text-[var(--text-primary)]">
+                <span className="text-body-medium text-[var(--text-primary)] font-medium">
                   {methodStr || '-'}
                 </span>
               </div>
@@ -1084,10 +1085,10 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             {/* Note */}
             {expense.note && (
               <div className="py-3 flex items-start justify-between gap-4">
-                <span className="text-[13px] font-normal text-[var(--text-secondary)] shrink-0 pt-0.5">
+                <span className="text-secondary text-[var(--text-secondary)] shrink-0 pt-0.5">
                   {t('ownNote')}
                 </span>
-                <span className="text-[14px] font-medium text-[var(--text-primary)] text-right max-w-[70%] break-words">
+                <span className="text-body-medium text-[var(--text-primary)] font-medium text-right max-w-[70%] break-words">
                   {expense.note}
                 </span>
               </div>
@@ -1098,13 +1099,13 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           <button
             type="button"
             onClick={() => setIsCancelModalOpen(true)}
-            className="w-full mt-2 p-3.5 bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-[8px] flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left border-none shadow-none"
+            className="w-full mt-2 p-3.5 bg-[var(--surface-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06] rounded-[var(--radius-card-nested,12px)] flex items-center justify-between group transition-colors cursor-pointer active:scale-[0.99] text-left border-none shadow-none"
           >
             <div>
-              <p className="text-[13px] font-medium text-[var(--text-primary)]">
+              <p className="text-body-medium font-medium text-[var(--text-primary)]">
                 {config.language === 'en' ? 'Cancel subscription' : 'Säg upp abonnemang'}
               </p>
-              <p className="text-[11.5px] font-normal text-[var(--text-secondary)] mt-0.5">
+              <p className="text-secondary text-[var(--text-secondary)] mt-0.5">
                 {config.language === 'en' ? 'Instructions and direct link' : 'Instruktioner och direktlänk'}
               </p>
             </div>
@@ -1118,7 +1119,7 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
             type="button"
             variant="secondary"
             size="md"
-            className="flex-1 rounded-full text-[13.5px] font-medium"
+            className="flex-1 text-body-medium font-medium"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(expense);
@@ -1753,10 +1754,10 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           <Button 
             type="button"
             variant="accent"
-            size="md"
-            className="flex-1 rounded-full text-[13.5px] font-medium"
+            size="lg"
+            className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             onClick={handleSave} 
-            icon={<Check size={15} strokeWidth={2.5} />}
+            icon={<Check size={16} strokeWidth={2.5} />}
           >
             {expense ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add fixed expense' : 'Lägg till fast kostnad')}
           </Button>
@@ -1768,8 +1769,9 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              variant="default"
-              size="md"
+              variant="danger"
+              size="xl"
+              shape="button"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             />
@@ -2473,10 +2475,10 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           <Button 
             type="button"
             variant="accent"
-            size="md"
-            className="flex-1 rounded-full text-[13.5px] font-medium"
+            size="lg"
+            className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             onClick={handleSave} 
-            icon={<Check size={15} strokeWidth={2.5} />}
+            icon={<Check size={16} strokeWidth={2.5} />}
           >
             {saving ? (config?.language === 'en' ? 'Save changes' : 'Spara ändringar') : (config?.language === 'en' ? 'Add saving' : 'Lägg till månadssparande')}
           </Button>
@@ -2488,8 +2490,9 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }}
-              variant="default"
-              size="md"
+              variant="danger"
+              size="xl"
+              shape="button"
               title={config?.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config?.language === 'en' ? 'Delete' : 'Ta bort'}
             />

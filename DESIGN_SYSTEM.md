@@ -57,17 +57,18 @@ Dejz använder **DM Sans** genomgående som enda UI-typsnitt för alla rubriker,
 
 | Typografisk roll | CSS Utility-klass | Storlek | Vikt | Radavstånd | Bokstavsavstånd | Användning |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Hero Amount** | `.text-hero-amount` | 36px | 700 | 1.1 | -0.03em | Appens viktigaste ekonomiska huvudbelopp (Kvar att spendera) |
-| **Large Amount** | `.text-large-amount` | 30px | 600 | 1.15 | -0.03em | Större ekonomiska delsummor och summeringar |
-| **Page Title** | `.text-page-title` | 24px | 600 | 1.25 | -0.025em | Sidrubriker, huvudvyer |
-| **Section Title** | `.text-section-title` | 18px | 600 | 1.3 | -0.015em | Sektionsrubriker, modaltitlar |
-| **Card Title** | `.text-card-title` | 16px | 600 | 1.35 | 0em | Korttitlar, listrubriker, dialog-delrubriker |
-| **Metric Label** | `.text-metric-label` | 14px | 500 | 1.35 | 0em | Nyckeltalsetiketter ovanför ekonomiska belopp (Hem, Analys, Ekonomi) |
-| **Body** | `.text-body` | 15px | 400 | 1.5 | 0em | Standard brödtext, inmatningsfält |
-| **Body Medium** | `.text-body-medium` | 15px | 500 | 1.5 | 0em | Transaktionsrader, knappar, viktad brödtext |
-| **Secondary** | `.text-secondary` | 13px | 400 | 1.45 | 0em | Sekundärtext, förklarande text |
-| **Label** | `.text-label` | 12px | 500 | 1.35 | 0.01em | Fältetiketter, filterknappar, statusindikatorer |
-| **Micro Label** | `.text-micro-label` | 11px | 600 | 1.3 | 0.01em | Badges, pills, små diagrametiketter, datumstämplar |
+| **Hero Amount** | `.text-hero-amount` | 30px | 700 | 1.1 | -0.03em | Appens viktigaste ekonomiska huvudbelopp (Kvar att spendera) |
+| **Large Amount** | `.text-large-amount` | 24px | 600 | 1.15 | -0.03em | Större ekonomiska delsummor och summeringar |
+| **List Amount** | `.text-list-amount` | 15px | 600 | 1.25 | -0.02em | Belopp i transaktionslistor och rader |
+| **Page Title** | `.text-page-title` | 18px | 600 | 1.25 | -0.025em | Sidrubriker, huvudvyer |
+| **Section Title** | `.text-section-title` | 15.5px | 600 | 1.3 | -0.015em | Sektionsrubriker, modaltitlar |
+| **Card Title** | `.text-card-title` | 11.5px | 600 | 1.35 | 0em | Korttitlar, listrubriker, dialog-delrubriker |
+| **Metric Label** | `.text-metric-label` | 12.5px | 500 | 1.35 | 0em | Nyckeltalsetiketter ovanför ekonomiska belopp (Hem, Analys, Ekonomi) |
+| **Body** | `.text-body` | 11px | 400 | 1.5 | 0em | Standard brödtext, inmatningsfält |
+| **Body Medium** | `.text-body-medium` | 13px | 500 | 1.45 | -0.01em | Transaktionsrader, knappar, viktad brödtext |
+| **Secondary** | `.text-secondary` | 10.5px | 400 | 1.45 | 0em | Sekundärtext, förklarande text |
+| **Label** | `.text-label` | 9.5px | 500 | 1.35 | 0.01em | Fältetiketter, filterknappar, statusindikatorer |
+| **Micro Label** | `.text-micro-label` | 9px | 400 | 1.3 | 0.01em | Badges, pills, små diagrametiketter, datumstämplar |
 
 Dessa klasser är definierade som centrala `@utility` i `src/index.css` och tillgängliga via `DS.typography` i `src/constants/designSystem.ts`. Hårdkoda **aldrig** godtyckliga textstorlekar som `text-[13px]` eller `text-[17px]` i nya komponenter.
 

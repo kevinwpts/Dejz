@@ -113,50 +113,63 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       exit={{ opacity: 0, x: -20 }}
       className="space-y-[var(--card-gap)] pb-20 page-max mx-auto w-full font-sans"
     >
-      {/* 1. Header Summary Cards */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* 1. Header Summary Cards matching Analysis summary style */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         {/* Att få (Skyldig mig) */}
-        <Card variant="default" padding="lg" className="space-y-1">
-          <div className="flex items-center gap-1.5 text-label font-semibold text-emerald-600 dark:text-emerald-400">
-            <ArrowDownLeft size={14} strokeWidth={2.5} />
-            <span>{isEn ? 'To receive' : 'Att få tillbaka'}</span>
+        <Card variant="default" padding="lg" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-micro-label font-bold uppercase tracking-wider text-[var(--text-tertiary)] flex items-center gap-1.5">
+              <ArrowDownLeft size={13} className="text-[var(--success-color)] shrink-0" strokeWidth={2.5} />
+              <span>{isEn ? 'To receive' : 'Att få tillbaka'}</span>
+            </span>
           </div>
-          <div className="text-large-amount text-[var(--text-primary)] font-amount tabular-nums">
-            +{formatAmount(totalOweMe, config.language)} {curr}
+          <div>
+            <span className="text-large-amount font-extrabold text-[var(--text-primary)] tracking-tight tabular-nums block truncate">
+              +{formatAmount(totalOweMe, config.language)} {curr}
+            </span>
           </div>
         </Card>
 
         {/* Att betala (Jag är skyldig) */}
-        <Card variant="default" padding="lg" className="space-y-1">
-          <div className="flex items-center gap-1.5 text-label font-semibold text-rose-500 dark:text-rose-400">
-            <ArrowUpRight size={14} strokeWidth={2.5} />
-            <span>{isEn ? 'To pay' : 'Att betala'}</span>
+        <Card variant="default" padding="lg" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-micro-label font-bold uppercase tracking-wider text-[var(--text-tertiary)] flex items-center gap-1.5">
+              <ArrowUpRight size={13} className="text-[var(--danger-color)] shrink-0" strokeWidth={2.5} />
+              <span>{isEn ? 'To pay' : 'Att betala'}</span>
+            </span>
           </div>
-          <div className="text-large-amount text-[var(--text-primary)] font-amount tabular-nums">
-            -{formatAmount(totalIOwe, config.language)} {curr}
+          <div>
+            <span className="text-large-amount font-extrabold text-[var(--text-primary)] tracking-tight tabular-nums block truncate">
+              -{formatAmount(totalIOwe, config.language)} {curr}
+            </span>
           </div>
         </Card>
       </div>
 
-      {/* 2. Filter tabs & Add Button */}
-      <div className="flex items-center justify-between gap-2">
-        <SegmentedControl
-          size="sm"
-          fullWidth={false}
-          value={activeTab}
-          onChange={(val) => setActiveTab(val as any)}
-          options={[
-            { value: 'all', label: isEn ? 'All' : 'Alla' },
-            { value: 'owe_me', label: isEn ? 'Owes me' : 'Skyldig mig' },
-            { value: 'i_owe', label: isEn ? 'I owe' : 'Jag är skyldig' },
-          ]}
-        />
+      {/* 2. Global Filter Pills & Add Button */}
+      <div className="flex items-center justify-between gap-2.5 min-w-0 w-full">
+        <div className="flex-1 min-w-0 overflow-x-auto no-scrollbar py-0.5">
+          <SegmentedControl
+            options={[
+              { value: 'all', label: isEn ? 'All' : 'Alla' },
+              { value: 'owe_me', label: isEn ? 'Owes me' : 'Skyldig mig' },
+              { value: 'i_owe', label: isEn ? 'I owe' : 'Jag är skyldig' },
+              { value: 'settled', label: isEn ? 'Settled' : 'Kvitterade' },
+            ]}
+            value={activeTab}
+            onChange={(val) => setActiveTab(val as any)}
+            size="sm"
+            fullWidth={false}
+            className="whitespace-nowrap shrink-0"
+          />
+        </div>
 
         <Button
           variant="primary"
           size="sm"
           onClick={() => setIsAddModalOpen(true)}
           icon={<Plus size={14} strokeWidth={2.5} />}
+          className="shrink-0 h-9 px-3.5 rounded-full text-xs font-bold"
         >
           {isEn ? 'Add' : 'Lägg till'}
         </Button>
@@ -178,80 +191,80 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
                   exit={{ opacity: 0, scale: 0.95 }}
                   className={`transition-all ${item.isSettled ? 'opacity-50' : ''}`}
                 >
-                  <Card variant="default" padding="md" className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
+                  <Card variant="default" padding="md" className="flex items-center justify-between gap-2.5 sm:gap-3 min-w-0 w-full overflow-hidden">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 overflow-hidden">
                       {/* Avatar initial */}
                       <div
-                        className={`w-10 h-10 rounded-[var(--radius-card-nested,8px)] flex items-center justify-center font-bold text-card-title shrink-0 ${
+                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-[var(--radius-card-nested,10px)] flex items-center justify-center font-bold text-sm shrink-0 ${
                           item.isSettled
                             ? 'bg-black/5 dark:bg-white/5 text-[var(--text-tertiary)]'
                             : isOweMe
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                            ? 'bg-[var(--success-container)] text-[var(--success-color)]'
+                            : 'bg-[var(--danger-container)] text-[var(--danger-color)]'
                         }`}
                       >
                         {item.personName.charAt(0).toUpperCase()}
                       </div>
 
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-body-medium font-semibold text-[var(--text-primary)] truncate">
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-body-medium font-bold text-[var(--text-primary)] truncate block">
                             {item.personName}
-                          </span>
-                          <span
-                            className={`text-micro-label font-semibold px-1.5 py-0.2 rounded-[var(--radius-badge,9999px)] ${
-                              isOweMe
-                                ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
-                                : 'text-rose-500 dark:text-rose-400 bg-rose-500/10'
-                            }`}
-                          >
-                            {isOweMe ? (isEn ? 'Owes you' : 'Skyldig dig') : (isEn ? 'You owe' : 'Du är skyldig')}
                           </span>
                         </div>
 
-                        {item.description && (
-                          <p className="text-secondary text-[var(--text-secondary)] truncate mt-0.5">
-                            {item.description}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-1.5 text-micro-label text-[var(--text-secondary)] opacity-75 min-w-0 mt-0.5">
+                          <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${isOweMe ? 'bg-[var(--success-color)]' : 'bg-[var(--danger-color)]'}`} />
+                          <span className="font-semibold shrink-0">
+                            {isOweMe ? (isEn ? 'Owes you' : 'Skyldig dig') : (isEn ? 'You owe' : 'Du är skyldig')}
+                          </span>
+                          {item.description && (
+                            <>
+                              <span className="shrink-0">•</span>
+                              <span className="truncate">{item.description}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
 
                     {/* Right: Amount & Settle Check button */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="text-right">
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 text-right ml-auto">
+                      <div>
                         <span
-                          className={`text-body-medium font-semibold font-amount tabular-nums block ${
+                          className={`text-body-medium font-bold tabular-nums whitespace-nowrap block shrink-0 ${
                             item.isSettled
                               ? 'line-through text-[var(--text-tertiary)]'
                               : isOweMe
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-rose-600 dark:text-rose-400'
+                              ? 'text-[var(--success-color)]'
+                              : 'text-[var(--danger-color)]'
                           }`}
                         >
                           {isOweMe ? '+' : '-'}{formatAmount(item.amount, config.language)} {curr}
                         </span>
                       </div>
 
-                      <IconButton
-                        icon={item.isSettled ? <CheckCircle2 size={16} strokeWidth={2.5} /> : <Check size={14} strokeWidth={2.5} />}
-                        onClick={() => handleToggleSettle(item.id)}
-                        size="md"
-                        variant={item.isSettled ? 'primary' : 'muted'}
-                        className={item.isSettled ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'hover:bg-emerald-500/15 hover:text-emerald-600'}
-                        title={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera / Fått betalt')}
-                        aria-label={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera')}
-                      />
+                      <div className="flex items-center gap-1 shrink-0">
+                        <IconButton
+                          icon={item.isSettled ? <CheckCircle2 size={16} strokeWidth={2.5} /> : <Check size={14} strokeWidth={2.5} />}
+                          onClick={() => handleToggleSettle(item.id)}
+                          size="sm"
+                          variant={item.isSettled ? 'primary' : 'muted'}
+                          className={item.isSettled ? 'bg-[var(--success-color)] text-white hover:bg-emerald-600' : 'hover:bg-[var(--success-container)] hover:text-[var(--success-color)]'}
+                          title={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera / Fått betalt')}
+                          aria-label={item.isSettled ? (isEn ? 'Mark as unsettled' : 'Ångra klarmarkering') : (isEn ? 'Mark as settled' : 'Klarmarkera')}
+                        />
 
-                      <IconButton
-                        icon={<Trash2 size={13} strokeWidth={2} />}
-                        onClick={() => handleDeleteDebt(item.id)}
-                        size="sm"
-                        variant="ghost"
-                        className="text-[var(--text-tertiary)] hover:text-rose-500 hover:bg-rose-500/10"
-                        title={isEn ? 'Delete' : 'Ta bort'}
-                        aria-label={isEn ? 'Delete' : 'Ta bort'}
-                      />
+                        <IconButton
+                          icon={<Trash2 size={13} strokeWidth={2} />}
+                          onClick={() => handleDeleteDebt(item.id)}
+                          size="sm"
+                          variant="ghost"
+                          className="text-[var(--text-tertiary)] hover:text-[var(--danger-color)] hover:bg-[var(--danger-container)]"
+                          title={isEn ? 'Delete' : 'Ta bort'}
+                          aria-label={isEn ? 'Delete' : 'Ta bort'}
+                        />
+                      </div>
                     </div>
                   </Card>
                 </motion.div>
@@ -286,7 +299,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
             onClick={() => setDebtType('owe_me')}
             className={`py-2 px-3 rounded-[var(--radius-btn,8px)] text-label font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               debtType === 'owe_me'
-                ? 'bg-emerald-500 text-white shadow-xs'
+                ? 'bg-[var(--success-color)] text-white shadow-xs'
                 : 'text-[var(--text-secondary)]'
             }`}
           >
@@ -298,7 +311,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
             onClick={() => setDebtType('i_owe')}
             className={`py-2 px-3 rounded-[var(--radius-btn,8px)] text-label font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               debtType === 'i_owe'
-                ? 'bg-rose-500 text-white shadow-xs'
+                ? 'bg-[var(--danger-color)] text-white shadow-xs'
                 : 'text-[var(--text-secondary)]'
             }`}
           >

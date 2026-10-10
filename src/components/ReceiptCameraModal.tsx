@@ -263,7 +263,7 @@ export function ReceiptCameraModal({
               type="button"
               onClick={toggleTorch}
               className={`w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-xl border border-subtle transition-all cursor-pointer shadow-subtle ${
-                torchOn ? 'bg-amber-400 text-black border-amber-300' : 'bg-black/40 hover:bg-black/60 text-white active:scale-95'
+                torchOn ? 'bg-[var(--warning-color)] text-black border-transparent' : 'bg-black/40 hover:bg-black/60 text-white active:scale-95'
               }`}
               aria-label={isEn ? 'Flashlight' : 'Ficklampa'}
             >
@@ -296,7 +296,7 @@ export function ReceiptCameraModal({
               <h3 className="text-card-title font-bold text-white">
                 {isEn ? 'Camera unavailable' : 'Kameran är inte tillgänglig'}
               </h3>
-              <p className="text-secondary text-[#A8A8A8] leading-relaxed">
+              <p className="text-secondary text-[var(--text-tertiary)] leading-relaxed">
                 {cameraError}
               </p>
             </div>
@@ -360,7 +360,7 @@ export function ReceiptCameraModal({
             <p className="text-body-medium font-bold text-white tracking-wide">
               {isEn ? 'Reading receipt details…' : 'Läser av kvittot…'}
             </p>
-            <p className="text-secondary text-[#A8A8A8]">
+            <p className="text-secondary text-[var(--text-tertiary)]">
               {isEn ? 'Extracting merchant & amount' : 'Analyserar butik, belopp och datum'}
             </p>
           </div>

@@ -650,48 +650,48 @@ export function LogView({
 
       {/* 5. Sammanfattningsmodul: Alla 3 värden (Utgifter, Inkomster, Netto) vid filter 'all', annars 2 kort */}
       {typeFilter === 'all' ? (
-        <Card variant="default" padding="sm" className="select-none overflow-hidden">
+        <Card variant="default" padding="md" className="select-none overflow-hidden">
           <div className="grid grid-cols-3 divide-x divide-subtle/70">
             {/* Utgifter */}
-            <div className="flex flex-col justify-between pr-1 sm:pr-2.5">
-              <span className="text-[11px] sm:text-metric-label font-medium text-[var(--text-secondary)] truncate">
+            <div className="flex flex-col justify-between pr-2 sm:pr-3 min-w-0">
+              <span className="text-micro-label font-bold uppercase tracking-wider text-[var(--text-tertiary)] truncate">
                 {getL10n('Utgifter', 'Expenses')}
               </span>
-              <div className="flex items-baseline gap-0.5 sm:gap-1 pt-1 min-w-0">
-                <span className="text-[13px] xs:text-[14.5px] sm:text-[16px] md:text-large-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] whitespace-nowrap">
+              <div className="flex items-baseline gap-1 pt-1.5 min-w-0">
+                <span className="text-base sm:text-lg md:text-xl font-extrabold tabular-nums tracking-tight text-[var(--text-primary)] truncate">
                   {summaryStats.totalExpenses > 0 ? `−${formatAmount(summaryStats.totalExpenses, getLocale())}` : '0'}
                 </span>
-                <span className="text-[9.5px] sm:text-xs font-normal text-[var(--text-tertiary)] shrink-0 select-none">
+                <span className="text-xs font-semibold text-[var(--text-tertiary)] shrink-0 select-none">
                   {config.currency || 'kr'}
                 </span>
               </div>
             </div>
 
             {/* Inkomster */}
-            <div className="flex flex-col justify-between px-1 sm:px-2.5">
-              <span className="text-[11px] sm:text-metric-label font-medium text-[var(--text-secondary)] truncate">
+            <div className="flex flex-col justify-between px-2 sm:px-3 min-w-0">
+              <span className="text-micro-label font-bold uppercase tracking-wider text-[var(--text-tertiary)] truncate">
                 {getL10n('Inkomster', 'Income')}
               </span>
-              <div className="flex items-baseline gap-0.5 sm:gap-1 pt-1 min-w-0">
-                <span className="text-[13px] xs:text-[14.5px] sm:text-[16px] md:text-large-amount font-bold tabular-nums tracking-tight text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+              <div className="flex items-baseline gap-1 pt-1.5 min-w-0">
+                <span className="text-base sm:text-lg md:text-xl font-extrabold tabular-nums tracking-tight text-[var(--success-color)] truncate">
                   {summaryStats.totalIncome > 0 ? `+${formatAmount(summaryStats.totalIncome, getLocale())}` : '0'}
                 </span>
-                <span className="text-[9.5px] sm:text-xs font-normal text-[var(--text-tertiary)] shrink-0 select-none">
+                <span className="text-xs font-semibold text-[var(--text-tertiary)] shrink-0 select-none">
                   {config.currency || 'kr'}
                 </span>
               </div>
             </div>
 
             {/* Netto */}
-            <div className="flex flex-col justify-between pl-1 sm:pl-2.5">
-              <span className="text-[11px] sm:text-metric-label font-medium text-[var(--text-secondary)] truncate">
+            <div className="flex flex-col justify-between pl-2 sm:pl-3 min-w-0">
+              <span className="text-micro-label font-bold uppercase tracking-wider text-[var(--text-tertiary)] truncate">
                 {getL10n('Netto', 'Net')}
               </span>
-              <div className="flex items-baseline gap-0.5 sm:gap-1 pt-1 min-w-0">
+              <div className="flex items-baseline gap-1 pt-1.5 min-w-0">
                 <span
-                  className={`text-[13px] xs:text-[14.5px] sm:text-[16px] md:text-large-amount font-bold tabular-nums tracking-tight whitespace-nowrap ${
+                  className={`text-base sm:text-lg md:text-xl font-extrabold tabular-nums tracking-tight truncate ${
                     summaryStats.net > 0 
-                      ? 'text-emerald-600 dark:text-emerald-400' 
+                      ? 'text-[var(--success-color)]' 
                       : summaryStats.net < 0
                       ? 'text-[var(--text-primary)]'
                       : 'text-[var(--text-secondary)]'
@@ -703,7 +703,7 @@ export function LogView({
                     ? `−${formatAmount(Math.abs(summaryStats.net), getLocale())}`
                     : '0'}
                 </span>
-                <span className="text-[9.5px] sm:text-xs font-normal text-[var(--text-tertiary)] shrink-0 select-none">
+                <span className="text-xs font-semibold text-[var(--text-tertiary)] shrink-0 select-none">
                   {config.currency || 'kr'}
                 </span>
               </div>
@@ -722,7 +722,7 @@ export function LogView({
               </span>
             </div>
             <div className="flex items-baseline gap-1 pt-1.5">
-              <span className={`text-large-amount font-bold tabular-nums tracking-tight ${typeFilter === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+              <span className={`text-large-amount font-bold tabular-nums tracking-tight ${typeFilter === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
                 {typeFilter === 'income'
                   ? (summaryStats.totalIncome > 0 ? `+${formatAmount(summaryStats.totalIncome, getLocale())}` : '0')
                   : (summaryStats.totalExpenses > 0 ? `−${formatAmount(summaryStats.totalExpenses, getLocale())}` : '0')}
@@ -781,7 +781,7 @@ export function LogView({
                   <span className="text-[var(--text-tertiary)]/40 text-[10px]">·</span>
                   <span className={`text-micro-label font-semibold tabular-nums font-amount ${
                     dayData.dayNet > 0 
-                      ? 'text-emerald-600 dark:text-emerald-400' 
+                      ? 'text-[var(--success-color)]' 
                       : 'text-[var(--text-primary)]'
                   }`}>
                     {dayData.dayNet > 0 ? `+${formatAmount(dayData.dayNet, getLocale())}` : formatAmount(dayData.dayNet, getLocale())} {config.currency || 'kr'}
@@ -1039,10 +1039,10 @@ export function LogView({
                       {/* Transaction Dots */}
                       <div className="flex items-center justify-center gap-0.5 pointer-events-none h-1 w-full">
                         {dayTx?.hasIncome && (
-                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-emerald-500'}`} />
+                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-[var(--success-color)]'}`} />
                         )}
                         {dayTx?.hasExpense && (
-                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-rose-500'}`} />
+                          <span className={`w-1 h-1 rounded-full ${isSelected ? 'bg-[var(--on-accent)]' : 'bg-[var(--danger-color)]'}`} />
                         )}
                       </div>
                     </button>

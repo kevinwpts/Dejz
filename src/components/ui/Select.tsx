@@ -72,13 +72,13 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         </div>
 
         {error && (
-          <p className="text-label text-rose-600 dark:text-rose-400 mt-0.5">
+          <p className="text-label text-[var(--danger-color)] mt-0.5">
             {error}
           </p>
         )}
 
         {helperText && !error && (
-          <p className="text-micro-label text-[#8C867C] dark:text-[#71717A] mt-0.5">
+          <p className="text-micro-label text-[var(--text-tertiary)] mt-0.5">
             {helperText}
           </p>
         )}

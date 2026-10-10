@@ -243,7 +243,7 @@ export function TransactionViewModal({
             </h2>
 
             {/* Price */}
-            <p className={`text-large-amount font-amount tabular-nums mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-primary)]'}`}>
+            <p className={`text-large-amount font-amount tabular-nums mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-80 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
               <span>{formatAmount(transaction.amount, config.language)}</span>
               <span className="text-card-title text-[var(--text-secondary)] ml-1.5 self-end pb-1">{config.currency}</span>
@@ -384,7 +384,7 @@ export function TransactionViewModal({
                       />
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all">
-                      <span className="bg-white/95 dark:bg-zinc-900/95 text-black dark:text-white px-4 py-2.5 rounded-badge text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-modal">
+                      <span className="bg-white/95 dark:bg-[var(--surface-color)]/95 text-black dark:text-white px-4 py-2.5 rounded-badge text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all shadow-modal">
                         {config.language === 'en' ? 'Click to zoom' : 'Klicka för att förstora'}
                       </span>
                     </div>
@@ -431,14 +431,14 @@ export function TransactionViewModal({
                       onClick={(e) => e.stopPropagation()}
                     >
                       {transaction.receiptUrl.includes('.pdf') ? (
-                        <div className="bg-white dark:bg-zinc-900 p-8 rounded-modal text-center space-y-4 shadow-modal">
-                          <FileText size={64} className="mx-auto text-violet-500" />
-                          <p className="text-sm font-medium text-zinc-900 dark:text-white">PDF-dokument</p>
+                        <div className="bg-white dark:bg-[var(--surface-color)] p-8 rounded-modal text-center space-y-4 shadow-modal">
+                          <FileText size={64} className="mx-auto text-[var(--accent-color)]" />
+                          <p className="text-sm font-medium text-[var(--text-primary)] dark:text-white">PDF-dokument</p>
                           <a 
                             href={transaction.receiptUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-block bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-btn text-sm font-semibold transition-colors shadow-modal"
+                            className="inline-block bg-[var(--accent-color)] hover:bg-[var(--accent-color)] text-white px-5 py-2.5 rounded-btn text-sm font-semibold transition-colors shadow-modal"
                           >
                             {config.language === 'en' ? 'Open PDF in new tab' : 'Öppna PDF i ny flik'}
                           </a>

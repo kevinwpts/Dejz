@@ -6,7 +6,7 @@ import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
 import { CategoryModal } from './CategoryModal';
 import { ConfirmModal } from './ConfirmModal';
-import { Button, Modal, Select } from './ui';
+import { Button, Modal, Select, Card } from './ui';
 import { formatAmount } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
@@ -352,9 +352,9 @@ export function BudgetCategoriesView({
                   <div
                     className={`text-large-amount font-amount tabular-nums ${
                       isOverAllocated
-                        ? 'text-rose-600 dark:text-rose-400'
+                        ? 'text-[var(--danger-color)]'
                         : remainingToAllocate === 0
-                        ? 'text-emerald-600 dark:text-emerald-400'
+                        ? 'text-[var(--success-color)]'
                         : 'text-[var(--text-primary)]'
                     }`}
                   >
@@ -373,7 +373,7 @@ export function BudgetCategoriesView({
               <div className="w-full h-1 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
-                    isOverAllocated ? 'bg-rose-500' : 'bg-[var(--accent-color)]'
+                    isOverAllocated ? 'bg-[var(--danger-color)]' : 'bg-[var(--accent-color)]'
                   }`}
                   style={{
                     width: `${Math.min(100, Math.round((totalCategoryAllocated / (totalPoolToAllocate || 1)) * 100))}%`,
@@ -402,8 +402,8 @@ export function BudgetCategoriesView({
               )}
             </div>
 
-            {/* Separata kort med mellanrum, precis som transaktionskort */}
-            <div className="space-y-[var(--card-gap)]">
+            {/* Sammanhängande modul med avdelare precis som inställningslistor */}
+            <Card variant="default" padding="none" className="divide-y divide-menu">
               {categoriesList.map((cat, index) => {
                 const fixedSpent = Math.round(getFixedSpentForCategory(cat.name));
                 const catBudget = Math.max(Number(cat.budget) || 0, fixedSpent);
@@ -423,11 +423,11 @@ export function BudgetCategoriesView({
                         handleEditCategory('expense', index, cat.name, cat.icon, cat.color, cat.budget);
                       }
                     }}
-                    className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
                   >
                     {/* Vänster: Tydlig rund ikon & kategorinamn */}
                     <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                      <CategoryIcon icon={cat.icon} color={catColor} size="md" categoryName={cat.name} />
+                      <CategoryIcon icon={cat.icon} color={catColor} size="sm" categoryName={cat.name} />
                       <div className="min-w-0 flex flex-col justify-center">
                         <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate">
                           {cat.name}
@@ -514,11 +514,11 @@ export function BudgetCategoriesView({
                   </div>
                 );
               })}
-            </div>
+            </Card>
           </div>
         </>
       ) : (
-        /* Inkomstkategorier i samma layout som Betalningsmetoder */
+        /* Inkomstkategorier i samma layout med sammanhängande kort */
         <div className="space-y-[var(--card-gap)]">
           <div className="flex items-center justify-between px-1">
             <span className="text-label font-semibold text-[var(--text-secondary)]">
@@ -535,7 +535,7 @@ export function BudgetCategoriesView({
             </Button>
           </div>
 
-          <div className="space-y-[var(--card-gap)]">
+          <Card variant="default" padding="none" className="divide-y divide-menu">
             {incomeCategoriesList.map((cat, index) => {
               const catColor = cat.color || getCategoryColor(cat.name, config?.incomeCategories);
               return (
@@ -543,10 +543,10 @@ export function BudgetCategoriesView({
                   key={cat.id || index}
                   type="button"
                   onClick={() => handleEditCategory('income', index, cat.name, cat.icon, cat.color)}
-                  className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group shadow-none border-none"
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
                 >
                   <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                    <CategoryIcon icon={cat.icon} color={catColor} size="md" categoryName={cat.name} />
+                    <CategoryIcon icon={cat.icon} color={catColor} size="sm" categoryName={cat.name} />
                     <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate">
                       {cat.name}
                     </span>
@@ -557,7 +557,7 @@ export function BudgetCategoriesView({
                 </button>
               );
             })}
-          </div>
+          </Card>
         </div>
       )}
 
@@ -580,7 +580,7 @@ export function BudgetCategoriesView({
             <button
               type="button"
               onClick={() => setShowResetBudgetConfirm(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-label font-semibold text-[var(--text-tertiary)] hover:text-rose-500 dark:hover:text-rose-400 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-label font-semibold text-[var(--text-tertiary)] hover:text-[var(--danger-color)] dark:hover:text-[var(--danger-color)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer active:scale-95"
             >
               <RotateCcw size={13} strokeWidth={2} />
               <span>{isEn ? 'Reset budget to 0' : 'Nollställ budget'}</span>

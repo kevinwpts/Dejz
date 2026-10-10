@@ -142,7 +142,7 @@ export function GreetingModule({
               {/* 1. Incomes */}
               <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
                 <span className="text-[var(--text-secondary)]">{isEn ? 'Total Income' : 'Totala inkomster'}</span>
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-amount tabular-nums">
+                <span className="font-semibold text-[var(--success-color)] font-amount tabular-nums">
                   +{formatAmount(stats?.totalIncome || 0, language)} {currency}
                 </span>
               </div>
@@ -150,7 +150,7 @@ export function GreetingModule({
               {/* 2. Fixed Expenses */}
               <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
                 <span className="text-[var(--text-secondary)]">{isEn ? 'Fixed Expenses' : 'Fasta utgifter (verkliga)'}</span>
-                <span className="font-semibold text-rose-500 dark:text-rose-400 font-amount tabular-nums">
+                <span className="font-semibold text-[var(--danger-color)] font-amount tabular-nums">
                   -{formatAmount(stats?.totalFixed || 0, language)} {currency}
                 </span>
               </div>
@@ -158,7 +158,7 @@ export function GreetingModule({
               {/* 3. Monthly Savings */}
               <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
                 <span className="text-[var(--text-secondary)]">{isEn ? 'Monthly Savings' : 'Månadssparande'}</span>
-                <span className="font-semibold text-amber-500 font-amount tabular-nums">
+                <span className="font-semibold text-[var(--warning-color)] font-amount tabular-nums">
                   -{formatAmount(stats?.totalSavings || 0, language)} {currency}
                 </span>
               </div>
@@ -174,7 +174,7 @@ export function GreetingModule({
               {/* 5. Total Spent in Period */}
               <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
                 <span className="text-[var(--text-secondary)]">{isEn ? 'Variable Spent' : 'Spenderat hittills'}</span>
-                <span className="font-semibold text-rose-500 dark:text-rose-400 font-amount tabular-nums">
+                <span className="font-semibold text-[var(--danger-color)] font-amount tabular-nums">
                   -{formatAmount(stats?.totalSpentInPeriod || 0, language)} {currency}
                 </span>
               </div>
@@ -183,7 +183,7 @@ export function GreetingModule({
               {stats?.totalExtraIncomeInPeriod > 0 && (
                 <div className="flex justify-between items-center text-xs py-1 border-b border-subtle">
                   <span className="text-[var(--text-secondary)]">{isEn ? 'Extra Income' : 'Extra inkomster'}</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-amount tabular-nums">
+                  <span className="font-semibold text-[var(--success-color)] font-amount tabular-nums">
                     +{formatAmount(stats?.totalExtraIncomeInPeriod || 0, language)} {currency}
                   </span>
                 </div>
