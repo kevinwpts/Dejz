@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft } from 'lucide-react';
 import { feedback } from '../utils/feedback';
-import { BottomSheet, BottomSheetOption } from './ui';
+import { BottomSheet } from './ui';
 
 interface PeriodSelectorModalProps {
   isOpen: boolean;
@@ -96,20 +96,39 @@ export function PeriodSelectorModal({
       }
     >
       {viewMode === 'list' ? (
-        <div className="space-y-1">
+        <div className="space-y-2 py-1">
           {/* Alla perioder option */}
           {showAllPeriodsOption && (
-            <BottomSheetOption
-              label={currentLang === 'en' ? 'All periods' : 'Alla perioder'}
-              subtitle={currentLang === 'en' ? 'Show all transactions' : 'Visa alla transaktioner'}
-              icon={<CalendarIcon size={15} strokeWidth={2} />}
-              isSelected={!selectedPeriod && !selectedDate}
+            <button
+              type="button"
               onClick={() => {
+                if (typeof feedback?.light === 'function') feedback.light();
                 onSelectPeriod(null);
                 onSelectDate(null);
                 onClose();
               }}
-            />
+              className={`w-full p-3.5 rounded-[var(--radius-card-sm,12px)] border transition-all text-left flex items-center justify-between gap-3 cursor-pointer active:scale-[0.98] ${
+                !selectedPeriod && !selectedDate
+                  ? 'bg-[var(--text-primary)] text-[var(--surface-color)] border-[var(--text-primary)] shadow-sm'
+                  : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.05]'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                  !selectedPeriod && !selectedDate ? 'bg-white/20 text-white' : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'
+                }`}>
+                  <CalendarIcon size={15} strokeWidth={2} />
+                </div>
+                <div>
+                  <div className="text-[14px] font-semibold tracking-tight">
+                    {currentLang === 'en' ? 'All periods' : 'Alla perioder'}
+                  </div>
+                  <div className={`text-[12px] ${!selectedPeriod && !selectedDate ? 'text-white/80' : 'text-[var(--text-tertiary)]'}`}>
+                    {currentLang === 'en' ? 'Show all transactions' : 'Visa alla transaktioner sammanlagt'}
+                  </div>
+                </div>
+              </div>
+            </button>
           )}
 
           {chronologicalPeriods.map((p, idx) => {
@@ -119,25 +138,52 @@ export function PeriodSelectorModal({
             const isSelected = selectedPeriod?.name === p.name && !selectedDate;
 
             return (
-              <BottomSheetOption
+              <button
                 key={idx}
-                label={title}
-                subtitle={sub || undefined}
-                badge={
-                  p.isCurrent ? (
-                    <span className="text-micro-label font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-primary)]">
-                      {currentLang === 'en' ? 'Current' : 'Nu'}
-                    </span>
-                  ) : undefined
-                }
-                icon={<CalendarIcon size={15} strokeWidth={2} />}
-                isSelected={isSelected}
+                type="button"
                 onClick={() => {
+                  if (typeof feedback?.light === 'function') feedback.light();
                   onSelectPeriod(p);
                   onSelectDate(null);
                   onClose();
                 }}
-              />
+                className={`w-full p-3.5 rounded-[var(--radius-card-sm,12px)] border transition-all text-left flex items-center justify-between gap-3 cursor-pointer active:scale-[0.98] ${
+                  isSelected
+                    ? 'bg-[var(--text-primary)] text-[var(--surface-color)] border-[var(--text-primary)] shadow-xs'
+                    : 'bg-[var(--surface-color)] text-[var(--text-primary)] border-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.05]'
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                    isSelected ? 'bg-white/20 text-white' : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'
+                  }`}>
+                    <CalendarIcon size={15} strokeWidth={2} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[14px] font-semibold tracking-tight truncate">{title}</span>
+                      {p.isCurrent && (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider ${
+                          isSelected ? 'bg-white/25 text-white' : 'bg-[var(--accent-color)]/15 text-[var(--accent-color)]'
+                        }`}>
+                          {currentLang === 'en' ? 'Current' : 'Nu'}
+                        </span>
+                      )}
+                    </div>
+                    {sub && (
+                      <div className={`text-[12px] truncate ${isSelected ? 'text-white/80' : 'text-[var(--text-tertiary)]'}`}>
+                        {sub}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {isSelected && (
+                  <div className="w-5 h-5 rounded-full bg-white text-[var(--text-primary)] flex items-center justify-center shrink-0">
+                    <span className="text-[11px] font-bold">✓</span>
+                  </div>
+                )}
+              </button>
             );
           })}
         </div>

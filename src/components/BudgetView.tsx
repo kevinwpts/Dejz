@@ -5,7 +5,7 @@ import { Frequency, Config, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { BudgetItem } from './BudgetItem';
 import { EmptyState } from './EmptyState';
-import { Button, Card } from './ui';
+import { Button, Card, FilterButtonGroup } from './ui';
 import { formatAmount } from '../utils/format';
 import { AnimatedNumber } from './AnimatedNumber';
 import { BudgetCategoriesView } from './BudgetCategoriesView';
@@ -301,45 +301,29 @@ export function BudgetView({
       transition={{ duration: 0.35 }}
       className="space-y-[var(--menu-content-gap)] font-sans"
     >
-      {/* Top Controls: Clean Segmented Pill Group */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
-        {[
+      {/* Top Controls: Clean FilterButtonGroup */}
+      <FilterButtonGroup
+        options={[
           {
             id: 'fixed',
             label: config?.language === 'en' ? 'Fixed expenses' : 'Fasta utgifter',
-            icon: <Calendar size={15} strokeWidth={2} />,
+            icon: <Calendar size={14} strokeWidth={2} />,
           },
           {
             id: 'income',
             label: config?.language === 'en' ? 'Income' : 'Inkomster',
-            icon: <ArrowDownLeft size={15} strokeWidth={2.5} />,
+            icon: <ArrowDownLeft size={14} strokeWidth={2.5} />,
           },
           {
             id: 'savings',
             label: config?.language === 'en' ? 'Monthly savings' : 'Månadssparande',
-            icon: <PiggyBank size={15} strokeWidth={2} />,
+            icon: <PiggyBank size={14} strokeWidth={2} />,
           },
-        ].map((tab) => {
-          const isActive = budgetFilter === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setBudgetFilter(tab.id as 'fixed' | 'income' | 'savings')}
-              className={`flex-shrink-0 whitespace-nowrap h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium transition-all cursor-pointer select-none active:scale-95 ${
-                isActive
-                  ? 'bg-[var(--text-primary)] text-[var(--surface-color)] shadow-xs font-semibold'
-                  : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-subtle hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
-              }`}
-            >
-              <span className={`shrink-0 flex items-center justify-center [&>svg]:w-[14px] [&>svg]:h-[14px] ${isActive ? 'text-[var(--surface-color)]' : 'text-[var(--text-secondary)]'}`}>
-                {tab.icon}
-              </span>
-              <span className="whitespace-nowrap">{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+        ]}
+        selectedId={budgetFilter}
+        onSelect={(id) => setBudgetFilter(id as 'fixed' | 'income' | 'savings')}
+        ariaLabel={config?.language === 'en' ? 'Filter finances' : 'Filtrera ekonomi'}
+      />
 
       {/* Overview Summary Card */}
       <Card variant="default" padding="md" className="select-none space-y-1">
@@ -359,15 +343,15 @@ export function BudgetView({
                 ? totalSavingsSum
                 : totalMonthlyFixedAverage
             )}
-            className="text-large-amount text-[var(--text-primary)] font-bold tabular-nums"
+            className="text-large-amount text-[var(--text-primary)] font-bold font-amount tabular-nums"
             formatter={(val) => {
               const prefix = budgetFilter === 'income' ? '+' : '−';
               return `${prefix}${formatAmount(val, config?.language)}`;
             }}
           />
-          <span className="text-secondary font-medium text-[var(--text-secondary)]">
+          <span className="text-secondary font-normal opacity-80 select-none">
             {config?.currency || 'kr'}
-            <span className="text-[10px] opacity-70 ml-1">
+            <span className="text-[10px] opacity-70 ml-0.5">
               {config?.language === 'en' ? '/mo' : '/mån'}
             </span>
           </span>
@@ -388,7 +372,7 @@ export function BudgetView({
             <div className="space-y-[var(--card-gap)]">
               {sortedIncomes.length > 0 ? (
                 <>
-                  <div className="flex items-center justify-between gap-2 px-0.5">
+                  <div className="flex items-center justify-between gap-2 px-0.5 mb-2.5 sm:mb-3">
                     <button
                       type="button"
                       onClick={() => {
@@ -456,7 +440,7 @@ export function BudgetView({
             <div className="space-y-[var(--card-gap)]">
               {filteredActiveFixedExpenses.length > 0 ? (
                 <>
-                  <div className="flex items-center justify-between gap-2 px-0.5">
+                  <div className="flex items-center justify-between gap-2 px-0.5 mb-2.5 sm:mb-3">
                     <button
                       type="button"
                       onClick={() => {
@@ -526,7 +510,7 @@ export function BudgetView({
             <div className="space-y-[var(--card-gap)]">
               {sortedSavings.length > 0 ? (
                 <>
-                  <div className="flex items-center justify-between gap-2 px-0.5">
+                  <div className="flex items-center justify-between gap-2 px-0.5 mb-2.5 sm:mb-3">
                     <button
                       type="button"
                       onClick={() => {

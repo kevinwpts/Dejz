@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { AnimatedNumber } from './AnimatedNumber';
 import { formatAmount } from '../utils/format';
-import { getBudgetStatus } from '../utils/budgetStatus';
 import { Icon } from './ui/Icon';
 import { Card } from './ui/Card';
 import { feedback } from '../utils/feedback';
@@ -31,28 +30,16 @@ export function BudgetGauge({
   label = 'Kvar att spendera',
   onOpenInfo,
   timeText,
-  timeRatio,
+  _timeRatio,
   remainingDays,
   totalDays,
   _calendarDays,
   periodIntervalText,
   paydayText,
-  onOpenPeriodInfo,
+  _onOpenPeriodInfo,
 }: BudgetGaugeProps) {
   const isEn = language === 'en';
   const isNegative = remainingCents < 0;
-
-  // Derive status from economic state and remaining time
-  const status = useMemo(() => {
-    const calcRemainingDays = remainingDays ?? (timeRatio !== undefined ? Math.round(timeRatio * 30) : 15);
-    const calcTotalDays = totalDays ?? 30;
-    return getBudgetStatus({
-      remainingCents,
-      disposablePotCents,
-      remainingDays: calcRemainingDays,
-      totalDays: calcTotalDays,
-    });
-  }, [remainingCents, disposablePotCents, remainingDays, totalDays, timeRatio]);
 
   // Initial disposable budget from the start of the period (100% baseline)
   const startPot = useMemo(() => {
@@ -75,26 +62,21 @@ export function BudgetGauge({
     return Math.max(0, Math.min(1, remainingCents / startPot));
   }, [remainingCents, startPot]);
 
-  // Semi-circle arc geometry (viewBox 0 0 100 56, center at 50,50 with r=40)
-  const arcLength = Math.PI * 40; // ≈ 125.664
-  const strokeDashoffset = arcLength * (1 - clampedFraction);
-
-  const circleTitle = useMemo(() => {
-    return isEn
-      ? `Start: ${formatAmount(startPot, language)} ${currency} · Left: ${formatAmount(remainingCents, language)} ${currency} (${percentage}%)`
-      : `Start: ${formatAmount(startPot, language)} ${currency} · Kvar: ${formatAmount(remainingCents, language)} ${currency} (${percentage}%)`;
-  }, [startPot, remainingCents, percentage, language, currency, isEn]);
-
   return (
     <div className="w-full select-none">
-      <Card variant="default" padding="md" className="border-none relative overflow-hidden transition-all">
-        {/* Main Row: (Label + Hero Amount) on left, Semi-circle Gauge on right */}
-        <div className="flex items-center justify-between gap-3 sm:gap-4">
-          {/* Primary Amount for entire period (Left) */}
+      <Card
+        variant="accent"
+        padding="md"
+        style={{ backgroundColor: 'var(--accent-color)', color: 'var(--on-accent)' }}
+        className="border-none relative overflow-hidden transition-all shadow-subtle text-[var(--on-accent)]"
+      >
+        {/* Main Row: Total remaining budget + Per day budget + Thick Circular Gauge Ring */}
+        <div className="flex items-center justify-between gap-3">
+          {/* Left Column: Totalt kvar + Stora siffran + /dag */}
           <div className="space-y-1 min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-metric-label">
-                {label}
+              <span className="text-[12.5px] sm:text-[13px] font-medium text-[var(--on-accent)] opacity-90">
+                {label || (isEn ? 'Total remaining' : 'Totalt kvar')}
               </span>
               {onOpenInfo && (
                 <button
@@ -103,7 +85,7 @@ export function BudgetGauge({
                     if (typeof feedback?.tap === 'function') feedback.tap();
                     onOpenInfo();
                   }}
-                  className="p-1 -m-1 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
+                  className="p-1 -m-1 rounded-full text-[var(--on-accent)] opacity-80 hover:opacity-100 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer border-none bg-transparent flex items-center justify-center"
                   aria-label="Info"
                   title={isEn ? 'How is this calculated?' : 'Hur beräknas detta?'}
                 >
@@ -112,109 +94,108 @@ export function BudgetGauge({
               )}
             </div>
 
-            <div className="flex items-baseline gap-1 sm:gap-1.5 min-w-0">
+            <div className="flex items-baseline gap-1.5 min-w-0 pt-0.5">
               <AnimatedNumber
                 value={remainingCents}
-                className={`text-hero-amount leading-none font-bold ${
-                  isNegative ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
+                className={`text-hero-amount leading-none font-bold tabular-nums tracking-tight ${
+                  isNegative ? 'text-[var(--danger-color)]' : 'text-[var(--on-accent)]'
                 }`}
                 formatter={(val) => formatAmount(val, language)}
               />
               <span
-                className={`text-secondary leading-none shrink-0 font-medium ${
-                  isNegative ? 'text-[var(--danger-color)]/80 dark:text-[var(--danger-color)]/80' : 'text-[var(--text-secondary)]'
+                className={`text-sm sm:text-base leading-none shrink-0 font-medium ${
+                  isNegative ? 'text-[var(--danger-color)]/80' : 'text-[var(--on-accent)]/80'
                 }`}
               >
                 {currency || 'kr'}
               </span>
             </div>
+
+            {/* Per dag beloppet placerat direkt under det stora beloppet */}
+            <div className="flex items-center gap-2 pt-0.5 text-xs text-[var(--on-accent)] opacity-90">
+              <span className="font-semibold text-[var(--on-accent)] font-amount tabular-nums">
+                {formatAmount(Math.round(remainingCents / Math.max(1, remainingDays ?? 1)), language)} {currency}/dag
+              </span>
+            </div>
           </div>
 
-          {/* Elegant Enlarged Semi-Circle Progress Indicator (Right) */}
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof feedback?.tap === 'function') feedback.tap();
-              onOpenInfo?.();
-            }}
-            className="flex flex-col items-center shrink-0 p-1 -m-1 rounded-[var(--radius-card-nested,12px)] hover:bg-black/[0.02] dark:hover:bg-white/[0.04] transition-all cursor-pointer border-none bg-transparent active:scale-95 text-left group"
-            aria-label={isEn ? 'Budget status details' : 'Detaljer för budgetstatus'}
-            title={circleTitle}
-          >
-            <div className="relative w-[124px] sm:w-[140px] h-[66px] sm:h-[74px] flex items-end justify-center">
-              <svg viewBox="0 0 100 58" className="w-full h-full overflow-visible">
-                {/* Background track semi-circle */}
-                <path
-                  d="M 10 50 A 40 40 0 0 1 90 50"
-                  fill="none"
+          {/* Right Column: Thick Circular Progress Ring */}
+          <div className="flex-shrink-0 flex items-center justify-center pl-1">
+            <div className="relative w-[68px] h-[68px] sm:w-[74px] sm:h-[74px] flex items-center justify-center">
+              <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 80 80">
+                {/* Background Track Circle */}
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="32"
                   stroke="currentColor"
-                  strokeWidth="7"
-                  strokeLinecap="round"
-                  className="text-black/[0.06] dark:text-white/[0.08]"
+                  strokeWidth="8.5"
+                  className="text-[var(--on-accent)] opacity-20 fill-none"
                 />
-                {/* Active progress arc with semantic color */}
-                {clampedFraction > 0 && (
-                  <path
-                    d="M 10 50 A 40 40 0 0 1 90 50"
-                    fill="none"
-                    stroke={status.colorHex}
-                    strokeWidth="7"
-                    strokeLinecap="round"
-                    strokeDasharray={arcLength}
-                    strokeDashoffset={strokeDashoffset}
-                    className="transition-[stroke-dashoffset,stroke] duration-700 ease-out"
-                  />
-                )}
+                {/* Foreground Animated Circle */}
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="32"
+                  stroke="currentColor"
+                  strokeWidth="8.5"
+                  strokeLinecap="round"
+                  strokeDasharray={201.06}
+                  strokeDashoffset={201.06 * (1 - clampedFraction)}
+                  className="text-[var(--on-accent)] transition-all duration-500 ease-out fill-none"
+                />
               </svg>
-
-              {/* Inside semi-circle: visually centered percentage text */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pt-2.5 sm:pt-3 pointer-events-none">
-                <span className="font-amount font-bold text-base sm:text-lg tabular-nums text-[var(--text-primary)] leading-none tracking-tight">
+              {/* Center Content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="text-[14px] sm:text-[15px] font-bold font-amount tabular-nums text-[var(--on-accent)] leading-none">
                   {percentage}%
+                </span>
+                <span className="text-[8.5px] font-bold text-[var(--on-accent)] opacity-85 uppercase tracking-wider mt-0.5">
+                  {isEn ? 'left' : 'kvar'}
                 </span>
               </div>
             </div>
-          </button>
+          </div>
         </div>
 
         {/* Bottom Section: Divider + Aktuell period & Nästa lön */}
         {periodIntervalText ? (
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof feedback?.tap === 'function') feedback.tap();
-              onOpenPeriodInfo?.();
-            }}
-            className="w-full pt-3 mt-3 border-t border-subtle flex items-center justify-between text-left cursor-pointer active:scale-[0.99] transition-all bg-transparent border-none p-0 group"
+          <div
+            className="w-full pt-2.5 mt-2.5 border-t border-[var(--on-accent)]/20 flex items-center justify-between text-left p-0 text-[var(--on-accent)] select-none"
           >
             {/* Left: Aktuell period */}
             <div className="flex flex-col min-w-0">
-              <span className="text-metric-label text-[var(--text-secondary)] font-medium leading-tight">
-                {isEn ? 'Current period' : 'Aktuell period'}
-              </span>
-              <span className="text-body-medium text-[var(--text-primary)] font-medium truncate mt-0.5 group-hover:text-[var(--accent-color)] transition-colors">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium leading-tight text-[var(--on-accent)] opacity-80">
+                <Icon name="calendar" size={12} className="shrink-0 opacity-80" />
+                <span>{isEn ? 'Current period' : 'Aktuell period'}</span>
+              </div>
+              <span className="text-xs sm:text-[13px] font-semibold text-[var(--on-accent)] truncate mt-0.5">
                 {periodIntervalText}
               </span>
             </div>
 
             {/* Subtle Divider */}
-            <div className="h-6 w-[1px] bg-black/[0.06] dark:bg-white/[0.08] shrink-0 mx-3" />
+            <div className="h-5 w-[1px] bg-[var(--on-accent)]/20 shrink-0 mx-3" />
 
             {/* Right: Nästa lön */}
             <div className="flex flex-col items-end shrink-0 text-right">
-              <span className="text-metric-label text-[var(--text-secondary)] font-medium leading-tight">
-                {isEn ? 'Next payday' : 'Nästa lön'}
-              </span>
-              <span className="text-body-medium text-[var(--text-primary)] font-medium font-amount tabular-nums truncate mt-0.5 group-hover:text-[var(--accent-color)] transition-colors">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium leading-tight justify-end text-[var(--on-accent)] opacity-80">
+                <Icon name="coins" size={12} className="shrink-0 opacity-80" />
+                <span>{isEn ? 'Next payday' : 'Nästa lön'}</span>
+              </div>
+              <span className="text-xs sm:text-[13px] font-semibold font-amount tabular-nums text-[var(--on-accent)] truncate mt-0.5">
                 {paydayText}
               </span>
             </div>
-          </button>
+          </div>
         ) : timeText ? (
-          <div className="pt-2.5 sm:pt-3 mt-2 border-t border-subtle flex items-center justify-between text-label text-[var(--text-secondary)]">
-            <span className="font-medium tracking-tight">{timeText}</span>
+          <div className="pt-2 mt-2 border-t border-[var(--on-accent)]/20 flex items-center justify-between text-xs text-[var(--on-accent)] opacity-90">
+            <div className="flex items-center gap-1.5 font-medium tracking-tight text-[var(--on-accent)]">
+              <Icon name="calendar" size={12} className="shrink-0 opacity-80" />
+              <span>{timeText}</span>
+            </div>
             {remainingDays !== undefined && totalDays !== undefined && (
-              <span className="font-amount tabular-nums text-micro-label opacity-80">
+              <span className="font-amount tabular-nums text-[10px] text-[var(--on-accent)] opacity-80">
                 {isEn
                   ? `Day ${totalDays - remainingDays + 1} of ${totalDays}`
                   : `Dag ${totalDays - remainingDays + 1} av ${totalDays}`}

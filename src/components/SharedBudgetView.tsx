@@ -52,7 +52,7 @@ export function SharedBudgetView({ config, setConfig }: SharedBudgetViewProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-[var(--card-gap)] pb-20 page-max mx-auto w-full font-sans"
+      className="space-y-[var(--menu-content-gap)] pb-20 page-max mx-auto w-full font-sans"
     >
       {/* 1. Header Hero - Compact */}
       <Card variant="default" padding="md" className="text-center space-y-2 relative overflow-hidden">

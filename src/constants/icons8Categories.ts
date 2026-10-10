@@ -299,7 +299,13 @@ export function resolveIcons8Key(iconKey?: string, categoryName?: string): strin
     return getIcons8ForCategoryName(categoryName || cleanKey);
   }
 
-  // 4. Return empty string if not found in Icons8 so CategoryIcon renders the exact Lucide vector icon
+  // 4. Try matching categoryName if provided
+  if (categoryName) {
+    const fromName = getIcons8ForCategoryName(categoryName);
+    if (fromName) return fromName;
+  }
+
+  // 5. Return empty string if not found in Icons8 so CategoryIcon renders the exact Lucide vector icon
   return '';
 }
 

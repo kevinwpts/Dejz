@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'hero' | 'nested' | 'flat' | 'elevated' | 'outlined' | 'muted';
+  variant?: 'default' | 'hero' | 'nested' | 'flat' | 'elevated' | 'outlined' | 'muted' | 'accent';
   padding?: 'none' | 'sm' | 'md' | 'lg';
   interactive?: boolean;
   as?: 'div' | 'section' | 'article';
@@ -26,6 +26,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
     const variantStyles = {
       default: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
+      accent: 'bg-[var(--accent-color)] text-[var(--on-accent)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
       hero: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-subtle',
       nested: 'bg-[var(--card-nested-bg)] border-none rounded-[var(--radius-card-nested,12px)] shadow-none',
       flat: 'bg-[var(--surface-color)] border-none rounded-[var(--radius-card,20px)] shadow-none',

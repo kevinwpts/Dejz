@@ -111,7 +111,7 @@ export function DebtsView({ config, setConfig }: DebtsViewProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-[var(--card-gap)] pb-20 page-max mx-auto w-full font-sans"
+      className="space-y-[var(--menu-content-gap)] pb-20 page-max mx-auto w-full font-sans"
     >
       {/* 1. Header Summary Cards matching Analysis summary style */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">

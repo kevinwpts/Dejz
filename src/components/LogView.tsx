@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { 
-  Wallet, 
   ArrowUpRight, 
   ArrowDownLeft, 
   LayoutGrid, 
   Calendar as CalendarIcon, 
   ChevronLeft, 
   ChevronRight, 
+  ChevronDown,
+  SlidersHorizontal,
   Layers, 
   RotateCcw
 } from 'lucide-react';
@@ -15,7 +16,7 @@ import { Transaction, Config, FixedExpense, Income, Frequency } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { TransactionItem } from './TransactionItem';
 import { EmptyState } from './EmptyState';
-import { FilterButtonGroup, Card, Input } from './ui';
+import { Input, BottomSheet, SegmentedControl, Button, FilterButtonGroup } from './ui';
 import { CategoryIcon } from './CategoryIcon';
 import { PeriodSelectorModal } from './PeriodSelectorModal';
 import { useScrollLock } from '../hooks/useScrollLock';
@@ -66,8 +67,9 @@ export function LogView({
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [isPeriodPickerOpen, setIsPeriodPickerOpen] = useState(false);
   const [modalPeriod, setModalPeriod] = useState<any | null>(null);
+  const [isFilterBottomSheetOpen, setIsFilterBottomSheetOpen] = useState(false);
 
-  useScrollLock(isPeriodPickerOpen);
+  useScrollLock(isPeriodPickerOpen || isFilterBottomSheetOpen);
 
   const getLocale = () => {
     const lang = currentLang || 'sv';
@@ -310,6 +312,32 @@ export function LogView({
       .sort((a, b) => b.count - a.count);
   }, [allCombinedTransactions, selectedPeriod, selectedDate, typeFilter]);
 
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (categoryFilter !== null) count++;
+    return count;
+  }, [categoryFilter]);
+
+  const allCategoryOptions = useMemo(() => {
+    const map = new Map<string, { name: string; count?: number }>();
+
+    availableCategories.forEach(c => {
+      map.set(c.name.toLowerCase(), { name: c.name, count: c.count });
+    });
+
+    const configured = [
+      ...(config.categories || []),
+      ...(config.incomeCategories || [])
+    ];
+    configured.forEach(c => {
+      if (c.name && !map.has(c.name.toLowerCase())) {
+        map.set(c.name.toLowerCase(), { name: c.name, count: 0 });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [availableCategories, config.categories, config.incomeCategories]);
+
   // Filter transactions by search query / category / date / period / type
   const filteredExpenses = useMemo(() => {
     if (!allCombinedTransactions) return [];
@@ -365,7 +393,7 @@ export function LogView({
   }, [allCombinedTransactions, searchQuery, categoryFilter, selectedDate, selectedPeriod, typeFilter]);
 
   // Aggregate stats for currently filtered view (expenses, income, net, count)
-  const summaryStats = useMemo(() => {
+  const _summaryStats = useMemo(() => {
     let totalExpenses = 0;
     let totalIncome = 0;
 
@@ -406,21 +434,21 @@ export function LogView({
     return Object.entries(groups).sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime());
   }, [filteredExpenses]);
 
-  const hasActiveFilters = Boolean(
-    searchQuery.trim() ||
-    selectedPeriod ||
-    selectedDate ||
-    categoryFilter ||
-    typeFilter !== 'all'
-  );
+  const hasActiveSearch = Boolean(searchQuery.trim());
+  const hasActiveFilters = Boolean(categoryFilter !== null || typeFilter !== 'all');
 
-  const handleResetFilters = () => {
+  const handleClearResultRow = () => {
     if (typeof feedback?.tap === 'function') feedback.tap();
-    setSearchQuery('');
-    setTypeFilter('all');
-    setSelectedPeriod(null);
-    setSelectedDate(null);
-    setCategoryFilter(null);
+    if (hasActiveSearch && hasActiveFilters) {
+      setSearchQuery('');
+      setTypeFilter('all');
+      setCategoryFilter(null);
+    } else if (hasActiveSearch) {
+      setSearchQuery('');
+    } else if (hasActiveFilters) {
+      setTypeFilter('all');
+      setCategoryFilter(null);
+    }
   };
 
   // Modal Calendar logic
@@ -505,7 +533,7 @@ export function LogView({
 
   return (
     <div className="space-y-[var(--menu-content-gap)] font-sans">
-      {/* 1. Real-time Search Input */}
+      {/* 1. Standalone Search Bar (Sökrutan ligger fritt) */}
       <div className="w-full">
         <Input
           variant="search"
@@ -523,232 +551,139 @@ export function LogView({
         />
       </div>
 
-      {/* 2. Top Controls: Compact Inline Row (Period button + Type filter) */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
-        <button
-          type="button"
-          onClick={() => {
-            const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
-            setModalPeriod(initial);
-            setIsPeriodPickerOpen(true);
-          }}
-          className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
-        >
-          <CalendarIcon size={15} className="text-[var(--text-secondary)] shrink-0" />
-          <span className="truncate max-w-[140px] sm:max-w-none">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
-          {selectedPeriod?.isCurrent && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
-              {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
-            </span>
-          )}
-          <ChevronLeft size={14} className="text-[var(--text-secondary)] shrink-0 ml-0.5 rotate-[-90deg]" />
-        </button>
-
-        <FilterButtonGroup
-          options={[
-            {
-              id: 'all',
-              label: t('all' as TranslationKey) || (config.language === 'en' ? 'All' : 'Alla'),
-              icon: <LayoutGrid size={15} strokeWidth={2} />,
-            },
-            {
-              id: 'expense',
-              label: t('expense' as TranslationKey) || (config.language === 'en' ? 'Expenses' : 'Utgifter'),
-              icon: <ArrowDownLeft size={15} strokeWidth={2.5} />,
-            },
-            {
-              id: 'income',
-              label: t('income' as TranslationKey) || (config.language === 'en' ? 'Income' : 'Inkomster'),
-              icon: <ArrowUpRight size={15} strokeWidth={2.5} />,
-            },
-          ]}
-          selectedId={typeFilter}
-          onSelect={(id) => setTypeFilter(id as 'all' | 'expense' | 'income')}
-          ariaLabel={getL10n('Filtrera transaktioner', 'Filter transactions')}
-          className="flex-shrink-0 w-auto"
-        />
-      </div>
-
-      {/* 3. Category Horizontal Pills (visible if 2 or more categories are present) */}
-      {availableCategories.length > 1 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 -mx-0.5">
+      {/* 2. Top Controls: Compact Inline Row (Period button + Transaction type filters + Icon-only Filter button) - Samma upplägg som Analysfliken */}
+      <div className="flex items-center justify-between gap-2 py-0.5 px-0.5 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Period Button */}
           <button
             type="button"
             onClick={() => {
-              if (typeof feedback?.selection === 'function') feedback.selection();
-              setCategoryFilter(null);
+              const initial = selectedPeriod || chronologicalPeriods.find(p => p.isCurrent) || chronologicalPeriods[chronologicalPeriods.length - 1] || null;
+              setModalPeriod(initial);
+              setIsPeriodPickerOpen(true);
             }}
-            className={`flex-shrink-0 whitespace-nowrap h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium transition-all cursor-pointer ${
-              !categoryFilter
-                ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-semibold shadow-xs'
-                : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
-            }`}
+            className="flex-shrink-0 h-[38px] sm:h-[40px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-2 text-xs sm:text-[13px] font-medium bg-[var(--surface-color)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer active:scale-[0.98] transition-all"
           >
-            <span>{getL10n('Alla kategorier', 'All categories', 'Alle kategorier', 'Alle kategorier', 'Kaikki')}</span>
+            <CalendarIcon size={15} className="text-[var(--text-secondary)] shrink-0" />
+            <span className="truncate max-w-[120px] sm:max-w-none">{activeFilterLabel || getL10n('Alla perioder', 'All periods')}</span>
+            {selectedPeriod?.isCurrent && (
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-primary)]">
+                {getL10n('Nu', 'Current', 'Nå', 'Nu', 'Nyt')}
+              </span>
+            )}
+            <ChevronDown size={14} className="text-[var(--text-secondary)] shrink-0 ml-0.5" />
           </button>
-          {availableCategories.map((cat) => {
-            const isCatSelected = categoryFilter?.toLowerCase() === cat.name.toLowerCase();
-            return (
-              <button
-                key={cat.name}
-                type="button"
-                onClick={() => {
-                  if (typeof feedback?.selection === 'function') feedback.selection();
-                  setCategoryFilter(isCatSelected ? null : cat.name);
-                }}
-                className={`flex-shrink-0 whitespace-nowrap h-[36px] sm:h-[38px] px-3.5 sm:px-4 rounded-full inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium transition-all cursor-pointer ${
-                  isCatSelected
-                    ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-semibold shadow-xs'
-                    : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
-                }`}
-              >
-                {(() => {
-                  const matchedCat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
-                    c => (c.name || '').trim().toLowerCase() === cat.name.toLowerCase() || c.id === cat.name
-                  );
-                  const iconKey = matchedCat?.icon || getCategoryIconName(cat.name);
-                  return (
-                    <CategoryIcon
-                      icon={iconKey}
-                      categoryName={cat.name}
-                      variant="minimal"
-                      size="2xs"
-                      className="w-4 h-4"
-                    />
-                  );
-                })()}
-                <span className="truncate max-w-[110px]">{cat.name}</span>
-                <span className={`text-[10px] tabular-nums font-amount ${
-                  isCatSelected ? 'text-[var(--surface-color)]/85' : 'text-[var(--text-tertiary)]'
-                }`}>
-                  {cat.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
 
-      {/* 4. Active Filters Reset Banner */}
-      {hasActiveFilters && (
-        <div className="flex items-center justify-between px-1 py-0.5 text-xs">
-          <div className="flex items-center gap-1.5 text-[var(--text-secondary)] overflow-hidden">
+          {/* Inline Transaction Type Filters */}
+          <div className="flex-shrink-0">
+            <FilterButtonGroup
+              options={[
+                {
+                  id: 'all',
+                  label: getL10n('Alla', 'All', 'Alle', 'Alle', 'Kaikki'),
+                },
+                {
+                  id: 'expense',
+                  label: getL10n('Utgifter', 'Expenses', 'Utgifter', 'Udgifter', 'Menot'),
+                },
+                {
+                  id: 'income',
+                  label: getL10n('Inkomster', 'Income', 'Inntekt', 'Indkomst', 'Tulot'),
+                },
+              ]}
+              selectedId={typeFilter}
+              onSelect={(id) => {
+                if (typeof feedback?.selection === 'function') feedback.selection();
+                setTypeFilter(id as 'all' | 'income' | 'expense');
+              }}
+              ariaLabel={getL10n('Filtrera typ', 'Filter type')}
+            />
+          </div>
+        </div>
+
+        {/* Filter Toggle Button (Icon only) */}
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof feedback?.light === 'function') feedback.light();
+            setIsFilterBottomSheetOpen(true);
+          }}
+          className={`flex-shrink-0 w-[38px] sm:w-[40px] h-[38px] sm:h-[40px] rounded-full inline-flex items-center justify-center relative transition-all cursor-pointer active:scale-95 shrink-0 ${
+            activeFiltersCount > 0
+              ? 'bg-[var(--text-primary)] text-[var(--surface-color)] shadow-xs font-semibold'
+              : 'bg-[var(--surface-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
+          }`}
+          title={getL10n('Filter', 'Filter')}
+          aria-label={getL10n('Filter', 'Filter')}
+        >
+          <SlidersHorizontal size={15} strokeWidth={2} />
+          {activeFiltersCount > 0 && (
+            <span className="w-5 h-5 rounded-full bg-[var(--accent-color)] text-[var(--on-accent)] text-[11px] font-bold inline-flex items-center justify-center shrink-0 ml-0.5">
+              {activeFiltersCount}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* 3. Discrete Results & Clear Row */}
+      {(hasActiveSearch || hasActiveFilters) && (
+        <div className="flex items-center justify-between px-1 py-0.5 text-xs text-[var(--text-secondary)]">
+          <div className="flex items-center gap-1.5 overflow-hidden">
             <span className="text-[11px] truncate">
-              {getL10n('Filtrerat resultat', 'Filtered results')}: <strong className="font-amount font-bold text-[var(--text-primary)]">{filteredExpenses.length}</strong> {getL10n('transaktioner', 'transactions')}
+              {filteredExpenses.length === 0 ? (
+                hasActiveSearch ? (
+                  <>
+                    <strong className="font-semibold text-[var(--text-primary)]">0</strong>{' '}
+                    {getL10n('träffar', 'matches', 'treff', 'fund', 'osumaa')}
+                  </>
+                ) : (
+                  <>
+                    <strong className="font-semibold text-[var(--text-primary)]">0</strong>{' '}
+                    {getL10n('transaktioner', 'transactions', 'transaksjoner', 'transaktioner', 'tapahtumaa')}
+                  </>
+                )
+              ) : (
+                hasActiveSearch ? (
+                  <>
+                    <strong className="font-semibold text-[var(--text-primary)]">{filteredExpenses.length}</strong>{' '}
+                    {getL10n(
+                      filteredExpenses.length === 1 ? 'träff' : 'träffar',
+                      filteredExpenses.length === 1 ? 'match' : 'matches',
+                      filteredExpenses.length === 1 ? 'treff' : 'treff',
+                      filteredExpenses.length === 1 ? 'fund' : 'fund',
+                      filteredExpenses.length === 1 ? 'osuma' : 'osumaa'
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <strong className="font-semibold text-[var(--text-primary)]">{filteredExpenses.length}</strong>{' '}
+                    {getL10n(
+                      filteredExpenses.length === 1 ? 'transaktion' : 'transaktioner',
+                      filteredExpenses.length === 1 ? 'transaction' : 'transactions',
+                      filteredExpenses.length === 1 ? 'transaksjon' : 'transaksjoner',
+                      filteredExpenses.length === 1 ? 'transaktion' : 'transaktioner',
+                      filteredExpenses.length === 1 ? 'tapahtuma' : 'tapahtumaa'
+                    )}
+                  </>
+                )
+              )}
             </span>
           </div>
+
           <button
             type="button"
-            onClick={handleResetFilters}
-            className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--accent-color)] hover:underline cursor-pointer shrink-0"
+            onClick={handleClearResultRow}
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--accent-color)] hover:underline cursor-pointer shrink-0 ml-2"
           >
             <RotateCcw size={11} />
-            <span>{getL10n('Rensa filter', 'Clear filters', 'Nullstill filtre', 'Ryd filtre', 'Tyhjennä')}</span>
+            <span>
+              {hasActiveSearch && hasActiveFilters
+                ? getL10n('Rensa allt', 'Clear all', 'Nullstill alt', 'Nulstil alt', 'Tyhjennä kaikki')
+                : hasActiveSearch
+                ? getL10n('Rensa sökning', 'Clear search', 'Nullstill søk', 'Nulstil søgning', 'Tyhjennä haku')
+                : getL10n('Rensa filter', 'Clear filters', 'Nullstill filter', 'Nulstil filter', 'Tyhjennä suodattimet')}
+            </span>
           </button>
-        </div>
-      )}
-
-      {/* 5. Sammanfattningsmodul: Alla 3 värden (Utgifter, Inkomster, Netto) vid filter 'all', annars 2 kort */}
-      {typeFilter === 'all' ? (
-        <Card variant="default" padding="md" className="select-none overflow-hidden">
-          <div className="grid grid-cols-3 divide-x divide-subtle/70">
-            {/* Utgifter */}
-            <div className="flex flex-col justify-between pr-2 sm:pr-3 min-w-0">
-              <span className="text-micro-label font-bold uppercase tracking-wider text-[var(--text-tertiary)] truncate">
-                {getL10n('Utgifter', 'Expenses')}
-              </span>
-              <div className="flex items-baseline gap-1 pt-1.5 min-w-0">
-                <span className="text-base sm:text-lg md:text-xl font-extrabold tabular-nums tracking-tight text-[var(--text-primary)] truncate">
-                  {summaryStats.totalExpenses > 0 ? `−${formatAmount(summaryStats.totalExpenses, getLocale())}` : '0'}
-                </span>
-                <span className="text-xs font-semibold text-[var(--text-tertiary)] shrink-0 select-none">
-                  {config.currency || 'kr'}
-                </span>
-              </div>
-            </div>
-
-            {/* Inkomster */}
-            <div className="flex flex-col justify-between px-2 sm:px-3 min-w-0">
-              <span className="text-micro-label font-bold uppercase tracking-wider text-[var(--text-tertiary)] truncate">
-                {getL10n('Inkomster', 'Income')}
-              </span>
-              <div className="flex items-baseline gap-1 pt-1.5 min-w-0">
-                <span className="text-base sm:text-lg md:text-xl font-extrabold tabular-nums tracking-tight text-[var(--success-color)] truncate">
-                  {summaryStats.totalIncome > 0 ? `+${formatAmount(summaryStats.totalIncome, getLocale())}` : '0'}
-                </span>
-                <span className="text-xs font-semibold text-[var(--text-tertiary)] shrink-0 select-none">
-                  {config.currency || 'kr'}
-                </span>
-              </div>
-            </div>
-
-            {/* Netto */}
-            <div className="flex flex-col justify-between pl-2 sm:pl-3 min-w-0">
-              <span className="text-micro-label font-bold uppercase tracking-wider text-[var(--text-tertiary)] truncate">
-                {getL10n('Netto', 'Net')}
-              </span>
-              <div className="flex items-baseline gap-1 pt-1.5 min-w-0">
-                <span
-                  className={`text-base sm:text-lg md:text-xl font-extrabold tabular-nums tracking-tight truncate ${
-                    summaryStats.net > 0 
-                      ? 'text-[var(--success-color)]' 
-                      : summaryStats.net < 0
-                      ? 'text-[var(--text-primary)]'
-                      : 'text-[var(--text-secondary)]'
-                  }`}
-                >
-                  {summaryStats.net > 0 
-                    ? `+${formatAmount(summaryStats.net, getLocale())}` 
-                    : summaryStats.net < 0
-                    ? `−${formatAmount(Math.abs(summaryStats.net), getLocale())}`
-                    : '0'}
-                </span>
-                <span className="text-xs font-semibold text-[var(--text-tertiary)] shrink-0 select-none">
-                  {config.currency || 'kr'}
-                </span>
-              </div>
-            </div>
-          </div>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-2 gap-2.5 select-none">
-          {/* Kort 1: Utgifter eller Inkomster */}
-          <Card variant="default" padding="sm" className="select-none flex flex-col justify-between">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
-                {typeFilter === 'income' 
-                  ? getL10n('Total inkomst', 'Total income') 
-                  : getL10n('Totala utgifter', 'Total expenses')}
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1 pt-1.5">
-              <span className={`text-large-amount font-bold tabular-nums tracking-tight ${typeFilter === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
-                {typeFilter === 'income'
-                  ? (summaryStats.totalIncome > 0 ? `+${formatAmount(summaryStats.totalIncome, getLocale())}` : '0')
-                  : (summaryStats.totalExpenses > 0 ? `−${formatAmount(summaryStats.totalExpenses, getLocale())}` : '0')}
-              </span>
-              <span className="text-label font-medium text-[var(--text-secondary)]">
-                {config.currency || 'kr'}
-              </span>
-            </div>
-          </Card>
-
-          {/* Kort 2: Transaktioner vid filtrerat läge */}
-          <Card variant="default" padding="sm" className="select-none flex flex-col justify-between">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
-                {getL10n('Transaktioner', 'Transactions')}
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1 pt-1.5">
-              <span className="text-large-amount font-bold text-[var(--text-primary)] tabular-nums tracking-tight">
-                {summaryStats.count}
-              </span>
-              <span className="text-label font-medium text-[var(--text-secondary)]">
-                {getL10n('st', 'txs')}
-              </span>
-            </div>
-          </Card>
         </div>
       )}
 
@@ -824,26 +759,32 @@ export function LogView({
           <motion.div 
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="py-8"
+            className="py-2 sm:py-3"
           >
             <EmptyState
-              icon={Wallet}
+              icon={
+                hasActiveSearch
+                  ? 'search'
+                  : hasActiveFilters
+                  ? 'filter'
+                  : 'wallet'
+              }
               title={
-                searchQuery.trim()
+                hasActiveSearch
                   ? getL10n(
-                      `Inga träffar för "${searchQuery}"`,
-                      `No matches for "${searchQuery}"`,
-                      `Ingen treff for "${searchQuery}"`,
-                      `Ingen fundet for "${searchQuery}"`,
-                      `Ei tuloksia haulle "${searchQuery}"`
+                      'Inga sökresultat',
+                      'No search results',
+                      'Ingen søkeresultater',
+                      'Ingen søgeresultater',
+                      'Ei hakutuloksia'
                     )
-                  : categoryFilter
+                  : hasActiveFilters
                   ? getL10n(
-                      `Inga transaktioner i kategorin "${categoryFilter}"`,
-                      `No transactions in "${categoryFilter}"`,
-                      `Ingen transaksjoner i "${categoryFilter}"`,
-                      `Ingen transaktioner i "${categoryFilter}"`,
-                      `Ei tapahtumia kategoriassa "${categoryFilter}"`
+                      'Inga matchande transaktioner',
+                      'No matching transactions',
+                      'Ingen matchende transaksjoner',
+                      'Ingen matchende transaktioner',
+                      'Ei täsmääviä tapahtumia'
                     )
                   : selectedDate 
                   ? getL10n(
@@ -864,32 +805,42 @@ export function LogView({
                   : (transactions?.length || 0) === 0 ? t('noTransactions') : t('noTransactionsSubtle')
               }
               description={
-                hasActiveFilters ? (
-                  <button
-                    type="button"
-                    onClick={handleResetFilters}
-                    className="text-xs font-semibold text-[var(--accent-color)] hover:underline cursor-pointer mt-1"
-                  >
-                    {getL10n(
-                      'Återställ filter och visa alla', 
-                      'Reset filters and show all', 
-                      'Nullstill filtre og vis alle', 
-                      'Nulstil filtre og vis alle', 
-                      'Tyhjennä suodattimet ja näytä kaikki'
-                    )}
-                  </button>
-                ) : (transactions?.length || 0) > 0 && typeFilter !== 'all' ? (
-                  getL10n(
-                    'Inga transaktioner matchar det valda filtret.',
-                    'No transactions match the selected filter.',
-                    'Ingen transaksjoner samsvarer med det valgte filteret.',
-                    'Ingen transaktioner matcher det valgte filter.',
-                    'Ei tapahtumia valitulla suodattimella.'
-                  )
-                ) : undefined
+                hasActiveSearch && hasActiveFilters
+                  ? getL10n(
+                      'Prova ett annat sökord eller ändra dina filter.',
+                      'Try another search term or change your filters.',
+                      'Prøv et annet søkeord eller endre filtrene dine.',
+                      'Prøv et andet søgeord eller ændre dine filtre.',
+                      'Kokeile toista hakusanaa tai muuta suodattimiasi.'
+                    )
+                  : hasActiveSearch
+                  ? getL10n(
+                      'Prova ett annat sökord.',
+                      'Try another search term.',
+                      'Prøv et annet søkeord.',
+                      'Prøv et andet søgeord.',
+                      'Kokeile toista hakusanaa.'
+                    )
+                  : hasActiveFilters
+                  ? getL10n(
+                      'Prova att ändra dina filter.',
+                      'Try changing your filters.',
+                      'Prøv å endre filtrene dine.',
+                      'Prøv at ændre dine filtre.',
+                      'Kokeile muuttaa suodattimiasi.'
+                    )
+                  : undefined
               }
-              actionLabel={(transactions?.length || 0) === 0 ? t('addExpense') : undefined}
-              onAction={(transactions?.length || 0) === 0 ? onAddTransaction : undefined}
+              actionLabel={
+                !hasActiveSearch && !hasActiveFilters && (transactions?.length || 0) === 0
+                  ? t('addExpense')
+                  : undefined
+              }
+              onAction={
+                !hasActiveSearch && !hasActiveFilters && (transactions?.length || 0) === 0
+                  ? onAddTransaction
+                  : undefined
+              }
             />
           </motion.div>
         )}
@@ -1053,6 +1004,123 @@ export function LogView({
           </div>
         }
       />
+
+      {/* Filter Bottom Sheet */}
+      <BottomSheet
+        isOpen={isFilterBottomSheetOpen}
+        onClose={() => setIsFilterBottomSheetOpen(false)}
+        title={getL10n('Filtrera transaktioner', 'Filter transactions', 'Filtrer transaksjoner', 'Filtrer transaktioner', 'Suodata tapahtumia')}
+        subtitle={getL10n('Välj transaktionstyp och kategori', 'Select transaction type and category')}
+        size="md"
+        bodyClassName="p-4 sm:p-5 space-y-5 overflow-y-auto custom-scrollbar"
+        footer={
+          <div className="flex items-center justify-between gap-3 w-full">
+            {activeFiltersCount > 0 ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="md"
+                onClick={() => {
+                  if (typeof feedback?.tap === 'function') feedback.tap();
+                  setTypeFilter('all');
+                  setCategoryFilter(null);
+                }}
+                icon={<RotateCcw size={14} />}
+                className="text-[var(--danger-color)] hover:text-[var(--danger-color)]"
+              >
+                {getL10n('Rensa filter', 'Clear filters')}
+              </Button>
+            ) : (
+              <div />
+            )}
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={() => {
+                if (typeof feedback?.tap === 'function') feedback.tap();
+                setIsFilterBottomSheetOpen(false);
+              }}
+              className="min-w-[120px]"
+            >
+              {getL10n('Visa resultat', 'Show results')}
+            </Button>
+          </div>
+        }
+      >
+        {/* Categories Pills */}
+        <div className="space-y-2.5">
+          {categoryFilter && (
+            <div className="flex justify-end px-0.5">
+              <button
+                type="button"
+                onClick={() => setCategoryFilter(null)}
+                className="text-xs font-medium text-[var(--accent-color)] hover:underline cursor-pointer"
+              >
+                {getL10n('Återställ', 'Reset')}
+              </button>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2 max-h-[220px] overflow-y-auto custom-scrollbar pr-1 py-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof feedback?.selection === 'function') feedback.selection();
+                setCategoryFilter(null);
+              }}
+              className={`px-3 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
+                categoryFilter === null
+                  ? 'bg-[var(--text-primary)] text-[var(--surface-color)] border-transparent shadow-xs'
+                  : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              <LayoutGrid size={13} strokeWidth={2} />
+              <span>{getL10n('Alla kategorier', 'All categories', 'Alle kategorier', 'Alle kategorier', 'Kaikki katekoriat')}</span>
+            </button>
+
+            {allCategoryOptions.map((cat) => {
+              const isSelected = categoryFilter?.toLowerCase() === cat.name.toLowerCase();
+              const matchedCat = [...(config.categories || []), ...(config.incomeCategories || [])].find(
+                c => (c.name || '').trim().toLowerCase() === cat.name.toLowerCase() || c.id === cat.name
+              );
+              const iconKey = matchedCat?.icon || getCategoryIconName(cat.name);
+
+              return (
+                <button
+                  key={cat.name}
+                  type="button"
+                  onClick={() => {
+                    if (typeof feedback?.selection === 'function') feedback.selection();
+                    setCategoryFilter(isSelected ? null : cat.name);
+                  }}
+                  className={`px-3 py-2 rounded-full text-xs font-medium transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
+                    isSelected
+                      ? 'bg-[var(--text-primary)] text-[var(--surface-color)] font-semibold border-transparent shadow-xs'
+                      : 'bg-black/[0.04] dark:bg-white/[0.06] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <CategoryIcon
+                    icon={iconKey}
+                    categoryName={cat.name}
+                    variant="minimal"
+                    size="2xs"
+                    className="w-3.5 h-3.5"
+                  />
+                  <span>{cat.name}</span>
+                  {cat.count !== undefined && cat.count > 0 && (
+                    <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-full ${
+                      isSelected ? 'bg-white/20 text-white' : 'bg-black/5 dark:bg-white/10 text-[var(--text-tertiary)]'
+                    }`}>
+                      {cat.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 }

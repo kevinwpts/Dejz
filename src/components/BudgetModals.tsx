@@ -461,8 +461,8 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-4">
-            <div className="flex items-center gap-3.5">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-3.5">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
@@ -477,40 +477,48 @@ export function IncomeModal({ income, onClose, onSave, onDelete, t, currency, us
                 />
               </button>
               <div className="flex-1 min-w-0">
+                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                  {config?.language === 'en' ? 'Name / Payer' : 'Namn / Betalare'}
+                </label>
                 <input 
                   ref={nameInputRef}
                   type="text" 
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   placeholder={t('incomePayerPlaceholder')} 
-                  className="text-[19px] sm:text-[21px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-[16px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
 
-            <div className="pt-3 border-t border-subtle flex items-baseline justify-start gap-1">
-              <div 
-                onClick={() => amountInputRef.current?.focus()}
-                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
-              >
-                <span className="text-2xl sm:text-3xl font-extrabold text-[var(--text-secondary)] select-none mr-2 mb-1 sm:mb-2 font-sans shrink-0">
-                  {currency}
-                </span>
-                <input
-                  ref={amountInputRef}
-                  type="text"
-                  inputMode="decimal"
-                  value={amount}
-                  onChange={(e) => setAmount(formatAmount(e.target.value))}
-                  onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setAmount(evaluateAndFormatAmount(amount));
-                    }
-                  }}
-                  placeholder="0"
-                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none"
-                />
+            <div className="pt-3 border-t border-subtle flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                  {config?.language === 'en' ? 'Amount' : 'Belopp'}
+                </label>
+                <div 
+                  onClick={() => amountInputRef.current?.focus()}
+                  className="flex items-center gap-2 font-amount cursor-text w-full"
+                >
+                  <input
+                    ref={amountInputRef}
+                    type="text"
+                    inputMode="decimal"
+                    value={amount}
+                    onChange={(e) => setAmount(formatAmount(e.target.value))}
+                    onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setAmount(evaluateAndFormatAmount(amount));
+                      }
+                    }}
+                    placeholder="0"
+                    className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] text-[30px] sm:text-[36px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
+                  />
+                  <span className="text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[8px] select-none shrink-0 font-sans">
+                    {currency}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -1379,8 +1387,8 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-4">
-            <div className="flex items-center gap-3.5">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-3.5">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
@@ -1395,40 +1403,48 @@ export function FixedExpenseModal({ expense, onClose, onSave, onDelete, t, curre
                 />
               </button>
               <div className="flex-1 min-w-0">
+                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                  {config?.language === 'en' ? 'Name / Expense' : 'Namn / Utgift'}
+                </label>
                 <input 
                   ref={nameInputRef}
                   type="text" 
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   placeholder={t('fixedExpensePlaceholder')} 
-                  className="text-[19px] sm:text-[21px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-[16px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
 
-            <div className="pt-3 border-t border-subtle flex items-baseline justify-start gap-1">
-              <div 
-                onClick={() => amountInputRef.current?.focus()}
-                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
-              >
-                <span className="text-2xl sm:text-3xl font-extrabold text-[var(--text-secondary)] select-none mr-2 mb-1 sm:mb-2 font-sans shrink-0">
-                  {currency}
-                </span>
-                <input
-                  ref={amountInputRef}
-                  type="text"
-                  inputMode="decimal"
-                  value={amount}
-                  onChange={(e) => setAmount(formatAmount(e.target.value))}
-                  onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setAmount(evaluateAndFormatAmount(amount));
-                    }
-                  }}
-                  placeholder="0"
-                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder-[var(--text-tertiary)] w-full leading-none"
-                />
+            <div className="pt-3 border-t border-subtle flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                  {config?.language === 'en' ? 'Amount' : 'Belopp'}
+                </label>
+                <div 
+                  onClick={() => amountInputRef.current?.focus()}
+                  className="flex items-center gap-2 font-amount cursor-text w-full"
+                >
+                  <input
+                    ref={amountInputRef}
+                    type="text"
+                    inputMode="decimal"
+                    value={amount}
+                    onChange={(e) => setAmount(formatAmount(e.target.value))}
+                    onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setAmount(evaluateAndFormatAmount(amount));
+                      }
+                    }}
+                    placeholder="0"
+                    className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] text-[30px] sm:text-[36px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
+                  />
+                  <span className="text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[8px] select-none shrink-0 font-sans">
+                    {currency}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -2267,8 +2283,8 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
           </div>
 
           {/* 1. Main Hero Card: Icon + Name & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-4">
-            <div className="flex items-center gap-3.5">
+          <div className="p-4 sm:p-5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border-none shadow-none space-y-3.5">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
@@ -2276,7 +2292,7 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                 title={t('chooseIcon')}
                 aria-label={t('chooseIcon')}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl overflow-hidden bg-black/5 dark:bg-white/5">
+                <div className="w-11 h-11 rounded-full flex items-center justify-center text-xl overflow-hidden bg-black/5 dark:bg-white/5">
                   {logo ? (
                     <img src={logo} alt="Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                   ) : isEmojiString(icon) ? (
@@ -2284,46 +2300,54 @@ export function MonthlySavingModal({ saving, onClose, onSave, onDelete, t, curre
                   ) : (
                     (() => {
                       const Icon = ICON_MAP[icon] || PiggyBank;
-                      return <Icon size={22} className="text-accent" />;
+                      return <Icon size={20} className="text-accent" />;
                     })()
                   )}
                 </div>
               </button>
               <div className="flex-1 min-w-0">
+                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                  {config?.language === 'en' ? 'Name / Goal' : 'Namn / Sparmål'}
+                </label>
                 <input 
                   ref={nameInputRef}
                   type="text" 
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
                   placeholder={t('savingsGoalPlaceholder')} 
-                  className="text-[19px] sm:text-[21px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-[16px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
 
-            <div className="pt-3 border-t border-subtle flex items-baseline justify-start gap-1">
-              <div 
-                onClick={() => amountInputRef.current?.focus()}
-                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full leading-none text-[var(--text-primary)]"
-              >
-                <span className="text-2xl sm:text-3xl font-extrabold text-[var(--text-secondary)] select-none mr-2 mb-1 sm:mb-2 font-sans shrink-0">
-                  {currency}
-                </span>
-                <input
-                  ref={amountInputRef}
-                  type="text"
-                  inputMode="decimal"
-                  value={amount}
-                  onChange={(e) => setAmount(formatAmount(e.target.value))}
-                  onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setAmount(evaluateAndFormatAmount(amount));
-                    }
-                  }}
-                  placeholder="0"
-                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] placeholder:font-normal placeholder-[var(--text-tertiary)] w-full leading-none"
-                />
+            <div className="pt-3 border-t border-subtle flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                  {config?.language === 'en' ? 'Amount' : 'Belopp'}
+                </label>
+                <div 
+                  onClick={() => amountInputRef.current?.focus()}
+                  className="flex items-center gap-2 font-amount cursor-text w-full"
+                >
+                  <input
+                    ref={amountInputRef}
+                    type="text"
+                    inputMode="decimal"
+                    value={amount}
+                    onChange={(e) => setAmount(formatAmount(e.target.value))}
+                    onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setAmount(evaluateAndFormatAmount(amount));
+                      }
+                    }}
+                    placeholder="0"
+                    className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] text-[30px] sm:text-[36px] placeholder:font-normal placeholder:text-[var(--text-tertiary)] w-full leading-none shrink min-w-[60px]"
+                  />
+                  <span className="text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[8px] select-none shrink-0 font-sans">
+                    {currency}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

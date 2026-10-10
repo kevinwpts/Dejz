@@ -3079,10 +3079,15 @@ export default function App() {
     return stats?.days || [];
   }, [stats]);
 
+  const actualPeriodId = useMemo(
+    () => getPeriodId(actualPeriodStart),
+    [actualPeriodStart],
+  );
+
   const attentionItems = useMemo(() => {
-    if (!config || !stats) return [];
+    if (!config) return [];
     const items: any[] = [];
-    const currentPeriodId = stats.periodId;
+    const currentPeriodId = actualPeriodId;
 
     incomes.forEach((i) => {
       if (
@@ -3112,13 +3117,14 @@ export default function App() {
     });
 
     return items;
-  }, [config, incomes, fixedExpenses, stats?.periodId]);
+  }, [config, incomes, fixedExpenses, actualPeriodId]);
 
   const notifications = useMemo<AppNotification[]>(() => {
-    if (!config || !stats) return [];
+    if (!config) return [];
     const notifs: AppNotification[] = [];
-    const currentPeriodId = stats.periodId;
-    const { periodStart, periodEnd } = stats;
+    const currentPeriodId = actualPeriodId;
+    const periodStart = actualPeriodStart;
+    const periodEnd = actualPeriodEnd;
 
     const allowVariable = config.notifications?.variableAmountsReminder !== false;
 
@@ -3129,98 +3135,98 @@ export default function App() {
           e.isVariable &&
           (!e.periodOverrides || e.periodOverrides[currentPeriodId] === undefined)
         ) {
-        const isDue = isVariableItemDue(
-          e.deductionDay || 1,
-          periodStart,
-          periodEnd,
-          new Date(),
-        );
-        const notifId = `expense_${e.id}_${currentPeriodId}`;
-        if (isDue && !dismissedNotificationIds.includes(notifId)) {
-          const expenseName = e.name || "utgift";
-          const lower = expenseName.toLowerCase();
-          const endsWithSuffix =
-            lower.endsWith("räkning") || lower.endsWith("faktura");
-          const title = endsWithSuffix
-            ? `Hej, vad blev din ${expenseName} denna månaden?`
-            : `Hej, vad blev din ${expenseName}-räkning denna månaden?`;
+          const isDue = isVariableItemDue(
+            e.deductionDay || 1,
+            periodStart,
+            periodEnd,
+            new Date(),
+          );
+          const notifId = `expense_${e.id}_${currentPeriodId}`;
+          if (isDue && !dismissedNotificationIds.includes(notifId)) {
+            const expenseName = e.name || "utgift";
+            const lower = expenseName.toLowerCase();
+            const endsWithSuffix =
+              lower.endsWith("räkning") || lower.endsWith("faktura");
+            const title = endsWithSuffix
+              ? `Hej, vad blev din ${expenseName} denna månaden?`
+              : `Hej, vad blev din ${expenseName}-räkning denna månaden?`;
 
-          notifs.push({
-            id: notifId,
-            type: "variable_expense",
-            item: { ...e, budgetType: "expense" },
-            title,
-            subtitle: `Dras den ${e.deductionDay || 1}:e`,
-            deductionDay: e.deductionDay || 1,
-            expectedAmount: Number(e.amount) || 0,
-          });
+            notifs.push({
+              id: notifId,
+              type: "variable_expense",
+              item: { ...e, budgetType: "expense" },
+              title,
+              subtitle: `Dras den ${e.deductionDay || 1}:e`,
+              deductionDay: e.deductionDay || 1,
+              expectedAmount: Number(e.amount) || 0,
+            });
+          }
         }
-      }
-    });
+      });
 
-    // 2. Variable incomes
-    incomes.forEach((i) => {
-      if (
-        i.isVariable &&
-        (!i.periodOverrides || i.periodOverrides[currentPeriodId] === undefined)
-      ) {
-        const isDue = isVariableItemDue(
-          i.deductionDay || 1,
-          periodStart,
-          periodEnd,
-          new Date(),
-        );
-        const notifId = `income_${i.id}_${currentPeriodId}`;
-        if (isDue && !dismissedNotificationIds.includes(notifId)) {
-          const incomeName = i.name || "inkomst";
-          const title = `Hej, vad blev din ${incomeName} denna månaden?`;
+      // 2. Variable incomes
+      incomes.forEach((i) => {
+        if (
+          i.isVariable &&
+          (!i.periodOverrides || i.periodOverrides[currentPeriodId] === undefined)
+        ) {
+          const isDue = isVariableItemDue(
+            i.deductionDay || 1,
+            periodStart,
+            periodEnd,
+            new Date(),
+          );
+          const notifId = `income_${i.id}_${currentPeriodId}`;
+          if (isDue && !dismissedNotificationIds.includes(notifId)) {
+            const incomeName = i.name || "inkomst";
+            const title = `Hej, vad blev din ${incomeName} denna månaden?`;
 
-          notifs.push({
-            id: notifId,
-            type: "variable_income",
-            item: { ...i, budgetType: "income" },
-            title,
-            subtitle: `Kommer den ${i.deductionDay || 1}:e`,
-            deductionDay: i.deductionDay || 1,
-            expectedAmount: Number(i.amount) || 0,
-          });
+            notifs.push({
+              id: notifId,
+              type: "variable_income",
+              item: { ...i, budgetType: "income" },
+              title,
+              subtitle: `Kommer den ${i.deductionDay || 1}:e`,
+              deductionDay: i.deductionDay || 1,
+              expectedAmount: Number(i.amount) || 0,
+            });
+          }
         }
-      }
-    });
+      });
 
-    // 3. Variable savings items
-    config.monthlySavingsItems?.forEach((s) => {
-      if (
-        s.isVariable &&
-        (!s.periodOverrides || s.periodOverrides[currentPeriodId] === undefined)
-      ) {
-        const isDue = isVariableItemDue(
-          s.deductionDay || 1,
-          periodStart,
-          periodEnd,
-          new Date(),
-        );
-        const notifId = `savings_${s.id}_${currentPeriodId}`;
-        if (isDue && !dismissedNotificationIds.includes(notifId)) {
-          const savingsName = s.name || "sparande";
-          const title = `Hej, vad sparar du till ${savingsName} denna månaden?`;
+      // 3. Variable savings items
+      config.monthlySavingsItems?.forEach((s) => {
+        if (
+          s.isVariable &&
+          (!s.periodOverrides || s.periodOverrides[currentPeriodId] === undefined)
+        ) {
+          const isDue = isVariableItemDue(
+            s.deductionDay || 1,
+            periodStart,
+            periodEnd,
+            new Date(),
+          );
+          const notifId = `savings_${s.id}_${currentPeriodId}`;
+          if (isDue && !dismissedNotificationIds.includes(notifId)) {
+            const savingsName = s.name || "sparande";
+            const title = `Hej, vad sparar du till ${savingsName} denna månaden?`;
 
-          notifs.push({
-            id: notifId,
-            type: "variable_savings",
-            item: { ...s, budgetType: "savings" },
-            title,
-            subtitle: `Dras den ${s.deductionDay || 1}:e`,
-            deductionDay: s.deductionDay || 1,
-            expectedAmount: Number(s.amount) || 0,
-          });
+            notifs.push({
+              id: notifId,
+              type: "variable_savings",
+              item: { ...s, budgetType: "savings" },
+              title,
+              subtitle: `Dras den ${s.deductionDay || 1}:e`,
+              deductionDay: s.deductionDay || 1,
+              expectedAmount: Number(s.amount) || 0,
+            });
+          }
         }
-      }
-    });
+      });
     }
 
     return notifs;
-  }, [config, stats, fixedExpenses, incomes, dismissedNotificationIds]);
+  }, [config, actualPeriodId, actualPeriodStart, actualPeriodEnd, fixedExpenses, incomes, dismissedNotificationIds]);
 
   const handleDismissNotification = (notificationId: string) => {
     setDismissedNotificationIds((prev) => {
@@ -3355,6 +3361,14 @@ export default function App() {
       }
 
       setIsAddTransactionOpen(false);
+
+      // Direct user to Home tab ('today') and select the transaction's date on the timeline
+      const txTimestamp = customTimestamp || (transaction as any).timestamp || Date.now();
+      const txDate = new Date(txTimestamp);
+      txDate.setHours(0, 0, 0, 0);
+      setTargetDate(txDate);
+      setCurrentPeriodDate(txDate);
+      setActiveTab("today");
     } catch (err: any) {
       console.error("[App] Error adding transaction:", err);
       const detail = err?.details ? ` (${err.details})` : "";
@@ -3387,6 +3401,13 @@ export default function App() {
       }
       setIsIncomeModalOpen(false);
       setEditingIncome(null);
+
+      // Direct user to Home tab ('today') and select today's date on the timeline
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      setTargetDate(now);
+      setCurrentPeriodDate(now);
+      setActiveTab("today");
     } catch (err: any) {
       console.error("[App] Error saving income:", err);
       addToast(

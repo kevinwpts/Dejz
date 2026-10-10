@@ -8,6 +8,7 @@ import { BudgetItem } from './BudgetItem';
 import { BottomSheet, EmptyState } from './ui';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
+import { getCategoryColor } from '../utils/categoryColors';
 
 interface CategoryBottomSheetModalProps {
   isOpen: boolean;
@@ -67,7 +68,7 @@ export function CategoryBottomSheetModal({
     return config.categories.find((c) => (c.name || '').trim().toLowerCase() === norm);
   }, [targetCategoryName, config?.categories]);
 
-  const categoryColor = categoryData?.color || matchedCategory?.color || '#6E6961';
+  const categoryColor = categoryData?.color || matchedCategory?.color || getCategoryColor(targetCategoryName || '', config?.categories);
   const iconKey = categoryData?.iconName || matchedCategory?.icon || getCategoryIconName(targetCategoryName || '');
 
   // Filter transactions for this category strictly within the current period
@@ -179,9 +180,9 @@ export function CategoryBottomSheetModal({
     >
               {/* Category Budget Status Card */}
               <div className="p-4 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle shrink-0 space-y-3">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center justify-between gap-3">
                   {/* Left: Main text + Subtext */}
-                  <div className="flex flex-col min-w-0">
+                  <div className="flex flex-col min-w-0 flex-1">
                     {hasBudget ? (
                       <>
                         <span

@@ -92,7 +92,9 @@ import {
   Sparkle,
   Key,
   CircleHalf,
-  CalendarCheck
+  CalendarCheck,
+  Funnel,
+  SlidersHorizontal
 } from '@phosphor-icons/react';
 
 export type IconName =
@@ -226,7 +228,10 @@ export type IconName =
   | 'sparkle'
   | 'key'
   | 'circle-half'
-  | 'calendar-check';
+  | 'calendar-check'
+  | 'filter'
+  | 'sliders'
+  | 'sliders-horizontal';
 
 export interface IconProps extends React.ComponentPropsWithoutRef<'svg'> {
   name: IconName;
@@ -368,6 +373,9 @@ const iconMap: Record<IconName, React.ComponentType<any>> = {
   key: Key,
   'circle-half': CircleHalf,
   'calendar-check': CalendarCheck,
+  filter: Funnel,
+  sliders: SlidersHorizontal,
+  'sliders-horizontal': SlidersHorizontal,
 };
 
 export function Icon({

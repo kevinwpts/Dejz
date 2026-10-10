@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { User, Search, ChevronLeft, Bell } from "lucide-react";
+import { DejzLogo } from "./DejzLogo";
 
 interface AppHeaderProps {
   userName?: string;
@@ -104,30 +105,17 @@ export function AppHeader({
             </>
           ) : (
             <button
-              onClick={() => onNavigate("profile")}
+              onClick={() => onNavigate("today")}
               className="flex items-center gap-2 transition-transform active:scale-95 cursor-pointer py-1 select-none"
-              aria-label="Profil"
-              title="Profil"
+              aria-label="dejz"
+              title="dejz"
             >
-              <div className={`w-9 h-9 rounded-full overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center ${
-                activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
-              }`}>
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <User size={18} strokeWidth={2} className="text-[#6D6962] dark:text-[#A8A8A8]" />
-                )}
-              </div>
+              <DejzLogo className="h-6 sm:h-7 w-auto" />
             </button>
           )}
         </div>
 
-        {/* Right Actions: Notifications + Search */}
+        {/* Right Actions: Notifications + Search + Profile Avatar */}
         <div className="flex items-center gap-1 shrink-0 z-10">
           {/* 1. Notifications */}
           {onOpenNotifications && (
@@ -161,6 +149,29 @@ export function AppHeader({
             title={language === 'en' ? 'Search' : 'Sök'}
           >
             <Search size={20} strokeWidth={2} />
+          </button>
+
+          {/* 3. Profile Avatar Button (Far Right) */}
+          <button
+            onClick={() => onNavigate("profile")}
+            className="flex items-center justify-center transition-transform active:scale-95 cursor-pointer p-0.5 select-none ml-1"
+            aria-label="Profil"
+            title="Profil"
+          >
+            <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden bg-black/5 dark:bg-white/5 flex items-center justify-center ${
+              activeTab === "profile" ? "ring-2 ring-[var(--accent-color)]" : ""
+            }`}>
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <User size={18} strokeWidth={2} className="text-[#6D6962] dark:text-[#A8A8A8]" />
+              )}
+            </div>
           </button>
         </div>
       </div>

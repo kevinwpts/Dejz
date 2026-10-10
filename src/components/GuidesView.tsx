@@ -143,7 +143,7 @@ export function GuidesView({ config }: GuidesViewProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-[var(--card-gap)] pb-20 page-max mx-auto w-full font-sans"
+      className="space-y-[var(--menu-content-gap)] pb-20 page-max mx-auto w-full font-sans"
     >
       {/* If a specific guide is opened */}
       {selectedGuide ? (

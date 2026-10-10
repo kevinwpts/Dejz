@@ -21,8 +21,7 @@ import { CategoryIcon } from "./CategoryIcon";
 import { EmptyState } from "./EmptyState";
 import { GreetingModule } from "./GreetingModule";
 import { PeriodTimeline } from "./PeriodTimeline";
-import { FixedExpenseScrollTimeline } from "./FixedExpenseScrollTimeline";
-import { Button, Modal, Card } from "./ui";
+import { Button, Modal } from "./ui";
 import { getCategoryIconName } from "../utils/icons";
 import { formatAmount } from "../utils/format";
 import { CategoryBottomSheetModal } from "./CategoryBottomSheetModal";
@@ -437,63 +436,60 @@ export function TodayView({
               </button>
             </div>
 
-            {/* En gemensam sammanhängande Card-modul för alla kategorier med horisontell scroll */}
-            <Card variant="default" padding="none" className="border-none">
-              <div className="overflow-x-auto scrollbar-hide py-5 sm:py-6 px-3.5 sm:px-4 flex items-start gap-3 sm:gap-4">
-                {categoryBudgetData.map((cat) => {
-                  const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
-                  const currency = config?.currency || 'kr';
-                  const isOverBudget = cat.hasBudget && (cat.isOverBudget || cat.remaining < 0);
-                  const rem = Math.round(cat.remaining);
+            {/* Horisontell karusell av mini-kort för kategoribudgetar (utan mätare) */}
+            <div
+              className="flex gap-2.5 overflow-x-auto py-1 px-0.5 no-scrollbar select-none snap-x snap-mandatory"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
+              {categoryBudgetData.map((cat) => {
+                const catColor = cat.color || getCategoryColor(cat.name, config?.categories);
+                const currency = config?.currency || 'kr';
+                const isOverBudget = cat.hasBudget && (cat.isOverBudget || cat.remaining < 0);
+                const rem = Math.round(cat.remaining);
 
-                  return (
-                    <button
-                      key={cat.name}
-                      type="button"
-                      onClick={() => {
-                        if (typeof feedback.light === 'function') feedback.light();
-                        handleCategoryClick(cat.name);
-                      }}
-                      className="flex flex-col items-center text-center shrink-0 w-[96px] sm:w-[104px] group cursor-pointer active:scale-[0.96] transition-transform select-none focus:outline-none"
-                    >
-                      {/* 1. Kategoriikon */}
-                      <CategoryIcon icon={cat.iconName} color={catColor} size="xl" categoryName={cat.name} />
+                return (
+                  <button
+                    key={cat.name}
+                    type="button"
+                    onClick={() => {
+                      if (typeof feedback.light === 'function') feedback.light();
+                      handleCategoryClick(cat.name);
+                    }}
+                    className="snap-start flex-shrink-0 min-w-[140px] sm:min-w-[155px] p-3 rounded-card bg-[var(--surface-color)] border border-subtle hover:border-[var(--border-control)] transition-all cursor-pointer active:scale-[0.98] text-left flex flex-col justify-between gap-2.5 shadow-subtle group select-none"
+                  >
+                    {/* Ikon */}
+                    <div className="flex items-center justify-between gap-2">
+                      <CategoryIcon icon={cat.iconName} color={catColor} size="sm" categoryName={cat.name} />
+                    </div>
 
-                      {/* 2. Kategorinamn (reservera fast höjd för upp till 2 rader så beloppen hamnar på exakt samma horisontella nivå) */}
-                      <div className="h-[24px] sm:h-[26px] flex items-center justify-center w-full px-0.5 mt-1.5">
-                        <span
-                          className="text-[9px] sm:text-[9.5px] font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors leading-tight line-clamp-2 w-full text-center"
-                          title={cat.name}
-                        >
-                          {cat.name}
-                        </span>
-                      </div>
-
-                      {/* 3. Kvarvarande eller överskridet belopp */}
-                      <span className="text-[13px] sm:text-[14px] font-semibold font-amount tabular-nums leading-tight mt-1 truncate max-w-full px-0.5 text-[var(--text-primary)]">
+                    {/* Kategorinamn och Belopp */}
+                    <div className="min-w-0">
+                      <span className="text-body-medium font-bold text-[var(--text-primary)] truncate block group-hover:text-[var(--accent-color)] transition-colors mb-0.5">
+                        {cat.name}
+                      </span>
+                      <span
+                        className={`text-body-medium font-bold font-amount tabular-nums block ${
+                          isOverBudget ? 'text-[var(--danger-color)]' : 'text-[var(--text-primary)]'
+                        }`}
+                      >
                         {!cat.hasBudget
                           ? `${formatAmount(Math.round(cat.spent), lang)} ${currency}`
                           : `${rem < 0 ? '−' : ''}${formatAmount(Math.abs(rem), lang)} ${currency}`}
                       </span>
-
-                      {/* 4. Kort status */}
-                      <span className="text-[10.5px] leading-tight mt-0.5 truncate max-w-full px-0.5 text-[var(--text-secondary)]">
-                        {cat.hasBudget
-                          ? (isOverBudget
-                              ? (lang === 'en' ? 'Over budget' : 'Över budget')
-                              : (lang === 'en' ? 'Left' : 'Kvar'))
-                          : (lang === 'en' ? 'Spent' : 'Spenderat')}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </Card>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         ) : null}
       </div>
 
-      {/* Monthly Deductions Timeline */}
+      {/* Monthly Deductions Timeline (Betalningar) - Sparad kod
       {fixedExpenses && fixedExpenses.length > 0 && (
         <div className="animate-fade-in -mx-0.5">
           <FixedExpenseScrollTimeline
@@ -503,55 +499,58 @@ export function TodayView({
           />
         </div>
       )}
+      */}
 
       {/* 3. Unified Timeline & Transactions Section */}
       <div className="space-y-[var(--card-gap)] sm:space-y-[var(--card-gap)]">
-        {/* Timeline */}
-        {calendarDays && calendarDays.length > 0 && (
-          <div className="animate-fade-in -mx-1 px-1">
-            <PeriodTimeline
-              calendarDays={calendarDays}
-              selectedDate={normalizedSelectedDate}
-              onSelectDate={setSelectedDate}
-              stats={stats}
-              language={lang}
-              isCurrentPeriod={isCurrentPeriod}
-              showFixedInCalendar={config?.showFixedExpensesInCalendar}
-            />
-          </div>
-        )}
+        {/* Timeline + Connected Date Header */}
+        <div className="space-y-2.5 sm:space-y-3">
+          {calendarDays && calendarDays.length > 0 && (
+            <div className="animate-fade-in -mx-1 px-1">
+              <PeriodTimeline
+                calendarDays={calendarDays}
+                selectedDate={normalizedSelectedDate}
+                onSelectDate={setSelectedDate}
+                stats={stats}
+                language={lang}
+                isCurrentPeriod={isCurrentPeriod}
+                showFixedInCalendar={config?.showFixedExpensesInCalendar}
+              />
+            </div>
+          )}
 
-        {/* Date Header directly connected with timeline */}
-        <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
-          <div className="flex items-center gap-2 min-w-0">
-            <h2 className="text-section-title truncate">
-              {stats.isPastPeriod
-                ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
-                : selectedDate.toDateString() === new Date().toDateString()
-                  ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
-                  : selectedDate.toLocaleDateString(
-                      lang === "en" ? "en-US" : "sv-SE",
-                      { day: "numeric", month: "long" },
-                    )}
-            </h2>
-          </div>
+          {/* Date Header directly connected with timeline */}
+          <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5">
+            <div className="flex items-center gap-2 min-w-0">
+              <h2 className="text-section-title truncate">
+                {stats.isPastPeriod
+                  ? (lang === "en" ? "Period transactions" : "Periodens transaktioner")
+                  : selectedDate.toDateString() === new Date().toDateString()
+                    ? `${lang === "en" ? "Today" : "Idag"}, ${selectedDate.toLocaleDateString(lang === "en" ? "en-US" : "sv-SE", { day: "numeric", month: "long" })}`
+                    : selectedDate.toLocaleDateString(
+                        lang === "en" ? "en-US" : "sv-SE",
+                        { day: "numeric", month: "long" },
+                      )}
+              </h2>
+            </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            {!isTodaySelected && (
-              <button
-                type="button"
-                onClick={handleGoToToday}
-                className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-button-sm,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-subtle text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none"
-              >
-                <RotateCcw size={11} strokeWidth={2.5} />
-                <span>{lang === "en" ? "Today" : "Idag"}</span>
-              </button>
-            )}
+            <div className="flex items-center gap-2 shrink-0">
+              {!isTodaySelected && (
+                <button
+                  type="button"
+                  onClick={handleGoToToday}
+                  className="flex items-center gap-1.5 px-2.5 h-6 rounded-[var(--radius-button-sm,10px)] bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-subtle text-micro-label font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all active:scale-95 cursor-pointer shadow-none"
+                >
+                  <RotateCcw size={11} strokeWidth={2.5} />
+                  <span>{lang === "en" ? "Today" : "Idag"}</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Selected Day's Transactions List */}
-        <div className="space-y-[var(--card-gap)]">
+        <div className="space-y-[var(--card-gap)] pt-1">
           <AnimatePresence mode="popLayout">
             {displayedVariableTransactions.length > 0 ? (
               <motion.div className="space-y-[var(--card-gap)]" key="transactions">

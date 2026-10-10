@@ -56,7 +56,7 @@ export function NotificationsView({
         className="py-12 px-2"
       >
         <EmptyState
-          icon={Check}
+          icon="check-circle"
           title={t('noNotifications')}
           description={
             config.language === 'en'

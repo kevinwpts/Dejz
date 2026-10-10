@@ -679,8 +679,8 @@ export function TransactionModal({
           )}
 
           {/* 1. Main Hero Card: Icon + Merchant & Amount Input */}
-          <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] border-none shadow-none space-y-4">
-            <div className="flex items-center gap-3.5">
+          <div className="p-4 sm:p-5 rounded-card bg-[var(--surface-color)] border-none shadow-none space-y-3.5">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setShowIconSelector(true)}
@@ -695,6 +695,9 @@ export function TransactionModal({
                 />
               </button>
               <div className="flex-1 min-w-0">
+                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                  {currentLang === 'en' ? 'Name / Merchant' : 'Namn / Mottagare'}
+                </label>
                 <input 
                   ref={merchantInputRef}
                   type="text" 
@@ -708,41 +711,39 @@ export function TransactionModal({
                     }
                   }}
                   placeholder={currentLang === 'en' ? 'Name' : 'Namn'}
-                  className="text-[19px] sm:text-[21px] font-bold tracking-tight text-[var(--text-primary)] leading-tight bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
+                  className="text-[16px] sm:text-[18px] font-semibold tracking-tight text-[var(--text-primary)] leading-snug bg-transparent outline-none w-full placeholder:text-[var(--text-tertiary)] placeholder:font-normal py-0.5"
                 />
               </div>
             </div>
 
-            <div className="pt-3 border-t border-subtle flex items-baseline justify-start gap-1">
-              <div 
-                onClick={() => amountInputRef.current?.focus()}
-                className="flex items-baseline font-amount text-[48px] sm:text-[64px] font-bold tabular-nums tracking-tight cursor-text w-full"
-              >
-                <span className="text-2xl sm:text-3xl font-extrabold text-[var(--text-secondary)] select-none mr-2 mb-1 sm:mb-2 font-sans shrink-0">
-                  {currency}
-                </span>
-                <input
-                  ref={amountInputRef}
-                  type="text"
-                  inputMode="decimal"
-                  value={amount}
-                  onChange={(e) => setAmount(formatAmount(e.target.value))}
-                  onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setAmount(evaluateAndFormatAmount(amount));
-                    }
-                  }}
-                  className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder-[var(--text-tertiary)] text-[var(--text-primary)] w-full leading-none"
-                  placeholder="0"
-                />
-                <button
-                  type="button"
-                  onClick={() => {}}
-                  className="text-[10px] font-bold text-[var(--text-secondary)] whitespace-nowrap bg-black/[0.04] dark:bg-white/[0.06] px-2 py-1 rounded-[var(--radius-button-sm,10px)]"
+            <div className="pt-3 border-t border-subtle flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <label className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-tertiary)] block mb-0.5">
+                  {currentLang === 'en' ? 'Amount' : 'Belopp'}
+                </label>
+                <div 
+                  onClick={() => amountInputRef.current?.focus()}
+                  className="flex items-center gap-2 font-amount cursor-text w-full"
                 >
-                  {currentLang === 'en' ? 'Split' : 'Dela upp'}
-                </button>
+                  <input
+                    ref={amountInputRef}
+                    type="text"
+                    inputMode="decimal"
+                    value={amount}
+                    onChange={(e) => setAmount(formatAmount(e.target.value))}
+                    onBlur={() => setAmount(evaluateAndFormatAmount(amount))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setAmount(evaluateAndFormatAmount(amount));
+                      }
+                    }}
+                    className="bg-transparent outline-none font-amount font-bold tabular-nums tracking-tight placeholder:font-normal placeholder:text-[var(--text-tertiary)] text-[var(--text-primary)] text-[30px] sm:text-[36px] w-full leading-none shrink min-w-[60px]"
+                    placeholder="0"
+                  />
+                  <span className="text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider bg-black/[0.04] dark:bg-white/[0.06] border border-subtle px-2.5 py-1 rounded-[8px] select-none shrink-0 font-sans">
+                    {currency}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

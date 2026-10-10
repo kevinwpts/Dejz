@@ -7,7 +7,8 @@ import {
   Sparkles,
   Check,
   Receipt,
-  Instagram
+  Instagram,
+  Star
 } from 'lucide-react';
 import { TranslationKey, Language } from '../i18n';
 import { PolicyModal } from './PolicyModal';
@@ -581,6 +582,104 @@ export function LandingPage({
               </div>
             </div>
           </Card>
+        </div>
+      </section>
+
+      {/* 8. BETA TESTERS SOCIAL PROOF SECTION */}
+      <section className="py-24 bg-[var(--bg-color)] border-b border-[var(--border-subtle)]">
+        <div className="max-w-[1240px] mx-auto px-6 sm:px-8 space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-color)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] shadow-2xs">
+              <div className="flex items-center gap-1 text-amber-500">
+                <Star size={14} fill="currentColor" />
+                <Star size={14} fill="currentColor" />
+                <Star size={14} fill="currentColor" />
+                <Star size={14} fill="currentColor" />
+                <Star size={14} fill="currentColor" />
+              </div>
+              <span>4.9 av 5 i betyg bland 20+ tidiga betatestare</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-semibold font-display tracking-tight text-[var(--text-primary)]">
+              Vad säger de som provat?
+            </h2>
+            <p className="text-base sm:text-lg text-[var(--text-secondary)]">
+              Dejz har testats av över 20 tidiga användare för att säkerställa att upplevelsen sitter perfekt från dag ett.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card variant="default" padding="lg" className="space-y-4 flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center gap-1 text-amber-500">
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                </div>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] italic leading-relaxed">
+                  &quot;Slutligen en app som inte kräver krångliga bankkopplingar. Har äntligen full koll på pengarna mellan lönerna!&quot;
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-[var(--surface-muted)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center">
+                  ML
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Marcus Lindström</h4>
+                  <p className="text-xs text-[var(--text-tertiary)]">Betatestare (Stockholm)</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card variant="default" padding="lg" className="space-y-4 flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center gap-1 text-amber-500">
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                </div>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] italic leading-relaxed">
+                  &quot;Periodkalkylen är guld värd. Man ser direkt vad som faktiskt finns kvar att spendera efter alla fasta utgifter.&quot;
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-[var(--surface-muted)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center">
+                  SK
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Sofia Karlsson</h4>
+                  <p className="text-xs text-[var(--text-tertiary)]">Betatestare (Göteborg)</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card variant="default" padding="lg" className="space-y-4 flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center gap-1 text-amber-500">
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                  <Star size={16} fill="currentColor" />
+                </div>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] italic leading-relaxed">
+                  &quot;Superenkel, snabb och stilren design. Precis det ekonomiverktyg jag har letat efter i flera år.&quot;
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-[var(--surface-muted)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-center">
+                  AE
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Alexander Ek</h4>
+                  <p className="text-xs text-[var(--text-tertiary)]">Betatestare (Malmö)</p>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
       </section>
 

@@ -104,10 +104,7 @@ export function SettingsView({
 
     return (
       <div className="space-y-4 w-full py-2">
-        <div className="flex items-center justify-between mb-2 px-1">
-          <span className="text-xs font-semibold text-[var(--text-secondary)]">
-            {methodsList.length} {config.language === 'en' ? 'payment methods' : 'betalningsmetoder'}
-          </span>
+        <div className="flex items-center justify-end mb-2 px-1">
           <Button
             variant="secondary"
             size="sm"
@@ -161,7 +158,7 @@ export function SettingsView({
             onClick={() => setIsResetPaymentMethodsModalOpen(true)}
             className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
           >
-            {config.language === 'en' ? 'Reset payment methods to default' : 'Återställ betalningsmetoder till standard'}
+            {config.language === 'en' ? 'Reset payment methods' : 'Återställ betalningsmetoder'}
           </Button>
         </div>
       </div>

@@ -160,9 +160,7 @@ export function ManageAccountView({
                 onChange={handleFileChange}
               />
             </label>
-            <p className="text-micro-label font-semibold text-[var(--text-secondary)] opacity-70">
-              Tryck för att ändra profilbild
-            </p>
+
           </div>
 
           <div className="space-y-4">
@@ -188,7 +186,7 @@ export function ManageAccountView({
             </div>
 
             {/* Password */}
-            <Card variant="default" padding="none">
+            <div className="border-t border-b border-[var(--border-subtle)] my-1">
               <ListRow
                 variant="grouped"
                 showChevron
@@ -197,15 +195,15 @@ export function ManageAccountView({
                 title={t('changePassword' as any) || 'Ändra lösenord'}
                 onClick={() => setShowPasswordChange(true)}
               />
-            </Card>
+            </div>
 
             {/* Connected Accounts */}
             {identities.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-2 pt-1">
                 <span className="text-label font-semibold text-[var(--text-secondary)] px-1.5 block">
                   {t('connectedAccounts' as any) || 'Kopplade konton'}
                 </span>
-                <Card variant="default" padding="none" className="divide-y divide-menu">
+                <div className="divide-y divide-[var(--border-subtle)] border-t border-b border-[var(--border-subtle)]">
                   {identities.map((identity) => (
                     <ListRow
                       key={identity.id}
@@ -246,7 +244,7 @@ export function ManageAccountView({
                       }
                     />
                   ))}
-                </Card>
+                </div>
               </div>
             )}
 

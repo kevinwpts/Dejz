@@ -290,7 +290,7 @@ export function ProfileView({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
-      className="space-y-[var(--card-gap)] w-full pb-12 font-sans"
+      className="space-y-[var(--menu-content-gap)] w-full pb-12 font-sans"
     >
       {/* User Header Module */}
       <div className="bg-[var(--surface-color)] rounded-[var(--radius-card,14px)] p-5 border border-subtle shadow-2xs flex items-center gap-4">
@@ -334,10 +334,10 @@ export function ProfileView({
         </div>
       </div>
 
-      <div className="space-y-[var(--card-gap)]">
+      <div className="space-y-6 sm:space-y-7">
         {/* Admin Tools for App Owner */}
         {isAdmin && (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <h4 className="text-section-title px-1.5 flex items-center gap-1.5">
               <span>{config.language === 'en' ? 'Administration' : 'Administration'}</span>
               <Crown size={14} strokeWidth={2} className="text-[var(--warning-color)] shrink-0" />
@@ -359,7 +359,7 @@ export function ProfileView({
         )}
 
         {/* Ekonomi & Budget */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <h4 className="text-section-title px-1.5">
             {t('economy')}
           </h4>
@@ -418,7 +418,7 @@ export function ProfileView({
         </div>
 
         {/* Verktyg & Delning */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <h4 className="text-section-title px-1.5">
             {config.language === 'en' ? 'Tools & Sharing' : 'Verktyg & Funktioner'}
           </h4>
@@ -463,7 +463,7 @@ export function ProfileView({
         </div>
 
         {/* App Settings */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <h4 className="text-section-title px-1.5">
             {t('appSettings')}
           </h4>
@@ -590,8 +590,8 @@ export function ProfileView({
         </div>
 
         {/* Support & Legal */}
-        <div className="space-y-2">
-          <h4 className="text-label font-semibold text-[var(--text-secondary)] px-1.5">
+        <div className="space-y-2.5">
+          <h4 className="text-section-title px-1.5">
             {t('support')}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
@@ -635,8 +635,8 @@ export function ProfileView({
         </div>
 
         {/* Account Actions */}
-        <div className="space-y-2">
-          <h4 className="text-label font-semibold text-[var(--danger-color)] px-1.5">
+        <div className="space-y-2.5">
+          <h4 className="text-section-title text-[var(--danger-color)] px-1.5">
             {t('dangerZone')}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">

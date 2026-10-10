@@ -51,7 +51,7 @@ export function ReceiptsView({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="space-y-[var(--card-gap)] pb-24 page-max mx-auto w-full min-w-0 overflow-x-hidden"
+      className="space-y-[var(--menu-content-gap)] pb-24 page-max mx-auto w-full min-w-0 overflow-x-hidden"
     >
       {/* Stats Summary Panel */}
       {receiptTransactions.length > 0 && (

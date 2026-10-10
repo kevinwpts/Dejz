@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Check, RotateCcw, ChevronRight } from 'lucide-react';
+import { Plus, RotateCcw, ChevronRight } from 'lucide-react';
 import { Config, Income, FixedExpense, Frequency, Category } from '../types';
 import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
@@ -187,7 +187,7 @@ export function BudgetCategoriesView({
     setShowResetBudgetConfirm(false);
   };
 
-  const handleSaveBudgetDone = () => {
+  const _handleSaveBudgetDone = () => {
     try {
       localStorage.setItem('dejz_has_saved_initial_budget', 'true');
     } catch (_e) {
@@ -305,16 +305,16 @@ export function BudgetCategoriesView({
   const incomeCategoriesList = (config.incomeCategories as Category[]) || DEFAULT_INCOME_CATEGORIES;
 
   return (
-    <div className="space-y-[var(--card-gap)] font-sans pb-10 page-max mx-auto w-full">
+    <div className="space-y-[var(--menu-content-gap)] font-sans pb-10 page-max mx-auto w-full">
       {/* 0. Flikväljare: Utgifter / Inkomster (döljs i rent budgetläge) */}
       {effectiveMode !== 'budget' && (
-        <div className="flex bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[8px] gap-1">
+        <div className="flex bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[var(--radius-card-nested,10px)] gap-1">
           <button
             type="button"
             onClick={() => setActiveCategoryType('expense')}
-            className={`flex-1 py-2 text-label font-bold rounded-[6px] transition-all cursor-pointer border-none ${
+            className={`flex-1 py-2 text-label font-bold rounded-[var(--radius-button-sm,8px)] transition-all cursor-pointer border-none ${
               activeCategoryType === 'expense'
-                ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
+                ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -323,9 +323,9 @@ export function BudgetCategoriesView({
           <button
             type="button"
             onClick={() => setActiveCategoryType('income')}
-            className={`flex-1 py-2 text-label font-bold rounded-[6px] transition-all cursor-pointer border-none ${
+            className={`flex-1 py-2 text-label font-bold rounded-[var(--radius-button-sm,8px)] transition-all cursor-pointer border-none ${
               activeCategoryType === 'income'
-                ? 'bg-white dark:bg-[#1C1C1E] text-[var(--text-primary)] shadow-xs'
+                ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -335,14 +335,14 @@ export function BudgetCategoriesView({
       )}
 
       {activeCategoryType === 'expense' ? (
-        <>
+        <div className="space-y-[var(--menu-content-gap)]">
           {/* 1. Toppmodul (visas endast vid budgetfördelning) */}
           {effectiveMode !== 'categories' && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
-              className="sticky top-0 z-20 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-md rounded-[8px] p-4 shadow-subtle border border-subtle space-y-[var(--card-gap)]"
+              className="sticky top-0 z-20 bg-[var(--surface-color)]/95 backdrop-blur-md rounded-[var(--radius-card,16px)] p-4 sm:p-5 shadow-subtle border border-subtle space-y-3"
             >
               <div className="flex items-baseline justify-between">
                 <div className="space-y-0.5">
@@ -385,11 +385,8 @@ export function BudgetCategoriesView({
 
           {/* 2. Utgiftskategorier */}
           <div className="space-y-[var(--card-gap)]">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-label font-semibold text-[var(--text-secondary)]">
-                {categoriesList.length} {isEn ? 'categories' : 'kategorier'}
-              </span>
-              {effectiveMode !== 'budget' && (
+            {effectiveMode !== 'budget' && (
+              <div className="flex items-center justify-end px-1">
                 <Button
                   type="button"
                   variant="secondary"
@@ -399,8 +396,8 @@ export function BudgetCategoriesView({
                 >
                   {t('newCategory')}
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Sammanhängande modul med avdelare precis som inställningslistor */}
             <Card variant="default" padding="none" className="divide-y divide-menu">
@@ -516,14 +513,11 @@ export function BudgetCategoriesView({
               })}
             </Card>
           </div>
-        </>
+        </div>
       ) : (
         /* Inkomstkategorier i samma layout med sammanhängande kort */
         <div className="space-y-[var(--card-gap)]">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-label font-semibold text-[var(--text-secondary)]">
-              {incomeCategoriesList.length} {isEn ? 'categories' : 'kategorier'}
-            </span>
+          <div className="flex items-center justify-end px-1">
             <Button
               type="button"
               variant="secondary"
@@ -563,18 +557,7 @@ export function BudgetCategoriesView({
 
       {/* 3. Minimal footer */}
       <div className="pt-2 space-y-[var(--card-gap)]">
-        <Button
-          type="button"
-          variant="accent"
-          size="md"
-          fullWidth
-          onClick={handleSaveBudgetDone}
-          icon={<Check size={16} strokeWidth={2.5} />}
-        >
-          {isEn ? 'Done' : 'Klar'}
-        </Button>
-
-        {/* Återställ-knapp i samma stil som betalningsmetoder */}
+        {/* Återställ-knappar */}
         <div className="flex flex-col items-center gap-2 pt-1">
           {effectiveMode !== 'categories' && (
             <button

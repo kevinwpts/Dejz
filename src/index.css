@@ -330,11 +330,14 @@ h6 {
 
 /* Central Semantic Typography Utilities */
 @utility text-hero-amount {
-  font-size: 30px;
+  font-size: 36px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.03em;
   font-family: var(--font-amount);
+  @media (min-width: 640px) {
+    font-size: 40px;
+  }
 }
 
 @utility text-large-amount {
@@ -642,12 +645,12 @@ h6 {
   --text-disabled: #A8A39D;
   --text-inactive: #A8A39D;
 
-  --border-subtle: #E9E9E9;
-  --border-color: #E9E9E9;
-  --border-control: #D8D8D8;
-  --border-strong: #B8B8B8;
-  --border-divider: #F3F3F3;
-  --border-menu-divider: #F7F7F7;
+  --border-subtle: transparent;
+  --border-color: transparent;
+  --border-control: transparent;
+  --border-strong: transparent;
+  --border-divider: transparent;
+  --border-menu-divider: transparent;
   --inner-highlight: #FFFFFF;
 
   --chip-bg: #F0F0F0;
@@ -684,7 +687,7 @@ h6 {
   --btn-primary-hover: #2563EB;
   --btn-primary-pressed: #1D4ED8;
 
-  --modal-bg: #FFFFFF;
+  --modal-bg: var(--bg-color);
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
   --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.025), 0 4px 14px rgba(0, 0, 0, 0.035);
   --bg-primary: var(--bg-color);
@@ -809,7 +812,7 @@ h6 {
   --surface-raised: #121212;
   --surface-elevated: #121212;
   --surface-elevated-gradient: #121212;
-  --modal-bg: #121212;
+  --modal-bg: var(--bg-color);
   --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
   --shadow-subtle: none;
   --surface-high: #1A1A1A;
@@ -821,12 +824,12 @@ h6 {
   --bg-primary: var(--bg-color);
   --chip-bg: #121212;
   --text-metric-label: #D6D6D6;
-  --border-subtle: #1E1E1E;
-  --border-color: #1E1E1E;
-  --border-control: #2A2A2A;
-  --border-strong: #333333;
-  --border-divider: #1E1E1E;
-  --border-menu-divider: #141414;
+  --border-subtle: transparent;
+  --border-color: transparent;
+  --border-control: transparent;
+  --border-strong: transparent;
+  --border-divider: transparent;
+  --border-menu-divider: transparent;
   --input-bg: #121212;
 }
 
@@ -846,7 +849,7 @@ h6 {
   --surface-raised: #1C1C1C;
   --surface-elevated: #1C1C1C;
   --surface-elevated-gradient: #1C1C1C;
-  --modal-bg: #1C1C1C;
+  --modal-bg: var(--bg-color);
 
   /* Layer 3: Surface High (Fields inside modals, switch off, tooltip, toast, progress track) */
   --surface-high: rgba(255, 255, 255, 0.06);
@@ -864,12 +867,12 @@ h6 {
   --text-inactive: #707070;
 
   /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-control: rgba(255, 255, 255, 0.18);
-  --border-strong: rgba(255, 255, 255, 0.35);
-  --border-divider: rgba(255, 255, 255, 0.06);
-  --border-menu-divider: rgba(255, 255, 255, 0.03);
+  --border-subtle: transparent;
+  --border-color: transparent;
+  --border-control: transparent;
+  --border-strong: transparent;
+  --border-divider: transparent;
+  --border-menu-divider: transparent;
   --inner-highlight: transparent;
   --input-bg: rgba(255, 255, 255, 0.05);
 
