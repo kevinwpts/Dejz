@@ -98,7 +98,7 @@ export function LandingPage({
   }, []);
 
   return (
-    <div className="min-h-dvh font-sans text-[var(--text-primary)] bg-[var(--bg-color)] relative selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)] light" style={{ colorScheme: 'light' }}>
+    <div className="min-h-dvh font-sans text-[var(--text-primary)] bg-[var(--bg-color)] relative selection:bg-[var(--accent-color)] selection:text-[var(--text-on-accent)]">
       {/* Policy Modal */}
       <PolicyModal 
         isOpen={activePolicy !== null}
@@ -305,7 +305,7 @@ export function LandingPage({
             </div>
 
             {/* Hero Image */}
-            <div className="w-full relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-slate-900 aspect-[16/11] sm:aspect-[16/10]">
+            <div className="w-full relative rounded-[var(--radius-card,16px)] overflow-hidden shadow-subtle border border-[var(--border-subtle)] bg-[var(--surface-color)] aspect-[16/11] sm:aspect-[16/10]">
               <img 
                 src="/hero.png" 
                 alt="Dejz App" 
@@ -713,12 +713,12 @@ export function LandingPage({
 
       {/* 10. SLUTLIG CTA */}
       <section className="py-12 px-6 sm:px-8 max-w-[1240px] mx-auto">
-        <div className="bg-slate-900 text-white rounded-[var(--radius-card,16px)] p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-subtle border border-[var(--border-subtle)]">
+        <Card variant="default" padding="lg" className="p-8 sm:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 border border-[var(--border-subtle)]">
           <div className="space-y-2 text-center lg:text-left">
-            <h2 className="text-xl sm:text-3xl font-semibold font-display tracking-tight text-white leading-snug">
+            <h2 className="text-xl sm:text-3xl font-semibold font-display tracking-tight text-[var(--text-primary)] leading-snug">
               Redo att få koll på ekonomin?
             </h2>
-            <p className="text-slate-300 text-sm sm:text-lg font-medium leading-relaxed">
+            <p className="text-[var(--text-secondary)] text-sm sm:text-lg font-medium leading-relaxed">
               Kom igång med Dejz på några minuter.
             </p>
           </div>
@@ -729,7 +729,7 @@ export function LandingPage({
                 variant="outline"
                 size="lg"
                 onClick={onGoogleLogin}
-                className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 border-none gap-2.5 font-bold"
+                className="w-full sm:w-auto gap-2.5 font-semibold"
               >
                 <svg className="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -749,7 +749,7 @@ export function LandingPage({
               Kom igång gratis
             </Button>
           </div>
-        </div>
+        </Card>
       </section>
 
       {/* 11. FOOTER */}

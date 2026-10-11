@@ -221,6 +221,7 @@ export interface TransactionSplit {
 
 export interface Transaction {
   id: string;
+  isStarred?: boolean;
   amount: number;
   category: string;
   categoryId?: string;

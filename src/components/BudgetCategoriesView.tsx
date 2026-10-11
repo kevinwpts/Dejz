@@ -6,7 +6,7 @@ import { TranslationKey } from '../i18n';
 import { CategoryIcon } from './CategoryIcon';
 import { CategoryModal } from './CategoryModal';
 import { ConfirmModal } from './ConfirmModal';
-import { Button, Modal, Select, Card } from './ui';
+import { Button, Modal, Select, Card, SegmentedControl, ListRow } from './ui';
 import { formatAmount, formatCurrency } from '../utils/format';
 import { getCategoryColor } from '../utils/categoryColors';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants';
@@ -308,30 +308,15 @@ export function BudgetCategoriesView({
     <div className="space-y-[var(--menu-content-gap)] font-sans pb-10 page-max mx-auto w-full">
       {/* 0. Flikväljare: Utgifter / Inkomster (döljs i rent budgetläge) */}
       {effectiveMode !== 'budget' && (
-        <div className="flex bg-black/[0.04] dark:bg-white/[0.06] p-1 rounded-[var(--radius-card-nested,10px)] gap-1">
-          <button
-            type="button"
-            onClick={() => setActiveCategoryType('expense')}
-            className={`flex-1 py-2 text-label font-bold rounded-[var(--radius-button-sm,8px)] transition-all cursor-pointer border-none ${
-              activeCategoryType === 'expense'
-                ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-xs'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            {isEn ? 'Expenses' : 'Utgifter'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveCategoryType('income')}
-            className={`flex-1 py-2 text-label font-bold rounded-[var(--radius-button-sm,8px)] transition-all cursor-pointer border-none ${
-              activeCategoryType === 'income'
-                ? 'bg-[var(--surface-color)] text-[var(--text-primary)] shadow-xs'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-          >
-            {isEn ? 'Income' : 'Inkomster'}
-          </button>
-        </div>
+        <SegmentedControl
+          options={[
+            { value: 'expense', label: isEn ? 'Expenses' : 'Utgifter' },
+            { value: 'income', label: isEn ? 'Income' : 'Inkomster' }
+          ]}
+          value={activeCategoryType}
+          onChange={setActiveCategoryType}
+          fullWidth
+        />
       )}
 
       {activeCategoryType === 'expense' ? (
@@ -531,22 +516,15 @@ export function BudgetCategoriesView({
             {incomeCategoriesList.map((cat, index) => {
               const catColor = cat.color || getCategoryColor(cat.name, config?.incomeCategories);
               return (
-                <button
+                <ListRow
                   key={cat.id || index}
-                  type="button"
+                  variant="grouped"
+                  density="compact"
+                  showChevron
+                  icon={<CategoryIcon icon={cat.icon} color={catColor} size="sm" categoryName={cat.name} noBackground />}
+                  title={cat.name}
                   onClick={() => handleEditCategory('income', index, cat.name, cat.icon, cat.color)}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer text-left group"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0 pr-2">
-                    <CategoryIcon icon={cat.icon} color={catColor} size="sm" categoryName={cat.name} />
-                    <span className="text-body-medium font-semibold text-[var(--text-primary)] tracking-tight truncate">
-                      {cat.name}
-                    </span>
-                  </div>
-                  <div className="text-[var(--text-tertiary)] shrink-0 pl-2 group-hover:text-[var(--text-secondary)] transition-colors">
-                    <ChevronRight size={16} strokeWidth={2} />
-                  </div>
-                </button>
+                />
               );
             })}
           </Card>

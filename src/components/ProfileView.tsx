@@ -1,7 +1,8 @@
+import { StarredTransactionsView } from './StarredTransactionsView';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Switch, Card, ListRow } from './ui';
-import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, PieChart, Tag } from 'lucide-react';
+import { LogOut, ChevronRight, Trash2, Calendar, Lock, Mail, CreditCard, Globe, Shield, Download, FileText, Palette, Coins, EyeOff, Crown, ShieldCheck, History, HandCoins, Receipt, Users2, BookOpen, Bell, PieChart, Tag , Heart} from 'lucide-react';
 import { Config, Transaction, Income, FixedExpense } from '../types';
 import { TranslationKey } from '../i18n';
 import { SettingsView } from './SettingsView';
@@ -47,7 +48,8 @@ interface ProfileViewProps {
   transactions: Transaction[];
   incomes: Income[];
   fixedExpenses: FixedExpense[];
-  initialSection?: 'main' | 'manageAccount' | 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'pro' | 'receipts' | 'debts' | 'sharedBudget' | 'guides' | 'notifications';
+  initialSection?: 'main' | 'manageAccount' | 'salary' | 'budget' | 'categories' | 'paymentMethods' | 'language' | 'pro' | 'receipts'
+    | 'starred' | 'debts' | 'sharedBudget' | 'guides' | 'notifications';
   navTrigger?: number;
   setCurrentPeriodDate: (date: Date) => void;
   periods: any[];
@@ -55,6 +57,7 @@ interface ProfileViewProps {
   onTriggerProUpgradeModal?: () => void;
   isDemoMode?: boolean;
   onViewTransaction: (t: Transaction) => void;
+  onToggleStar?: (transaction: Transaction) => void;
   onRenameCategory?: (type: 'income' | 'expense', oldName: string, newName: string) => Promise<void> | void;
   onMigrateAndDeleteCategory?: (type: 'income' | 'expense', deleteCategoryId: string, migrateToCategoryId?: string) => void;
 }
@@ -102,6 +105,7 @@ export function ProfileView({
   isDemoMode,
   onExitDemo,
   onViewTransaction,
+  onToggleStar,
   onRenameCategory,
   onMigrateAndDeleteCategory,
 }: ProfileViewProps) {
@@ -147,6 +151,21 @@ export function ProfileView({
         fixedExpenses={_fixedExpenses}
         onRefresh={onRefresh}
         addToast={addToast}
+      />
+    );
+  }
+
+  if (activePage === 'starred') {
+    return (
+      <StarredTransactionsView
+        onBack={() => {
+          setActivePage('main');
+          onNavigate('profile', 'main');
+        }}
+        transactions={_transactions}
+        config={config}
+        onViewTransaction={onViewTransaction}
+        onToggleStar={onToggleStar}
       />
     );
   }
@@ -334,6 +353,45 @@ export function ProfileView({
         </div>
       </div>
 
+            {/* Quick Access Priority Modules */}
+      <div className="grid grid-cols-3 gap-2.5">
+        <button
+          onClick={() => handleSectionClick('receipts')}
+          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+        >
+          <div className="w-10 h-10 rounded-full bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:bg-[var(--accent-color)]/10 group-hover:text-[var(--accent-color)] transition-colors">
+            <Receipt size={20} strokeWidth={2} />
+          </div>
+          <span className="text-label font-semibold text-[var(--text-primary)] truncate w-full text-center">
+            {config.language === 'en' ? 'Receipts' : 'Kvitton'}
+          </span>
+        </button>
+
+        <button
+          onClick={() => handleSectionClick('debts')}
+          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+        >
+          <div className="w-10 h-10 rounded-full bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:bg-[var(--accent-color)]/10 group-hover:text-[var(--accent-color)] transition-colors">
+            <HandCoins size={20} strokeWidth={2} />
+          </div>
+          <span className="text-label font-semibold text-[var(--text-primary)] truncate w-full text-center">
+            {config.language === 'en' ? 'Debts' : 'Skyldig'}
+          </span>
+        </button>
+
+        <button
+          onClick={() => handleSectionClick('starred')}
+          className="flex flex-col items-center justify-center p-3.5 rounded-[var(--radius-card,14px)] bg-[var(--surface-color)] border border-subtle hover:border-[var(--accent-color)]/40 transition-all cursor-pointer group active:scale-[0.98] shadow-2xs"
+        >
+          <div className="w-10 h-10 rounded-full bg-black/[0.04] dark:bg-white/5 flex items-center justify-center text-[var(--text-primary)] mb-2 group-hover:bg-[var(--accent-color)]/10 group-hover:text-[var(--accent-color)] transition-colors">
+            <Heart size={20} strokeWidth={2} />
+          </div>
+          <span className="text-label font-semibold text-[var(--text-primary)] truncate w-full text-center">
+            {config.language === 'en' ? 'Starred' : 'Hjärtade'}
+          </span>
+        </button>
+      </div>
+
       <div className="space-y-6 sm:space-y-7">
         {/* Admin Tools for App Owner */}
         {isAdmin && (
@@ -347,6 +405,7 @@ export function ProfileView({
                 variant="grouped"
                 density="compact"
                 showChevron
+                multiline={true}
                 icon={<ShieldCheck size={18} strokeWidth={2} />}
                 iconBg="bg-[var(--warning-container)]"
                 iconColor="text-[var(--warning-color)]"
@@ -423,24 +482,8 @@ export function ProfileView({
             {config.language === 'en' ? 'Tools & Sharing' : 'Verktyg & Funktioner'}
           </h4>
           <Card variant="default" padding="none" className="divide-y divide-menu">
-            <ListRow
-              variant="grouped"
-              density="compact"
-              showChevron
-              icon={<HandCoins size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
-              title={config.language === 'en' ? 'Debts & IOUs' : 'Skyldig (Skulder & utlägg)'}
-              onClick={() => handleSectionClick('debts')}
-            />
-            <ListRow
-              variant="grouped"
-              density="compact"
-              showChevron
-              icon={<Receipt size={18} strokeWidth={2} />}
-              iconBg="bg-black/5 dark:bg-white/5"
-              title={config.language === 'en' ? 'Receipts' : 'Kvitton'}
-              onClick={() => handleSectionClick('receipts')}
-            />
+            
+            
             <ListRow
               variant="grouped"
               density="compact"

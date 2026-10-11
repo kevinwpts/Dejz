@@ -5,7 +5,7 @@ import { TransactionLogo } from './TransactionLogo';
 import { formatAmount, capitalize } from '../utils/format';
 import { CategoryIcon } from './CategoryIcon';
 import { getCategoryIconName } from '../utils/icons';
-import { Paperclip, Trash2, RotateCw } from 'lucide-react';
+import { Paperclip, Trash2, RotateCw, Heart } from 'lucide-react';
 import { feedback } from '../utils/feedback';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { ConfirmModal } from './ConfirmModal';
@@ -26,6 +26,7 @@ interface TransactionItemProps {
   hideFixedBadge?: boolean;
   showDate?: boolean;
   isVariable?: boolean;
+  onToggleStar?: (transaction: Transaction) => void;
 }
 
 export function TransactionItem({ 
@@ -44,8 +45,10 @@ export function TransactionItem({
   hideFixedBadge,
   showDate,
   isVariable,
+  onToggleStar: _onToggleStar,
 }: TransactionItemProps) {
   const transaction = originalTransaction as any;
+  const isStarred = Boolean(transaction.isStarred || (transaction.tags && Array.isArray(transaction.tags) && transaction.tags.includes('starred')));
   const isFixedItem = Boolean(
     isFixed || 
     transaction?.isFixed || 
@@ -261,6 +264,11 @@ export function TransactionItem({
               <div className="flex items-center min-w-0">
                 <p className="text-body-medium font-medium text-[var(--text-primary)] leading-snug truncate flex-1 min-w-0 flex items-center">
                   <span className="truncate">{merchantName}</span>
+                  {isStarred && (
+                    <span title={getL10n('Hjärtmarkerad', 'Starred')} className="inline-flex items-center ml-1.5 shrink-0 text-rose-500">
+                      <Heart size={13} className="fill-rose-500 text-rose-500" />
+                    </span>
+                  )}
                   {isFixedItem && !hideFixedBadge && (
                     <span 
                       title={getL10n(
@@ -303,8 +311,8 @@ export function TransactionItem({
             </div>
           </div>
           
-          {/* Primary Amount: matching title size and color */}
-          <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-2">
+          {/* Primary Amount */}
+          <div className="flex flex-col items-end justify-center flex-shrink-0 whitespace-nowrap pl-1">
             <p className={`text-list-amount whitespace-nowrap ${transaction.type === 'income' ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-80 mr-0.5">{transaction.type === 'income' ? '+' : '−'}</span>
               <span className="tabular-nums">{formatAmount(finalAmount, config?.language || 'sv')}</span>

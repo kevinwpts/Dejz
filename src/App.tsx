@@ -3499,6 +3499,26 @@ export default function App() {
     }
   };
 
+  const handleToggleStar = async (updatedTx: Transaction) => {
+    try {
+      const res = await dataService.updateTransaction(updatedTx.id, updatedTx);
+      setTransactions((prev) => prev.map((e) => (e.id === res.id ? res : e)));
+      if (viewingTransaction && viewingTransaction.id === res.id) {
+        setViewingTransaction(res);
+      }
+      const isStarred = Boolean(res.isStarred || (res.tags && res.tags.includes('starred')));
+      addToast(
+        isStarred
+          ? (config?.language === 'en' ? 'Saved to starred' : 'Hjärtmarkerad')
+          : (config?.language === 'en' ? 'Removed from starred' : 'Hjärta borttaget'),
+        'success'
+      );
+    } catch (err) {
+      console.error('Failed to toggle star:', err);
+      addToast(t('error'), 'error');
+    }
+  };
+
   const handleDeleteIncome = async (id: string) => {
     try {
       await dataService.deleteIncomeSource(id);
@@ -4549,6 +4569,7 @@ export default function App() {
                   setViewingMonthlySaving(saving);
                 }}
                 onDeleteTransaction={deleteTransaction}
+                onToggleStar={handleToggleStar}
                 currentPeriodDate={currentPeriodDate}
                 currentPeriodStart={currentPeriodStart}
                 currentPeriodEnd={currentPeriodEnd}
@@ -4646,6 +4667,7 @@ export default function App() {
                   setViewingMonthlySaving(saving);
                 }}
                 onDeleteTransaction={deleteTransaction}
+                onToggleStar={handleToggleStar}
                 t={t}
                 currentLang={config.language as Language}
               />
@@ -4869,6 +4891,7 @@ export default function App() {
                 setCurrentPeriodDate={setCurrentPeriodDate}
                 periods={periods}
                 onViewTransaction={setViewingTransaction}
+                onToggleStar={handleToggleStar}
                 onCancelledSubscriptionsClick={() => setIsCancelledSubscriptionsOpen(true)}
               />
             </div>
@@ -5288,6 +5311,16 @@ export default function App() {
         {viewingTransaction && (
           <TransactionViewModal
             transaction={viewingTransaction}
+            onUpdateTransaction={async (updatedTx) => {
+              try {
+                const res = await dataService.updateTransaction(updatedTx.id, updatedTx);
+                setTransactions((prev) => prev.map((e) => (e.id === res.id ? res : e)));
+                setViewingTransaction(res);
+                addToast(config?.language === 'en' ? 'Transaction updated' : 'Transaktion uppdaterad', 'success');
+              } catch {
+                addToast(t('error'), 'error');
+              }
+            }}
             onClose={() => handleCloseTransactionView()}
             onEdit={(t) => {
               setViewingTransaction(null);
@@ -5704,7 +5737,7 @@ export default function App() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-              className="bg-[var(--surface-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-subtle font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y"
+              className="bg-[var(--bg-color)] w-full sm:max-w-xl rounded-t-[var(--radius-modal,16px)] sm:rounded-modal relative flex flex-col overflow-hidden shadow-modal font-sans p-6 pb-[max(2rem,env(safe-area-inset-bottom,20px))] space-y-4 touch-pan-y border-none"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drawer Handle / Drag Pill */}
@@ -5808,7 +5841,7 @@ export default function App() {
                           ? "bg-[var(--danger-color)] text-white border-rose-400 animate-pulse scale-105"
                           : isAudioTranscribing
                             ? "bg-[var(--danger-container)] text-[var(--danger-color)] border-[var(--danger-color)]"
-                            : "bg-white dark:bg-white/5 hover:bg-black/[0.03] dark:hover:bg-white/15 text-[var(--text-secondary)] border-subtle active:scale-95 shadow-xs"
+                            : "bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/[0.06] dark:hover:bg-white/15 text-[var(--text-secondary)] border-subtle active:scale-95 shadow-xs"
                       }`}
                     >
                       {isAudioTranscribing ? (
@@ -5829,7 +5862,7 @@ export default function App() {
                         ? { type: 'error', message: plusVoiceError }
                         : null
                   }
-                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-white dark:bg-white/5 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
+                  inputClassName={`h-14 sm:h-16 text-[15px] sm:text-[16px] rounded-input bg-[var(--surface-muted)] dark:bg-white/10 text-[var(--text-primary)] placeholder-[var(--text-tertiary)] dark:placeholder-[var(--text-tertiary)] shadow-xs ${
                     isRecording ? "border-[var(--danger-color)]/80 ring-2 ring-rose-500/30" : "border-subtle"
                   }`}
                 />

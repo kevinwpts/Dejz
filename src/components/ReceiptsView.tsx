@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Receipt, Paperclip, ChevronRight, FileText } from 'lucide-react';
+import { Receipt, ChevronRight, FileText } from 'lucide-react';
 import { Transaction, Config } from '../types';
 import { EmptyState } from './EmptyState';
 import { formatAmount, capitalize } from '../utils/format';
@@ -70,31 +70,37 @@ export function ReceiptsView({
       exit={{ opacity: 0, y: -8 }}
       className="space-y-[var(--menu-content-gap)] pb-24 page-max mx-auto w-full min-w-0"
     >
-      {/* 1. Metric Summary Cards matching global Dejz standard */}
+      {/* 1. Metric Summary Cards matching AnalysisView standard */}
       {receiptTransactions.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 gap-2.5 select-none">
           {/* Card 1: Totalt belopp */}
-          <Card variant="default" padding="md" className="space-y-1 min-w-0">
-            <div className="flex items-center gap-1.5 text-metric-label font-medium text-[var(--text-metric-label)]">
-              <Receipt size={14} className="text-[var(--accent-color)] shrink-0" strokeWidth={2} />
-              <span className="truncate">{isEn ? 'Total amount' : 'Totalt belopp'}</span>
+          <Card variant="default" padding="sm" className="select-none flex flex-col justify-between min-w-0">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+                {isEn ? 'Total amount' : 'Totalt belopp'}
+              </span>
             </div>
-            <div className="pt-0.5">
-              <span className="text-large-amount font-amount font-semibold text-[var(--text-primary)] tabular-nums block truncate">
-                {formatAmount(totalAmount, config.language)} {curr}
+            <div className="flex items-baseline gap-1 pt-1.5 min-w-0">
+              <span className="text-large-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] truncate max-w-full">
+                {formatAmount(totalAmount, config.language)}
+              </span>
+              <span className="text-label font-medium text-[var(--text-secondary)] shrink-0">
+                {curr}
               </span>
             </div>
           </Card>
 
-          {/* Card 2: Antal sparade kvitton */}
-          <Card variant="default" padding="md" className="space-y-1 min-w-0">
-            <div className="flex items-center gap-1.5 text-metric-label font-medium text-[var(--text-metric-label)]">
-              <Paperclip size={13} className="text-[var(--text-secondary)] shrink-0" strokeWidth={2} />
-              <span className="truncate">{isEn ? 'Saved receipts' : 'Sparade kvitton'}</span>
-            </div>
-            <div className="pt-0.5">
-              <span className="text-large-amount font-amount font-semibold text-[var(--text-primary)] tabular-nums block truncate">
-                {filteredTransactions.length} {isEn ? 'receipts' : 'st'}
+          {/* Card 2: Sparade kvitton */}
+          <Card variant="default" padding="sm" className="select-none flex flex-col justify-between min-w-0">
+            <span className="text-metric-label font-medium text-[var(--text-secondary)] truncate">
+              {isEn ? 'Saved receipts' : 'Sparade kvitton'}
+            </span>
+            <div className="flex items-baseline gap-1 pt-1.5 min-w-0">
+              <span className="text-large-amount font-bold tabular-nums tracking-tight text-[var(--text-primary)] truncate max-w-full">
+                {filteredTransactions.length}
+              </span>
+              <span className="text-label font-medium text-[var(--text-secondary)] shrink-0">
+                {isEn ? 'st' : 'st'}
               </span>
             </div>
           </Card>
@@ -110,7 +116,7 @@ export function ReceiptsView({
           placeholder={isEn ? 'Search merchant, category, or amount...' : 'Sök köpställe, kategori eller belopp...'}
           onClear={() => setSearchQuery('')}
           id="receipts_search_input"
-          className="h-[42px] sm:h-[44px] text-xs sm:text-sm bg-[var(--surface-color)] shadow-subtle border-none"
+          className="w-full"
         />
       )}
 

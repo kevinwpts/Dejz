@@ -311,7 +311,8 @@ export const dataService = {
       paymentMethod: t.payment_method,
       receiptUrl: t.receipt_url,
       tags: t.tags || [],
-      splits: t.splits || []
+      splits: t.splits || [],
+      isStarred: Boolean(t.is_starred || (t.tags && Array.isArray(t.tags) && t.tags.includes('starred')))
     }));
   },
 
@@ -335,6 +336,10 @@ export const dataService = {
       await supabase.from('profiles').upsert({ id: userId, dark_mode: true });
     }
 
+    const tagsWithStar = transaction.isStarred
+      ? Array.from(new Set([...(transaction.tags || []), 'starred']))
+      : (transaction.tags || []).filter(t => t !== 'starred');
+
     const { data, error } = await supabase
       .from('transactions')
       .insert({
@@ -350,7 +355,7 @@ export const dataService = {
         icon: transaction.icon,
         payment_method: transaction.paymentMethod,
         receipt_url: transaction.receiptUrl,
-        tags: transaction.tags,
+        tags: tagsWithStar,
         splits: transaction.splits
       })
       .select();
@@ -376,7 +381,8 @@ export const dataService = {
       paymentMethod: row.payment_method,
       receiptUrl: row.receipt_url,
       tags: row.tags || [],
-      splits: row.splits || []
+      splits: row.splits || [],
+      isStarred: Boolean(row.is_starred || (row.tags && Array.isArray(row.tags) && row.tags.includes('starred')) || transaction.isStarred)
     };
   },
 
@@ -393,6 +399,10 @@ export const dataService = {
       localStorage.setItem('demo_transactions', JSON.stringify(list));
       return updatedTx;
     }
+    const tagsWithStar = transaction.isStarred
+      ? Array.from(new Set([...(transaction.tags || []), 'starred']))
+      : (transaction.tags || []).filter(t => t !== 'starred');
+
     const { data, error } = await supabase
       .from('transactions')
       .update({
@@ -407,7 +417,7 @@ export const dataService = {
         icon: transaction.icon,
         payment_method: transaction.paymentMethod,
         receipt_url: transaction.receiptUrl,
-        tags: transaction.tags,
+        tags: tagsWithStar,
         splits: transaction.splits
       })
       .eq('id', id)
@@ -431,7 +441,8 @@ export const dataService = {
       paymentMethod: row.payment_method,
       receiptUrl: row.receipt_url,
       tags: row.tags || [],
-      splits: row.splits || []
+      splits: row.splits || [],
+      isStarred: Boolean(row.is_starred || (row.tags && Array.isArray(row.tags) && row.tags.includes('starred')) || transaction.isStarred)
     };
   },
 

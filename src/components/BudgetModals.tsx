@@ -265,13 +265,14 @@ export function IncomeViewModal({ income, onClose, onEdit, onDelete, t, currency
           </Button>
 
           <IconButton 
-            icon={<Trash2 size={16} strokeWidth={2} />}
+            icon={<Trash2 size={16} strokeWidth={2} className="text-[var(--text-primary)]" />}
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               setShowDeleteConfirm(true);
             }} 
             variant="default"
-            size="md"
+            size="lg"
+            className="rounded-[var(--radius-button,12px)] bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15"
             title={config.language === 'en' ? 'Delete' : 'Ta bort'}
             aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
           />
@@ -1147,13 +1148,14 @@ export function FixedExpenseViewModal({ expense, onClose, onEdit, onDelete, t, c
           </Button>
 
           <IconButton 
-            icon={<Trash2 size={16} strokeWidth={2} />}
+            icon={<Trash2 size={16} strokeWidth={2} className="text-[var(--text-primary)]" />}
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               setShowDeleteConfirm(true);
             }} 
             variant="default"
-            size="md"
+            size="lg"
+            className="rounded-[var(--radius-button,12px)] bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15"
             title={config.language === 'en' ? 'Delete' : 'Ta bort'}
             aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
           />

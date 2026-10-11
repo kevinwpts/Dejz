@@ -35,6 +35,7 @@ interface CategoryBottomSheetModalProps {
   language?: string;
   onViewTransaction: (transaction: Transaction) => void;
   onDeleteTransaction?: (id: string) => void;
+  onToggleStar?: (transaction: Transaction) => void;
   onAddTransaction?: (type?: string, prefill?: any) => void;
   onNavigate?: (tab: string, section?: string) => void;
   t?: (key: TranslationKey) => string;
@@ -54,6 +55,7 @@ export function CategoryBottomSheetModal({
   language = 'sv',
   onViewTransaction,
   onDeleteTransaction,
+  onToggleStar,
   t,
 }: CategoryBottomSheetModalProps) {
   const isEn = language === 'en';
@@ -324,6 +326,7 @@ export function CategoryBottomSheetModal({
                           config={config}
                           onView={onViewTransaction}
                           onDelete={onDeleteTransaction}
+                          onToggleStar={onToggleStar}
                           showDate={true}
                         />
                       ))}

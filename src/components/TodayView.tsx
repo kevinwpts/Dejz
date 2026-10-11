@@ -60,6 +60,7 @@ interface TodayViewProps {
   onUpdateConfig?: (config: Config) => void;
   onOpenCalculator?: () => void;
   isDemoMode?: boolean;
+  onToggleStar?: (transaction: Transaction) => void;
 }
 
 export function TodayView({
@@ -76,6 +77,7 @@ export function TodayView({
   onAddIncome,
   onViewTransaction,
   onDeleteTransaction,
+  onToggleStar,
   onNavigate,
   attentionItems: _attentionItems = [],
   onEditAttentionItem: _onEditAttentionItem,
@@ -566,6 +568,7 @@ export function TodayView({
                       transaction={transaction}
                       onView={onViewTransaction}
                       onDelete={onDeleteTransaction}
+                      onToggleStar={onToggleStar}
                       config={config}
                       onClick={() => {
                         if (onViewTransaction) onViewTransaction(transaction);
@@ -699,6 +702,7 @@ export function TodayView({
         language={lang}
         onViewTransaction={onViewTransaction}
         onDeleteTransaction={onDeleteTransaction}
+        onToggleStar={onToggleStar}
         onAddTransaction={onAddTransaction}
         onNavigate={onNavigate}
         t={t}

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
-import { X, ChevronRight, Calendar, Plus, Camera, Trash2, Check, Loader2, Paperclip, FileText } from 'lucide-react';
-import { IconButton } from './ui';
+import { X, ChevronRight, Calendar, Plus, Camera, Trash2, Check, Loader2, Paperclip, FileText, Heart } from 'lucide-react';
+import { IconButton, Button, Switch } from './ui';
 import { Transaction, Category, TransactionSplit } from '../types';
 import { TranslationKey, Language } from '../i18n';
 import { formatAmount, parseAmount } from '../utils/format';
@@ -183,6 +183,9 @@ export function TransactionModal({
       (config?.categories || []).find((c: any) => c.name?.trim().toLowerCase() === norm) ||
       (config?.incomeCategories || []).find((c: any) => c.name?.trim().toLowerCase() === norm);
   }, [categories, category, config]);
+  const [isStarred, setIsStarred] = useState<boolean>(
+    Boolean(transaction?.isStarred || (transaction?.tags && Array.isArray(transaction.tags) && transaction.tags.includes('starred')))
+  );
   const [note, setNote] = useState(transaction?.note || prefill?.note || '');
   const [merchant, setMerchant] = useState(transaction?.merchant || prefill?.name || '');
   const [icon, setIcon] = useState(transaction?.icon || 'none');
@@ -956,7 +959,7 @@ export function TransactionModal({
               </div>
             ) : (
               /* Single Category Row with Inline Split Button */
-              <div className="p-4 flex items-center justify-between min-h-[60px] gap-2">
+              <div className="p-4 flex items-center justify-between hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all group min-h-[58px]">
                 <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
                   {t('category')}
                 </span>
@@ -967,24 +970,27 @@ export function TransactionModal({
                       setActiveSplitIndex(null);
                       setIsCategoryPickerOpen(true);
                     }}
-                    className="flex items-center gap-2 p-1.5 px-2.5 rounded-btn-sm bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all cursor-pointer group"
+                    className="flex items-center gap-2 min-w-0 cursor-pointer group/cat hover:text-[var(--accent-color)]"
                   >
                     <CategoryIcon 
-                      icon={currentCatData?.icon || 'tag'} 
+                      icon={currentCatData?.icon || 'receipt'} 
                       color={currentCatData?.color || 'var(--accent-color)'}
                       size="xs" 
                       categoryName={category}
                     />
-                    <span className="text-body font-bold text-[var(--text-primary)] truncate max-w-[120px] sm:max-w-[160px]">
+                    <span className="text-sm font-medium text-[var(--text-primary)] group-hover/cat:text-[var(--accent-color)] transition-colors truncate max-w-[130px] sm:max-w-[180px]">
                       {category || (currentLang === 'en' ? 'Select category' : 'Välj kategori')}
                     </span>
-                    <ChevronRight size={15} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 shrink-0" />
+                    <ChevronRight size={16} strokeWidth={2} className="text-[var(--text-secondary)] opacity-60 group-hover/cat:opacity-100 group-hover/cat:translate-x-0.5 transition-all shrink-0 ml-0.5" />
                   </div>
 
                   {type === 'expense' && (
-                    <button
+                    <Button
                       type="button"
-                      onClick={() => {
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (typeof feedback?.light === 'function') feedback.light();
                         const totalVal = parseAmount(amount);
                         const cat1 = category || categories[0]?.name || '';
@@ -995,13 +1001,11 @@ export function TransactionModal({
                           { id: Math.random().toString(), amount: totalVal - half, category: cat2, tags: [] }
                         ]);
                       }}
-                      className="h-8 px-2.5 rounded-[var(--radius-button-sm,10px)] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-primary)] text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 active:scale-95"
-                      title="Dela upp i flera kategorier"
+                      icon={<Plus size={13} strokeWidth={2.5} />}
                     >
-                      <Plus size={13} strokeWidth={2.5} />
-                      <span>{currentLang === 'en' ? 'Split' : 'Dela upp'}</span>
-                    </button>
-                    )}
+                      {currentLang === 'en' ? 'Split' : 'Dela upp'}
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
@@ -1096,6 +1100,23 @@ export function TransactionModal({
               </div>
             </div>
 
+            {/* Row 5: Heart / Starred */}
+            <div className="p-4 flex items-center justify-between min-h-[60px] border-t border-subtle">
+              <div className="flex items-center gap-2">
+                <Heart size={16} className={isStarred ? "fill-rose-500 text-rose-500 shrink-0" : "text-[var(--text-secondary)] shrink-0"} />
+                <span className="text-body font-normal text-[var(--text-primary)]">
+                  {currentLang === 'en' ? 'Starred' : 'Hjärtmarkerad'}
+                </span>
+              </div>
+              <Switch
+                checked={isStarred}
+                onCheckedChange={(checked) => {
+                  if (typeof feedback?.light === 'function') feedback.light();
+                  setIsStarred(checked);
+                }}
+              />
+            </div>
+
             {/* Row 4: Receipt / Attachment */}
             <div className="p-4 flex items-center justify-between min-h-[60px]">
               <span className="text-body font-normal text-[var(--text-secondary)] shrink-0">
@@ -1166,9 +1187,11 @@ export function TransactionModal({
         </div>
 
         {/* Register / Save Button & Delete Button */}
-          <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10">
-            <button 
+          <div className="shrink-0 px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-5 border-t border-subtle bg-transparent flex items-center gap-2.5 relative z-10 max-w-xl mx-auto w-full">
+            <Button 
               type="button"
+              variant="accent"
+              size="lg"
               disabled={!isSplitsValid}
               onClick={() => {
                 if (!isSplitsValid) return;
@@ -1183,21 +1206,20 @@ export function TransactionModal({
                   icon: icon || 'receipt',
                   paymentMethod: transaction?.paymentMethod,
                   receiptUrl,
-                  tags: [],
+                  tags: isStarred ? ['starred'] : [],
+                  isStarred,
                   splits: splits,
                   date: selectedDate
                 });
                 onClose();
               }}
-              className="flex-1 h-12 rounded-[var(--radius-button,12px)] bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-pressed)] text-[var(--on-accent)] text-body-medium font-semibold tracking-tight flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-none border-none"
+              icon={<Check size={16} strokeWidth={2.5} />}
+              className="flex-1 rounded-[var(--radius-button,12px)] text-body-medium font-semibold"
             >
-              <Check size={16} strokeWidth={2.5} />
-              <span>
-                {transaction 
-                  ? (currentLang === 'en' ? 'Save changes' : 'Spara ändringar')
-                  : (type === 'income' ? (t('registerIncome' as any) || 'Registrera inkomst') : (t('registerExpense' as any) || 'Registrera utgift'))}
-              </span>
-            </button>
+              {transaction 
+                ? (currentLang === 'en' ? 'Save changes' : 'Spara ändringar')
+                : (type === 'income' ? (t('registerIncome' as any) || 'Registrera inkomst') : (t('registerExpense' as any) || 'Registrera utgift'))}
+            </Button>
 
             {transaction && transaction.id && onDelete && (
               <IconButton

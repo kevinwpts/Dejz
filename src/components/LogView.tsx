@@ -36,6 +36,7 @@ interface LogViewProps {
   onViewIncome?: (income: Income) => void;
   onViewMonthlySaving?: (saving: any) => void;
   onDeleteTransaction: (id: string) => void;
+  onToggleStar?: (transaction: Transaction) => void;
   t: (key: TranslationKey) => string;
   currentLang: Language;
 }
@@ -53,11 +54,12 @@ export function LogView({
   onViewIncome, 
   onViewMonthlySaving, 
   onDeleteTransaction, 
+  onToggleStar,
   t, 
   currentLang, 
   periods 
 }: LogViewProps) {
-  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'starred'>('all');
   const [selectedPeriod, setSelectedPeriod] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -380,7 +382,10 @@ export function LogView({
         }
 
         // 5. Type filter
-        if (typeFilter !== 'all') {
+        if (typeFilter === 'starred') {
+          const isStarred = Boolean((e as any).isStarred || (e.tags && e.tags.includes('starred')));
+          if (!isStarred) return false;
+        } else if (typeFilter !== 'all') {
           if (e.type !== typeFilter) return false;
         }
         
@@ -587,11 +592,15 @@ export function LogView({
                   id: 'income',
                   label: getL10n('Inkomster', 'Income', 'Inntekt', 'Indkomst', 'Tulot'),
                 },
+                {
+                  id: 'starred',
+                  label: getL10n('Hjärtan', 'Starred', 'Favoritter', 'Favoritter', 'Suosikit'),
+                },
               ]}
               selectedId={typeFilter}
               onSelect={(id) => {
                 if (typeof feedback?.selection === 'function') feedback.selection();
-                setTypeFilter(id as 'all' | 'income' | 'expense');
+                setTypeFilter(id as 'all' | 'income' | 'expense' | 'starred');
               }}
               ariaLabel={getL10n('Filtrera typ', 'Filter type')}
             />
@@ -712,6 +721,7 @@ export function LogView({
                     config={config}
                     onView={transaction.isFixed ? undefined : onViewTransaction}
                     onDelete={transaction.isFixed ? undefined : onDeleteTransaction}
+                    onToggleStar={transaction.isFixed ? undefined : onToggleStar}
                     onClick={() => {
                       if (transaction.isFixed) {
                         if (transaction.type === 'income' && onViewIncome) {

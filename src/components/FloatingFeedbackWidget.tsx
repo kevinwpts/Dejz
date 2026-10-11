@@ -10,6 +10,7 @@ interface FloatingFeedbackWidgetProps {
 
 export function FloatingFeedbackWidget({ onOpenFeedback, language = 'sv' }: FloatingFeedbackWidgetProps) {
   const [isDismissed, setIsDismissed] = useState(false);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   useEffect(() => {
     // Check session storage on mount
@@ -19,7 +20,55 @@ export function FloatingFeedbackWidget({ onOpenFeedback, language = 'sv' }: Floa
     }
   }, []);
 
-  if (isDismissed) return null;
+  useEffect(() => {
+    // Detect focused input fields or active virtual keyboard
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        setIsKeyboardOpen(true);
+      }
+    };
+
+    const handleFocusOut = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        setIsKeyboardOpen(false);
+      }
+    };
+
+    const handleViewportResize = () => {
+      if (window.visualViewport) {
+        const isShrunk = window.innerHeight - window.visualViewport.height > 150;
+        setIsKeyboardOpen(isShrunk);
+      }
+    };
+
+    window.addEventListener('focusin', handleFocusIn);
+    window.addEventListener('focusout', handleFocusOut);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportResize);
+    }
+
+    return () => {
+      window.removeEventListener('focusin', handleFocusIn);
+      window.removeEventListener('focusout', handleFocusOut);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportResize);
+      }
+    };
+  }, []);
+
+  if (isDismissed || isKeyboardOpen) return null;
 
   const handleDismiss = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -48,9 +97,9 @@ export function FloatingFeedbackWidget({ onOpenFeedback, language = 'sv' }: Floa
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 10, scale: 0.95 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="fixed bottom-[5.2rem] left-3 sm:left-auto sm:right-5 z-20 select-none pointer-events-auto"
+        className="fixed bottom-[4.75rem] right-3.5 sm:right-5 z-20 select-none pointer-events-auto"
       >
-        <div className="flex items-center bg-[var(--surface-color)]/90 backdrop-blur-md border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-full shadow-xs overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
+        <div className="flex items-center bg-[var(--surface-color)]/95 backdrop-blur-md border border-[var(--border-subtle)] text-[var(--text-primary)] rounded-full shadow-subtle overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
           <button
             type="button"
             onClick={handleOpen}

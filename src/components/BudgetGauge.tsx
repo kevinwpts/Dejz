@@ -39,7 +39,6 @@ export function BudgetGauge({
   _onOpenPeriodInfo,
 }: BudgetGaugeProps) {
   const isEn = language === 'en';
-  const isNegative = remainingCents < 0;
 
   // Initial disposable budget from the start of the period (100% baseline)
   const startPot = useMemo(() => {
@@ -97,16 +96,10 @@ export function BudgetGauge({
             <div className="flex items-baseline gap-1.5 min-w-0 pt-0.5">
               <AnimatedNumber
                 value={remainingCents}
-                className={`text-hero-amount leading-none font-bold tabular-nums tracking-tight ${
-                  isNegative ? 'text-[var(--danger-color)]' : 'text-[var(--on-accent)]'
-                }`}
+                className="text-hero-amount leading-none font-bold tabular-nums tracking-tight text-[var(--on-accent)]"
                 formatter={(val) => formatAmount(val, language)}
               />
-              <span
-                className={`text-sm sm:text-base leading-none shrink-0 font-medium ${
-                  isNegative ? 'text-[var(--danger-color)]/80' : 'text-[var(--on-accent)]/80'
-                }`}
-              >
+              <span className="text-sm sm:text-base leading-none shrink-0 font-medium text-[var(--on-accent)]/80">
                 {currency || 'kr'}
               </span>
             </div>

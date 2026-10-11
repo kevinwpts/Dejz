@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'motion/react';
 
-import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2, ChevronDown } from 'lucide-react';
+import { X, Pencil, Tag, Repeat, Paperclip, FileText, Trash2, ChevronDown , Heart} from 'lucide-react';
 import { Button, IconButton } from './ui';
 import { Transaction, Config } from '../types';
 import { TranslationKey } from '../i18n';
@@ -28,6 +28,7 @@ interface TransactionViewModalProps {
   onDuplicate: (transaction: Transaction) => void;
   t: (key: TranslationKey) => string;
   config: Config;
+  onUpdateTransaction?: (transaction: Transaction) => void;
 }
 
 function _hexToRgba(hex: string, alpha: number): string {
@@ -55,12 +56,37 @@ export function TransactionViewModal({
   onDelete, 
   onDuplicate, 
   t, 
-  config 
+  config,
+  onUpdateTransaction
 }: TransactionViewModalProps) {
+  const [currentTx, setCurrentTx] = useState<Transaction>(transaction);
+
+  useEffect(() => {
+    setCurrentTx(transaction);
+  }, [transaction]);
+
+  const isStarred = Boolean(currentTx.isStarred || (currentTx.tags && currentTx.tags.includes('starred')));
+
+  const handleToggleStar = () => {
+    if (typeof feedback?.light === 'function') feedback.light();
+    const newStarred = !isStarred;
+    const updated = {
+      ...currentTx,
+      isStarred: newStarred,
+      tags: newStarred
+        ? Array.from(new Set([...(currentTx.tags || []), 'starred']))
+        : (currentTx.tags || []).filter((tag: string) => tag !== 'starred')
+    };
+    setCurrentTx(updated);
+    if (onUpdateTransaction) {
+      onUpdateTransaction(updated);
+    }
+  };
+
   useScrollLock(true);
   const dragControls = useDragControls();
-  const isIncome = transaction.type === 'income';
-  const isSavings = transaction.type === 'savings';
+  const isIncome = currentTx.type === 'income';
+  const isSavings = currentTx.type === 'savings';
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReceiptLightbox, setShowReceiptLightbox] = useState(false);
@@ -214,11 +240,34 @@ export function TransactionViewModal({
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-4 sm:pt-7 pb-5 space-y-4.5 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 pt-3 sm:pt-5 pb-5 space-y-4 custom-scrollbar touch-pan-y overscroll-contain min-h-0 relative z-10">
           {/* Hero Section: Centered Logo, Title below, Price below title */}
-          <div className="relative flex flex-col items-center text-center pt-6 sm:pt-8 pb-4">
+          <div className="relative flex flex-col items-center text-center pt-2 sm:pt-4 pb-3">
             {/* Close Button top-right */}
-            <div className="absolute top-0 right-0 z-10">
+            <div className="absolute top-0 right-0 z-10 flex items-center gap-1.5">
+              <IconButton
+                icon={
+                  <Heart
+                    size={18}
+                    strokeWidth={2}
+                    className={
+                      isStarred
+                        ? 'fill-rose-500 text-rose-500 transition-all scale-105'
+                        : 'text-[var(--text-primary)] hover:text-rose-500 transition-colors'
+                    }
+                  />
+                }
+                onClick={handleToggleStar}
+                variant="muted"
+                size="md"
+                className={
+                  isStarred
+                    ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                    : 'bg-black/5 dark:bg-white/10'
+                }
+                title={isStarred ? (config.language === 'en' ? 'Remove star' : 'Ta bort hjärta') : (config.language === 'en' ? 'Star transaction' : 'Hjärtmarkera')}
+                aria-label={isStarred ? 'Remove star' : 'Star transaction'}
+              />
               <IconButton 
                 icon={<X size={15} strokeWidth={2.5} />}
                 onClick={() => {
@@ -232,9 +281,9 @@ export function TransactionViewModal({
               />
             </div>
 
-            {/* Centered Logo */}
-            <div className="scale-135 sm:scale-150 mb-7 pt-3">
-              <TransactionLogo transaction={transaction} config={config} size="xl" />
+            {/* Centered Logo (56px) */}
+            <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center shrink-0 mb-2.5 mt-1">
+              <TransactionLogo transaction={currentTx} config={config} size="lg" />
             </div>
 
             {/* Title */}
@@ -243,10 +292,10 @@ export function TransactionViewModal({
             </h2>
 
             {/* Price */}
-            <p className={`text-large-amount font-amount tabular-nums mt-1.5 flex items-baseline justify-center ${isIncome ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
+            <p className={`text-large-amount font-amount tabular-nums mt-1 flex items-baseline justify-center ${isIncome ? 'text-[var(--success-color)]' : 'text-[var(--text-primary)]'}`}>
               <span className="opacity-80 mr-1">{isIncome ? '+' : isSavings ? '→' : '−'}</span>
-              <span>{formatAmount(transaction.amount, config.language)}</span>
-              <span className="text-card-title text-[var(--text-secondary)] ml-1.5 self-end pb-1">{config?.currency || 'kr'}</span>
+              <span>{formatAmount(currentTx.amount, config.language)}</span>
+              <span className="text-secondary font-medium text-[var(--text-secondary)] ml-1.5 self-end pb-0.5">{config?.currency || 'kr'}</span>
             </p>
           </div>
 
@@ -520,7 +569,7 @@ export function TransactionViewModal({
             type="button"
             variant="secondary"
             size="md"
-            className="flex-1 rounded-full text-body font-medium"
+            className="flex-1 text-body-medium font-medium"
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onEdit(transaction);
@@ -531,26 +580,28 @@ export function TransactionViewModal({
           </Button>
 
           <IconButton 
-            icon={<Repeat size={16} strokeWidth={2} className="dark:text-white" />}
+            icon={<Repeat size={16} strokeWidth={2} className="text-[var(--text-primary)]" />}
             onClick={() => {
               if (typeof feedback?.light === 'function') feedback.light();
               onDuplicate(transaction);
             }} 
             variant="default"
-            size="md"
+            size="lg"
+            className="rounded-[var(--radius-button,12px)] bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15"
             title={t('duplicate')}
             aria-label={t('duplicate')}
           />
 
           {onDelete && (
             <IconButton 
-              icon={<Trash2 size={16} strokeWidth={2} className="dark:text-white" />}
+              icon={<Trash2 size={16} strokeWidth={2} className="text-[var(--text-primary)]" />}
               onClick={() => {
                 if (typeof feedback?.light === 'function') feedback.light();
                 setShowDeleteConfirm(true);
               }} 
               variant="default"
-              size="md"
+              size="lg"
+              className="rounded-[var(--radius-button,12px)] bg-[var(--surface-muted)] dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15"
               title={config.language === 'en' ? 'Delete' : 'Ta bort'}
               aria-label={config.language === 'en' ? 'Delete' : 'Ta bort'}
             />
